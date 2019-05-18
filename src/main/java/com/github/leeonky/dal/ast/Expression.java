@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.AssertResult;
 import com.github.leeonky.dal.CompilingContext;
 import com.github.leeonky.dal.Evaluatable;
 
@@ -14,10 +13,7 @@ public class Expression implements Evaluatable {
     }
 
     @Override
-    public AssertResult evaluate(CompilingContext context) {
-        AssertResult assertResult = new AssertResult();
-        if (Objects.equals(context.getInputValue(), rightValue))
-            return assertResult;
-        return assertResult.setMessage("Expected value to [= 2]\n but was <" + context.getInputValue() + ">");
+    public Object evaluate(CompilingContext context) {
+        return Objects.equals(context.getInputValue(), rightValue);
     }
 }

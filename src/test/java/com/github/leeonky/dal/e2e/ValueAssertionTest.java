@@ -23,6 +23,6 @@ class ValueAssertionTest {
         AssertResult assertResult = dataAssertor.assertData(1, "= 2");
 
         assertFalse(assertResult.isPassed());
-        Assertions.assertThat(assertResult.getMessage()).contains("Expected value to [= 2]\n but was <1>");
+        Assertions.assertThat(assertResult.getMessage()).contains("Expected value to [= 2] but was <1>");
     }
 }
