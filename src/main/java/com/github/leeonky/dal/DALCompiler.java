@@ -15,12 +15,15 @@ import static java.util.Arrays.asList;
 public class DALCompiler {
     private final List<Operator> operatorList = asList(new Equal(), new NotEqual());
 
-    public Node compile(String expressionContent) {
-        final String trim = expressionContent.trim();
+    public Node compile(String content) {
+        final String trim = content.trim();
         return operatorList.stream()
                 .filter(opt -> opt.isMatch(trim))
-                .map(operator -> new Expression(new InputNode(),
-                        new ConstNode(Integer.valueOf(trim.substring(operator.length()).trim())), operator))
+                .map(operator -> new Expression(new InputNode(), compileNode(trim.substring(operator.length())), operator))
                 .findFirst().get();
+    }
+
+    private ConstNode compileNode(String content) {
+        return new ConstNode(Integer.valueOf(content.trim()));
     }
 }

@@ -5,19 +5,14 @@ import com.github.leeonky.dal.ast.Node;
 
 import java.util.Objects;
 
-public class Equal implements Operator {
+public class Equal extends SymbolOperator {
+
+    public Equal() {
+        super("=");
+    }
+
     @Override
     public Object calculate(CompilingContext context, Node node1, Node node2) {
         return Objects.equals(node1.evaluate(context), node2.evaluate(context));
-    }
-
-    @Override
-    public boolean isMatch(String content) {
-        return content.startsWith("=");
-    }
-
-    @Override
-    public int length() {
-        return "=".length();
     }
 }
