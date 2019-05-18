@@ -12,7 +12,7 @@ public class AssertResult {
         return message;
     }
 
-    AssertResult setMessage(String message) {
+    public AssertResult setMessage(String message) {
         passed = false;
         this.message = message;
         return this;

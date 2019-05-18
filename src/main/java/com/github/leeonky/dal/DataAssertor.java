@@ -1,10 +1,9 @@
 package com.github.leeonky.dal;
 
 public class DataAssertor {
+    private DALCompiler dalCompiler = new DALCompiler();
+
     public AssertResult assertData(Object actual, String expression) {
-        AssertResult assertResult = new AssertResult();
-        if (expression.contains("2"))
-            return assertResult.setMessage("Expected value to [= 2]\n but was <1>");
-        return assertResult;
+        return dalCompiler.compile(expression).evaluate(new CompilingContext(actual));
     }
 }
