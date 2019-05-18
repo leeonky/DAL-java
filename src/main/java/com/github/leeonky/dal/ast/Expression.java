@@ -1,19 +1,19 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.CompilingContext;
-import com.github.leeonky.dal.Evaluatable;
 
 import java.util.Objects;
 
 public class Expression implements Evaluatable {
-    private Object rightValue;
+    private final Evaluatable leftValue, rightValue;
 
-    public void setRightValue(Object rightValue) {
+    public Expression(Evaluatable leftValue, Evaluatable rightValue) {
+        this.leftValue = leftValue;
         this.rightValue = rightValue;
     }
 
     @Override
     public Object evaluate(CompilingContext context) {
-        return Objects.equals(context.getInputValue(), rightValue);
+        return Objects.equals(leftValue.evaluate(context), rightValue.evaluate(context));
     }
 }
