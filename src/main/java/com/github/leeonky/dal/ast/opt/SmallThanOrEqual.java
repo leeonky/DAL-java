@@ -1,9 +1,8 @@
 package com.github.leeonky.dal.ast.opt;
 
+import com.github.leeonky.dal.Comparer;
 import com.github.leeonky.dal.CompilingContext;
 import com.github.leeonky.dal.ast.Node;
-
-import java.math.BigDecimal;
 
 public class SmallThanOrEqual extends SymbolOperator {
     public SmallThanOrEqual() {
@@ -12,9 +11,6 @@ public class SmallThanOrEqual extends SymbolOperator {
 
     @Override
     public Object calculate(CompilingContext context, Node node1, Node node2) {
-        Object value1 = node1.evaluate(context);
-        Object value2 = node2.evaluate(context);
-
-        return new BigDecimal(value1.toString()).compareTo(new BigDecimal(value2.toString())) <= 0;
+        return Comparer.compare(node1.evaluate(context), node2.evaluate(context)) <= 0;
     }
 }
