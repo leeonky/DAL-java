@@ -4,7 +4,7 @@ import com.github.leeonky.dal.Comparer;
 import com.github.leeonky.dal.CompilingContext;
 import com.github.leeonky.dal.ast.Node;
 
-public class SmallThan extends SymbolOperator {
+public class SmallThan extends Operator {
     public SmallThan() {
         super("<");
     }

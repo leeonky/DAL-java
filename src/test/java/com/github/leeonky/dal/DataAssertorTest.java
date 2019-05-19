@@ -50,6 +50,8 @@ class DataAssertorTest {
             assertThrows(RuntimeException.class, () -> dataAssertor.assertData(1, "is1"));
 
             assertTrue(dataAssertor.assertData(1, "is\t1").isPassed());
+
+            assertTrue(dataAssertor.assertData(1, "=1").isPassed());
         }
     }
 }
