@@ -26,8 +26,8 @@ public class DALCompiler {
         operatorList.sort(Comparator.comparingInt(Operator::length).reversed());
     }
 
-    public static boolean isSpliter(String content, int position) {
-        char c = content.charAt(position);
+    public static boolean isSpliter(SourceCode sourceCode, int position) {
+        char c = sourceCode.charAt(position);
         try {
             return Character.isWhitespace(c);
         } catch (Exception e) {
@@ -35,15 +35,18 @@ public class DALCompiler {
         }
     }
 
-    public Node compile(String content) {
-        final String trim = content.trim();
+    public Node compile(SourceCode content) {
+        Operator operator = takeOperator(content.trimLeft());
+        return new Expression(new InputNode(), compileNode(content), operator);
+    }
+
+    private Operator takeOperator(SourceCode content) {
         return operatorList.stream()
-                .filter(opt -> opt.isMatch(trim))
-                .map(operator -> new Expression(new InputNode(), compileNode(trim.substring(operator.length())), operator))
+                .filter(opt -> opt.getFrom(content))
                 .findFirst().get();
     }
 
-    private ConstNode compileNode(String content) {
-        return new ConstNode(Integer.valueOf(content.trim()));
+    private ConstNode compileNode(SourceCode content) {
+        return new ConstNode(Integer.valueOf(content.trimLeft().toString()));
     }
 }

@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast.opt;
 
 import com.github.leeonky.dal.CompilingContext;
 import com.github.leeonky.dal.DALCompiler;
+import com.github.leeonky.dal.SourceCode;
 import com.github.leeonky.dal.ast.Node;
 
 public abstract class Operator {
@@ -20,8 +21,12 @@ public abstract class Operator {
 
     public abstract Object calculate(CompilingContext context, Node node1, Node node2);
 
-    public boolean isMatch(String content) {
-        return content.startsWith(code) && (!isKeyword || DALCompiler.isSpliter(content, length()));
+    public boolean getFrom(SourceCode sourceCode) {
+        return isMatched(sourceCode) && (sourceCode.substring(length()) != null);
+    }
+
+    private boolean isMatched(SourceCode sourceCode) {
+        return sourceCode.startsWith(code) && (!isKeyword || DALCompiler.isSpliter(sourceCode, length()));
     }
 
     public int length() {
