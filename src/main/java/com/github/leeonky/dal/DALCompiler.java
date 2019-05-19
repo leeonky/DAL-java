@@ -4,17 +4,27 @@ import com.github.leeonky.dal.ast.ConstNode;
 import com.github.leeonky.dal.ast.Expression;
 import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.opt.Equal;
-import com.github.leeonky.dal.ast.opt.Is;
-import com.github.leeonky.dal.ast.opt.NotEqual;
-import com.github.leeonky.dal.ast.opt.Operator;
+import com.github.leeonky.dal.ast.opt.*;
 
+import java.util.Comparator;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 
 public class DALCompiler {
-    private final List<Operator> operatorList = asList(new Equal(), new NotEqual(), new Is());
+    private static final List<Operator> operatorList;
+
+    static {
+        operatorList = asList(
+                new Equal(),
+                new NotEqual(),
+                new MoreThan(),
+                new MoreThanOrEqual(),
+                new SmallThan(),
+                new SmallThanOrEqual(),
+                new Is());
+        operatorList.sort(Comparator.comparingInt(Operator::length).reversed());
+    }
 
     public static boolean isSpliter(String content, int position) {
         char c = content.charAt(position);

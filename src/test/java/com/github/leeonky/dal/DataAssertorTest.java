@@ -20,16 +20,16 @@ class DataAssertorTest {
         @Test
         void assert_int_equals_passed() {
             assertTrue(dataAssertor.assertData(1, "= 1").isPassed());
+            assertTrue(dataAssertor.assertData(1, "!= 2").isPassed());
+            assertTrue(dataAssertor.assertData(1, "> 0").isPassed());
+            assertTrue(dataAssertor.assertData(1, ">= 1").isPassed());
+            assertTrue(dataAssertor.assertData(1, "< 2").isPassed());
+            assertTrue(dataAssertor.assertData(1, "<= 1").isPassed());
         }
 
         @Test
         void assert_int_equals_failed() {
             assertFailed(dataAssertor.assertData(1, "= 2"), "Expected value to [= 2] but was <1>");
-        }
-
-        @Test
-        void assert_int_not_equals_passed() {
-            assertTrue(dataAssertor.assertData(1, "!= 2").isPassed());
         }
     }
 
