@@ -8,8 +8,7 @@ import java.math.BigDecimal;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.github.leeonky.dal.token.Token.constValue;
-import static com.github.leeonky.dal.token.Token.token;
+import static com.github.leeonky.dal.token.Token.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -23,32 +22,50 @@ class SourceCodeTest {
             assertThrows(RuntimeException.class, () -> new SourceCode(" ").getToken());
         }
 
-        @Test
-        void single_token() {
-            assertGetToken("ab", token("ab"));
-        }
-
-        @Test
-        void with_end_char() {
-            assertGetToken("a ", token("a"));
-        }
-
-        @Test
-        void with_multi_tokens() {
-            assertGetToken("ab   cd", token("ab"), token("cd"));
-        }
-
-        @Test
-        void number_token() {
-            assertGetToken("1", constValue(new BigDecimal(1)));
-            assertGetToken("11", constValue(new BigDecimal(11)));
-        }
-
         private void assertGetToken(String sourceCode, Token... tokens) {
             SourceCode sourceCode1 = new SourceCode(sourceCode);
             assertThat(IntStream.range(0, tokens.length).boxed()
                     .map(i -> sourceCode1.getToken())
                     .collect(Collectors.toList())).containsOnly(tokens);
+        }
+
+        @Test
+        void number_token() {
+            assertGetToken("1", constValueToken(new BigDecimal(1)));
+            assertGetToken("11", constValueToken(new BigDecimal(11)));
+        }
+
+        @Nested
+        class TypeToken {
+
+            @Test
+            void single_type_token() {
+                assertGetToken("ab", typeToken("ab"));
+            }
+
+            @Test
+            void two_single_tokens() {
+                assertGetToken("ab   cd", typeToken("ab"), typeToken("cd"));
+            }
+
+            @Test
+            void nested_type_token() {
+                assertGetToken("a.b", typeToken("a.b"));
+            }
+        }
+
+        @Nested
+        class PropertyToken {
+
+            @Test
+            void single_property_token() {
+                assertGetToken(".a", propertyToken(".a"));
+            }
+
+            @Test
+            void property_chain_token() {
+                assertGetToken(".a.x", propertyToken(".a.x"));
+            }
         }
     }
 }

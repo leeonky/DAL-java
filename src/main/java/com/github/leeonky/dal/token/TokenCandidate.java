@@ -10,7 +10,9 @@ public abstract class TokenCandidate {
     public static TokenCandidate createTokenCandidate(char c) {
         if (Character.isDigit(c))
             return new NumberTokenCandidate(c);
-        return new TokenTokenCandidate(c);
+        if (c == '.')
+            return new PropertyTokenCandidate(c);
+        return new TypeTokenCandidate(c);
     }
 
     public void append(char c) {

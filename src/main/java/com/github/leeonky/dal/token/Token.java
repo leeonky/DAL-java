@@ -11,11 +11,15 @@ public class Token {
         this.value = value;
     }
 
-    public static Token token(Object value) {
-        return new Token(Type.TOKEN, value);
+    public static Token typeToken(Object value) {
+        return new Token(Type.TYPE, value);
     }
 
-    public static Token constValue(Object value) {
+    public static Token propertyToken(String value) {
+        return new Token(Type.PROPERTY, value);
+    }
+
+    public static Token constValueToken(Object value) {
         return new Token(Type.VALUE, value);
     }
 
@@ -28,10 +32,10 @@ public class Token {
 
     @Override
     public String toString() {
-        return String.valueOf(value);
+        return type + "<" + String.valueOf(value) + ">";
     }
 
     enum Type {
-        VALUE, TOKEN
+        VALUE, TYPE, PROPERTY
     }
 }

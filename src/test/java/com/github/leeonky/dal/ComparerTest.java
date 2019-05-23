@@ -31,10 +31,10 @@ class ComparerTest {
 
         @Test
         void compare_number_in_different_type() {
-            assertCompare(1, Integer.valueOf(1), 0);
-            assertCompare(1, Byte.valueOf((byte) 1), 0);
-            assertCompare(1, Short.valueOf((byte) 1), 0);
-            assertCompare(1, Long.valueOf((byte) 1), 0);
+            assertCompare(1, 1, 0);
+            assertCompare(1, (byte) 1, 0);
+            assertCompare(1, (short) (byte) 1, 0);
+            assertCompare(1, (long) (byte) 1, 0);
             assertCompare(1, new BigDecimal(1), 0);
             assertCompare(1, new BigInteger("1"), 0);
             assertCompare(1, 0, 1);
