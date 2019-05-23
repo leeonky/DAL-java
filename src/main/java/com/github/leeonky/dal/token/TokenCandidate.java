@@ -12,7 +12,11 @@ public abstract class TokenCandidate {
             return new NumberTokenCandidate(c);
         if (c == '.')
             return new PropertyTokenCandidate(c);
-        return new TypeTokenCandidate(c);
+        if (c == '[')
+            return new ItemTokenCandidate(c);
+        if (OperatorTokenCandidate.isOperator(c))
+            return new OperatorTokenCandidate(c);
+        return new WordTokenCandidate(c);
     }
 
     public void append(char c) {
@@ -25,7 +29,11 @@ public abstract class TokenCandidate {
 
     public abstract Token toToken();
 
-    public boolean canEnd(char c) {
-        return Character.isWhitespace(c);
+    public boolean isExcludedSplitChar(char c) {
+        return Character.isWhitespace(c) || c == '[';
+    }
+
+    public boolean isIncludedLastChar(char c) {
+        return false;
     }
 }

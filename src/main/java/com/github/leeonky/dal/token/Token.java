@@ -11,16 +11,24 @@ public class Token {
         this.value = value;
     }
 
-    public static Token typeToken(Object value) {
-        return new Token(Type.TYPE, value);
+    public static Token wordToken(Object value) {
+        return new Token(Type.WORD, value);
     }
 
     public static Token propertyToken(String value) {
         return new Token(Type.PROPERTY, value);
     }
 
-    public static Token constValueToken(Object value) {
-        return new Token(Type.VALUE, value);
+    public static Token itemToken(String value) {
+        return new Token(Type.ITEM, value);
+    }
+
+    public static Token operatorToken(String value) {
+        return new Token(Type.OPERATOR, value);
+    }
+
+    public static Token numebrToken(Object value) {
+        return new Token(Type.NUMBER, value);
     }
 
     @Override
@@ -36,6 +44,6 @@ public class Token {
     }
 
     enum Type {
-        VALUE, TYPE, PROPERTY
+        NUMBER, WORD, PROPERTY, ITEM, OPERATOR
     }
 }

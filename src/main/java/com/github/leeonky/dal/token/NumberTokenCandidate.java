@@ -9,6 +9,6 @@ public class NumberTokenCandidate extends TokenCandidate {
 
     @Override
     public Token toToken() {
-        return Token.constValueToken(new BigDecimal(content()));
+        return Token.numebrToken(new BigDecimal(content()));
     }
 }

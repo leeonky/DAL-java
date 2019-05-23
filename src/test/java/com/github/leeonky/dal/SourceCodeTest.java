@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.github.leeonky.dal.token.Token.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,16 +23,20 @@ class SourceCodeTest {
         }
 
         private void assertGetToken(String sourceCode, Token... tokens) {
+            List<Token> actualTokens = new ArrayList<>();
             SourceCode sourceCode1 = new SourceCode(sourceCode);
-            assertThat(IntStream.range(0, tokens.length).boxed()
-                    .map(i -> sourceCode1.getToken())
-                    .collect(Collectors.toList())).containsOnly(tokens);
+            while (!sourceCode1.isEnd())
+                actualTokens.add(sourceCode1.getToken());
+            assertThat(actualTokens).containsOnly(tokens);
         }
 
-        @Test
-        void number_token() {
-            assertGetToken("1", constValueToken(new BigDecimal(1)));
-            assertGetToken("11", constValueToken(new BigDecimal(11)));
+        @Nested
+        class NumberToken {
+            @Test
+            void number_token() {
+                assertGetToken("1", numebrToken(new BigDecimal(1)));
+                assertGetToken("11", numebrToken(new BigDecimal(11)));
+            }
         }
 
         @Nested
@@ -40,17 +44,26 @@ class SourceCodeTest {
 
             @Test
             void single_type_token() {
-                assertGetToken("ab", typeToken("ab"));
-            }
-
-            @Test
-            void two_single_tokens() {
-                assertGetToken("ab   cd", typeToken("ab"), typeToken("cd"));
+                assertGetToken("ab", wordToken("ab"));
             }
 
             @Test
             void nested_type_token() {
-                assertGetToken("a.b", typeToken("a.b"));
+                assertGetToken("a.b", wordToken("a.b"));
+            }
+        }
+
+        @Nested
+        class ItemToken {
+
+            @Test
+            void get_item_by_index() {
+                assertGetToken("[1]", itemToken("[1]"));
+            }
+
+            @Test
+            void item_token_end_char() {
+                assertGetToken("[1][2]", itemToken("[1]"), itemToken("[2]"));
             }
         }
 
@@ -65,6 +78,28 @@ class SourceCodeTest {
             @Test
             void property_chain_token() {
                 assertGetToken(".a.x", propertyToken(".a.x"));
+            }
+        }
+
+        @Nested
+        class OperatorToken {
+            @Test
+            void supported_single_char_operators() {
+                assertGetToken("=", operatorToken("="));
+                assertGetToken(">", operatorToken(">"));
+                assertGetToken("<", operatorToken("<"));
+                assertGetToken("-", operatorToken("-"));
+                assertGetToken("+", operatorToken("+"));
+                assertGetToken("*", operatorToken("*"));
+                assertGetToken("/", operatorToken("/"));
+            }
+
+            @Test
+            void supported_two_chars_operators() {
+                assertGetToken(">=", operatorToken(">="));
+                assertGetToken("<=", operatorToken("<="));
+                assertGetToken("&&", operatorToken("&&"));
+                assertGetToken("||", operatorToken("||"));
             }
         }
     }
