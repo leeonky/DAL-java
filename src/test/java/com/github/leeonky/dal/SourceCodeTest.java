@@ -40,15 +40,15 @@ class SourceCodeTest {
         }
 
         @Nested
-        class TypeToken {
+        class WordToken {
 
             @Test
-            void single_type_token() {
+            void single_word_token() {
                 assertGetToken("ab", wordToken("ab"));
             }
 
             @Test
-            void nested_type_token() {
+            void nested_word_token() {
                 assertGetToken("a.b", wordToken("a.b"));
             }
         }
@@ -100,6 +100,35 @@ class SourceCodeTest {
                 assertGetToken("<=", operatorToken("<="));
                 assertGetToken("&&", operatorToken("&&"));
                 assertGetToken("||", operatorToken("||"));
+            }
+        }
+
+        @Nested
+        class SplitTokens {
+
+            @Test
+            void split_number() {
+                assertGetToken("1 ", numebrToken(new BigDecimal(1)));
+                assertGetToken("1\t", numebrToken(new BigDecimal(1)));
+                assertGetToken("1\n", numebrToken(new BigDecimal(1)));
+                assertGetToken("1=", numebrToken(new BigDecimal(1)), operatorToken("="));
+                assertGetToken("1>", numebrToken(new BigDecimal(1)), operatorToken(">"));
+                assertGetToken("1<", numebrToken(new BigDecimal(1)), operatorToken("<"));
+                assertGetToken("1-", numebrToken(new BigDecimal(1)), operatorToken("-"));
+                assertGetToken("1+", numebrToken(new BigDecimal(1)), operatorToken("+"));
+                assertGetToken("1*", numebrToken(new BigDecimal(1)), operatorToken("*"));
+                assertGetToken("1/", numebrToken(new BigDecimal(1)), operatorToken("/"));
+                assertGetToken("1|", numebrToken(new BigDecimal(1)), operatorToken("|"));
+                assertGetToken("1&", numebrToken(new BigDecimal(1)), operatorToken("&"));
+                assertGetToken("1||", numebrToken(new BigDecimal(1)), operatorToken("||"));
+                assertGetToken("1&&", numebrToken(new BigDecimal(1)), operatorToken("&&"));
+            }
+
+            @Test
+            void split_word_token() {
+                assertGetToken(".a ", propertyToken(".a"));
+                assertGetToken(".a[1]", propertyToken(".a"), itemToken("[1]"));
+                assertGetToken(".a=", propertyToken(".a"), operatorToken("="));
             }
         }
     }

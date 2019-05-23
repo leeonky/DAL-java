@@ -5,7 +5,7 @@ public class OperatorTokenCandidate extends TokenCandidate {
         super(c);
     }
 
-    public static boolean isOperator(char c) {
+    public static boolean isStartOperator(char c) {
         switch (c) {
             case '=':
             case '>':

@@ -12,9 +12,9 @@ public abstract class TokenCandidate {
             return new NumberTokenCandidate(c);
         if (c == '.')
             return new PropertyTokenCandidate(c);
-        if (c == '[')
+        if (ItemTokenCandidate.isStartOperator(c))
             return new ItemTokenCandidate(c);
-        if (OperatorTokenCandidate.isOperator(c))
+        if (OperatorTokenCandidate.isStartOperator(c))
             return new OperatorTokenCandidate(c);
         return new WordTokenCandidate(c);
     }
@@ -30,7 +30,7 @@ public abstract class TokenCandidate {
     public abstract Token toToken();
 
     public boolean isExcludedSplitChar(char c) {
-        return Character.isWhitespace(c) || c == '[';
+        return Character.isWhitespace(c) || ItemTokenCandidate.isStartOperator(c);
     }
 
     public boolean isIncludedLastChar(char c) {

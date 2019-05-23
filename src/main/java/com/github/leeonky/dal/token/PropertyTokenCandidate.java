@@ -10,4 +10,12 @@ public class PropertyTokenCandidate extends TokenCandidate {
     public Token toToken() {
         return Token.propertyToken(content());
     }
+
+    @Override
+    public boolean isExcludedSplitChar(char c) {
+        return Character.isSpaceChar(c)
+                || OperatorTokenCandidate.isStartOperator(c)
+                || ItemTokenCandidate.isStartOperator(c)
+                ;
+    }
 }

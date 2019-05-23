@@ -11,4 +11,9 @@ public class NumberTokenCandidate extends TokenCandidate {
     public Token toToken() {
         return Token.numebrToken(new BigDecimal(content()));
     }
+
+    @Override
+    public boolean isExcludedSplitChar(char c) {
+        return Character.isSpaceChar(c) || OperatorTokenCandidate.isStartOperator(c);
+    }
 }

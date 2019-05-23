@@ -38,6 +38,7 @@ public class SourceCode {
     }
 
     public boolean isEnd() {
+        trimLeft();
         return offset == charBuffer.length;
     }
 

@@ -5,6 +5,10 @@ public class ItemTokenCandidate extends TokenCandidate {
         super(c);
     }
 
+    public static boolean isStartOperator(char c) {
+        return c == '[';
+    }
+
     @Override
     public Token toToken() {
         return Token.itemToken(content());
