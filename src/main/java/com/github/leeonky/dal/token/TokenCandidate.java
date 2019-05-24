@@ -16,6 +16,10 @@ public abstract class TokenCandidate {
             return new ItemTokenCandidate(c);
         if (OperatorTokenCandidate.isStartOperator(c))
             return new OperatorTokenCandidate(c);
+        if (c == '(')
+            return new BeginBracketTokenCandidate(c);
+        if (c == ')')
+            return new EndBracketTokenCandidate(c);
         return new WordTokenCandidate(c);
     }
 

@@ -31,6 +31,14 @@ public class Token {
         return new Token(Type.NUMBER, value);
     }
 
+    public static Token beginBrachetToken() {
+        return new Token(Type.BEGIN_BRACKET, "(");
+    }
+
+    public static Token endBrachetToken() {
+        return new Token(Type.END_BRACKET, ")");
+    }
+
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Token
@@ -44,6 +52,6 @@ public class Token {
     }
 
     enum Type {
-        NUMBER, WORD, PROPERTY, ITEM, OPERATOR
+        NUMBER, WORD, PROPERTY, ITEM, OPERATOR, BEGIN_BRACKET, END_BRACKET
     }
 }

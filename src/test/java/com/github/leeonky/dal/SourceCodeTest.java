@@ -104,24 +104,33 @@ class SourceCodeTest {
         }
 
         @Nested
+        class BracketToken {
+            @Test
+            void begin_end_bracket_token() {
+                assertGetToken("(", beginBrachetToken());
+                assertGetToken(")", endBrachetToken());
+            }
+        }
+
+        @Nested
         class SplitTokens {
 
             @Test
             void split_number() {
-                assertGetToken("1 ", numebrToken(new BigDecimal(1)));
-                assertGetToken("1\t", numebrToken(new BigDecimal(1)));
-                assertGetToken("1\n", numebrToken(new BigDecimal(1)));
-                assertGetToken("1=", numebrToken(new BigDecimal(1)), operatorToken("="));
-                assertGetToken("1>", numebrToken(new BigDecimal(1)), operatorToken(">"));
-                assertGetToken("1<", numebrToken(new BigDecimal(1)), operatorToken("<"));
-                assertGetToken("1-", numebrToken(new BigDecimal(1)), operatorToken("-"));
-                assertGetToken("1+", numebrToken(new BigDecimal(1)), operatorToken("+"));
-                assertGetToken("1*", numebrToken(new BigDecimal(1)), operatorToken("*"));
-                assertGetToken("1/", numebrToken(new BigDecimal(1)), operatorToken("/"));
-                assertGetToken("1|", numebrToken(new BigDecimal(1)), operatorToken("|"));
-                assertGetToken("1&", numebrToken(new BigDecimal(1)), operatorToken("&"));
-                assertGetToken("1||", numebrToken(new BigDecimal(1)), operatorToken("||"));
-                assertGetToken("1&&", numebrToken(new BigDecimal(1)), operatorToken("&&"));
+                assertGetToken("11 ", numebrToken(new BigDecimal(11)));
+                assertGetToken("11\t", numebrToken(new BigDecimal(11)));
+                assertGetToken("11\n", numebrToken(new BigDecimal(11)));
+                assertGetToken("11=", numebrToken(new BigDecimal(11)), operatorToken("="));
+                assertGetToken("11>", numebrToken(new BigDecimal(11)), operatorToken(">"));
+                assertGetToken("11<", numebrToken(new BigDecimal(11)), operatorToken("<"));
+                assertGetToken("11-", numebrToken(new BigDecimal(11)), operatorToken("-"));
+                assertGetToken("11+", numebrToken(new BigDecimal(11)), operatorToken("+"));
+                assertGetToken("11*", numebrToken(new BigDecimal(11)), operatorToken("*"));
+                assertGetToken("11/", numebrToken(new BigDecimal(11)), operatorToken("/"));
+                assertGetToken("11|", numebrToken(new BigDecimal(11)), operatorToken("|"));
+                assertGetToken("11&", numebrToken(new BigDecimal(11)), operatorToken("&"));
+                assertGetToken("11||", numebrToken(new BigDecimal(11)), operatorToken("||"));
+                assertGetToken("11&&", numebrToken(new BigDecimal(11)), operatorToken("&&"));
             }
 
             @Test
