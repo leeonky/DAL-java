@@ -18,6 +18,8 @@ public class NumberTokenCandidate extends TokenCandidate {
 
     @Override
     public boolean isExcludedSplitChar(char c) {
-        return Character.isSpaceChar(c) || OperatorTokenCandidate.isBegin(c);
+        return super.isExcludedSplitChar(c)
+                || OperatorTokenCandidate.isBegin(c)
+                || BeginBracketTokenCandidate.isBegin(c);
     }
 }

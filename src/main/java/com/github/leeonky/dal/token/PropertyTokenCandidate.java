@@ -17,9 +17,8 @@ public class PropertyTokenCandidate extends TokenCandidate {
 
     @Override
     public boolean isExcludedSplitChar(char c) {
-        return Character.isSpaceChar(c)
+        return super.isExcludedSplitChar(c)
                 || OperatorTokenCandidate.isBegin(c)
-                || ItemTokenCandidate.isBegin(c)
-                ;
+                || BeginBracketTokenCandidate.isBegin(c);
     }
 }

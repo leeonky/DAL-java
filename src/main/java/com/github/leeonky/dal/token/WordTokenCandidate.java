@@ -11,4 +11,11 @@ public class WordTokenCandidate extends TokenCandidate {
     public Token toToken() {
         return wordToken(content());
     }
+
+    @Override
+    public boolean isExcludedSplitChar(char c) {
+        return super.isExcludedSplitChar(c)
+                || BeginBracketTokenCandidate.isBegin(c)
+                || OperatorTokenCandidate.isBegin(c);
+    }
 }

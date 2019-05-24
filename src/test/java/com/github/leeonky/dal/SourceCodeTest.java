@@ -100,6 +100,7 @@ class SourceCodeTest {
                 assertGetToken("<=", operatorToken("<="));
                 assertGetToken("&&", operatorToken("&&"));
                 assertGetToken("||", operatorToken("||"));
+                assertGetToken("!=", operatorToken("!="));
             }
         }
 
@@ -120,6 +121,7 @@ class SourceCodeTest {
                 assertGetToken("11 ", numebrToken(new BigDecimal(11)));
                 assertGetToken("11\t", numebrToken(new BigDecimal(11)));
                 assertGetToken("11\n", numebrToken(new BigDecimal(11)));
+
                 assertGetToken("11=", numebrToken(new BigDecimal(11)), operatorToken("="));
                 assertGetToken("11>", numebrToken(new BigDecimal(11)), operatorToken(">"));
                 assertGetToken("11<", numebrToken(new BigDecimal(11)), operatorToken("<"));
@@ -131,13 +133,49 @@ class SourceCodeTest {
                 assertGetToken("11&", numebrToken(new BigDecimal(11)), operatorToken("&"));
                 assertGetToken("11||", numebrToken(new BigDecimal(11)), operatorToken("||"));
                 assertGetToken("11&&", numebrToken(new BigDecimal(11)), operatorToken("&&"));
+
+                assertGetToken("11(", numebrToken(new BigDecimal(11)), beginBrachetToken());
+
+                assertGetToken("11[1]", numebrToken(new BigDecimal(11)), itemToken("[1]"));
             }
 
             @Test
             void split_word_token() {
+                assertGetToken("a ", wordToken("a"));
+
+                assertGetToken("a=", wordToken("a"), operatorToken("="));
+
+                assertGetToken("a[0]", wordToken("a"), itemToken("[0]"));
+
+                assertGetToken("a(", wordToken("a"), beginBrachetToken());
+            }
+
+            @Test
+            void split_property_token() {
                 assertGetToken(".a ", propertyToken(".a"));
+
                 assertGetToken(".a[1]", propertyToken(".a"), itemToken("[1]"));
+
                 assertGetToken(".a=", propertyToken(".a"), operatorToken("="));
+
+                assertGetToken(".a(", propertyToken(".a"), beginBrachetToken());
+            }
+
+            @Test
+            void split_operator_token() {
+                assertGetToken("= ", operatorToken("="));
+
+                assertGetToken("==", operatorToken("="), operatorToken("="));
+
+                assertGetToken("=1", operatorToken("="), numebrToken(new BigDecimal(1)));
+
+                assertGetToken("=a", operatorToken("="), wordToken("a"));
+
+                assertGetToken("=(", operatorToken("="), beginBrachetToken());
+
+                assertGetToken("=.a", operatorToken("="), propertyToken(".a"));
+
+                assertGetToken("=[0]", operatorToken("="), itemToken("[0]"));
             }
         }
     }
