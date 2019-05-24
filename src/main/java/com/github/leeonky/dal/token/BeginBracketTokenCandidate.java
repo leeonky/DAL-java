@@ -5,6 +5,10 @@ public class BeginBracketTokenCandidate extends TokenCandidate {
         super(c);
     }
 
+    public static boolean isBegin(char c) {
+        return c == '(';
+    }
+
     @Override
     public Token toToken() {
         return Token.beginBrachetToken();

@@ -7,6 +7,10 @@ public class NumberTokenCandidate extends TokenCandidate {
         super(c);
     }
 
+    public static boolean isBegin(char c) {
+        return Character.isDigit(c);
+    }
+
     @Override
     public Token toToken() {
         return Token.numebrToken(new BigDecimal(content()));
@@ -14,6 +18,6 @@ public class NumberTokenCandidate extends TokenCandidate {
 
     @Override
     public boolean isExcludedSplitChar(char c) {
-        return Character.isSpaceChar(c) || OperatorTokenCandidate.isStartOperator(c);
+        return Character.isSpaceChar(c) || OperatorTokenCandidate.isBegin(c);
     }
 }

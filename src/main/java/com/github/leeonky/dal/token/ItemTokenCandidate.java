@@ -5,7 +5,7 @@ public class ItemTokenCandidate extends TokenCandidate {
         super(c);
     }
 
-    public static boolean isStartOperator(char c) {
+    public static boolean isBegin(char c) {
         return c == '[';
     }
 

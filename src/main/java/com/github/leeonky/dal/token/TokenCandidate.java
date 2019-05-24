@@ -8,17 +8,17 @@ public abstract class TokenCandidate {
     }
 
     public static TokenCandidate createTokenCandidate(char c) {
-        if (Character.isDigit(c))
+        if (NumberTokenCandidate.isBegin(c))
             return new NumberTokenCandidate(c);
-        if (c == '.')
+        if (PropertyTokenCandidate.isBegin(c))
             return new PropertyTokenCandidate(c);
-        if (ItemTokenCandidate.isStartOperator(c))
+        if (ItemTokenCandidate.isBegin(c))
             return new ItemTokenCandidate(c);
-        if (OperatorTokenCandidate.isStartOperator(c))
+        if (OperatorTokenCandidate.isBegin(c))
             return new OperatorTokenCandidate(c);
-        if (c == '(')
+        if (BeginBracketTokenCandidate.isBegin(c))
             return new BeginBracketTokenCandidate(c);
-        if (c == ')')
+        if (EndBracketTokenCandidate.isBegin(c))
             return new EndBracketTokenCandidate(c);
         return new WordTokenCandidate(c);
     }
@@ -34,7 +34,7 @@ public abstract class TokenCandidate {
     public abstract Token toToken();
 
     public boolean isExcludedSplitChar(char c) {
-        return Character.isWhitespace(c) || ItemTokenCandidate.isStartOperator(c);
+        return Character.isWhitespace(c) || ItemTokenCandidate.isBegin(c);
     }
 
     public boolean isIncludedLastChar(char c) {
