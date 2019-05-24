@@ -45,7 +45,7 @@ public class SourceCode {
     public Token getToken() {
         if (trimLeft().isEnd())
             throw new IllegalStateException("No more token");
-        TokenCandidate tokenCandidate = TokenCandidate.createTokenCandidate(charBuffer[offset++]);
+        TokenCandidate tokenCandidate = TokenCandidate.createTokenCandidate(charBuffer[offset], offset++);
         while (!isEnd() && !tokenCandidate.isExcludedSplitChar(charBuffer[offset])) {
             char c = charBuffer[offset++];
             if (tokenCandidate.isDiscardedLastChar(c))

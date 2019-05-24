@@ -54,7 +54,7 @@ class SourceCodeTest {
         }
 
         @Nested
-        class ItemToken {
+        class ConstValueToken {
 
             @Test
             void get_item_by_index() {
@@ -64,6 +64,14 @@ class SourceCodeTest {
             @Test
             void item_token_end_char() {
                 assertGetToken("[1][2]", constIndexToken(1), constIndexToken(2));
+            }
+
+            @Test
+            void only_support_int_index() {
+                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" [x]", constIndexToken(1)));
+                assertThat(syntexException)
+                        .hasMessage("only support const int array index")
+                        .hasFieldOrPropertyWithValue("position", 2);
             }
         }
 
