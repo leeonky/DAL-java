@@ -58,12 +58,12 @@ class SourceCodeTest {
 
             @Test
             void get_item_by_index() {
-                assertGetToken("[1]", itemToken("[1]"));
+                assertGetToken("[1]", constIndexToken(1));
             }
 
             @Test
             void item_token_end_char() {
-                assertGetToken("[1][2]", itemToken("[1]"), itemToken("[2]"));
+                assertGetToken("[1][2]", constIndexToken(1), constIndexToken(2));
             }
         }
 
@@ -146,7 +146,7 @@ class SourceCodeTest {
 
                 assertGetToken("11(", numebrToken(new BigDecimal(11)), beginBrachetToken());
 
-                assertGetToken("11[1]", numebrToken(new BigDecimal(11)), itemToken("[1]"));
+                assertGetToken("11[1]", numebrToken(new BigDecimal(11)), constIndexToken(1));
             }
 
             @Test
@@ -155,7 +155,7 @@ class SourceCodeTest {
 
                 assertGetToken("a=", wordToken("a"), operatorToken("="));
 
-                assertGetToken("a[0]", wordToken("a"), itemToken("[0]"));
+                assertGetToken("a[0]", wordToken("a"), constIndexToken(0));
 
                 assertGetToken("a(", wordToken("a"), beginBrachetToken());
             }
@@ -164,7 +164,7 @@ class SourceCodeTest {
             void split_property_token() {
                 assertGetToken(".a ", propertyToken(".a"));
 
-                assertGetToken(".a[1]", propertyToken(".a"), itemToken("[1]"));
+                assertGetToken(".a[1]", propertyToken(".a"), constIndexToken(1));
 
                 assertGetToken(".a=", propertyToken(".a"), operatorToken("="));
 
@@ -185,7 +185,7 @@ class SourceCodeTest {
 
                 assertGetToken("=.a", operatorToken("="), propertyToken(".a"));
 
-                assertGetToken("=[0]", operatorToken("="), itemToken("[0]"));
+                assertGetToken("=[0]", operatorToken("="), constIndexToken(0));
             }
         }
     }

@@ -19,8 +19,8 @@ public class Token {
         return new Token(Type.PROPERTY, value);
     }
 
-    public static Token itemToken(String value) {
-        return new Token(Type.ITEM, value);
+    public static Token constIndexToken(int value) {
+        return new Token(Type.CONST_INDEX, value);
     }
 
     public static Token operatorToken(String value) {
@@ -56,6 +56,6 @@ public class Token {
     }
 
     enum Type {
-        NUMBER, WORD, PROPERTY, ITEM, OPERATOR, BEGIN_BRACKET, END_BRACKET, STRING
+        NUMBER, WORD, PROPERTY, CONST_INDEX, OPERATOR, BEGIN_BRACKET, END_BRACKET, STRING
     }
 }

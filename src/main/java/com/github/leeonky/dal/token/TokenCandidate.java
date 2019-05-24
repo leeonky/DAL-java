@@ -4,7 +4,8 @@ public abstract class TokenCandidate {
     private StringBuilder stringBuilder = new StringBuilder();
 
     public TokenCandidate(char c) {
-        stringBuilder.append(c);
+        if (!isDiscardFirstChar())
+            stringBuilder.append(c);
     }
 
     public static TokenCandidate createTokenCandidate(char c) {
@@ -12,8 +13,8 @@ public abstract class TokenCandidate {
             return new NumberTokenCandidate(c);
         if (PropertyTokenCandidate.isBegin(c))
             return new PropertyTokenCandidate(c);
-        if (ItemTokenCandidate.isBegin(c))
-            return new ItemTokenCandidate(c);
+        if (ConstIndexTokenCandidate.isBegin(c))
+            return new ConstIndexTokenCandidate(c);
         if (OperatorTokenCandidate.isBegin(c))
             return new OperatorTokenCandidate(c);
         if (BeginBracketTokenCandidate.isBegin(c))
@@ -36,7 +37,7 @@ public abstract class TokenCandidate {
     public abstract Token toToken();
 
     public boolean isExcludedSplitChar(char c) {
-        return Character.isWhitespace(c) || ItemTokenCandidate.isBegin(c);
+        return Character.isWhitespace(c) || ConstIndexTokenCandidate.isBegin(c);
     }
 
     public boolean isIncludedLastChar(char c) {
@@ -44,6 +45,10 @@ public abstract class TokenCandidate {
     }
 
     public boolean isDiscardedLastChar(char c) {
+        return false;
+    }
+
+    public boolean isDiscardFirstChar() {
         return false;
     }
 }

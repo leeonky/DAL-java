@@ -1,22 +1,22 @@
 package com.github.leeonky.dal.token;
 
-public class SingleQuotationTokenCandidate extends TokenCandidate {
-    public SingleQuotationTokenCandidate(char c) {
+public class ConstIndexTokenCandidate extends TokenCandidate {
+    public ConstIndexTokenCandidate(char c) {
         super(c);
     }
 
     public static boolean isBegin(char c) {
-        return c == '\'';
+        return c == '[';
     }
 
     @Override
     public Token toToken() {
-        return Token.stringToken(content());
+        return Token.constIndexToken(Integer.valueOf(content()));
     }
 
     @Override
     public boolean isDiscardedLastChar(char c) {
-        return c == '\'';
+        return c == ']';
     }
 
     @Override
