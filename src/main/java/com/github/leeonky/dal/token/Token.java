@@ -35,6 +35,10 @@ public class Token {
         return new Token(Type.BEGIN_BRACKET, "(");
     }
 
+    public static Token stringToken(String value) {
+        return new Token(Type.STRING, value);
+    }
+
     public static Token endBrachetToken() {
         return new Token(Type.END_BRACKET, ")");
     }
@@ -52,6 +56,6 @@ public class Token {
     }
 
     enum Type {
-        NUMBER, WORD, PROPERTY, ITEM, OPERATOR, BEGIN_BRACKET, END_BRACKET
+        NUMBER, WORD, PROPERTY, ITEM, OPERATOR, BEGIN_BRACKET, END_BRACKET, STRING
     }
 }

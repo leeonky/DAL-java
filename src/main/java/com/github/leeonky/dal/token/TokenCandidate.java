@@ -20,6 +20,8 @@ public abstract class TokenCandidate {
             return new BeginBracketTokenCandidate(c);
         if (EndBracketTokenCandidate.isBegin(c))
             return new EndBracketTokenCandidate(c);
+        if (SingleQuotationTokenCandidate.isBegin(c))
+            return new SingleQuotationTokenCandidate(c);
         return new WordTokenCandidate(c);
     }
 
@@ -38,6 +40,10 @@ public abstract class TokenCandidate {
     }
 
     public boolean isIncludedLastChar(char c) {
+        return false;
+    }
+
+    public boolean isDiscardedLastChar(char c) {
         return false;
     }
 }

@@ -48,6 +48,8 @@ public class SourceCode {
         TokenCandidate tokenCandidate = TokenCandidate.createTokenCandidate(charBuffer[offset++]);
         while (!isEnd() && !tokenCandidate.isExcludedSplitChar(charBuffer[offset])) {
             char c = charBuffer[offset++];
+            if (tokenCandidate.isDiscardedLastChar(c))
+                break;
             tokenCandidate.append(c);
             if (tokenCandidate.isIncludedLastChar(c))
                 break;

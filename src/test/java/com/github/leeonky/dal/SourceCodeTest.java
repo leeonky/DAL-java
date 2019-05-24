@@ -114,6 +114,16 @@ class SourceCodeTest {
         }
 
         @Nested
+        class StringToken {
+
+            @Test
+            void begin_with_single_quotation() {
+                assertGetToken("'a'", stringToken("a"));
+                assertGetToken("'a''b", stringToken("a"), stringToken("b"));
+            }
+        }
+
+        @Nested
         class SplitTokens {
 
             @Test
