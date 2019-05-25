@@ -3,11 +3,12 @@ package com.github.leeonky.dal.token;
 public abstract class TokenCandidate {
     private final int startPosition;
     private final StringBuilder stringBuilder = new StringBuilder();
+    private boolean finished = false;
 
     public TokenCandidate(SourceCode sourceCode) {
         startPosition = sourceCode.getPosition();
         char c = sourceCode.takeChar();
-        if (!isDiscardPrefix())
+        if (!isDiscardBeginChar())
             stringBuilder.append(c);
     }
 
@@ -21,26 +22,7 @@ public abstract class TokenCandidate {
 
     protected abstract Token toToken();
 
-    protected boolean isNextTokenStart(char c) {
-        return Character.isWhitespace(c) || c == '[';
-    }
-
-    protected boolean isNextTokenStart(SourceCode sourceCode) {
-        return isNextTokenStart(sourceCode.getChar());
-    }
-
-    protected boolean isDiscardedLastChar(char c) {
-        return false;
-    }
-
-    protected boolean isDiscardedSuffix(SourceCode sourceCode) {
-        boolean discardedLastChar = isDiscardedLastChar(sourceCode.getChar());
-        if (discardedLastChar)
-            sourceCode.takeChar();
-        return discardedLastChar;
-    }
-
-    protected boolean isDiscardPrefix() {
+    protected boolean isDiscardBeginChar() {
         return false;
     }
 
@@ -48,11 +30,35 @@ public abstract class TokenCandidate {
         return startPosition;
     }
 
+    protected boolean isUnexpectedChar(char c) {
+        return Character.isWhitespace(c) || c == '[';
+    }
+
     Token getToken(SourceCode sourceCode) {
         while (sourceCode.hasContent()
                 && !isDiscardedSuffix(sourceCode)
-                && !isNextTokenStart(sourceCode))
+                && !isUnexpectedChar(sourceCode.getChar()))
             append(sourceCode.takeChar());
         return toToken();
+    }
+
+    protected String discardedSuffix() {
+        return null;
+    }
+
+    protected boolean isFinished() {
+        return finished;
+    }
+
+    private boolean isDiscardedSuffix(SourceCode sourceCode) {
+        String suffix = discardedSuffix();
+        if (suffix != null) {
+            if (sourceCode.startsWith(suffix)) {
+                sourceCode.seek(suffix.length());
+                finished = true;
+                return true;
+            }
+        }
+        return false;
     }
 }

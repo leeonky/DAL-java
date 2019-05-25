@@ -3,9 +3,8 @@ package com.github.leeonky.dal.token;
 import com.github.leeonky.dal.SyntexException;
 
 public class SingleQuotationTokenCandidate extends TokenCandidate {
-    private boolean finished = false;
 
-    public SingleQuotationTokenCandidate(SourceCode sourceCode) {
+    SingleQuotationTokenCandidate(SourceCode sourceCode) {
         super(sourceCode);
     }
 
@@ -15,25 +14,25 @@ public class SingleQuotationTokenCandidate extends TokenCandidate {
 
     @Override
     public Token toToken() {
-        if (!finished)
+        if (!isFinished())
             throw new SyntexException(getStartPosition() + content().length() + 1, "string should end with '\''");
         return Token.stringToken(content());
     }
 
     @Override
-    public boolean isDiscardedLastChar(char c) {
-        return c == '\'' && (finished = true);
+    public boolean isDiscardBeginChar() {
+        return true;
     }
 
     @Override
-    public boolean isDiscardPrefix() {
-        return true;
+    protected String discardedSuffix() {
+        return "'";
     }
 }
 
 class SingleQuotationTokenCandidateFactory implements TokenCandidateFactory {
 
-    public static final SingleQuotationTokenCandidateFactory INSTANCE = new SingleQuotationTokenCandidateFactory();
+    static final SingleQuotationTokenCandidateFactory INSTANCE = new SingleQuotationTokenCandidateFactory();
 
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {

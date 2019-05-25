@@ -31,8 +31,8 @@ class ScannerTest {
 
             @Test
             void number_token() {
-                assertGetToken("1", numebrToken(new BigDecimal(1)));
-                assertGetToken("11", numebrToken(new BigDecimal(11)));
+                assertGetToken("1", numberToken(new BigDecimal(1)));
+                assertGetToken("11", numberToken(new BigDecimal(11)));
             }
         }
 
@@ -123,8 +123,8 @@ class ScannerTest {
         class BracketToken {
             @Test
             void begin_end_bracket_token() {
-                assertGetToken("(", beginBrachetToken());
-                assertGetToken(")", endBrachetToken());
+                assertGetToken("(", beginBracketToken());
+                assertGetToken(")", endBracketToken());
             }
         }
 
@@ -153,25 +153,25 @@ class ScannerTest {
 
             @Test
             void split_number() {
-                assertGetToken("11 ", numebrToken(new BigDecimal(11)));
-                assertGetToken("11\t", numebrToken(new BigDecimal(11)));
-                assertGetToken("11\n", numebrToken(new BigDecimal(11)));
+                assertGetToken("11 ", numberToken(new BigDecimal(11)));
+                assertGetToken("11\t", numberToken(new BigDecimal(11)));
+                assertGetToken("11\n", numberToken(new BigDecimal(11)));
 
-                assertGetToken("11=", numebrToken(new BigDecimal(11)), operatorToken("="));
-                assertGetToken("11>", numebrToken(new BigDecimal(11)), operatorToken(">"));
-                assertGetToken("11<", numebrToken(new BigDecimal(11)), operatorToken("<"));
-                assertGetToken("11-", numebrToken(new BigDecimal(11)), operatorToken("-"));
-                assertGetToken("11+", numebrToken(new BigDecimal(11)), operatorToken("+"));
-                assertGetToken("11*", numebrToken(new BigDecimal(11)), operatorToken("*"));
-                assertGetToken("11/", numebrToken(new BigDecimal(11)), operatorToken("/"));
-                assertGetToken("11|", numebrToken(new BigDecimal(11)), operatorToken("|"));
-                assertGetToken("11&", numebrToken(new BigDecimal(11)), operatorToken("&"));
-                assertGetToken("11||", numebrToken(new BigDecimal(11)), operatorToken("||"));
-                assertGetToken("11&&", numebrToken(new BigDecimal(11)), operatorToken("&&"));
+                assertGetToken("11=", numberToken(new BigDecimal(11)), operatorToken("="));
+                assertGetToken("11>", numberToken(new BigDecimal(11)), operatorToken(">"));
+                assertGetToken("11<", numberToken(new BigDecimal(11)), operatorToken("<"));
+                assertGetToken("11-", numberToken(new BigDecimal(11)), operatorToken("-"));
+                assertGetToken("11+", numberToken(new BigDecimal(11)), operatorToken("+"));
+                assertGetToken("11*", numberToken(new BigDecimal(11)), operatorToken("*"));
+                assertGetToken("11/", numberToken(new BigDecimal(11)), operatorToken("/"));
+                assertGetToken("11|", numberToken(new BigDecimal(11)), operatorToken("|"));
+                assertGetToken("11&", numberToken(new BigDecimal(11)), operatorToken("&"));
+                assertGetToken("11||", numberToken(new BigDecimal(11)), operatorToken("||"));
+                assertGetToken("11&&", numberToken(new BigDecimal(11)), operatorToken("&&"));
 
-                assertGetToken("11(", numebrToken(new BigDecimal(11)), beginBrachetToken());
+                assertGetToken("11(", numberToken(new BigDecimal(11)), beginBracketToken());
 
-                assertGetToken("11[1]", numebrToken(new BigDecimal(11)), constIndexToken(1));
+                assertGetToken("11[1]", numberToken(new BigDecimal(11)), constIndexToken(1));
             }
 
             @Test
@@ -182,7 +182,7 @@ class ScannerTest {
 
                 assertGetToken("a[0]", wordToken("a"), constIndexToken(0));
 
-                assertGetToken("a(", wordToken("a"), beginBrachetToken());
+                assertGetToken("a(", wordToken("a"), beginBracketToken());
             }
 
             @Test
@@ -193,7 +193,7 @@ class ScannerTest {
 
                 assertGetToken(".a=", propertyToken(".a"), operatorToken("="));
 
-                assertGetToken(".a(", propertyToken(".a"), beginBrachetToken());
+                assertGetToken(".a(", propertyToken(".a"), beginBracketToken());
             }
 
             @Test
@@ -202,11 +202,11 @@ class ScannerTest {
 
                 assertGetToken("==", operatorToken("="), operatorToken("="));
 
-                assertGetToken("=1", operatorToken("="), numebrToken(new BigDecimal(1)));
+                assertGetToken("=1", operatorToken("="), numberToken(new BigDecimal(1)));
 
                 assertGetToken("=a", operatorToken("="), wordToken("a"));
 
-                assertGetToken("=(", operatorToken("="), beginBrachetToken());
+                assertGetToken("=(", operatorToken("="), beginBracketToken());
 
                 assertGetToken("=.a", operatorToken("="), propertyToken(".a"));
 

@@ -12,8 +12,8 @@ class PropertyTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public boolean isNextTokenStart(char c) {
-        return super.isNextTokenStart(c)
+    public boolean isUnexpectedChar(char c) {
+        return super.isUnexpectedChar(c)
                 || OperatorTokenCandidate.isBegin(c)
                 || BeginBracketTokenCandidate.isBegin(c);
     }
@@ -21,7 +21,7 @@ class PropertyTokenCandidate extends TokenCandidate {
 
 class PropertyTokenCandidateFactory implements TokenCandidateFactory {
 
-    public static final PropertyTokenCandidateFactory INSTANCE = new PropertyTokenCandidateFactory();
+    static final PropertyTokenCandidateFactory INSTANCE = new PropertyTokenCandidateFactory();
 
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {

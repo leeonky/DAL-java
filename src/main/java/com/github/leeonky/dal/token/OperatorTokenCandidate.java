@@ -34,7 +34,7 @@ class OperatorTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public boolean isNextTokenStart(char c) {
+    public boolean isUnexpectedChar(char c) {
         String operatorCandidate = content() + c;
         return !MULTI_CHAR_OPTS.stream().anyMatch(opt -> opt.startsWith(operatorCandidate));
     }
@@ -42,7 +42,7 @@ class OperatorTokenCandidate extends TokenCandidate {
 }
 
 class OperatorTokenCandidateFactory implements TokenCandidateFactory {
-    public static final OperatorTokenCandidateFactory INSTANCE = new OperatorTokenCandidateFactory();
+    static final OperatorTokenCandidateFactory INSTANCE = new OperatorTokenCandidateFactory();
 
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
@@ -51,7 +51,20 @@ class OperatorTokenCandidateFactory implements TokenCandidateFactory {
 
     @Override
     public boolean isBegin(SourceCode sourceCode) {
-        return OperatorTokenCandidate.isBegin(sourceCode.getChar());
+        switch (sourceCode.getChar()) {
+            case '=':
+            case '>':
+            case '<':
+            case '+':
+            case '-':
+            case '*':
+            case '/':
+            case '&':
+            case '|':
+            case '!':
+                return true;
+        }
+        return false;
     }
 }
 

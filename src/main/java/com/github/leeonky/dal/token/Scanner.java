@@ -19,12 +19,8 @@ public class Scanner {
     public List<Token> scan(SourceCode sourceCode) {
         List<Token> tokens = new ArrayList<>();
         while (sourceCode.hasContent())
-            tokens.add(getOneToken(sourceCode));
+            tokens.add(takeTokenCandidate(sourceCode).getToken(sourceCode));
         return tokens;
-    }
-
-    private Token getOneToken(SourceCode sourceCode) {
-        return takeTokenCandidate(sourceCode).getToken(sourceCode);
     }
 
     private TokenCandidate takeTokenCandidate(SourceCode sourceCode) {

@@ -3,15 +3,14 @@ package com.github.leeonky.dal.token;
 import com.github.leeonky.dal.SyntexException;
 
 class ConstIndexTokenCandidate extends TokenCandidate {
-    private boolean finished = false;
 
-    public ConstIndexTokenCandidate(SourceCode sourceCode) {
+    ConstIndexTokenCandidate(SourceCode sourceCode) {
         super(sourceCode);
     }
 
     @Override
     public Token toToken() {
-        if (!finished)
+        if (!isFinished())
             throw new SyntexException(getStartPosition() + content().length() + 1, "missed ']'");
         int value;
         try {
@@ -23,19 +22,19 @@ class ConstIndexTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public boolean isDiscardedLastChar(char c) {
-        return c == ']' && (finished = true);
+    protected String discardedSuffix() {
+        return "]";
     }
 
     @Override
-    public boolean isDiscardPrefix() {
+    public boolean isDiscardBeginChar() {
         return true;
     }
 }
 
 class ConstIndexTokenCandidateFactory implements TokenCandidateFactory {
 
-    public static final ConstIndexTokenCandidateFactory INSTANCE = new ConstIndexTokenCandidateFactory();
+    static final ConstIndexTokenCandidateFactory INSTANCE = new ConstIndexTokenCandidateFactory();
 
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {

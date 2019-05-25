@@ -27,11 +27,11 @@ public class Token {
         return new Token(Type.OPERATOR, value);
     }
 
-    public static Token numebrToken(Object value) {
+    public static Token numberToken(Object value) {
         return new Token(Type.NUMBER, value);
     }
 
-    public static Token beginBrachetToken() {
+    public static Token beginBracketToken() {
         return new Token(Type.BEGIN_BRACKET, "(");
     }
 
@@ -39,7 +39,7 @@ public class Token {
         return new Token(Type.STRING, value);
     }
 
-    public static Token endBrachetToken() {
+    public static Token endBracketToken() {
         return new Token(Type.END_BRACKET, ")");
     }
 

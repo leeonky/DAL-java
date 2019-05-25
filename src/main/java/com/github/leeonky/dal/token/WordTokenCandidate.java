@@ -13,8 +13,8 @@ class WordTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public boolean isNextTokenStart(char c) {
-        return super.isNextTokenStart(c)
+    public boolean isUnexpectedChar(char c) {
+        return super.isUnexpectedChar(c)
                 || BeginBracketTokenCandidate.isBegin(c)
                 || OperatorTokenCandidate.isBegin(c);
     }

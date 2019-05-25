@@ -27,6 +27,11 @@ public class SourceCode {
         return sourceCode.charAt(offset + position);
     }
 
+    public SourceCode substring(int begin) {
+        offset += begin;
+        return this;
+    }
+
     public SourceCode trimLeft() {
         while (offset < charBuffer.length && Character.isWhitespace(getChar()))
             offset++;
@@ -41,13 +46,12 @@ public class SourceCode {
         return charBuffer[offset++];
     }
 
-    public SourceCode substring(int begin) {
-        offset += begin;
-        return this;
-    }
-
     public boolean hasContent() {
         trimLeft();
         return offset < charBuffer.length;
+    }
+
+    public void seek(int p) {
+        offset += p;
     }
 }

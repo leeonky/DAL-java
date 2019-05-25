@@ -11,13 +11,13 @@ class BeginBracketTokenCandidate extends TokenCandidate {
 
     @Override
     public Token toToken() {
-        return Token.beginBrachetToken();
+        return Token.beginBracketToken();
     }
 }
 
 class BeginBracketTokenCandidateFactory implements TokenCandidateFactory {
 
-    public static final BeginBracketTokenCandidateFactory INSTANCE = new BeginBracketTokenCandidateFactory();
+    static final BeginBracketTokenCandidateFactory INSTANCE = new BeginBracketTokenCandidateFactory();
 
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
@@ -26,6 +26,6 @@ class BeginBracketTokenCandidateFactory implements TokenCandidateFactory {
 
     @Override
     public boolean isBegin(SourceCode sourceCode) {
-        return BeginBracketTokenCandidate.isBegin(sourceCode.getChar());
+        return sourceCode.getChar() == '(';
     }
 }

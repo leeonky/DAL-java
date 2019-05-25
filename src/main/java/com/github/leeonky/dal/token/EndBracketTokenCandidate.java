@@ -11,13 +11,13 @@ class EndBracketTokenCandidate extends TokenCandidate {
 
     @Override
     public Token toToken() {
-        return Token.endBrachetToken();
+        return Token.endBracketToken();
     }
 }
 
 class EndBracketTokenCandidateFactory implements TokenCandidateFactory {
 
-    public static final EndBracketTokenCandidateFactory INSTANCE = new EndBracketTokenCandidateFactory();
+    static final EndBracketTokenCandidateFactory INSTANCE = new EndBracketTokenCandidateFactory();
 
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {

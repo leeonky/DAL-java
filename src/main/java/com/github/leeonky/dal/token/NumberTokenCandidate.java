@@ -9,19 +9,19 @@ class NumberTokenCandidate extends TokenCandidate {
 
     @Override
     public Token toToken() {
-        return Token.numebrToken(new BigDecimal(content()));
+        return Token.numberToken(new BigDecimal(content()));
     }
 
     @Override
-    public boolean isNextTokenStart(char c) {
-        return super.isNextTokenStart(c)
+    public boolean isUnexpectedChar(char c) {
+        return super.isUnexpectedChar(c)
                 || OperatorTokenCandidate.isBegin(c)
                 || BeginBracketTokenCandidate.isBegin(c);
     }
 }
 
 class NumberTokenCandidateFactory implements TokenCandidateFactory {
-    public static final NumberTokenCandidateFactory INSTANCE = new NumberTokenCandidateFactory();
+    static final NumberTokenCandidateFactory INSTANCE = new NumberTokenCandidateFactory();
 
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
