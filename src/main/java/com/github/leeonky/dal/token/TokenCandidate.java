@@ -45,10 +45,18 @@ public abstract class TokenCandidate {
     }
 
     Token getToken(SourceCode sourceCode) {
-        while (sourceCode.hasContent()
-                && !isDiscardedSuffix(sourceCode)
-                && !isUnexpectedChar(sourceCode.getChar()))
-            while (append(sourceCode.takeChar()) && sourceCode.notEnd()) ;
+        if (discardedSuffix() != null) {
+            while (sourceCode.notEnd()
+                    && !isDiscardedSuffix(sourceCode))
+                while (append(sourceCode.takeChar()) && sourceCode.notEnd()) {
+                }
+        } else {
+
+            while (sourceCode.hasContent()
+                    && !isDiscardedSuffix(sourceCode)
+                    && !isUnexpectedChar(sourceCode.getChar()))
+                append(sourceCode.takeChar());
+        }
         return toToken();
     }
 

@@ -76,7 +76,7 @@ class ScannerTest {
                 SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" [xx   ", constIndexToken(1)));
                 assertThat(syntexException)
                         .hasMessage("missed ']'")
-                        .hasFieldOrPropertyWithValue("position", 4);
+                        .hasFieldOrPropertyWithValue("position", 7);
 
                 "aue".charAt(0);
             }
@@ -133,7 +133,6 @@ class ScannerTest {
 
             @Test
             void begin_with_single_quotation() {
-//                assertGetToken("'a x'", stringToken("a x"));
                 assertGetToken("'a''b'", stringToken("a"), stringToken("b"));
             }
 
@@ -142,7 +141,13 @@ class ScannerTest {
                 SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" 'xx   "));
                 assertThat(syntexException)
                         .hasMessage("string should end with '\''")
-                        .hasFieldOrPropertyWithValue("position", 4);
+                        .hasFieldOrPropertyWithValue("position", 7);
+            }
+
+            @Test
+            void string_contains_blank() {
+                assertGetToken("'  '", stringToken("  "));
+                assertGetToken("' a '", stringToken(" a "));
             }
         }
 
@@ -159,17 +164,17 @@ class ScannerTest {
                 SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" \"xx   "));
                 assertThat(syntexException)
                         .hasMessage("string should end with '\"'")
-                        .hasFieldOrPropertyWithValue("position", 4);
+                        .hasFieldOrPropertyWithValue("position", 7);
             }
 
             @Test
             void escape_char() {
-                assertGetToken("\"a\\\"\"", stringToken("a\""));
-                assertGetToken("\"a\\t\"", stringToken("a\t"));
-                assertGetToken("\"a\\n\"", stringToken("a\n"));
-                assertGetToken("\"a\\\\\"", stringToken("a\\"));
+                assertGetToken("\"\\\"\"", stringToken("\""));
+                assertGetToken("\"\\t\"", stringToken("\t"));
+                assertGetToken("\"\\n\"", stringToken("\n"));
+                assertGetToken("\"\\\\\"", stringToken("\\"));
 
-                assertGetToken("\"a\\n\\n\"", stringToken("a\n\n"));
+                assertGetToken("\"\\n\\n\"", stringToken("\n\n"));
             }
 
             @Test
@@ -188,6 +193,12 @@ class ScannerTest {
                 assertThat(syntexException)
                         .hasMessage("unsupported escape char")
                         .hasFieldOrPropertyWithValue("position", 3);
+            }
+
+            @Test
+            void string_contains_blank() {
+                assertGetToken("\"  \"", stringToken("  "));
+                assertGetToken("\" a \"", stringToken(" a "));
             }
         }
 
