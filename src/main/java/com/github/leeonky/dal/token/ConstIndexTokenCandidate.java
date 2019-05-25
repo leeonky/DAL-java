@@ -28,6 +28,11 @@ class ConstIndexTokenCandidate extends TokenCandidate {
     public boolean isDiscardBeginChar() {
         return true;
     }
+
+    @Override
+    protected boolean isUnexpectedChar(char c) {
+        return false;
+    }
 }
 
 class ConstIndexTokenCandidateFactory implements TokenCandidateFactory {

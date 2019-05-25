@@ -207,7 +207,7 @@ class ScannerTest {
 
             @Test
             void split_number() {
-                assertGetToken("11 ", numberToken(new BigDecimal(11)));
+                assertGetToken("11 12", numberToken(new BigDecimal(11)), numberToken(new BigDecimal(12)));
                 assertGetToken("11\t", numberToken(new BigDecimal(11)));
                 assertGetToken("11\n", numberToken(new BigDecimal(11)));
 
@@ -230,7 +230,7 @@ class ScannerTest {
 
             @Test
             void split_word_token() {
-                assertGetToken("a ", wordToken("a"));
+                assertGetToken("a b", wordToken("a"), wordToken("b"));
 
                 assertGetToken("a=", wordToken("a"), operatorToken("="));
 
@@ -241,7 +241,7 @@ class ScannerTest {
 
             @Test
             void split_property_token() {
-                assertGetToken(".a ", propertyToken(".a"));
+                assertGetToken(".a .b", propertyToken(".a"), propertyToken(".b"));
 
                 assertGetToken(".a[1]", propertyToken(".a"), constIndexToken(1));
 
@@ -252,7 +252,7 @@ class ScannerTest {
 
             @Test
             void split_operator_token() {
-                assertGetToken("= ", operatorToken("="));
+                assertGetToken("= =", operatorToken("="), operatorToken("="));
 
                 assertGetToken("==", operatorToken("="), operatorToken("="));
 

@@ -24,6 +24,11 @@ class SingleQuotationStringTokenCandidate extends TokenCandidate {
     protected String discardedSuffix() {
         return "'";
     }
+
+    @Override
+    protected boolean isUnexpectedChar(char c) {
+        return false;
+    }
 }
 
 class SingleQuotationStringTokenCandidateFactory implements TokenCandidateFactory {
