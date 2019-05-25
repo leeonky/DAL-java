@@ -2,9 +2,9 @@ package com.github.leeonky.dal.token;
 
 import com.github.leeonky.dal.SyntexException;
 
-public class SingleQuotationTokenCandidate extends TokenCandidate {
+class SingleQuotationStringTokenCandidate extends TokenCandidate {
 
-    SingleQuotationTokenCandidate(SourceCode sourceCode) {
+    SingleQuotationStringTokenCandidate(SourceCode sourceCode) {
         super(sourceCode);
     }
 
@@ -26,13 +26,13 @@ public class SingleQuotationTokenCandidate extends TokenCandidate {
     }
 }
 
-class SingleQuotationTokenCandidateFactory implements TokenCandidateFactory {
+class SingleQuotationStringTokenCandidateFactory implements TokenCandidateFactory {
 
-    static final SingleQuotationTokenCandidateFactory INSTANCE = new SingleQuotationTokenCandidateFactory();
+    static final SingleQuotationStringTokenCandidateFactory INSTANCE = new SingleQuotationStringTokenCandidateFactory();
 
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
-        return new SingleQuotationTokenCandidate(sourceCode);
+        return new SingleQuotationStringTokenCandidate(sourceCode);
     }
 
     @Override

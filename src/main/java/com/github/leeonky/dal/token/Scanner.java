@@ -18,7 +18,8 @@ public class Scanner {
             OperatorTokenCandidateFactory.INSTANCE,
             BeginBracketTokenCandidateFactory.INSTANCE,
             EndBracketTokenCandidateFactory.INSTANCE,
-            SingleQuotationTokenCandidateFactory.INSTANCE
+            SingleQuotationStringTokenCandidateFactory.INSTANCE,
+            DoubleQuotationStringTokenCandidateFactory.INSTANCE
     );
 
     public List<Token> scan(SourceCode sourceCode) {

@@ -129,7 +129,7 @@ class ScannerTest {
         }
 
         @Nested
-        class StringToken {
+        class SingleQuotationStringToken {
 
             @Test
             void begin_with_single_quotation() {
@@ -143,8 +143,23 @@ class ScannerTest {
                 assertThat(syntexException)
                         .hasMessage("string should end with '\''")
                         .hasFieldOrPropertyWithValue("position", 4);
+            }
+        }
 
-                "aue".charAt(0);
+        @Nested
+        class DoubleQuotationStringToken {
+
+            @Test
+            void no_escape_char() {
+                assertGetToken("\"a\"", stringToken("a"));
+            }
+
+            @Test
+            void should_end_with_end_single_quotation() {
+                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" \"xx   ", stringToken("xx")));
+                assertThat(syntexException)
+                        .hasMessage("string should end with '\"'")
+                        .hasFieldOrPropertyWithValue("position", 4);
             }
         }
 
