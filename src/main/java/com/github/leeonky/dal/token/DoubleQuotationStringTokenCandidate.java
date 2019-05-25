@@ -3,6 +3,8 @@ package com.github.leeonky.dal.token;
 import com.github.leeonky.dal.SyntexException;
 
 class DoubleQuotationStringTokenCandidate extends TokenCandidate {
+    private boolean isEscape = false;
+    private int codeLength = 0;
 
     DoubleQuotationStringTokenCandidate(SourceCode sourceCode) {
         super(sourceCode);
@@ -11,8 +13,39 @@ class DoubleQuotationStringTokenCandidate extends TokenCandidate {
     @Override
     public Token toToken() {
         if (!isFinished())
-            throw new SyntexException(getStartPosition() + content().length() + 1, "string should end with '\"'");
+            throw new SyntexException(getStartPosition() + codeLength + 1, "string should end with '\"'");
         return Token.stringToken(content());
+    }
+
+    @Override
+    protected boolean append(char c) {
+        codeLength++;
+        if (isEscape) {
+            super.append(getEscapedChar(c));
+            isEscape = false;
+        } else {
+            if (c == '\\') {
+                isEscape = true;
+                return true;
+            }
+            super.append(c);
+        }
+        return false;
+    }
+
+    private char getEscapedChar(char c) {
+        switch (c) {
+            case '"':
+                return '"';
+            case 't':
+                return '\t';
+            case 'n':
+                return '\n';
+            case '\\':
+                return '\\';
+            default:
+                throw new SyntexException(getStartPosition() + codeLength, "unsupported escape char");
+        }
     }
 
     @Override
@@ -23,6 +56,11 @@ class DoubleQuotationStringTokenCandidate extends TokenCandidate {
     @Override
     protected String discardedSuffix() {
         return "\"";
+    }
+
+    @Override
+    protected boolean isUnexpectedChar(char c) {
+        return false;
     }
 }
 

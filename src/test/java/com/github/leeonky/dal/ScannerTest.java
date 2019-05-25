@@ -133,13 +133,13 @@ class ScannerTest {
 
             @Test
             void begin_with_single_quotation() {
-                assertGetToken("'a'", stringToken("a"));
+//                assertGetToken("'a x'", stringToken("a x"));
                 assertGetToken("'a''b'", stringToken("a"), stringToken("b"));
             }
 
             @Test
             void should_end_with_end_single_quotation() {
-                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" 'xx   ", stringToken("xx")));
+                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" 'xx   "));
                 assertThat(syntexException)
                         .hasMessage("string should end with '\''")
                         .hasFieldOrPropertyWithValue("position", 4);
@@ -156,10 +156,38 @@ class ScannerTest {
 
             @Test
             void should_end_with_end_single_quotation() {
-                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" \"xx   ", stringToken("xx")));
+                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" \"xx   "));
                 assertThat(syntexException)
                         .hasMessage("string should end with '\"'")
                         .hasFieldOrPropertyWithValue("position", 4);
+            }
+
+            @Test
+            void escape_char() {
+                assertGetToken("\"a\\\"\"", stringToken("a\""));
+                assertGetToken("\"a\\t\"", stringToken("a\t"));
+                assertGetToken("\"a\\n\"", stringToken("a\n"));
+                assertGetToken("\"a\\\\\"", stringToken("a\\"));
+
+                assertGetToken("\"a\\n\\n\"", stringToken("a\n\n"));
+            }
+
+            @Test
+            void unfinished_escape_char() {
+                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken("\"a\\"));
+
+                assertThat(syntexException)
+                        .hasMessage("string should end with '\"'")
+                        .hasFieldOrPropertyWithValue("position", 3);
+            }
+
+            @Test
+            void unsupported_escape_char() {
+                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken("\"a\\a"));
+
+                assertThat(syntexException)
+                        .hasMessage("unsupported escape char")
+                        .hasFieldOrPropertyWithValue("position", 3);
             }
         }
 

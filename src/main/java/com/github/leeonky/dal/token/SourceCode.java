@@ -48,6 +48,10 @@ public class SourceCode {
 
     public boolean hasContent() {
         trimLeft();
+        return notEnd();
+    }
+
+    public boolean notEnd() {
         return offset < charBuffer.length;
     }
 

@@ -21,8 +21,9 @@ public abstract class TokenCandidate {
             stringBuilder.append(c);
     }
 
-    protected void append(char c) {
+    protected boolean append(char c) {
         stringBuilder.append(c);
+        return false;
     }
 
     protected String content() {
@@ -47,7 +48,7 @@ public abstract class TokenCandidate {
         while (sourceCode.hasContent()
                 && !isDiscardedSuffix(sourceCode)
                 && !isUnexpectedChar(sourceCode.getChar()))
-            append(sourceCode.takeChar());
+            while (append(sourceCode.takeChar()) && sourceCode.notEnd()) ;
         return toToken();
     }
 
