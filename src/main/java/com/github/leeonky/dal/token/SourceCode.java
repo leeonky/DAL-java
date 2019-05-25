@@ -46,9 +46,8 @@ public class SourceCode {
         return this;
     }
 
-
-    public boolean isEnd() {
+    public boolean hasContent() {
         trimLeft();
-        return offset == charBuffer.length;
+        return offset < charBuffer.length;
     }
 }

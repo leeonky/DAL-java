@@ -35,6 +35,8 @@ class ConstIndexTokenCandidate extends TokenCandidate {
 
 class ConstIndexTokenCandidateFactory implements TokenCandidateFactory {
 
+    public static final ConstIndexTokenCandidateFactory INSTANCE = new ConstIndexTokenCandidateFactory();
+
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
         return new ConstIndexTokenCandidate(sourceCode);

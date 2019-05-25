@@ -13,14 +13,16 @@ class NumberTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public boolean isExcludedSplitChar(char c) {
-        return super.isExcludedSplitChar(c)
+    public boolean isNextTokenStart(char c) {
+        return super.isNextTokenStart(c)
                 || OperatorTokenCandidate.isBegin(c)
                 || BeginBracketTokenCandidate.isBegin(c);
     }
 }
 
 class NumberTokenCandidateFactory implements TokenCandidateFactory {
+    public static final NumberTokenCandidateFactory INSTANCE = new NumberTokenCandidateFactory();
+
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
         return new NumberTokenCandidate(sourceCode);

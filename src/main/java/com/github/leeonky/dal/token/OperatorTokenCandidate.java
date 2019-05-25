@@ -34,18 +34,16 @@ class OperatorTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public boolean isExcludedSplitChar(char c) {
+    public boolean isNextTokenStart(char c) {
         String operatorCandidate = content() + c;
         return !MULTI_CHAR_OPTS.stream().anyMatch(opt -> opt.startsWith(operatorCandidate));
     }
 
-    @Override
-    public boolean isIncludedLastChar(char c) {
-        return true; //Every operator has 2 chars at most, so directly return true
-    }
 }
 
 class OperatorTokenCandidateFactory implements TokenCandidateFactory {
+    public static final OperatorTokenCandidateFactory INSTANCE = new OperatorTokenCandidateFactory();
+
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
         return new OperatorTokenCandidate(sourceCode);

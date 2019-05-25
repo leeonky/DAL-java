@@ -13,8 +13,8 @@ class WordTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public boolean isExcludedSplitChar(char c) {
-        return super.isExcludedSplitChar(c)
+    public boolean isNextTokenStart(char c) {
+        return super.isNextTokenStart(c)
                 || BeginBracketTokenCandidate.isBegin(c)
                 || OperatorTokenCandidate.isBegin(c);
     }

@@ -33,6 +33,8 @@ public class SingleQuotationTokenCandidate extends TokenCandidate {
 
 class SingleQuotationTokenCandidateFactory implements TokenCandidateFactory {
 
+    public static final SingleQuotationTokenCandidateFactory INSTANCE = new SingleQuotationTokenCandidateFactory();
+
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
         return new SingleQuotationTokenCandidate(sourceCode);

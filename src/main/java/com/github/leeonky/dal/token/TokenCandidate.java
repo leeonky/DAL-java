@@ -19,21 +19,28 @@ public abstract class TokenCandidate {
         return stringBuilder.toString();
     }
 
-    public abstract Token toToken();
+    protected abstract Token toToken();
 
-    public boolean isExcludedSplitChar(char c) {
+    protected boolean isNextTokenStart(char c) {
         return Character.isWhitespace(c) || c == '[';
     }
 
-    public boolean isIncludedLastChar(char c) {
+    protected boolean isNextTokenStart(SourceCode sourceCode) {
+        return isNextTokenStart(sourceCode.getChar());
+    }
+
+    protected boolean isDiscardedLastChar(char c) {
         return false;
     }
 
-    public boolean isDiscardedLastChar(char c) {
-        return false;
+    protected boolean isDiscardedSuffix(SourceCode sourceCode) {
+        boolean discardedLastChar = isDiscardedLastChar(sourceCode.getChar());
+        if (discardedLastChar)
+            sourceCode.takeChar();
+        return discardedLastChar;
     }
 
-    public boolean isDiscardPrefix() {
+    protected boolean isDiscardPrefix() {
         return false;
     }
 
@@ -42,19 +49,10 @@ public abstract class TokenCandidate {
     }
 
     Token getToken(SourceCode sourceCode) {
-        while (!sourceCode.isEnd()) {
-            char c = sourceCode.getChar();
-            if (isDiscardedLastChar(c)) {
-                sourceCode.takeChar();
-                break;
-            }
-            if (isExcludedSplitChar(c))
-                break;
-            append(c);
-            sourceCode.takeChar();
-            if (isIncludedLastChar(c))
-                break;
-        }
+        while (sourceCode.hasContent()
+                && !isDiscardedSuffix(sourceCode)
+                && !isNextTokenStart(sourceCode))
+            append(sourceCode.takeChar());
         return toToken();
     }
 }

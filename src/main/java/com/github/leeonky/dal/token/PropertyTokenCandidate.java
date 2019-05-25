@@ -12,14 +12,16 @@ class PropertyTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public boolean isExcludedSplitChar(char c) {
-        return super.isExcludedSplitChar(c)
+    public boolean isNextTokenStart(char c) {
+        return super.isNextTokenStart(c)
                 || OperatorTokenCandidate.isBegin(c)
                 || BeginBracketTokenCandidate.isBegin(c);
     }
 }
 
 class PropertyTokenCandidateFactory implements TokenCandidateFactory {
+
+    public static final PropertyTokenCandidateFactory INSTANCE = new PropertyTokenCandidateFactory();
 
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {

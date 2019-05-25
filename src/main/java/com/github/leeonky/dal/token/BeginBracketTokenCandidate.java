@@ -17,6 +17,8 @@ class BeginBracketTokenCandidate extends TokenCandidate {
 
 class BeginBracketTokenCandidateFactory implements TokenCandidateFactory {
 
+    public static final BeginBracketTokenCandidateFactory INSTANCE = new BeginBracketTokenCandidateFactory();
+
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
         return new BeginBracketTokenCandidate(sourceCode);
