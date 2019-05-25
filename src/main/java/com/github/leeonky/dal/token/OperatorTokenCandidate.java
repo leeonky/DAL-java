@@ -1,31 +1,9 @@
 package com.github.leeonky.dal.token;
 
-import java.util.List;
-
-import static java.util.Arrays.asList;
-
 class OperatorTokenCandidate extends TokenCandidate {
-    private static final List<String> MULTI_CHAR_OPTS = asList(">=", "<=", "&&", "||", "!=");
 
     OperatorTokenCandidate(SourceCode sourceCode) {
         super(sourceCode);
-    }
-
-    static boolean isBegin(char c) {
-        switch (c) {
-            case '=':
-            case '>':
-            case '<':
-            case '+':
-            case '-':
-            case '*':
-            case '/':
-            case '&':
-            case '|':
-            case '!':
-                return true;
-        }
-        return false;
     }
 
     @Override
@@ -36,7 +14,7 @@ class OperatorTokenCandidate extends TokenCandidate {
     @Override
     public boolean isUnexpectedChar(char c) {
         String operatorCandidate = content() + c;
-        return !MULTI_CHAR_OPTS.stream().anyMatch(opt -> opt.startsWith(operatorCandidate));
+        return !Scanner.MULTI_CHAR_OPTS.stream().anyMatch(opt -> opt.startsWith(operatorCandidate));
     }
 
 }

@@ -12,13 +12,11 @@ class ConstIndexTokenCandidate extends TokenCandidate {
     public Token toToken() {
         if (!isFinished())
             throw new SyntexException(getStartPosition() + content().length() + 1, "missed ']'");
-        int value;
         try {
-            value = Integer.valueOf(content());
+            return Token.constIndexToken(Integer.valueOf(content()));
         } catch (NumberFormatException e) {
             throw new SyntexException(getStartPosition() + 1, "only support const int array index");
         }
-        return Token.constIndexToken(value);
     }
 
     @Override

@@ -3,20 +3,14 @@ package com.github.leeonky.dal.token;
 import java.math.BigDecimal;
 
 class NumberTokenCandidate extends TokenCandidate {
+
     NumberTokenCandidate(SourceCode sourceCode) {
-        super(sourceCode);
+        super(sourceCode, Scanner.CHAR_SPLIT);
     }
 
     @Override
     public Token toToken() {
         return Token.numberToken(new BigDecimal(content()));
-    }
-
-    @Override
-    public boolean isUnexpectedChar(char c) {
-        return super.isUnexpectedChar(c)
-                || OperatorTokenCandidate.isBegin(c)
-                || BeginBracketTokenCandidate.isBegin(c);
     }
 }
 

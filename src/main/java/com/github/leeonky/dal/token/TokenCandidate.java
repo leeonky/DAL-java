@@ -1,11 +1,20 @@
 package com.github.leeonky.dal.token;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public abstract class TokenCandidate {
     private final int startPosition;
     private final StringBuilder stringBuilder = new StringBuilder();
+    private final Set<Character> split;
     private boolean finished = false;
 
     public TokenCandidate(SourceCode sourceCode) {
+        this(sourceCode, new HashSet<>());
+    }
+
+    public TokenCandidate(SourceCode sourceCode, Set<Character> split) {
+        this.split = split;
         startPosition = sourceCode.getPosition();
         char c = sourceCode.takeChar();
         if (!isDiscardBeginChar())
@@ -31,7 +40,7 @@ public abstract class TokenCandidate {
     }
 
     protected boolean isUnexpectedChar(char c) {
-        return Character.isWhitespace(c) || c == '[';
+        return Character.isWhitespace(c) || c == '[' || split.contains(c);
     }
 
     Token getToken(SourceCode sourceCode) {

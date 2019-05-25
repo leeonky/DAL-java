@@ -8,10 +8,6 @@ public class SingleQuotationTokenCandidate extends TokenCandidate {
         super(sourceCode);
     }
 
-    public static boolean isBegin(char c) {
-        return c == '\'';
-    }
-
     @Override
     public Token toToken() {
         if (!isFinished())
@@ -41,6 +37,6 @@ class SingleQuotationTokenCandidateFactory implements TokenCandidateFactory {
 
     @Override
     public boolean isBegin(SourceCode sourceCode) {
-        return SingleQuotationTokenCandidate.isBegin(sourceCode.getChar());
+        return sourceCode.getChar() == '\'';
     }
 }
