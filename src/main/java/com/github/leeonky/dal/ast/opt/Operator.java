@@ -32,4 +32,9 @@ public abstract class Operator {
     public int length() {
         return code.length();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Operator && code == ((Operator) obj).code;
+    }
 }

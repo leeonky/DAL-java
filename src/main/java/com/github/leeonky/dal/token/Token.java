@@ -55,6 +55,10 @@ public class Token {
         return type + "<" + String.valueOf(value) + ">";
     }
 
+    public String getWord() {
+        return value.toString();
+    }
+
     enum Type {
         NUMBER, WORD, PROPERTY, CONST_INDEX, OPERATOR, BEGIN_BRACKET, END_BRACKET, STRING
     }

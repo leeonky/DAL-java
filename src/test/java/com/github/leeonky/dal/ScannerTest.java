@@ -265,6 +265,10 @@ class ScannerTest {
                 assertGetToken("=.a", operatorToken("="), propertyToken(".a"));
 
                 assertGetToken("=[0]", operatorToken("="), constIndexToken(0));
+
+                assertGetToken("='0'", operatorToken("="), stringToken("0"));
+
+                assertGetToken("=\"0\"", operatorToken("="), stringToken("0"));
             }
         }
     }
