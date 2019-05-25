@@ -2,8 +2,8 @@ package com.github.leeonky.dal.ast.opt;
 
 import com.github.leeonky.dal.CompilingContext;
 import com.github.leeonky.dal.DALCompiler;
-import com.github.leeonky.dal.SourceCode;
 import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.token.SourceCode;
 
 public abstract class Operator {
     private final String code;

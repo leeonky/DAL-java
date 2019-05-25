@@ -1,5 +1,7 @@
 package com.github.leeonky.dal;
 
+import com.github.leeonky.dal.token.SourceCode;
+
 public class DataAssertor {
     private DALCompiler dalCompiler = new DALCompiler();
 

@@ -4,14 +4,14 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 
-public class OperatorTokenCandidate extends TokenCandidate {
+class OperatorTokenCandidate extends TokenCandidate {
     private static final List<String> MULTI_CHAR_OPTS = asList(">=", "<=", "&&", "||", "!=");
 
-    public OperatorTokenCandidate(char c) {
-        super(c);
+    OperatorTokenCandidate(SourceCode sourceCode) {
+        super(sourceCode);
     }
 
-    public static boolean isBegin(char c) {
+    static boolean isBegin(char c) {
         switch (c) {
             case '=':
             case '>':
@@ -44,3 +44,16 @@ public class OperatorTokenCandidate extends TokenCandidate {
         return true; //Every operator has 2 chars at most, so directly return true
     }
 }
+
+class OperatorTokenCandidateFactory implements TokenCandidateFactory {
+    @Override
+    public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
+        return new OperatorTokenCandidate(sourceCode);
+    }
+
+    @Override
+    public boolean isBegin(SourceCode sourceCode) {
+        return OperatorTokenCandidate.isBegin(sourceCode.getChar());
+    }
+}
+

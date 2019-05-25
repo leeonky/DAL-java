@@ -2,13 +2,9 @@ package com.github.leeonky.dal.token;
 
 import java.math.BigDecimal;
 
-public class NumberTokenCandidate extends TokenCandidate {
-    public NumberTokenCandidate(char c) {
-        super(c);
-    }
-
-    public static boolean isBegin(char c) {
-        return Character.isDigit(c);
+class NumberTokenCandidate extends TokenCandidate {
+    NumberTokenCandidate(SourceCode sourceCode) {
+        super(sourceCode);
     }
 
     @Override
@@ -23,3 +19,16 @@ public class NumberTokenCandidate extends TokenCandidate {
                 || BeginBracketTokenCandidate.isBegin(c);
     }
 }
+
+class NumberTokenCandidateFactory implements TokenCandidateFactory {
+    @Override
+    public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
+        return new NumberTokenCandidate(sourceCode);
+    }
+
+    @Override
+    public boolean isBegin(SourceCode sourceCode) {
+        return Character.isDigit(sourceCode.getChar());
+    }
+}
+

@@ -11,11 +11,6 @@ public class Token {
         this.value = value;
     }
 
-    public Token(Type type, Object value, int position) {
-        this.type = type;
-        this.value = value;
-    }
-
     public static Token wordToken(Object value) {
         return new Token(Type.WORD, value);
     }

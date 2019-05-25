@@ -1,13 +1,9 @@
 package com.github.leeonky.dal.token;
 
-public class PropertyTokenCandidate extends TokenCandidate {
+class PropertyTokenCandidate extends TokenCandidate {
 
-    public PropertyTokenCandidate(char c) {
-        super(c);
-    }
-
-    public static boolean isBegin(char c) {
-        return c == '.';
+    PropertyTokenCandidate(SourceCode sourceCode) {
+        super(sourceCode);
     }
 
     @Override
@@ -20,5 +16,18 @@ public class PropertyTokenCandidate extends TokenCandidate {
         return super.isExcludedSplitChar(c)
                 || OperatorTokenCandidate.isBegin(c)
                 || BeginBracketTokenCandidate.isBegin(c);
+    }
+}
+
+class PropertyTokenCandidateFactory implements TokenCandidateFactory {
+
+    @Override
+    public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
+        return new PropertyTokenCandidate(sourceCode);
+    }
+
+    @Override
+    public boolean isBegin(SourceCode sourceCode) {
+        return sourceCode.getChar() == '.';
     }
 }

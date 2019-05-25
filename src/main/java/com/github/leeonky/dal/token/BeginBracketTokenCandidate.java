@@ -1,16 +1,29 @@
 package com.github.leeonky.dal.token;
 
-public class BeginBracketTokenCandidate extends TokenCandidate {
-    public BeginBracketTokenCandidate(char c) {
-        super(c);
+class BeginBracketTokenCandidate extends TokenCandidate {
+    BeginBracketTokenCandidate(SourceCode sourceCode) {
+        super(sourceCode);
     }
 
-    public static boolean isBegin(char c) {
+    static boolean isBegin(char c) {
         return c == '(';
     }
 
     @Override
     public Token toToken() {
         return Token.beginBrachetToken();
+    }
+}
+
+class BeginBracketTokenCandidateFactory implements TokenCandidateFactory {
+
+    @Override
+    public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
+        return new BeginBracketTokenCandidate(sourceCode);
+    }
+
+    @Override
+    public boolean isBegin(SourceCode sourceCode) {
+        return BeginBracketTokenCandidate.isBegin(sourceCode.getChar());
     }
 }

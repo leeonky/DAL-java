@@ -1,8 +1,12 @@
 package com.github.leeonky.dal.token;
 
+import com.github.leeonky.dal.SyntexException;
+
 public class SingleQuotationTokenCandidate extends TokenCandidate {
-    public SingleQuotationTokenCandidate(char c) {
-        super(c);
+    private boolean finished = false;
+
+    public SingleQuotationTokenCandidate(SourceCode sourceCode) {
+        super(sourceCode);
     }
 
     public static boolean isBegin(char c) {
@@ -11,16 +15,31 @@ public class SingleQuotationTokenCandidate extends TokenCandidate {
 
     @Override
     public Token toToken() {
+        if (!finished)
+            throw new SyntexException(getStartPosition() + content().length() + 1, "string should end with '\''");
         return Token.stringToken(content());
     }
 
     @Override
     public boolean isDiscardedLastChar(char c) {
-        return c == '\'';
+        return c == '\'' && (finished = true);
     }
 
     @Override
-    public boolean isDiscardFirstChar() {
+    public boolean isDiscardPrefix() {
         return true;
+    }
+}
+
+class SingleQuotationTokenCandidateFactory implements TokenCandidateFactory {
+
+    @Override
+    public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
+        return new SingleQuotationTokenCandidate(sourceCode);
+    }
+
+    @Override
+    public boolean isBegin(SourceCode sourceCode) {
+        return SingleQuotationTokenCandidate.isBegin(sourceCode.getChar());
     }
 }

@@ -1,37 +1,34 @@
 package com.github.leeonky.dal;
 
+import com.github.leeonky.dal.token.Scanner;
+import com.github.leeonky.dal.token.SourceCode;
 import com.github.leeonky.dal.token.Token;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.github.leeonky.dal.token.Token.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class SourceCodeTest {
+class ScannerTest {
     @Nested
     class GetToken {
 
         @Test
         void empty_code() {
-            assertThrows(RuntimeException.class, () -> new SourceCode("").getToken());
-            assertThrows(RuntimeException.class, () -> new SourceCode(" ").getToken());
+            assertThat(new Scanner().scan(new SourceCode(""))).isEmpty();
+            assertThat(new Scanner().scan(new SourceCode("  "))).isEmpty();
         }
 
         private void assertGetToken(String sourceCode, Token... tokens) {
-            List<Token> actualTokens = new ArrayList<>();
-            SourceCode sourceCode1 = new SourceCode(sourceCode);
-            while (!sourceCode1.isEnd())
-                actualTokens.add(sourceCode1.getToken());
-            assertThat(actualTokens).containsOnly(tokens);
+            assertThat(new Scanner().scan(new SourceCode(sourceCode))).containsOnly(tokens);
         }
 
         @Nested
         class NumberToken {
+
             @Test
             void number_token() {
                 assertGetToken("1", numebrToken(new BigDecimal(1)));
@@ -72,6 +69,16 @@ class SourceCodeTest {
                 assertThat(syntexException)
                         .hasMessage("only support const int array index")
                         .hasFieldOrPropertyWithValue("position", 2);
+            }
+
+            @Test
+            void should_end_with_end_bracket() {
+                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" [xx   ", constIndexToken(1)));
+                assertThat(syntexException)
+                        .hasMessage("missed ']'")
+                        .hasFieldOrPropertyWithValue("position", 4);
+
+                "aue".charAt(0);
             }
         }
 
@@ -127,7 +134,17 @@ class SourceCodeTest {
             @Test
             void begin_with_single_quotation() {
                 assertGetToken("'a'", stringToken("a"));
-                assertGetToken("'a''b", stringToken("a"), stringToken("b"));
+                assertGetToken("'a''b'", stringToken("a"), stringToken("b"));
+            }
+
+            @Test
+            void should_end_with_end_single_quotation() {
+                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" 'xx   ", stringToken("xx")));
+                assertThat(syntexException)
+                        .hasMessage("string should end with '\''")
+                        .hasFieldOrPropertyWithValue("position", 4);
+
+                "aue".charAt(0);
             }
         }
 

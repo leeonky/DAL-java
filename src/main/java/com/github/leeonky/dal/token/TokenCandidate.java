@@ -1,50 +1,28 @@
 package com.github.leeonky.dal.token;
 
 public abstract class TokenCandidate {
-    private final int position;
+    private final int startPosition;
     private final StringBuilder stringBuilder = new StringBuilder();
 
-    public TokenCandidate(char c, int position) {
-        this.position = position;
-        if (!isDiscardFirstChar())
+    public TokenCandidate(SourceCode sourceCode) {
+        startPosition = sourceCode.getPosition();
+        char c = sourceCode.takeChar();
+        if (!isDiscardPrefix())
             stringBuilder.append(c);
     }
 
-    @Deprecated
-    public TokenCandidate(char c) {
-        this(c, 0);
-    }
-
-    public static TokenCandidate createTokenCandidate(char c, int position) {
-        if (NumberTokenCandidate.isBegin(c))
-            return new NumberTokenCandidate(c);
-        if (PropertyTokenCandidate.isBegin(c))
-            return new PropertyTokenCandidate(c);
-        if (ConstIndexTokenCandidate.isBegin(c))
-            return new ConstIndexTokenCandidate(c, position);
-        if (OperatorTokenCandidate.isBegin(c))
-            return new OperatorTokenCandidate(c);
-        if (BeginBracketTokenCandidate.isBegin(c))
-            return new BeginBracketTokenCandidate(c);
-        if (EndBracketTokenCandidate.isBegin(c))
-            return new EndBracketTokenCandidate(c);
-        if (SingleQuotationTokenCandidate.isBegin(c))
-            return new SingleQuotationTokenCandidate(c);
-        return new WordTokenCandidate(c);
-    }
-
-    public void append(char c) {
+    protected void append(char c) {
         stringBuilder.append(c);
     }
 
-    public String content() {
+    protected String content() {
         return stringBuilder.toString();
     }
 
     public abstract Token toToken();
 
     public boolean isExcludedSplitChar(char c) {
-        return Character.isWhitespace(c) || ConstIndexTokenCandidate.isBegin(c);
+        return Character.isWhitespace(c) || c == '[';
     }
 
     public boolean isIncludedLastChar(char c) {
@@ -55,11 +33,28 @@ public abstract class TokenCandidate {
         return false;
     }
 
-    public boolean isDiscardFirstChar() {
+    public boolean isDiscardPrefix() {
         return false;
     }
 
-    public int getPosition() {
-        return position;
+    protected int getStartPosition() {
+        return startPosition;
+    }
+
+    Token getToken(SourceCode sourceCode) {
+        while (!sourceCode.isEnd()) {
+            char c = sourceCode.getChar();
+            if (isDiscardedLastChar(c)) {
+                sourceCode.takeChar();
+                break;
+            }
+            if (isExcludedSplitChar(c))
+                break;
+            append(c);
+            sourceCode.takeChar();
+            if (isIncludedLastChar(c))
+                break;
+        }
+        return toToken();
     }
 }
