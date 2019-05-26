@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.token;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,11 +21,11 @@ public class Scanner {
             DoubleQuotationStringTokenCandidateFactory.INSTANCE
     );
 
-    public List<Token> scan(SourceCode sourceCode) {
-        List<Token> tokens = new ArrayList<>();
+    public TokenStream scan(SourceCode sourceCode) {
+        TokenStream tokenStream = new TokenStream();
         while (sourceCode.hasContent())
-            tokens.add(takeTokenCandidate(sourceCode).getToken(sourceCode));
-        return tokens;
+            tokenStream.appendToken(takeTokenCandidate(sourceCode).getToken(sourceCode));
+        return tokenStream;
     }
 
     private TokenCandidate takeTokenCandidate(SourceCode sourceCode) {

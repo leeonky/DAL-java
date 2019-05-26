@@ -14,6 +14,7 @@ import static java.util.Arrays.asList;
 
 public class DALCompiler {
     public static final String WHICH = "which";
+    public static final String IS = "is";
     private static final List<Operator> operatorList;
 
     static {
@@ -56,12 +57,15 @@ public class DALCompiler {
 
     //=======================
     public Node compile2(Object input, SourceCode sourceCode) {
-        TokenStream tokenStream = new TokenStream(scanner.scan(sourceCode));
-        Token is = tokenStream.pop();
-        Token type = tokenStream.pop();
-        tokenStream.matchAndTakeKeyWord(WHICH);
+        TokenStream tokenStream = scanner.scan(sourceCode);
+        String type;
+        if (tokenStream.matchAndTakeKeyWord(IS)) {
+            type = tokenStream.pop().getWord();
+            tokenStream.matchAndTakeKeyWord(WHICH);
+        } else
+            type = "Object";
         Node assertionExpression = tokenStream.hasTokens() ? compile(tokenStream) : new ConstNode(true);
-        return new TypeAssertionExpression(new ConstNode(input), type.getWord(), assertionExpression);
+        return new TypeAssertionExpression(new ConstNode(input), type, assertionExpression);
     }
 
     private Node compile(TokenStream tokenStream) {

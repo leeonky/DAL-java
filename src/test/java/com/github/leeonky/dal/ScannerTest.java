@@ -18,12 +18,12 @@ class ScannerTest {
 
         @Test
         void empty_code() {
-            assertThat(new Scanner().scan(new SourceCode(""))).isEmpty();
-            assertThat(new Scanner().scan(new SourceCode("  "))).isEmpty();
+            assertThat(new Scanner().scan(new SourceCode("")).allTokens()).isEmpty();
+            assertThat(new Scanner().scan(new SourceCode("  ")).allTokens()).isEmpty();
         }
 
         private void assertGetToken(String sourceCode, Token... tokens) {
-            assertThat(new Scanner().scan(new SourceCode(sourceCode))).containsOnly(tokens);
+            assertThat(new Scanner().scan(new SourceCode(sourceCode)).allTokens()).containsOnly(tokens);
         }
 
         @Nested

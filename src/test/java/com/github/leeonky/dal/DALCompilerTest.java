@@ -16,13 +16,33 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DALCompilerTest {
 
     @Nested
-    class FromBeginning {
+    class TypeAssertionExpressionTest {
         DALCompiler dalCompiler = new DALCompiler();
 
         @Test
         void type_assertion_and_property_assertion() {
             Object input = new Object();
             Node node = dalCompiler.compile2(input, new SourceCode("is Object which 1=1"));
+            assertThat(node).isEqualTo(
+                    new TypeAssertionExpression(new ConstNode(input), "Object",
+                            new Expression(new ConstNode(new BigDecimal(1)), new ConstNode(new BigDecimal(1)), new Equal())
+                    ));
+        }
+
+        @Test
+        void type_assertion_and_property_assertion_with_no_word_which() {
+            Object input = new Object();
+            Node node = dalCompiler.compile2(input, new SourceCode("is Object 1=1"));
+            assertThat(node).isEqualTo(
+                    new TypeAssertionExpression(new ConstNode(input), "Object",
+                            new Expression(new ConstNode(new BigDecimal(1)), new ConstNode(new BigDecimal(1)), new Equal())
+                    ));
+        }
+
+        @Test
+        void default_type_assertion_and_property_assertion() {
+            Object input = new Object();
+            Node node = dalCompiler.compile2(input, new SourceCode("1=1"));
             assertThat(node).isEqualTo(
                     new TypeAssertionExpression(new ConstNode(input), "Object",
                             new Expression(new ConstNode(new BigDecimal(1)), new ConstNode(new BigDecimal(1)), new Equal())

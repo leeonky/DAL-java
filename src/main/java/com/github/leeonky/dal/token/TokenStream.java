@@ -1,13 +1,17 @@
 package com.github.leeonky.dal.token;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 public class TokenStream {
-    public final LinkedList<Token> tokens;
+    public final LinkedList<Token> tokens = new LinkedList<>();
 
     public TokenStream(List<Token> tokens) {
-        this.tokens = new LinkedList<>(tokens);
+        this.tokens.addAll(tokens);
+    }
+
+    public TokenStream() {
     }
 
     public Token pop() {
@@ -26,4 +30,11 @@ public class TokenStream {
         return false;
     }
 
+    public List<Token> allTokens() {
+        return new ArrayList<>(tokens);
+    }
+
+    public void appendToken(Token token) {
+        tokens.add(token);
+    }
 }
