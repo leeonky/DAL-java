@@ -5,14 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class TokenStream {
-    public final LinkedList<Token> tokens = new LinkedList<>();
-
-    public TokenStream(List<Token> tokens) {
-        this.tokens.addAll(tokens);
-    }
-
-    public TokenStream() {
-    }
+    private final LinkedList<Token> tokens = new LinkedList<>();
 
     public Token pop() {
         return tokens.pop();
@@ -23,7 +16,7 @@ public class TokenStream {
     }
 
     public boolean matchAndTakeKeyWord(String keyword) {
-        if (hasTokens() && tokens.getFirst().isWord(keyword)) {
+        if (hasTokens() && tokens.getFirst().isKeyWord(keyword)) {
             tokens.pop();
             return true;
         }

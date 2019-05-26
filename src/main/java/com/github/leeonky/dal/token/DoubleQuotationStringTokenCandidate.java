@@ -11,7 +11,7 @@ class DoubleQuotationStringTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public Token toToken() {
+    protected Token toToken() {
         if (!isFinished())
             throw new SyntexException(getStartPosition() + codeLength + 1, "string should end with '\"'");
         return Token.stringToken(content());
@@ -49,7 +49,7 @@ class DoubleQuotationStringTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public boolean isDiscardBeginChar() {
+    protected boolean isDiscardBeginChar() {
         return true;
     }
 

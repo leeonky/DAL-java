@@ -9,7 +9,7 @@ class NumberTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public Token toToken() {
+    protected Token toToken() {
         return Token.numberToken(new BigDecimal(content()));
     }
 }

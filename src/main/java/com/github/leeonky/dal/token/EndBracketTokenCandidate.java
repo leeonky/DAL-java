@@ -8,7 +8,7 @@ class EndBracketTokenCandidateFactory implements TokenCandidateFactory {
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
         return new TokenCandidate(sourceCode) {
             @Override
-            public Token toToken() {
+            protected Token toToken() {
                 return Token.endBracketToken();
             }
         };

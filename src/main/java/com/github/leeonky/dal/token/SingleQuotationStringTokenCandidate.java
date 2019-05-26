@@ -9,14 +9,14 @@ class SingleQuotationStringTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public Token toToken() {
+    protected Token toToken() {
         if (!isFinished())
             throw new SyntexException(getStartPosition() + content().length() + 1, "string should end with '\''");
         return Token.stringToken(content());
     }
 
     @Override
-    public boolean isDiscardBeginChar() {
+    protected boolean isDiscardBeginChar() {
         return true;
     }
 

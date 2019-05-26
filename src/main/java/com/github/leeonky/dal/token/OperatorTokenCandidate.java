@@ -7,12 +7,12 @@ class OperatorTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public Token toToken() {
+    protected Token toToken() {
         return Token.operatorToken(content());
     }
 
     @Override
-    public boolean isUnexpectedChar(char c) {
+    protected boolean isUnexpectedChar(char c) {
         String operatorCandidate = content() + c;
         return !Scanner.MULTI_CHAR_OPTS.stream().anyMatch(opt -> opt.startsWith(operatorCandidate));
     }

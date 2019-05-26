@@ -46,6 +46,14 @@ public class Token {
         return new Token(Type.END_BRACKET, ")");
     }
 
+    public static Token nullValueToken() {
+        return new Token(Type.NULL, null);
+    }
+
+    public static Token keyWordToken(String keyWord) {
+        return new Token(Type.KEY_WORD, keyWord);
+    }
+
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Token
@@ -74,7 +82,11 @@ public class Token {
         return type == Type.WORD && value.equals(keyword);
     }
 
+    boolean isKeyWord(String keyword) {
+        return type == Type.KEY_WORD && value.equals(keyword);
+    }
+
     enum Type {
-        NUMBER, WORD, PROPERTY, CONST_INDEX, OPERATOR, BEGIN_BRACKET, END_BRACKET, STRING
+        NUMBER, WORD, PROPERTY, CONST_INDEX, OPERATOR, BEGIN_BRACKET, END_BRACKET, STRING, NULL, KEY_WORD
     }
 }

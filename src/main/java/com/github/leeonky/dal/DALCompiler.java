@@ -15,6 +15,7 @@ import static java.util.Arrays.asList;
 public class DALCompiler {
     public static final String WHICH = "which";
     public static final String IS = "is";
+    public static final String NULL = "null";
     private static final List<Operator> operatorList;
 
     static {
@@ -76,7 +77,7 @@ public class DALCompiler {
     }
 
     private Operator toOperator(Token token) {
-        switch (token.getWord()) {
+        switch (token.getOperator()) {
             case "=":
                 return new Equal();
         }

@@ -6,7 +6,7 @@ class PropertyTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    public Token toToken() {
+    protected Token toToken() {
         return Token.propertyToken(content().split("\\."));
     }
 
