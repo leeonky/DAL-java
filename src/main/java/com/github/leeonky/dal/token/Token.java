@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.token;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 public class Token {
@@ -52,11 +53,23 @@ public class Token {
 
     @Override
     public String toString() {
-        return type + "<" + String.valueOf(value) + ">";
+        return type + "<" + value + ">";
     }
 
     public String getWord() {
         return value.toString();
+    }
+
+    public String getOperator() {
+        return value.toString();
+    }
+
+    public BigDecimal getNumber() {
+        return (BigDecimal) value;
+    }
+
+    boolean isWord(String keyword) {
+        return type == Type.WORD && value.equals(keyword);
     }
 
     enum Type {

@@ -5,14 +5,15 @@ import com.github.leeonky.dal.ast.opt.*;
 import com.github.leeonky.dal.token.Scanner;
 import com.github.leeonky.dal.token.SourceCode;
 import com.github.leeonky.dal.token.Token;
+import com.github.leeonky.dal.token.TokenStream;
 
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 
 public class DALCompiler {
+    public static final String WHICH = "which";
     private static final List<Operator> operatorList;
 
     static {
@@ -55,14 +56,26 @@ public class DALCompiler {
 
     //=======================
     public Node compile2(Object input, SourceCode sourceCode) {
-        LinkedList<Token> tokens = new LinkedList<>(scanner.scan(sourceCode));
-        Token is = tokens.pop();
-        Token type = tokens.pop();
-        Node assertionExpression = tokens.isEmpty() ? new ConstNode(true) : compile(tokens);
+        TokenStream tokenStream = new TokenStream(scanner.scan(sourceCode));
+        Token is = tokenStream.pop();
+        Token type = tokenStream.pop();
+        tokenStream.matchAndTakeKeyWord(WHICH);
+        Node assertionExpression = tokenStream.hasTokens() ? compile(tokenStream) : new ConstNode(true);
         return new TypeAssertionExpression(new ConstNode(input), type.getWord(), assertionExpression);
     }
 
-    private Node compile(LinkedList<Token> tokens) {
-        return new Expression(new ConstNode(1), new ConstNode(1), new Equal());
+    private Node compile(TokenStream tokenStream) {
+        Token token1 = tokenStream.pop();
+        Token tokenOpt = tokenStream.pop();
+        Token token2 = tokenStream.pop();
+        return new Expression(new ConstNode(token1.getNumber()), new ConstNode(token2.getNumber()), toOperator(tokenOpt));
+    }
+
+    private Operator toOperator(Token token) {
+        switch (token.getWord()) {
+            case "=":
+                return new Equal();
+        }
+        return null;
     }
 }

@@ -9,12 +9,14 @@ import com.github.leeonky.dal.token.SourceCode;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DALCompilerTest {
 
     @Nested
-    class FromBegining {
+    class FromBeginning {
         DALCompiler dalCompiler = new DALCompiler();
 
         @Test
@@ -23,12 +25,12 @@ class DALCompilerTest {
             Node node = dalCompiler.compile2(input, new SourceCode("is Object which 1=1"));
             assertThat(node).isEqualTo(
                     new TypeAssertionExpression(new ConstNode(input), "Object",
-                            new Expression(new ConstNode(1), new ConstNode(1), new Equal())
+                            new Expression(new ConstNode(new BigDecimal(1)), new ConstNode(new BigDecimal(1)), new Equal())
                     ));
         }
 
         @Test
-        void only_type_assertion_no_property_assertion() {
+        void only_type_assertion_no_property_assertion_no_which() {
             Object input = new Object();
             Node node = dalCompiler.compile2(input, new SourceCode("is Object"));
             assertThat(node).isEqualTo(new TypeAssertionExpression(new ConstNode(input), "Object", new ConstNode(true)));
