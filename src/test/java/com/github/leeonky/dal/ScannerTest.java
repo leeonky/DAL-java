@@ -87,12 +87,12 @@ class ScannerTest {
 
             @Test
             void single_property_token() {
-                assertGetToken(".a", propertyToken(".a"));
+                assertGetToken(".a", propertyToken("a"));
             }
 
             @Test
             void property_chain_token() {
-                assertGetToken(".a.x", propertyToken(".a.x"));
+                assertGetToken(".a.x", propertyToken("a", "x"));
             }
         }
 
@@ -241,13 +241,13 @@ class ScannerTest {
 
             @Test
             void split_property_token() {
-                assertGetToken(".a .b", propertyToken(".a"), propertyToken(".b"));
+                assertGetToken(".a .b", propertyToken("a"), propertyToken("b"));
 
-                assertGetToken(".a[1]", propertyToken(".a"), constIndexToken(1));
+                assertGetToken(".a[1]", propertyToken("a"), constIndexToken(1));
 
-                assertGetToken(".a=", propertyToken(".a"), operatorToken("="));
+                assertGetToken(".a=", propertyToken("a"), operatorToken("="));
 
-                assertGetToken(".a(", propertyToken(".a"), beginBracketToken());
+                assertGetToken(".a(", propertyToken("a"), beginBracketToken());
             }
 
             @Test
@@ -262,7 +262,7 @@ class ScannerTest {
 
                 assertGetToken("=(", operatorToken("="), beginBracketToken());
 
-                assertGetToken("=.a", operatorToken("="), propertyToken(".a"));
+                assertGetToken("=.a", operatorToken("="), propertyToken("a"));
 
                 assertGetToken("=[0]", operatorToken("="), constIndexToken(0));
 

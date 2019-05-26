@@ -3,6 +3,8 @@ package com.github.leeonky.dal.token;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import static java.util.Arrays.asList;
+
 public class Token {
     private final Type type;
     private final Object value;
@@ -16,8 +18,8 @@ public class Token {
         return new Token(Type.WORD, value);
     }
 
-    public static Token propertyToken(String value) {
-        return new Token(Type.PROPERTY, value);
+    public static Token propertyToken(String... properties) {
+        return new Token(Type.PROPERTY, asList(properties));
     }
 
     public static Token constIndexToken(int value) {
