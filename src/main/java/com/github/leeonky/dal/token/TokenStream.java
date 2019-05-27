@@ -23,11 +23,23 @@ public class TokenStream {
         return false;
     }
 
+    public boolean matchAndTakeRootValue() {
+        if (hasTokens() && tokens.getFirst().getType() == Token.Type.ROOT_VALUE) {
+            tokens.pop();
+            return true;
+        }
+        return false;
+    }
+
     public List<Token> allTokens() {
         return new ArrayList<>(tokens);
     }
 
     public void appendToken(Token token) {
         tokens.add(token);
+    }
+
+    public void insertFirst(Token token) {
+        tokens.addFirst(token);
     }
 }

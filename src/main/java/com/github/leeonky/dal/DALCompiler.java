@@ -1,6 +1,7 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.ast.opt.Operator;
 import com.github.leeonky.dal.ast.opt.*;
 import com.github.leeonky.dal.token.Scanner;
 import com.github.leeonky.dal.token.SourceCode;
@@ -10,16 +11,19 @@ import com.github.leeonky.dal.token.TokenStream;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.github.leeonky.dal.ast.Operator.EQUAL;
 import static java.util.Arrays.asList;
 
 public class DALCompiler {
     public static final String WHICH = "which";
     public static final String IS = "is";
     public static final String NULL = "null";
-    private static final List<Operator> operatorList;
+    public static final String TRUE = "true";
+    public static final String FALSE = "false";
+    private static final List<Operator> OPERATOR_DP_LIST;
 
     static {
-        operatorList = asList(
+        OPERATOR_DP_LIST = asList(
                 new Equal(),
                 new NotEqual(),
                 new MoreThan(),
@@ -27,7 +31,7 @@ public class DALCompiler {
                 new SmallThan(),
                 new SmallThanOrEqual(),
                 new Is());
-        operatorList.sort(Comparator.comparingInt(Operator::length).reversed());
+        OPERATOR_DP_LIST.sort(Comparator.comparingInt(Operator::length).reversed());
     }
 
     private Scanner scanner = new Scanner();
@@ -43,11 +47,11 @@ public class DALCompiler {
 
     public Node compile(SourceCode content) {
         Operator operator = takeOperator(content.trimLeft());
-        return new Expression(new InputNode(), compileNode(content), operator);
+        return new Expression(InputNode.INSTANCE, compileNode(content), operator);
     }
 
     private Operator takeOperator(SourceCode content) {
-        return operatorList.stream()
+        return OPERATOR_DP_LIST.stream()
                 .filter(opt -> opt.getFrom(content))
                 .findFirst().get();
     }
@@ -57,29 +61,26 @@ public class DALCompiler {
     }
 
     //=======================
-    public Node compile2(Object input, SourceCode sourceCode) {
+    public Node compile2(SourceCode sourceCode) {
         TokenStream tokenStream = scanner.scan(sourceCode);
-        String type;
-        if (tokenStream.matchAndTakeKeyWord(IS)) {
-            type = tokenStream.pop().getWord();
-            tokenStream.matchAndTakeKeyWord(WHICH);
-        } else
-            type = "Object";
-        Node assertionExpression = tokenStream.hasTokens() ? compile(tokenStream) : new ConstNode(true);
-        return new TypeAssertionExpression(new ConstNode(input), type, assertionExpression);
+        tokenStream.insertFirst(Token.rootValueToken());
+        return compileTokenStream(tokenStream);
     }
 
-    private Node compile(TokenStream tokenStream) {
-        Token token1 = tokenStream.pop();
-        Token tokenOpt = tokenStream.pop();
-        Token token2 = tokenStream.pop();
-        return new Expression(new ConstNode(token1.getNumber()), new ConstNode(token2.getNumber()), toOperator(tokenOpt));
+    private Node compileTokenStream(TokenStream tokenStream) {
+        tokenStream.pop();//ROOT
+        Node node = InputNode.INSTANCE;
+        while (tokenStream.hasTokens()) {
+            Token token = tokenStream.pop();
+            node = new PropertyNode(node, token.getProperties());
+        }
+        return node;
     }
 
-    private Operator toOperator(Token token) {
+    private com.github.leeonky.dal.ast.Operator toOperator(Token token) {
         switch (token.getOperator()) {
             case "=":
-                return new Equal();
+                return EQUAL;
         }
         return null;
     }

@@ -5,6 +5,7 @@ import com.github.leeonky.dal.DALCompiler;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.token.SourceCode;
 
+@Deprecated
 public abstract class Operator {
     private final String code;
     private final boolean isKeyword;

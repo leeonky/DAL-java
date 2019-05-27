@@ -62,6 +62,10 @@ public class Token {
         return type + "<" + value + ">";
     }
 
+    public Object getConstValue() {
+        return value;
+    }
+
     public String getWord() {
         return value.toString();
     }

@@ -6,12 +6,12 @@ import java.util.Objects;
 
 public class TypeAssertionExpression implements Node {
     private final Node instance;
-    private final String type;
+    private final TypeNode typeNode;
     private final Node assertion;
 
-    public TypeAssertionExpression(Node instance, String type, Node assertion) {
+    public TypeAssertionExpression(Node instance, TypeNode typeNode, Node assertion) {
         this.instance = instance;
-        this.type = type;
+        this.typeNode = typeNode;
         this.assertion = assertion;
     }
 
@@ -24,7 +24,7 @@ public class TypeAssertionExpression implements Node {
     public boolean equals(Object obj) {
         return obj instanceof TypeAssertionExpression
                 && Objects.equals(instance, ((TypeAssertionExpression) obj).instance)
-                && Objects.equals(type, ((TypeAssertionExpression) obj).type)
+                && Objects.equals(typeNode, ((TypeAssertionExpression) obj).typeNode)
                 && Objects.equals(assertion, ((TypeAssertionExpression) obj).assertion);
     }
 }
