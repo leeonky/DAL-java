@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.token;
 
-import static com.github.leeonky.dal.DALCompiler.NULL;
+import static com.github.leeonky.dal.DALCompiler.*;
 import static com.github.leeonky.dal.token.Token.*;
 
 class WordTokenCandidate extends TokenCandidate {
@@ -12,7 +12,11 @@ class WordTokenCandidate extends TokenCandidate {
     protected Token toToken() {
         String content = content();
         if (NULL.equals(content))
-            return nullValueToken();
+            return constValueToken(null);
+        if (TRUE.equals(content))
+            return constValueToken(true);
+        if (FALSE.equals(content))
+            return constValueToken(false);
         if (Scanner.KEYWORD_SETS.contains(content))
             return keyWordToken(content);
         return wordToken(content);

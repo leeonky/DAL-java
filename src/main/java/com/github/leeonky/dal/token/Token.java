@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.token;
 
-import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 
 import static java.util.Arrays.asList;
@@ -30,28 +30,24 @@ public class Token {
         return new Token(Type.OPERATOR, value);
     }
 
-    public static Token numberToken(Object value) {
-        return new Token(Type.NUMBER, value);
+    public static Token constValueToken(Object value) {
+        return new Token(Type.CONST_VALUE, value);
     }
 
     public static Token beginBracketToken() {
         return new Token(Type.BEGIN_BRACKET, "(");
     }
 
-    public static Token stringToken(String value) {
-        return new Token(Type.STRING, value);
-    }
-
     public static Token endBracketToken() {
         return new Token(Type.END_BRACKET, ")");
     }
 
-    public static Token nullValueToken() {
-        return new Token(Type.NULL, null);
-    }
-
     public static Token keyWordToken(String keyWord) {
         return new Token(Type.KEY_WORD, keyWord);
+    }
+
+    public static Token rootValueToken() {
+        return new Token(Type.ROOT_VALUE, null);
     }
 
     @Override
@@ -74,19 +70,19 @@ public class Token {
         return value.toString();
     }
 
-    public BigDecimal getNumber() {
-        return (BigDecimal) value;
-    }
-
-    boolean isWord(String keyword) {
-        return type == Type.WORD && value.equals(keyword);
+    public List<String> getProperties() {
+        return (List<String>) value;
     }
 
     boolean isKeyWord(String keyword) {
         return type == Type.KEY_WORD && value.equals(keyword);
     }
 
-    enum Type {
-        NUMBER, WORD, PROPERTY, CONST_INDEX, OPERATOR, BEGIN_BRACKET, END_BRACKET, STRING, NULL, KEY_WORD
+    public Type getType() {
+        return type;
+    }
+
+    public enum Type {
+        WORD, PROPERTY, CONST_INDEX, OPERATOR, BEGIN_BRACKET, END_BRACKET, KEY_WORD, ROOT_VALUE, CONST_VALUE
     }
 }

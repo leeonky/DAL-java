@@ -12,7 +12,7 @@ class SingleQuotationStringTokenCandidate extends TokenCandidate {
     protected Token toToken() {
         if (!isFinished())
             throw new SyntexException(getStartPosition() + content().length() + 1, "string should end with '\''");
-        return Token.stringToken(content());
+        return Token.constValueToken(content());
     }
 
     @Override

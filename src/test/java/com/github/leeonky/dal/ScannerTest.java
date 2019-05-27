@@ -31,8 +31,8 @@ class ScannerTest {
 
             @Test
             void number_token() {
-                assertGetToken("1", numberToken(new BigDecimal(1)));
-                assertGetToken("11", numberToken(new BigDecimal(11)));
+                assertGetToken("1", constValueToken(new BigDecimal(1)));
+                assertGetToken("11", constValueToken(new BigDecimal(11)));
             }
         }
 
@@ -133,7 +133,7 @@ class ScannerTest {
 
             @Test
             void begin_with_single_quotation() {
-                assertGetToken("'a''b'", stringToken("a"), stringToken("b"));
+                assertGetToken("'a''b'", constValueToken("a"), constValueToken("b"));
             }
 
             @Test
@@ -146,8 +146,8 @@ class ScannerTest {
 
             @Test
             void string_contains_blank() {
-                assertGetToken("'  '", stringToken("  "));
-                assertGetToken("' a '", stringToken(" a "));
+                assertGetToken("'  '", constValueToken("  "));
+                assertGetToken("' a '", constValueToken(" a "));
             }
         }
 
@@ -156,7 +156,7 @@ class ScannerTest {
 
             @Test
             void no_escape_char() {
-                assertGetToken("\"a\"", stringToken("a"));
+                assertGetToken("\"a\"", constValueToken("a"));
             }
 
             @Test
@@ -169,12 +169,12 @@ class ScannerTest {
 
             @Test
             void escape_char() {
-                assertGetToken("\"\\\"\"", stringToken("\""));
-                assertGetToken("\"\\t\"", stringToken("\t"));
-                assertGetToken("\"\\n\"", stringToken("\n"));
-                assertGetToken("\"\\\\\"", stringToken("\\"));
+                assertGetToken("\"\\\"\"", constValueToken("\""));
+                assertGetToken("\"\\t\"", constValueToken("\t"));
+                assertGetToken("\"\\n\"", constValueToken("\n"));
+                assertGetToken("\"\\\\\"", constValueToken("\\"));
 
-                assertGetToken("\"\\n\\n\"", stringToken("\n\n"));
+                assertGetToken("\"\\n\\n\"", constValueToken("\n\n"));
             }
 
             @Test
@@ -197,8 +197,8 @@ class ScannerTest {
 
             @Test
             void string_contains_blank() {
-                assertGetToken("\"  \"", stringToken("  "));
-                assertGetToken("\" a \"", stringToken(" a "));
+                assertGetToken("\"  \"", constValueToken("  "));
+                assertGetToken("\" a \"", constValueToken(" a "));
             }
         }
 
@@ -207,25 +207,25 @@ class ScannerTest {
 
             @Test
             void split_number() {
-                assertGetToken("11 12", numberToken(new BigDecimal(11)), numberToken(new BigDecimal(12)));
-                assertGetToken("11\t", numberToken(new BigDecimal(11)));
-                assertGetToken("11\n", numberToken(new BigDecimal(11)));
+                assertGetToken("11 12", constValueToken(new BigDecimal(11)), constValueToken(new BigDecimal(12)));
+                assertGetToken("11\t", constValueToken(new BigDecimal(11)));
+                assertGetToken("11\n", constValueToken(new BigDecimal(11)));
 
-                assertGetToken("11=", numberToken(new BigDecimal(11)), operatorToken("="));
-                assertGetToken("11>", numberToken(new BigDecimal(11)), operatorToken(">"));
-                assertGetToken("11<", numberToken(new BigDecimal(11)), operatorToken("<"));
-                assertGetToken("11-", numberToken(new BigDecimal(11)), operatorToken("-"));
-                assertGetToken("11+", numberToken(new BigDecimal(11)), operatorToken("+"));
-                assertGetToken("11*", numberToken(new BigDecimal(11)), operatorToken("*"));
-                assertGetToken("11/", numberToken(new BigDecimal(11)), operatorToken("/"));
-                assertGetToken("11|", numberToken(new BigDecimal(11)), operatorToken("|"));
-                assertGetToken("11&", numberToken(new BigDecimal(11)), operatorToken("&"));
-                assertGetToken("11||", numberToken(new BigDecimal(11)), operatorToken("||"));
-                assertGetToken("11&&", numberToken(new BigDecimal(11)), operatorToken("&&"));
+                assertGetToken("11=", constValueToken(new BigDecimal(11)), operatorToken("="));
+                assertGetToken("11>", constValueToken(new BigDecimal(11)), operatorToken(">"));
+                assertGetToken("11<", constValueToken(new BigDecimal(11)), operatorToken("<"));
+                assertGetToken("11-", constValueToken(new BigDecimal(11)), operatorToken("-"));
+                assertGetToken("11+", constValueToken(new BigDecimal(11)), operatorToken("+"));
+                assertGetToken("11*", constValueToken(new BigDecimal(11)), operatorToken("*"));
+                assertGetToken("11/", constValueToken(new BigDecimal(11)), operatorToken("/"));
+                assertGetToken("11|", constValueToken(new BigDecimal(11)), operatorToken("|"));
+                assertGetToken("11&", constValueToken(new BigDecimal(11)), operatorToken("&"));
+                assertGetToken("11||", constValueToken(new BigDecimal(11)), operatorToken("||"));
+                assertGetToken("11&&", constValueToken(new BigDecimal(11)), operatorToken("&&"));
 
-                assertGetToken("11(", numberToken(new BigDecimal(11)), beginBracketToken());
+                assertGetToken("11(", constValueToken(new BigDecimal(11)), beginBracketToken());
 
-                assertGetToken("11[1]", numberToken(new BigDecimal(11)), constIndexToken(1));
+                assertGetToken("11[1]", constValueToken(new BigDecimal(11)), constIndexToken(1));
             }
 
             @Test
@@ -256,7 +256,7 @@ class ScannerTest {
 
                 assertGetToken("==", operatorToken("="), operatorToken("="));
 
-                assertGetToken("=1", operatorToken("="), numberToken(new BigDecimal(1)));
+                assertGetToken("=1", operatorToken("="), constValueToken(new BigDecimal(1)));
 
                 assertGetToken("=a", operatorToken("="), wordToken("a"));
 
@@ -266,9 +266,9 @@ class ScannerTest {
 
                 assertGetToken("=[0]", operatorToken("="), constIndexToken(0));
 
-                assertGetToken("='0'", operatorToken("="), stringToken("0"));
+                assertGetToken("='0'", operatorToken("="), constValueToken("0"));
 
-                assertGetToken("=\"0\"", operatorToken("="), stringToken("0"));
+                assertGetToken("=\"0\"", operatorToken("="), constValueToken("0"));
             }
         }
     }
