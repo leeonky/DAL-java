@@ -18,7 +18,7 @@ public class DALCompiler {
     public static final String FALSE = "false";
     private Scanner scanner = new Scanner();
 
-    public Node compile2(SourceCode sourceCode) {
+    public Node compile(SourceCode sourceCode) {
         TokenStream tokenStream = scanner.scan(sourceCode);
         tokenStream.insertFirst(Token.rootValueToken());
         return compileTokenStream(tokenStream);
