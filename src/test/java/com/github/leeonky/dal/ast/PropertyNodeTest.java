@@ -26,6 +26,7 @@ class PropertyNodeTest {
     @Test
     void access_property_through_public_get_method() {
         assertProperty(new Bean().setMethod(1), Collections.singletonList("method"), 1);
+        assertProperty(new Bean().setBooleanValue(true), Collections.singletonList("booleanValue"), true);
     }
 
     @Test
@@ -64,5 +65,8 @@ class PropertyNodeTest {
 
         @Getter
         private Bean subBean;
+
+        @Getter
+        private boolean booleanValue;
     }
 }

@@ -1,5 +1,6 @@
 package com.github.leeonky.dal;
 
+import com.github.leeonky.dal.ast.ConstNode;
 import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.ast.PropertyNode;
@@ -19,14 +20,22 @@ public class DALCompiler {
     private Scanner scanner = new Scanner();
 
     public Node compile(SourceCode sourceCode) {
-        TokenStream tokenStream = scanner.scan(sourceCode);
-        tokenStream.insertFirst(Token.rootValueToken());
-        return compileTokenStream(tokenStream);
+        return compileTokenStream(scanner.scan(sourceCode));
     }
 
     private Node compileTokenStream(TokenStream tokenStream) {
-        tokenStream.pop();//ROOT
-        Node node = InputNode.INSTANCE;
+        if (tokenStream.hasTokens()) {
+            return compileValueNode(tokenStream);
+        }
+        return InputNode.INSTANCE;
+    }
+
+    private Node compileValueNode(TokenStream tokenStream) {
+        Node node;
+        if (tokenStream.currentType() == Token.Type.CONST_VALUE)
+            node = new ConstNode(tokenStream.pop().getConstValue());
+        else
+            node = InputNode.INSTANCE;
         while (tokenStream.hasTokens())
             node = new PropertyNode(node, tokenStream.pop().getProperties());
         return node;

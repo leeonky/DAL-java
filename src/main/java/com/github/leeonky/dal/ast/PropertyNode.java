@@ -3,7 +3,6 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.CheckedBiFunction;
 import com.github.leeonky.dal.CompilingContext;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,11 +51,15 @@ public class PropertyNode implements Node {
     private Object getPropertyThroughBean(Object instance, String name) {
         try {
             return instance.getClass().getField(name).get(instance);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+        } catch (Exception e) {
             try {
                 return instance.getClass().getMethod("get" + capitalize(name)).invoke(instance);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException ex) {
-                throw new IllegalStateException();
+            } catch (Exception ex) {
+                try {
+                    return instance.getClass().getMethod("is" + capitalize(name)).invoke(instance);
+                } catch (Exception ex2) {
+                    throw new IllegalStateException(ex2);
+                }
             }
         }
     }

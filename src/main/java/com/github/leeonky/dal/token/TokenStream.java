@@ -39,7 +39,7 @@ public class TokenStream {
         tokens.add(token);
     }
 
-    public void insertFirst(Token token) {
-        tokens.addFirst(token);
+    public Token.Type currentType() {
+        return tokens.getFirst().getType();
     }
 }

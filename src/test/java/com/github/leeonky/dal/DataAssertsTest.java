@@ -1,6 +1,5 @@
 package com.github.leeonky.dal;
 
-import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.assertj.core.api.Assertions;
@@ -20,26 +19,36 @@ class DataAssertsTest {
         Assertions.assertThat(assertResult.getMessage()).contains(s);
     }
 
+    private void assertPass(Object actual, String expression) {
+        assertTrue(dataAssertor.assertData(actual, expression).isPassed());
+    }
+
     @Test
     void assert_root_value() {
-        assertTrue(dataAssertor.assertData(true, "").isPassed());
+        assertPass(true, "");
         assertFailed(dataAssertor.assertData(false, ""), "Expected root value to be [true] but was <false>");
     }
 
     @Test
-    void assert_property_of_root_value() throws JSONException {
-        assertTrue(dataAssertor.assertData(new Bean().setField(true), ".field").isPassed());
-        assertTrue(dataAssertor.assertData(new Bean().setMethod(true), ".method").isPassed());
+    void assert_property() throws JSONException {
+        assertPass(new Bean().setField(true), ".field");
+
+        assertPass("", ".empty");
 
         dataAssertor.getCompilingContextBuilder().registerType(JSONObject.class, JSONObject::get);
-        assertTrue(dataAssertor.assertData(new JSONObject("{\"field\": true}"), ".field").isPassed());
+        assertPass(new JSONObject("{\"field\": true}"), ".field");
+    }
+
+    @Test
+    void assert_one_const_value() {
+        assertPass(null, "true");
     }
 
     @Setter
     @Accessors(chain = true)
     public static class Bean {
         public boolean field;
-        @Getter
-        public boolean method;
+
+        public int value;
     }
 }

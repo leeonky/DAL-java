@@ -1,11 +1,14 @@
 package com.github.leeonky.dal;
 
+import com.github.leeonky.dal.ast.ConstNode;
 import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.ast.PropertyNode;
 import com.github.leeonky.dal.token.SourceCode;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,23 +17,49 @@ class DALCompilerTest {
 
     DALCompiler dalCompiler = new DALCompiler();
 
-    @Test
-    void empty_source_code_should_return_input_node() {
-        Node node = dalCompiler.compile(new SourceCode(""));
-        assertThat(node).isEqualTo(InputNode.INSTANCE);
+    @Nested
+    class NoExpression {
+
+        @Test
+        void empty_source_code_should_return_input_node() {
+            Node node = dalCompiler.compile(new SourceCode(""));
+            assertThat(node).isEqualTo(InputNode.INSTANCE);
+        }
+
+        @Test
+        void access_property_of_root_value() {
+            Node node = dalCompiler.compile(new SourceCode(".result"));
+            assertThat(node).isEqualTo(new PropertyNode(InputNode.INSTANCE, singletonList("result")));
+        }
+
+        @Test
+        void access_property_list_of_root_value() {
+            Node node = dalCompiler.compile(new SourceCode(".sub .result"));
+            assertThat(node).isEqualTo(new PropertyNode(new PropertyNode(InputNode.INSTANCE, singletonList("sub")), singletonList("result")));
+        }
+
+        @Test
+        void access_one_const_value_ignore_root_value() {
+            Node node = dalCompiler.compile(new SourceCode("1"));
+            assertThat(node).isEqualTo(new ConstNode(new BigDecimal(1)));
+        }
+
+        @Test
+        void access_one_const_value_property_ignore_root_value() {
+            Node node = dalCompiler.compile(new SourceCode("''.empty"));
+            assertThat(node).isEqualTo(new PropertyNode(new ConstNode(""), singletonList("empty")));
+        }
     }
 
-    @Test
-    void access_property_of_root_value() {
-        Node node = dalCompiler.compile(new SourceCode(".result"));
-        assertThat(node).isEqualTo(new PropertyNode(InputNode.INSTANCE, singletonList("result")));
-    }
-
-    @Test
-    void access_property_list_of_root_value() {
-        Node node = dalCompiler.compile(new SourceCode(".sub .result"));
-        assertThat(node).isEqualTo(new PropertyNode(new PropertyNode(InputNode.INSTANCE, singletonList("sub")), singletonList("result")));
-    }
+//    @Nested
+//    class SimpleExpression {
+//
+//        @Test
+//        void one_logic_checking() {
+//            Node node = dalCompiler.compile(new SourceCode("=1"));
+//            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, new ConstNode(new BigDecimal(1)), Operator.EQUAL));
+//        }
+//    }
 
 //    @Test
 //    void one_const_value_source_code_should_return_input_node() {
