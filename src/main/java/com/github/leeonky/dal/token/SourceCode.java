@@ -23,15 +23,6 @@ public class SourceCode {
         return sourceCode.startsWith(prefix, offset);
     }
 
-    public char charAt(int position) {
-        return sourceCode.charAt(offset + position);
-    }
-
-    public SourceCode substring(int begin) {
-        offset += begin;
-        return this;
-    }
-
     public SourceCode trimLeft() {
         while (offset < charBuffer.length && Character.isWhitespace(getChar()))
             offset++;

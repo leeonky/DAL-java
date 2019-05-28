@@ -38,6 +38,7 @@ class ExpressionTest {
     @Test
     void assert_simple_calculate() {
         assertSimplePlus(1, new BigDecimal(2), new BigDecimal(3));
+        assertSimplePlus(new BigDecimal(2), 1, new BigDecimal(3));
         assertSimplePlus("1", "2", "12");
         assertSimplePlus("1", 2, "12");
         assertSimplePlus(1, "2", "12");

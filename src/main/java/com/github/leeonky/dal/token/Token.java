@@ -46,10 +46,6 @@ public class Token {
         return new Token(Type.KEY_WORD, keyWord);
     }
 
-    public static Token rootValueToken() {
-        return new Token(Type.ROOT_VALUE, null);
-    }
-
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Token
@@ -66,10 +62,6 @@ public class Token {
         return value;
     }
 
-    public String getWord() {
-        return value.toString();
-    }
-
     public String getOperator() {
         return value.toString();
     }
@@ -78,15 +70,11 @@ public class Token {
         return (List<String>) value;
     }
 
-    boolean isKeyWord(String keyword) {
-        return type == Type.KEY_WORD && value.equals(keyword);
-    }
-
     public Type getType() {
         return type;
     }
 
     public enum Type {
-        WORD, PROPERTY, CONST_INDEX, OPERATOR, BEGIN_BRACKET, END_BRACKET, KEY_WORD, ROOT_VALUE, CONST_VALUE
+        WORD, PROPERTY, CONST_INDEX, OPERATOR, BEGIN_BRACKET, END_BRACKET, KEY_WORD, CONST_VALUE
     }
 }
