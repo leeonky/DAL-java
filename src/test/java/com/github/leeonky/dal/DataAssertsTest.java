@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DataAssertsTest {
 
-    DataAssertor dataAssertor = new DataAssertor();
+    private DataAssertor dataAssertor = new DataAssertor();
 
     private void assertFailed(AssertResult assertResult, String s) {
         assertFalse(assertResult.isPassed());
@@ -42,6 +42,11 @@ class DataAssertsTest {
     @Test
     void assert_one_const_value() {
         assertPass(null, "true");
+    }
+
+    @Test
+    void assert_simple_expression() {
+        assertPass(1, "=1");
     }
 
     @Setter

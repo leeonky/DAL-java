@@ -7,9 +7,9 @@ import java.util.Objects;
 public class Expression implements Node {
     private final Node node1, node2;
 
-    private final com.github.leeonky.dal.ast.Operator operator;
+    private final Operator operator;
 
-    public Expression(Node node1, Node node2, com.github.leeonky.dal.ast.Operator operator) {
+    public Expression(Node node1, Node node2, Operator operator) {
         this.node1 = node1;
         this.node2 = node2;
         this.operator = operator;
@@ -17,7 +17,7 @@ public class Expression implements Node {
 
     @Override
     public Object evaluate(CompilingContext context) {
-        throw new IllegalStateException();
+        return operator.calculate(node1.evaluate(context), node2.evaluate(context));
     }
 
     @Override

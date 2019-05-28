@@ -1,15 +1,15 @@
 package com.github.leeonky.dal;
 
-import com.github.leeonky.dal.ast.ConstNode;
-import com.github.leeonky.dal.ast.InputNode;
-import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.PropertyNode;
+import com.github.leeonky.dal.ast.*;
 import com.github.leeonky.dal.token.Scanner;
 import com.github.leeonky.dal.token.SourceCode;
 import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenStream;
 
-import static com.github.leeonky.dal.ast.Operator.EQUAL;
+import java.util.Optional;
+
+import static com.github.leeonky.dal.ast.Operator.*;
+import static java.util.Optional.ofNullable;
 
 public class DALCompiler {
     public static final String WHICH = "which";
@@ -24,28 +24,45 @@ public class DALCompiler {
     }
 
     private Node compileTokenStream(TokenStream tokenStream) {
+        Node node = compileValueNode(tokenStream).orElse(InputNode.INSTANCE);
         if (tokenStream.hasTokens()) {
-            return compileValueNode(tokenStream);
+            Operator operator = toOperator(tokenStream.pop());
+            Node node2 = compileValueNode(tokenStream).orElseThrow(() -> new SyntexException(1, "expression not finished"));
+            return new Expression(node, node2, operator);
+        } else
+            return node;
+    }
+
+    private Optional<Node> compileValueNode(TokenStream tokenStream) {
+        Node node = null;
+        if (tokenStream.hasTokens()) {
+            if (tokenStream.currentType() == Token.Type.CONST_VALUE)
+                node = new ConstNode(tokenStream.pop().getConstValue());
+            else if (tokenStream.isCurrentSingleEvaluateNode())
+                node = InputNode.INSTANCE;
         }
-        return InputNode.INSTANCE;
+        if (node != null)
+            while (tokenStream.hasTokens() && tokenStream.isCurrentSingleEvaluateNode())
+                node = new PropertyNode(node, tokenStream.pop().getProperties());
+        return ofNullable(node);
     }
 
-    private Node compileValueNode(TokenStream tokenStream) {
-        Node node;
-        if (tokenStream.currentType() == Token.Type.CONST_VALUE)
-            node = new ConstNode(tokenStream.pop().getConstValue());
-        else
-            node = InputNode.INSTANCE;
-        while (tokenStream.hasTokens())
-            node = new PropertyNode(node, tokenStream.pop().getProperties());
-        return node;
-    }
-
-    private com.github.leeonky.dal.ast.Operator toOperator(Token token) {
-        switch (token.getOperator()) {
+    private Operator toOperator(Token token) {
+        String operator = token.getOperator();
+        switch (operator) {
             case "=":
                 return EQUAL;
+            case ">":
+                return GREATER;
+            case "<":
+                return LESS;
+            case ">=":
+                return GREATER_OR_EQUAL;
+            case "<=":
+                return LESS_OR_EQUAL;
+            case "!=":
+                return NOT_EQUAL;
         }
-        return null;
+        throw new SyntexException(-1, "not support operator " + operator + " yet");
     }
 }

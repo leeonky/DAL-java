@@ -1,9 +1,6 @@
 package com.github.leeonky.dal;
 
-import com.github.leeonky.dal.ast.ConstNode;
-import com.github.leeonky.dal.ast.InputNode;
-import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.PropertyNode;
+import com.github.leeonky.dal.ast.*;
 import com.github.leeonky.dal.token.SourceCode;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -12,6 +9,7 @@ import java.math.BigDecimal;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DALCompilerTest {
 
@@ -51,15 +49,46 @@ class DALCompilerTest {
         }
     }
 
-//    @Nested
-//    class SimpleExpression {
-//
-//        @Test
-//        void one_logic_checking() {
-//            Node node = dalCompiler.compile(new SourceCode("=1"));
-//            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, new ConstNode(new BigDecimal(1)), Operator.EQUAL));
-//        }
-//    }
+    @Nested
+    class SimpleExpression {
+
+        @Test
+        void expression_with_root_value() {
+            assertCompileOperator("=", Operator.EQUAL);
+            assertCompileOperator("!=", Operator.NOT_EQUAL);
+            assertCompileOperator(">", Operator.GREATER);
+            assertCompileOperator("<", Operator.LESS);
+            assertCompileOperator(">=", Operator.GREATER_OR_EQUAL);
+            assertCompileOperator("<=", Operator.LESS_OR_EQUAL);
+        }
+
+        @Test
+        void not_supported_operator() {
+            SyntexException syntexException = assertThrows(SyntexException.class, () -> dalCompiler.compile(new SourceCode("+1")));
+            assertThat(syntexException).hasMessage("not support operator + yet");
+        }
+
+        private void assertCompileOperator(String sourceCode, Operator operator) {
+            Node node = dalCompiler.compile(new SourceCode(sourceCode + "1"));
+            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, new ConstNode(new BigDecimal(1)), operator));
+        }
+
+        @Test
+        void should_raise_error_when_expression_not_finished_1() {
+            SyntexException syntexException = assertThrows(SyntexException.class, () -> dalCompiler.compile(new SourceCode("=")));
+            assertThat(syntexException)
+//                    .hasFieldOrPropertyWithValue("position", 1)
+                    .hasMessage("expression not finished");
+        }
+
+        @Test
+        void should_raise_error_when_expression_not_finished_2() {
+            SyntexException syntexException = assertThrows(SyntexException.class, () -> dalCompiler.compile(new SourceCode("= =")));
+            assertThat(syntexException)
+//                    .hasFieldOrPropertyWithValue("position", 2)
+                    .hasMessage("expression not finished");
+        }
+    }
 
 //    @Test
 //    void one_const_value_source_code_should_return_input_node() {

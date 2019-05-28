@@ -15,22 +15,6 @@ public class TokenStream {
         return tokens.size() > 0;
     }
 
-    public boolean matchAndTakeKeyWord(String keyword) {
-        if (hasTokens() && tokens.getFirst().isKeyWord(keyword)) {
-            tokens.pop();
-            return true;
-        }
-        return false;
-    }
-
-    public boolean matchAndTakeRootValue() {
-        if (hasTokens() && tokens.getFirst().getType() == Token.Type.ROOT_VALUE) {
-            tokens.pop();
-            return true;
-        }
-        return false;
-    }
-
     public List<Token> allTokens() {
         return new ArrayList<>(tokens);
     }
@@ -41,5 +25,9 @@ public class TokenStream {
 
     public Token.Type currentType() {
         return tokens.getFirst().getType();
+    }
+
+    public boolean isCurrentSingleEvaluateNode() {
+        return currentType() == Token.Type.PROPERTY;
     }
 }
