@@ -20,17 +20,17 @@ public class DALCompiler {
     private Scanner scanner = new Scanner();
 
     public Node compile(SourceCode sourceCode) {
-        return compileTokenStream(scanner.scan(sourceCode));
+        return compileAll(scanner.scan(sourceCode));
     }
 
-    private Node compileTokenStream(TokenStream tokenStream) {
+    private Node compileAll(TokenStream tokenStream) {
         Node node = compileValueNode(tokenStream).orElse(InputNode.INSTANCE);
-        if (tokenStream.hasTokens()) {
+        while (tokenStream.hasTokens()) {
             Operator operator = toOperator(tokenStream.pop());
             Node node2 = compileValueNode(tokenStream).orElseThrow(() -> new SyntexException(1, "expression not finished"));
-            return new Expression(node, node2, operator);
-        } else
-            return node;
+            node = new Expression(node, node2, operator);
+        }
+        return node;
     }
 
     private Optional<Node> compileValueNode(TokenStream tokenStream) {
@@ -62,6 +62,8 @@ public class DALCompiler {
                 return LESS_OR_EQUAL;
             case "!=":
                 return NOT_EQUAL;
+            case "+":
+                return PLUS;
         }
         throw new SyntexException(-1, "not support operator " + operator + " yet");
     }

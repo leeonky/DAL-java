@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class DataAssertsTest {
+class DataAssertTest {
 
-    private DataAssertor dataAssertor = new DataAssertor();
+    private DataAssert dataAssert = new DataAssert();
 
     private void assertFailed(AssertResult assertResult, String s) {
         assertFalse(assertResult.isPassed());
@@ -20,13 +20,13 @@ class DataAssertsTest {
     }
 
     private void assertPass(Object actual, String expression) {
-        assertTrue(dataAssertor.assertData(actual, expression).isPassed());
+        assertTrue(dataAssert.assertData(actual, expression).isPassed());
     }
 
     @Test
     void assert_root_value() {
         assertPass(true, "");
-        assertFailed(dataAssertor.assertData(false, ""), "Expected root value to be [true] but was <false>");
+        assertFailed(dataAssert.assertData(false, ""), "Expected root value to be [true] but was <false>");
     }
 
     @Test
@@ -35,7 +35,7 @@ class DataAssertsTest {
 
         assertPass("", ".empty");
 
-        dataAssertor.getCompilingContextBuilder().registerType(JSONObject.class, JSONObject::get);
+        dataAssert.getCompilingContextBuilder().registerType(JSONObject.class, JSONObject::get);
         assertPass(new JSONObject("{\"field\": true}"), ".field");
     }
 
@@ -46,7 +46,13 @@ class DataAssertsTest {
 
     @Test
     void assert_simple_expression() {
-        assertPass(1, "=1");
+        assertPass(2, "=2");
+        assertPass(2, "1=1");
+    }
+
+    @Test
+    void assert_simple_calculate() {
+        assertPass(2, "+1=3");
     }
 
     @Setter

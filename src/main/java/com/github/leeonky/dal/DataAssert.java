@@ -2,7 +2,7 @@ package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.token.SourceCode;
 
-public class DataAssertor {
+public class DataAssert {
     private DALCompiler dalCompiler = new DALCompiler();
     private CompilingContextBuilder compilingContextBuilder = new CompilingContextBuilder();
 

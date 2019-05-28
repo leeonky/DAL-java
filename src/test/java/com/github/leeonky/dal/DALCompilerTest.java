@@ -60,12 +60,13 @@ class DALCompilerTest {
             assertCompileOperator("<", Operator.LESS);
             assertCompileOperator(">=", Operator.GREATER_OR_EQUAL);
             assertCompileOperator("<=", Operator.LESS_OR_EQUAL);
+            assertCompileOperator("+", Operator.PLUS);
         }
 
         @Test
         void not_supported_operator() {
-            SyntexException syntexException = assertThrows(SyntexException.class, () -> dalCompiler.compile(new SourceCode("+1")));
-            assertThat(syntexException).hasMessage("not support operator + yet");
+            SyntexException syntexException = assertThrows(SyntexException.class, () -> dalCompiler.compile(new SourceCode("-1")));
+            assertThat(syntexException).hasMessage("not support operator - yet");
         }
 
         private void assertCompileOperator(String sourceCode, Operator operator) {
@@ -87,6 +88,13 @@ class DALCompilerTest {
             assertThat(syntexException)
 //                    .hasFieldOrPropertyWithValue("position", 2)
                     .hasMessage("expression not finished");
+        }
+
+        @Test
+        void simple_expression() {
+            Node node = dalCompiler.compile(new SourceCode("+1=2"));
+            assertThat(node).isEqualTo(new Expression(new Expression(InputNode.INSTANCE, new ConstNode(new BigDecimal(1)), Operator.PLUS),
+                    new ConstNode(new BigDecimal(2)), Operator.EQUAL));
         }
     }
 

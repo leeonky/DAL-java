@@ -1,9 +1,13 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.CompilingContextBuilder;
+import com.github.leeonky.dal.RuntimeException;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ExpressionTest {
 
@@ -28,6 +32,26 @@ class ExpressionTest {
         assertPassed("a", "b", Operator.LESS_OR_EQUAL);
         assertPassed("b", "b", Operator.LESS_OR_EQUAL);
         assertFailed("b", "a", Operator.LESS_OR_EQUAL);
+
+    }
+
+    @Test
+    void assert_simple_calculate() {
+        assertSimplePlus(1, new BigDecimal(2), new BigDecimal(3));
+        assertSimplePlus("1", "2", "12");
+        assertSimplePlus("1", 2, "12");
+        assertSimplePlus(1, "2", "12");
+
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> {
+            new Expression(new ConstNode(null), new ConstNode(null), Operator.PLUS).evaluate(new CompilingContextBuilder().build(null));
+        });
+        assertThat(runtimeException).hasMessage("calculate type not matched");
+    }
+
+    private void assertSimplePlus(Object v1, Object v2, Object expected) {
+        Object evaluate = new Expression(new ConstNode(v1), new ConstNode(v2), Operator.PLUS).evaluate(new CompilingContextBuilder().build(null));
+
+        assertThat(evaluate).isEqualTo(expected);
     }
 
     private void assertPassed(String s1, String s2, Operator operator) {

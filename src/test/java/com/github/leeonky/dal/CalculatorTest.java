@@ -9,9 +9,9 @@ import java.math.BigInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-class ComparerTest {
+class CalculatorTest {
     private void assertCompare(Object v1, Object v2, int result) {
-        assertThat(Comparer.compare(v1, v2)).isEqualTo(result);
+        assertThat(Calculator.compare(v1, v2)).isEqualTo(result);
     }
 
     @Nested
@@ -19,13 +19,13 @@ class ComparerTest {
 
         @Test
         void all_params_should_not_be_null() {
-            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> Comparer.compare(1, null));
+            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> Calculator.compare(1, null));
             assertThat(illegalStateException).hasMessage("Can not compare <1> and <null>");
 
-            illegalStateException = assertThrows(IllegalStateException.class, () -> Comparer.compare(null, null));
+            illegalStateException = assertThrows(IllegalStateException.class, () -> Calculator.compare(null, null));
             assertThat(illegalStateException).hasMessage("Can not compare <null> and <null>");
 
-            illegalStateException = assertThrows(IllegalStateException.class, () -> Comparer.compare(null, 1));
+            illegalStateException = assertThrows(IllegalStateException.class, () -> Calculator.compare(null, 1));
             assertThat(illegalStateException).hasMessage("Can not compare <null> and <1>");
         }
 
@@ -42,7 +42,7 @@ class ComparerTest {
 
         @Test
         void should_check_type_before_compare() {
-            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> Comparer.compare(1, "1"));
+            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> Calculator.compare(1, "1"));
             assertThat(illegalStateException).hasMessage("Can not compare <java.lang.Integer: 1> and <java.lang.String: 1>");
         }
     }
@@ -61,23 +61,23 @@ class ComparerTest {
     class Equal {
         @Test
         void both_null_is_equal() {
-            assertTrue(Comparer.equals(null, null));
+            assertTrue(Calculator.equals(null, null));
         }
 
         @Test
         void null_is_not_equal_to_not_null() {
-            assertFalse(Comparer.equals(null, 1));
-            assertFalse(Comparer.equals(1, null));
+            assertFalse(Calculator.equals(null, 1));
+            assertFalse(Calculator.equals(1, null));
         }
 
         @Test
         void number_equal() {
-            assertTrue(Comparer.equals(1, 1L));
+            assertTrue(Calculator.equals(1, 1L));
         }
 
         @Test
         void other_type_equal() {
-            assertTrue(Comparer.equals("a", "a"));
+            assertTrue(Calculator.equals("a", "a"));
         }
     }
 }

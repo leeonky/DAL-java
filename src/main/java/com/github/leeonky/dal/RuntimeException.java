@@ -1,14 +1,13 @@
 package com.github.leeonky.dal;
 
-public class SyntexException extends RuntimeException {
+public class RuntimeException extends java.lang.RuntimeException {
     private final int position;
 
-    public SyntexException(int position, String message) {
-        super(message, position);
+    public RuntimeException(String message, int position) {
+        super(message);
         this.position = position;
     }
 
-    @Override
     public int getPosition() {
         return position;
     }
