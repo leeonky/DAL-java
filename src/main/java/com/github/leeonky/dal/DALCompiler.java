@@ -27,10 +27,8 @@ public class DALCompiler {
     private Node compileTokenStream(TokenStream tokenStream) {
         tokenStream.pop();//ROOT
         Node node = InputNode.INSTANCE;
-        while (tokenStream.hasTokens()) {
-            Token token = tokenStream.pop();
-            node = new PropertyNode(node, token.getProperties());
-        }
+        while (tokenStream.hasTokens())
+            node = new PropertyNode(node, tokenStream.pop().getProperties());
         return node;
     }
 

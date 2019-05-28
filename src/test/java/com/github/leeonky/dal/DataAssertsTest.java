@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.assertj.core.api.Assertions;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -25,9 +27,12 @@ class DataAssertsTest {
     }
 
     @Test
-    void assert_property_of_root_value() {
+    void assert_property_of_root_value() throws JSONException {
         assertTrue(dataAssertor.assertData(new Bean().setField(true), ".field").isPassed());
         assertTrue(dataAssertor.assertData(new Bean().setMethod(true), ".method").isPassed());
+
+        dataAssertor.getCompilingContextBuilder().registerType(JSONObject.class, JSONObject::get);
+        assertTrue(dataAssertor.assertData(new JSONObject("{\"field\": true}"), ".field").isPassed());
     }
 
     @Setter

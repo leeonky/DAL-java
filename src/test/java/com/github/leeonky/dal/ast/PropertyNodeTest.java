@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.CompilingContextBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -16,7 +16,7 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PropertyNodeTest {
-    private final CompilingContext compilingContext = new CompilingContext(null);
+    private final CompilingContextBuilder compilingContextBuilder = new CompilingContextBuilder();
 
     @Test
     void access_property_through_public_field() {
@@ -42,14 +42,14 @@ class PropertyNodeTest {
 
     @Test
     void access_customer_type_property() throws JSONException {
-        compilingContext.registerType(JSONObject.class, JSONObject::get);
+        compilingContextBuilder.registerType(JSONObject.class, JSONObject::get);
 
         assertProperty(new JSONObject("{\"key\": \"value\"}"), Collections.singletonList("key"), "value");
     }
 
     private void assertProperty(Object instance, List<String> properties, Object expected) {
         Object value = new PropertyNode(new ConstNode(instance), properties)
-                .evaluate(compilingContext);
+                .evaluate(compilingContextBuilder.build(null));
 
         assertThat(value).isEqualTo(expected);
     }
