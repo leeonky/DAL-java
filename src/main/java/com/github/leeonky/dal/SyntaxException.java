@@ -1,9 +1,9 @@
 package com.github.leeonky.dal;
 
-public class SyntexException extends RuntimeException {
+public class SyntaxException extends RuntimeException {
     private final int position;
 
-    public SyntexException(int position, String message) {
+    public SyntaxException(int position, String message) {
         super(message, position);
         this.position = position;
     }

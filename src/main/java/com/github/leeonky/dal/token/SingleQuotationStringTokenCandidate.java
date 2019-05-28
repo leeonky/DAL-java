@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.SyntexException;
+import com.github.leeonky.dal.SyntaxException;
 
 class SingleQuotationStringTokenCandidate extends TokenCandidate {
 
@@ -11,7 +11,7 @@ class SingleQuotationStringTokenCandidate extends TokenCandidate {
     @Override
     protected Token toToken() {
         if (!isFinished())
-            throw new SyntexException(getStartPosition() + content().length() + 1, "string should end with '\''");
+            throw new SyntaxException(getStartPosition() + content().length() + 1, "string should end with '\''");
         return Token.constValueToken(content());
     }
 

@@ -26,8 +26,13 @@ public class Scanner {
 
     public TokenStream scan(SourceCode sourceCode) {
         TokenStream tokenStream = new TokenStream();
-        while (sourceCode.hasContent())
-            tokenStream.appendToken(takeTokenCandidate(sourceCode).getToken(sourceCode));
+        while (sourceCode.hasContent()) {
+            int begin = sourceCode.getPosition();
+            Token token = takeTokenCandidate(sourceCode).getToken(sourceCode);
+            token.setPositionBegin(begin);
+            token.setPositionEnd(sourceCode.getPosition());
+            tokenStream.appendToken(token);
+        }
         return tokenStream;
     }
 

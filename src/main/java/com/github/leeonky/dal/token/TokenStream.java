@@ -1,18 +1,18 @@
 package com.github.leeonky.dal.token;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class TokenStream {
-    private final LinkedList<Token> tokens = new LinkedList<>();
+    private final List<Token> tokens = new ArrayList<>();
+    private int index = 0;
 
     public Token pop() {
-        return tokens.pop();
+        return tokens.get(index++);
     }
 
     public boolean hasTokens() {
-        return tokens.size() > 0;
+        return index < tokens.size();
     }
 
     public List<Token> allTokens() {
@@ -24,10 +24,14 @@ public class TokenStream {
     }
 
     public Token.Type currentType() {
-        return tokens.getFirst().getType();
+        return tokens.get(index).getType();
     }
 
     public boolean isCurrentSingleEvaluateNode() {
         return currentType() == Token.Type.PROPERTY;
+    }
+
+    public int getPosition() {
+        return hasTokens() ? tokens.get(index).getPositionBegin() : (index > 0 ? tokens.get(index - 1).getPositionEnd() : 0);
     }
 }

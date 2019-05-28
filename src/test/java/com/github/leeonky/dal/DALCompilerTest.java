@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DALCompilerTest {
 
-    DALCompiler dalCompiler = new DALCompiler();
+    private DALCompiler dalCompiler = new DALCompiler();
 
     @Nested
     class NoExpression {
@@ -65,8 +65,10 @@ class DALCompilerTest {
 
         @Test
         void not_supported_operator() {
-            SyntexException syntexException = assertThrows(SyntexException.class, () -> dalCompiler.compile(new SourceCode("-1")));
-            assertThat(syntexException).hasMessage("not support operator - yet");
+            SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode("-1")));
+            assertThat(syntaxException)
+                    .hasFieldOrPropertyWithValue("position", 0)
+                    .hasMessage("not support operator - yet");
         }
 
         private void assertCompileOperator(String sourceCode, Operator operator) {
@@ -76,17 +78,17 @@ class DALCompilerTest {
 
         @Test
         void should_raise_error_when_expression_not_finished_1() {
-            SyntexException syntexException = assertThrows(SyntexException.class, () -> dalCompiler.compile(new SourceCode("=")));
-            assertThat(syntexException)
-//                    .hasFieldOrPropertyWithValue("position", 1)
+            SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode("=")));
+            assertThat(syntaxException)
+                    .hasFieldOrPropertyWithValue("position", 1)
                     .hasMessage("expression not finished");
         }
 
         @Test
         void should_raise_error_when_expression_not_finished_2() {
-            SyntexException syntexException = assertThrows(SyntexException.class, () -> dalCompiler.compile(new SourceCode("= =")));
-            assertThat(syntexException)
-//                    .hasFieldOrPropertyWithValue("position", 2)
+            SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode("= =")));
+            assertThat(syntaxException)
+                    .hasFieldOrPropertyWithValue("position", 2)
                     .hasMessage("expression not finished");
         }
 

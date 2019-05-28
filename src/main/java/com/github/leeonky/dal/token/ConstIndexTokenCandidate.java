@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.SyntexException;
+import com.github.leeonky.dal.SyntaxException;
 
 class ConstIndexTokenCandidate extends TokenCandidate {
 
@@ -11,11 +11,11 @@ class ConstIndexTokenCandidate extends TokenCandidate {
     @Override
     protected Token toToken() {
         if (!isFinished())
-            throw new SyntexException(getStartPosition() + content().length() + 1, "missed ']'");
+            throw new SyntaxException(getStartPosition() + content().length() + 1, "missed ']'");
         try {
             return Token.constIndexToken(Integer.valueOf(content()));
         } catch (NumberFormatException e) {
-            throw new SyntexException(getStartPosition() + 1, "only support const int array index");
+            throw new SyntaxException(getStartPosition() + 1, "only support const int array index");
         }
     }
 

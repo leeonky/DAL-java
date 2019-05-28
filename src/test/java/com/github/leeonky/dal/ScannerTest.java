@@ -65,16 +65,16 @@ class ScannerTest {
 
             @Test
             void only_support_int_index() {
-                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" [x]", constIndexToken(1)));
-                assertThat(syntexException)
+                SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> assertGetToken(" [x]", constIndexToken(1)));
+                assertThat(syntaxException)
                         .hasMessage("only support const int array index")
                         .hasFieldOrPropertyWithValue("position", 2);
             }
 
             @Test
             void should_end_with_end_bracket() {
-                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" [xx   ", constIndexToken(1)));
-                assertThat(syntexException)
+                SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> assertGetToken(" [xx   ", constIndexToken(1)));
+                assertThat(syntaxException)
                         .hasMessage("missed ']'")
                         .hasFieldOrPropertyWithValue("position", 7);
 
@@ -138,8 +138,8 @@ class ScannerTest {
 
             @Test
             void should_end_with_end_single_quotation() {
-                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" 'xx   "));
-                assertThat(syntexException)
+                SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> assertGetToken(" 'xx   "));
+                assertThat(syntaxException)
                         .hasMessage("string should end with '\''")
                         .hasFieldOrPropertyWithValue("position", 7);
             }
@@ -161,8 +161,8 @@ class ScannerTest {
 
             @Test
             void should_end_with_end_single_quotation() {
-                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken(" \"xx   "));
-                assertThat(syntexException)
+                SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> assertGetToken(" \"xx   "));
+                assertThat(syntaxException)
                         .hasMessage("string should end with '\"'")
                         .hasFieldOrPropertyWithValue("position", 7);
             }
@@ -179,18 +179,18 @@ class ScannerTest {
 
             @Test
             void unfinished_escape_char() {
-                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken("\"a\\"));
+                SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> assertGetToken("\"a\\"));
 
-                assertThat(syntexException)
+                assertThat(syntaxException)
                         .hasMessage("string should end with '\"'")
                         .hasFieldOrPropertyWithValue("position", 3);
             }
 
             @Test
             void unsupported_escape_char() {
-                SyntexException syntexException = assertThrows(SyntexException.class, () -> assertGetToken("\"a\\a"));
+                SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> assertGetToken("\"a\\a"));
 
-                assertThat(syntexException)
+                assertThat(syntaxException)
                         .hasMessage("unsupported escape char")
                         .hasFieldOrPropertyWithValue("position", 3);
             }

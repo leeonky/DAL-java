@@ -8,6 +8,7 @@ import static java.util.Arrays.asList;
 public class Token {
     private final Type type;
     private final Object value;
+    private int positionBegin, positionEnd;
 
     public Token(Type type, Object value) {
         this.type = type;
@@ -72,6 +73,22 @@ public class Token {
 
     public Type getType() {
         return type;
+    }
+
+    public int getPositionEnd() {
+        return positionEnd;
+    }
+
+    public void setPositionEnd(int positionEnd) {
+        this.positionEnd = positionEnd;
+    }
+
+    public int getPositionBegin() {
+        return positionBegin;
+    }
+
+    public void setPositionBegin(int positionBegin) {
+        this.positionBegin = positionBegin;
     }
 
     public enum Type {

@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.SyntexException;
+import com.github.leeonky.dal.SyntaxException;
 
 class DoubleQuotationStringTokenCandidate extends TokenCandidate {
     private boolean isEscape = false;
@@ -13,7 +13,7 @@ class DoubleQuotationStringTokenCandidate extends TokenCandidate {
     @Override
     protected Token toToken() {
         if (!isFinished())
-            throw new SyntexException(getStartPosition() + codeLength + 1, "string should end with '\"'");
+            throw new SyntaxException(getStartPosition() + codeLength + 1, "string should end with '\"'");
         return Token.constValueToken(content());
     }
 
@@ -44,7 +44,7 @@ class DoubleQuotationStringTokenCandidate extends TokenCandidate {
             case '\\':
                 return '\\';
             default:
-                throw new SyntexException(getStartPosition() + codeLength, "unsupported escape char");
+                throw new SyntaxException(getStartPosition() + codeLength, "unsupported escape char");
         }
     }
 

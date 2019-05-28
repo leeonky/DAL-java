@@ -27,7 +27,8 @@ public class DALCompiler {
         Node node = compileValueNode(tokenStream).orElse(InputNode.INSTANCE);
         while (tokenStream.hasTokens()) {
             Operator operator = toOperator(tokenStream.pop());
-            Node node2 = compileValueNode(tokenStream).orElseThrow(() -> new SyntexException(1, "expression not finished"));
+            Node node2 = compileValueNode(tokenStream)
+                    .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished"));
             node = new Expression(node, node2, operator);
         }
         return node;
@@ -65,6 +66,6 @@ public class DALCompiler {
             case "+":
                 return PLUS;
         }
-        throw new SyntexException(-1, "not support operator " + operator + " yet");
+        throw new SyntaxException(token.getPositionBegin(), "not support operator " + operator + " yet");
     }
 }
