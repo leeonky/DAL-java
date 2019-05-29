@@ -4,7 +4,7 @@ import com.github.leeonky.dal.CompilingContext;
 
 import java.util.Objects;
 
-public class TypeAssertionExpression implements Node {
+public class TypeAssertionExpression extends Node {
     private final Node instance;
     private final TypeNode typeNode;
     private final Node assertion;

@@ -56,7 +56,7 @@ public class Token {
 
     @Override
     public String toString() {
-        return type + "<" + value + ">";
+        return type + "`" + value + "`";
     }
 
     public Object getConstValue() {

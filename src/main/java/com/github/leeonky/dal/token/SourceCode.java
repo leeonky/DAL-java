@@ -14,11 +14,6 @@ public class SourceCode {
         return offset;
     }
 
-    @Override
-    public String toString() {
-        return sourceCode.substring(offset);
-    }
-
     public boolean startsWith(String prefix) {
         return sourceCode.startsWith(prefix, offset);
     }

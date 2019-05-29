@@ -36,6 +36,10 @@ public class Calculator {
             return v1.toString() + v2;
         if (v2 instanceof String)
             return v1 + v2.toString();
-        throw new RuntimeException("calculate type not matched", 1);
+        throw new IllegalStateException(String.format("Can not plus %s and %s", getClass(v1), getClass(v2)));
+    }
+
+    private static Class<?> getClass(Object obj) {
+        return obj == null ? null : obj.getClass();
     }
 }

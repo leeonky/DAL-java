@@ -1,10 +1,11 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.RuntimeException;
 
 import java.util.Objects;
 
-public class Expression implements Node {
+public class Expression extends Node {
     private final Node node1, node2;
 
     private final Operator operator;
@@ -17,7 +18,13 @@ public class Expression implements Node {
 
     @Override
     public Object evaluate(CompilingContext context) {
-        return operator.calculate(node1.evaluate(context), node2.evaluate(context));
+        Object v1 = node1.evaluate(context);
+        Object v2 = node2.evaluate(context);
+        try {
+            return operator.calculate(v1, v2);
+        } catch (IllegalStateException ex) {
+            throw new RuntimeException(ex.getMessage(), operator.getPosition());
+        }
     }
 
     @Override

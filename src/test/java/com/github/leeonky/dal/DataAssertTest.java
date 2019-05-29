@@ -2,13 +2,13 @@ package com.github.leeonky.dal;
 
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.assertj.core.api.Assertions;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 class DataAssertTest {
 
@@ -16,7 +16,7 @@ class DataAssertTest {
 
     private void assertFailed(AssertResult assertResult, String s) {
         assertFalse(assertResult.isPassed());
-        Assertions.assertThat(assertResult.getMessage()).contains(s);
+        assertThat(assertResult.getMessage()).contains(s);
     }
 
     private void assertPass(Object actual, String expression) {
@@ -61,5 +61,36 @@ class DataAssertTest {
         public boolean field;
 
         public int value;
+    }
+
+    @Nested
+    class RuntimeError {
+
+        @Test
+        void plus_with_un_matched_type() {
+            RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> dataAssert.assertData(null, " + 1"));
+
+            assertThat(runtimeException)
+                    .hasFieldOrPropertyWithValue("position", 1)
+                    .hasMessage("Can not plus null and class java.math.BigDecimal");
+        }
+
+        @Test
+        void compare_with_un_matched_type() {
+            RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> dataAssert.assertData(null, " > 1"));
+
+            assertThat(runtimeException)
+                    .hasFieldOrPropertyWithValue("position", 1)
+                    .hasMessage("Can not compare <null> and <1>");
+        }
+
+        @Test
+        void access_invalid_property() {
+            RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> dataAssert.assertData("", " = .fun"));
+
+            assertThat(runtimeException)
+                    .hasFieldOrPropertyWithValue("position", 3)
+                    .hasMessage("Get property failed, property can be public field, getter or customer type getter");
+        }
     }
 }

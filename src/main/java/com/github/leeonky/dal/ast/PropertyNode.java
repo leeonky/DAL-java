@@ -2,13 +2,13 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.CheckedBiFunction;
 import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.RuntimeException;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiFunction;
 
-public class PropertyNode implements Node {
+public class PropertyNode extends Node {
     private final Node instanceNode;
     private final List<String> properties;
 
@@ -32,34 +32,31 @@ public class PropertyNode implements Node {
     private Object getPropertyValue(Object instance, String name, CompilingContext context) {
         return instance instanceof Map ?
                 ((Map) instance).get(name)
-                : getPropertyThroughCustomerType(instance, name, context, this::getPropertyThroughBean);
+                : getPropertyFromType(instance, name, context);
     }
 
     @SuppressWarnings("unchecked")
-    private Object getPropertyThroughCustomerType(Object instance, String name, CompilingContext context, BiFunction<Object, String, Object> defaultGetter) {
-        return context.getRegisterTypes().entrySet().stream()
+    private Object getPropertyFromType(Object instance, String name, CompilingContext context) {
+        CheckedBiFunction<?, String, Object> function = context.getRegisterTypes().entrySet().stream()
                 .filter(e -> e.getKey().isInstance(instance))
-                .map(e -> {
-                    try {
-                        return ((CheckedBiFunction) e.getValue()).apply(instance, name);
-                    } catch (Exception ex) {
-                        throw new IllegalStateException(ex);
-                    }
-                }).findFirst().orElseGet(() -> defaultGetter.apply(instance, name));
+                .map(Map.Entry::getValue)
+                .findFirst().orElseGet(() -> this::getPropertyThroughBean);
+        try {
+            return ((CheckedBiFunction) function).apply(instance, name);
+        } catch (Exception e) {
+            throw new RuntimeException("Get property failed, property can be public field, getter or customer type getter",
+                    getPositionBegin());
+        }
     }
 
-    private Object getPropertyThroughBean(Object instance, String name) {
+    private Object getPropertyThroughBean(Object instance, String name) throws Exception {
         try {
             return instance.getClass().getField(name).get(instance);
         } catch (Exception e) {
             try {
                 return instance.getClass().getMethod("get" + capitalize(name)).invoke(instance);
             } catch (Exception ex) {
-                try {
-                    return instance.getClass().getMethod("is" + capitalize(name)).invoke(instance);
-                } catch (Exception ex2) {
-                    throw new IllegalStateException(ex2);
-                }
+                return instance.getClass().getMethod("is" + capitalize(name)).invoke(instance);
             }
         }
     }

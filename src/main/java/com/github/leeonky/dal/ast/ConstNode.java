@@ -4,7 +4,7 @@ import com.github.leeonky.dal.CompilingContext;
 
 import java.util.Objects;
 
-public class ConstNode implements Node {
+public class ConstNode extends Node {
     public static final ConstNode NULL_CONST_NODE = new ConstNode(null);
 
     private final Object value;

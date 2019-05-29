@@ -54,13 +54,13 @@ class DALCompilerTest {
 
         @Test
         void expression_with_root_value() {
-            assertCompileOperator("=", Operator.EQUAL);
-            assertCompileOperator("!=", Operator.NOT_EQUAL);
-            assertCompileOperator(">", Operator.GREATER);
-            assertCompileOperator("<", Operator.LESS);
-            assertCompileOperator(">=", Operator.GREATER_OR_EQUAL);
-            assertCompileOperator("<=", Operator.LESS_OR_EQUAL);
-            assertCompileOperator("+", Operator.PLUS);
+            assertCompileOperator("=", new Operator.Equal());
+            assertCompileOperator("!=", new Operator.NotEqual());
+            assertCompileOperator(">", new Operator.Greater());
+            assertCompileOperator("<", new Operator.Less());
+            assertCompileOperator(">=", new Operator.GreaterOrEqual());
+            assertCompileOperator("<=", new Operator.LessOrEqual());
+            assertCompileOperator("+", new Operator.Plus());
         }
 
         @Test
@@ -95,8 +95,8 @@ class DALCompilerTest {
         @Test
         void simple_expression() {
             Node node = dalCompiler.compile(new SourceCode("+1=2"));
-            assertThat(node).isEqualTo(new Expression(new Expression(InputNode.INSTANCE, new ConstNode(new BigDecimal(1)), Operator.PLUS),
-                    new ConstNode(new BigDecimal(2)), Operator.EQUAL));
+            assertThat(node).isEqualTo(new Expression(new Expression(InputNode.INSTANCE, new ConstNode(new BigDecimal(1)), new Operator.Plus()),
+                    new ConstNode(new BigDecimal(2)), new Operator.Equal()));
         }
     }
 

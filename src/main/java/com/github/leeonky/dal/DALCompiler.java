@@ -8,7 +8,6 @@ import com.github.leeonky.dal.token.TokenStream;
 
 import java.util.Optional;
 
-import static com.github.leeonky.dal.ast.Operator.*;
 import static java.util.Optional.ofNullable;
 
 public class DALCompiler {
@@ -43,29 +42,44 @@ public class DALCompiler {
                 node = InputNode.INSTANCE;
         }
         if (node != null)
-            while (tokenStream.hasTokens() && tokenStream.isCurrentSingleEvaluateNode())
-                node = new PropertyNode(node, tokenStream.pop().getProperties());
+            while (tokenStream.hasTokens() && tokenStream.isCurrentSingleEvaluateNode()) {
+                Token token = tokenStream.pop();
+                node = new PropertyNode(node, token.getProperties());
+                node.setPositionBegin(token.getPositionBegin());
+                node.setPositionEnd(token.getPositionEnd());
+            }
         return ofNullable(node);
     }
 
     private Operator toOperator(Token token) {
-        String operator = token.getOperator();
-        switch (operator) {
+        String operatorString = token.getOperator();
+        Operator operator;
+        switch (operatorString) {
             case "=":
-                return EQUAL;
+                operator = new Operator.Equal();
+                break;
             case ">":
-                return GREATER;
+                operator = new Operator.Greater();
+                break;
             case "<":
-                return LESS;
+                operator = new Operator.Less();
+                break;
             case ">=":
-                return GREATER_OR_EQUAL;
+                operator = new Operator.GreaterOrEqual();
+                break;
             case "<=":
-                return LESS_OR_EQUAL;
+                operator = new Operator.LessOrEqual();
+                break;
             case "!=":
-                return NOT_EQUAL;
+                operator = new Operator.NotEqual();
+                break;
             case "+":
-                return PLUS;
+                operator = new Operator.Plus();
+                break;
+            default:
+                throw new SyntaxException(token.getPositionBegin(), "not support operator " + operatorString + " yet");
         }
-        throw new SyntaxException(token.getPositionBegin(), "not support operator " + operator + " yet");
+        operator.setPosition(token.getPositionBegin());
+        return operator;
     }
 }

@@ -1,37 +1,35 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.CompilingContextBuilder;
-import com.github.leeonky.dal.RuntimeException;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ExpressionTest {
 
     @Test
     void test_operator() {
-        assertPassed("a", "a", Operator.EQUAL);
-        assertFailed("a", "b", Operator.EQUAL);
+        assertPassed("a", "a", new Operator.Equal());
+        assertFailed("a", "b", new Operator.Equal());
 
-        assertPassed("a", "b", Operator.NOT_EQUAL);
-        assertFailed("b", "b", Operator.NOT_EQUAL);
+        assertPassed("a", "b", new Operator.NotEqual());
+        assertFailed("b", "b", new Operator.NotEqual());
 
-        assertPassed("b", "a", Operator.GREATER);
-        assertFailed("a", "b", Operator.GREATER);
+        assertPassed("b", "a", new Operator.Greater());
+        assertFailed("a", "b", new Operator.Greater());
 
-        assertPassed("a", "b", Operator.LESS);
-        assertFailed("b", "a", Operator.LESS);
+        assertPassed("a", "b", new Operator.Less());
+        assertFailed("b", "a", new Operator.Less());
 
-        assertPassed("b", "a", Operator.GREATER_OR_EQUAL);
-        assertPassed("b", "b", Operator.GREATER_OR_EQUAL);
-        assertFailed("a", "b", Operator.GREATER_OR_EQUAL);
+        assertPassed("b", "a", new Operator.GreaterOrEqual());
+        assertPassed("b", "b", new Operator.GreaterOrEqual());
+        assertFailed("a", "b", new Operator.GreaterOrEqual());
 
-        assertPassed("a", "b", Operator.LESS_OR_EQUAL);
-        assertPassed("b", "b", Operator.LESS_OR_EQUAL);
-        assertFailed("b", "a", Operator.LESS_OR_EQUAL);
+        assertPassed("a", "b", new Operator.LessOrEqual());
+        assertPassed("b", "b", new Operator.LessOrEqual());
+        assertFailed("b", "a", new Operator.LessOrEqual());
 
     }
 
@@ -42,15 +40,10 @@ class ExpressionTest {
         assertSimplePlus("1", "2", "12");
         assertSimplePlus("1", 2, "12");
         assertSimplePlus(1, "2", "12");
-
-        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> {
-            new Expression(new ConstNode(null), new ConstNode(null), Operator.PLUS).evaluate(new CompilingContextBuilder().build(null));
-        });
-        assertThat(runtimeException).hasMessage("calculate type not matched");
     }
 
     private void assertSimplePlus(Object v1, Object v2, Object expected) {
-        Object evaluate = new Expression(new ConstNode(v1), new ConstNode(v2), Operator.PLUS).evaluate(new CompilingContextBuilder().build(null));
+        Object evaluate = new Expression(new ConstNode(v1), new ConstNode(v2), new Operator.Plus()).evaluate(new CompilingContextBuilder().build(null));
 
         assertThat(evaluate).isEqualTo(expected);
     }

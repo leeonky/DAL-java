@@ -4,7 +4,7 @@ import com.github.leeonky.dal.CompilingContext;
 
 import java.util.Objects;
 
-public class TypeNode implements Node {
+public class TypeNode extends Node {
     private final String type;
 
     public TypeNode(String type) {
