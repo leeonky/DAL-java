@@ -19,14 +19,14 @@ class CalculatorTest {
 
         @Test
         void all_params_should_not_be_null() {
-            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> Calculator.compare(1, null));
-            assertThat(illegalStateException).hasMessage("Can not compare <1> and <null>");
+            IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.compare(1, null));
+            assertThat(illegalArgumentException).hasMessage("Can not compare <1> and <null>");
 
-            illegalStateException = assertThrows(IllegalStateException.class, () -> Calculator.compare(null, null));
-            assertThat(illegalStateException).hasMessage("Can not compare <null> and <null>");
+            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.compare(null, null));
+            assertThat(illegalArgumentException).hasMessage("Can not compare <null> and <null>");
 
-            illegalStateException = assertThrows(IllegalStateException.class, () -> Calculator.compare(null, 1));
-            assertThat(illegalStateException).hasMessage("Can not compare <null> and <1>");
+            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.compare(null, 1));
+            assertThat(illegalArgumentException).hasMessage("Can not compare <null> and <1>");
         }
 
         @Test
@@ -42,8 +42,8 @@ class CalculatorTest {
 
         @Test
         void should_check_type_before_compare() {
-            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> Calculator.compare(1, "1"));
-            assertThat(illegalStateException).hasMessage("Can not compare <java.lang.Integer: 1> and <java.lang.String: 1>");
+            IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.compare(1, "1"));
+            assertThat(illegalArgumentException).hasMessage("Can not compare <java.lang.Integer: 1> and <java.lang.String: 1>");
         }
     }
 
@@ -78,6 +78,8 @@ class CalculatorTest {
         @Test
         void other_type_equal() {
             assertTrue(Calculator.equals("a", "a"));
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> Calculator.equals("a", 1));
+            assertThat(exception).hasMessage("Can not compare java.lang.String and java.lang.Integer");
         }
     }
 }

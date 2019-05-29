@@ -22,7 +22,7 @@ public class Expression extends Node {
         Object v2 = node2.evaluate(context);
         try {
             return operator.calculate(v1, v2);
-        } catch (IllegalStateException ex) {
+        } catch (IllegalArgumentException ex) {
             throw new RuntimeException(ex.getMessage(), operator.getPosition());
         }
     }

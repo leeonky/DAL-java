@@ -72,7 +72,7 @@ class DataAssertTest {
 
             assertThat(runtimeException)
                     .hasFieldOrPropertyWithValue("position", 1)
-                    .hasMessage("Can not plus null and class java.math.BigDecimal");
+                    .hasMessage("Can not plus null and java.math.BigDecimal");
         }
 
         @Test
