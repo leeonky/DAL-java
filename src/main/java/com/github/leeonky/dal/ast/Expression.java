@@ -10,10 +10,19 @@ public class Expression extends Node {
 
     private final Operator operator;
 
-    public Expression(Node node1, Node node2, Operator operator) {
+    public Expression(Node node1, Operator operator, Node node2) {
         this.node1 = node1;
         this.node2 = node2;
         this.operator = operator;
+    }
+
+    public Expression adjustOperatorOrder() {
+        if (node1 instanceof Expression) {
+            Expression expression1 = (Expression) node1;
+            if (operator.isPrecedentThan(expression1.operator))
+                return new Expression(expression1.node1, expression1.operator, new Expression(expression1.node2, operator, node2));
+        }
+        return this;
     }
 
     @Override

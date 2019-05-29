@@ -3,8 +3,18 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.Calculator;
 
 public abstract class Operator {
-
+    private static final int PRECEDENCE_LOGIC_OPT = 200;
+    private static final int PRECEDENCE_PLUS_SUB_OPT = 300;
+    private final int precedence;
     private int position;
+
+    protected Operator(int precedence) {
+        this.precedence = precedence;
+    }
+
+    public boolean isPrecedentThan(Operator operator) {
+        return precedence > operator.precedence;
+    }
 
     public abstract Object calculate(Object v1, Object v2);
 
@@ -22,6 +32,10 @@ public abstract class Operator {
     }
 
     public static class Equal extends Operator {
+        public Equal() {
+            super(PRECEDENCE_LOGIC_OPT);
+        }
+
         @Override
         public Object calculate(Object v1, Object v2) {
             return Calculator.equals(v1, v2);
@@ -29,6 +43,10 @@ public abstract class Operator {
     }
 
     public static class Less extends Operator {
+        public Less() {
+            super(PRECEDENCE_LOGIC_OPT);
+        }
+
         @Override
         public Object calculate(Object v1, Object v2) {
             return Calculator.compare(v1, v2) < 0;
@@ -36,6 +54,10 @@ public abstract class Operator {
     }
 
     public static class GreaterOrEqual extends Operator {
+        public GreaterOrEqual() {
+            super(PRECEDENCE_LOGIC_OPT);
+        }
+
         @Override
         public Object calculate(Object v1, Object v2) {
             return Calculator.compare(v1, v2) >= 0;
@@ -43,6 +65,10 @@ public abstract class Operator {
     }
 
     public static class LessOrEqual extends Operator {
+        public LessOrEqual() {
+            super(PRECEDENCE_LOGIC_OPT);
+        }
+
         @Override
         public Object calculate(Object v1, Object v2) {
             return Calculator.compare(v1, v2) <= 0;
@@ -50,6 +76,10 @@ public abstract class Operator {
     }
 
     public static class NotEqual extends Operator {
+        public NotEqual() {
+            super(PRECEDENCE_LOGIC_OPT);
+        }
+
         @Override
         public Object calculate(Object v1, Object v2) {
             return !Calculator.equals(v1, v2);
@@ -57,6 +87,10 @@ public abstract class Operator {
     }
 
     public static class Plus extends Operator {
+        public Plus() {
+            super(PRECEDENCE_PLUS_SUB_OPT);
+        }
+
         @Override
         public Object calculate(Object v1, Object v2) {
             return Calculator.plus(v1, v2);
@@ -64,6 +98,10 @@ public abstract class Operator {
     }
 
     public static class Greater extends Operator {
+        public Greater() {
+            super(PRECEDENCE_LOGIC_OPT);
+        }
+
         @Override
         public Object calculate(Object v1, Object v2) {
             return Calculator.compare(v1, v2) > 0;

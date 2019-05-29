@@ -52,6 +52,11 @@ class DALCompilerTest {
     @Nested
     class SimpleExpression {
 
+        private void assertCompileOperator(String sourceCode, Operator operator) {
+            Node node = dalCompiler.compile(new SourceCode(sourceCode + "1"));
+            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, operator, new ConstNode(new BigDecimal(1))));
+        }
+
         @Test
         void expression_with_root_value() {
             assertCompileOperator("=", new Operator.Equal());
@@ -69,11 +74,6 @@ class DALCompilerTest {
             assertThat(syntaxException)
                     .hasFieldOrPropertyWithValue("position", 0)
                     .hasMessage("not support operator - yet");
-        }
-
-        private void assertCompileOperator(String sourceCode, Operator operator) {
-            Node node = dalCompiler.compile(new SourceCode(sourceCode + "1"));
-            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, new ConstNode(new BigDecimal(1)), operator));
         }
 
         @Test
@@ -95,8 +95,20 @@ class DALCompilerTest {
         @Test
         void simple_expression() {
             Node node = dalCompiler.compile(new SourceCode("+1=2"));
-            assertThat(node).isEqualTo(new Expression(new Expression(InputNode.INSTANCE, new ConstNode(new BigDecimal(1)), new Operator.Plus()),
-                    new ConstNode(new BigDecimal(2)), new Operator.Equal()));
+            assertThat(node).isEqualTo(new Expression(new Expression(InputNode.INSTANCE, new Operator.Plus(), new ConstNode(new BigDecimal(1))),
+                    new Operator.Equal(), new ConstNode(new BigDecimal(2))));
+        }
+    }
+
+    @Nested
+    class ComplexExpression {
+
+        @Test
+        void operator_order_plus_first() {
+            Node node = dalCompiler.compile(new SourceCode("=1+1"));
+            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE,
+                    new Operator.Equal(), new Expression(new ConstNode(new BigDecimal(1)), new Operator.Plus(), new ConstNode(new BigDecimal(1)))
+            ));
         }
     }
 

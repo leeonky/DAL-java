@@ -25,10 +25,10 @@ public class DALCompiler {
     private Node compileAll(TokenStream tokenStream) {
         Node node = compileValueNode(tokenStream).orElse(InputNode.INSTANCE);
         while (tokenStream.hasTokens()) {
-            Operator operator = toOperator(tokenStream.pop());
-            Node node2 = compileValueNode(tokenStream)
-                    .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished"));
-            node = new Expression(node, node2, operator);
+            node = new Expression(node, toOperator(tokenStream.pop()),
+                    compileValueNode(tokenStream)
+                            .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished")))
+                    .adjustOperatorOrder();
         }
         return node;
     }

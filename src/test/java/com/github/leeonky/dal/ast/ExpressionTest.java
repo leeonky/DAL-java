@@ -43,19 +43,19 @@ class ExpressionTest {
     }
 
     private void assertSimplePlus(Object v1, Object v2, Object expected) {
-        Object evaluate = new Expression(new ConstNode(v1), new ConstNode(v2), new Operator.Plus()).evaluate(new CompilingContextBuilder().build(null));
+        Object evaluate = new Expression(new ConstNode(v1), new Operator.Plus(), new ConstNode(v2)).evaluate(new CompilingContextBuilder().build(null));
 
         assertThat(evaluate).isEqualTo(expected);
     }
 
     private void assertPassed(String s1, String s2, Operator operator) {
-        Object evaluate = new Expression(new ConstNode(s1), new ConstNode(s2), operator).evaluate(new CompilingContextBuilder().build(null));
+        Object evaluate = new Expression(new ConstNode(s1), operator, new ConstNode(s2)).evaluate(new CompilingContextBuilder().build(null));
 
         assertThat(evaluate).isEqualTo(true);
     }
 
     private void assertFailed(String s1, String s2, Operator operator) {
-        Object evaluate = new Expression(new ConstNode(s1), new ConstNode(s2), operator).evaluate(new CompilingContextBuilder().build(null));
+        Object evaluate = new Expression(new ConstNode(s1), operator, new ConstNode(s2)).evaluate(new CompilingContextBuilder().build(null));
 
         assertThat(evaluate).isEqualTo(false);
     }
