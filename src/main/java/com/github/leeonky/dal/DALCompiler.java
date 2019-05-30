@@ -76,6 +76,15 @@ public class DALCompiler {
             case "+":
                 operator = new Operator.Plus();
                 break;
+            case "-":
+                operator = new Operator.Subtraction();
+                break;
+            case "*":
+                operator = new Operator.Multiplication();
+                break;
+            case "/":
+                operator = new Operator.Division();
+                break;
             default:
                 throw new SyntaxException(token.getPositionBegin(), "not support operator " + operatorString + " yet");
         }

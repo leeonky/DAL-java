@@ -55,6 +55,11 @@ class DataAssertTest {
         assertPass(2, "+1=3");
     }
 
+    @Test
+    void assert_complex_calculate() {
+        assertPass(17, "=2+3*4+4/2+1");
+    }
+
     @Setter
     @Accessors(chain = true)
     public static class Bean {

@@ -66,14 +66,17 @@ class DALCompilerTest {
             assertCompileOperator(">=", new Operator.GreaterOrEqual());
             assertCompileOperator("<=", new Operator.LessOrEqual());
             assertCompileOperator("+", new Operator.Plus());
+            assertCompileOperator("-", new Operator.Subtraction());
+            assertCompileOperator("*", new Operator.Multiplication());
+            assertCompileOperator("/", new Operator.Division());
         }
 
         @Test
         void not_supported_operator() {
-            SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode("-1")));
+            SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode("&1")));
             assertThat(syntaxException)
                     .hasFieldOrPropertyWithValue("position", 0)
-                    .hasMessage("not support operator - yet");
+                    .hasMessage("not support operator & yet");
         }
 
         @Test

@@ -52,4 +52,16 @@ public class Calculator {
     private static String getClass(Object obj) {
         return obj == null ? null : obj.getClass().getName();
     }
+
+    public static Object subtract(Object v1, Object v2) {
+        return new BigDecimal(v1.toString()).subtract(new BigDecimal(v2.toString()));
+    }
+
+    public static Object multiply(Object v1, Object v2) {
+        return new BigDecimal(v1.toString()).multiply(new BigDecimal(v2.toString()));
+    }
+
+    public static Object divide(Object v1, Object v2) {
+        return new BigDecimal(v1.toString()).divide(new BigDecimal(v2.toString()));
+    }
 }

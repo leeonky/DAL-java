@@ -5,6 +5,7 @@ import com.github.leeonky.dal.Calculator;
 public abstract class Operator {
     private static final int PRECEDENCE_LOGIC_OPT = 200;
     private static final int PRECEDENCE_PLUS_SUB_OPT = 300;
+    private static final int PRECEDENCE_MUL_DIV = 400;
     private final int precedence;
     private int position;
 
@@ -105,6 +106,39 @@ public abstract class Operator {
         @Override
         public Object calculate(Object v1, Object v2) {
             return Calculator.compare(v1, v2) > 0;
+        }
+    }
+
+    public static class Subtraction extends Operator {
+        public Subtraction() {
+            super(PRECEDENCE_PLUS_SUB_OPT);
+        }
+
+        @Override
+        public Object calculate(Object v1, Object v2) {
+            return Calculator.subtract(v1, v2);
+        }
+    }
+
+    public static class Multiplication extends Operator {
+        public Multiplication() {
+            super(PRECEDENCE_MUL_DIV);
+        }
+
+        @Override
+        public Object calculate(Object v1, Object v2) {
+            return Calculator.multiply(v1, v2);
+        }
+    }
+
+    public static class Division extends Operator {
+        public Division() {
+            super(PRECEDENCE_MUL_DIV);
+        }
+
+        @Override
+        public Object calculate(Object v1, Object v2) {
+            return Calculator.divide(v1, v2);
         }
     }
 }
