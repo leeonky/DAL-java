@@ -54,14 +54,20 @@ public class Calculator {
     }
 
     public static Object subtract(Object v1, Object v2) {
-        return new BigDecimal(v1.toString()).subtract(new BigDecimal(v2.toString()));
+        if (v1 instanceof Number && v2 instanceof Number)
+            return new BigDecimal(v1.toString()).subtract(new BigDecimal(v2.toString()));
+        throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", getClass(v1), getClass(v2)));
     }
 
     public static Object multiply(Object v1, Object v2) {
-        return new BigDecimal(v1.toString()).multiply(new BigDecimal(v2.toString()));
+        if (v1 instanceof Number && v2 instanceof Number)
+            return new BigDecimal(v1.toString()).multiply(new BigDecimal(v2.toString()));
+        throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", getClass(v1), getClass(v2)));
     }
 
     public static Object divide(Object v1, Object v2) {
-        return new BigDecimal(v1.toString()).divide(new BigDecimal(v2.toString()));
+        if (v1 instanceof Number && v2 instanceof Number)
+            return new BigDecimal(v1.toString()).divide(new BigDecimal(v2.toString()));
+        throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", getClass(v1), getClass(v2)));
     }
 }

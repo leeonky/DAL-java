@@ -82,4 +82,27 @@ class CalculatorTest {
             assertThat(exception).hasMessage("Can not compare java.lang.String and java.lang.Integer");
         }
     }
+
+    @Nested
+    class MultiDivSub {
+
+        @Test
+        void calculate_with_number() {
+            assertThat(Calculator.multiply(1, 2)).isEqualTo(new BigDecimal(2));
+            assertThat(Calculator.subtract(4, 1)).isEqualTo(new BigDecimal(3));
+            assertThat(Calculator.divide(8, 2)).isEqualTo(new BigDecimal(4));
+        }
+
+        @Test
+        void all_input_number_should_number_type() {
+            IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.multiply("2", "4"));
+            assertThat(illegalArgumentException).hasMessage("Operands should be number but java.lang.String and java.lang.String");
+
+            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.divide("2", "4"));
+            assertThat(illegalArgumentException).hasMessage("Operands should be number but java.lang.String and java.lang.String");
+
+            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.subtract("2", "4"));
+            assertThat(illegalArgumentException).hasMessage("Operands should be number but java.lang.String and java.lang.String");
+        }
+    }
 }
