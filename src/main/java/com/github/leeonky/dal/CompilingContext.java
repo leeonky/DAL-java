@@ -1,6 +1,7 @@
 package com.github.leeonky.dal;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class CompilingContext {
     private final Map<Class<?>, CheckedBiFunction<?, String, Object>> registerTypes;
@@ -15,7 +16,10 @@ public class CompilingContext {
         return inputValue;
     }
 
-    public Map<Class<?>, CheckedBiFunction<?, String, Object>> getRegisterTypes() {
-        return registerTypes;
+    public Optional<CheckedBiFunction<?, String, Object>> customerGetter(Object instance) {
+        return registerTypes.entrySet().stream()
+                .filter(e -> e.getKey().isInstance(instance))
+                .findFirst()
+                .map(Map.Entry::getValue);
     }
 }

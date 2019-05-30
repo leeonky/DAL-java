@@ -58,6 +58,7 @@ class DataAssertTest {
     @Test
     void assert_complex_calculate() {
         assertPass(17, "=2+3*4+4/2+1");
+        assertPass(null, "2+3*4+4/2+1=2+3*4+4/2+1");
     }
 
     @Setter

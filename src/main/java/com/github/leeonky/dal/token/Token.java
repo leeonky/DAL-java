@@ -1,5 +1,8 @@
 package com.github.leeonky.dal.token;
 
+import com.github.leeonky.dal.SyntaxException;
+import com.github.leeonky.dal.ast.Operator;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -63,10 +66,6 @@ public class Token {
         return value;
     }
 
-    public String getOperator() {
-        return value.toString();
-    }
-
     public List<String> getProperties() {
         return (List<String>) value;
     }
@@ -89,6 +88,47 @@ public class Token {
 
     public void setPositionBegin(int positionBegin) {
         this.positionBegin = positionBegin;
+    }
+
+    public Operator toOperator() {
+        String operatorString = value.toString();
+        Operator operator;
+        switch (operatorString) {
+            case "=":
+                operator = new Operator.Equal();
+                break;
+            case ">":
+                operator = new Operator.Greater();
+                break;
+            case "<":
+                operator = new Operator.Less();
+                break;
+            case ">=":
+                operator = new Operator.GreaterOrEqual();
+                break;
+            case "<=":
+                operator = new Operator.LessOrEqual();
+                break;
+            case "!=":
+                operator = new Operator.NotEqual();
+                break;
+            case "+":
+                operator = new Operator.Plus();
+                break;
+            case "-":
+                operator = new Operator.Subtraction();
+                break;
+            case "*":
+                operator = new Operator.Multiplication();
+                break;
+            case "/":
+                operator = new Operator.Division();
+                break;
+            default:
+                throw new SyntaxException(getPositionBegin(), "not support operator " + operatorString + " yet");
+        }
+        operator.setPosition(getPositionBegin());
+        return operator;
     }
 
     public enum Type {

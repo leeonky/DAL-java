@@ -25,7 +25,7 @@ public class DALCompiler {
     private Node compileAll(TokenStream tokenStream) {
         Node node = compileValueNode(tokenStream).orElse(InputNode.INSTANCE);
         while (tokenStream.hasTokens()) {
-            node = new Expression(node, toOperator(tokenStream.pop()),
+            node = new Expression(node, tokenStream.pop().toOperator(),
                     compileValueNode(tokenStream)
                             .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished")))
                     .adjustOperatorOrder();
@@ -49,46 +49,5 @@ public class DALCompiler {
                 node.setPositionEnd(token.getPositionEnd());
             }
         return ofNullable(node);
-    }
-
-    private Operator toOperator(Token token) {
-        String operatorString = token.getOperator();
-        Operator operator;
-        switch (operatorString) {
-            case "=":
-                operator = new Operator.Equal();
-                break;
-            case ">":
-                operator = new Operator.Greater();
-                break;
-            case "<":
-                operator = new Operator.Less();
-                break;
-            case ">=":
-                operator = new Operator.GreaterOrEqual();
-                break;
-            case "<=":
-                operator = new Operator.LessOrEqual();
-                break;
-            case "!=":
-                operator = new Operator.NotEqual();
-                break;
-            case "+":
-                operator = new Operator.Plus();
-                break;
-            case "-":
-                operator = new Operator.Subtraction();
-                break;
-            case "*":
-                operator = new Operator.Multiplication();
-                break;
-            case "/":
-                operator = new Operator.Division();
-                break;
-            default:
-                throw new SyntaxException(token.getPositionBegin(), "not support operator " + operatorString + " yet");
-        }
-        operator.setPosition(token.getPositionBegin());
-        return operator;
     }
 }

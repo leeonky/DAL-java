@@ -6,9 +6,9 @@ import com.github.leeonky.dal.RuntimeException;
 import java.util.Objects;
 
 public class Expression extends Node {
-    private final Node node1, node2;
-
+    private final Node node1;
     private final Operator operator;
+    private final Node node2;
 
     public Expression(Node node1, Operator operator, Node node2) {
         this.node1 = node1;
@@ -20,7 +20,8 @@ public class Expression extends Node {
         if (node1 instanceof Expression) {
             Expression expression1 = (Expression) node1;
             if (operator.isPrecedentThan(expression1.operator))
-                return new Expression(expression1.node1, expression1.operator, new Expression(expression1.node2, operator, node2));
+                return new Expression(expression1.node1, expression1.operator,
+                        new Expression(expression1.node2, operator, node2).adjustOperatorOrder());
         }
         return this;
     }

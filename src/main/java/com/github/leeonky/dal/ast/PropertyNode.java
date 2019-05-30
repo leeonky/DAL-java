@@ -37,10 +37,7 @@ public class PropertyNode extends Node {
 
     @SuppressWarnings("unchecked")
     private Object getPropertyFromType(Object instance, String name, CompilingContext context) {
-        CheckedBiFunction<?, String, Object> function = context.getRegisterTypes().entrySet().stream()
-                .filter(e -> e.getKey().isInstance(instance))
-                .map(Map.Entry::getValue)
-                .findFirst().orElseGet(() -> this::getPropertyThroughBean);
+        CheckedBiFunction<?, String, Object> function = context.customerGetter(instance).orElse(this::getPropertyThroughBean);
         try {
             return ((CheckedBiFunction) function).apply(instance, name);
         } catch (Exception e) {

@@ -113,6 +113,19 @@ class DALCompilerTest {
                     new Operator.Equal(), new Expression(new ConstNode(new BigDecimal(1)), new Operator.Plus(), new ConstNode(new BigDecimal(1)))
             ));
         }
+
+        @Test
+        void operator() {
+            Node node = dalCompiler.compile(new SourceCode("=1+1*1"));
+            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE,
+                    new Operator.Equal(),
+                    new Expression(
+                            new ConstNode(new BigDecimal(1))
+                            , new Operator.Plus(),
+                            new Expression(new ConstNode(new BigDecimal(1)), new Operator.Multiplication(), new ConstNode(new BigDecimal(1)))
+                    )
+            ));
+        }
     }
 
 //    @Test
