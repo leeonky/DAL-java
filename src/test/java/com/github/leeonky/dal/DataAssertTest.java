@@ -61,6 +61,11 @@ class DataAssertTest {
         assertPass(null, "2+3*4+4/2+1=2+3*4+4/2+1");
     }
 
+    @Test
+    void assert_expression_with_backet() {
+        assertPass(5, "=(2+3)*(4+4)/(2+6)");
+    }
+
     @Setter
     @Accessors(chain = true)
     public static class Bean {

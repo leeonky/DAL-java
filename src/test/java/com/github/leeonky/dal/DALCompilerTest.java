@@ -128,11 +128,32 @@ class DALCompilerTest {
         }
     }
 
-//    @Test
-//    void one_const_value_source_code_should_return_input_node() {
-//        Node node = dalCompiler.compile(new SourceCode("true"));
-//        assertThat(node).isEqualTo(new ConstNode(true));
-//    }
+    @Nested
+    class BracketInExpression {
+
+        @Test
+        void compile_simple_bracket() {
+            Node node = dalCompiler.compile(new SourceCode("(1)"));
+
+            assertThat(node).isEqualTo(new BracketNode().setNode(new ConstNode(new BigDecimal(1))).finishBracket());
+        }
+
+        @Test
+        void compile_simple_bracket_not_complete_1() {
+            SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode("(1")));
+            assertThat(syntaxException)
+                    .hasMessage("missed end bracket")
+                    .hasFieldOrPropertyWithValue("position", 0);
+        }
+
+        @Test
+        void compile_simple_bracket_not_complete_2() {
+            SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode("1)")));
+            assertThat(syntaxException)
+                    .hasMessage("missed begin bracket")
+                    .hasFieldOrPropertyWithValue("position", 1);
+        }
+    }
 
     @Nested
     class TypeAssertionExpressionTest {

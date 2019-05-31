@@ -8,6 +8,7 @@ import com.github.leeonky.dal.token.TokenStream;
 
 import java.util.Optional;
 
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 public class DALCompiler {
@@ -19,12 +20,17 @@ public class DALCompiler {
     private Scanner scanner = new Scanner();
 
     public Node compile(SourceCode sourceCode) {
-        return compileAll(scanner.scan(sourceCode));
+        return compileExpression(scanner.scan(sourceCode), InputNode.INSTANCE, null);
     }
 
-    private Node compileAll(TokenStream tokenStream) {
-        Node node = compileValueNode(tokenStream).orElse(InputNode.INSTANCE);
-        while (tokenStream.hasTokens()) {
+    private Node compileExpression(TokenStream tokenStream, Node inputNode, BracketNode bracketNode) {
+        Optional<Node> nodeOptional = compileValueNode(tokenStream);
+        Node node;
+        if (inputNode != null)
+            node = nodeOptional.orElse(inputNode);
+        else
+            node = nodeOptional.get();
+        while (tokenStream.hasTokens() && !tokenStream.isCurrentEndBracketAndTakeThenFinishBracket(bracketNode)) {
             node = new Expression(node, tokenStream.pop().toOperator(),
                     compileValueNode(tokenStream)
                             .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished")))
@@ -40,6 +46,9 @@ public class DALCompiler {
                 node = new ConstNode(tokenStream.pop().getConstValue());
             else if (tokenStream.isCurrentSingleEvaluateNode())
                 node = InputNode.INSTANCE;
+            else if (tokenStream.isCurrentBeginBracket()) {
+                return of(compileBracket(tokenStream, node));
+            }
         }
         if (node != null)
             while (tokenStream.hasTokens() && tokenStream.isCurrentSingleEvaluateNode()) {
@@ -49,5 +58,14 @@ public class DALCompiler {
                 node.setPositionEnd(token.getPositionEnd());
             }
         return ofNullable(node);
+    }
+
+    private BracketNode compileBracket(TokenStream tokenStream, Node node) {
+        Token bracketToken = tokenStream.pop();
+        BracketNode bracketNode = new BracketNode();
+        bracketNode.setNode(compileExpression(tokenStream, node, bracketNode));
+        if (!bracketNode.isFinished())
+            throw new SyntaxException(bracketToken.getPositionBegin(), "missed end bracket");
+        return bracketNode;
     }
 }
