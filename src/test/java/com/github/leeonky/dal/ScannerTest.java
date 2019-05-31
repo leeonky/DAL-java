@@ -125,6 +125,7 @@ class ScannerTest {
             void begin_end_bracket_token() {
                 assertGetToken("(", beginBracketToken());
                 assertGetToken(")", endBracketToken());
+                assertGetToken("(0)", beginBracketToken(), constValueToken(new BigDecimal(0)), endBracketToken());
             }
         }
 
@@ -224,6 +225,7 @@ class ScannerTest {
                 assertGetToken("11&&", constValueToken(new BigDecimal(11)), operatorToken("&&"));
 
                 assertGetToken("11(", constValueToken(new BigDecimal(11)), beginBracketToken());
+                assertGetToken("11)", constValueToken(new BigDecimal(11)), endBracketToken());
 
                 assertGetToken("11[1]", constValueToken(new BigDecimal(11)), constIndexToken(1));
             }
@@ -237,6 +239,7 @@ class ScannerTest {
                 assertGetToken("a[0]", wordToken("a"), constIndexToken(0));
 
                 assertGetToken("a(", wordToken("a"), beginBracketToken());
+                assertGetToken("a)", wordToken("a"), endBracketToken());
             }
 
             @Test
@@ -248,6 +251,7 @@ class ScannerTest {
                 assertGetToken(".a=", propertyToken("a"), operatorToken("="));
 
                 assertGetToken(".a(", propertyToken("a"), beginBracketToken());
+                assertGetToken(".a)", propertyToken("a"), endBracketToken());
             }
 
             @Test
@@ -261,6 +265,7 @@ class ScannerTest {
                 assertGetToken("=a", operatorToken("="), wordToken("a"));
 
                 assertGetToken("=(", operatorToken("="), beginBracketToken());
+                assertGetToken("=)", operatorToken("="), endBracketToken());
 
                 assertGetToken("=.a", operatorToken("="), propertyToken("a"));
 
