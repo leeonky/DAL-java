@@ -185,6 +185,22 @@ class DALCompilerTest {
                     new Expression(new ConstNode(new BigDecimal(2)), new Operator.Greater(), new ConstNode(new BigDecimal(1)))
             ));
         }
+
+        @Test
+        void logical_not() {
+            Node node = dalCompiler.compile(new SourceCode("!true"));
+            assertThat(node).isEqualTo(new Expression(new ConstNode(true), new Operator.Not(), new ConstNode(null)));
+        }
+
+        @Test
+        void logical_not_should_has_highest_precedence() {
+            Node node = dalCompiler.compile(new SourceCode("!true=false"));
+            assertThat(node).isEqualTo(new Expression(
+                    new Expression(new ConstNode(true), new Operator.Not(), new ConstNode(null))
+                    , new Operator.Equal(),
+                    new ConstNode(false)
+            ));
+        }
     }
 
     @Nested

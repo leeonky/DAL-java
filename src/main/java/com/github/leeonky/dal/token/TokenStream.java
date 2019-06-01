@@ -4,9 +4,14 @@ import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.BracketNode;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import static java.util.Arrays.asList;
 
 public class TokenStream {
+    private static final Set<String> UNARY_OPERATORS = new HashSet<>(asList("!"));
     private final List<Token> tokens = new ArrayList<>();
     private int index = 0;
 
@@ -51,5 +56,9 @@ public class TokenStream {
             return true;
         }
         return false;
+    }
+
+    public boolean isSingleUnaryOperator() {
+        return currentType() == Token.Type.OPERATOR && UNARY_OPERATORS.contains(tokens.get(index).getConstValue());
     }
 }

@@ -130,6 +130,9 @@ public class Token {
             case "||":
                 operator = new Operator.Or();
                 break;
+            case "!":
+                operator = new Operator.Not();
+                break;
             default:
                 throw new SyntaxException(getPositionBegin(), "not support operator " + operatorString + " yet");
         }

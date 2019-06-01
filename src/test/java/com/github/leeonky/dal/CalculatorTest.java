@@ -107,10 +107,10 @@ class CalculatorTest {
     }
 
     @Nested
-    class LogicalAndOr {
+    class Logical {
 
         @Test
-        void logical_calcutate() {
+        void logical_calculate() {
             assertThat(Calculator.and(true, false)).isEqualTo(false);
             assertThat(Calculator.and(true, true)).isEqualTo(true);
             assertThat(Calculator.and(false, true)).isEqualTo(false);
@@ -120,6 +120,9 @@ class CalculatorTest {
             assertThat(Calculator.or(true, true)).isEqualTo(true);
             assertThat(Calculator.or(false, true)).isEqualTo(true);
             assertThat(Calculator.or(false, false)).isEqualTo(false);
+
+            assertThat(Calculator.not(true)).isEqualTo(false);
+            assertThat(Calculator.not(false)).isEqualTo(true);
         }
 
         @Test
@@ -135,6 +138,9 @@ class CalculatorTest {
 
             illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.or(true, 1));
             assertThat(illegalArgumentException).hasMessage("Operand 2 should be boolean but java.lang.Integer");
+
+            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.not(1));
+            assertThat(illegalArgumentException).hasMessage("Operand should be boolean but java.lang.Integer");
         }
     }
 }

@@ -86,4 +86,10 @@ public class Calculator {
             throw new IllegalArgumentException("Operand 2 should be boolean but " + getClass(v2));
         return Boolean.logicalOr((boolean) v1, (boolean) v2);
     }
+
+    public static Object not(Object v) {
+        if (!(v instanceof Boolean))
+            throw new IllegalArgumentException("Operand should be boolean but " + getClass(v));
+        return !(boolean) v;
+    }
 }

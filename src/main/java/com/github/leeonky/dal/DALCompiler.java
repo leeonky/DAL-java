@@ -48,8 +48,11 @@ public class DALCompiler {
                 node = new ConstNode(tokenStream.pop().getConstValue());
             else if (tokenStream.isCurrentSingleEvaluateNode())
                 node = InputNode.INSTANCE;
-            else if (tokenStream.isCurrentBeginBracket()) {
+            else if (tokenStream.isCurrentBeginBracket())
                 return of(compileBracket(tokenStream, node));
+            else if (tokenStream.isSingleUnaryOperator()) {
+                Token unaryOperatorToken = tokenStream.pop();
+                return of(new Expression(compileValueNode(tokenStream).get(), unaryOperatorToken.toOperator(), new ConstNode(null)));
             }
         }
         if (node != null)

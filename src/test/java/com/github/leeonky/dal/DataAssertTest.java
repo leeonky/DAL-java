@@ -68,6 +68,8 @@ class DataAssertTest {
 
     @Test
     void assert_logic_expression() {
+        assertPass(null, "!false");
+
         assertPass(null, "true and true");
         assertPass(null, "true or false");
     }

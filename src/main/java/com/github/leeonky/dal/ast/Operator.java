@@ -7,6 +7,7 @@ public abstract class Operator {
     private static final int PRECEDENCE_LOGIC_COMPARE_OPT = 210;
     private static final int PRECEDENCE_PLUS_SUB_OPT = 300;
     private static final int PRECEDENCE_MUL_DIV = 400;
+    private static final int PRECEDENCE_LOGIC_NOT_OPT = 500;
     private final int precedence;
     private int position;
 
@@ -162,6 +163,17 @@ public abstract class Operator {
         @Override
         public Object calculate(Object v1, Object v2) {
             return Calculator.or(v1, v2);
+        }
+    }
+
+    public static class Not extends Operator {
+        public Not() {
+            super(PRECEDENCE_LOGIC_NOT_OPT);
+        }
+
+        @Override
+        public Object calculate(Object v1, Object v2) {
+            return Calculator.not(v1);
         }
     }
 }
