@@ -13,268 +13,240 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ScannerTest {
+
+    @Test
+    void empty_source_code_should_return_empty_list() {
+        assertEmptySourceCode("");
+        assertEmptySourceCode("  ");
+    }
+
+    private void assertEmptySourceCode(String sourceCode) {
+        assertThat(new Scanner().scan(new SourceCode(sourceCode)).allTokens()).isEmpty();
+    }
+
+    private void assertScanTokens(String sourceCode, Token... tokens) {
+        assertThat(new Scanner().scan(new SourceCode(sourceCode)).allTokens()).containsOnly(tokens);
+    }
+
+    private void assertCompileError(String sourceCode, int position, String message) {
+        SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> new Scanner().scan(new SourceCode(sourceCode)));
+        assertThat(syntaxException).hasMessage(message).hasFieldOrPropertyWithValue("position", position);
+    }
+
     @Nested
-    class GetToken {
+    class NumberToken {
 
         @Test
-        void empty_code() {
-            assertThat(new Scanner().scan(new SourceCode("")).allTokens()).isEmpty();
-            assertThat(new Scanner().scan(new SourceCode("  ")).allTokens()).isEmpty();
+        void should_support_number_and_convert_big_decimal() {
+            assertScanTokens("1", constValueToken(new BigDecimal(1)));
+            assertScanTokens("11", constValueToken(new BigDecimal(11)));
+        }
+    }
+
+    @Nested
+    class WordToken {
+
+        @Test
+        void single_word_token() {
+            assertScanTokens("ab", wordToken("ab"));
         }
 
-        private void assertGetToken(String sourceCode, Token... tokens) {
-            assertThat(new Scanner().scan(new SourceCode(sourceCode)).allTokens()).containsOnly(tokens);
+        @Test
+        void should_not_split_word_for_char_point() {
+            assertScanTokens("a.b", wordToken("a.b"));
+        }
+    }
+
+    @Nested
+    class ConstIndexToken {
+
+        @Test
+        void should_only_support_const_integer_index() {
+            assertScanTokens("[1]", constIndexToken(1));
+            assertCompileError(" [x]", 2, "only support const int array index");
         }
 
-        @Nested
-        class NumberToken {
+        @Test
+        void should_end_with_end_bracket() {
+            assertCompileError(" [xx   ", 7, "missed ']'");
+        }
+    }
 
-            @Test
-            void number_token() {
-                assertGetToken("1", constValueToken(new BigDecimal(1)));
-                assertGetToken("11", constValueToken(new BigDecimal(11)));
-            }
+    @Nested
+    class PropertyToken {
+
+        @Test
+        void should_support_single_property() {
+            assertScanTokens(".a", propertyToken("a"));
         }
 
-        @Nested
-        class WordToken {
+        @Test
+        void should_support_property_chain() {
+            assertScanTokens(".a.x", propertyToken("a", "x"));
+        }
+    }
 
-            @Test
-            void single_word_token() {
-                assertGetToken("ab", wordToken("ab"));
-            }
+    @Nested
+    class OperatorToken {
 
-            @Test
-            void nested_word_token() {
-                assertGetToken("a.b", wordToken("a.b"));
-            }
+        @Test
+        void supported_single_char_operators() {
+            assertScanTokens("=", operatorToken("="));
+            assertScanTokens(">", operatorToken(">"));
+            assertScanTokens("<", operatorToken("<"));
+            assertScanTokens("-", operatorToken("-"));
+            assertScanTokens("+", operatorToken("+"));
+            assertScanTokens("*", operatorToken("*"));
+            assertScanTokens("/", operatorToken("/"));
         }
 
-        @Nested
-        class ConstValueToken {
+        @Test
+        void supported_double_char_operators() {
+            assertScanTokens(">=", operatorToken(">="));
+            assertScanTokens("<=", operatorToken("<="));
+            assertScanTokens("&&", operatorToken("&&"));
+            assertScanTokens("||", operatorToken("||"));
+            assertScanTokens("!=", operatorToken("!="));
+        }
+    }
 
-            @Test
-            void get_item_by_index() {
-                assertGetToken("[1]", constIndexToken(1));
-            }
+    @Nested
+    class BracketToken {
 
-            @Test
-            void item_token_end_char() {
-                assertGetToken("[1][2]", constIndexToken(1), constIndexToken(2));
-            }
+        @Test
+        void begin_end_bracket_token() {
+            assertScanTokens("(", beginBracketToken());
+            assertScanTokens(")", endBracketToken());
+            assertScanTokens("(0)", beginBracketToken(), constValueToken(new BigDecimal(0)), endBracketToken());
+        }
+    }
 
-            @Test
-            void only_support_int_index() {
-                SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> assertGetToken(" [x]", constIndexToken(1)));
-                assertThat(syntaxException)
-                        .hasMessage("only support const int array index")
-                        .hasFieldOrPropertyWithValue("position", 2);
-            }
+    @Nested
+    class SingleQuotationStringToken {
 
-            @Test
-            void should_end_with_end_bracket() {
-                SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> assertGetToken(" [xx   ", constIndexToken(1)));
-                assertThat(syntaxException)
-                        .hasMessage("missed ']'")
-                        .hasFieldOrPropertyWithValue("position", 7);
-
-                "aue".charAt(0);
-            }
+        @Test
+        void should_begin_and_end_with_single_quotation() {
+            assertScanTokens("'a''b'", constValueToken("a"), constValueToken("b"));
+            assertCompileError(" 'xx   ", 7, "string should end with '\''");
         }
 
-        @Nested
-        class PropertyToken {
+        @Test
+        void should_support_blank_in_string() {
+            assertScanTokens("'  '", constValueToken("  "));
+            assertScanTokens("' a '", constValueToken(" a "));
+        }
+    }
 
-            @Test
-            void single_property_token() {
-                assertGetToken(".a", propertyToken("a"));
-            }
+    @Nested
+    class DoubleQuotationStringToken {
 
-            @Test
-            void property_chain_token() {
-                assertGetToken(".a.x", propertyToken("a", "x"));
-            }
+        @Test
+        void contains_no_escape_char() {
+            assertScanTokens("\"a\"", constValueToken("a"));
         }
 
-        @Nested
-        class OperatorToken {
-            @Test
-            void supported_single_char_operators() {
-                assertGetToken("=", operatorToken("="));
-                assertGetToken(">", operatorToken(">"));
-                assertGetToken("<", operatorToken("<"));
-                assertGetToken("-", operatorToken("-"));
-                assertGetToken("+", operatorToken("+"));
-                assertGetToken("*", operatorToken("*"));
-                assertGetToken("/", operatorToken("/"));
-            }
-
-            @Test
-            void supported_two_chars_operators() {
-                assertGetToken(">=", operatorToken(">="));
-                assertGetToken("<=", operatorToken("<="));
-                assertGetToken("&&", operatorToken("&&"));
-                assertGetToken("||", operatorToken("||"));
-                assertGetToken("!=", operatorToken("!="));
-            }
+        @Test
+        void should_end_with_end_single_quotation() {
+            assertCompileError(" \"xx   ", 7, "string should end with '\"'");
         }
 
-        @Nested
-        class BracketToken {
-            @Test
-            void begin_end_bracket_token() {
-                assertGetToken("(", beginBracketToken());
-                assertGetToken(")", endBracketToken());
-                assertGetToken("(0)", beginBracketToken(), constValueToken(new BigDecimal(0)), endBracketToken());
-            }
+        @Test
+        void should_support_some_escape_char() {
+            assertScanTokens("\"\\\"\"", constValueToken("\""));
+            assertScanTokens("\"\\t\"", constValueToken("\t"));
+            assertScanTokens("\"\\n\"", constValueToken("\n"));
+            assertScanTokens("\"\\\\\"", constValueToken("\\"));
+            assertScanTokens("\"\\n\\n\"", constValueToken("\n\n"));
         }
 
-        @Nested
-        class SingleQuotationStringToken {
-
-            @Test
-            void begin_with_single_quotation() {
-                assertGetToken("'a''b'", constValueToken("a"), constValueToken("b"));
-            }
-
-            @Test
-            void should_end_with_end_single_quotation() {
-                SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> assertGetToken(" 'xx   "));
-                assertThat(syntaxException)
-                        .hasMessage("string should end with '\''")
-                        .hasFieldOrPropertyWithValue("position", 7);
-            }
-
-            @Test
-            void string_contains_blank() {
-                assertGetToken("'  '", constValueToken("  "));
-                assertGetToken("' a '", constValueToken(" a "));
-            }
+        @Test
+        void escape_char_should_be_finished() {
+            assertCompileError("\"a\\", 3, "string should end with '\"'");
         }
 
-        @Nested
-        class DoubleQuotationStringToken {
-
-            @Test
-            void no_escape_char() {
-                assertGetToken("\"a\"", constValueToken("a"));
-            }
-
-            @Test
-            void should_end_with_end_single_quotation() {
-                SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> assertGetToken(" \"xx   "));
-                assertThat(syntaxException)
-                        .hasMessage("string should end with '\"'")
-                        .hasFieldOrPropertyWithValue("position", 7);
-            }
-
-            @Test
-            void escape_char() {
-                assertGetToken("\"\\\"\"", constValueToken("\""));
-                assertGetToken("\"\\t\"", constValueToken("\t"));
-                assertGetToken("\"\\n\"", constValueToken("\n"));
-                assertGetToken("\"\\\\\"", constValueToken("\\"));
-
-                assertGetToken("\"\\n\\n\"", constValueToken("\n\n"));
-            }
-
-            @Test
-            void unfinished_escape_char() {
-                SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> assertGetToken("\"a\\"));
-
-                assertThat(syntaxException)
-                        .hasMessage("string should end with '\"'")
-                        .hasFieldOrPropertyWithValue("position", 3);
-            }
-
-            @Test
-            void unsupported_escape_char() {
-                SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> assertGetToken("\"a\\a"));
-
-                assertThat(syntaxException)
-                        .hasMessage("unsupported escape char")
-                        .hasFieldOrPropertyWithValue("position", 3);
-            }
-
-            @Test
-            void string_contains_blank() {
-                assertGetToken("\"  \"", constValueToken("  "));
-                assertGetToken("\" a \"", constValueToken(" a "));
-            }
+        @Test
+        void unsupported_escape_char_should_raise_error() {
+            assertCompileError("\"a\\a", 3, "unsupported escape char");
         }
 
-        @Nested
-        class SplitTokens {
+        @Test
+        void should_support_blank_in_string() {
+            assertScanTokens("\"  \"", constValueToken("  "));
+            assertScanTokens("\" a \"", constValueToken(" a "));
+        }
+    }
 
-            @Test
-            void split_number() {
-                assertGetToken("11 12", constValueToken(new BigDecimal(11)), constValueToken(new BigDecimal(12)));
-                assertGetToken("11\t", constValueToken(new BigDecimal(11)));
-                assertGetToken("11\n", constValueToken(new BigDecimal(11)));
+    @Nested
+    class SplitTokens {
 
-                assertGetToken("11=", constValueToken(new BigDecimal(11)), operatorToken("="));
-                assertGetToken("11>", constValueToken(new BigDecimal(11)), operatorToken(">"));
-                assertGetToken("11<", constValueToken(new BigDecimal(11)), operatorToken("<"));
-                assertGetToken("11-", constValueToken(new BigDecimal(11)), operatorToken("-"));
-                assertGetToken("11+", constValueToken(new BigDecimal(11)), operatorToken("+"));
-                assertGetToken("11*", constValueToken(new BigDecimal(11)), operatorToken("*"));
-                assertGetToken("11/", constValueToken(new BigDecimal(11)), operatorToken("/"));
-                assertGetToken("11|", constValueToken(new BigDecimal(11)), operatorToken("|"));
-                assertGetToken("11&", constValueToken(new BigDecimal(11)), operatorToken("&"));
-                assertGetToken("11||", constValueToken(new BigDecimal(11)), operatorToken("||"));
-                assertGetToken("11&&", constValueToken(new BigDecimal(11)), operatorToken("&&"));
+        @Test
+        void split_number() {
+            assertScanTokens("11 12", constValueToken(new BigDecimal(11)), constValueToken(new BigDecimal(12)));
+            assertScanTokens("11\t", constValueToken(new BigDecimal(11)));
+            assertScanTokens("11\n", constValueToken(new BigDecimal(11)));
 
-                assertGetToken("11(", constValueToken(new BigDecimal(11)), beginBracketToken());
-                assertGetToken("11)", constValueToken(new BigDecimal(11)), endBracketToken());
+            assertScanTokens("11=", constValueToken(new BigDecimal(11)), operatorToken("="));
+            assertScanTokens("11>", constValueToken(new BigDecimal(11)), operatorToken(">"));
+            assertScanTokens("11<", constValueToken(new BigDecimal(11)), operatorToken("<"));
+            assertScanTokens("11-", constValueToken(new BigDecimal(11)), operatorToken("-"));
+            assertScanTokens("11+", constValueToken(new BigDecimal(11)), operatorToken("+"));
+            assertScanTokens("11*", constValueToken(new BigDecimal(11)), operatorToken("*"));
+            assertScanTokens("11/", constValueToken(new BigDecimal(11)), operatorToken("/"));
+            assertScanTokens("11|", constValueToken(new BigDecimal(11)), operatorToken("|"));
+            assertScanTokens("11&", constValueToken(new BigDecimal(11)), operatorToken("&"));
+            assertScanTokens("11||", constValueToken(new BigDecimal(11)), operatorToken("||"));
+            assertScanTokens("11&&", constValueToken(new BigDecimal(11)), operatorToken("&&"));
 
-                assertGetToken("11[1]", constValueToken(new BigDecimal(11)), constIndexToken(1));
-            }
+            assertScanTokens("11(", constValueToken(new BigDecimal(11)), beginBracketToken());
+            assertScanTokens("11)", constValueToken(new BigDecimal(11)), endBracketToken());
 
-            @Test
-            void split_word_token() {
-                assertGetToken("a b", wordToken("a"), wordToken("b"));
+            assertScanTokens("11[1]", constValueToken(new BigDecimal(11)), constIndexToken(1));
+        }
 
-                assertGetToken("a=", wordToken("a"), operatorToken("="));
+        @Test
+        void split_word_token() {
+            assertScanTokens("a b", wordToken("a"), wordToken("b"));
 
-                assertGetToken("a[0]", wordToken("a"), constIndexToken(0));
+            assertScanTokens("a=", wordToken("a"), operatorToken("="));
 
-                assertGetToken("a(", wordToken("a"), beginBracketToken());
-                assertGetToken("a)", wordToken("a"), endBracketToken());
-            }
+            assertScanTokens("a[0]", wordToken("a"), constIndexToken(0));
 
-            @Test
-            void split_property_token() {
-                assertGetToken(".a .b", propertyToken("a"), propertyToken("b"));
+            assertScanTokens("a(", wordToken("a"), beginBracketToken());
+            assertScanTokens("a)", wordToken("a"), endBracketToken());
+        }
 
-                assertGetToken(".a[1]", propertyToken("a"), constIndexToken(1));
+        @Test
+        void split_property_token() {
+            assertScanTokens(".a .b", propertyToken("a"), propertyToken("b"));
 
-                assertGetToken(".a=", propertyToken("a"), operatorToken("="));
+            assertScanTokens(".a[1]", propertyToken("a"), constIndexToken(1));
 
-                assertGetToken(".a(", propertyToken("a"), beginBracketToken());
-                assertGetToken(".a)", propertyToken("a"), endBracketToken());
-            }
+            assertScanTokens(".a=", propertyToken("a"), operatorToken("="));
 
-            @Test
-            void split_operator_token() {
-                assertGetToken("= =", operatorToken("="), operatorToken("="));
+            assertScanTokens(".a(", propertyToken("a"), beginBracketToken());
+            assertScanTokens(".a)", propertyToken("a"), endBracketToken());
+        }
 
-                assertGetToken("==", operatorToken("="), operatorToken("="));
+        @Test
+        void split_operator_token() {
+            assertScanTokens("= =", operatorToken("="), operatorToken("="));
 
-                assertGetToken("=1", operatorToken("="), constValueToken(new BigDecimal(1)));
+            assertScanTokens("==", operatorToken("="), operatorToken("="));
 
-                assertGetToken("=a", operatorToken("="), wordToken("a"));
+            assertScanTokens("=1", operatorToken("="), constValueToken(new BigDecimal(1)));
 
-                assertGetToken("=(", operatorToken("="), beginBracketToken());
-                assertGetToken("=)", operatorToken("="), endBracketToken());
+            assertScanTokens("=a", operatorToken("="), wordToken("a"));
 
-                assertGetToken("=.a", operatorToken("="), propertyToken("a"));
+            assertScanTokens("=(", operatorToken("="), beginBracketToken());
+            assertScanTokens("=)", operatorToken("="), endBracketToken());
 
-                assertGetToken("=[0]", operatorToken("="), constIndexToken(0));
+            assertScanTokens("=.a", operatorToken("="), propertyToken("a"));
 
-                assertGetToken("='0'", operatorToken("="), constValueToken("0"));
+            assertScanTokens("=[0]", operatorToken("="), constIndexToken(0));
 
-                assertGetToken("=\"0\"", operatorToken("="), constValueToken("0"));
-            }
+            assertScanTokens("='0'", operatorToken("="), constValueToken("0"));
+
+            assertScanTokens("=\"0\"", operatorToken("="), constValueToken("0"));
         }
     }
 }

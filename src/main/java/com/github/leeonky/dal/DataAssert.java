@@ -11,8 +11,10 @@ public class DataAssert {
     }
 
     public AssertResult assertData(Object actual, String expression) {
-        return (boolean) dalCompiler.compile(new SourceCode(expression)).evaluate(compilingContextBuilder.build(actual)) ?
-                AssertResult.passedResult() :
-                AssertResult.failedResult(actual, expression);
+        Object result = dalCompiler.compile(new SourceCode(expression)).evaluate(compilingContextBuilder.build(actual));
+        if (result instanceof Boolean)
+            return (boolean) result ? AssertResult.passedResult()
+                    : AssertResult.failedResult(actual, expression);
+        throw new IllegalStateException("Assert result should be boolean but " + DALCompiler.getClassName(result));
     }
 }

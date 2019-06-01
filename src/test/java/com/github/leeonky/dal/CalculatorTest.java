@@ -2,6 +2,7 @@ package com.github.leeonky.dal;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -14,24 +15,31 @@ class CalculatorTest {
         assertThat(Calculator.compare(v1, v2)).isEqualTo(result);
     }
 
+    private void assertIllegalArgument(Executable executable, String message) {
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, executable);
+        assertThat(illegalArgumentException).hasMessage(message);
+    }
+
     @Nested
     class NumberCompare {
 
         @Test
         void all_params_should_not_be_null() {
-            IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.compare(1, null));
-            assertThat(illegalArgumentException).hasMessage("Can not compare <1> and <null>");
-
-            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.compare(null, null));
-            assertThat(illegalArgumentException).hasMessage("Can not compare <null> and <null>");
-
-            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.compare(null, 1));
-            assertThat(illegalArgumentException).hasMessage("Can not compare <null> and <1>");
+            assertIllegalArgument(() -> Calculator.compare(1, null), "Can not compare <1> and <null>");
+            assertIllegalArgument(() -> Calculator.compare(null, null), "Can not compare <null> and <null>");
+            assertIllegalArgument(() -> Calculator.compare(null, 1), "Can not compare <null> and <1>");
         }
 
         @Test
-        void compare_number_in_different_type() {
+        void compare_number_with_three_result() {
             assertCompare(1, 1, 0);
+            assertCompare(1, 0, 1);
+            assertCompare(0, 1, -1);
+        }
+
+        @Test
+        void compare_number_in_different_number_type() {
+            assertCompare(1, 1.0, 0);
             assertCompare(1, (byte) 1, 0);
             assertCompare(1, (short) (byte) 1, 0);
             assertCompare(1, (long) (byte) 1, 0);
@@ -41,9 +49,8 @@ class CalculatorTest {
         }
 
         @Test
-        void should_check_type_before_compare() {
-            IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.compare(1, "1"));
-            assertThat(illegalArgumentException).hasMessage("Can not compare <java.lang.Integer: 1> and <java.lang.String: 1>");
+        void do_not_allow_compare_in_different_type() {
+            assertIllegalArgument(() -> Calculator.compare(1, "1"), "Can not compare <java.lang.Integer: 1> and <java.lang.String: 1>");
         }
     }
 
@@ -54,11 +61,33 @@ class CalculatorTest {
         void compare_string() {
             assertCompare("a", "a", 0);
             assertCompare("b", "a", 1);
+            assertCompare("a", "b", -1);
+        }
+    }
+
+    @Nested
+    class Plus {
+
+        @Test
+        void plus_number_in_different_number_type() {
+            assertThat(Calculator.plus(1, 1L)).isEqualTo(new BigDecimal(2));
+        }
+
+        @Test
+        void plus_object_and_string_should_call_to_string_of_object() {
+            assertThat(Calculator.plus(1, "")).isEqualTo("1");
+            assertThat(Calculator.plus("", 1)).isEqualTo("1");
+        }
+
+        @Test
+        void should_raise_error_when_input_object_type_does_not_suit_for_plus() {
+            assertIllegalArgument(() -> Calculator.plus(true, 1), "Can not plus java.lang.Boolean and java.lang.Integer");
         }
     }
 
     @Nested
     class Equal {
+
         @Test
         void both_null_is_equal() {
             assertTrue(Calculator.equals(null, null));
@@ -71,38 +100,69 @@ class CalculatorTest {
         }
 
         @Test
-        void number_equal() {
+        void number_equal_in_different_number_type() {
             assertTrue(Calculator.equals(1, 1L));
         }
 
         @Test
-        void other_type_equal() {
+        void string_equals() {
             assertTrue(Calculator.equals("a", "a"));
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> Calculator.equals("a", 1));
-            assertThat(exception).hasMessage("Can not compare java.lang.String and java.lang.Integer");
+            assertFalse(Calculator.equals("a", "b"));
+        }
+
+        @Test
+        void number_equals() {
+            assertTrue(Calculator.equals(1, 1L));
+            assertTrue(Calculator.equals(1, 1.0));
+            assertTrue(Calculator.equals(0, 0.0));
+            assertFalse(Calculator.equals(1, 2L));
+        }
+
+        @Test
+        void should_raise_error_when_type_not_matched() {
+            assertIllegalArgument(() -> Calculator.equals("a", 1), "Can not compare java.lang.String and java.lang.Integer");
         }
     }
 
     @Nested
-    class MultiDivSub {
+    class Multi {
 
         @Test
-        void calculate_with_number() {
-            assertThat(Calculator.multiply(1, 2)).isEqualTo(new BigDecimal(2));
-            assertThat(Calculator.subtract(4, 1)).isEqualTo(new BigDecimal(3));
+        void support_calculate_in_different_number_type() {
+            assertThat(Calculator.multiply(1, 2L)).isEqualTo(new BigDecimal(2));
+        }
+
+        @Test
+        void all_input_number_should_number_type() {
+            assertIllegalArgument(() -> Calculator.multiply("2", "4"), "Operands should be number but java.lang.String and java.lang.String");
+        }
+    }
+
+    @Nested
+    class Div {
+
+        @Test
+        void support_calculate_in_different_number_type() {
             assertThat(Calculator.divide(8, 2)).isEqualTo(new BigDecimal(4));
         }
 
         @Test
         void all_input_number_should_number_type() {
-            IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.multiply("2", "4"));
-            assertThat(illegalArgumentException).hasMessage("Operands should be number but java.lang.String and java.lang.String");
+            assertIllegalArgument(() -> Calculator.divide("2", "4"), "Operands should be number but java.lang.String and java.lang.String");
+        }
+    }
 
-            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.divide("2", "4"));
-            assertThat(illegalArgumentException).hasMessage("Operands should be number but java.lang.String and java.lang.String");
+    @Nested
+    class Sub {
 
-            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.subtract("2", "4"));
-            assertThat(illegalArgumentException).hasMessage("Operands should be number but java.lang.String and java.lang.String");
+        @Test
+        void support_calculate_in_different_number_type() {
+            assertThat(Calculator.subtract(4, 1)).isEqualTo(new BigDecimal(3));
+        }
+
+        @Test
+        void all_input_number_should_number_type() {
+            assertIllegalArgument(() -> Calculator.subtract("2", "4"), "Operands should be number but java.lang.String and java.lang.String");
         }
     }
 
@@ -127,20 +187,11 @@ class CalculatorTest {
 
         @Test
         void input_value_should_be_logical_type() {
-            IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.and("2", true));
-            assertThat(illegalArgumentException).hasMessage("Operand 1 should be boolean but java.lang.String");
-
-            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.and(true, 1));
-            assertThat(illegalArgumentException).hasMessage("Operand 2 should be boolean but java.lang.Integer");
-
-            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.or("2", true));
-            assertThat(illegalArgumentException).hasMessage("Operand 1 should be boolean but java.lang.String");
-
-            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.or(true, 1));
-            assertThat(illegalArgumentException).hasMessage("Operand 2 should be boolean but java.lang.Integer");
-
-            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.not(1));
-            assertThat(illegalArgumentException).hasMessage("Operand should be boolean but java.lang.Integer");
+            assertIllegalArgument(() -> Calculator.and("2", true), "Operand 1 should be boolean but java.lang.String");
+            assertIllegalArgument(() -> Calculator.and(true, 1), "Operand 2 should be boolean but java.lang.Integer");
+            assertIllegalArgument(() -> Calculator.or("2", true), "Operand 1 should be boolean but java.lang.String");
+            assertIllegalArgument(() -> Calculator.or(true, 1), "Operand 2 should be boolean but java.lang.Integer");
+            assertIllegalArgument(() -> Calculator.not(1), "Operand should be boolean but java.lang.Integer");
         }
     }
 }

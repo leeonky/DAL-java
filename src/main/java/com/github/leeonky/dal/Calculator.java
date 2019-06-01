@@ -20,8 +20,9 @@ public class Calculator {
     }
 
     public static boolean equals(Object v1, Object v2) {
-        return (v1 instanceof Number && v2 instanceof Number && toBigDecimal(v1).equals(toBigDecimal(v2)))
-                || objectEquals(v1, v2);
+        if (v1 instanceof Number && v2 instanceof Number)
+            return toBigDecimal(v1).compareTo(toBigDecimal(v2)) == 0;
+        return objectEquals(v1, v2);
     }
 
     private static boolean objectEquals(Object v1, Object v2) {
@@ -46,50 +47,46 @@ public class Calculator {
             return v1.toString() + v2;
         if (v2 instanceof String)
             return v1 + v2.toString();
-        throw new IllegalArgumentException(String.format("Can not plus %s and %s", getClass(v1), getClass(v2)));
-    }
-
-    private static String getClass(Object obj) {
-        return obj == null ? null : obj.getClass().getName();
+        throw new IllegalArgumentException(String.format("Can not plus %s and %s", DALCompiler.getClassName(v1), DALCompiler.getClassName(v2)));
     }
 
     public static Object subtract(Object v1, Object v2) {
         if (v1 instanceof Number && v2 instanceof Number)
             return new BigDecimal(v1.toString()).subtract(new BigDecimal(v2.toString()));
-        throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", getClass(v1), getClass(v2)));
+        throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", DALCompiler.getClassName(v1), DALCompiler.getClassName(v2)));
     }
 
     public static Object multiply(Object v1, Object v2) {
         if (v1 instanceof Number && v2 instanceof Number)
             return new BigDecimal(v1.toString()).multiply(new BigDecimal(v2.toString()));
-        throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", getClass(v1), getClass(v2)));
+        throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", DALCompiler.getClassName(v1), DALCompiler.getClassName(v2)));
     }
 
     public static Object divide(Object v1, Object v2) {
         if (v1 instanceof Number && v2 instanceof Number)
             return new BigDecimal(v1.toString()).divide(new BigDecimal(v2.toString()));
-        throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", getClass(v1), getClass(v2)));
+        throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", DALCompiler.getClassName(v1), DALCompiler.getClassName(v2)));
     }
 
     public static Object and(Object v1, Object v2) {
         if (!(v1 instanceof Boolean))
-            throw new IllegalArgumentException("Operand 1 should be boolean but " + getClass(v1));
+            throw new IllegalArgumentException("Operand 1 should be boolean but " + DALCompiler.getClassName(v1));
         if (!(v2 instanceof Boolean))
-            throw new IllegalArgumentException("Operand 2 should be boolean but " + getClass(v2));
+            throw new IllegalArgumentException("Operand 2 should be boolean but " + DALCompiler.getClassName(v2));
         return Boolean.logicalAnd((boolean) v1, (boolean) v2);
     }
 
     public static Object or(Object v1, Object v2) {
         if (!(v1 instanceof Boolean))
-            throw new IllegalArgumentException("Operand 1 should be boolean but " + getClass(v1));
+            throw new IllegalArgumentException("Operand 1 should be boolean but " + DALCompiler.getClassName(v1));
         if (!(v2 instanceof Boolean))
-            throw new IllegalArgumentException("Operand 2 should be boolean but " + getClass(v2));
+            throw new IllegalArgumentException("Operand 2 should be boolean but " + DALCompiler.getClassName(v2));
         return Boolean.logicalOr((boolean) v1, (boolean) v2);
     }
 
     public static Object not(Object v) {
         if (!(v instanceof Boolean))
-            throw new IllegalArgumentException("Operand should be boolean but " + getClass(v));
+            throw new IllegalArgumentException("Operand should be boolean but " + DALCompiler.getClassName(v));
         return !(boolean) v;
     }
 }

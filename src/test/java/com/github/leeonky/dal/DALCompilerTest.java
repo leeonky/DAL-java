@@ -15,37 +15,43 @@ class DALCompilerTest {
 
     private DALCompiler dalCompiler = new DALCompiler();
 
+    private void assertSyntaxException(String sourceCode, int position, String message) {
+        SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode(sourceCode)));
+        assertThat(syntaxException)
+                .hasFieldOrPropertyWithValue("position", position)
+                .hasMessage(message);
+    }
+
+    private void assertCompileNode(String sourceCode, Node expected) {
+        assertThat(dalCompiler.compile(new SourceCode(sourceCode))).isEqualTo(expected);
+    }
+
     @Nested
     class NoExpression {
 
         @Test
         void empty_source_code_should_return_input_node() {
-            Node node = dalCompiler.compile(new SourceCode(""));
-            assertThat(node).isEqualTo(InputNode.INSTANCE);
+            assertCompileNode("", InputNode.INSTANCE);
         }
 
         @Test
         void access_property_of_root_value() {
-            Node node = dalCompiler.compile(new SourceCode(".result"));
-            assertThat(node).isEqualTo(new PropertyNode(InputNode.INSTANCE, singletonList("result")));
+            assertCompileNode(".result", new PropertyNode(InputNode.INSTANCE, singletonList("result")));
         }
 
         @Test
         void access_property_list_of_root_value() {
-            Node node = dalCompiler.compile(new SourceCode(".sub .result"));
-            assertThat(node).isEqualTo(new PropertyNode(new PropertyNode(InputNode.INSTANCE, singletonList("sub")), singletonList("result")));
+            assertCompileNode(".sub .result", new PropertyNode(new PropertyNode(InputNode.INSTANCE, singletonList("sub")), singletonList("result")));
         }
 
         @Test
         void access_one_const_value_ignore_root_value() {
-            Node node = dalCompiler.compile(new SourceCode("1"));
-            assertThat(node).isEqualTo(new ConstNode(new BigDecimal(1)));
+            assertCompileNode("1", new ConstNode(new BigDecimal(1)));
         }
 
         @Test
         void access_one_const_value_property_ignore_root_value() {
-            Node node = dalCompiler.compile(new SourceCode("''.empty"));
-            assertThat(node).isEqualTo(new PropertyNode(new ConstNode(""), singletonList("empty")));
+            assertCompileNode("''.empty", new PropertyNode(new ConstNode(""), singletonList("empty")));
         }
     }
 
@@ -53,12 +59,11 @@ class DALCompilerTest {
     class SimpleExpression {
 
         private void assertCompileOperator(String sourceCode, Operator operator) {
-            Node node = dalCompiler.compile(new SourceCode(sourceCode + "1"));
-            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, operator, new ConstNode(new BigDecimal(1))));
+            assertCompileNode(sourceCode + "1", new Expression(InputNode.INSTANCE, operator, new ConstNode(new BigDecimal(1))));
         }
 
         @Test
-        void expression_with_root_value() {
+        void should_support_follow_operators() {
             assertCompileOperator("=", new Operator.Equal());
             assertCompileOperator("!=", new Operator.NotEqual());
             assertCompileOperator(">", new Operator.Greater());
@@ -73,33 +78,24 @@ class DALCompilerTest {
 
         @Test
         void not_supported_operator() {
-            SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode("&1")));
-            assertThat(syntaxException)
-                    .hasFieldOrPropertyWithValue("position", 0)
-                    .hasMessage("not support operator & yet");
+            assertSyntaxException("&1", 0, "not support operator & yet");
         }
 
         @Test
         void should_raise_error_when_expression_not_finished_1() {
-            SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode("=")));
-            assertThat(syntaxException)
-                    .hasFieldOrPropertyWithValue("position", 1)
-                    .hasMessage("expression not finished");
+            assertSyntaxException("=", 1, "expression not finished");
         }
 
         @Test
         void should_raise_error_when_expression_not_finished_2() {
-            SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode("= =")));
-            assertThat(syntaxException)
-                    .hasFieldOrPropertyWithValue("position", 2)
-                    .hasMessage("expression not finished");
+            assertSyntaxException("= =", 2, "expression not finished");
         }
 
         @Test
         void simple_expression() {
-            Node node = dalCompiler.compile(new SourceCode("+1=2"));
-            assertThat(node).isEqualTo(new Expression(new Expression(InputNode.INSTANCE, new Operator.Plus(), new ConstNode(new BigDecimal(1))),
-                    new Operator.Equal(), new ConstNode(new BigDecimal(2))));
+            assertCompileNode("+1=2",
+                    new Expression(new Expression(InputNode.INSTANCE, new Operator.Plus(), new ConstNode(new BigDecimal(1))),
+                            new Operator.Equal(), new ConstNode(new BigDecimal(2))));
         }
     }
 
@@ -107,17 +103,15 @@ class DALCompilerTest {
     class ComplexExpression {
 
         @Test
-        void operator_order_plus_first() {
-            Node node = dalCompiler.compile(new SourceCode("=1+1"));
-            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE,
+        void plus_has_higher_precedence_then_equal() {
+            assertCompileNode("=1+1", new Expression(InputNode.INSTANCE,
                     new Operator.Equal(), new Expression(new ConstNode(new BigDecimal(1)), new Operator.Plus(), new ConstNode(new BigDecimal(1)))
             ));
         }
 
         @Test
-        void operator() {
-            Node node = dalCompiler.compile(new SourceCode("=1+1*1"));
-            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE,
+        void mul_has_higher_precedence_then_plus() {
+            assertCompileNode("=1+1*1", new Expression(InputNode.INSTANCE,
                     new Operator.Equal(),
                     new Expression(
                             new ConstNode(new BigDecimal(1))
@@ -133,25 +127,17 @@ class DALCompilerTest {
 
         @Test
         void compile_simple_bracket() {
-            Node node = dalCompiler.compile(new SourceCode("(1)"));
-
-            assertThat(node).isEqualTo(new BracketNode().setNode(new ConstNode(new BigDecimal(1))).finishBracket());
+            assertCompileNode("(1)", new BracketNode().setNode(new ConstNode(new BigDecimal(1))).finishBracket());
         }
 
         @Test
-        void compile_simple_bracket_not_complete_1() {
-            SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode("(1")));
-            assertThat(syntaxException)
-                    .hasMessage("missed end bracket")
-                    .hasFieldOrPropertyWithValue("position", 0);
+        void miss_end_bracket_should_raise_error() {
+            assertSyntaxException("(1", 0, "missed end bracket");
         }
 
         @Test
-        void compile_simple_bracket_not_complete_2() {
-            SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode("1)")));
-            assertThat(syntaxException)
-                    .hasMessage("missed begin bracket")
-                    .hasFieldOrPropertyWithValue("position", 1);
+        void miss_begin_bracket_should_raise_error() {
+            assertSyntaxException("1)", 1, "missed begin bracket");
         }
     }
 
@@ -160,26 +146,19 @@ class DALCompilerTest {
 
         @Test
         void simple_logic_and() {
-            Node node = dalCompiler.compile(new SourceCode("&& true"));
-            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, new Operator.And(), new ConstNode(true)));
-
-            node = dalCompiler.compile(new SourceCode("and true"));
-            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, new Operator.And(), new ConstNode(true)));
+            assertCompileNode("&& true", new Expression(InputNode.INSTANCE, new Operator.And(), new ConstNode(true)));
+            assertCompileNode("and true", new Expression(InputNode.INSTANCE, new Operator.And(), new ConstNode(true)));
         }
 
         @Test
         void simple_logic_or() {
-            Node node = dalCompiler.compile(new SourceCode("|| true"));
-            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, new Operator.Or(), new ConstNode(true)));
-
-            node = dalCompiler.compile(new SourceCode("or true"));
-            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, new Operator.Or(), new ConstNode(true)));
+            assertCompileNode("|| true", new Expression(InputNode.INSTANCE, new Operator.Or(), new ConstNode(true)));
+            assertCompileNode("or true", new Expression(InputNode.INSTANCE, new Operator.Or(), new ConstNode(true)));
         }
 
         @Test
         void lower_precedence_then_others() {
-            Node node = dalCompiler.compile(new SourceCode("=1 || 2>1"));
-            assertThat(node).isEqualTo(new Expression(
+            assertCompileNode("=1 || 2>1", new Expression(
                     new Expression(InputNode.INSTANCE, new Operator.Equal(), new ConstNode(new BigDecimal(1)))
                     , new Operator.Or(),
                     new Expression(new ConstNode(new BigDecimal(2)), new Operator.Greater(), new ConstNode(new BigDecimal(1)))
@@ -188,14 +167,12 @@ class DALCompilerTest {
 
         @Test
         void logical_not() {
-            Node node = dalCompiler.compile(new SourceCode("!true"));
-            assertThat(node).isEqualTo(new Expression(new ConstNode(true), new Operator.Not(), new ConstNode(null)));
+            assertCompileNode("!true", new Expression(new ConstNode(true), new Operator.Not(), new ConstNode(null)));
         }
 
         @Test
         void logical_not_should_has_highest_precedence() {
-            Node node = dalCompiler.compile(new SourceCode("!true=false"));
-            assertThat(node).isEqualTo(new Expression(
+            assertCompileNode("!true=false", new Expression(
                     new Expression(new ConstNode(true), new Operator.Not(), new ConstNode(null))
                     , new Operator.Equal(),
                     new ConstNode(false)

@@ -21,6 +21,10 @@ public class DALCompiler {
     public static final String OR = "or";
     private Scanner scanner = new Scanner();
 
+    public static String getClassName(Object obj) {
+        return obj == null ? null : obj.getClass().getName();
+    }
+
     public Node compile(SourceCode sourceCode) {
         return compileExpression(scanner.scan(sourceCode), InputNode.INSTANCE, null);
     }

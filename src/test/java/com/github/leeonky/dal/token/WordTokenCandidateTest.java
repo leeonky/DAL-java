@@ -8,12 +8,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class WordTokenCandidateTest {
 
     @Test
-    void should_create_null_const_value_token() {
-        assertToken("null", constValueToken(null));
-    }
-
-    @Test
     void should_key_word_token() {
+        assertToken("null", constValueToken(null));
         assertToken("is", keyWordToken("is"));
         assertToken("which", keyWordToken("which"));
         assertToken("true", constValueToken(true));
