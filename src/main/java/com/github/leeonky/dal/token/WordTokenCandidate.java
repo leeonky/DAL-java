@@ -17,6 +17,10 @@ class WordTokenCandidate extends TokenCandidate {
             return constValueToken(true);
         if (FALSE.equals(content))
             return constValueToken(false);
+        if (AND.equals(content))
+            return operatorToken("&&");
+        if (OR.equals(content))
+            return operatorToken("||");
         if (Scanner.KEYWORD_SETS.contains(content))
             return keyWordToken(content);
         return wordToken(content);

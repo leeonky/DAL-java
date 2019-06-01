@@ -105,4 +105,36 @@ class CalculatorTest {
             assertThat(illegalArgumentException).hasMessage("Operands should be number but java.lang.String and java.lang.String");
         }
     }
+
+    @Nested
+    class LogicalAndOr {
+
+        @Test
+        void logical_calcutate() {
+            assertThat(Calculator.and(true, false)).isEqualTo(false);
+            assertThat(Calculator.and(true, true)).isEqualTo(true);
+            assertThat(Calculator.and(false, true)).isEqualTo(false);
+            assertThat(Calculator.and(false, false)).isEqualTo(false);
+
+            assertThat(Calculator.or(true, false)).isEqualTo(true);
+            assertThat(Calculator.or(true, true)).isEqualTo(true);
+            assertThat(Calculator.or(false, true)).isEqualTo(true);
+            assertThat(Calculator.or(false, false)).isEqualTo(false);
+        }
+
+        @Test
+        void input_value_should_be_logical_type() {
+            IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.and("2", true));
+            assertThat(illegalArgumentException).hasMessage("Operand 1 should be boolean but java.lang.String");
+
+            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.and(true, 1));
+            assertThat(illegalArgumentException).hasMessage("Operand 2 should be boolean but java.lang.Integer");
+
+            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.or("2", true));
+            assertThat(illegalArgumentException).hasMessage("Operand 1 should be boolean but java.lang.String");
+
+            illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> Calculator.or(true, 1));
+            assertThat(illegalArgumentException).hasMessage("Operand 2 should be boolean but java.lang.Integer");
+        }
+    }
 }

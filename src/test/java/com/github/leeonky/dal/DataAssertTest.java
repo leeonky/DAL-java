@@ -66,6 +66,12 @@ class DataAssertTest {
         assertPass(5, "=(2+3)*(4+4)/(2+6)");
     }
 
+    @Test
+    void assert_logic_expression() {
+        assertPass(null, "true and true");
+        assertPass(null, "true or false");
+    }
+
     @Setter
     @Accessors(chain = true)
     public static class Bean {

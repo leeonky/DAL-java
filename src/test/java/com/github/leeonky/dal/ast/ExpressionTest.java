@@ -48,6 +48,13 @@ class ExpressionTest {
         assertCalculate(6, new Operator.Division(), 3, new BigDecimal(2));
     }
 
+    @Test
+    void assert_logic_combination() {
+        assertCalculate(true, new Operator.And(), true, true);
+
+        assertCalculate(true, new Operator.Or(), false, true);
+    }
+
     private void assertCalculate(Object v1, Operator operator, Object v2, Object expected) {
         Object evaluate = new Expression(new ConstNode(v1), operator, new ConstNode(v2)).evaluate(new CompilingContextBuilder().build(null));
 

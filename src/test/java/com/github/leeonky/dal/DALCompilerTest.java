@@ -156,6 +156,38 @@ class DALCompilerTest {
     }
 
     @Nested
+    class LogicExpression {
+
+        @Test
+        void simple_logic_and() {
+            Node node = dalCompiler.compile(new SourceCode("&& true"));
+            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, new Operator.And(), new ConstNode(true)));
+
+            node = dalCompiler.compile(new SourceCode("and true"));
+            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, new Operator.And(), new ConstNode(true)));
+        }
+
+        @Test
+        void simple_logic_or() {
+            Node node = dalCompiler.compile(new SourceCode("|| true"));
+            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, new Operator.Or(), new ConstNode(true)));
+
+            node = dalCompiler.compile(new SourceCode("or true"));
+            assertThat(node).isEqualTo(new Expression(InputNode.INSTANCE, new Operator.Or(), new ConstNode(true)));
+        }
+
+        @Test
+        void lower_precedence_then_others() {
+            Node node = dalCompiler.compile(new SourceCode("=1 || 2>1"));
+            assertThat(node).isEqualTo(new Expression(
+                    new Expression(InputNode.INSTANCE, new Operator.Equal(), new ConstNode(new BigDecimal(1)))
+                    , new Operator.Or(),
+                    new Expression(new ConstNode(new BigDecimal(2)), new Operator.Greater(), new ConstNode(new BigDecimal(1)))
+            ));
+        }
+    }
+
+    @Nested
     class TypeAssertionExpressionTest {
 
 //        @Test

@@ -3,7 +3,8 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.Calculator;
 
 public abstract class Operator {
-    private static final int PRECEDENCE_LOGIC_OPT = 200;
+    private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
+    private static final int PRECEDENCE_LOGIC_COMPARE_OPT = 210;
     private static final int PRECEDENCE_PLUS_SUB_OPT = 300;
     private static final int PRECEDENCE_MUL_DIV = 400;
     private final int precedence;
@@ -34,7 +35,7 @@ public abstract class Operator {
 
     public static class Equal extends Operator {
         public Equal() {
-            super(PRECEDENCE_LOGIC_OPT);
+            super(PRECEDENCE_LOGIC_COMPARE_OPT);
         }
 
         @Override
@@ -45,7 +46,7 @@ public abstract class Operator {
 
     public static class Less extends Operator {
         public Less() {
-            super(PRECEDENCE_LOGIC_OPT);
+            super(PRECEDENCE_LOGIC_COMPARE_OPT);
         }
 
         @Override
@@ -56,7 +57,7 @@ public abstract class Operator {
 
     public static class GreaterOrEqual extends Operator {
         public GreaterOrEqual() {
-            super(PRECEDENCE_LOGIC_OPT);
+            super(PRECEDENCE_LOGIC_COMPARE_OPT);
         }
 
         @Override
@@ -67,7 +68,7 @@ public abstract class Operator {
 
     public static class LessOrEqual extends Operator {
         public LessOrEqual() {
-            super(PRECEDENCE_LOGIC_OPT);
+            super(PRECEDENCE_LOGIC_COMPARE_OPT);
         }
 
         @Override
@@ -78,7 +79,7 @@ public abstract class Operator {
 
     public static class NotEqual extends Operator {
         public NotEqual() {
-            super(PRECEDENCE_LOGIC_OPT);
+            super(PRECEDENCE_LOGIC_COMPARE_OPT);
         }
 
         @Override
@@ -100,7 +101,7 @@ public abstract class Operator {
 
     public static class Greater extends Operator {
         public Greater() {
-            super(PRECEDENCE_LOGIC_OPT);
+            super(PRECEDENCE_LOGIC_COMPARE_OPT);
         }
 
         @Override
@@ -139,6 +140,28 @@ public abstract class Operator {
         @Override
         public Object calculate(Object v1, Object v2) {
             return Calculator.divide(v1, v2);
+        }
+    }
+
+    public static class And extends Operator {
+        public And() {
+            super(PRECEDENCE_LOGIC_COMBINATION_OPT);
+        }
+
+        @Override
+        public Object calculate(Object v1, Object v2) {
+            return Calculator.and(v1, v2);
+        }
+    }
+
+    public static class Or extends Operator {
+        public Or() {
+            super(PRECEDENCE_LOGIC_COMBINATION_OPT);
+        }
+
+        @Override
+        public Object calculate(Object v1, Object v2) {
+            return Calculator.or(v1, v2);
         }
     }
 }

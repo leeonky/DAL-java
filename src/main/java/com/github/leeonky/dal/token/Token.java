@@ -124,6 +124,12 @@ public class Token {
             case "/":
                 operator = new Operator.Division();
                 break;
+            case "&&":
+                operator = new Operator.And();
+                break;
+            case "||":
+                operator = new Operator.Or();
+                break;
             default:
                 throw new SyntaxException(getPositionBegin(), "not support operator " + operatorString + " yet");
         }

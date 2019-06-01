@@ -2,8 +2,7 @@ package com.github.leeonky.dal.token;
 
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.token.Token.constValueToken;
-import static com.github.leeonky.dal.token.Token.keyWordToken;
+import static com.github.leeonky.dal.token.Token.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class WordTokenCandidateTest {
@@ -19,6 +18,8 @@ class WordTokenCandidateTest {
         assertToken("which", keyWordToken("which"));
         assertToken("true", constValueToken(true));
         assertToken("false", constValueToken(false));
+        assertToken("and", operatorToken("&&"));
+        assertToken("or", operatorToken("||"));
     }
 
     private void assertToken(String code, Token token) {

@@ -70,4 +70,20 @@ public class Calculator {
             return new BigDecimal(v1.toString()).divide(new BigDecimal(v2.toString()));
         throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", getClass(v1), getClass(v2)));
     }
+
+    public static Object and(Object v1, Object v2) {
+        if (!(v1 instanceof Boolean))
+            throw new IllegalArgumentException("Operand 1 should be boolean but " + getClass(v1));
+        if (!(v2 instanceof Boolean))
+            throw new IllegalArgumentException("Operand 2 should be boolean but " + getClass(v2));
+        return Boolean.logicalAnd((boolean) v1, (boolean) v2);
+    }
+
+    public static Object or(Object v1, Object v2) {
+        if (!(v1 instanceof Boolean))
+            throw new IllegalArgumentException("Operand 1 should be boolean but " + getClass(v1));
+        if (!(v2 instanceof Boolean))
+            throw new IllegalArgumentException("Operand 2 should be boolean but " + getClass(v2));
+        return Boolean.logicalOr((boolean) v1, (boolean) v2);
+    }
 }
