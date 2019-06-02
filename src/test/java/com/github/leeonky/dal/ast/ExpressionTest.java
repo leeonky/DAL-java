@@ -45,7 +45,7 @@ class ExpressionTest {
 
         assertCalculate(true, new Operator.Or(), false, true);
 
-        assertCalculate(true, new Operator.Not(), null, false);
+        assertCalculate(null, new Operator.Not(), true, false);
     }
 
     private void assertCalculate(Object v1, Operator operator, Object v2, Object expected) {

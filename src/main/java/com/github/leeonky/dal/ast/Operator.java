@@ -173,7 +173,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Object v1, Object v2) {
-            return Calculator.not(v1);
+            return Calculator.not(v2);
         }
     }
 }

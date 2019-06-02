@@ -56,7 +56,7 @@ public class DALCompiler {
                 return of(compileBracket(tokenStream, node));
             else if (tokenStream.isSingleUnaryOperator()) {
                 Token unaryOperatorToken = tokenStream.pop();
-                return of(new Expression(compileValueNode(tokenStream).get(), unaryOperatorToken.toOperator(), new ConstNode(null)));
+                return of(new Expression(new ConstNode(null), unaryOperatorToken.toOperator(), compileValueNode(tokenStream).get()));
             }
         }
         if (node != null)

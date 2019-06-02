@@ -51,42 +51,44 @@ public class Calculator {
     }
 
     public static Object subtract(Object v1, Object v2) {
-        if (v1 instanceof Number && v2 instanceof Number)
-            return new BigDecimal(v1.toString()).subtract(new BigDecimal(v2.toString()));
-        throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", DALCompiler.getClassName(v1), DALCompiler.getClassName(v2)));
+        requireNumber(v1, v2);
+        return new BigDecimal(v1.toString()).subtract(new BigDecimal(v2.toString()));
     }
 
     public static Object multiply(Object v1, Object v2) {
-        if (v1 instanceof Number && v2 instanceof Number)
-            return new BigDecimal(v1.toString()).multiply(new BigDecimal(v2.toString()));
-        throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", DALCompiler.getClassName(v1), DALCompiler.getClassName(v2)));
+        requireNumber(v1, v2);
+        return new BigDecimal(v1.toString()).multiply(new BigDecimal(v2.toString()));
     }
 
     public static Object divide(Object v1, Object v2) {
-        if (v1 instanceof Number && v2 instanceof Number)
-            return new BigDecimal(v1.toString()).divide(new BigDecimal(v2.toString()));
-        throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", DALCompiler.getClassName(v1), DALCompiler.getClassName(v2)));
+        requireNumber(v1, v2);
+        return new BigDecimal(v1.toString()).divide(new BigDecimal(v2.toString()));
+    }
+
+    private static void requireNumber(Object v1, Object v2) {
+        if (!(v1 instanceof Number && v2 instanceof Number))
+            throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", DALCompiler.getClassName(v1), DALCompiler.getClassName(v2)));
     }
 
     public static Object and(Object v1, Object v2) {
-        if (!(v1 instanceof Boolean))
-            throw new IllegalArgumentException("Operand 1 should be boolean but " + DALCompiler.getClassName(v1));
-        if (!(v2 instanceof Boolean))
-            throw new IllegalArgumentException("Operand 2 should be boolean but " + DALCompiler.getClassName(v2));
+        requireBooleanType(v1, "Operand 1");
+        requireBooleanType(v2, "Operand 2");
         return Boolean.logicalAnd((boolean) v1, (boolean) v2);
     }
 
     public static Object or(Object v1, Object v2) {
-        if (!(v1 instanceof Boolean))
-            throw new IllegalArgumentException("Operand 1 should be boolean but " + DALCompiler.getClassName(v1));
-        if (!(v2 instanceof Boolean))
-            throw new IllegalArgumentException("Operand 2 should be boolean but " + DALCompiler.getClassName(v2));
+        requireBooleanType(v1, "Operand 1");
+        requireBooleanType(v2, "Operand 2");
         return Boolean.logicalOr((boolean) v1, (boolean) v2);
     }
 
     public static Object not(Object v) {
-        if (!(v instanceof Boolean))
-            throw new IllegalArgumentException("Operand should be boolean but " + DALCompiler.getClassName(v));
+        requireBooleanType(v, "Operand");
         return !(boolean) v;
+    }
+
+    private static void requireBooleanType(Object v, final String operand) {
+        if (!(v instanceof Boolean))
+            throw new IllegalArgumentException(operand + " should be boolean but " + DALCompiler.getClassName(v));
     }
 }
