@@ -7,7 +7,7 @@ public abstract class Operator {
     private static final int PRECEDENCE_LOGIC_COMPARE_OPT = 210;
     private static final int PRECEDENCE_PLUS_SUB_OPT = 300;
     private static final int PRECEDENCE_MUL_DIV = 400;
-    private static final int PRECEDENCE_LOGIC_NOT_OPT = 500;
+    private static final int PRECEDENCE_UNARY_OPERATION = 500;
     private final int precedence;
     private int position;
 
@@ -168,12 +168,24 @@ public abstract class Operator {
 
     public static class Not extends Operator {
         public Not() {
-            super(PRECEDENCE_LOGIC_NOT_OPT);
+            super(PRECEDENCE_UNARY_OPERATION);
         }
 
         @Override
         public Object calculate(Object v1, Object v2) {
             return Calculator.not(v2);
+        }
+    }
+
+    public static class Minus extends Operator {
+
+        public Minus() {
+            super(PRECEDENCE_UNARY_OPERATION);
+        }
+
+        @Override
+        public Object calculate(Object v1, Object v2) {
+            return Calculator.negate(v2);
         }
     }
 }

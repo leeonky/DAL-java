@@ -123,6 +123,37 @@ class DALCompilerTest {
     }
 
     @Nested
+    class OperatorMinus {
+
+        @Test
+        void minus_should_after_an_operator() {
+            assertCompileNode("-1=0", new Expression(
+                    new Expression(
+                            InputNode.INSTANCE
+                            , new Operator.Subtraction(),
+                            new ConstNode(new BigDecimal(1))
+                    )
+                    , new Operator.Equal(),
+                    new ConstNode(new BigDecimal(0))
+            ));
+
+            assertCompileNode("1+ -1=0", new Expression(
+                    new Expression(
+                            new ConstNode(new BigDecimal(1))
+                            , new Operator.Plus(),
+                            new Expression(
+                                    new ConstNode(null)
+                                    , new Operator.Minus(),
+                                    new ConstNode(new BigDecimal(1))
+                            )
+                    )
+                    , new Operator.Equal(),
+                    new ConstNode(new BigDecimal(0))
+            ));
+        }
+    }
+
+    @Nested
     class BracketInExpression {
 
         @Test

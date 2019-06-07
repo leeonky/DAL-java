@@ -91,4 +91,10 @@ public class Calculator {
         if (!(v instanceof Boolean))
             throw new IllegalArgumentException(operand + " should be boolean but " + DALCompiler.getClassName(v));
     }
+
+    public static Object negate(Object v) {
+        if (v instanceof Number)
+            return new BigDecimal(v.toString()).negate();
+        throw new IllegalArgumentException(String.format("Operands should be number but %s", DALCompiler.getClassName(v)));
+    }
 }

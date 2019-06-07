@@ -37,6 +37,8 @@ class ExpressionTest {
         assertCalculate(2, new Operator.Multiplication(), 3, new BigDecimal(6));
 
         assertCalculate(6, new Operator.Division(), 3, new BigDecimal(2));
+
+        assertCalculate(1, new Operator.Minus(), new BigDecimal(2), new BigDecimal(-2));
     }
 
     @Test

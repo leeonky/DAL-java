@@ -167,6 +167,22 @@ class CalculatorTest {
     }
 
     @Nested
+    class Negate {
+
+        @Test
+        void support_all_number_type() {
+            assertThat(Calculator.negate(1)).isEqualTo(new BigDecimal(-1));
+            assertThat(Calculator.negate(1L)).isEqualTo(new BigDecimal(-1));
+            assertThat(Calculator.negate(1.0)).isEqualTo(new BigDecimal("-1.0"));
+        }
+
+        @Test
+        void should_raise_error_when_negate_non_number_types() {
+            assertIllegalArgument(() -> Calculator.negate("2"), "Operands should be number but java.lang.String");
+        }
+    }
+
+    @Nested
     class Logical {
 
         @Test

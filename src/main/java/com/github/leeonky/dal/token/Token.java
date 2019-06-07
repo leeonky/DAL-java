@@ -90,51 +90,61 @@ public class Token {
         this.positionBegin = positionBegin;
     }
 
-    public Operator toOperator() {
+    public Operator toOperator(boolean isUnaryOperator) {
         String operatorString = value.toString();
         Operator operator;
-        switch (operatorString) {
-            case "=":
-                operator = new Operator.Equal();
-                break;
-            case ">":
-                operator = new Operator.Greater();
-                break;
-            case "<":
-                operator = new Operator.Less();
-                break;
-            case ">=":
-                operator = new Operator.GreaterOrEqual();
-                break;
-            case "<=":
-                operator = new Operator.LessOrEqual();
-                break;
-            case "!=":
-                operator = new Operator.NotEqual();
-                break;
-            case "+":
-                operator = new Operator.Plus();
-                break;
-            case "-":
-                operator = new Operator.Subtraction();
-                break;
-            case "*":
-                operator = new Operator.Multiplication();
-                break;
-            case "/":
-                operator = new Operator.Division();
-                break;
-            case "&&":
-                operator = new Operator.And();
-                break;
-            case "||":
-                operator = new Operator.Or();
-                break;
-            case "!":
-                operator = new Operator.Not();
-                break;
-            default:
-                throw new SyntaxException(getPositionBegin(), "not support operator " + operatorString + " yet");
+        if (isUnaryOperator) {
+            switch (operatorString) {
+                case "-":
+                    operator = new Operator.Minus();
+                    break;
+                case "!":
+                    operator = new Operator.Not();
+                    break;
+                default:
+                    throw new SyntaxException(getPositionBegin(), "not support operator " + operatorString + " yet");
+            }
+        } else {
+            switch (operatorString) {
+                case "=":
+                    operator = new Operator.Equal();
+                    break;
+                case ">":
+                    operator = new Operator.Greater();
+                    break;
+                case "<":
+                    operator = new Operator.Less();
+                    break;
+                case ">=":
+                    operator = new Operator.GreaterOrEqual();
+                    break;
+                case "<=":
+                    operator = new Operator.LessOrEqual();
+                    break;
+                case "!=":
+                    operator = new Operator.NotEqual();
+                    break;
+                case "+":
+                    operator = new Operator.Plus();
+                    break;
+                case "-":
+                    operator = new Operator.Subtraction();
+                    break;
+                case "*":
+                    operator = new Operator.Multiplication();
+                    break;
+                case "/":
+                    operator = new Operator.Division();
+                    break;
+                case "&&":
+                    operator = new Operator.And();
+                    break;
+                case "||":
+                    operator = new Operator.Or();
+                    break;
+                default:
+                    throw new SyntaxException(getPositionBegin(), "not support operator " + operatorString + " yet");
+            }
         }
         operator.setPosition(getPositionBegin());
         return operator;

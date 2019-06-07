@@ -106,8 +106,13 @@ class DataAssertTest {
         }
 
         @Test
-        void expression_with_backet() {
+        void expression_with_bracket() {
             assertPass(5, "=(2+3)*(4+4)/(2+6)");
+        }
+
+        @Test
+        void expression_with_minus() {
+            assertPass(1, "-2=-1");
         }
 
         @Test

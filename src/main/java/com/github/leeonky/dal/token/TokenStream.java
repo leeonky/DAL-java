@@ -11,7 +11,11 @@ import java.util.Set;
 import static java.util.Arrays.asList;
 
 public class TokenStream {
-    private static final Set<String> UNARY_OPERATORS = new HashSet<>(asList("!"));
+    private static final Set<String> UNARY_OPERATORS_WITHOUT_INTENTION = new HashSet<>(asList("!"));
+    private static final Set<String> UNARY_OPERATORS = new HashSet<String>(asList("-")) {{
+        addAll(UNARY_OPERATORS_WITHOUT_INTENTION);
+    }};
+
     private final List<Token> tokens = new ArrayList<>();
     private int index = 0;
 
@@ -58,7 +62,9 @@ public class TokenStream {
         return false;
     }
 
-    public boolean isSingleUnaryOperator() {
-        return currentType() == Token.Type.OPERATOR && UNARY_OPERATORS.contains(tokens.get(index).getConstValue());
+    public boolean isSingleUnaryOperator(boolean withoutIntention) {
+        return currentType() == Token.Type.OPERATOR &&
+                (withoutIntention ? UNARY_OPERATORS_WITHOUT_INTENTION : UNARY_OPERATORS)
+                        .contains(tokens.get(index).getConstValue());
     }
 }

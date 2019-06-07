@@ -26,26 +26,20 @@ public class DALCompiler {
     }
 
     public Node compile(SourceCode sourceCode) {
-        return compileExpression(scanner.scan(sourceCode), InputNode.INSTANCE, null);
+        return compileExpression(scanner.scan(sourceCode), null, true);
     }
 
-    private Node compileExpression(TokenStream tokenStream, Node inputNode, BracketNode bracketNode) {
-        Optional<Node> nodeOptional = compileValueNode(tokenStream);
-        Node node;
-        if (inputNode != null)
-            node = nodeOptional.orElse(inputNode);
-        else
-            node = nodeOptional.get();
-        while (tokenStream.hasTokens() && !tokenStream.isCurrentEndBracketAndTakeThenFinishBracket(bracketNode)) {
-            node = new Expression(node, tokenStream.pop().toOperator(),
-                    compileValueNode(tokenStream)
+    private Node compileExpression(TokenStream tokenStream, BracketNode bracketNode, boolean referenceInput) {
+        Node node = compileValueNode(tokenStream, referenceInput).get();
+        while (tokenStream.hasTokens() && !tokenStream.isCurrentEndBracketAndTakeThenFinishBracket(bracketNode))
+            node = new Expression(node, tokenStream.pop().toOperator(false),
+                    compileValueNode(tokenStream, false)
                             .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished")))
                     .adjustOperatorOrder();
-        }
         return node;
     }
 
-    private Optional<Node> compileValueNode(TokenStream tokenStream) {
+    private Optional<Node> compileValueNode(TokenStream tokenStream, boolean isFirstNode) {
         Node node = null;
         if (tokenStream.hasTokens()) {
             if (tokenStream.currentType() == Token.Type.CONST_VALUE)
@@ -53,12 +47,14 @@ public class DALCompiler {
             else if (tokenStream.isCurrentSingleEvaluateNode())
                 node = InputNode.INSTANCE;
             else if (tokenStream.isCurrentBeginBracket())
-                return of(compileBracket(tokenStream, node));
-            else if (tokenStream.isSingleUnaryOperator()) {
+                return of(compileBracket(tokenStream));
+            else if (tokenStream.isSingleUnaryOperator(isFirstNode)) {
                 Token unaryOperatorToken = tokenStream.pop();
-                return of(new Expression(new ConstNode(null), unaryOperatorToken.toOperator(), compileValueNode(tokenStream).get()));
+                return of(new Expression(new ConstNode(null), unaryOperatorToken.toOperator(true), compileValueNode(tokenStream, false).get()));
             }
         }
+        if (isFirstNode && node == null)
+            return of(InputNode.INSTANCE);
         if (node != null)
             while (tokenStream.hasTokens() && tokenStream.isCurrentSingleEvaluateNode()) {
                 Token token = tokenStream.pop();
@@ -69,10 +65,10 @@ public class DALCompiler {
         return ofNullable(node);
     }
 
-    private BracketNode compileBracket(TokenStream tokenStream, Node node) {
+    private BracketNode compileBracket(TokenStream tokenStream) {
         Token bracketToken = tokenStream.pop();
         BracketNode bracketNode = new BracketNode();
-        bracketNode.setNode(compileExpression(tokenStream, node, bracketNode));
+        bracketNode.setNode(compileExpression(tokenStream, bracketNode, false));
         if (!bracketNode.isFinished())
             throw new SyntaxException(bracketToken.getPositionBegin(), "missed end bracket");
         return bracketNode;
