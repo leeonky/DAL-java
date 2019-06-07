@@ -13,7 +13,7 @@ public class TypeNode extends Node {
 
     @Override
     public Object evaluate(CompilingContext context) {
-        return null;
+        return context.getTypes().get(type);
     }
 
     @Override

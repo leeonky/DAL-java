@@ -65,6 +65,6 @@ public class TokenStream {
     public boolean isSingleUnaryOperator(boolean withoutIntention) {
         return currentType() == Token.Type.OPERATOR &&
                 (withoutIntention ? UNARY_OPERATORS_WITHOUT_INTENTION : UNARY_OPERATORS)
-                        .contains(tokens.get(index).getConstValue());
+                        .contains(tokens.get(index).getValue());
     }
 }

@@ -75,7 +75,7 @@ class DataAssertTest {
 
         @Test
         void should_support_register_customer_getter() throws JSONException {
-            dataAssert.getCompilingContextBuilder().registerType(JSONObject.class, JSONObject::get);
+            dataAssert.getCompilingContextBuilder().registerPropertyAccessor(JSONObject.class, JSONObject::get);
             assertPass(new JSONObject("{\"field\": true}"), ".field");
         }
 
@@ -131,6 +131,20 @@ class DataAssertTest {
         @Test
         void compare_with_un_matched_type() {
             assertRuntimeException(null, " > 1", 1, "Can not compare <null> and <1>");
+        }
+    }
+
+    @Nested
+    class AssertObject {
+
+        @Nested
+        class AssertType {
+
+            @Test
+            void assert_object_type() {
+                dataAssert.getCompilingContextBuilder().registerJavaLangType(String.class);
+                assertPass("", "is String");
+            }
         }
     }
 }

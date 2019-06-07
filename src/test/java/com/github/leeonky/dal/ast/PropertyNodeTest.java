@@ -43,7 +43,7 @@ class PropertyNodeTest {
 
     @Test
     void access_customer_type_property() throws JSONException {
-        compilingContextBuilder.registerType(JSONObject.class, JSONObject::get);
+        compilingContextBuilder.registerPropertyAccessor(JSONObject.class, JSONObject::get);
 
         assertProperty(new JSONObject("{\"key\": \"value\"}"), Collections.singletonList("key"), "value");
     }

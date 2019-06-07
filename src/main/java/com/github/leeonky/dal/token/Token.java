@@ -62,7 +62,7 @@ public class Token {
         return type + "`" + value + "`";
     }
 
-    public Object getConstValue() {
+    public Object getValue() {
         return value;
     }
 
@@ -141,6 +141,9 @@ public class Token {
                     break;
                 case "||":
                     operator = new Operator.Or();
+                    break;
+                case "is":
+                    operator = new Operator.InstanceOf();
                     break;
                 default:
                     throw new SyntaxException(getPositionBegin(), "not support operator " + operatorString + " yet");

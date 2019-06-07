@@ -212,6 +212,19 @@ class DALCompilerTest {
     }
 
     @Nested
+    class InstanceOf {
+
+        @Test
+        void is_type_expression() {
+            assertCompileNode("is String", new Expression(
+                    InputNode.INSTANCE
+                    , new Operator.InstanceOf(),
+                    new TypeNode("String")
+            ));
+        }
+    }
+
+    @Nested
     class TypeAssertionExpressionTest {
 
 //        @Test

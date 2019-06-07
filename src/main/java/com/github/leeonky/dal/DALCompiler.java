@@ -34,7 +34,8 @@ public class DALCompiler {
         while (tokenStream.hasTokens() && !tokenStream.isCurrentEndBracketAndTakeThenFinishBracket(bracketNode))
             node = new Expression(node, tokenStream.pop().toOperator(false),
                     compileValueNode(tokenStream, false)
-                            .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished")))
+                            .orElseGet(() -> compileTypeNode(tokenStream)
+                                    .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished"))))
                     .adjustOperatorOrder();
         return node;
     }
@@ -43,7 +44,7 @@ public class DALCompiler {
         Node node = null;
         if (tokenStream.hasTokens()) {
             if (tokenStream.currentType() == Token.Type.CONST_VALUE)
-                node = new ConstNode(tokenStream.pop().getConstValue());
+                node = new ConstNode(tokenStream.pop().getValue());
             else if (tokenStream.isCurrentSingleEvaluateNode())
                 node = InputNode.INSTANCE;
             else if (tokenStream.isCurrentBeginBracket())
@@ -62,6 +63,13 @@ public class DALCompiler {
                 node.setPositionBegin(token.getPositionBegin());
                 node.setPositionEnd(token.getPositionEnd());
             }
+        return ofNullable(node);
+    }
+
+    private Optional<Node> compileTypeNode(TokenStream tokenStream) {
+        Node node = null;
+        if (tokenStream.hasTokens() && tokenStream.currentType() == Token.Type.WORD)
+            node = new TypeNode(tokenStream.pop().getValue().toString());
         return ofNullable(node);
     }
 
