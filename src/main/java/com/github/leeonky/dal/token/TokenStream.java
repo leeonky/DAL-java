@@ -47,6 +47,15 @@ public class TokenStream {
         return hasTokens() ? tokens.get(index).getPositionBegin() : (index > 0 ? tokens.get(index - 1).getPositionEnd() : 0);
     }
 
+    public boolean isCurrentKeywordAndTake(String keyword) {
+        final Token token = tokens.get(index);
+        if (token.getType() == Token.Type.KEY_WORD && keyword.equals(token.getValue())) {
+            index++;
+            return true;
+        }
+        return false;
+    }
+
     public boolean isCurrentBeginBracket() {
         return currentType() == Token.Type.BEGIN_BRACKET;
     }

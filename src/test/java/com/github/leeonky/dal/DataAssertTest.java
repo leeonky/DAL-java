@@ -141,9 +141,20 @@ class DataAssertTest {
         class AssertType {
 
             @Test
-            void assert_object_type() {
+            void assert_java_lang_class() {
                 dataAssert.getCompilingContextBuilder().registerJavaLangType(String.class);
                 assertPass("", "is String");
+            }
+        }
+
+        @Nested
+        class AssertValueInFormat {
+
+            @Test
+            void assert_string_value_format() {
+                dataAssert.getCompilingContextBuilder().registerStringValueFormat("URL", s -> s.startsWith("http"));
+
+                assertPass("http://www.baidu.com", "is URL");
             }
         }
     }

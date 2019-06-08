@@ -2,8 +2,6 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.Calculator;
 
-import java.util.function.Function;
-
 public abstract class Operator {
     private static final int PRECEDENCE_IS_WHICH = 100;
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
@@ -189,18 +187,6 @@ public abstract class Operator {
         @Override
         public Object calculate(Object v1, Object v2) {
             return Calculator.negate(v2);
-        }
-    }
-
-    public static class InstanceOf extends Operator {
-
-        public InstanceOf() {
-            super(PRECEDENCE_IS_WHICH);
-        }
-
-        @Override
-        public Object calculate(Object v1, Object v2) {
-            return ((Function) v2).apply(v1);
         }
     }
 }

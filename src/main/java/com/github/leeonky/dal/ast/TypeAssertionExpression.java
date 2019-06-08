@@ -3,6 +3,7 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.CompilingContext;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 public class TypeAssertionExpression extends Node {
     private final Node instance;
@@ -17,7 +18,9 @@ public class TypeAssertionExpression extends Node {
 
     @Override
     public Object evaluate(CompilingContext context) {
-        throw new IllegalStateException();
+        Object instance = this.instance.evaluate(context);
+        Function function = (Function) typeNode.evaluate(context);
+        return new Expression(new ConstNode(function.apply(instance)), new Operator.And(), assertion).evaluate(context);
     }
 
     @Override

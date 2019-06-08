@@ -1,8 +1,10 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.RuntimeException;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 public class TypeNode extends Node {
     private final String type;
@@ -13,7 +15,10 @@ public class TypeNode extends Node {
 
     @Override
     public Object evaluate(CompilingContext context) {
-        return context.getTypes().get(type);
+        final Function<Object, Boolean> function = context.getTypes().get(type);
+        if (function == null)
+            throw new RuntimeException("Type '" + type + "' not registered", getPositionBegin());
+        return function;
     }
 
     @Override

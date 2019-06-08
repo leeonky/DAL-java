@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -216,10 +217,19 @@ class DALCompilerTest {
 
         @Test
         void is_type_expression() {
-            assertCompileNode("is String", new Expression(
-                    InputNode.INSTANCE
-                    , new Operator.InstanceOf(),
-                    new TypeNode("String")
+            assertCompileNode("is String", new TypeAssertionExpression(
+                    InputNode.INSTANCE,
+                    new TypeNode("String"),
+                    new ConstNode(true)
+            ));
+        }
+
+        @Test
+        void is_type_expression_and_which_assertion() {
+            assertCompileNode("is String which .empty", new TypeAssertionExpression(
+                    InputNode.INSTANCE,
+                    new TypeNode("String"),
+                    new PropertyNode(InputNode.INSTANCE, asList("empty"))
             ));
         }
     }

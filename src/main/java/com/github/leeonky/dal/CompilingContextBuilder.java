@@ -19,4 +19,9 @@ public class CompilingContextBuilder {
     public void registerJavaLangType(Class<?> clazz) {
         types.put(clazz.getName().replace("java.lang.", ""), String.class::isInstance);
     }
+
+    public void registerStringValueFormat(String type, Function<String, Boolean> assertion) {
+        types.put(type, o ->
+                (o instanceof String) && assertion.apply((String) o));
+    }
 }

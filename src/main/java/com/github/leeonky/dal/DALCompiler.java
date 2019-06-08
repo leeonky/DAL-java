@@ -31,12 +31,17 @@ public class DALCompiler {
 
     private Node compileExpression(TokenStream tokenStream, BracketNode bracketNode, boolean referenceInput) {
         Node node = compileValueNode(tokenStream, referenceInput).get();
-        while (tokenStream.hasTokens() && !tokenStream.isCurrentEndBracketAndTakeThenFinishBracket(bracketNode))
-            node = new Expression(node, tokenStream.pop().toOperator(false),
-                    compileValueNode(tokenStream, false)
-                            .orElseGet(() -> compileTypeNode(tokenStream)
-                                    .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished"))))
-                    .adjustOperatorOrder();
+        while (tokenStream.hasTokens() && !tokenStream.isCurrentEndBracketAndTakeThenFinishBracket(bracketNode)) {
+            if (tokenStream.isCurrentKeywordAndTake(IS))
+                node = new TypeAssertionExpression(node, compileTypeNode(tokenStream).get(),
+                        (tokenStream.hasTokens() && tokenStream.isCurrentKeywordAndTake(WHICH))
+                                ? compileExpression(tokenStream, bracketNode, false) : new ConstNode(true));
+            else
+                node = new Expression(node, tokenStream.pop().toOperator(false),
+                        compileValueNode(tokenStream, false)
+                                .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished")))
+                        .adjustOperatorOrder();
+        }
         return node;
     }
 
@@ -66,8 +71,8 @@ public class DALCompiler {
         return ofNullable(node);
     }
 
-    private Optional<Node> compileTypeNode(TokenStream tokenStream) {
-        Node node = null;
+    private Optional<TypeNode> compileTypeNode(TokenStream tokenStream) {
+        TypeNode node = null;
         if (tokenStream.hasTokens() && tokenStream.currentType() == Token.Type.WORD)
             node = new TypeNode(tokenStream.pop().getValue().toString());
         return ofNullable(node);
