@@ -73,8 +73,10 @@ public class DALCompiler {
 
     private Optional<TypeNode> compileTypeNode(TokenStream tokenStream) {
         TypeNode node = null;
-        if (tokenStream.hasTokens() && tokenStream.currentType() == Token.Type.WORD)
+        if (tokenStream.hasTokens() && tokenStream.currentType() == Token.Type.WORD) {
             node = new TypeNode(tokenStream.pop().getValue().toString());
+            node.setPositionBegin(tokenStream.getPosition());
+        }
         return ofNullable(node);
     }
 

@@ -7,6 +7,8 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.net.URL;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -81,7 +83,7 @@ class DataAssertTest {
 
         @Test
         void should_raise_error_access_invalid_property() {
-            assertRuntimeException("", " = .fun", 3, "Get property failed, property can be public field, getter or customer type getter");
+            assertRuntimeException("", " = .fun", 3, "Get property fun failed, property can be public field, getter or customer type getter");
         }
     }
 
@@ -142,7 +144,7 @@ class DataAssertTest {
 
             @Test
             void assert_java_lang_class() {
-                dataAssert.getCompilingContextBuilder().registerJavaLangType(String.class);
+                dataAssert.getCompilingContextBuilder().registerStringValueFormat(String.class);
                 assertPass("", "is String");
             }
         }
@@ -152,9 +154,15 @@ class DataAssertTest {
 
             @Test
             void assert_string_value_format() {
-                dataAssert.getCompilingContextBuilder().registerStringValueFormat("URL", s -> s.startsWith("http"));
+                dataAssert.getCompilingContextBuilder()
+                        .registerStringValueFormat(URL.class)
+                        .registerStringValueFormat(String.class);
 
                 assertPass("http://www.baidu.com", "is URL");
+
+                assertPass("http://www.baidu.com", "is URL which .protocol = 'http' and (.protocol is String)");
+
+                assertPass("http://www.baidu.com", "is URL which .protocol = 'http' and .host = 'www.baidu.com'");
             }
         }
     }

@@ -15,7 +15,7 @@ public class TypeNode extends Node {
 
     @Override
     public Object evaluate(CompilingContext context) {
-        final Function<Object, Boolean> function = context.getTypes().get(type);
+        final Function<Object, Object> function = context.getTypes().get(type);
         if (function == null)
             throw new RuntimeException("Type '" + type + "' not registered", getPositionBegin());
         return function;

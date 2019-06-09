@@ -41,7 +41,7 @@ public class PropertyNode extends Node {
         try {
             return ((CheckedBiFunction) function).apply(instance, name);
         } catch (Exception e) {
-            throw new RuntimeException("Get property failed, property can be public field, getter or customer type getter",
+            throw new RuntimeException("Get property " + name + " failed, property can be public field, getter or customer type getter",
                     getPositionBegin());
         }
     }

@@ -1,6 +1,8 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.RuntimeException;
+import com.github.leeonky.dal.token.IllegalTypeException;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -20,7 +22,20 @@ public class TypeAssertionExpression extends Node {
     public Object evaluate(CompilingContext context) {
         Object instance = this.instance.evaluate(context);
         Function function = (Function) typeNode.evaluate(context);
-        return new Expression(new ConstNode(function.apply(instance)), new Operator.And(), assertion).evaluate(context);
+        Object wrappedValue;
+        try {
+            wrappedValue = function.apply(instance);
+        } catch (IllegalTypeException ignore) {
+            return false;
+        } catch (IllegalStateException e) {
+            throw new RuntimeException(e.getMessage(), typeNode.getPositionBegin());
+        }
+        try {
+            context.wrapInputValue(wrappedValue);
+            return assertion.evaluate(context);
+        } finally {
+            context.unWrapLastInputValue();
+        }
     }
 
     @Override
