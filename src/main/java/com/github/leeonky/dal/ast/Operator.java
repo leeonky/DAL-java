@@ -3,7 +3,6 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.Calculator;
 
 public abstract class Operator {
-    private static final int PRECEDENCE_IS_WHICH = 100;
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
     private static final int PRECEDENCE_LOGIC_COMPARE_OPT = 210;
     private static final int PRECEDENCE_PLUS_SUB_OPT = 300;

@@ -2,9 +2,12 @@ package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.token.IllegalTypeException;
 
+import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CompilingContextBuilder {
     private final Map<Class<?>, CheckedBiFunction<?, String, Object>> propertyAccessors = new LinkedHashMap<>();
@@ -33,6 +36,17 @@ public class CompilingContextBuilder {
                 }
             }
             throw new IllegalTypeException();
+        });
+        return this;
+    }
+
+    public CompilingContextBuilder registerSchema(String type, Map<String, String> fieldTypes) {
+        types.put(type, o -> {
+            Field[] fields = o.getClass().getFields();
+            if (Stream.of(fields).map(Field::getName).collect(Collectors.toSet()).equals(fieldTypes.keySet()))
+                return o;
+            else
+                throw new IllegalTypeException();
         });
         return this;
     }

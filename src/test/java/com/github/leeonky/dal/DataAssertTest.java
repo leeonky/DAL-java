@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,6 +57,18 @@ class DataAssertTest {
         public boolean field;
 
         public int value;
+    }
+
+    @Setter
+    @Accessors(chain = true)
+    public static class ObjectA {
+        public String f1, f2;
+    }
+
+    @Setter
+    @Accessors(chain = true)
+    public static class ObjectB {
+        public String f1;
     }
 
     @Nested
@@ -140,17 +154,13 @@ class DataAssertTest {
     class AssertObject {
 
         @Nested
-        class AssertType {
+        class AssertValueInFormat {
 
             @Test
-            void assert_java_lang_class() {
+            void assert_string_value() {
                 dataAssert.getCompilingContextBuilder().registerStringValueFormat(String.class);
                 assertPass("", "is String");
             }
-        }
-
-        @Nested
-        class AssertValueInFormat {
 
             @Test
             void assert_string_value_format() {
@@ -163,6 +173,25 @@ class DataAssertTest {
                 assertPass("http://www.baidu.com", "is URL which .protocol = 'http' and (.protocol is String)");
 
                 assertPass("http://www.baidu.com", "is URL which .protocol = 'http' and .host = 'www.baidu.com'");
+            }
+        }
+
+        @Nested
+        class AssertSchema {
+
+            @Test
+            void assert_schema_with() {
+                Map<String, String> fields = new HashMap<>();
+                fields.put("f1", "String");
+                fields.put("f2", "URL");
+
+                dataAssert.getCompilingContextBuilder()
+                        .registerStringValueFormat(URL.class)
+                        .registerSchema("ObjectA", fields);
+
+                assertPass(new ObjectA().setF1("str").setF2("http://www.baidu.com"), "is ObjectA which .f1='str' and (.f2 is URL)");
+
+                assertFalse(dataAssert.assertData(new ObjectB().setF1("str"), "is ObjectA which .f1='str' and .f2 is URL").isPassed());
             }
         }
     }
