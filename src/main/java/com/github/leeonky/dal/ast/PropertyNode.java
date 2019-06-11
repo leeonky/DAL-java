@@ -17,8 +17,20 @@ public class PropertyNode extends Node {
         this.properties = properties;
     }
 
-    private String capitalize(String str) {
+    private static String capitalize(String str) {
         return str.toUpperCase().substring(0, 1) + str.substring(1);
+    }
+
+    private static Object getPropertyThroughBean(Object instance, String name) throws Exception {
+        try {
+            return instance.getClass().getMethod("get" + capitalize(name)).invoke(instance);
+        } catch (Exception ex) {
+            try {
+                return instance.getClass().getMethod("is" + capitalize(name)).invoke(instance);
+            } catch (Exception e) {
+                return instance.getClass().getField(name).get(instance);
+            }
+        }
     }
 
     @Override
@@ -37,24 +49,12 @@ public class PropertyNode extends Node {
 
     @SuppressWarnings("unchecked")
     private Object getPropertyFromType(Object instance, String name, CompilingContext context) {
-        CheckedBiFunction<?, String, Object> function = context.customerGetter(instance).orElse(this::getPropertyThroughBean);
+        CheckedBiFunction<?, String, Object> function = context.customerGetter(instance).orElse(PropertyNode::getPropertyThroughBean);
         try {
             return ((CheckedBiFunction) function).apply(instance, name);
         } catch (Exception e) {
             throw new RuntimeException("Get property " + name + " failed, property can be public field, getter or customer type getter",
                     getPositionBegin());
-        }
-    }
-
-    private Object getPropertyThroughBean(Object instance, String name) throws Exception {
-        try {
-            return instance.getClass().getField(name).get(instance);
-        } catch (Exception e) {
-            try {
-                return instance.getClass().getMethod("get" + capitalize(name)).invoke(instance);
-            } catch (Exception ex) {
-                return instance.getClass().getMethod("is" + capitalize(name)).invoke(instance);
-            }
         }
     }
 

@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.e2e;
 
+import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,10 +32,26 @@ class VerifyClassSchema extends TestBase {
         assertFailed(new BeanWithMoreProperties(), "is Bean");
     }
 
+    @Test
+    void should_support_fields_and_getter_and_getter_value_override_field() {
+        assertPass(new BeanWithGetter().setF1("str").setF2("http://www.hello.com"), "is Bean which .f1='another f1'");
+    }
+
     @Setter
     @Accessors(chain = true)
     public static class Bean {
         public String f1, f2;
+    }
+
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class BeanWithGetter {
+        public String f1, f2;
+
+        public String getF1() {
+            return "another f1";
+        }
     }
 
     @Setter
