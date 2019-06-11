@@ -57,7 +57,7 @@ class PropertyNodeTest {
 
     @Setter
     @Accessors(chain = true)
-    static class Bean {
+    public static class Bean {
         public int field;
 
         @Getter
