@@ -1,5 +1,7 @@
 package com.github.leeonky.dal;
 
+import com.github.leeonky.dal.util.BeanUtil;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -47,7 +49,7 @@ public class Calculator {
             return v1.toString() + v2;
         if (v2 instanceof String)
             return v1 + v2.toString();
-        throw new IllegalArgumentException(String.format("Can not plus %s and %s", DALCompiler.getClassName(v1), DALCompiler.getClassName(v2)));
+        throw new IllegalArgumentException(String.format("Can not plus %s and %s", BeanUtil.getClassName(v1), BeanUtil.getClassName(v2)));
     }
 
     public static Object subtract(Object v1, Object v2) {
@@ -67,7 +69,7 @@ public class Calculator {
 
     private static void requireNumber(Object v1, Object v2) {
         if (!(v1 instanceof Number && v2 instanceof Number))
-            throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", DALCompiler.getClassName(v1), DALCompiler.getClassName(v2)));
+            throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", BeanUtil.getClassName(v1), BeanUtil.getClassName(v2)));
     }
 
     public static Object and(Object v1, Object v2) {
@@ -89,12 +91,12 @@ public class Calculator {
 
     private static void requireBooleanType(Object v, final String operand) {
         if (!(v instanceof Boolean))
-            throw new IllegalArgumentException(operand + " should be boolean but " + DALCompiler.getClassName(v));
+            throw new IllegalArgumentException(operand + " should be boolean but " + BeanUtil.getClassName(v));
     }
 
     public static Object negate(Object v) {
         if (v instanceof Number)
             return new BigDecimal(v.toString()).negate();
-        throw new IllegalArgumentException(String.format("Operands should be number but %s", DALCompiler.getClassName(v)));
+        throw new IllegalArgumentException(String.format("Operands should be number but %s", BeanUtil.getClassName(v)));
     }
 }

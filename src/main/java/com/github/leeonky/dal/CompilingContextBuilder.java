@@ -1,7 +1,6 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.token.IllegalTypeException;
-import com.github.leeonky.dal.util.BeanUtil;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,9 +37,13 @@ public class CompilingContextBuilder {
         return this;
     }
 
-    public CompilingContextBuilder registerSchema(String type, Map<String, String> fieldTypes) {
-        types.put(type, o -> {
-            if (BeanUtil.findPropertyNames(o.getClass()).equals(fieldTypes.keySet()))
+    public CompilingContextBuilder registerClassSchema(Class<?> clazz) {
+        return registerClassSchema(clazz.getSimpleName(), clazz);
+    }
+
+    private CompilingContextBuilder registerClassSchema(String name, Class<?> clazz) {
+        types.put(name, o -> {
+            if (o != null && o.getClass().equals(clazz))
                 return o;
             else
                 throw new IllegalTypeException();

@@ -45,4 +45,8 @@ public class BeanUtil {
     private static String getPropertyNameFromGetter(String s) {
         return StringUtil.unCapitalize(s.replaceAll("^get", "").replaceAll("^is", ""));
     }
+
+    public static String getClassName(Object obj) {
+        return obj == null ? null : obj.getClass().getName();
+    }
 }

@@ -1,0 +1,122 @@
+package com.github.leeonky.dal.e2e;
+
+import com.github.leeonky.dal.AssertResult;
+import lombok.Setter;
+import lombok.experimental.Accessors;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class BasicVerify extends VerifyBase {
+
+    @Setter
+    @Accessors(chain = true)
+    public static class Bean {
+        public boolean field;
+
+        public int value;
+    }
+
+    @Setter
+    @Accessors(chain = true)
+    public static class ObjectA {
+        public String f1, f2;
+    }
+
+    @Setter
+    @Accessors(chain = true)
+    public static class ObjectB {
+        public String f1;
+    }
+
+    @Nested
+    class Basic {
+
+        @Test
+        void should_use_root_value_as_assertion_expression_when_source_code_is_empty() {
+            assertPass(true, "");
+
+            AssertResult assertResult = dataAssert.assertData(false, "");
+            assertFalse(assertResult.isPassed());
+            assertThat(assertResult.getMessage()).contains("Expected root value to be [true] but was <false>");
+        }
+
+
+        @Test
+        void verify_expression_return_type_should_be_boolean() {
+            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
+                    () -> dataAssert.assertData(1, ""));
+            assertThat(illegalStateException).hasMessage("Verification result should be boolean but java.lang.Integer");
+        }
+
+        @Test
+        void verify_const_value() {
+            assertPass(null, "true");
+        }
+
+        @Test
+        void verify_calculation() {
+            assertPass(1, "=1");
+            assertPass(null, "1=1");
+
+            assertPass(17, "=2+3*4+4/2+1");
+            assertPass(null, "2+3*4+4/2+1=2+3*4+4/2+1");
+
+            assertPass(5, "=(2+3)*(4+4)/(2+6)");
+        }
+
+        @Test
+        void first_operand_should_be_root_value_when_no_specified() {
+            assertPass(2, "-1=1");
+        }
+
+        @Test
+        void verify_logical_combinations() {
+            assertPass(null, "!false");
+
+            assertPass(null, "true and true");
+            assertPass(null, "true or false");
+        }
+
+        @Test
+        void expression_operand_type_should_be_matched() {
+            assertRuntimeException(null, " + 1", 1, "Can not plus null and java.math.BigDecimal");
+            assertRuntimeException(null, " > 1", 1, "Can not compare <null> and <1>");
+        }
+    }
+
+    @Nested
+    class AccessProperty {
+
+        @Test
+        void should_access_root_value_property_when_no_instance_specified() {
+            assertPass("", ".empty");
+        }
+
+        @Test
+        void should_support_access_property_through_public_field() {
+            assertPass(new Bean().setField(true), ".field");
+        }
+
+        @Test
+        void should_support_access_property_through_getter() {
+            assertPass(null, "''.empty");
+        }
+
+        @Test
+        void should_support_register_customer_getter() throws JSONException {
+            dataAssert.getCompilingContextBuilder().registerPropertyAccessor(JSONObject.class, JSONObject::get);
+            assertPass(new JSONObject("{\"field\": true}"), ".field");
+        }
+
+        @Test
+        void should_raise_error_when_access_invalid_property() {
+            assertRuntimeException("", " = .fun", 3, "Get property fun failed, property can be public field, getter or customer type getter");
+        }
+    }
+}
