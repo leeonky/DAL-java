@@ -60,9 +60,18 @@ public class DALCompiler {
         if (node != null)
             while (tokenStream.hasTokens() && tokenStream.isCurrentSingleEvaluateNode()) {
                 Token token = tokenStream.pop();
-                node = new PropertyNode(node, token.getProperties());
-                node.setPositionBegin(token.getPositionBegin());
-                node.setPositionEnd(token.getPositionEnd());
+                switch (token.getType()) {
+                    case PROPERTY:
+                        node = new PropertyNode(node, token.getProperties());
+                        node.setPositionBegin(token.getPositionBegin());
+                        node.setPositionEnd(token.getPositionEnd());
+                        break;
+                    case CONST_INDEX:
+                        node = new Expression(node, new Operator.Index(), new ConstNode(token.getValue()));
+                        node.setPositionBegin(token.getPositionBegin());
+                        node.setPositionEnd(token.getPositionEnd());
+                        break;
+                }
             }
         return ofNullable(node);
     }

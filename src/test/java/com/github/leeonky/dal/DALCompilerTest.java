@@ -28,7 +28,7 @@ class DALCompilerTest {
     }
 
     @Nested
-    class NoExpression {
+    class PropertyExpression {
 
         @Test
         void empty_source_code_should_return_input_node() {
@@ -53,6 +53,15 @@ class DALCompilerTest {
         @Test
         void access_one_const_value_property_ignore_root_value() {
             assertCompileNode("''.empty", new PropertyNode(new ConstNode(""), singletonList("empty")));
+        }
+    }
+
+    @Nested
+    class AccessElementExpression {
+
+        @Test
+        void support_access_array_by_const_index() {
+            assertCompileNode("[0]", new Expression(InputNode.INSTANCE, new Operator.Index(), new ConstNode(0)));
         }
     }
 

@@ -13,6 +13,14 @@ public class CompilingContextBuilder {
     private final Map<Class<?>, Function<?, Set<String>>> propertyCollectors = new LinkedHashMap<>();
     private final Map<String, Function<Object, Object>> types = new LinkedHashMap<>();
 
+    public CompilingContextBuilder() {
+        types.put("List", o -> {
+            if (o != null && o instanceof Iterable || o.getClass().isArray())
+                return o;
+            throw new IllegalTypeException();
+        });
+    }
+
     public <T> CompilingContextBuilder registerPropertyAccessor(Class<T> type, CheckedBiFunction<T, String, Object> propertyAccessor) {
         propertyAccessors.put(type, propertyAccessor);
         return this;

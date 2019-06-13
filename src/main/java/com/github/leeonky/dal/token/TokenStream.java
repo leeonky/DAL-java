@@ -40,7 +40,7 @@ public class TokenStream {
     }
 
     public boolean isCurrentSingleEvaluateNode() {
-        return currentType() == Token.Type.PROPERTY;
+        return currentType() == Token.Type.PROPERTY || currentType() == Token.Type.CONST_INDEX;
     }
 
     public int getPosition() {

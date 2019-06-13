@@ -2,12 +2,15 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.Calculator;
 
+import java.lang.reflect.Array;
+
 public abstract class Operator {
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
     private static final int PRECEDENCE_LOGIC_COMPARE_OPT = 210;
     private static final int PRECEDENCE_PLUS_SUB_OPT = 300;
     private static final int PRECEDENCE_MUL_DIV = 400;
     private static final int PRECEDENCE_UNARY_OPERATION = 500;
+    private static final int PRECEDENCE_INDEX = 501;
     private final int precedence;
     private int position;
 
@@ -186,6 +189,18 @@ public abstract class Operator {
         @Override
         public Object calculate(Object v1, Object v2) {
             return Calculator.negate(v2);
+        }
+    }
+
+    public static class Index extends Operator {
+
+        public Index() {
+            super(PRECEDENCE_UNARY_OPERATION);
+        }
+
+        @Override
+        public Object calculate(Object v1, Object v2) {
+            return Array.get(v1, (int) v2);
         }
     }
 }
