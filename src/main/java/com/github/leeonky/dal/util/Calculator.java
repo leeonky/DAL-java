@@ -1,6 +1,4 @@
-package com.github.leeonky.dal;
-
-import com.github.leeonky.dal.util.BeanUtil;
+package com.github.leeonky.dal.util;
 
 import java.math.BigDecimal;
 import java.util.Objects;

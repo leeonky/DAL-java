@@ -1,6 +1,9 @@
 package com.github.leeonky.dal;
 
-import com.github.leeonky.ArrayType;
+import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.util.ListAccessor;
+import com.github.leeonky.dal.util.PropertyAccessor;
+import com.github.leeonky.dal.util.TypeData;
 
 import java.util.LinkedList;
 import java.util.Map;
@@ -8,43 +11,41 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class CompilingContext {
-    private final Map<Class<?>, CheckedBiFunction<?, String, Object>> propertyAccessors;
-    private final Map<Class<?>, ArrayType<?>> arrayTypes;
+    private final TypeData<PropertyAccessor> propertyAccessors;
+    private final TypeData<ListAccessor> listDefinitions;
     private final LinkedList<Object> wrappedValueStack = new LinkedList<>();
-    private final Map<String, Function<Object, Object>> types;
+    private final Map<String, Function<Object, Object>> typeDefinitions;
 
-    public CompilingContext(Object inputValue, Map<Class<?>, CheckedBiFunction<?, String, Object>> propertyAccessors,
-                            Map<String, Function<Object, Object>> types, Map<Class<?>, ArrayType<?>> arrayTypes) {
+    public CompilingContext(Object inputValue, TypeData<PropertyAccessor> propertyAccessors,
+                            Map<String, Function<Object, Object>> typeDefinitions, TypeData<ListAccessor> listDefinitions) {
         this.propertyAccessors = propertyAccessors;
-        this.arrayTypes = arrayTypes;
+        this.listDefinitions = listDefinitions;
         wrappedValueStack.add(inputValue);
-        this.types = types;
+        this.typeDefinitions = typeDefinitions;
     }
 
     public Object getInputValue() {
         return wrappedValueStack.getLast();
     }
 
-    public void wrapInputValue(Object value) {
-        wrappedValueStack.add(value);
+    public Object wrapInputValueAndEvaluate(Object value, Node node) {
+        try {
+            wrappedValueStack.add(value);
+            return node.evaluate(this);
+        } finally {
+            wrappedValueStack.removeLast();
+        }
     }
 
-    public void unWrapLastInputValue() {
-        wrappedValueStack.removeLast();
+    public Optional<Function<Object, Object>> searchTypeDefinition(String type) {
+        return Optional.ofNullable(typeDefinitions.get(type));
     }
 
-    public Optional<CheckedBiFunction<?, String, Object>> customerGetter(Object instance) {
-        return propertyAccessors.entrySet().stream()
-                .filter(e -> e.getKey().isInstance(instance))
-                .findFirst()
-                .map(Map.Entry::getValue);
+    public Optional<PropertyAccessor> searchPropertyAccessor(Object object) {
+        return propertyAccessors.getData(object);
     }
 
-    public Map<String, Function<Object, Object>> getTypes() {
-        return types;
-    }
-
-    public Map<Class<?>, ArrayType<?>> getArrayTypes() {
-        return arrayTypes;
+    public Optional<ListAccessor> searchArrayType(Object object) {
+        return listDefinitions.getData(object);
     }
 }

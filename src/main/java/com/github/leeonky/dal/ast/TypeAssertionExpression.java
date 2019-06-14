@@ -19,22 +19,15 @@ public class TypeAssertionExpression extends Node {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object evaluate(CompilingContext context) {
-        Object instance = this.instance.evaluate(context);
-        Function function = (Function) typeNode.evaluate(context);
-        Object wrappedValue;
         try {
-            wrappedValue = function.apply(instance);
+            Object value = ((Function) typeNode.evaluate(context)).apply(instance.evaluate(context));
+            return context.wrapInputValueAndEvaluate(value, assertion);
         } catch (IllegalTypeException ignore) {
             return false;
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), typeNode.getPositionBegin());
-        }
-        try {
-            context.wrapInputValue(wrappedValue);
-            return assertion.evaluate(context);
-        } finally {
-            context.unWrapLastInputValue();
         }
     }
 

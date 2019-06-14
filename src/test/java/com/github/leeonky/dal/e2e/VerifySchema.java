@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.e2e;
 
+import com.github.leeonky.dal.util.PropertyAccessor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.json.JSONException;
@@ -54,12 +55,20 @@ class VerifySchema extends VerifyBase {
 
     @Test
     void should_support_register_customer_object_type() throws JSONException {
-        dataAssert.getCompilingContextBuilder().registerPropertyCollector(JSONObject.class, j -> {
-            Set<String> set = new HashSet<>();
-            Iterator iterator = j.keys();
-            while (iterator.hasNext())
-                set.add(iterator.next().toString());
-            return set;
+        dataAssert.getCompilingContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
+            @Override
+            public Object getValue(JSONObject instance, String name) {
+                return null;
+            }
+
+            @Override
+            public Set<String> getPropertyNames(JSONObject instance) {
+                Set<String> set = new HashSet<>();
+                Iterator iterator = instance.keys();
+                while (iterator.hasNext())
+                    set.add(iterator.next().toString());
+                return set;
+            }
         });
 
         assertPass(new JSONObject("{\"f1\": 1, \"f2\": 1}"), "is Bean");

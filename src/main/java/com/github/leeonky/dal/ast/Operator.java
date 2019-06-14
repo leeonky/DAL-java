@@ -1,10 +1,13 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.Calculator;
+import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.util.Calculator;
+import com.github.leeonky.dal.util.ListAccessor;
 
 import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Optional;
 
 public abstract class Operator {
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
@@ -24,7 +27,13 @@ public abstract class Operator {
         return precedence > operator.precedence;
     }
 
-    public abstract Object calculate(Object v1, Object v2);
+    protected Object calculate(Object v1, Object v2) {
+        return null;
+    }
+
+    public Object calculate(Node node1, Node node2, CompilingContext context) {
+        return calculate(node1.evaluate(context), node2.evaluate(context));
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -45,7 +54,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return Calculator.equals(v1, v2);
         }
     }
@@ -56,7 +65,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return Calculator.compare(v1, v2) < 0;
         }
     }
@@ -67,7 +76,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return Calculator.compare(v1, v2) >= 0;
         }
     }
@@ -78,7 +87,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return Calculator.compare(v1, v2) <= 0;
         }
     }
@@ -89,7 +98,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return !Calculator.equals(v1, v2);
         }
     }
@@ -100,7 +109,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return Calculator.plus(v1, v2);
         }
     }
@@ -111,7 +120,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return Calculator.compare(v1, v2) > 0;
         }
     }
@@ -122,7 +131,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return Calculator.subtract(v1, v2);
         }
     }
@@ -133,7 +142,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return Calculator.multiply(v1, v2);
         }
     }
@@ -144,7 +153,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return Calculator.divide(v1, v2);
         }
     }
@@ -155,7 +164,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return Calculator.and(v1, v2);
         }
     }
@@ -166,7 +175,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return Calculator.or(v1, v2);
         }
     }
@@ -177,7 +186,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return Calculator.not(v2);
         }
     }
@@ -189,7 +198,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        protected Object calculate(Object v1, Object v2) {
             return Calculator.negate(v2);
         }
     }
@@ -201,7 +210,13 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Object v1, Object v2) {
+        @SuppressWarnings("unchecked")
+        public Object calculate(Node node1, Node node2, CompilingContext context) {
+            Object v1 = node1.evaluate(context);
+            Object v2 = node2.evaluate(context);
+            Optional<ListAccessor> optionalArrayType = context.searchArrayType(v1);
+            if (optionalArrayType.isPresent())
+                return optionalArrayType.get().get(v1, (int) v2);
             if (v1 instanceof Iterable) {
                 Iterator iterator = ((Iterable) v1).iterator();
                 for (int i = 0; iterator.hasNext(); i++) {

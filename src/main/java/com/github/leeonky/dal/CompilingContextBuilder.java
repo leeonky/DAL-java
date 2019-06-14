@@ -1,39 +1,36 @@
 package com.github.leeonky.dal;
 
-import com.github.leeonky.ArrayType;
 import com.github.leeonky.dal.token.IllegalTypeException;
 import com.github.leeonky.dal.util.BeanUtil;
+import com.github.leeonky.dal.util.ListAccessor;
+import com.github.leeonky.dal.util.PropertyAccessor;
+import com.github.leeonky.dal.util.TypeData;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class CompilingContextBuilder {
-    private final Map<Class<?>, CheckedBiFunction<?, String, Object>> propertyAccessors = new LinkedHashMap<>();
-    private final Map<Class<?>, Function<?, Set<String>>> propertyCollectors = new LinkedHashMap<>();
-    private final Map<String, Function<Object, Object>> types = new LinkedHashMap<>();
-    private final Map<Class<?>, ArrayType<?>> arrayTypes = new LinkedHashMap<>();
+    private final TypeData<PropertyAccessor> propertyAccessors = new TypeData<>();
+    private final Map<String, Function<Object, Object>> typeDefinitions = new LinkedHashMap<>();
+    private final TypeData<ListAccessor> listAccessors = new TypeData<>();
 
     public CompilingContextBuilder() {
-        types.put("List", o -> {
-            if (o != null) {
-                if (arrayTypes.entrySet().stream()
-                        .anyMatch(e -> e.getKey().isInstance(o))
-                        || o instanceof Iterable || o.getClass().isArray())
-                    return o;
-            }
-            throw new IllegalTypeException();
-        });
+        typeDefinitions.put("List", o ->
+                requiredType(o != null && listAccessors.containsType(o) || o instanceof Iterable || o.getClass().isArray(),
+                        () -> o));
     }
 
-    public <T> CompilingContextBuilder registerPropertyAccessor(Class<T> type, CheckedBiFunction<T, String, Object> propertyAccessor) {
-        propertyAccessors.put(type, propertyAccessor);
-        return this;
+    private <T> T requiredType(boolean rightType, Supplier<T> supplier) {
+        if (rightType)
+            return supplier.get();
+        throw new IllegalTypeException();
     }
 
     public CompilingContext build(Object inputValue) {
-        return new CompilingContext(inputValue, propertyAccessors, types, arrayTypes);
+        return new CompilingContext(inputValue, propertyAccessors, typeDefinitions, listAccessors);
     }
 
     public CompilingContextBuilder registerStringValueFormat(Class<?> clazz) {
@@ -51,11 +48,7 @@ public class CompilingContextBuilder {
     }
 
     public CompilingContextBuilder registerStringValueFormat(String name, Function<String, ?> mapper) {
-        types.put(name, o -> {
-            if (o instanceof String)
-                return mapper.apply((String) o);
-            throw new IllegalTypeException();
-        });
+        typeDefinitions.put(name, o -> requiredType(o instanceof String, () -> mapper.apply((String) o)));
         return this;
     }
 
@@ -68,21 +61,14 @@ public class CompilingContextBuilder {
     }
 
     public CompilingContextBuilder registerSchema(String name, Set<String> schema) {
-        types.put(name, o -> {
-            if (o != null && schema.containsAll(getPropertyNames(o)))
-                return o;
-            throw new IllegalTypeException();
-        });
+        typeDefinitions.put(name, o -> requiredType(o != null && schema.containsAll(getPropertyNames(o)), () -> o));
         return this;
     }
 
     @SuppressWarnings("unchecked")
     private Set<String> getPropertyNames(Object o) {
-        return propertyCollectors.entrySet().stream()
-                .filter(e -> e.getKey().isInstance(o))
-                .map(Map.Entry::getValue)
-                .map(f -> ((Function<Object, Set<String>>) f).apply(o))
-                .findFirst()
+        return propertyAccessors.getData(o)
+                .map(f -> f.getPropertyNames(o))
                 .orElseGet(() -> {
                     if (o instanceof Map)
                         return ((Map) o).keySet();
@@ -90,13 +76,13 @@ public class CompilingContextBuilder {
                 });
     }
 
-    public <T> CompilingContextBuilder registerPropertyCollector(Class<T> type, Function<T, Set<String>> collector) {
-        propertyCollectors.put(type, collector);
+    public <T> CompilingContextBuilder registerPropertyAccessor(Class<T> type, PropertyAccessor<T> propertyAccessor) {
+        propertyAccessors.put(type, propertyAccessor);
         return this;
     }
 
-    public <T> CompilingContextBuilder registerListType(Class<T> type, ArrayType<T> arrayType) {
-        arrayTypes.put(type, arrayType);
+    public <T> CompilingContextBuilder registerListType(Class<T> type, ListAccessor<T> listAccessor) {
+        listAccessors.put(type, listAccessor);
         return this;
     }
 }
