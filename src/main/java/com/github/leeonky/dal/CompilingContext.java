@@ -10,18 +10,26 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.github.leeonky.dal.CompilingContextBuilder.requiredType;
+
 public class CompilingContext {
     private final TypeData<PropertyAccessor> propertyAccessors;
-    private final TypeData<ListAccessor> listDefinitions;
+    private final TypeData<ListAccessor> listAccessors;
     private final LinkedList<Object> wrappedValueStack = new LinkedList<>();
     private final Map<String, Function<Object, Object>> typeDefinitions;
 
     public CompilingContext(Object inputValue, TypeData<PropertyAccessor> propertyAccessors,
-                            Map<String, Function<Object, Object>> typeDefinitions, TypeData<ListAccessor> listDefinitions) {
+                            Map<String, Function<Object, Object>> typeDefinitions, TypeData<ListAccessor> listAccessors) {
         this.propertyAccessors = propertyAccessors;
-        this.listDefinitions = listDefinitions;
+        this.listAccessors = listAccessors;
         wrappedValueStack.add(inputValue);
         this.typeDefinitions = typeDefinitions;
+
+        typeDefinitions.put("List", o -> requiredType(isList(o), () -> o));
+    }
+
+    public boolean isList(Object o) {
+        return o != null && listAccessors.containsType(o) || o instanceof Iterable || o.getClass().isArray();
     }
 
     public Object getInputValue() {
@@ -45,7 +53,7 @@ public class CompilingContext {
         return propertyAccessors.getData(object);
     }
 
-    public Optional<ListAccessor> searchArrayType(Object object) {
-        return listDefinitions.getData(object);
+    public Optional<ListAccessor> searchListAccessor(Object object) {
+        return listAccessors.getData(object);
     }
 }

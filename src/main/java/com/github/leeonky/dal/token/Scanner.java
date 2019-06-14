@@ -16,7 +16,7 @@ public class Scanner {
     private List<TokenCandidateFactory> factories = asList(
             NumberTokenCandidateFactory.INSTANCE,
             PropertyTokenCandidateFactory.INSTANCE,
-            ConstIndexTokenCandidateFactory.INSTANCE,
+            AccessElementTokenCandidateFactory.INSTANCE,
             OperatorTokenCandidateFactory.INSTANCE,
             BeginBracketTokenCandidateFactory.INSTANCE,
             EndBracketTokenCandidateFactory.INSTANCE,

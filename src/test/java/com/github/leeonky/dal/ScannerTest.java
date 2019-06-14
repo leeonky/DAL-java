@@ -61,9 +61,8 @@ class ScannerTest {
     class ConstIndexToken {
 
         @Test
-        void should_only_support_const_integer_index() {
+        void should_support_const_integer_index() {
             assertScanTokens("[1]", constIndexToken(1));
-            assertCompileError(" [x]", 2, "only support const int array index");
         }
 
         @Test
@@ -83,6 +82,11 @@ class ScannerTest {
         @Test
         void should_support_property_chain() {
             assertScanTokens(".a.x", propertyToken("a", "x"));
+        }
+
+        @Test
+        void should_support_access_property_via_bracket() {
+            assertScanTokens("[ a - key]", propertyToken(" a - key"));
         }
     }
 

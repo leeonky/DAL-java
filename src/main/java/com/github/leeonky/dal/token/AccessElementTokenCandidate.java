@@ -2,9 +2,9 @@ package com.github.leeonky.dal.token;
 
 import com.github.leeonky.dal.SyntaxException;
 
-class ConstIndexTokenCandidate extends TokenCandidate {
+class AccessElementTokenCandidate extends TokenCandidate {
 
-    ConstIndexTokenCandidate(SourceCode sourceCode) {
+    AccessElementTokenCandidate(SourceCode sourceCode) {
         super(sourceCode);
     }
 
@@ -13,7 +13,11 @@ class ConstIndexTokenCandidate extends TokenCandidate {
         if (!isFinished())
             throw new SyntaxException(getStartPosition() + content().length() + 1, "missed ']'");
         try {
-            return Token.constIndexToken(Integer.valueOf(content()));
+            try {
+                return Token.constIndexToken(Integer.valueOf(content()));
+            } catch (NumberFormatException ignore) {
+                return Token.propertyToken(content());
+            }
         } catch (NumberFormatException e) {
             throw new SyntaxException(getStartPosition() + 1, "only support const int array index");
         }
@@ -35,13 +39,13 @@ class ConstIndexTokenCandidate extends TokenCandidate {
     }
 }
 
-class ConstIndexTokenCandidateFactory implements TokenCandidateFactory {
+class AccessElementTokenCandidateFactory implements TokenCandidateFactory {
 
-    static final ConstIndexTokenCandidateFactory INSTANCE = new ConstIndexTokenCandidateFactory();
+    static final AccessElementTokenCandidateFactory INSTANCE = new AccessElementTokenCandidateFactory();
 
     @Override
     public TokenCandidate createTokenCandidate(SourceCode sourceCode) {
-        return new ConstIndexTokenCandidate(sourceCode);
+        return new AccessElementTokenCandidate(sourceCode);
     }
 
     @Override

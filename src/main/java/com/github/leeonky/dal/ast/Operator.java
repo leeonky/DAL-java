@@ -214,7 +214,7 @@ public abstract class Operator {
         public Object calculate(Node node1, Node node2, CompilingContext context) {
             Object v1 = node1.evaluate(context);
             Object v2 = node2.evaluate(context);
-            Optional<ListAccessor> optionalArrayType = context.searchArrayType(v1);
+            Optional<ListAccessor> optionalArrayType = context.searchListAccessor(v1);
             if (optionalArrayType.isPresent())
                 return optionalArrayType.get().get(v1, (int) v2);
             if (v1 instanceof Iterable) {

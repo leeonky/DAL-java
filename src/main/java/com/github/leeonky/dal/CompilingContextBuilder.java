@@ -18,12 +18,10 @@ public class CompilingContextBuilder {
     private final TypeData<ListAccessor> listAccessors = new TypeData<>();
 
     public CompilingContextBuilder() {
-        typeDefinitions.put("List", o ->
-                requiredType(o != null && listAccessors.containsType(o) || o instanceof Iterable || o.getClass().isArray(),
-                        () -> o));
+        typeDefinitions.put("List", o -> requiredType(o != null && listAccessors.containsType(o) || o instanceof Iterable || o.getClass().isArray(), () -> o));
     }
 
-    private <T> T requiredType(boolean rightType, Supplier<T> supplier) {
+    public static <T> T requiredType(boolean rightType, Supplier<T> supplier) {
         if (rightType)
             return supplier.get();
         throw new IllegalTypeException();

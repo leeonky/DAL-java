@@ -8,6 +8,8 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -112,6 +114,13 @@ class BasicVerify extends VerifyBase {
         void should_support_register_customer_getter() throws JSONException {
             dataAssert.getCompilingContextBuilder().registerPropertyAccessor(JSONObject.class, JSONObject::get);
             assertPass(new JSONObject("{\"field\": true}"), ".field");
+        }
+
+        @Test
+        void should_support_access_property_via_bracket() {
+            assertPass(new HashMap<String, String>() {{
+                put(" a key ", "value");
+            }}, "[ a key ] = 'value'");
         }
 
         @Test
