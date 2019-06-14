@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.CompilingContextBuilder;
+import com.github.leeonky.dal.util.PropertyAccessor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +45,17 @@ class PropertyNodeTest {
 
     @Test
     void access_customer_type_property() throws JSONException {
-        compilingContextBuilder.registerPropertyAccessor(JSONObject.class, JSONObject::get);
+        compilingContextBuilder.registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
+            @Override
+            public Object getValue(JSONObject instance, String name) throws Exception {
+                return instance.get(name);
+            }
+
+            @Override
+            public Set<String> getPropertyNames(JSONObject instance) {
+                return null;
+            }
+        });
 
         assertProperty(new JSONObject("{\"key\": \"value\"}"), Collections.singletonList("key"), "value");
     }

@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.e2e;
 
 import com.github.leeonky.dal.AssertResult;
+import com.github.leeonky.dal.util.PropertyAccessor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.json.JSONException;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -112,7 +114,17 @@ class BasicVerify extends VerifyBase {
 
         @Test
         void should_support_register_customer_getter() throws JSONException {
-            dataAssert.getCompilingContextBuilder().registerPropertyAccessor(JSONObject.class, JSONObject::get);
+            dataAssert.getCompilingContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
+                @Override
+                public Object getValue(JSONObject instance, String name) throws Exception {
+                    return instance.get(name);
+                }
+
+                @Override
+                public Set<String> getPropertyNames(JSONObject instance) {
+                    return null;
+                }
+            });
             assertPass(new JSONObject("{\"field\": true}"), ".field");
         }
 
