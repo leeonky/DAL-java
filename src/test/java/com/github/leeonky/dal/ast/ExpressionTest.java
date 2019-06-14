@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ExpressionTest {
 
@@ -48,6 +50,12 @@ class ExpressionTest {
         assertCalculate(true, new Operator.Or(), false, true);
 
         assertCalculate(null, new Operator.Not(), true, false);
+    }
+
+    @Test
+    void should_support_short_circuit_expression() {
+        assertTrue((boolean) new Expression(new ConstNode(true), new Operator.Or(), new ConstNode(null)).evaluate(new CompilingContextBuilder().build(null)));
+        assertFalse((boolean) new Expression(new ConstNode(false), new Operator.And(), new ConstNode(null)).evaluate(new CompilingContextBuilder().build(null)));
     }
 
     private void assertCalculate(Object v1, Operator operator, Object v2, Object expected) {

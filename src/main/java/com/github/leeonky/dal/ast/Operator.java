@@ -164,8 +164,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return Calculator.and(v1, v2);
+        public Object calculate(Node node1, Node node2, CompilingContext context) {
+            return Calculator.and(() -> node1.evaluate(context), () -> node2.evaluate(context));
         }
     }
 
@@ -175,8 +175,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return Calculator.or(v1, v2);
+        public Object calculate(Node node1, Node node2, CompilingContext context) {
+            return Calculator.or(() -> node1.evaluate(context), () -> node2.evaluate(context));
         }
     }
 

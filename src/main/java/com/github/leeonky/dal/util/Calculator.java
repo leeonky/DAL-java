@@ -2,6 +2,7 @@ package com.github.leeonky.dal.util;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public class Calculator {
     public static int compare(Object v1, Object v2) {
@@ -70,16 +71,26 @@ public class Calculator {
             throw new IllegalArgumentException(String.format("Operands should be number but %s and %s", BeanUtil.getClassName(v1), BeanUtil.getClassName(v2)));
     }
 
-    public static Object and(Object v1, Object v2) {
+    public static Object and(Supplier<Object> s1, Supplier<Object> s2) {
+        Object v1 = s1.get();
         requireBooleanType(v1, "Operand 1");
-        requireBooleanType(v2, "Operand 2");
-        return Boolean.logicalAnd((boolean) v1, (boolean) v2);
+        if ((boolean) v1) {
+            Object v2 = s2.get();
+            requireBooleanType(v2, "Operand 2");
+            return v2;
+        }
+        return false;
     }
 
-    public static Object or(Object v1, Object v2) {
+    public static Object or(Supplier<Object> s1, Supplier<Object> s2) {
+        Object v1 = s1.get();
         requireBooleanType(v1, "Operand 1");
-        requireBooleanType(v2, "Operand 2");
-        return Boolean.logicalOr((boolean) v1, (boolean) v2);
+        if (!(boolean) v1) {
+            Object v2 = s2.get();
+            requireBooleanType(v2, "Operand 2");
+            return v2;
+        }
+        return true;
     }
 
     public static Object not(Object v) {
@@ -87,7 +98,7 @@ public class Calculator {
         return !(boolean) v;
     }
 
-    private static void requireBooleanType(Object v, final String operand) {
+    public static void requireBooleanType(Object v, final String operand) {
         if (!(v instanceof Boolean))
             throw new IllegalArgumentException(operand + " should be boolean but " + BeanUtil.getClassName(v));
     }
