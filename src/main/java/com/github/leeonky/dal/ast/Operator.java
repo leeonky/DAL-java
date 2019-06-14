@@ -3,6 +3,8 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.Calculator;
 
 import java.lang.reflect.Array;
+import java.util.Iterator;
+import java.util.Objects;
 
 public abstract class Operator {
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
@@ -200,6 +202,15 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Object v1, Object v2) {
+            if (v1 instanceof Iterable) {
+                Iterator iterator = ((Iterable) v1).iterator();
+                for (int i = 0; iterator.hasNext(); i++) {
+                    Object object = iterator.next();
+                    if (Objects.equals(i, v2))
+                        return object;
+                }
+                throw new ArrayIndexOutOfBoundsException();
+            }
             return Array.get(v1, (int) v2);
         }
     }

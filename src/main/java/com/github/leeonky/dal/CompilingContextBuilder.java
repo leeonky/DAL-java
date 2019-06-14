@@ -1,5 +1,6 @@
 package com.github.leeonky.dal;
 
+import com.github.leeonky.ArrayType;
 import com.github.leeonky.dal.token.IllegalTypeException;
 import com.github.leeonky.dal.util.BeanUtil;
 
@@ -12,11 +13,16 @@ public class CompilingContextBuilder {
     private final Map<Class<?>, CheckedBiFunction<?, String, Object>> propertyAccessors = new LinkedHashMap<>();
     private final Map<Class<?>, Function<?, Set<String>>> propertyCollectors = new LinkedHashMap<>();
     private final Map<String, Function<Object, Object>> types = new LinkedHashMap<>();
+    private final Map<Class<?>, ArrayType<?>> arrayTypes = new LinkedHashMap<>();
 
     public CompilingContextBuilder() {
         types.put("List", o -> {
-            if (o != null && o instanceof Iterable || o.getClass().isArray())
-                return o;
+            if (o != null) {
+                if (arrayTypes.entrySet().stream()
+                        .anyMatch(e -> e.getKey().isInstance(o))
+                        || o instanceof Iterable || o.getClass().isArray())
+                    return o;
+            }
             throw new IllegalTypeException();
         });
     }
@@ -27,7 +33,7 @@ public class CompilingContextBuilder {
     }
 
     public CompilingContext build(Object inputValue) {
-        return new CompilingContext(inputValue, propertyAccessors, types);
+        return new CompilingContext(inputValue, propertyAccessors, types, arrayTypes);
     }
 
     public CompilingContextBuilder registerStringValueFormat(Class<?> clazz) {
@@ -86,6 +92,11 @@ public class CompilingContextBuilder {
 
     public <T> CompilingContextBuilder registerPropertyCollector(Class<T> type, Function<T, Set<String>> collector) {
         propertyCollectors.put(type, collector);
+        return this;
+    }
+
+    public <T> CompilingContextBuilder registerListType(Class<T> type, ArrayType<T> arrayType) {
+        arrayTypes.put(type, arrayType);
         return this;
     }
 }
