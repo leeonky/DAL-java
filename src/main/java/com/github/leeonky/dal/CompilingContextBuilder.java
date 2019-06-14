@@ -6,6 +6,8 @@ import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import com.github.leeonky.dal.util.TypeData;
 
+import java.net.URL;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -18,7 +20,9 @@ public class CompilingContextBuilder {
     private final TypeData<ListAccessor> listAccessors = new TypeData<>();
 
     public CompilingContextBuilder() {
-        typeDefinitions.put("List", o -> requiredType(o != null && listAccessors.containsType(o) || o instanceof Iterable || o.getClass().isArray(), () -> o));
+        registerStringValueFormat(String.class);
+        registerStringValueFormat(URL.class);
+        registerStringValueFormat("Instant", Instant::parse);
     }
 
     public static <T> T requiredType(boolean rightType, Supplier<T> supplier) {

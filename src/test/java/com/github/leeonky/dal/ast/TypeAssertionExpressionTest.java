@@ -4,8 +4,6 @@ import com.github.leeonky.dal.CompilingContextBuilder;
 import com.github.leeonky.dal.RuntimeException;
 import org.junit.jupiter.api.Test;
 
-import java.net.URL;
-
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -16,7 +14,6 @@ class TypeAssertionExpressionTest {
 
     @Test
     void unexpected_data_type_should_return_false() {
-        compilingContextBuilder.registerStringValueFormat(String.class);
         assertFalse((Boolean) new TypeAssertionExpression(new ConstNode(1), new TypeNode("String"),
                 new ConstNode(true)).evaluate(compilingContextBuilder.build(null)));
     }
@@ -37,8 +34,6 @@ class TypeAssertionExpressionTest {
 
     @Test
     void should_wrapper_object_as_target_type() {
-        compilingContextBuilder.registerStringValueFormat(URL.class);
-
         new TypeAssertionExpression(InputNode.INSTANCE, new TypeNode("URL"),
                 new Expression(new PropertyNode(InputNode.INSTANCE, asList("protocol")),
                         new Operator.Equal(),
