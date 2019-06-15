@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class BasicVerify extends VerifyBase {
+class VerifyTest extends Base {
 
     @Setter
     @Accessors(chain = true)

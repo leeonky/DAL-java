@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 import static java.util.Arrays.asList;
 
-class VerifyList extends VerifyBase {
+class VerifyList extends Base {
 
     @Test
     void should_support_java_array_as_schema_list() {

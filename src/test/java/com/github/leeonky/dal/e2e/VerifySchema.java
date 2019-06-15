@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-class VerifySchema extends VerifyBase {
+class VerifySchema extends Base {
 
     @BeforeEach
     void registerBeanSchema() {

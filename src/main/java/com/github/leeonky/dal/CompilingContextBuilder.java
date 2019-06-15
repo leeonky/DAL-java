@@ -1,5 +1,6 @@
 package com.github.leeonky.dal;
 
+import com.github.leeonky.dal.format.PositiveInteger;
 import com.github.leeonky.dal.token.IllegalTypeException;
 import com.github.leeonky.dal.util.BeanUtil;
 import com.github.leeonky.dal.util.ListAccessor;
@@ -23,6 +24,8 @@ public class CompilingContextBuilder {
         registerStringValueFormat(String.class);
         registerStringValueFormat(URL.class);
         registerStringValueFormat("Instant", Instant::parse);
+
+        registerNumberValueFormat(PositiveInteger.class);
     }
 
     public static <T> T requiredType(boolean rightType, Supplier<T> supplier) {
@@ -51,6 +54,27 @@ public class CompilingContextBuilder {
 
     public CompilingContextBuilder registerStringValueFormat(String name, Function<String, ?> mapper) {
         typeDefinitions.put(name, o -> requiredType(o instanceof String, () -> mapper.apply((String) o)));
+        return this;
+    }
+
+    public CompilingContextBuilder registerNumberValueFormat(Class<?> clazz) {
+        return registerNumberValueFormat(clazz.getSimpleName(), clazz);
+    }
+
+    public CompilingContextBuilder registerNumberValueFormat(String name, Class<?> clazz) {
+        return registerNumberValueFormat(name, n -> {
+            try {
+                return clazz.getConstructor(Number.class).newInstance(n);
+            } catch (Exception e) {
+                if (e.getCause() instanceof IllegalTypeException)
+                    throw (IllegalTypeException) e.getCause();
+                throw new IllegalStateException(String.format("Failed to wrap [%s] to %s. Type Wrapper should have a constructor %s(Number)", n, name, name));
+            }
+        });
+    }
+
+    public CompilingContextBuilder registerNumberValueFormat(String name, Function<Number, ?> mapper) {
+        typeDefinitions.put(name, o -> requiredType(o instanceof Number, () -> mapper.apply((Number) o)));
         return this;
     }
 

@@ -5,7 +5,7 @@ import com.github.leeonky.dal.DataAssert;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-class VerifyBase {
+class Base {
     DataAssert dataAssert = new DataAssert();
 
     void assertPass(Object input, String expression) {

@@ -2,7 +2,7 @@ package com.github.leeonky.dal.e2e;
 
 import org.junit.jupiter.api.Test;
 
-class VerifyStringValue extends VerifyBase {
+class VerifyStringValue extends Base {
 
     @Test
     void verify_string_type() {
