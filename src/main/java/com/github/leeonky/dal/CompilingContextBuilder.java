@@ -11,8 +11,8 @@ import java.net.URL;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class CompilingContextBuilder {
@@ -83,23 +83,14 @@ public class CompilingContextBuilder {
     }
 
     public CompilingContextBuilder registerSchema(String name, Class<?> clazz) {
-        return registerSchema(name, BeanUtil.findPropertyNames(clazz));
-    }
-
-    public CompilingContextBuilder registerSchema(String name, Set<String> schema) {
-        typeDefinitions.put(name, o -> requiredType(o != null && schema.containsAll(getPropertyNames(o)), () -> o));
-        return this;
+        return registerSchema(name, bw -> BeanUtil.findPropertyNames(clazz).containsAll(bw.getPropertyNames()));
     }
 
     @SuppressWarnings("unchecked")
-    private Set<String> getPropertyNames(Object o) {
-        return propertyAccessors.getData(o)
-                .map(f -> f.getPropertyNames(o))
-                .orElseGet(() -> {
-                    if (o instanceof Map)
-                        return ((Map) o).keySet();
-                    return BeanUtil.findPropertyNames(o.getClass());
-                });
+    public <T> CompilingContextBuilder registerSchema(String name, Predicate<BeanWrapper> predicate) {
+        typeDefinitions.put(name, o -> requiredType(o != null &&
+                predicate.test(new BeanWrapper(o, propertyAccessors)), () -> o));
+        return this;
     }
 
     public <T> CompilingContextBuilder registerPropertyAccessor(Class<T> type, PropertyAccessor<T> propertyAccessor) {
@@ -107,7 +98,7 @@ public class CompilingContextBuilder {
         return this;
     }
 
-    public <T> CompilingContextBuilder registerListType(Class<T> type, ListAccessor<T> listAccessor) {
+    public <T> CompilingContextBuilder registerListAccessor(Class<T> type, ListAccessor<T> listAccessor) {
         listAccessors.put(type, listAccessor);
         return this;
     }

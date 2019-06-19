@@ -41,7 +41,7 @@ class VerifyList extends Base {
 
     @Test
     void should_support_customer_array_type() throws JSONException {
-        dataAssert.getCompilingContextBuilder().registerListType(JSONArray.class, new ListAccessor<JSONArray>() {
+        dataAssert.getCompilingContextBuilder().registerListAccessor(JSONArray.class, new ListAccessor<JSONArray>() {
             @Override
             public Object get(JSONArray jsonArray, int index) {
                 try {

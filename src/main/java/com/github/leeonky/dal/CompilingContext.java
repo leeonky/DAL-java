@@ -49,8 +49,8 @@ public class CompilingContext {
         return Optional.ofNullable(typeDefinitions.get(type));
     }
 
-    public Optional<PropertyAccessor> searchPropertyAccessor(Object object) {
-        return propertyAccessors.getData(object);
+    public TypeData<PropertyAccessor> getPropertyAccessors() {
+        return propertyAccessors;
     }
 
     public Optional<ListAccessor> searchListAccessor(Object object) {
