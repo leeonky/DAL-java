@@ -1,11 +1,9 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.BeanWrapper;
 import com.github.leeonky.dal.CompilingContext;
 import com.github.leeonky.dal.RuntimeException;
+import com.github.leeonky.dal.util.WrappedObject;
 
-import java.lang.reflect.Array;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,33 +24,16 @@ public class PropertyNode extends Node {
         return instance;
     }
 
-    @SuppressWarnings("unchecked")
     private Object getPropertyValue(Object instance, String name, CompilingContext context) {
+        WrappedObject wrappedObject = context.wrap(instance);
         if ("size".equals(name) && context.isList(instance))
-            return getListSize(instance, context);
+            return wrappedObject.getListSize();
         try {
-            return new BeanWrapper(instance, context.getPropertyAccessors()).getPropertyValue(name);
+            return wrappedObject.getPropertyValue(name);
         } catch (IllegalStateException e) {
             throw new RuntimeException("Get property " + name + " failed, property can be public field, getter or customer type getter",
                     getPositionBegin());
         }
-    }
-
-    private Object getListSize(Object instance, CompilingContext context) {
-        return context.searchListAccessor(instance)
-                .map(p -> p.size(instance))
-                .orElseGet(() -> {
-                    if (instance instanceof Iterable) {
-                        Iterator iterator = ((Iterable) instance).iterator();
-                        int size = 0;
-                        while (iterator.hasNext()) {
-                            iterator.next();
-                            size++;
-                        }
-                        return size;
-                    }
-                    return Array.getLength(instance);
-                });
     }
 
     @Override

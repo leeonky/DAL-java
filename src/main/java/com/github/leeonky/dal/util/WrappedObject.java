@@ -1,27 +1,24 @@
-package com.github.leeonky.dal;
+package com.github.leeonky.dal.util;
 
-import com.github.leeonky.dal.util.BeanUtil;
-import com.github.leeonky.dal.util.PropertyAccessor;
-import com.github.leeonky.dal.util.TypeData;
-
+import java.lang.reflect.Array;
+import java.util.Iterator;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
-public class BeanWrapper {
+public class WrappedObject {
     private final Object instance;
-    private final Optional<PropertyAccessor> propertyAccessor;
     private final TypeData<PropertyAccessor> propertyAccessors;
+    private final TypeData<ListAccessor> listAccessors;
 
-    public BeanWrapper(Object instance, TypeData<PropertyAccessor> propertyAccessors) {
+    public WrappedObject(Object instance, TypeData<PropertyAccessor> propertyAccessors, TypeData<ListAccessor> listAccessors) {
         this.instance = instance;
-        propertyAccessor = propertyAccessors.getData(instance);
         this.propertyAccessors = propertyAccessors;
+        this.listAccessors = listAccessors;
     }
 
     @SuppressWarnings("unchecked")
     public Set<String> getPropertyNames() {
-        return propertyAccessor
+        return propertyAccessors.getData(instance)
                 .map(f -> f.getPropertyNames(instance))
                 .orElseGet(() -> {
                     if (instance instanceof Map)
@@ -40,13 +37,31 @@ public class BeanWrapper {
         return instance;
     }
 
-    public BeanWrapper getPropertyValueWrapper(String name) {
-        return new BeanWrapper(getPropertyValue(name), propertyAccessors);
+    public WrappedObject getPropertyValueWrapper(String name) {
+        return new WrappedObject(getPropertyValue(name), propertyAccessors, listAccessors);
+    }
+
+    @SuppressWarnings("unchecked")
+    public int getListSize() {
+        return listAccessors.getData(instance)
+                .map(p -> p.size(instance))
+                .orElseGet(() -> {
+                    if (instance instanceof Iterable) {
+                        Iterator iterator = ((Iterable) instance).iterator();
+                        int size = 0;
+                        while (iterator.hasNext()) {
+                            iterator.next();
+                            size++;
+                        }
+                        return size;
+                    }
+                    return Array.getLength(instance);
+                });
     }
 
     @SuppressWarnings("unchecked")
     private Object getPropertyFromType(String name) {
-        return propertyAccessor
+        return propertyAccessors.getData(instance)
                 .map(p -> checkedReturn(() -> p.getValue(instance, name)))
                 .orElseGet(() -> checkedReturn(() -> BeanUtil.getPropertyValue(instance, name)));
     }

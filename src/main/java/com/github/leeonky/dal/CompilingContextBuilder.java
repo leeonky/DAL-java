@@ -2,10 +2,7 @@ package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.format.PositiveInteger;
 import com.github.leeonky.dal.token.IllegalTypeException;
-import com.github.leeonky.dal.util.BeanUtil;
-import com.github.leeonky.dal.util.ListAccessor;
-import com.github.leeonky.dal.util.PropertyAccessor;
-import com.github.leeonky.dal.util.TypeData;
+import com.github.leeonky.dal.util.*;
 
 import java.net.URL;
 import java.time.Instant;
@@ -87,10 +84,14 @@ public class CompilingContextBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> CompilingContextBuilder registerSchema(String name, Predicate<BeanWrapper> predicate) {
+    public <T> CompilingContextBuilder registerSchema(String name, Predicate<WrappedObject> predicate) {
         typeDefinitions.put(name, o -> requiredType(o != null &&
-                predicate.test(new BeanWrapper(o, propertyAccessors)), () -> o));
+                predicate.test(wrap(o)), () -> o));
         return this;
+    }
+
+    public WrappedObject wrap(Object o) {
+        return new WrappedObject(o, propertyAccessors, listAccessors);
     }
 
     public <T> CompilingContextBuilder registerPropertyAccessor(Class<T> type, PropertyAccessor<T> propertyAccessor) {

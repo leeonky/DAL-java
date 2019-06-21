@@ -4,6 +4,7 @@ import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import com.github.leeonky.dal.util.TypeData;
+import com.github.leeonky.dal.util.WrappedObject;
 
 import java.util.LinkedList;
 import java.util.Map;
@@ -49,11 +50,11 @@ public class CompilingContext {
         return Optional.ofNullable(typeDefinitions.get(type));
     }
 
-    public TypeData<PropertyAccessor> getPropertyAccessors() {
-        return propertyAccessors;
-    }
-
     public Optional<ListAccessor> searchListAccessor(Object object) {
         return listAccessors.getData(object);
+    }
+
+    public WrappedObject wrap(Object instance) {
+        return new WrappedObject(instance, propertyAccessors, listAccessors);
     }
 }
