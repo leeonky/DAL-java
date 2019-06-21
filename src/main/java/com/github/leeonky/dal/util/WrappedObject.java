@@ -1,9 +1,7 @@
 package com.github.leeonky.dal.util;
 
 import java.lang.reflect.Array;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class WrappedObject {
     private final Object instance;
@@ -41,22 +39,43 @@ public class WrappedObject {
         return new WrappedObject(getPropertyValue(name), propertyAccessors, listAccessors);
     }
 
-    @SuppressWarnings("unchecked")
     public int getListSize() {
+        int size = 0;
+        for (Object dummy : getList())
+            size++;
+        return size;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Iterable getList() {
         return listAccessors.getData(instance)
-                .map(p -> p.size(instance))
+                .map(l -> l.toIterable(instance))
                 .orElseGet(() -> {
                     if (instance instanceof Iterable) {
-                        Iterator iterator = ((Iterable) instance).iterator();
-                        int size = 0;
-                        while (iterator.hasNext()) {
-                            iterator.next();
-                            size++;
-                        }
-                        return size;
+                        return (Iterable) instance;
                     }
-                    return Array.getLength(instance);
+                    return () -> new Iterator() {
+                        private final int length = Array.getLength(instance);
+                        private int index = 0;
+
+                        @Override
+                        public boolean hasNext() {
+                            return index < length;
+                        }
+
+                        @Override
+                        public Object next() {
+                            return Array.get(instance, index++);
+                        }
+                    };
                 });
+    }
+
+    public Iterable<WrappedObject> getWrappedList() {
+        List<WrappedObject> result = new ArrayList<>();
+        for (Object object : getList())
+            result.add(new WrappedObject(object, propertyAccessors, listAccessors));
+        return result;
     }
 
     @SuppressWarnings("unchecked")
