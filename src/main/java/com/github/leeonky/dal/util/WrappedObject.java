@@ -15,13 +15,13 @@ public class WrappedObject {
     }
 
     @SuppressWarnings("unchecked")
-    public Set<String> getPropertyNames() {
+    public Set<String> getPropertyReaderNames() {
         return propertyAccessors.getData(instance)
                 .map(f -> f.getPropertyNames(instance))
                 .orElseGet(() -> {
                     if (instance instanceof Map)
                         return ((Map) instance).keySet();
-                    return BeanUtil.findPropertyNames(instance.getClass());
+                    return BeanUtil.findPropertyReaderNames(instance.getClass());
                 });
     }
 

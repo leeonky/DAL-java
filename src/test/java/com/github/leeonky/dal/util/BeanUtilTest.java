@@ -75,22 +75,22 @@ class BeanUtilTest {
 
         @Test
         void should_return_all_public_fields() {
-            assertThat(BeanUtil.findPropertyNames(Bean.class)).containsOnly("field");
+            assertThat(BeanUtil.findPropertyReaderNames(Bean.class)).containsOnly("field");
         }
 
         @Test
         void property_names_should_contains_standard_getter() {
-            assertThat(BeanUtil.findPropertyNames(BeanWithGetter.class)).containsOnly("field");
+            assertThat(BeanUtil.findPropertyReaderNames(BeanWithGetter.class)).containsOnly("field");
         }
 
         @Test
         void property_names_should_contains_standard_bool_getter() {
-            assertThat(BeanUtil.findPropertyNames(BeanWithBoolGetter.class)).containsOnly("bool");
+            assertThat(BeanUtil.findPropertyReaderNames(BeanWithBoolGetter.class)).containsOnly("bool");
         }
 
         @Test
         void property_names_should_contains_standard_boolean_getter() {
-            assertThat(BeanUtil.findPropertyNames(BeanWithBooleanGetter.class)).containsOnly("boolean");
+            assertThat(BeanUtil.findPropertyReaderNames(BeanWithBooleanGetter.class)).containsOnly("boolean");
         }
     }
 

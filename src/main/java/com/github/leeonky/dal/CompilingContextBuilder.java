@@ -80,7 +80,7 @@ public class CompilingContextBuilder {
     }
 
     public CompilingContextBuilder registerSchema(String name, Class<?> clazz) {
-        return registerSchema(name, bw -> BeanUtil.findPropertyNames(clazz).containsAll(bw.getPropertyNames()));
+        return registerSchema(name, bw -> BeanUtil.findPropertyReaderNames(clazz).containsAll(bw.getPropertyReaderNames()));
     }
 
     @SuppressWarnings("unchecked")
