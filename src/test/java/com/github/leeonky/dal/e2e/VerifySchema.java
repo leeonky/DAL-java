@@ -72,6 +72,8 @@ class VerifySchema extends Base {
         });
 
         assertPass(new JSONObject("{\"f1\": 1, \"f2\": 1}"), "is Bean");
+        assertPass(null, "= null");
+        assertPass(JSONObject.NULL, "= null");
     }
 
     @Setter

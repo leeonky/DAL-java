@@ -93,6 +93,13 @@ public class WrappedObject {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public boolean isNull() {
+        return propertyAccessors.getData(instance)
+                .map(p -> p.isNull(instance))
+                .orElseGet(() -> Objects.equals(instance, null));
+    }
+
     interface CheckedSupplier {
         Object get() throws Exception;
     }
