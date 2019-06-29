@@ -7,7 +7,7 @@ import java.math.BigInteger;
 public class PositiveInteger implements Formatter<Number> {
 
     @Override
-    public Object toValue(Object input) {
+    public Object toValue(Number input) {
         String val = input.toString();
         if (val.chars().anyMatch(c -> !Character.isDigit(c)))
             throw new IllegalTypeException();

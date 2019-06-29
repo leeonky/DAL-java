@@ -19,5 +19,5 @@ public interface Formatter<T> {
                 .orElseThrow(IllegalTypeException::new);
     }
 
-    Object toValue(Object input);
+    Object toValue(T input);
 }
