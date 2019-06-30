@@ -18,10 +18,10 @@ public class CompilingContextBuilder {
     private final Map<Class<?>, Object> formatterCache = new HashMap<>();
 
     public CompilingContextBuilder() {
-        registerValueFormat(PositiveInteger.class);
-        registerValueFormat(URL.class);
-        registerValueFormat(Instant.class);
-        registerValueFormat("String", StringType.class);
+        registerValueFormat(new PositiveInteger());
+        registerValueFormat(new URL());
+        registerValueFormat(new Instant());
+        registerValueFormat("String", new StringType());
     }
 
     public static <T> T requiredType(boolean rightType, Supplier<T> supplier) {
@@ -30,20 +30,13 @@ public class CompilingContextBuilder {
         throw new IllegalTypeException();
     }
 
-    public <T extends Formatter<?>> CompilingContextBuilder registerValueFormat(Class<T> type) {
-        return registerValueFormat(type.getSimpleName(), type);
+    public CompilingContextBuilder registerValueFormat(Formatter formatter) {
+        return registerValueFormat(formatter.getClass().getSimpleName(), formatter);
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Formatter<?>> CompilingContextBuilder registerValueFormat(String name, Class<T> type) {
+    public CompilingContextBuilder registerValueFormat(String name, Formatter formatter) {
         typeDefinitions.put(name, o -> {
-            Formatter formatter = (Formatter) formatterCache.computeIfAbsent(type, t -> {
-                try {
-                    return t.getConstructor().newInstance();
-                } catch (Exception e) {
-                    throw new IllegalArgumentException("Could not create instance of " + type.getName());
-                }
-            });
             if (formatter.isValidType(o))
                 return formatter.toValue(o);
             throw new IllegalTypeException();
