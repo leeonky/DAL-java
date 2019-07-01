@@ -137,7 +137,7 @@ class VerifyTest extends Base {
 
         @Test
         void should_raise_error_when_access_invalid_property() {
-            assertRuntimeException("", " = .fun", 3, "Get property fun failed, property can be public field, getter or customer type getter");
+            assertRuntimeException("", " = .fun", 3, "Get property 'fun' failed, property can be public field, getter or customer type getter");
         }
     }
 }

@@ -31,7 +31,7 @@ public class PropertyNode extends Node {
         try {
             return wrappedObject.getPropertyValue(name);
         } catch (IllegalStateException e) {
-            throw new RuntimeException("Get property " + name + " failed, property can be public field, getter or customer type getter",
+            throw new RuntimeException("Get property '" + name + "' failed, property can be public field, getter or customer type getter",
                     getPositionBegin());
         }
     }
