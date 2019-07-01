@@ -31,7 +31,7 @@ public class WrappedObject {
                 : getPropertyFromType(name);
     }
 
-    public Object getInstance() {
+    public Object getValue() {
         return instance;
     }
 

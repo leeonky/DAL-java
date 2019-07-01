@@ -2,20 +2,25 @@ package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.format.*;
 import com.github.leeonky.dal.token.IllegalTypeException;
+import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.util.*;
 
-import java.util.HashMap;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class CompilingContextBuilder {
     private final TypeData<PropertyAccessor> propertyAccessors = new TypeData<>();
     private final Map<String, Function<Object, Object>> typeDefinitions = new LinkedHashMap<>();
     private final TypeData<ListAccessor> listAccessors = new TypeData<>();
-    private final Map<Class<?>, Object> formatterCache = new HashMap<>();
+    private final Set<Class<?>> schemas = new HashSet<>();
 
     public CompilingContextBuilder() {
         registerValueFormat(new PositiveInteger());
@@ -53,7 +58,46 @@ public class CompilingContextBuilder {
     }
 
     public CompilingContextBuilder registerSchema(String name, Class<?> clazz) {
-        return registerSchema(name, bw -> BeanUtil.findPropertyReaderNames(clazz).containsAll(bw.getPropertyReaderNames()));
+        schemas.add(clazz);
+        return registerSchema(name, bw -> isRightObject(clazz, bw));
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean isRightObject(Class<?> clazz, WrappedObject bw) {
+        Set<Member> members = BeanUtil.findPropertyReaders(clazz);
+        Set<String> expectedFields = members.stream().map(Member::getName).collect(Collectors.toSet());
+        Set<String> actualFields = bw.getPropertyReaderNames();
+        for (String f : actualFields) {
+            if (!expectedFields.contains(f)) {
+                System.err.printf("Unexpected field %s for type %s[%s]\n", f, clazz.getSimpleName(), clazz.getName());
+                return false;
+            }
+        }
+        for (Member member : members) {
+            Field field = (Field) member;
+            boolean allowNull = field.getAnnotation(AllowNull.class) != null;
+            if (!allowNull && !actualFields.contains(field.getName())) {
+                System.err.printf("Expected field %s for type %s[%s], but does not exist\n", field.getName(), clazz.getSimpleName(), clazz.getName());
+                return false;
+            }
+            Class<?> fieldType = field.getType();
+            WrappedObject propertyValueWrapper = bw.getPropertyValueWrapper(member.getName());
+            if (Formatter.class.isAssignableFrom(fieldType)) {
+                try {
+                    Formatter formatter = (Formatter) fieldType.getConstructor().newInstance();
+                    if (allowNull && propertyValueWrapper.isNull())
+                        continue;
+                    if (!formatter.isValidValue(propertyValueWrapper.getValue()))
+                        return false;
+                } catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            } else if (schemas.contains(fieldType)) {
+                if (!isRightObject(fieldType, propertyValueWrapper))
+                    return false;
+            }
+        }
+        return true;
     }
 
     public CompilingContextBuilder registerSchema(String name, Predicate<WrappedObject> predicate) {

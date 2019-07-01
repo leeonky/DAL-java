@@ -20,4 +20,15 @@ public interface Formatter<T> {
     }
 
     Object toValue(T input);
+
+    default boolean isValidValue(T value) {
+        if (isValidType(value)) {
+            try {
+                toValue(value);
+                return true;
+            } catch (IllegalTypeException ignore) {
+            }
+        }
+        return false;
+    }
 }
