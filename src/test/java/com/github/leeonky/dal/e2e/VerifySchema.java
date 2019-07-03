@@ -2,7 +2,9 @@ package com.github.leeonky.dal.e2e;
 
 import com.github.leeonky.dal.format.PositiveInteger;
 import com.github.leeonky.dal.type.AllowNull;
+import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
@@ -54,6 +57,14 @@ class VerifySchema extends Base {
         public RightFieldAndType type;
     }
 
+    public static class NestedList {
+        public List<RightFieldAndType> list;
+    }
+
+    public static class NestedNestedList {
+        public List<List<RightFieldAndType>> list;
+    }
+
     @Nested
     class RegisterSchemaType {
         @BeforeEach
@@ -76,11 +87,27 @@ class VerifySchema extends Base {
                         set.add(iterator.next().toString());
                     return set;
                 }
-            });
-            dataAssert.getCompilingContextBuilder()
+            }).registerListAccessor(JSONArray.class, new ListAccessor<JSONArray>() {
+                @Override
+                public Object get(JSONArray jsonArray, int index) {
+                    try {
+                        return jsonArray.get(index);
+                    } catch (JSONException e) {
+                        throw new IllegalStateException(e);
+                    }
+                }
+
+                @Override
+                public int size(JSONArray jsonArray) {
+                    return jsonArray.length();
+                }
+            })
                     .registerSchema(RightFieldAndType.class)
                     .registerSchema(AllowNullField.class)
-                    .registerSchema(NestedType.class);
+                    .registerSchema(NestedType.class)
+                    .registerSchema(NestedList.class)
+                    .registerSchema(NestedNestedList.class)
+            ;
         }
 
         @Test
@@ -113,6 +140,18 @@ class VerifySchema extends Base {
         void should_verify_nested_schema() throws JSONException {
             assertPass(new JSONObject("{\"type\":{\"id\": 1}}"), "is NestedType");
             assertFailed(new JSONObject("{\"type\":{\"id\": 0}}"), "is NestedType");
+        }
+
+        @Test
+        void should_support_verify_nested_list_schema() throws JSONException {
+            assertPass(new JSONObject("{\"list\": [{\"id\": 1}]}"), "is NestedList");
+            assertFailed(new JSONObject("{\"list\": [{\"id\": 0}]}"), "is NestedList");
+        }
+
+        @Test
+        void should_support_verify_nested_nested_list_schema() throws JSONException {
+            assertPass(new JSONObject("{\"list\": [[{\"id\": 1}]]}"), "is NestedNestedList");
+            assertFailed(new JSONObject("{\"list\": [[{\"id\": 0}]]}"), "is NestedNestedList");
         }
         //TODO list, map, nested list, nested map, polymorphic, polymorphic list
     }

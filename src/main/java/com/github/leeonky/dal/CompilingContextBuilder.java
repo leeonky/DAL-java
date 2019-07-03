@@ -1,5 +1,6 @@
 package com.github.leeonky.dal;
 
+import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.*;
 import com.github.leeonky.dal.token.IllegalTypeException;
 import com.github.leeonky.dal.type.AllowNull;
@@ -7,10 +8,9 @@ import com.github.leeonky.dal.util.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -33,6 +33,24 @@ public class CompilingContextBuilder {
         if (rightType)
             return supplier.get();
         throw new IllegalTypeException();
+    }
+
+    private static Optional<Type> getGenericParams(Type type, int index) {
+        return Optional.of(type)
+                .filter(ParameterizedType.class::isInstance)
+                .map(ParameterizedType.class::cast)
+                .map(p -> p.getActualTypeArguments()[index]);
+    }
+
+    private static Class<?> guessType(String subPrefix, Type elementType) {
+        Class<?> subType;
+        if (elementType instanceof Class<?>)
+            subType = (Class<?>) elementType;
+        else if (elementType instanceof ParameterizedType)
+            subType = (Class<?>) ((ParameterizedType) elementType).getRawType();
+        else
+            throw new IllegalArgumentException("Can not process " + subPrefix + " in type " + elementType);
+        return subType;
     }
 
     public CompilingContextBuilder registerValueFormat(Formatter formatter) {
@@ -59,11 +77,10 @@ public class CompilingContextBuilder {
 
     public CompilingContextBuilder registerSchema(String name, Class<?> clazz) {
         schemas.add(clazz);
-        return registerSchema(name, bw -> isRightObject(clazz, bw));
+        return registerSchema(name, bw -> isRightObject(clazz, bw, ""));
     }
 
-    @SuppressWarnings("unchecked")
-    private boolean isRightObject(Class<?> clazz, WrappedObject bw) {
+    private boolean isRightObject(Class<?> clazz, WrappedObject bw, String subPrefix) {
         Set<Member> members = BeanUtil.findPropertyReaders(clazz);
         Set<String> expectedFields = members.stream().map(Member::getName).collect(Collectors.toSet());
         Set<String> actualFields = bw.getPropertyReaderNames();
@@ -80,20 +97,36 @@ public class CompilingContextBuilder {
                 System.err.printf("Expected field %s for type %s[%s], but does not exist\n", field.getName(), clazz.getSimpleName(), clazz.getName());
                 return false;
             }
-            Class<?> fieldType = field.getType();
             WrappedObject propertyValueWrapper = bw.getPropertyValueWrapper(member.getName());
-            if (Formatter.class.isAssignableFrom(fieldType)) {
-                try {
-                    Formatter formatter = (Formatter) fieldType.getConstructor().newInstance();
-                    if (allowNull && propertyValueWrapper.isNull())
-                        continue;
-                    if (!formatter.isValidValue(propertyValueWrapper.getValue()))
-                        return false;
-                } catch (Exception e) {
-                    throw new IllegalStateException(e);
-                }
-            } else if (schemas.contains(fieldType)) {
-                if (!isRightObject(fieldType, propertyValueWrapper))
+            if (allowNull && propertyValueWrapper.isNull())
+                continue;
+
+            Class<?> fieldType = field.getType();
+            if (!isRightObject(subPrefix + "." + field.getName(), propertyValueWrapper, fieldType, field.getGenericType()))
+                return false;
+        }
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean isRightObject(String subPrefix, WrappedObject propertyValueWrapper, Class<?> fieldType, Type genericType) {
+        if (Formatter.class.isAssignableFrom(fieldType)) {
+            try {
+                Formatter formatter = (Formatter) fieldType.getConstructor().newInstance();
+                if (!formatter.isValidValue(propertyValueWrapper.getValue()))
+                    return false;
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        } else if (schemas.contains(fieldType)) {
+            return isRightObject(fieldType, propertyValueWrapper, subPrefix);
+        } else if (Iterable.class.isAssignableFrom(fieldType)) {
+            int index = 0;
+            Type elementType = getGenericParams(genericType, 0).orElseThrow(() ->
+                    new IllegalArgumentException(subPrefix + " should be generic type"));
+            Class<?> subType = guessType(subPrefix, elementType);
+            for (WrappedObject wrappedElement : propertyValueWrapper.getWrappedList()) {
+                if (!isRightObject(String.format("%s[%d]", subPrefix, index++), wrappedElement, subType, elementType))
                     return false;
             }
         }
