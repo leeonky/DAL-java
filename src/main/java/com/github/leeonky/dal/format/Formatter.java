@@ -31,4 +31,8 @@ public interface Formatter<T> {
         }
         return false;
     }
+
+    default String getFormatterName() {
+        return getClass().getSimpleName().replaceFirst("^Formatter", "");
+    }
 }

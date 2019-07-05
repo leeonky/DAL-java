@@ -11,10 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -65,6 +62,14 @@ class VerifySchema extends Base {
         public List<List<RightFieldAndType>> list;
     }
 
+    public static class NestedMap {
+        public Map<String, RightFieldAndType> map;
+    }
+
+    public static class NestedNestedMap {
+        public Map<String, Map<String, RightFieldAndType>> map;
+    }
+
     @Nested
     class RegisterSchemaType {
         @BeforeEach
@@ -107,6 +112,8 @@ class VerifySchema extends Base {
                     .registerSchema(NestedType.class)
                     .registerSchema(NestedList.class)
                     .registerSchema(NestedNestedList.class)
+                    .registerSchema(NestedMap.class)
+                    .registerSchema(NestedNestedMap.class)
             ;
         }
 
@@ -153,6 +160,15 @@ class VerifySchema extends Base {
             assertPass(new JSONObject("{\"list\": [[{\"id\": 1}]]}"), "is NestedNestedList");
             assertFailed(new JSONObject("{\"list\": [[{\"id\": 0}]]}"), "is NestedNestedList");
         }
-        //TODO list, map, nested list, nested map, polymorphic, polymorphic list
+
+        @Test
+        void should_support_verify_nested_map_schema() throws JSONException {
+            assertPass(new JSONObject("{\"map\": {\"str\": {\"id\": 1}}}"), "is NestedMap");
+            assertFailed(new JSONObject("{\"map\": {\"str\": {\"id\": 0}}}"), "is NestedMap");
+
+            assertPass(new JSONObject("{\"map\": {\"str\": {\"str\": {\"id\": 1}}}}"), "is NestedNestedMap");
+            assertFailed(new JSONObject("{\"map\": {\"str\": {\"str\": {\"id\": 0}}}}"), "is NestedNestedMap");
+        }
+        //TODO polymorphic, polymorphic list
     }
 }

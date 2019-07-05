@@ -26,7 +26,7 @@ public class CompilingContextBuilder {
         registerValueFormat(new PositiveInteger());
         registerValueFormat(new URL());
         registerValueFormat(new Instant());
-        registerValueFormat("String", new StringType());
+        registerValueFormat(new FormatterString());
     }
 
     public static <T> T requiredType(boolean rightType, Supplier<T> supplier) {
@@ -54,7 +54,7 @@ public class CompilingContextBuilder {
     }
 
     public CompilingContextBuilder registerValueFormat(Formatter formatter) {
-        return registerValueFormat(formatter.getClass().getSimpleName(), formatter);
+        return registerValueFormat(formatter.getFormatterName(), formatter);
     }
 
     @SuppressWarnings("unchecked")
@@ -86,7 +86,7 @@ public class CompilingContextBuilder {
         Set<String> actualFields = bw.getPropertyReaderNames();
         for (String f : actualFields) {
             if (!expectedFields.contains(f)) {
-                System.err.printf("Unexpected field %s for type %s[%s]\n", f, clazz.getSimpleName(), clazz.getName());
+                System.err.printf("Unexpected field `%s` for type %s[%s]\n", f, clazz.getSimpleName(), clazz.getName());
                 return false;
             }
         }
@@ -94,7 +94,7 @@ public class CompilingContextBuilder {
             Field field = (Field) member;
             boolean allowNull = field.getAnnotation(AllowNull.class) != null;
             if (!allowNull && !actualFields.contains(field.getName())) {
-                System.err.printf("Expected field %s for type %s[%s], but does not exist\n", field.getName(), clazz.getSimpleName(), clazz.getName());
+                System.err.printf("Expected field `%s` for type %s[%s], but does not exist\n", field.getName(), clazz.getSimpleName(), clazz.getName());
                 return false;
             }
             WrappedObject propertyValueWrapper = bw.getPropertyValueWrapper(member.getName());
@@ -109,24 +109,35 @@ public class CompilingContextBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    private boolean isRightObject(String subPrefix, WrappedObject propertyValueWrapper, Class<?> fieldType, Type genericType) {
+    private boolean isRightObject(String subPrefix, WrappedObject wrapperValue, Class<?> fieldType, Type genericType) {
         if (Formatter.class.isAssignableFrom(fieldType)) {
             try {
                 Formatter formatter = (Formatter) fieldType.getConstructor().newInstance();
-                if (!formatter.isValidValue(propertyValueWrapper.getValue()))
+                if (!formatter.isValidValue(wrapperValue.getValue())) {
+                    System.err.printf("Expected field `%s` shoub be in %s, but was [%s]\n",
+                            subPrefix, formatter.getFormatterName(), wrapperValue.getValue());
                     return false;
+                }
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }
         } else if (schemas.contains(fieldType)) {
-            return isRightObject(fieldType, propertyValueWrapper, subPrefix);
+            return isRightObject(fieldType, wrapperValue, subPrefix);
         } else if (Iterable.class.isAssignableFrom(fieldType)) {
             int index = 0;
             Type elementType = getGenericParams(genericType, 0).orElseThrow(() ->
                     new IllegalArgumentException(subPrefix + " should be generic type"));
             Class<?> subType = guessType(subPrefix, elementType);
-            for (WrappedObject wrappedElement : propertyValueWrapper.getWrappedList()) {
+            for (WrappedObject wrappedElement : wrapperValue.getWrappedList()) {
                 if (!isRightObject(String.format("%s[%d]", subPrefix, index++), wrappedElement, subType, elementType))
+                    return false;
+            }
+        } else if (Map.class.isAssignableFrom(fieldType)) {
+            Type elementType = getGenericParams(genericType, 1).orElseThrow(() ->
+                    new IllegalArgumentException(subPrefix + " should be generic type"));
+            Class<?> subType = guessType(subPrefix, elementType);
+            for (String key : wrapperValue.getPropertyReaderNames()) {
+                if (!isRightObject(subPrefix + "." + key, wrapperValue.getPropertyValueWrapper(key), subType, elementType))
                     return false;
             }
         }
