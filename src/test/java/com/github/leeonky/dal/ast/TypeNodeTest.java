@@ -16,7 +16,7 @@ class TypeNodeTest {
         final RuntimeException runtimeException = assertThrows(RuntimeException.class,
                 () -> typeNode.evaluate(new CompilingContextBuilder().build(null)));
 
-        assertThat(runtimeException).hasMessage("Type 'Type' not registered")
+        assertThat(runtimeException).hasMessage("Schema 'Type' not registered")
                 .hasFieldOrPropertyWithValue("position", 10);
     }
 }

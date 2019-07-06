@@ -4,6 +4,7 @@ import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.*;
 import com.github.leeonky.dal.token.IllegalTypeException;
 import com.github.leeonky.dal.type.AllowNull;
+import com.github.leeonky.dal.type.SubTypeViaString;
 import com.github.leeonky.dal.util.*;
 
 import java.lang.reflect.Field;
@@ -15,6 +16,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CompilingContextBuilder {
     private final TypeData<PropertyAccessor> propertyAccessors = new TypeData<>();
@@ -122,7 +124,16 @@ public class CompilingContextBuilder {
                 throw new IllegalStateException(e);
             }
         } else if (schemas.contains(fieldType)) {
-            return isRightObject(fieldType, wrapperValue, subPrefix);
+            SubTypeViaString subTypeViaString = fieldType.getAnnotation(SubTypeViaString.class);
+            if (subTypeViaString != null) {
+                String propertyValue = (String) wrapperValue.getPropertyValue(subTypeViaString.property());
+                Class<?> subType = Stream.of(subTypeViaString.types())
+                        .filter(t -> t.value().equals(propertyValue))
+                        .map(SubTypeViaString.Type::type)
+                        .findFirst().get();
+                return isRightObject(subType, wrapperValue, subPrefix);
+            } else
+                return isRightObject(fieldType, wrapperValue, subPrefix);
         } else if (Iterable.class.isAssignableFrom(fieldType)) {
             int index = 0;
             Type elementType = getGenericParams(genericType, 0).orElseThrow(() ->

@@ -1,0 +1,21 @@
+package com.github.leeonky.dal.type;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+@Target({TYPE})
+@Retention(RUNTIME)
+public @interface SubTypeViaString {
+    String property();
+
+    Type[] types();
+
+    @interface Type {
+        String value();
+
+        Class<?> type();
+    }
+}

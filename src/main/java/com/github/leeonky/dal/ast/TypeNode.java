@@ -15,7 +15,7 @@ public class TypeNode extends Node {
     @Override
     public Object evaluate(CompilingContext context) {
         return context.searchTypeDefinition(type).orElseThrow(() ->
-                new RuntimeException("Type '" + type + "' not registered", getPositionBegin()));
+                new RuntimeException("Schema '" + type + "' not registered", getPositionBegin()));
     }
 
     @Override

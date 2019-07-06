@@ -1,7 +1,9 @@
 package com.github.leeonky.dal.e2e;
 
 import com.github.leeonky.dal.format.PositiveInteger;
+import com.github.leeonky.dal.format.URL;
 import com.github.leeonky.dal.type.AllowNull;
+import com.github.leeonky.dal.type.SubTypeViaString;
 import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import org.json.JSONArray;
@@ -14,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class VerifySchema extends Base {
 
@@ -70,6 +74,30 @@ class VerifySchema extends Base {
         public Map<String, Map<String, RightFieldAndType>> map;
     }
 
+    @SubTypeViaString(property = "type", types = {
+            @SubTypeViaString.Type(value = "V1", type = V1.class),
+            @SubTypeViaString.Type(value = "V2", type = V2.class)
+    })
+    public static abstract class Abstract {
+        public String type;
+    }
+
+    public static abstract class V1 extends Abstract {
+        public PositiveInteger id;
+    }
+
+    public static abstract class V2 extends Abstract {
+        public URL url;
+    }
+
+    public static class V {
+        public Abstract v;
+    }
+
+    public static class VList {
+        public List<Abstract> vs;
+    }
+
     @Nested
     class RegisterSchemaType {
         @BeforeEach
@@ -114,6 +142,9 @@ class VerifySchema extends Base {
                     .registerSchema(NestedNestedList.class)
                     .registerSchema(NestedMap.class)
                     .registerSchema(NestedNestedMap.class)
+                    .registerSchema(Abstract.class)
+                    .registerSchema(V.class)
+                    .registerSchema(VList.class)
             ;
         }
 
@@ -169,6 +200,35 @@ class VerifySchema extends Base {
             assertPass(new JSONObject("{\"map\": {\"str\": {\"str\": {\"id\": 1}}}}"), "is NestedNestedMap");
             assertFailed(new JSONObject("{\"map\": {\"str\": {\"str\": {\"id\": 0}}}}"), "is NestedNestedMap");
         }
-        //TODO polymorphic, polymorphic list
+
+        @Test
+        void should_match_specific_sub_schema() throws JSONException {
+            assertPass(new JSONObject("{\"v\": {\"id\": 1, \"type\": \"V1\"}}"), "is V");
+            assertPass(new JSONObject("{\"v\": {\"url\": \"http://www.google.com\", \"type\": \"V2\"}}"), "is V");
+
+            assertFailed(new JSONObject("{\"v\": {\"id\": 1, \"type\": V2}}"), "is V");
+            assertFailed(new JSONObject("{\"v\": {\"id\": 0, \"type\": V1}}"), "is V");
+        }
+
+        @Test
+        void should_match_specific_sub_schema_in_list() throws JSONException {
+            assertPass(new JSONObject("{\"vs\": [{\"id\": 1, \"type\": \"V1\"}]}"), "is VList");
+            assertPass(new JSONObject("{\"vs\": [{\"url\": \"http://www.google.com\", \"type\": \"V2\"}]}"), "is VList");
+
+            assertFailed(new JSONObject("{\"vs\": [{\"id\": 1, \"type\": V2}]}"), "is VList");
+            assertFailed(new JSONObject("{\"vs\": [{\"id\": 0, \"type\": V1}]}"), "is VList");
+        }
+
+        //        @Test
+        void should_error_when_no_type_property() {
+            RuntimeException runtimeException = assertThrows(RuntimeException.class,
+                    () -> dataAssert.assertData(new JSONObject("{\"v\": {\"id\": 1}}"), "is V"));
+            assertThat(runtimeException).hasMessage("");
+        }
+        //TODO polymorphic list
+        //no type property
+        //Type property data type miss match
+        //No matched subtype
     }
 }
+
