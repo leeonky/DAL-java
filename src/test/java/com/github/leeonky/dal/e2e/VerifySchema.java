@@ -98,6 +98,26 @@ class VerifySchema extends Base {
         public List<Abstract> vs;
     }
 
+    public static class NestedSubType {
+        public String type;
+    }
+
+    @SubTypeViaString(property = "type.type", types = {
+            @SubTypeViaString.Type(value = "V1", type = NestedV1.class),
+            @SubTypeViaString.Type(value = "V2", type = NestedV2.class)
+    })
+    public static class NestedAbstract {
+        public NestedSubType type;
+    }
+
+    public static class NestedV1 extends NestedAbstract {
+        public PositiveInteger id;
+    }
+
+    public static class NestedV2 extends NestedAbstract {
+        public URL url;
+    }
+
     @Nested
     class RegisterSchemaType {
         @BeforeEach
@@ -145,6 +165,7 @@ class VerifySchema extends Base {
                     .registerSchema(Abstract.class)
                     .registerSchema(V.class)
                     .registerSchema(VList.class)
+                    .registerSchema(NestedAbstract.class)
             ;
         }
 
@@ -219,16 +240,25 @@ class VerifySchema extends Base {
             assertFailed(new JSONObject("{\"vs\": [{\"id\": 0, \"type\": V1}]}"), "is VList");
         }
 
-        //        @Test
+        @Test
+        void should_match_specific_sub_schema_through_nested_property() throws JSONException {
+            assertPass(new JSONObject("{\"type\": {\"type\": \"V1\"}, \"id\": 1}"), "is NestedAbstract");
+            assertPass(new JSONObject("{\"type\": {\"type\": \"V2\"}, \"url\": \"http://www.google.com\"}"), "is NestedAbstract");
+        }
+
+        @Test
         void should_error_when_no_type_property() {
             RuntimeException runtimeException = assertThrows(RuntimeException.class,
                     () -> dataAssert.assertData(new JSONObject("{\"v\": {\"id\": 1}}"), "is V"));
-            assertThat(runtimeException).hasMessage("");
+            assertThat(runtimeException).hasMessage("Cannot guess sub type through property type value[null]");
         }
-        //TODO polymorphic list
-        //no type property
-        //Type property data type miss match
-        //No matched subtype
+
+        @Test
+        void should_error_when_no_matched_subtype() {
+            RuntimeException runtimeException = assertThrows(RuntimeException.class,
+                    () -> dataAssert.assertData(new JSONObject("{\"v\": {\"id\": 1, \"type\": V3}}"), "is V"));
+            assertThat(runtimeException).hasMessage("Cannot guess sub type through property type value[V3]");
+        }
     }
 }
 

@@ -26,6 +26,10 @@ public class WrappedObject {
     }
 
     public Object getPropertyValue(String name) {
+        if (name.contains(".")) {
+            String[] split = name.split("\\.", 2);
+            return getPropertyValueWrapper(split[0]).getPropertyValue(split[1]);
+        }
         return instance instanceof Map ?
                 ((Map) instance).get(name)
                 : getPropertyFromType(name);

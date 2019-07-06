@@ -82,13 +82,23 @@ public class CompilingContextBuilder {
         return registerSchema(name, bw -> isRightObject(clazz, bw, ""));
     }
 
-    private boolean isRightObject(Class<?> clazz, WrappedObject bw, String subPrefix) {
-        Set<Member> members = BeanUtil.findPropertyReaders(clazz);
+    private boolean isRightObject(Class<?> clazz, WrappedObject wrappedObject, String subPrefix) {
+        Class<?> type = clazz;
+        SubTypeViaString subTypeViaString = clazz.getAnnotation(SubTypeViaString.class);
+        if (subTypeViaString != null) {
+            Object value = wrappedObject.getPropertyValue(subTypeViaString.property());
+            type = Stream.of(subTypeViaString.types())
+                    .filter(t -> t.value().equals(value))
+                    .map(SubTypeViaString.Type::type)
+                    .findFirst().orElseThrow(() -> new IllegalStateException(String.format("Cannot guess sub type through property type value[%s]", value)));
+        }
+
+        Set<Member> members = BeanUtil.findPropertyReaders(type);
         Set<String> expectedFields = members.stream().map(Member::getName).collect(Collectors.toSet());
-        Set<String> actualFields = bw.getPropertyReaderNames();
+        Set<String> actualFields = wrappedObject.getPropertyReaderNames();
         for (String f : actualFields) {
             if (!expectedFields.contains(f)) {
-                System.err.printf("Unexpected field `%s` for type %s[%s]\n", f, clazz.getSimpleName(), clazz.getName());
+                System.err.printf("Unexpected field `%s` for type %s[%s]\n", f, type.getSimpleName(), type.getName());
                 return false;
             }
         }
@@ -96,10 +106,10 @@ public class CompilingContextBuilder {
             Field field = (Field) member;
             boolean allowNull = field.getAnnotation(AllowNull.class) != null;
             if (!allowNull && !actualFields.contains(field.getName())) {
-                System.err.printf("Expected field `%s` for type %s[%s], but does not exist\n", field.getName(), clazz.getSimpleName(), clazz.getName());
+                System.err.printf("Expected field `%s` for type %s[%s], but does not exist\n", field.getName(), type.getSimpleName(), type.getName());
                 return false;
             }
-            WrappedObject propertyValueWrapper = bw.getPropertyValueWrapper(member.getName());
+            WrappedObject propertyValueWrapper = wrappedObject.getPropertyValueWrapper(member.getName());
             if (allowNull && propertyValueWrapper.isNull())
                 continue;
 
@@ -116,7 +126,7 @@ public class CompilingContextBuilder {
             try {
                 Formatter formatter = (Formatter) fieldType.getConstructor().newInstance();
                 if (!formatter.isValidValue(wrapperValue.getValue())) {
-                    System.err.printf("Expected field `%s` shoub be in %s, but was [%s]\n",
+                    System.err.printf("Expected field `%s` should be in %s, but was [%s]\n",
                             subPrefix, formatter.getFormatterName(), wrapperValue.getValue());
                     return false;
                 }
@@ -124,16 +134,7 @@ public class CompilingContextBuilder {
                 throw new IllegalStateException(e);
             }
         } else if (schemas.contains(fieldType)) {
-            SubTypeViaString subTypeViaString = fieldType.getAnnotation(SubTypeViaString.class);
-            if (subTypeViaString != null) {
-                String propertyValue = (String) wrapperValue.getPropertyValue(subTypeViaString.property());
-                Class<?> subType = Stream.of(subTypeViaString.types())
-                        .filter(t -> t.value().equals(propertyValue))
-                        .map(SubTypeViaString.Type::type)
-                        .findFirst().get();
-                return isRightObject(subType, wrapperValue, subPrefix);
-            } else
-                return isRightObject(fieldType, wrapperValue, subPrefix);
+            return isRightObject(fieldType, wrapperValue, subPrefix);
         } else if (Iterable.class.isAssignableFrom(fieldType)) {
             int index = 0;
             Type elementType = getGenericParams(genericType, 0).orElseThrow(() ->
