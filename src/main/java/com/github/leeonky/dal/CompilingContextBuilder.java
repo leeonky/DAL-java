@@ -1,21 +1,24 @@
 package com.github.leeonky.dal;
 
-import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.*;
 import com.github.leeonky.dal.token.IllegalTypeException;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.SubTypeViaString;
-import com.github.leeonky.dal.util.*;
+import com.github.leeonky.dal.util.ListAccessor;
+import com.github.leeonky.dal.util.PropertyAccessor;
+import com.github.leeonky.dal.util.TypeData;
+import com.github.leeonky.dal.util.WrappedObject;
+import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.GenericType;
+import com.github.leeonky.util.PropertyReader;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CompilingContextBuilder {
@@ -35,24 +38,6 @@ public class CompilingContextBuilder {
         if (rightType)
             return supplier.get();
         throw new IllegalTypeException();
-    }
-
-    private static Optional<Type> getGenericParams(Type type, int index) {
-        return Optional.of(type)
-                .filter(ParameterizedType.class::isInstance)
-                .map(ParameterizedType.class::cast)
-                .map(p -> p.getActualTypeArguments()[index]);
-    }
-
-    private static Class<?> guessType(String subPrefix, Type elementType) {
-        Class<?> subType;
-        if (elementType instanceof Class<?>)
-            subType = (Class<?>) elementType;
-        else if (elementType instanceof ParameterizedType)
-            subType = (Class<?>) ((ParameterizedType) elementType).getRawType();
-        else
-            throw new IllegalArgumentException("Can not process " + subPrefix + " in type " + elementType);
-        return subType;
     }
 
     public CompilingContextBuilder registerValueFormat(Formatter formatter) {
@@ -82,6 +67,7 @@ public class CompilingContextBuilder {
         return registerSchema(name, bw -> isRightObject(clazz, bw, ""));
     }
 
+    @SuppressWarnings("unchecked")
     private boolean isRightObject(Class<?> clazz, WrappedObject wrappedObject, String subPrefix) {
         Class<?> type = clazz;
         SubTypeViaString subTypeViaString = clazz.getAnnotation(SubTypeViaString.class);
@@ -93,8 +79,9 @@ public class CompilingContextBuilder {
                     .findFirst().orElseThrow(() -> new IllegalStateException(String.format("Cannot guess sub type through property type value[%s]", value)));
         }
 
-        Set<Member> members = BeanUtil.findPropertyReaders(type);
-        Set<String> expectedFields = members.stream().map(Member::getName).collect(Collectors.toSet());
+        BeanClass beanClass = new BeanClass<>(type);
+        Map<String, PropertyReader<?>> propertyReaders = beanClass.getPropertyReaders();
+        Set<String> expectedFields = propertyReaders.keySet();
         Set<String> actualFields = wrappedObject.getPropertyReaderNames();
         for (String f : actualFields) {
             if (!expectedFields.contains(f)) {
@@ -102,26 +89,25 @@ public class CompilingContextBuilder {
                 return false;
             }
         }
-        for (Member member : members) {
-            Field field = (Field) member;
-            boolean allowNull = field.getAnnotation(AllowNull.class) != null;
-            if (!allowNull && !actualFields.contains(field.getName())) {
-                System.err.printf("Expected field `%s` for type %s[%s], but does not exist\n", field.getName(), type.getSimpleName(), type.getName());
+        for (PropertyReader propertyReader : propertyReaders.values()) {
+            boolean allowNull = propertyReader.getAnnotation(AllowNull.class) != null;
+            if (!allowNull && !actualFields.contains(propertyReader.getName())) {
+                System.err.printf("Expected field `%s` for type %s[%s], but does not exist\n", propertyReader.getName(), type.getSimpleName(), type.getName());
                 return false;
             }
-            WrappedObject propertyValueWrapper = wrappedObject.getPropertyValueWrapper(member.getName());
+            WrappedObject propertyValueWrapper = wrappedObject.getPropertyValueWrapper(propertyReader.getName());
             if (allowNull && propertyValueWrapper.isNull())
                 continue;
 
-            Class<?> fieldType = field.getType();
-            if (!isRightObject(subPrefix + "." + field.getName(), propertyValueWrapper, fieldType, field.getGenericType()))
+            if (!isRightObject(subPrefix + "." + propertyReader.getName(), propertyValueWrapper, propertyReader.getGenericType()))
                 return false;
         }
         return true;
     }
 
     @SuppressWarnings("unchecked")
-    private boolean isRightObject(String subPrefix, WrappedObject wrapperValue, Class<?> fieldType, Type genericType) {
+    private boolean isRightObject(String subPrefix, WrappedObject wrapperValue, GenericType genericType) {
+        Class<?> fieldType = genericType.getRawType();
         if (Formatter.class.isAssignableFrom(fieldType)) {
             try {
                 Formatter formatter = (Formatter) fieldType.getConstructor().newInstance();
@@ -137,19 +123,17 @@ public class CompilingContextBuilder {
             return isRightObject(fieldType, wrapperValue, subPrefix);
         } else if (Iterable.class.isAssignableFrom(fieldType)) {
             int index = 0;
-            Type elementType = getGenericParams(genericType, 0).orElseThrow(() ->
+            GenericType subGenericType = genericType.getGenericTypeParameter(0).orElseThrow(() ->
                     new IllegalArgumentException(subPrefix + " should be generic type"));
-            Class<?> subType = guessType(subPrefix, elementType);
             for (WrappedObject wrappedElement : wrapperValue.getWrappedList()) {
-                if (!isRightObject(String.format("%s[%d]", subPrefix, index++), wrappedElement, subType, elementType))
+                if (!isRightObject(String.format("%s[%d]", subPrefix, index++), wrappedElement, subGenericType))
                     return false;
             }
         } else if (Map.class.isAssignableFrom(fieldType)) {
-            Type elementType = getGenericParams(genericType, 1).orElseThrow(() ->
+            GenericType subGenericType = genericType.getGenericTypeParameter(1).orElseThrow(() ->
                     new IllegalArgumentException(subPrefix + " should be generic type"));
-            Class<?> subType = guessType(subPrefix, elementType);
             for (String key : wrapperValue.getPropertyReaderNames()) {
-                if (!isRightObject(subPrefix + "." + key, wrapperValue.getPropertyValueWrapper(key), subType, elementType))
+                if (!isRightObject(subPrefix + "." + key, wrapperValue.getPropertyValueWrapper(key), subGenericType))
                     return false;
             }
         }

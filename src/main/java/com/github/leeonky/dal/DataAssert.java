@@ -1,11 +1,14 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.token.SourceCode;
-import com.github.leeonky.dal.util.BeanUtil;
 
 public class DataAssert {
     private DALCompiler dalCompiler = new DALCompiler();
     private CompilingContextBuilder compilingContextBuilder = new CompilingContextBuilder();
+
+    public static String getClassName(Object obj) {
+        return obj == null ? null : obj.getClass().getName();
+    }
 
     public CompilingContextBuilder getCompilingContextBuilder() {
         return compilingContextBuilder;
@@ -16,6 +19,6 @@ public class DataAssert {
         if (result instanceof Boolean)
             return (boolean) result ? AssertResult.passedResult()
                     : AssertResult.failedResult(actual, expression);
-        throw new IllegalStateException("Verification result should be boolean but " + BeanUtil.getClassName(result));
+        throw new IllegalStateException("Verification result should be boolean but " + getClassName(result));
     }
 }

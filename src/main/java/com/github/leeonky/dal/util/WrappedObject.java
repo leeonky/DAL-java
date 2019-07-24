@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.util;
 
+import com.github.leeonky.util.BeanClass;
+
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -7,11 +9,13 @@ public class WrappedObject {
     private final Object instance;
     private final TypeData<PropertyAccessor> propertyAccessors;
     private final TypeData<ListAccessor> listAccessors;
+    private final BeanClass beanClass;
 
     public WrappedObject(Object instance, TypeData<PropertyAccessor> propertyAccessors, TypeData<ListAccessor> listAccessors) {
         this.instance = instance;
         this.propertyAccessors = propertyAccessors;
         this.listAccessors = listAccessors;
+        beanClass = instance == null ? null : new BeanClass<>(instance.getClass());
     }
 
     @SuppressWarnings("unchecked")
@@ -21,7 +25,7 @@ public class WrappedObject {
                 .orElseGet(() -> {
                     if (instance instanceof Map)
                         return ((Map) instance).keySet();
-                    return BeanUtil.findPropertyReaderNames(instance.getClass());
+                    return beanClass.getPropertyReaders().keySet();
                 });
     }
 
@@ -45,7 +49,7 @@ public class WrappedObject {
 
     public int getListSize() {
         int size = 0;
-        for (Object dummy : getList())
+        for (Object ignore : getList())
             size++;
         return size;
     }
@@ -55,9 +59,8 @@ public class WrappedObject {
         return listAccessors.getData(instance)
                 .map(l -> l.toIterable(instance))
                 .orElseGet(() -> {
-                    if (instance instanceof Iterable) {
+                    if (instance instanceof Iterable)
                         return (Iterable) instance;
-                    }
                     return () -> new Iterator() {
                         private final int length = Array.getLength(instance);
                         private int index = 0;
@@ -86,7 +89,7 @@ public class WrappedObject {
     private Object getPropertyFromType(String name) {
         return propertyAccessors.getData(instance)
                 .map(p -> checkedReturn(() -> p.getValue(instance, name)))
-                .orElseGet(() -> checkedReturn(() -> BeanUtil.getPropertyValue(instance, name)));
+                .orElseGet(() -> checkedReturn(() -> beanClass.getPropertyValue(instance, name)));
     }
 
     private Object checkedReturn(CheckedSupplier supplier) {
