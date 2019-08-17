@@ -15,7 +15,7 @@ public class WrappedObject {
         this.instance = instance;
         this.propertyAccessors = propertyAccessors;
         this.listAccessors = listAccessors;
-        beanClass = instance == null ? null : new BeanClass<>(instance.getClass());
+        beanClass = instance == null ? null : BeanClass.create(instance.getClass());
     }
 
     @SuppressWarnings("unchecked")

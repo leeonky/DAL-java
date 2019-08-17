@@ -30,7 +30,7 @@ public class CompilingContext {
     }
 
     public boolean isList(Object o) {
-        return o != null && listAccessors.containsType(o) || o instanceof Iterable || o.getClass().isArray();
+        return o != null && (listAccessors.containsType(o) || o instanceof Iterable || o.getClass().isArray());
     }
 
     public Object getInputValue() {

@@ -79,7 +79,7 @@ public class CompilingContextBuilder {
                     .findFirst().orElseThrow(() -> new IllegalStateException(String.format("Cannot guess sub type through property type value[%s]", value)));
         }
 
-        BeanClass beanClass = new BeanClass<>(type);
+        BeanClass beanClass = BeanClass.create(type);
         Map<String, PropertyReader<?>> propertyReaders = beanClass.getPropertyReaders();
         Set<String> expectedFields = propertyReaders.keySet();
         Set<String> actualFields = wrappedObject.getPropertyReaderNames();
