@@ -55,7 +55,7 @@ class VerifyTest extends Base {
         void verify_expression_return_type_should_be_boolean() {
             IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
                     () -> dataAssert.assertData(1, ""));
-            assertThat(illegalStateException).hasMessage("Verification result should be boolean but java.lang.Integer");
+            assertThat(illegalStateException).hasMessage("Verification result should be boolean but 'java.lang.Integer'");
         }
 
         @Test
@@ -89,8 +89,8 @@ class VerifyTest extends Base {
 
         @Test
         void expression_operand_type_should_be_matched() {
-            assertRuntimeException(null, " + 1", 1, "Can not plus null and java.math.BigDecimal");
-            assertRuntimeException(null, " > 1", 1, "Can not compare <null> and <1>");
+            assertRuntimeException(null, " + 1", 1, "Can not plus 'null' and 'java.math.BigDecimal'");
+            assertRuntimeException(null, " > 1", 1, "Can not compare [null] and [1]");
         }
     }
 

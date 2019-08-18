@@ -14,7 +14,7 @@ class WrappedObjectTest {
     void check_null_for_customer_schema() {
         CompilingContextBuilder compilingContextBuilder = new CompilingContextBuilder().registerPropertyAccessor(AlwaysNull.class, new PropertyAccessor<AlwaysNull>() {
             @Override
-            public Object getValue(AlwaysNull instance, String name) throws Exception {
+            public Object getValue(AlwaysNull instance, String name) {
                 return null;
             }
 
