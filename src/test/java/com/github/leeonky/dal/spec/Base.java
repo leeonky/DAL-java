@@ -1,22 +1,22 @@
-package com.github.leeonky.dal.e2e;
+package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.DataAssert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-class Base {
-    DataAssert dataAssert = new DataAssert();
+public class Base {
+    protected DataAssert dataAssert = new DataAssert();
 
-    void assertPass(Object input, String expression) {
+    protected void assertPass(Object input, String expression) {
         assertTrue(dataAssert.assertData(input, expression).isPassed());
     }
 
-    void assertFailed(Object input, String expression) {
+    protected void assertFailed(Object input, String expression) {
         assertFalse(dataAssert.assertData(input, expression).isPassed());
     }
 
-    void assertRuntimeException(Object input, String sourceCode, int position, String message) {
+    protected void assertRuntimeException(Object input, String sourceCode, int position, String message) {
         RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> dataAssert.assertData(input, sourceCode));
 
         assertThat(runtimeException)

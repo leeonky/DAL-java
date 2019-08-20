@@ -6,6 +6,7 @@ import com.github.leeonky.dal.util.ListAccessor;
 
 import java.lang.reflect.Array;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -215,9 +216,12 @@ public abstract class Operator {
             Object v1 = node1.evaluate(context);
             Object v2 = node2.evaluate(context);
             Optional<ListAccessor> optionalArrayType = context.searchListAccessor(v1);
+            int index = (int) v2;
             if (optionalArrayType.isPresent())
-                return optionalArrayType.get().get(v1, (int) v2);
-            if (v1 instanceof Iterable) {
+                return optionalArrayType.get().get(v1, index);
+            if (v1 instanceof List)
+                return ((List) v1).get(index);
+            else if (v1 instanceof Iterable) {
                 Iterator iterator = ((Iterable) v1).iterator();
                 for (int i = 0; iterator.hasNext(); i++) {
                     Object object = iterator.next();
@@ -226,7 +230,7 @@ public abstract class Operator {
                 }
                 throw new ArrayIndexOutOfBoundsException();
             }
-            return Array.get(v1, (int) v2);
+            return Array.get(v1, index);
         }
     }
 }

@@ -26,10 +26,11 @@ public class DALCompiler {
     }
 
     private Node compileExpression(TokenStream tokenStream, BracketNode bracketNode, boolean referenceInput) {
-        Node node = compileValueNode(tokenStream, referenceInput).get();
+        Node node = compileValueNode(tokenStream, referenceInput).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expect a value"));
         while (tokenStream.hasTokens() && !tokenStream.isCurrentEndBracketAndTakeThenFinishBracket(bracketNode)) {
             if (tokenStream.isCurrentKeywordAndTake(IS))
-                node = new TypeAssertionExpression(node, compileTypeNode(tokenStream).get(),
+                node = new TypeAssertionExpression(node, compileTypeNode(tokenStream)
+                        .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "operand of operator is must be a type")),
                         (tokenStream.hasTokens() && tokenStream.isCurrentKeywordAndTake(WHICH))
                                 ? compileExpression(tokenStream, bracketNode, false) : new ConstNode(true));
             else
@@ -52,7 +53,8 @@ public class DALCompiler {
                 return of(compileBracket(tokenStream));
             else if (tokenStream.isSingleUnaryOperator(isFirstNode)) {
                 Token unaryOperatorToken = tokenStream.pop();
-                return of(new Expression(new ConstNode(null), unaryOperatorToken.toOperator(true), compileValueNode(tokenStream, false).get()));
+                return of(new Expression(new ConstNode(null), unaryOperatorToken.toOperator(true), compileValueNode(tokenStream, false)
+                        .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expect a value"))));
             }
         }
         if (isFirstNode && node == null)

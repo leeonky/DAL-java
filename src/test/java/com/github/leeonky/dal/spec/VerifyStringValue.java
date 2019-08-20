@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.e2e;
+package com.github.leeonky.dal.spec;
 
 import org.junit.jupiter.api.Test;
 

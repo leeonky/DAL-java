@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.e2e;
+package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.AssertResult;
 import com.github.leeonky.dal.util.PropertyAccessor;
@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class VerifyTest extends Base {
+class BasicVerify extends Base {
 
     @Setter
     @Accessors(chain = true)

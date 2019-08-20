@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.e2e;
+package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.util.ListAccessor;
 import org.json.JSONArray;
