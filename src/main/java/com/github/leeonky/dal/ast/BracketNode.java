@@ -1,13 +1,13 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.RuntimeContext;
 
 public class BracketNode extends Node {
     private Node node;
     private boolean finished = false;
 
     @Override
-    public Object evaluate(CompilingContext context) {
+    public Object evaluate(RuntimeContext context) {
         return node.evaluate(context);
     }
 

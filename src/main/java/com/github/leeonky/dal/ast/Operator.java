@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.util.Calculator;
 import com.github.leeonky.dal.util.ListAccessor;
 
@@ -32,7 +32,7 @@ public abstract class Operator {
         return null;
     }
 
-    public Object calculate(Node node1, Node node2, CompilingContext context) {
+    public Object calculate(Node node1, Node node2, RuntimeContext context) {
         return calculate(node1.evaluate(context), node2.evaluate(context));
     }
 
@@ -165,7 +165,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Node node1, Node node2, CompilingContext context) {
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
             return Calculator.and(() -> node1.evaluate(context), () -> node2.evaluate(context));
         }
     }
@@ -176,7 +176,7 @@ public abstract class Operator {
         }
 
         @Override
-        public Object calculate(Node node1, Node node2, CompilingContext context) {
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
             return Calculator.or(() -> node1.evaluate(context), () -> node2.evaluate(context));
         }
     }
@@ -212,7 +212,7 @@ public abstract class Operator {
 
         @Override
         @SuppressWarnings("unchecked")
-        public Object calculate(Node node1, Node node2, CompilingContext context) {
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
             Object v1 = node1.evaluate(context);
             Object v2 = node2.evaluate(context);
             Optional<ListAccessor> optionalArrayType = context.searchListAccessor(v1);

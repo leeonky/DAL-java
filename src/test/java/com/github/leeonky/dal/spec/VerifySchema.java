@@ -25,7 +25,7 @@ class VerifySchema extends Base {
 
     @Test
     void should_support_register_customer_object_type() throws JSONException {
-        dataAssert.getCompilingContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
+        dataAssert.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
             @Override
             public Object getValue(JSONObject instance, String name) {
                 return "mocked return value of " + name;
@@ -37,7 +37,7 @@ class VerifySchema extends Base {
             }
         });
 
-        dataAssert.getCompilingContextBuilder().registerSchema("Bean",
+        dataAssert.getRuntimeContextBuilder().registerSchema("Bean",
                 wrappedObject -> wrappedObject.getPropertyReaderNames() == PROPERTY_NAMES);
 
         assertPass(new JSONObject("{\"f1\": 1, \"f2\": 1}"), "is Bean which .f1='mocked return value of f1'");
@@ -122,7 +122,7 @@ class VerifySchema extends Base {
     class RegisterSchemaType {
         @BeforeEach
         void registerJson() {
-            dataAssert.getCompilingContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
+            dataAssert.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
                 @Override
                 public Object getValue(JSONObject instance, String name) {
                     try {

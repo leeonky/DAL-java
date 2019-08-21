@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
 
 import java.util.Objects;
@@ -13,8 +13,8 @@ public class TypeNode extends Node {
     }
 
     @Override
-    public Object evaluate(CompilingContext context) {
-        return context.searchTypeDefinition(type).orElseThrow(() ->
+    public Object evaluate(RuntimeContext context) {
+        return context.searchConstructor(type).orElseThrow(() ->
                 new RuntimeException("Schema '" + type + "' not registered", getPositionBegin()));
     }
 

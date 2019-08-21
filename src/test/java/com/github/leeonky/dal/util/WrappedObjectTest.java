@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.util;
 
-import com.github.leeonky.dal.CompilingContextBuilder;
+import com.github.leeonky.dal.RuntimeContextBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -12,7 +12,7 @@ class WrappedObjectTest {
 
     @Test
     void check_null_for_customer_schema() {
-        CompilingContextBuilder compilingContextBuilder = new CompilingContextBuilder().registerPropertyAccessor(AlwaysNull.class, new PropertyAccessor<AlwaysNull>() {
+        RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder().registerPropertyAccessor(AlwaysNull.class, new PropertyAccessor<AlwaysNull>() {
             @Override
             public Object getValue(AlwaysNull instance, String name) {
                 return null;
@@ -29,11 +29,11 @@ class WrappedObjectTest {
             }
         });
 
-        assertTrue(compilingContextBuilder.wrap(new AlwaysNull()).isNull());
-        assertTrue(compilingContextBuilder.wrap(null).isNull());
-        assertFalse(compilingContextBuilder.wrap(new Object()).isNull());
+        assertTrue(runtimeContextBuilder.build(null).wrap(new AlwaysNull()).isNull());
+        assertTrue(runtimeContextBuilder.build(null).wrap(null).isNull());
+        assertFalse(runtimeContextBuilder.build(null).wrap(new Object()).isNull());
     }
 
-    static class AlwaysNull {
+    private static class AlwaysNull {
     }
 }

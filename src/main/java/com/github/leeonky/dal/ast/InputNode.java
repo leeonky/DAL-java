@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.RuntimeContext;
 
 public class InputNode extends Node {
     public static final InputNode INSTANCE = new InputNode();
@@ -9,7 +9,7 @@ public class InputNode extends Node {
     }
 
     @Override
-    public Object evaluate(CompilingContext context) {
+    public Object evaluate(RuntimeContext context) {
         return context.getInputValue();
     }
 }

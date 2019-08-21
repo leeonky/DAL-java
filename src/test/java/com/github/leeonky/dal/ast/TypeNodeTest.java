@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.CompilingContextBuilder;
+import com.github.leeonky.dal.RuntimeContextBuilder;
 import com.github.leeonky.dal.RuntimeException;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +14,7 @@ class TypeNodeTest {
         TypeNode typeNode = new TypeNode("Type");
         typeNode.setPositionBegin(10);
         final RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                () -> typeNode.evaluate(new CompilingContextBuilder().build(null)));
+                () -> typeNode.evaluate(new RuntimeContextBuilder().build(null)));
 
         assertThat(runtimeException).hasMessage("Schema 'Type' not registered")
                 .hasFieldOrPropertyWithValue("position", 10);

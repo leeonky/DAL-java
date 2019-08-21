@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
 
 import java.util.Objects;
@@ -27,7 +27,7 @@ public class Expression extends Node {
     }
 
     @Override
-    public Object evaluate(CompilingContext context) {
+    public Object evaluate(RuntimeContext context) {
         try {
             return operator.calculate(node1, node2, context);
         } catch (IllegalArgumentException ex) {

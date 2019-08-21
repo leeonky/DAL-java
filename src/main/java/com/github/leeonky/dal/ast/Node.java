@@ -1,11 +1,11 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.RuntimeContext;
 
 public abstract class Node {
     private int positionBegin, positionEnd;
 
-    public abstract Object evaluate(CompilingContext context);
+    public abstract Object evaluate(RuntimeContext context);
 
     public int getPositionEnd() {
         return positionEnd;

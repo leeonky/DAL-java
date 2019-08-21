@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.RuntimeContext;
 
 import java.util.Objects;
 
@@ -14,7 +14,7 @@ public class ConstNode extends Node {
     }
 
     @Override
-    public Object evaluate(CompilingContext context) {
+    public Object evaluate(RuntimeContext context) {
         return value;
     }
 

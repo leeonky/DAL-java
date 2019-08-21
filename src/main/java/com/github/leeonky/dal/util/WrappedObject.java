@@ -18,6 +18,10 @@ public class WrappedObject {
         beanClass = instance == null ? null : BeanClass.create(instance.getClass());
     }
 
+    public boolean isList() {
+        return instance != null && (listAccessors.containsType(instance) || instance instanceof Iterable || instance.getClass().isArray());
+    }
+
     @SuppressWarnings("unchecked")
     public Set<String> getPropertyReaderNames() {
         return propertyAccessors.getData(instance)

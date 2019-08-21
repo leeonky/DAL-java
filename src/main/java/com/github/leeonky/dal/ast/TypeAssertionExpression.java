@@ -1,11 +1,11 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.Constructor;
+import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
 import com.github.leeonky.dal.token.IllegalTypeException;
 
 import java.util.Objects;
-import java.util.function.Function;
 
 public class TypeAssertionExpression extends Node {
     private final Node instance;
@@ -19,10 +19,9 @@ public class TypeAssertionExpression extends Node {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Object evaluate(CompilingContext context) {
+    public Object evaluate(RuntimeContext context) {
         try {
-            Object value = ((Function) typeNode.evaluate(context)).apply(instance.evaluate(context));
+            Object value = ((Constructor) typeNode.evaluate(context)).apply(instance.evaluate(context), context);
             return context.wrapInputValueAndEvaluate(value, assertion);
         } catch (IllegalTypeException ignore) {
             return false;

@@ -1,18 +1,18 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.CompilingContextBuilder;
+import com.github.leeonky.dal.RuntimeContextBuilder;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class TypeAssertionExpressionTest {
-    CompilingContextBuilder compilingContextBuilder = new CompilingContextBuilder();
+    RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
 
     @Test
     void unexpected_data_type_should_return_false() {
         assertFalse((Boolean) new TypeAssertionExpression(new ConstNode(1), new TypeNode("String"),
-                new ConstNode(true)).evaluate(compilingContextBuilder.build(null)));
+                new ConstNode(true)).evaluate(runtimeContextBuilder.build(null)));
     }
 
     @Test
@@ -21,7 +21,7 @@ class TypeAssertionExpressionTest {
                 new Expression(new PropertyNode(InputNode.INSTANCE, asList("protocol")),
                         new Operator.Equal(),
                         new ConstNode("http")
-                )).evaluate(compilingContextBuilder.build("http://www.baidu.com"));
+                )).evaluate(runtimeContextBuilder.build("http://www.baidu.com"));
 
     }
 }

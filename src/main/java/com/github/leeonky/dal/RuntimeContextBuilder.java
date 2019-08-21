@@ -16,37 +16,31 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class CompilingContextBuilder {
+public class RuntimeContextBuilder {
     private final TypeData<PropertyAccessor> propertyAccessors = new TypeData<>();
-    private final Map<String, Function<Object, Object>> typeDefinitions = new LinkedHashMap<>();
     private final TypeData<ListAccessor> listAccessors = new TypeData<>();
+    private final Map<String, Constructor> constructors = new LinkedHashMap<>();
     private final Set<Class<?>> schemas = new HashSet<>();
 
-    public CompilingContextBuilder() {
+    public RuntimeContextBuilder() {
         registerValueFormat(new PositiveInteger());
         registerValueFormat(new URL());
         registerValueFormat(new Instant());
         registerValueFormat(new FormatterString());
+
+        registerSchema("List", WrappedObject::isList);
     }
 
-    public static <T> T requiredType(boolean rightType, Supplier<T> supplier) {
-        if (rightType)
-            return supplier.get();
-        throw new IllegalTypeException();
-    }
-
-    public CompilingContextBuilder registerValueFormat(Formatter formatter) {
+    public RuntimeContextBuilder registerValueFormat(Formatter formatter) {
         return registerValueFormat(formatter.getFormatterName(), formatter);
     }
 
     @SuppressWarnings("unchecked")
-    public CompilingContextBuilder registerValueFormat(String name, Formatter formatter) {
-        typeDefinitions.put(name, o -> {
+    public RuntimeContextBuilder registerValueFormat(String name, Formatter formatter) {
+        constructors.put(name, (o, context) -> {
             if (formatter.isValidType(o))
                 return formatter.toValue(o);
             throw new IllegalTypeException();
@@ -54,15 +48,15 @@ public class CompilingContextBuilder {
         return this;
     }
 
-    public CompilingContext build(Object inputValue) {
-        return new CompilingContext(inputValue, propertyAccessors, typeDefinitions, listAccessors);
+    public RuntimeContext build(Object inputValue) {
+        return new RuntimeContext(inputValue, propertyAccessors, constructors, listAccessors);
     }
 
-    public CompilingContextBuilder registerSchema(Class<?> clazz) {
+    public RuntimeContextBuilder registerSchema(Class<?> clazz) {
         return registerSchema(clazz.getSimpleName(), clazz);
     }
 
-    public CompilingContextBuilder registerSchema(String name, Class<?> clazz) {
+    public RuntimeContextBuilder registerSchema(String name, Class<?> clazz) {
         schemas.add(clazz);
         return registerSchema(name, bw -> isRightObject(clazz, bw, ""));
     }
@@ -140,22 +134,21 @@ public class CompilingContextBuilder {
         return true;
     }
 
-    public CompilingContextBuilder registerSchema(String name, Predicate<WrappedObject> predicate) {
-        typeDefinitions.put(name, o -> requiredType(o != null &&
-                predicate.test(wrap(o)), () -> o));
+    public RuntimeContextBuilder registerSchema(String name, Predicate<WrappedObject> predicate) {
+        constructors.put(name, (o, context) -> {
+            if (o != null && predicate.test(context.wrap(o)))
+                return o;
+            throw new IllegalTypeException();
+        });
         return this;
     }
 
-    public WrappedObject wrap(Object o) {
-        return new WrappedObject(o, propertyAccessors, listAccessors);
-    }
-
-    public <T> CompilingContextBuilder registerPropertyAccessor(Class<T> type, PropertyAccessor<T> propertyAccessor) {
+    public <T> RuntimeContextBuilder registerPropertyAccessor(Class<T> type, PropertyAccessor<T> propertyAccessor) {
         propertyAccessors.put(type, propertyAccessor);
         return this;
     }
 
-    public <T> CompilingContextBuilder registerListAccessor(Class<T> type, ListAccessor<T> listAccessor) {
+    public <T> RuntimeContextBuilder registerListAccessor(Class<T> type, ListAccessor<T> listAccessor) {
         listAccessors.put(type, listAccessor);
         return this;
     }

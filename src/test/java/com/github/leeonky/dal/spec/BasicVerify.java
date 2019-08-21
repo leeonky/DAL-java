@@ -114,7 +114,7 @@ class BasicVerify extends Base {
 
         @Test
         void should_support_register_customer_getter() throws JSONException {
-            dataAssert.getCompilingContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
+            dataAssert.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
                 @Override
                 public Object getValue(JSONObject instance, String name) throws Exception {
                     return instance.get(name);

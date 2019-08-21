@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.CompilingContext;
+import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
 import com.github.leeonky.dal.util.WrappedObject;
 
@@ -17,16 +17,16 @@ public class PropertyNode extends Node {
     }
 
     @Override
-    public Object evaluate(CompilingContext context) {
+    public Object evaluate(RuntimeContext context) {
         Object instance = instanceNode.evaluate(context);
         for (String name : properties)
             instance = getPropertyValue(instance, name, context);
         return instance;
     }
 
-    private Object getPropertyValue(Object instance, String name, CompilingContext context) {
+    private Object getPropertyValue(Object instance, String name, RuntimeContext context) {
         WrappedObject wrappedObject = context.wrap(instance);
-        if ("size".equals(name) && context.isList(instance))
+        if ("size".equals(name) && wrappedObject.isList())
             return wrappedObject.getListSize();
         try {
             return wrappedObject.getPropertyValue(name);

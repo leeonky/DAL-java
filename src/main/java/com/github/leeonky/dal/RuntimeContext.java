@@ -9,45 +9,36 @@ import com.github.leeonky.dal.util.WrappedObject;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
-import static com.github.leeonky.dal.CompilingContextBuilder.requiredType;
-
-public class CompilingContext {
+public class RuntimeContext {
     private final TypeData<PropertyAccessor> propertyAccessors;
     private final TypeData<ListAccessor> listAccessors;
     private final LinkedList<Object> wrappedValueStack = new LinkedList<>();
-    private final Map<String, Function<Object, Object>> typeDefinitions;
+    private final Map<String, Constructor> constructors;
 
-    public CompilingContext(Object inputValue, TypeData<PropertyAccessor> propertyAccessors,
-                            Map<String, Function<Object, Object>> typeDefinitions, TypeData<ListAccessor> listAccessors) {
+    public RuntimeContext(Object inputValue, TypeData<PropertyAccessor> propertyAccessors,
+                          Map<String, Constructor> constructors, TypeData<ListAccessor> listAccessors) {
+        wrappedValueStack.push(inputValue);
+        this.constructors = constructors;
         this.propertyAccessors = propertyAccessors;
         this.listAccessors = listAccessors;
-        wrappedValueStack.add(inputValue);
-        this.typeDefinitions = typeDefinitions;
-
-        typeDefinitions.put("List", o -> requiredType(isList(o), () -> o));
-    }
-
-    public boolean isList(Object o) {
-        return o != null && (listAccessors.containsType(o) || o instanceof Iterable || o.getClass().isArray());
     }
 
     public Object getInputValue() {
-        return wrappedValueStack.getLast();
+        return wrappedValueStack.getFirst();
     }
 
     public Object wrapInputValueAndEvaluate(Object value, Node node) {
         try {
-            wrappedValueStack.add(value);
+            wrappedValueStack.push(value);
             return node.evaluate(this);
         } finally {
-            wrappedValueStack.removeLast();
+            wrappedValueStack.pop();
         }
     }
 
-    public Optional<Function<Object, Object>> searchTypeDefinition(String type) {
-        return Optional.ofNullable(typeDefinitions.get(type));
+    public Optional<Constructor> searchConstructor(String type) {
+        return Optional.ofNullable(constructors.get(type));
     }
 
     public Optional<ListAccessor> searchListAccessor(Object object) {

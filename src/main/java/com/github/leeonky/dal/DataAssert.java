@@ -6,14 +6,14 @@ import static com.github.leeonky.util.BeanClass.getClassName;
 
 public class DataAssert {
     private DALCompiler dalCompiler = new DALCompiler();
-    private CompilingContextBuilder compilingContextBuilder = new CompilingContextBuilder();
+    private RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
 
-    public CompilingContextBuilder getCompilingContextBuilder() {
-        return compilingContextBuilder;
+    public RuntimeContextBuilder getRuntimeContextBuilder() {
+        return runtimeContextBuilder;
     }
 
     public AssertResult assertData(Object actual, String expression) {
-        Object result = dalCompiler.compile(new SourceCode(expression)).evaluate(compilingContextBuilder.build(actual));
+        Object result = dalCompiler.compile(new SourceCode(expression)).evaluate(runtimeContextBuilder.build(actual));
         if (result instanceof Boolean)
             return (boolean) result ? AssertResult.passedResult()
                     : AssertResult.failedResult(actual, expression);
