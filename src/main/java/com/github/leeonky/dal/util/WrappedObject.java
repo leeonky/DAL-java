@@ -1,9 +1,12 @@
 package com.github.leeonky.dal.util;
 
+import com.github.leeonky.dal.RuntimeContext;
+import com.github.leeonky.dal.type.SubType;
 import com.github.leeonky.util.BeanClass;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class WrappedObject {
     private final Object instance;
@@ -18,7 +21,7 @@ public class WrappedObject {
         beanClass = instance == null ? null : BeanClass.create(instance.getClass());
     }
 
-    public boolean isList() {
+    public boolean isList(RuntimeContext context) {
         return instance != null && (listAccessors.containsType(instance) || instance instanceof Iterable || instance.getClass().isArray());
     }
 
@@ -109,6 +112,19 @@ public class WrappedObject {
         return propertyAccessors.getData(instance)
                 .map(p -> p.isNull(instance))
                 .orElseGet(() -> Objects.equals(instance, null));
+    }
+
+    public BeanClass getPolymorphicSchemaType(Class<?> superSchemaType) {
+        Class<?> type = superSchemaType;
+        SubType subType = superSchemaType.getAnnotation(SubType.class);
+        if (subType != null) {
+            Object value = getPropertyValue(subType.property());
+            type = Stream.of(subType.types())
+                    .filter(t -> t.value().equals(value))
+                    .map(SubType.Type::type)
+                    .findFirst().orElseThrow(() -> new IllegalStateException(String.format("Cannot guess sub type through property type value[%s]", value)));
+        }
+        return BeanClass.create(type);
     }
 
     interface CheckedSupplier {

@@ -3,7 +3,7 @@ package com.github.leeonky.dal.spec;
 import com.github.leeonky.dal.format.PositiveInteger;
 import com.github.leeonky.dal.format.URL;
 import com.github.leeonky.dal.type.AllowNull;
-import com.github.leeonky.dal.type.SubTypeViaString;
+import com.github.leeonky.dal.type.SubType;
 import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import org.json.JSONArray;
@@ -38,7 +38,7 @@ class VerifySchema extends Base {
         });
 
         dataAssert.getRuntimeContextBuilder().registerSchema("Bean",
-                wrappedObject -> wrappedObject.getPropertyReaderNames() == PROPERTY_NAMES);
+                (wrappedObject, context) -> wrappedObject.getPropertyReaderNames() == PROPERTY_NAMES);
 
         assertPass(new JSONObject("{\"f1\": 1, \"f2\": 1}"), "is Bean which .f1='mocked return value of f1'");
         assertPass(null, "= null");
@@ -74,9 +74,9 @@ class VerifySchema extends Base {
         public Map<String, Map<String, RightFieldAndType>> map;
     }
 
-    @SubTypeViaString(property = "type", types = {
-            @SubTypeViaString.Type(value = "V1", type = V1.class),
-            @SubTypeViaString.Type(value = "V2", type = V2.class)
+    @SubType(property = "type", types = {
+            @SubType.Type(value = "V1", type = V1.class),
+            @SubType.Type(value = "V2", type = V2.class)
     })
     public static abstract class Abstract {
         public String type;
@@ -102,9 +102,9 @@ class VerifySchema extends Base {
         public String type;
     }
 
-    @SubTypeViaString(property = "type.type", types = {
-            @SubTypeViaString.Type(value = "V1", type = NestedV1.class),
-            @SubTypeViaString.Type(value = "V2", type = NestedV2.class)
+    @SubType(property = "type.type", types = {
+            @SubType.Type(value = "V1", type = NestedV1.class),
+            @SubType.Type(value = "V2", type = NestedV2.class)
     })
     public static class NestedAbstract {
         public NestedSubType type;

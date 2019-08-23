@@ -26,7 +26,7 @@ public class PropertyNode extends Node {
 
     private Object getPropertyValue(Object instance, String name, RuntimeContext context) {
         WrappedObject wrappedObject = context.wrap(instance);
-        if ("size".equals(name) && wrappedObject.isList())
+        if ("size".equals(name) && wrappedObject.isList(context))
             return wrappedObject.getListSize();
         try {
             return wrappedObject.getPropertyValue(name);
