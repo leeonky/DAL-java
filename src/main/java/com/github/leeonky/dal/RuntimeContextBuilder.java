@@ -52,7 +52,7 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerSchema(String name, Class<?> clazz) {
         schemas.add(clazz);
-        return registerSchema(name, (bw, context) -> context.verifySchema(clazz, bw, "", this));
+        return registerSchema(name, (bw, context) -> context.verifySchema(clazz, bw, ""));
     }
 
     public RuntimeContextBuilder registerSchema(String name, BiFunction<WrappedObject, RuntimeContext, Boolean> predicate) {
