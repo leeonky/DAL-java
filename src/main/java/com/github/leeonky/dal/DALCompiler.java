@@ -29,14 +29,12 @@ public class DALCompiler {
         Node node = compileValueNode(tokenStream, referenceInput).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expect a value"));
         while (tokenStream.hasTokens() && !tokenStream.isCurrentEndBracketAndTakeThenFinishBracket(bracketNode)) {
             if (tokenStream.isCurrentKeywordAndTake(IS))
-                node = new TypeAssertionExpression(node, compileTypeNode(tokenStream)
-                        .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "operand of operator is must be a type")),
-                        (tokenStream.hasTokens() && tokenStream.isCurrentKeywordAndTake(WHICH))
-                                ? compileExpression(tokenStream, bracketNode, false) : new ConstNode(true));
+                node = new TypeAssertionExpression(node,
+                        compileTypeNode(tokenStream).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "operand of operator is must be a type")),
+                        (tokenStream.hasTokens() && tokenStream.isCurrentKeywordAndTake(WHICH)) ? compileExpression(tokenStream, bracketNode, false) : new ConstNode(true));
             else
                 node = new Expression(node, tokenStream.pop().toOperator(false),
-                        compileValueNode(tokenStream, false)
-                                .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished")))
+                        compileValueNode(tokenStream, false).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished")))
                         .adjustOperatorOrder();
         }
         return node;
@@ -50,7 +48,7 @@ public class DALCompiler {
             else if (tokenStream.isCurrentSingleEvaluateNode())
                 node = InputNode.INSTANCE;
             else if (tokenStream.isCurrentBeginBracket())
-                return of(compileBracket(tokenStream));
+                node = compileBracket(tokenStream);
             else if (tokenStream.isSingleUnaryOperator(isFirstNode)) {
                 Token unaryOperatorToken = tokenStream.pop();
                 return of(new Expression(new ConstNode(null), unaryOperatorToken.toOperator(true), compileValueNode(tokenStream, false)

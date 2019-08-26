@@ -54,6 +54,13 @@ class DALCompilerTest {
         void access_one_const_value_property_ignore_root_value() {
             assertCompileNode("''.empty", new PropertyNode(new ConstNode(""), singletonList("empty")));
         }
+
+        @Test
+        void access_property_after_bracket() {
+            BracketNode bracketNode = new BracketNode();
+            bracketNode.setNode(new ConstNode(""));
+            assertCompileNode("('').empty", new PropertyNode(bracketNode, singletonList("empty")));
+        }
     }
 
     @Nested

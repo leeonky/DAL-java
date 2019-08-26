@@ -96,10 +96,11 @@ public class RuntimeContext {
         return propertyReader -> propertyReader.getAnnotation(AllowNull.class) != null;
     }
 
+    @SuppressWarnings("unchecked")
     private boolean verifySchemaInGenericType(String subPrefix, WrappedObject wrapperObject, GenericType genericType) {
         Class<?> fieldType = genericType.getRawType();
         if (Formatter.class.isAssignableFrom(fieldType))
-            return verifyFormatterValue(subPrefix, wrapperObject, fieldType);
+            return verifyFormatterValue(subPrefix, wrapperObject, (Formatter<Object>) BeanClass.newInstance(fieldType));
         else if (schemas.contains(fieldType))
             return verifySchema(fieldType, wrapperObject, subPrefix);
         else if (Iterable.class.isAssignableFrom(fieldType))
@@ -112,10 +113,9 @@ public class RuntimeContext {
     private boolean verifyMap(String subPrefix, WrappedObject wrapperObject, GenericType genericType) {
         GenericType subGenericType = genericType.getGenericTypeParameter(1).orElseThrow(() ->
                 new IllegalArgumentException(subPrefix + " should be generic type"));
-        for (String key : wrapperObject.getPropertyReaderNames())
-            if (!verifySchemaInGenericType(subPrefix + "." + key, wrapperObject.getPropertyValueWrapper(key), subGenericType))
-                return false;
-        return true;
+        return wrapperObject.getPropertyReaderNames().stream()
+                .allMatch(key -> verifySchemaInGenericType(subPrefix + "." + key,
+                        wrapperObject.getPropertyValueWrapper(key), subGenericType));
     }
 
     private boolean verifyList(String subPrefix, WrappedObject wrapperObject, GenericType genericType) {
@@ -128,14 +128,11 @@ public class RuntimeContext {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
-    private boolean verifyFormatterValue(String subPrefix, WrappedObject wrapperObject, Class<?> fieldType) {
-        Formatter formatter = (Formatter) BeanClass.newInstance(fieldType);
-        if (!formatter.isValidValue(wrapperObject.getValue())) {
-            System.err.printf("Expected field `%s` should be in %s, but was [%s]\n",
-                    subPrefix, formatter.getFormatterName(), wrapperObject.getValue());
-            return false;
-        }
-        return true;
+    private boolean verifyFormatterValue(String subPrefix, WrappedObject wrapperObject, Formatter<Object> formatter) {
+        if (formatter.isValidValue(wrapperObject.getValue()))
+            return true;
+        System.err.printf("Expected field `%s` should be in %s, but was [%s]\n",
+                subPrefix, formatter.getFormatterName(), wrapperObject.getValue());
+        return false;
     }
 }
