@@ -5,9 +5,7 @@ import com.github.leeonky.dal.util.Calculator;
 import com.github.leeonky.dal.util.ListAccessor;
 
 import java.lang.reflect.Array;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public abstract class Operator {
@@ -222,12 +220,10 @@ public abstract class Operator {
             if (v1 instanceof List)
                 return ((List) v1).get(index);
             else if (v1 instanceof Iterable) {
-                Iterator iterator = ((Iterable) v1).iterator();
-                for (int i = 0; iterator.hasNext(); i++) {
-                    Object object = iterator.next();
-                    if (Objects.equals(i, v2))
+                int i = 0;
+                for (Object object : (Iterable) v1)
+                    if (i++ == index)
                         return object;
-                }
                 throw new ArrayIndexOutOfBoundsException();
             }
             return Array.get(v1, index);

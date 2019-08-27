@@ -26,7 +26,7 @@ public class DALCompiler {
     }
 
     private Node compileExpression(TokenStream tokenStream, BracketNode bracketNode, boolean referenceInput) {
-        Node node = compileValueNode(tokenStream, referenceInput).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expect a value"));
+        Node node = compileOneNode(tokenStream, referenceInput).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expect a value"));
         while (tokenStream.hasTokens() && !tokenStream.isCurrentEndBracketAndTakeThenFinishBracket(bracketNode)) {
             if (tokenStream.isCurrentKeywordAndTake(IS))
                 node = new TypeAssertionExpression(node,
@@ -34,13 +34,39 @@ public class DALCompiler {
                         (tokenStream.hasTokens() && tokenStream.isCurrentKeywordAndTake(WHICH)) ? compileExpression(tokenStream, bracketNode, false) : new ConstNode(true));
             else
                 node = new Expression(node, tokenStream.pop().toOperator(false),
-                        compileValueNode(tokenStream, false).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished")))
+                        compileOneNode(tokenStream, false).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished")))
                         .adjustOperatorOrder();
         }
         return node;
     }
 
-    private Optional<Node> compileValueNode(TokenStream tokenStream, boolean isFirstNode) {
+    private Optional<Node> compileOneNode(TokenStream tokenStream, boolean isFirstNode) {
+        if (tokenStream.hasTokens() && tokenStream.isSingleUnaryOperator(isFirstNode))
+            return of(new Expression(new ConstNode(null), tokenStream.pop().toOperator(true), compileOneNode(tokenStream, false)
+                    .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expect a value"))));
+        return ofNullable(compilePropertyOrIndexChain(tokenStream, compileOperand(tokenStream, isFirstNode)));
+    }
+
+    private Node compilePropertyOrIndexChain(TokenStream tokenStream, Node node) {
+        while (tokenStream.hasTokens() && tokenStream.isCurrentSingleEvaluateNode()) {
+            Token token = tokenStream.pop();
+            switch (token.getType()) {
+                case PROPERTY:
+                    node = new PropertyNode(node, token.getProperties());
+                    node.setPositionBegin(token.getPositionBegin());
+                    node.setPositionEnd(token.getPositionEnd());
+                    break;
+                case CONST_INDEX:
+                    node = new Expression(node, new Operator.Index(), new ConstNode(token.getValue()));
+                    node.setPositionBegin(token.getPositionBegin());
+                    node.setPositionEnd(token.getPositionEnd());
+                    break;
+            }
+        }
+        return node;
+    }
+
+    private Node compileOperand(TokenStream tokenStream, boolean isFirstNode) {
         Node node = null;
         if (tokenStream.hasTokens()) {
             if (tokenStream.currentType() == Token.Type.CONST_VALUE)
@@ -49,31 +75,10 @@ public class DALCompiler {
                 node = InputNode.INSTANCE;
             else if (tokenStream.isCurrentBeginBracket())
                 node = compileBracket(tokenStream);
-            else if (tokenStream.isSingleUnaryOperator(isFirstNode)) {
-                Token unaryOperatorToken = tokenStream.pop();
-                return of(new Expression(new ConstNode(null), unaryOperatorToken.toOperator(true), compileValueNode(tokenStream, false)
-                        .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expect a value"))));
-            }
         }
         if (isFirstNode && node == null)
-            return of(InputNode.INSTANCE);
-        if (node != null)
-            while (tokenStream.hasTokens() && tokenStream.isCurrentSingleEvaluateNode()) {
-                Token token = tokenStream.pop();
-                switch (token.getType()) {
-                    case PROPERTY:
-                        node = new PropertyNode(node, token.getProperties());
-                        node.setPositionBegin(token.getPositionBegin());
-                        node.setPositionEnd(token.getPositionEnd());
-                        break;
-                    case CONST_INDEX:
-                        node = new Expression(node, new Operator.Index(), new ConstNode(token.getValue()));
-                        node.setPositionBegin(token.getPositionBegin());
-                        node.setPositionEnd(token.getPositionEnd());
-                        break;
-                }
-            }
-        return ofNullable(node);
+            node = InputNode.INSTANCE;
+        return node;
     }
 
     private Optional<TypeNode> compileTypeNode(TokenStream tokenStream) {
