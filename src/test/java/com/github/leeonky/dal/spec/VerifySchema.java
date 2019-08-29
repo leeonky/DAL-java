@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
+import static com.github.leeonky.dal.NameStrategy.SIMPLE_NAME_WITH_PARENT;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -258,6 +259,13 @@ class VerifySchema extends Base {
             RuntimeException runtimeException = assertThrows(RuntimeException.class,
                     () -> dataAssert.assertData(new JSONObject("{\"v\": {\"id\": 1, \"type\": V3}}"), "is V"));
             assertThat(runtimeException).hasMessage("Cannot guess sub type through property type value[V3]");
+        }
+
+        @Test
+        void should_support_with_parent_type_name() throws JSONException {
+            dataAssert.getRuntimeContextBuilder().registerSchema(RightFieldAndType.class, SIMPLE_NAME_WITH_PARENT);
+
+            assertPass(new JSONObject("{\"id\": 1}"), "is VerifySchema.RightFieldAndType");
         }
     }
 }

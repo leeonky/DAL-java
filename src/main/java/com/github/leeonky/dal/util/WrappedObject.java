@@ -42,14 +42,14 @@ public class WrappedObject {
     public Object getPropertyValue(String name) {
         if (name.contains(".")) {
             String[] split = name.split("\\.", 2);
-            return getPropertyValueWrapper(split[0]).getPropertyValue(split[1]);
+            return getWrappedPropertyValue(split[0]).getPropertyValue(split[1]);
         }
         return instance instanceof Map ?
                 ((Map) instance).get(name)
                 : getPropertyFromType(name);
     }
 
-    private WrappedObject getPropertyValueWrapper(String name) {
+    public WrappedObject getWrappedPropertyValue(String name) {
         return runtimeContext.wrap(getPropertyValue(name));
     }
 
@@ -142,7 +142,7 @@ public class WrappedObject {
     private boolean allPropertyValueShouldBeValid(String subPrefix, BeanClass<?> polymorphicBeanClass) {
         return polymorphicBeanClass.getPropertyReaders().values().stream()
                 .noneMatch(propertyReader -> {
-                    WrappedObject propertyValueWrapper = getPropertyValueWrapper(propertyReader.getName());
+                    WrappedObject propertyValueWrapper = getWrappedPropertyValue(propertyReader.getName());
                     if (isAllowNull().test(propertyReader) && propertyValueWrapper.isNull())
                         return false;
                     return !propertyValueWrapper.verifySchemaInGenericType(subPrefix + "." + propertyReader.getName(), propertyReader.getGenericType());
@@ -185,6 +185,6 @@ public class WrappedObject {
         GenericType subGenericType = genericType.getGenericTypeParameter(1).orElseThrow(() ->
                 new IllegalArgumentException(subPrefix + " should be generic type"));
         return getPropertyReaderNames().stream()
-                .allMatch(key -> getPropertyValueWrapper(key).verifySchemaInGenericType(subPrefix + "." + key, subGenericType));
+                .allMatch(key -> getWrappedPropertyValue(key).verifySchemaInGenericType(subPrefix + "." + key, subGenericType));
     }
 }

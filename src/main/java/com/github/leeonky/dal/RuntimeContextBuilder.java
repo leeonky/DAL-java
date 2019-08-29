@@ -47,7 +47,7 @@ public class RuntimeContextBuilder {
     }
 
     public RuntimeContextBuilder registerSchema(Class<?> clazz) {
-        return registerSchema(clazz.getSimpleName(), clazz);
+        return registerSchema(clazz, NameStrategy.SIMPLE_NAME);
     }
 
     public RuntimeContextBuilder registerSchema(String name, Class<?> clazz) {
@@ -74,4 +74,7 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    public RuntimeContextBuilder registerSchema(Class<?> clazz, NameStrategy nameStrategy) {
+        return registerSchema(nameStrategy.toName(clazz), clazz);
+    }
 }
