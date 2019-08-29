@@ -128,6 +128,11 @@ class BasicVerify extends Base {
                 public Set<String> getPropertyNames(JSONObject instance) {
                     return null;
                 }
+
+                @Override
+                public boolean isNull(JSONObject instance) {
+                    return instance == null || instance.equals(JSONObject.NULL);
+                }
             });
             assertPass(new JSONObject("{\"field\": true}"), ".field");
         }

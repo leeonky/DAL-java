@@ -1,11 +1,13 @@
 package com.github.leeonky.dal.spec;
 
-import com.github.leeonky.dal.format.PositiveInteger;
-import com.github.leeonky.dal.format.URL;
+import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.SubType;
 import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,6 +38,11 @@ class VerifySchema extends Base {
             public Set<String> getPropertyNames(JSONObject instance) {
                 return PROPERTY_NAMES;
             }
+
+            @Override
+            public boolean isNull(JSONObject instance) {
+                return instance == null || instance.equals(JSONObject.NULL);
+            }
         });
 
         dataAssert.getRuntimeContextBuilder().registerSchema("Bean",
@@ -47,12 +54,12 @@ class VerifySchema extends Base {
     }
 
     public static class RightFieldAndType {
-        public PositiveInteger id;
+        public Formatters.PositiveInteger id;
     }
 
     public static class AllowNullField {
         @AllowNull
-        public PositiveInteger id;
+        public Formatters.PositiveInteger id;
     }
 
     public static class NestedType {
@@ -75,6 +82,13 @@ class VerifySchema extends Base {
         public Map<String, Map<String, RightFieldAndType>> map;
     }
 
+    @Getter
+    @Setter
+    @Accessors(chain = true)
+    public static class ClassObject {
+        private int id;
+    }
+
     @SubType(property = "type", types = {
             @SubType.Type(value = "V1", type = V1.class),
             @SubType.Type(value = "V2", type = V2.class)
@@ -84,11 +98,11 @@ class VerifySchema extends Base {
     }
 
     public static abstract class V1 extends Abstract {
-        public PositiveInteger id;
+        public Formatters.PositiveInteger id;
     }
 
     public static abstract class V2 extends Abstract {
-        public URL url;
+        public Formatters.URL url;
     }
 
     public static class V {
@@ -112,11 +126,11 @@ class VerifySchema extends Base {
     }
 
     public static class NestedV1 extends NestedAbstract {
-        public PositiveInteger id;
+        public Formatters.PositiveInteger id;
     }
 
     public static class NestedV2 extends NestedAbstract {
-        public URL url;
+        public Formatters.URL url;
     }
 
     @Nested
@@ -140,6 +154,11 @@ class VerifySchema extends Base {
                     while (iterator.hasNext())
                         set.add(iterator.next().toString());
                     return set;
+                }
+
+                @Override
+                public boolean isNull(JSONObject instance) {
+                    return instance == null || instance.equals(JSONObject.NULL);
                 }
             }).registerListAccessor(JSONArray.class, new ListAccessor<JSONArray>() {
                 @Override
@@ -173,6 +192,11 @@ class VerifySchema extends Base {
         @Test
         void should_verify_fields_and_type() throws JSONException {
             assertPass(new JSONObject("{\"id\": 1}"), "is RightFieldAndType");
+            assertPass(new HashMap<String, Object>() {{
+                put("id", 1);
+            }}, "is RightFieldAndType");
+
+            assertPass(new ClassObject().setId(1), "is RightFieldAndType");
         }
 
         @Test
@@ -267,6 +291,7 @@ class VerifySchema extends Base {
 
             assertPass(new JSONObject("{\"id\": 1}"), "is VerifySchema.RightFieldAndType");
         }
+
     }
 }
 

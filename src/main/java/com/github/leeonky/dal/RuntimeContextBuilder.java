@@ -1,6 +1,7 @@
 package com.github.leeonky.dal;
 
-import com.github.leeonky.dal.format.*;
+import com.github.leeonky.dal.format.Formatter;
+import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.dal.token.IllegalTypeException;
 import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
@@ -20,10 +21,10 @@ public class RuntimeContextBuilder {
     private final Set<Class<?>> schemas = new HashSet<>();
 
     public RuntimeContextBuilder() {
-        registerValueFormat(new PositiveInteger());
-        registerValueFormat(new URL());
-        registerValueFormat(new Instant());
-        registerValueFormat(new FormatterString());
+        registerValueFormat(new Formatters.PositiveInteger());
+        registerValueFormat(new Formatters.URL());
+        registerValueFormat(new Formatters.Instant());
+        registerValueFormat(new Formatters.FormatterString());
 
         registerSchema("List", WrappedObject::isList);
     }

@@ -57,11 +57,6 @@ public class Token {
                 && Objects.equals(value, ((Token) obj).value);
     }
 
-    @Override
-    public String toString() {
-        return type + "`" + value + "`";
-    }
-
     public Object getValue() {
         return value;
     }

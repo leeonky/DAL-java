@@ -5,7 +5,6 @@ import com.github.leeonky.dal.util.Calculator;
 import com.github.leeonky.dal.util.ListAccessor;
 
 import java.lang.reflect.Array;
-import java.util.List;
 import java.util.Optional;
 
 public abstract class Operator {
@@ -26,13 +25,7 @@ public abstract class Operator {
         return precedence > operator.precedence;
     }
 
-    protected Object calculate(Object v1, Object v2) {
-        return null;
-    }
-
-    public Object calculate(Node node1, Node node2, RuntimeContext context) {
-        return calculate(node1.evaluate(context), node2.evaluate(context));
-    }
+    public abstract Object calculate(Node node1, Node node2, RuntimeContext context);
 
     @Override
     public boolean equals(Object obj) {
@@ -53,8 +46,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return Calculator.equals(v1, v2);
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
+            return Calculator.equals(node1.evaluate(context), node2.evaluate(context));
         }
     }
 
@@ -64,8 +57,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return Calculator.compare(v1, v2) < 0;
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
+            return Calculator.compare(node1.evaluate(context), node2.evaluate(context)) < 0;
         }
     }
 
@@ -75,8 +68,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return Calculator.compare(v1, v2) >= 0;
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
+            return Calculator.compare(node1.evaluate(context), node2.evaluate(context)) >= 0;
         }
     }
 
@@ -86,8 +79,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return Calculator.compare(v1, v2) <= 0;
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
+            return Calculator.compare(node1.evaluate(context), node2.evaluate(context)) <= 0;
         }
     }
 
@@ -97,8 +90,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return !Calculator.equals(v1, v2);
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
+            return !Calculator.equals(node1.evaluate(context), node2.evaluate(context));
         }
     }
 
@@ -108,8 +101,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return Calculator.plus(v1, v2);
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
+            return Calculator.plus(node1.evaluate(context), node2.evaluate(context));
         }
     }
 
@@ -119,8 +112,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return Calculator.compare(v1, v2) > 0;
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
+            return Calculator.compare(node1.evaluate(context), node2.evaluate(context)) > 0;
         }
     }
 
@@ -130,8 +123,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return Calculator.subtract(v1, v2);
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
+            return Calculator.subtract(node1.evaluate(context), node2.evaluate(context));
         }
     }
 
@@ -141,8 +134,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return Calculator.multiply(v1, v2);
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
+            return Calculator.multiply(node1.evaluate(context), node2.evaluate(context));
         }
     }
 
@@ -152,8 +145,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return Calculator.divide(v1, v2);
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
+            return Calculator.divide(node1.evaluate(context), node2.evaluate(context));
         }
     }
 
@@ -185,8 +178,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return Calculator.not(v2);
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
+            return Calculator.not(node2.evaluate(context));
         }
     }
 
@@ -197,8 +190,8 @@ public abstract class Operator {
         }
 
         @Override
-        protected Object calculate(Object v1, Object v2) {
-            return Calculator.negate(v2);
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
+            return Calculator.negate(node2.evaluate(context));
         }
     }
 
@@ -217,8 +210,6 @@ public abstract class Operator {
             int index = (int) v2;
             if (optionalArrayType.isPresent())
                 return optionalArrayType.get().get(v1, index);
-            if (v1 instanceof List)
-                return ((List) v1).get(index);
             else if (v1 instanceof Iterable) {
                 int i = 0;
                 for (Object object : (Iterable) v1)

@@ -59,6 +59,11 @@ class PropertyNodeTest {
             public Set<String> getPropertyNames(JSONObject instance) {
                 return null;
             }
+
+            @Override
+            public boolean isNull(JSONObject instance) {
+                return instance == null || instance.equals(JSONObject.NULL);
+            }
         });
 
         assertProperty(new JSONObject("{\"key\": \"value\"}"), Collections.singletonList("key"), "value");

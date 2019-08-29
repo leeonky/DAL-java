@@ -19,5 +19,7 @@ class VerifyStringValue extends Base {
     @Test
     void verify_instant() {
         assertPass("2001-12-10T10:00:11Z", "is Instant");
+
+        assertFailed("2001-12-10T10:00:11", "is Instant");
     }
 }

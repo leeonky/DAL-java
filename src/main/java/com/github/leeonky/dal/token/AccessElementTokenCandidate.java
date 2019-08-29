@@ -13,13 +13,9 @@ class AccessElementTokenCandidate extends TokenCandidate {
         if (!isFinished())
             throw new SyntaxException(getStartPosition() + content().length() + 1, "missed ']'");
         try {
-            try {
-                return Token.constIndexToken(Integer.valueOf(content()));
-            } catch (NumberFormatException ignore) {
-                return Token.propertyToken(content());
-            }
-        } catch (NumberFormatException e) {
-            throw new SyntaxException(getStartPosition() + 1, "only support const int array index");
+            return Token.constIndexToken(Integer.valueOf(content()));
+        } catch (NumberFormatException ignore) {
+            return Token.propertyToken(content());
         }
     }
 
