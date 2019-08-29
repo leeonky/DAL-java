@@ -1,34 +1,37 @@
 package com.github.leeonky.dal.util;
 
 import com.github.leeonky.dal.RuntimeContext;
+import com.github.leeonky.dal.format.Formatter;
+import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.SubType;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.GenericType;
+import com.github.leeonky.util.PropertyReader;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class WrappedObject {
     private final Object instance;
-    private final TypeData<PropertyAccessor> propertyAccessors;
-    private final TypeData<ListAccessor> listAccessors;
-    private final BeanClass beanClass;
+    private final BeanClass<Object> beanClass;
+    private final RuntimeContext runtimeContext;
 
-    public WrappedObject(Object instance, TypeData<PropertyAccessor> propertyAccessors, TypeData<ListAccessor> listAccessors) {
+    @SuppressWarnings("unchecked")
+    public WrappedObject(Object instance, RuntimeContext context) {
         this.instance = instance;
-        this.propertyAccessors = propertyAccessors;
-        this.listAccessors = listAccessors;
-        beanClass = instance == null ? null : BeanClass.create(instance.getClass());
+        beanClass = instance == null ? null : (BeanClass<Object>) BeanClass.create(instance.getClass());
+        runtimeContext = context;
     }
 
-    public boolean isList(RuntimeContext context) {
-        return instance != null && (listAccessors.containsType(instance) || instance instanceof Iterable || instance.getClass().isArray());
+    public boolean isList() {
+        return instance != null && (runtimeContext.isRegisteredList(instance) || instance instanceof Iterable || instance.getClass().isArray());
     }
 
     @SuppressWarnings("unchecked")
     public Set<String> getPropertyReaderNames() {
-        return propertyAccessors.getData(instance)
-                .map(f -> f.getPropertyNames(instance))
+        return runtimeContext.findPropertyReaderNames(instance)
                 .orElseGet(() -> {
                     if (instance instanceof Map)
                         return ((Map) instance).keySet();
@@ -46,12 +49,8 @@ public class WrappedObject {
                 : getPropertyFromType(name);
     }
 
-    public Object getValue() {
-        return instance;
-    }
-
-    public WrappedObject getPropertyValueWrapper(String name) {
-        return new WrappedObject(getPropertyValue(name), propertyAccessors, listAccessors);
+    private WrappedObject getPropertyValueWrapper(String name) {
+        return runtimeContext.wrap(getPropertyValue(name));
     }
 
     public int getListSize() {
@@ -61,10 +60,8 @@ public class WrappedObject {
         return size;
     }
 
-    @SuppressWarnings("unchecked")
     public Iterable getList() {
-        return listAccessors.getData(instance)
-                .map(l -> l.toIterable(instance))
+        return runtimeContext.gitList(instance)
                 .orElseGet(() -> {
                     if (instance instanceof Iterable)
                         return (Iterable) instance;
@@ -88,33 +85,20 @@ public class WrappedObject {
     public Iterable<WrappedObject> getWrappedList() {
         List<WrappedObject> result = new ArrayList<>();
         for (Object object : getList())
-            result.add(new WrappedObject(object, propertyAccessors, listAccessors));
+            result.add(runtimeContext.wrap(object));
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     private Object getPropertyFromType(String name) {
-        return propertyAccessors.getData(instance)
-                .map(p -> checkedReturn(() -> p.getValue(instance, name)))
-                .orElseGet(() -> checkedReturn(() -> beanClass.getPropertyValue(instance, name)));
+        return runtimeContext.getPropertyValue(instance, name)
+                .orElseGet(() -> beanClass.getPropertyValue(instance, name));
     }
 
-    private Object checkedReturn(CheckedSupplier supplier) {
-        try {
-            return supplier.get();
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
+    public Boolean isNull() {
+        return runtimeContext.isNull(instance);
     }
 
-    @SuppressWarnings("unchecked")
-    public boolean isNull() {
-        return propertyAccessors.getData(instance)
-                .map(p -> p.isNull(instance))
-                .orElseGet(() -> Objects.equals(instance, null));
-    }
-
-    public BeanClass getPolymorphicSchemaType(Class<?> superSchemaType) {
+    private BeanClass getPolymorphicSchemaType(Class<?> superSchemaType) {
         Class<?> type = superSchemaType;
         SubType subType = superSchemaType.getAnnotation(SubType.class);
         if (subType != null) {
@@ -127,7 +111,80 @@ public class WrappedObject {
         return BeanClass.create(type);
     }
 
-    interface CheckedSupplier {
-        Object get() throws Exception;
+    public boolean verifySchema(Class<?> schemaType, String subPrefix) {
+        BeanClass<?> polymorphicBeanClass = getPolymorphicSchemaType(schemaType);
+        Set<String> propertyReaderNames = getPropertyReaderNames();
+
+        return noMoreUnexpectedField(polymorphicBeanClass, polymorphicBeanClass.getPropertyReaders().keySet(), propertyReaderNames)
+                && allMandatoryPropertyShouldBeExist(polymorphicBeanClass, propertyReaderNames)
+                && allPropertyValueShouldBeValid(subPrefix, polymorphicBeanClass);
+    }
+
+    private boolean allMandatoryPropertyShouldBeExist(BeanClass<?> polymorphicBeanClass, Set<String> actualFields) {
+        return polymorphicBeanClass.getPropertyReaders().values().stream()
+                .filter(isAllowNull().negate())
+                .filter(propertyReader -> !actualFields.contains(propertyReader.getName()))
+                .peek(propertyReader -> System.err.printf("Expected field `%s` for type %s[%s], but does not exist\n", propertyReader.getName(), polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName()))
+                .count() == 0;
+    }
+
+    private Predicate<PropertyReader<?>> isAllowNull() {
+        return propertyReader -> propertyReader.getAnnotation(AllowNull.class) != null;
+    }
+
+    private boolean noMoreUnexpectedField(BeanClass polymorphicBeanClass, Set<String> expectedFields, Set<String> actualFields) {
+        return actualFields.stream()
+                .filter(f -> !expectedFields.contains(f))
+                .peek(f -> System.err.printf("Unexpected field `%s` for type %s[%s]\n", f, polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName()))
+                .count() == 0;
+    }
+
+    private boolean allPropertyValueShouldBeValid(String subPrefix, BeanClass<?> polymorphicBeanClass) {
+        return polymorphicBeanClass.getPropertyReaders().values().stream()
+                .noneMatch(propertyReader -> {
+                    WrappedObject propertyValueWrapper = getPropertyValueWrapper(propertyReader.getName());
+                    if (isAllowNull().test(propertyReader) && propertyValueWrapper.isNull())
+                        return false;
+                    return !propertyValueWrapper.verifySchemaInGenericType(subPrefix + "." + propertyReader.getName(), propertyReader.getGenericType());
+                });
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean verifySchemaInGenericType(String subPrefix, GenericType genericType) {
+        Class<?> fieldType = genericType.getRawType();
+        if (com.github.leeonky.dal.format.Formatter.class.isAssignableFrom(fieldType))
+            return verifyFormatterValue(subPrefix, (Formatter<Object>) BeanClass.newInstance(fieldType));
+        else if (runtimeContext.isRegistered(fieldType))
+            return verifySchema(fieldType, subPrefix);
+        else if (Iterable.class.isAssignableFrom(fieldType))
+            return verifyList(subPrefix, genericType);
+        else if (Map.class.isAssignableFrom(fieldType))
+            return verifyMap(subPrefix, genericType);
+        return true;
+    }
+
+    private boolean verifyFormatterValue(String subPrefix, Formatter<Object> formatter) {
+        if (formatter.isValidValue(instance))
+            return true;
+        System.err.printf("Expected field `%s` should be in %s, but was [%s]\n",
+                subPrefix, formatter.getFormatterName(), instance);
+        return false;
+    }
+
+    private boolean verifyList(String subPrefix, GenericType genericType) {
+        int index = 0;
+        GenericType subGenericType = genericType.getGenericTypeParameter(0).orElseThrow(() ->
+                new IllegalArgumentException(subPrefix + " should be generic type"));
+        for (WrappedObject wrappedElement : getWrappedList())
+            if (!wrappedElement.verifySchemaInGenericType(String.format("%s[%d]", subPrefix, index++), subGenericType))
+                return false;
+        return true;
+    }
+
+    private boolean verifyMap(String subPrefix, GenericType genericType) {
+        GenericType subGenericType = genericType.getGenericTypeParameter(1).orElseThrow(() ->
+                new IllegalArgumentException(subPrefix + " should be generic type"));
+        return getPropertyReaderNames().stream()
+                .allMatch(key -> getPropertyValueWrapper(key).verifySchemaInGenericType(subPrefix + "." + key, subGenericType));
     }
 }

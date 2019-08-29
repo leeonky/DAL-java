@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public interface PropertyAccessor<T> {
-    Object getValue(T instance, String name) throws Exception;
+    Object getValue(T instance, String name);
 
     Set<String> getPropertyNames(T instance);
 

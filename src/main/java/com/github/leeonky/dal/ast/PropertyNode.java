@@ -26,11 +26,11 @@ public class PropertyNode extends Node {
 
     private Object getPropertyValue(Object instance, String name, RuntimeContext context) {
         WrappedObject wrappedObject = context.wrap(instance);
-        if ("size".equals(name) && wrappedObject.isList(context))
+        if ("size".equals(name) && wrappedObject.isList())
             return wrappedObject.getListSize();
         try {
             return wrappedObject.getPropertyValue(name);
-        } catch (IllegalStateException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Get property '" + name + "' failed, property can be public field, getter or customer type getter",
                     getPositionBegin());
         }

@@ -1,21 +1,12 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.format.Formatter;
-import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import com.github.leeonky.dal.util.TypeData;
 import com.github.leeonky.dal.util.WrappedObject;
-import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.GenericType;
-import com.github.leeonky.util.PropertyReader;
 
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Predicate;
+import java.util.*;
 
 public class RuntimeContext {
     private final TypeData<PropertyAccessor> propertyAccessors;
@@ -55,84 +46,39 @@ public class RuntimeContext {
     }
 
     public WrappedObject wrap(Object instance) {
-        return new WrappedObject(instance, propertyAccessors, listAccessors);
+        return new WrappedObject(instance, this);
     }
 
-    public boolean verifySchema(Class<?> schemaType, WrappedObject wrappedObject, String subPrefix) {
-        BeanClass<?> beanClass = wrappedObject.getPolymorphicSchemaType(schemaType);
-        Set<String> propertyReaderNames = wrappedObject.getPropertyReaderNames();
-
-        return noMoreUnexpectedField(beanClass, beanClass.getPropertyReaders().keySet(), propertyReaderNames)
-                && allMandatoryPropertyShouldBeExist(beanClass, propertyReaderNames)
-                && allPropertyValueShouldBeValid(wrappedObject, subPrefix, beanClass);
-    }
-
-    private boolean allPropertyValueShouldBeValid(WrappedObject wrappedObject, String subPrefix, BeanClass<?> beanClass) {
-        return beanClass.getPropertyReaders().values().stream()
-                .noneMatch(propertyReader -> {
-                    WrappedObject propertyValueWrapper = wrappedObject.getPropertyValueWrapper(propertyReader.getName());
-                    if (isAllowNull().test(propertyReader) && propertyValueWrapper.isNull())
-                        return false;
-                    return !verifySchemaInGenericType(subPrefix + "." + propertyReader.getName(), propertyValueWrapper, propertyReader.getGenericType());
-                });
-    }
-
-    private boolean allMandatoryPropertyShouldBeExist(BeanClass<?> beanClass, Set<String> actualFields) {
-        return beanClass.getPropertyReaders().values().stream()
-                .filter(isAllowNull().negate())
-                .filter(propertyReader -> !actualFields.contains(propertyReader.getName()))
-                .peek(propertyReader -> System.err.printf("Expected field `%s` for type %s[%s], but does not exist\n", propertyReader.getName(), beanClass.getSimpleName(), beanClass.getName()))
-                .count() == 0;
-    }
-
-    private boolean noMoreUnexpectedField(BeanClass beanClass, Set<String> expectedFields, Set<String> actualFields) {
-        return actualFields.stream()
-                .filter(f -> !expectedFields.contains(f))
-                .peek(f -> System.err.printf("Unexpected field `%s` for type %s[%s]\n", f, beanClass.getSimpleName(), beanClass.getName()))
-                .count() == 0;
-    }
-
-    private Predicate<PropertyReader<?>> isAllowNull() {
-        return propertyReader -> propertyReader.getAnnotation(AllowNull.class) != null;
+    public boolean isRegistered(Class<?> fieldType) {
+        return schemas.contains(fieldType);
     }
 
     @SuppressWarnings("unchecked")
-    private boolean verifySchemaInGenericType(String subPrefix, WrappedObject wrapperObject, GenericType genericType) {
-        Class<?> fieldType = genericType.getRawType();
-        if (Formatter.class.isAssignableFrom(fieldType))
-            return verifyFormatterValue(subPrefix, wrapperObject, (Formatter<Object>) BeanClass.newInstance(fieldType));
-        else if (schemas.contains(fieldType))
-            return verifySchema(fieldType, wrapperObject, subPrefix);
-        else if (Iterable.class.isAssignableFrom(fieldType))
-            return verifyList(subPrefix, wrapperObject, genericType);
-        else if (Map.class.isAssignableFrom(fieldType))
-            return verifyMap(subPrefix, wrapperObject, genericType);
-        return true;
+    public Optional<Set> findPropertyReaderNames(Object instance) {
+        return propertyAccessors.getData(instance)
+                .map(f -> f.getPropertyNames(instance));
     }
 
-    private boolean verifyMap(String subPrefix, WrappedObject wrapperObject, GenericType genericType) {
-        GenericType subGenericType = genericType.getGenericTypeParameter(1).orElseThrow(() ->
-                new IllegalArgumentException(subPrefix + " should be generic type"));
-        return wrapperObject.getPropertyReaderNames().stream()
-                .allMatch(key -> verifySchemaInGenericType(subPrefix + "." + key,
-                        wrapperObject.getPropertyValueWrapper(key), subGenericType));
+    @SuppressWarnings("unchecked")
+    public Boolean isNull(Object instance) {
+        return propertyAccessors.getData(instance)
+                .map(p -> p.isNull(instance))
+                .orElseGet(() -> Objects.equals(instance, null));
     }
 
-    private boolean verifyList(String subPrefix, WrappedObject wrapperObject, GenericType genericType) {
-        int index = 0;
-        GenericType subGenericType = genericType.getGenericTypeParameter(0).orElseThrow(() ->
-                new IllegalArgumentException(subPrefix + " should be generic type"));
-        for (WrappedObject wrappedElement : wrapperObject.getWrappedList())
-            if (!verifySchemaInGenericType(String.format("%s[%d]", subPrefix, index++), wrappedElement, subGenericType))
-                return false;
-        return true;
+    @SuppressWarnings("unchecked")
+    public Optional<Object> getPropertyValue(Object instance, String name) {
+        return propertyAccessors.getData(instance)
+                .map(p -> p.getValue(instance, name));
     }
 
-    private boolean verifyFormatterValue(String subPrefix, WrappedObject wrapperObject, Formatter<Object> formatter) {
-        if (formatter.isValidValue(wrapperObject.getValue()))
-            return true;
-        System.err.printf("Expected field `%s` should be in %s, but was [%s]\n",
-                subPrefix, formatter.getFormatterName(), wrapperObject.getValue());
-        return false;
+    @SuppressWarnings("unchecked")
+    public Optional<Iterable> gitList(Object instance) {
+        return listAccessors.getData(instance)
+                .map(l -> l.toIterable(instance));
+    }
+
+    public boolean isRegisteredList(Object instance) {
+        return listAccessors.containsType(instance);
     }
 }

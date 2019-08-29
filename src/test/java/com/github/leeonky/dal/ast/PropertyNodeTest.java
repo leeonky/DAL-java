@@ -47,8 +47,12 @@ class PropertyNodeTest {
     void access_customer_type_property() throws JSONException {
         runtimeContextBuilder.registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
             @Override
-            public Object getValue(JSONObject instance, String name) throws Exception {
-                return instance.get(name);
+            public Object getValue(JSONObject instance, String name) {
+                try {
+                    return instance.get(name);
+                } catch (JSONException e) {
+                    throw new IllegalStateException(e);
+                }
             }
 
             @Override

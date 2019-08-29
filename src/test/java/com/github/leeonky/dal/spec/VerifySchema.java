@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class VerifySchema extends Base {
 
-    public static final Set<String> PROPERTY_NAMES = new HashSet<>(asList("f1", "f2"));
+    private static final Set<String> PROPERTY_NAMES = new HashSet<>(asList("f1", "f2"));
 
     @Test
     void should_support_register_customer_object_type() throws JSONException {
@@ -38,7 +38,7 @@ class VerifySchema extends Base {
         });
 
         dataAssert.getRuntimeContextBuilder().registerSchema("Bean",
-                (wrappedObject, context) -> wrappedObject.getPropertyReaderNames() == PROPERTY_NAMES);
+                wrappedObject -> wrappedObject.getPropertyReaderNames() == PROPERTY_NAMES);
 
         assertPass(new JSONObject("{\"f1\": 1, \"f2\": 1}"), "is Bean which .f1='mocked return value of f1'");
         assertPass(null, "= null");

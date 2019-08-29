@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class RuntimeContextBuilder {
     private final TypeData<PropertyAccessor> propertyAccessors = new TypeData<>();
@@ -52,12 +52,12 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerSchema(String name, Class<?> clazz) {
         schemas.add(clazz);
-        return registerSchema(name, (bw, context) -> context.verifySchema(clazz, bw, ""));
+        return registerSchema(name, (bw) -> bw.verifySchema(clazz, ""));
     }
 
-    public RuntimeContextBuilder registerSchema(String name, BiFunction<WrappedObject, RuntimeContext, Boolean> predicate) {
+    public RuntimeContextBuilder registerSchema(String name, Function<WrappedObject, Boolean> predicate) {
         constructors.put(name, (o, context) -> {
-            if (o != null && predicate.apply(context.wrap(o), context))
+            if (o != null && predicate.apply(context.wrap(o)))
                 return o;
             throw new IllegalTypeException();
         });
