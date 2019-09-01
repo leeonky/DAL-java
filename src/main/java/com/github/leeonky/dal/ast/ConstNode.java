@@ -22,4 +22,13 @@ public class ConstNode extends Node {
     public boolean equals(Object obj) {
         return obj instanceof ConstNode && Objects.equals(value, ((ConstNode) obj).value);
     }
+
+    @Override
+    public String inspect() {
+        if (value == null)
+            return "null";
+        if (value instanceof String)
+            return String.format("'%s'", value.toString());
+        return value.toString();
+    }
 }

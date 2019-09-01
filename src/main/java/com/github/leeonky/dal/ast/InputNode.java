@@ -12,4 +12,9 @@ public class InputNode extends Node {
     public Object evaluate(RuntimeContext context) {
         return context.getInputValue();
     }
+
+    @Override
+    public String inspect() {
+        return "";
+    }
 }

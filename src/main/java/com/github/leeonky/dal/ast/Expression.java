@@ -45,4 +45,9 @@ public class Expression extends Node {
                 && Objects.equals(operator, ((Expression) obj).operator)
                 && Objects.equals(operator, ((Expression) obj).operator);
     }
+
+    @Override
+    public String inspect() {
+        return operator.inspect(node1, node2);
+    }
 }

@@ -22,4 +22,9 @@ public class TypeNode extends Node {
     public boolean equals(Object obj) {
         return obj instanceof TypeNode && Objects.equals(type, ((TypeNode) obj).type);
     }
+
+    @Override
+    public String inspect() {
+        return type;
+    }
 }

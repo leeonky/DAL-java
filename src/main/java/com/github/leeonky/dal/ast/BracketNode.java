@@ -29,4 +29,9 @@ public class BracketNode extends Node {
         finished = true;
         return this;
     }
+
+    @Override
+    public String inspect() {
+        return String.format("(%s)", node.inspect());
+    }
 }

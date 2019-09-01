@@ -37,4 +37,9 @@ public class TypeAssertionExpression extends Node {
                 && Objects.equals(typeNode, ((TypeAssertionExpression) obj).typeNode)
                 && Objects.equals(assertion, ((TypeAssertionExpression) obj).assertion);
     }
+
+    @Override
+    public String inspect() {
+        return String.format("%s is %s which %s", instance.inspect(), typeNode.inspect(), assertion.inspect());
+    }
 }

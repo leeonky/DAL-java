@@ -42,4 +42,9 @@ public class PropertyNode extends Node {
                 && Objects.equals(instanceNode, ((PropertyNode) obj).instanceNode)
                 && Objects.equals(properties, ((PropertyNode) obj).properties);
     }
+
+    @Override
+    public String inspect() {
+        return String.format("%s.%s", instanceNode.inspect(), String.join(".", properties));
+    }
 }
