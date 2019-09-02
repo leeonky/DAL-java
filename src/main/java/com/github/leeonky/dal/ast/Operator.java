@@ -16,11 +16,17 @@ public abstract class Operator {
     private static final int PRECEDENCE_INDEX = 501;
     private final int precedence;
     private final String inspect;
+    private final boolean needInspect;
     private int position;
 
-    protected Operator(int precedence, String inspect) {
+    protected Operator(int precedence, String inspect, boolean needInspect) {
         this.precedence = precedence;
         this.inspect = inspect;
+        this.needInspect = needInspect;
+    }
+
+    public boolean isNeedInspect() {
+        return needInspect;
     }
 
     public boolean isPrecedentThan(Operator operator) {
@@ -48,7 +54,7 @@ public abstract class Operator {
 
     public static class Equal extends Operator {
         public Equal() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, "=");
+            super(PRECEDENCE_LOGIC_COMPARE_OPT, "=", true);
         }
 
         @Override
@@ -59,7 +65,7 @@ public abstract class Operator {
 
     public static class Less extends Operator {
         public Less() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, "<");
+            super(PRECEDENCE_LOGIC_COMPARE_OPT, "<", true);
         }
 
         @Override
@@ -70,7 +76,7 @@ public abstract class Operator {
 
     public static class GreaterOrEqual extends Operator {
         public GreaterOrEqual() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, ">=");
+            super(PRECEDENCE_LOGIC_COMPARE_OPT, ">=", true);
         }
 
         @Override
@@ -81,7 +87,7 @@ public abstract class Operator {
 
     public static class LessOrEqual extends Operator {
         public LessOrEqual() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, "<=");
+            super(PRECEDENCE_LOGIC_COMPARE_OPT, "<=", true);
         }
 
         @Override
@@ -92,7 +98,7 @@ public abstract class Operator {
 
     public static class NotEqual extends Operator {
         public NotEqual() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, "!=");
+            super(PRECEDENCE_LOGIC_COMPARE_OPT, "!=", true);
         }
 
         @Override
@@ -103,7 +109,7 @@ public abstract class Operator {
 
     public static class Plus extends Operator {
         public Plus() {
-            super(PRECEDENCE_PLUS_SUB_OPT, "+");
+            super(PRECEDENCE_PLUS_SUB_OPT, "+", false);
         }
 
         @Override
@@ -119,7 +125,7 @@ public abstract class Operator {
 
     public static class Greater extends Operator {
         public Greater() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, ">");
+            super(PRECEDENCE_LOGIC_COMPARE_OPT, ">", true);
         }
 
         @Override
@@ -130,7 +136,7 @@ public abstract class Operator {
 
     public static class Subtraction extends Operator {
         public Subtraction() {
-            super(PRECEDENCE_PLUS_SUB_OPT, "-");
+            super(PRECEDENCE_PLUS_SUB_OPT, "-", false);
         }
 
         @Override
@@ -141,7 +147,7 @@ public abstract class Operator {
 
     public static class Multiplication extends Operator {
         public Multiplication() {
-            super(PRECEDENCE_MUL_DIV, "*");
+            super(PRECEDENCE_MUL_DIV, "*", false);
         }
 
         @Override
@@ -152,7 +158,7 @@ public abstract class Operator {
 
     public static class Division extends Operator {
         public Division() {
-            super(PRECEDENCE_MUL_DIV, "/");
+            super(PRECEDENCE_MUL_DIV, "/", false);
         }
 
         @Override
@@ -163,7 +169,7 @@ public abstract class Operator {
 
     public static class And extends Operator {
         public And() {
-            super(PRECEDENCE_LOGIC_COMBINATION_OPT, "&&");
+            super(PRECEDENCE_LOGIC_COMBINATION_OPT, "&&", true);
         }
 
         @Override
@@ -179,7 +185,7 @@ public abstract class Operator {
 
     public static class Or extends Operator {
         public Or() {
-            super(PRECEDENCE_LOGIC_COMBINATION_OPT, "||");
+            super(PRECEDENCE_LOGIC_COMBINATION_OPT, "||", true);
         }
 
         @Override
@@ -190,7 +196,7 @@ public abstract class Operator {
 
     public static class Not extends Operator {
         public Not() {
-            super(PRECEDENCE_UNARY_OPERATION, "!");
+            super(PRECEDENCE_UNARY_OPERATION, "!", true);
         }
 
         @Override
@@ -207,7 +213,7 @@ public abstract class Operator {
     public static class Minus extends Operator {
 
         public Minus() {
-            super(PRECEDENCE_UNARY_OPERATION, "-");
+            super(PRECEDENCE_UNARY_OPERATION, "-", false);
         }
 
         @Override
@@ -224,7 +230,7 @@ public abstract class Operator {
     public static class Index extends Operator {
 
         public Index() {
-            super(PRECEDENCE_UNARY_OPERATION, null);
+            super(PRECEDENCE_UNARY_OPERATION, null, false);
         }
 
         @Override

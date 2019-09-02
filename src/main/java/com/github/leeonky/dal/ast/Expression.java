@@ -29,7 +29,10 @@ public class Expression extends Node {
     @Override
     public Object evaluate(RuntimeContext context) {
         try {
-            return operator.calculate(node1, node2, context);
+            Object result = operator.calculate(node1, node2, context);
+            if (operator.isNeedInspect() && Boolean.class.isInstance(result) && !(boolean) result)
+                System.err.println("Warning: Expression `" + inspect() + "` got false.");
+            return result;
         } catch (IllegalArgumentException ex) {
             throw new RuntimeException(ex.getMessage(), operator.getPosition());
         } catch (ArrayIndexOutOfBoundsException ex) {
