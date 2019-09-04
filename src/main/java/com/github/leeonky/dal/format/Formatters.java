@@ -2,6 +2,7 @@ package com.github.leeonky.dal.format;
 
 import com.github.leeonky.dal.token.IllegalTypeException;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public class Formatters {
@@ -19,17 +20,32 @@ public class Formatters {
         }
     }
 
-    public static class PositiveInteger implements Formatter<Number> {
+    public static class PositiveInteger extends Integer {
 
         @Override
         public Object toValue(Number input) {
-            String val = input.toString();
-            if (val.chars().anyMatch(c -> !Character.isDigit(c)))
-                throw new IllegalTypeException();
-            BigInteger value = new BigInteger(val);
+            BigInteger value = (BigInteger) super.toValue(input);
             if (value.compareTo(BigInteger.ZERO) <= 0)
                 throw new IllegalTypeException();
             return value;
+        }
+    }
+
+    public static class Integer implements Formatter<Number> {
+
+        @Override
+        public boolean isValidType(Object input) {
+            return input instanceof Number;
+        }
+
+        @Override
+        public Object toValue(Number input) {
+            if (input instanceof Double
+                    || input instanceof Float
+                    || (input instanceof BigDecimal && ((BigDecimal) input).scale() != 0)) {
+                throw new IllegalTypeException();
+            }
+            return new BigInteger(input.toString());
         }
     }
 

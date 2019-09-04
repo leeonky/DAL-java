@@ -22,6 +22,7 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder() {
         registerValueFormat(new Formatters.PositiveInteger());
+        registerValueFormat(new Formatters.Integer());
         registerValueFormat(new Formatters.URL());
         registerValueFormat(new Formatters.Instant());
         registerValueFormat(new Formatters.FormatterString());
