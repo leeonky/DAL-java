@@ -152,9 +152,12 @@ public class WrappedObject {
     @SuppressWarnings("unchecked")
     private boolean verifySchemaInGenericType(String subPrefix, GenericType genericType) {
         Class<?> fieldType = genericType.getRawType();
-        if (com.github.leeonky.dal.format.Formatter.class.isAssignableFrom(fieldType))
-            return verifyFormatterValue(subPrefix, (Formatter<Object>) BeanClass.newInstance(fieldType));
-        else if (runtimeContext.isRegistered(fieldType))
+        if (com.github.leeonky.dal.format.Formatter.class.isAssignableFrom(fieldType)) {
+            Optional<GenericType> genericTypeParameter = genericType.getGenericTypeParameter(0);
+            Object formatter = genericTypeParameter.isPresent() ? BeanClass.newInstance(fieldType, genericTypeParameter.get().getRawType())
+                    : BeanClass.newInstance(fieldType);
+            return verifyFormatterValue(subPrefix, (Formatter<Object>) formatter);
+        } else if (runtimeContext.isRegistered(fieldType))
             return verifySchema(fieldType, subPrefix);
         else if (Iterable.class.isAssignableFrom(fieldType))
             return verifyList(subPrefix, genericType);

@@ -26,6 +26,7 @@ public class RuntimeContextBuilder {
         registerValueFormat(new Formatters.URL());
         registerValueFormat(new Formatters.Instant());
         registerValueFormat(new Formatters.FormatterString());
+        registerValueFormat(new Formatters.Enum<>());
 
         registerSchema("List", WrappedObject::isList);
     }

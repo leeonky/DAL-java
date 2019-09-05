@@ -5,6 +5,8 @@ import com.github.leeonky.dal.token.IllegalTypeException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import static java.lang.Enum.valueOf;
+
 public class Formatters {
     public static class FormatterString implements Formatter<String> {
         @Override
@@ -53,6 +55,38 @@ public class Formatters {
         @Override
         public Object toValue(String input) {
             return Formatter.toValueOrThrowIllegalTypeException(input, java.net.URL::new);
+        }
+    }
+
+    public static class Enum<T extends java.lang.Enum<T>> implements Formatter<String> {
+        private final Class<T> enumType;
+
+        public Enum() {
+            this(null);
+        }
+
+        public Enum(Class<T> enumType) {
+            this.enumType = enumType;
+        }
+
+        @Override
+        public Object toValue(String input) {
+            return enumType == null ? defaultVerification(input) : verifyViaEnumType(input);
+        }
+
+        private Object verifyViaEnumType(String input) {
+            try {
+                return valueOf(enumType, input);
+            } catch (Exception e) {
+                throw new IllegalTypeException();
+            }
+        }
+
+        private Object defaultVerification(String input) {
+            if (input.chars().filter(Character::isLetter)
+                    .anyMatch(Character::isLowerCase))
+                throw new IllegalTypeException();
+            return input;
         }
     }
 }
