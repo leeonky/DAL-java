@@ -36,6 +36,17 @@ class VerifyValueFormat extends Base {
             assertFailed((float) 0.1, "is Integer");
             assertFailed(null, "0.000000000000000000000000001 is Integer");
             assertPass(null, "(-10000000000000000000000000000) is Integer");
+
+            assertPass(null, "1 is Number");
+
+            assertPass(null, "1 is PositiveNumber");
+            assertPass(null, "1.0 is PositiveNumber");
+            assertFailed(null, "(-1) is PositiveNumber");
+            assertFailed(null, "0 is PositiveNumber");
+
+            assertPass(null, "0 is ZeroNumber");
+            assertPass(null, "0.0 is ZeroNumber");
+            assertPass(0.0, " is ZeroNumber");
         }
     }
 

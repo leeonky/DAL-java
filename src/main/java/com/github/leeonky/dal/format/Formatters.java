@@ -89,4 +89,32 @@ public class Formatters {
             return input;
         }
     }
+
+    public static class FormatterNumber implements Formatter<Number> {
+
+        @Override
+        public Object toValue(Number input) {
+            return input;
+        }
+    }
+
+    public static class PositiveNumber implements Formatter<Number> {
+
+        @Override
+        public Object toValue(Number input) {
+            if (new BigDecimal(input.toString()).compareTo(BigDecimal.ZERO) <= 0)
+                throw new IllegalTypeException();
+            return input;
+        }
+    }
+
+    public static class ZeroNumber implements Formatter<Number> {
+
+        @Override
+        public Object toValue(Number input) {
+            if (new BigDecimal(input.toString()).compareTo(BigDecimal.ZERO) != 0)
+                throw new IllegalTypeException();
+            return input;
+        }
+    }
 }
