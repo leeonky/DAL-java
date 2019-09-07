@@ -21,15 +21,20 @@ public class RuntimeContextBuilder {
     private final Set<Class<?>> schemas = new HashSet<>();
 
     public RuntimeContextBuilder() {
-        registerValueFormat(new Formatters.PositiveInteger());
-        registerValueFormat(new Formatters.Integer());
+        registerValueFormat(new Formatters.String());
         registerValueFormat(new Formatters.URL());
         registerValueFormat(new Formatters.Instant());
-        registerValueFormat(new Formatters.FormatterString());
+        registerValueFormat(new Formatters.LocalDate());
+        registerValueFormat(new Formatters.LocalDateTime());
         registerValueFormat(new Formatters.Enum<>());
-        registerValueFormat(new Formatters.FormatterNumber());
+
+        registerValueFormat(new Formatters.Number());
+        registerValueFormat(new Formatters.PositiveInteger());
+        registerValueFormat(new Formatters.Integer());
         registerValueFormat(new Formatters.PositiveNumber());
         registerValueFormat(new Formatters.ZeroNumber());
+
+        registerValueFormat(new Formatters.Boolean());
 
         registerSchema("List", WrappedObject::isList);
     }

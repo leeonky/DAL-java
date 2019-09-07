@@ -99,4 +99,37 @@ class VerifyValueFormat extends Base {
             }}, "is EnumSchema");
         }
     }
+
+    @Nested
+    class VerifyLocalDateTime {
+
+        @Test
+        void support_local_date() {
+            assertPass("2001-10-11", "is LocalDate");
+            assertFailed("2001-1-1", "is LocalDate");
+            assertFailed("2001-21-1", "is LocalDate");
+        }
+
+        @Test
+        void support_local_date_time() {
+            assertPass("2001-10-11T01:00:00", "is LocalDateTime");
+            assertFailed("2001-10-11T01:00:00Z", "is LocalDateTime");
+            assertFailed("2001-1-1T01:00:00", "is LocalDateTime");
+            assertFailed("2001-21-1T01:00:00", "is LocalDateTime");
+        }
+    }
+
+    @Nested
+    class VerifyBoolean {
+
+        @Test
+        void support_local_date() {
+            assertPass(true, "is Boolean");
+            assertPass(false, "is Boolean");
+            assertPass(null, "true is Boolean");
+            assertFailed("1", "is Boolean");
+            assertFailed("'true'", "is Boolean");
+            assertFailed("0", "is Boolean");
+        }
+    }
 }
