@@ -23,6 +23,11 @@ public class Formatters {
                 public boolean verify(java.time.Instant actual) {
                     return expect.equals(actual);
                 }
+
+                @Override
+                public java.lang.String getFormatterName() {
+                    return java.lang.String.format("Instant equalTo [%s]", expect);
+                }
             };
         }
 
@@ -37,7 +42,7 @@ public class Formatters {
             return new PositiveInteger() {
                 @Override
                 public boolean verify(BigInteger value) {
-                    return value.compareTo(new BigInteger(value.toString())) == 0;
+                    return value.compareTo(BigInteger.valueOf(expect)) == 0;
                 }
             };
         }

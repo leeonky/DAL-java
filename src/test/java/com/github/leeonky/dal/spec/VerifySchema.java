@@ -3,7 +3,6 @@ package com.github.leeonky.dal.spec;
 import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.SubType;
-import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import lombok.Getter;
 import lombok.Setter;
@@ -137,21 +136,9 @@ class VerifySchema extends Base {
     class RegisterSchemaType {
         @BeforeEach
         void registerJson() {
-            dataAssert.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new JsonPropertyAccessor()).registerListAccessor(JSONArray.class, new ListAccessor<JSONArray>() {
-                @Override
-                public Object get(JSONArray jsonArray, int index) {
-                    try {
-                        return jsonArray.get(index);
-                    } catch (JSONException e) {
-                        throw new IllegalStateException(e);
-                    }
-                }
-
-                @Override
-                public int size(JSONArray jsonArray) {
-                    return jsonArray.length();
-                }
-            })
+            dataAssert.getRuntimeContextBuilder()
+                    .registerPropertyAccessor(JSONObject.class, new JsonPropertyAccessor())
+                    .registerListAccessor(JSONArray.class, new JSONArrayListAccessor())
                     .registerSchema(RightFieldAndType.class)
                     .registerSchema(AllowNullField.class)
                     .registerSchema(NestedType.class)
