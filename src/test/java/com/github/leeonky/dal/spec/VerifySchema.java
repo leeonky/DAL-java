@@ -97,11 +97,11 @@ class VerifySchema extends Base {
         public String type;
     }
 
-    public static abstract class V1 extends Abstract {
+    public static class V1 extends Abstract {
         public Formatters.PositiveInteger id;
     }
 
-    public static abstract class V2 extends Abstract {
+    public static class V2 extends Abstract {
         public Formatters.URL url;
     }
 
@@ -137,30 +137,7 @@ class VerifySchema extends Base {
     class RegisterSchemaType {
         @BeforeEach
         void registerJson() {
-            dataAssert.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
-                @Override
-                public Object getValue(JSONObject instance, String name) {
-                    try {
-                        return instance.get(name);
-                    } catch (JSONException e) {
-                        return JSONObject.NULL;
-                    }
-                }
-
-                @Override
-                public Set<String> getPropertyNames(JSONObject instance) {
-                    Set<String> set = new HashSet<>();
-                    Iterator iterator = instance.keys();
-                    while (iterator.hasNext())
-                        set.add(iterator.next().toString());
-                    return set;
-                }
-
-                @Override
-                public boolean isNull(JSONObject instance) {
-                    return instance == null || instance.equals(JSONObject.NULL);
-                }
-            }).registerListAccessor(JSONArray.class, new ListAccessor<JSONArray>() {
+            dataAssert.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new JsonPropertyAccessor()).registerListAccessor(JSONArray.class, new ListAccessor<JSONArray>() {
                 @Override
                 public Object get(JSONArray jsonArray, int index) {
                     try {
@@ -293,5 +270,6 @@ class VerifySchema extends Base {
         }
 
     }
+
 }
 

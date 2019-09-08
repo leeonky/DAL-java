@@ -9,40 +9,52 @@ import java.time.format.DateTimeParseException;
 import static java.lang.Enum.valueOf;
 
 public class Formatters {
-    public static class String implements Formatter<java.lang.String> {
+    public static class String extends BaseFormatter<java.lang.String, java.lang.String> {
         @Override
-        public Object toValue(java.lang.String input) {
+        public java.lang.String toValue(java.lang.String input) {
             return input;
         }
     }
 
-    public static class Instant implements Formatter<java.lang.String> {
+    public static class Instant extends BaseFormatter<java.lang.String, java.time.Instant> {
+        public static Instant equalTo(java.time.Instant expect) {
+            return new Instant() {
+                @Override
+                public boolean verify(java.time.Instant actual) {
+                    return expect.equals(actual);
+                }
+            };
+        }
+
         @Override
-        public Object toValue(java.lang.String input) {
-            return Formatter.toValueOrThrowIllegalTypeException(input, java.time.Instant::parse);
+        public java.time.Instant toValue(java.lang.String input) {
+            return BaseFormatter.toValueOrThrowIllegalTypeException(input, java.time.Instant::parse);
         }
     }
 
     public static class PositiveInteger extends Integer {
+        public static PositiveInteger equalTo(long expect) {
+            return new PositiveInteger() {
+                @Override
+                public boolean verify(BigInteger value) {
+                    return value.compareTo(new BigInteger(value.toString())) == 0;
+                }
+            };
+        }
 
         @Override
-        public Object toValue(java.lang.Number input) {
-            BigInteger value = (BigInteger) super.toValue(input);
+        public BigInteger toValue(java.lang.Number input) {
+            BigInteger value = super.toValue(input);
             if (value.compareTo(BigInteger.ZERO) <= 0)
                 throw new IllegalTypeException();
             return value;
         }
     }
 
-    public static class Integer implements Formatter<java.lang.Number> {
+    public static class Integer extends BaseFormatter<java.lang.Number, BigInteger> {
 
         @Override
-        public boolean isValidType(Object input) {
-            return input instanceof java.lang.Number;
-        }
-
-        @Override
-        public Object toValue(java.lang.Number input) {
+        public BigInteger toValue(java.lang.Number input) {
             if (input instanceof Double
                     || input instanceof Float
                     || (input instanceof BigDecimal && ((BigDecimal) input).scale() != 0)) {
@@ -52,14 +64,15 @@ public class Formatters {
         }
     }
 
-    public static class URL implements Formatter<java.lang.String> {
+    public static class URL extends BaseFormatter<java.lang.String, java.net.URL> {
+
         @Override
-        public Object toValue(java.lang.String input) {
-            return Formatter.toValueOrThrowIllegalTypeException(input, java.net.URL::new);
+        public java.net.URL toValue(java.lang.String input) {
+            return BaseFormatter.toValueOrThrowIllegalTypeException(input, java.net.URL::new);
         }
     }
 
-    public static class Enum<T extends java.lang.Enum<T>> implements Formatter<java.lang.String> {
+    public static class Enum<T extends java.lang.Enum<T>> extends BaseFormatter<java.lang.String, T> {
         private final Class<T> enumType;
 
         public Enum() {
@@ -71,11 +84,11 @@ public class Formatters {
         }
 
         @Override
-        public Object toValue(java.lang.String input) {
+        public T toValue(java.lang.String input) {
             return enumType == null ? defaultVerification(input) : verifyViaEnumType(input);
         }
 
-        private Object verifyViaEnumType(java.lang.String input) {
+        private T verifyViaEnumType(java.lang.String input) {
             try {
                 return valueOf(enumType, input);
             } catch (Exception e) {
@@ -83,46 +96,47 @@ public class Formatters {
             }
         }
 
-        private Object defaultVerification(java.lang.String input) {
+        private T defaultVerification(java.lang.String input) {
             if (input.chars().filter(Character::isLetter)
                     .anyMatch(Character::isLowerCase))
                 throw new IllegalTypeException();
+            return null;
+        }
+    }
+
+    public static class Number extends BaseFormatter<java.lang.Number, java.lang.Number> {
+
+        @Override
+        public java.lang.Number toValue(java.lang.Number input) {
             return input;
         }
     }
 
-    public static class Number implements Formatter<java.lang.Number> {
+    public static class PositiveNumber extends BaseFormatter<java.lang.Number, BigDecimal> {
 
         @Override
-        public Object toValue(java.lang.Number input) {
-            return input;
-        }
-    }
-
-    public static class PositiveNumber implements Formatter<java.lang.Number> {
-
-        @Override
-        public Object toValue(java.lang.Number input) {
-            if (new BigDecimal(input.toString()).compareTo(BigDecimal.ZERO) <= 0)
+        public BigDecimal toValue(java.lang.Number input) {
+            BigDecimal decimal = new BigDecimal(input.toString());
+            if (decimal.compareTo(BigDecimal.ZERO) <= 0)
                 throw new IllegalTypeException();
-            return input;
+            return decimal;
         }
     }
 
-    public static class ZeroNumber implements Formatter<java.lang.Number> {
+    public static class ZeroNumber extends BaseFormatter<java.lang.Number, java.lang.Integer> {
 
         @Override
-        public Object toValue(java.lang.Number input) {
+        public java.lang.Integer toValue(java.lang.Number input) {
             if (new BigDecimal(input.toString()).compareTo(BigDecimal.ZERO) != 0)
                 throw new IllegalTypeException();
-            return input;
+            return 0;
         }
     }
 
-    public static class LocalDate implements Formatter<java.lang.String> {
+    public static class LocalDate extends BaseFormatter<java.lang.String, java.time.LocalDate> {
 
         @Override
-        public Object toValue(java.lang.String input) {
+        public java.time.LocalDate toValue(java.lang.String input) {
             try {
                 return java.time.LocalDate.parse(input);
             } catch (DateTimeParseException ignore) {
@@ -131,9 +145,10 @@ public class Formatters {
         }
     }
 
-    public static class LocalDateTime implements Formatter<java.lang.String> {
+    public static class LocalDateTime extends BaseFormatter<java.lang.String, java.time.LocalDateTime> {
+
         @Override
-        public Object toValue(java.lang.String input) {
+        public java.time.LocalDateTime toValue(java.lang.String input) {
             try {
                 return java.time.LocalDateTime.parse(input);
             } catch (DateTimeParseException ignore) {
@@ -142,9 +157,9 @@ public class Formatters {
         }
     }
 
-    public static class Boolean implements Formatter<java.lang.Boolean> {
+    public static class Boolean extends BaseFormatter<java.lang.Boolean, java.lang.Boolean> {
         @Override
-        public Object toValue(java.lang.Boolean input) {
+        public java.lang.Boolean toValue(java.lang.Boolean input) {
             return input;
         }
     }
