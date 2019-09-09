@@ -119,20 +119,22 @@ public class WrappedObject {
     public boolean verifySchema(Class<?> schemaType, String subPrefix) {
         BeanClass<Object> polymorphicBeanClass = getPolymorphicSchemaType(schemaType);
         Set<String> propertyReaderNames = getPropertyReaderNames();
-        Object schemaInstance = polymorphicBeanClass.newInstance();
 
         return noMoreUnexpectedField(polymorphicBeanClass, polymorphicBeanClass.getPropertyReaders().keySet(), propertyReaderNames)
                 && allMandatoryPropertyShouldBeExist(polymorphicBeanClass, propertyReaderNames)
-                && allPropertyValueShouldBeValid(subPrefix, polymorphicBeanClass, schemaInstance);
+                && allPropertyValueShouldBeValid(subPrefix, polymorphicBeanClass, polymorphicBeanClass.newInstance());
     }
 
-    private boolean allMandatoryPropertyShouldBeExist(BeanClass<?> polymorphicBeanClass, Set<String> actualFields) {
+    private <T> boolean allMandatoryPropertyShouldBeExist(BeanClass<T> polymorphicBeanClass, Set<String> actualFields) {
         return polymorphicBeanClass.getPropertyReaders().values().stream()
                 .filter(isAllowNull().negate())
-                .filter(propertyReader -> !actualFields.contains(propertyReader.getName()))
-                .peek(propertyReader -> System.err.printf("Expected field `%s` for type %s[%s], but does not exist\n",
-                        propertyReader.getName(), polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName()))
-                .count() == 0;
+                .allMatch(propertyReader -> shouldContainsField(actualFields, polymorphicBeanClass, propertyReader));
+    }
+
+    private <T> boolean shouldContainsField(Set<String> actualFields, BeanClass<T> polymorphicBeanClass, PropertyReader<T> propertyReader) {
+        return actualFields.contains(propertyReader.getName())
+                || errorLog("Expected field `%s` for type %s[%s], but does not exist\n", propertyReader.getName(),
+                polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
     private Predicate<PropertyReader<?>> isAllowNull() {
@@ -141,33 +143,33 @@ public class WrappedObject {
 
     private boolean noMoreUnexpectedField(BeanClass polymorphicBeanClass, Set<String> expectedFields, Set<String> actualFields) {
         return actualFields.stream()
-                .filter(f -> !expectedFields.contains(f))
-                .peek(f -> System.err.printf("Unexpected field `%s` for type %s[%s]\n", f, polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName()))
-                .count() == 0;
+                .allMatch(f -> shouldNotContainsUnexpectedField(polymorphicBeanClass, expectedFields, f));
+    }
+
+    private boolean shouldNotContainsUnexpectedField(BeanClass polymorphicBeanClass, Set<String> expectedFields, String f) {
+        return expectedFields.contains(f)
+                || errorLog("Unexpected field `%s` for type %s[%s]\n", f, polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
     private <T> boolean allPropertyValueShouldBeValid(String subPrefix, BeanClass<T> polymorphicBeanClass, T schemaInstance) {
         return polymorphicBeanClass.getPropertyReaders().values().stream()
-                .noneMatch(propertyReader -> {
-                    WrappedObject propertyValueWrapper = getWrappedPropertyValue(propertyReader.getName());
-                    if (isAllowNull().test(propertyReader) && propertyValueWrapper.isNull())
-                        return false;
-
-                    return !propertyValueWrapper.verifySchemaInGenericType(subPrefix + "." + propertyReader.getName(),
+                .allMatch(propertyReader -> {
+                    WrappedObject wrappedPropertyValue = getWrappedPropertyValue(propertyReader.getName());
+                    return allowNullAndIsNull(propertyReader, wrappedPropertyValue)
+                            || wrappedPropertyValue.verifySchemaInGenericType(subPrefix + "." + propertyReader.getName(),
                             propertyReader.getGenericType(), propertyReader.getValue(schemaInstance));
                 });
+    }
+
+    private <T> boolean allowNullAndIsNull(PropertyReader<T> propertyReader, WrappedObject propertyValueWrapper) {
+        return isAllowNull().test(propertyReader) && propertyValueWrapper.isNull();
     }
 
     @SuppressWarnings("unchecked")
     private <T> boolean verifySchemaInGenericType(String subPrefix, GenericType genericType, Object schemaProperty) {
         Class<?> fieldType = genericType.getRawType();
         if (Formatter.class.isAssignableFrom(fieldType)) {
-            Optional<GenericType> genericTypeParameter = genericType.getGenericTypeParameter(0);
-            Object formatter = schemaProperty;
-            if (formatter == null)
-                formatter = genericTypeParameter.isPresent() ? BeanClass.newInstance(fieldType, genericTypeParameter.get().getRawType())
-                        : BeanClass.newInstance(fieldType);
-            return verifyFormatterValue(subPrefix, (Formatter<Object, Object>) formatter);
+            return verifyFormatterValue(subPrefix, getOrCreateFormatter(schemaProperty, genericType));
         } else if (runtimeContext.isRegistered(fieldType))
             return verifySchema(fieldType, subPrefix);
         else if (Iterable.class.isAssignableFrom(fieldType))
@@ -175,6 +177,16 @@ public class WrappedObject {
         else if (Map.class.isAssignableFrom(fieldType))
             return verifyMap(subPrefix, genericType);
         return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Formatter<Object, Object> getOrCreateFormatter(Object schemaProperty, GenericType genericType) {
+        if (schemaProperty != null)
+            return (Formatter<Object, Object>) schemaProperty;
+        Class<Object> fieldType = (Class<Object>) genericType.getRawType();
+        return (Formatter<Object, Object>) genericType.getGenericTypeParameter(0)
+                .map(t -> BeanClass.newInstance(fieldType, t.getRawType()))
+                .orElseGet(() -> BeanClass.newInstance(fieldType));
     }
 
     private boolean verifyFormatterValue(String subPrefix, Formatter<Object, Object> formatter) {
