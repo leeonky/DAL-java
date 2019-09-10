@@ -8,7 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 
@@ -57,6 +59,22 @@ class VerifySchemaField extends Base {
                 "}"), "is PositiveNumberListValue");
     }
 
+    @Test
+    void support_verify_positive_integer_map() throws JSONException {
+        dataAssert.getRuntimeContextBuilder().registerSchema(PositiveNumberMapValue.class);
+        assertPass(new JSONObject("{" +
+                "\"positiveIntegerMap\": {\"a\": 1, \"b\": 2}" +
+                "}"), "is PositiveNumberMapValue");
+
+        assertFailed(new JSONObject("{" +
+                "\"positiveIntegerMap\": {\"a\": 1}" +
+                "}"), "is PositiveNumberMapValue");
+
+        assertFailed(new JSONObject("{" +
+                "\"positiveIntegerMap\": {\"a\": 1, \"b\": 3}" +
+                "}"), "is PositiveNumberMapValue");
+    }
+
     public static class InstantValue {
         public static final Formatters.Instant instant = Formatters.Instant.equalTo(Instant.parse("1999-10-10T11:12:13Z"));
     }
@@ -68,5 +86,12 @@ class VerifySchemaField extends Base {
 
     public static class PositiveNumberListValue {
         public List<Formatters.PositiveInteger> positiveIntegerList = asList(Formatters.PositiveInteger.equalTo(1), Formatters.PositiveInteger.equalTo(2));
+    }
+
+    public static class PositiveNumberMapValue {
+        public Map<String, Formatters.PositiveInteger> positiveIntegerMap = new HashMap<String, Formatters.PositiveInteger>() {{
+            put("a", Formatters.PositiveInteger.equalTo(1));
+            put("b", Formatters.PositiveInteger.equalTo(2));
+        }};
     }
 }

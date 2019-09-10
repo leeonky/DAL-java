@@ -175,7 +175,7 @@ public class WrappedObject {
         else if (Iterable.class.isAssignableFrom(fieldType))
             return verifyList(subPrefix, genericType, (Iterable) schemaProperty);
         else if (Map.class.isAssignableFrom(fieldType))
-            return verifyMap(subPrefix, genericType);
+            return verifyMap(subPrefix, genericType, (Map) schemaProperty);
         return true;
     }
 
@@ -219,15 +219,19 @@ public class WrappedObject {
         }
     }
 
-    private boolean shouldBeSameSize(String subPrefix, List<WrappedObject> wrappedObjectList, List<Object> schemaPropertyList) {
+    private boolean shouldBeSameSize(String subPrefix, Collection<?> wrappedObjectList, Collection<?> schemaPropertyList) {
         return wrappedObjectList.size() == schemaPropertyList.size()
                 || errorLog("Expected field `%s` should be size [%d], but was size [%d]\n", subPrefix, schemaPropertyList.size(), wrappedObjectList.size());
     }
 
-    private boolean verifyMap(String subPrefix, GenericType genericType) {
+    private boolean verifyMap(String subPrefix, GenericType genericType, Map<?, Object> schemaProperty) {
         GenericType subGenericType = genericType.getGenericTypeParameter(1).orElseThrow(() ->
                 new IllegalArgumentException(String.format("`%s` should be generic type", subPrefix)));
-        return getPropertyReaderNames().stream()
-                .allMatch(key -> getWrappedPropertyValue(key).verifySchemaInGenericType(subPrefix + "." + key, subGenericType, null));
+        if (schemaProperty == null)
+            return getPropertyReaderNames().stream()
+                    .allMatch(key -> getWrappedPropertyValue(key).verifySchemaInGenericType(subPrefix + "." + key, subGenericType, null));
+        return shouldBeSameSize(subPrefix, getPropertyReaderNames(), schemaProperty.values())
+                && getPropertyReaderNames().stream()
+                .allMatch(key -> getWrappedPropertyValue(key).verifySchemaInGenericType(subPrefix + "." + key, subGenericType, schemaProperty.get(key)));
     }
 }
