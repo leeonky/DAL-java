@@ -26,9 +26,34 @@ public class Formatters {
 
                 @Override
                 public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Instant equalTo [%s]", expect);
+                    return java.lang.String.format("Instant equal to [%s]", expect);
                 }
             };
+        }
+
+        public static Instant equalTo(java.lang.String expect) {
+            return equalTo(java.time.Instant.parse(expect));
+        }
+
+        public static Instant now(int errorMs) {
+            return new Instant() {
+                private java.time.Instant now;
+
+                @Override
+                public boolean verify(java.time.Instant actual) {
+                    now = java.time.Instant.now();
+                    return actual.isAfter(now.plusMillis(-errorMs)) && actual.isBefore(now.plusMillis(errorMs));
+                }
+
+                @Override
+                public java.lang.String getFormatterName() {
+                    return java.lang.String.format("Instant now[%s] +/- %dms", now, errorMs);
+                }
+            };
+        }
+
+        public static Instant now() {
+            return now(10000);
         }
 
         @Override
@@ -37,16 +62,8 @@ public class Formatters {
         }
     }
 
+    @Deprecated
     public static class PositiveInteger extends Integer {
-        public static PositiveInteger equalTo(long expect) {
-            return new PositiveInteger() {
-                @Override
-                public boolean verify(BigInteger value) {
-                    return value.compareTo(BigInteger.valueOf(expect)) == 0;
-                }
-            };
-        }
-
         @Override
         public BigInteger toValue(java.lang.Number input) {
             BigInteger value = super.toValue(input);
@@ -57,6 +74,55 @@ public class Formatters {
     }
 
     public static class Integer extends BaseFormatter<java.lang.Number, BigInteger> {
+        public static Integer equalTo(long expect) {
+            return new Integer() {
+                @Override
+                public boolean verify(BigInteger value) {
+                    return value.compareTo(BigInteger.valueOf(expect)) == 0;
+                }
+
+                @Override
+                public java.lang.String getFormatterName() {
+                    return java.lang.String.format("Integer equal to [%d]", expect);
+                }
+            };
+        }
+
+        public static Integer positive() {
+            return greaterThan(0);
+        }
+
+        private static Integer greaterThan(long expect) {
+            return new Integer() {
+                @Override
+                public boolean verify(BigInteger value) {
+                    return value.compareTo(BigInteger.valueOf(expect)) > 0;
+                }
+
+                @Override
+                public java.lang.String getFormatterName() {
+                    return java.lang.String.format("Integer greater than %d", expect);
+                }
+            };
+        }
+
+        private static Integer lessThan(long expect) {
+            return new Integer() {
+                @Override
+                public boolean verify(BigInteger value) {
+                    return value.compareTo(BigInteger.valueOf(expect)) < 0;
+                }
+
+                @Override
+                public java.lang.String getFormatterName() {
+                    return java.lang.String.format("Integer less than %d", expect);
+                }
+            };
+        }
+
+        public static Integer negative() {
+            return lessThan(0);
+        }
 
         @Override
         public BigInteger toValue(java.lang.Number input) {
