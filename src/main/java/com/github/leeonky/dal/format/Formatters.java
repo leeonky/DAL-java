@@ -5,6 +5,7 @@ import com.github.leeonky.dal.token.IllegalTypeException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.format.DateTimeParseException;
+import java.util.Objects;
 
 import static java.lang.Enum.valueOf;
 
@@ -154,6 +155,21 @@ public class Formatters {
             this.enumType = enumType;
         }
 
+        @SuppressWarnings("unchecked")
+        public static <E extends java.lang.Enum<E>> Enum<E> equalTo(E expect) {
+            return new Enum<E>((Class<E>) expect.getClass()) {
+                @Override
+                public boolean verify(E actual) {
+                    return Objects.equals(expect, actual);
+                }
+
+                @Override
+                public java.lang.String getFormatterName() {
+                    return java.lang.String.format("Enum equal to %s", expect);
+                }
+            };
+        }
+
         @Override
         public T toValue(java.lang.String input) {
             return enumType == null ? defaultVerification(input) : verifyViaEnumType(input);
@@ -183,6 +199,7 @@ public class Formatters {
         }
     }
 
+    @Deprecated
     public static class PositiveNumber extends BaseFormatter<java.lang.Number, BigDecimal> {
 
         @Override
@@ -194,6 +211,7 @@ public class Formatters {
         }
     }
 
+    @Deprecated
     public static class ZeroNumber extends BaseFormatter<java.lang.Number, java.lang.Integer> {
 
         @Override

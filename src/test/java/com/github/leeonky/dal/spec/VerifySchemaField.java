@@ -22,6 +22,10 @@ class VerifySchemaField extends Base {
                 .registerListAccessor(JSONArray.class, new JSONArrayListAccessor());
     }
 
+    public enum E {
+        A, B
+    }
+
     public static class InstantValue {
         public static final Formatters.Instant instant = Formatters.Instant.equalTo("1999-10-10T11:12:13Z");
     }
@@ -52,6 +56,10 @@ class VerifySchemaField extends Base {
 
     public static class NegativeIntegerValue {
         public Formatters.Integer integer = Formatters.Integer.negative();
+    }
+
+    public static class EnumValue {
+        public Formatters.Enum<E> e = Formatters.Enum.equalTo(E.B);
     }
 
     @Nested
@@ -152,6 +160,17 @@ class VerifySchemaField extends Base {
             dataAssert.getRuntimeContextBuilder().registerSchema(InstantNowValue.class);
             assertPass(new JSONObject("{\"instant\": \"" + java.time.Instant.now().toString() + "\"}"), "is InstantNowValue");
             assertFailed(new JSONObject("{\"instant\": \"" + java.time.Instant.now().plusSeconds(100).toString() + "\"}"), "is InstantNowValue");
+        }
+    }
+
+    @Nested
+    class Enum {
+
+        @Test
+        void support_equal_to() throws JSONException {
+            dataAssert.getRuntimeContextBuilder().registerSchema(EnumValue.class);
+            assertPass(new JSONObject("{\"e\": \"B\"}"), "is EnumValue");
+            assertFailed(new JSONObject("{\"e\": \"A\"}"), "is EnumValue");
         }
     }
 }
