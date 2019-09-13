@@ -24,6 +24,7 @@ public class TypeAssertionExpression extends Node {
             Object value = ((Constructor) typeNode.evaluate(context)).apply(instance.evaluate(context), context);
             return context.wrapInputValueAndEvaluate(value, assertion);
         } catch (IllegalTypeException ignore) {
+            System.err.println("Warning: Type assertion `" + inspect() + "` got false.");
             return false;
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), typeNode.getPositionBegin());

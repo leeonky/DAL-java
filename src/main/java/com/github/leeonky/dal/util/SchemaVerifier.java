@@ -149,7 +149,7 @@ public class SchemaVerifier {
     }
 
     private boolean verifyFormatterValue(String subPrefix, Formatter<Object, Object> formatter) {
-        return formatter.isValidValue(object.getInstance())
+        return formatter.isValid(object.getInstance())
                 || errorLog("Expected field `%s` should be in `%s`, but was [%s]\n", subPrefix, formatter.getFormatterName(), object.getInstance());
     }
 }

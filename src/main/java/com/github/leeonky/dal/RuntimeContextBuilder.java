@@ -49,11 +49,7 @@ public class RuntimeContextBuilder {
 
     @SuppressWarnings("unchecked")
     public RuntimeContextBuilder registerValueFormat(String name, Formatter formatter) {
-        constructors.put(name, (o, context) -> {
-            if (formatter.isValidType(o))
-                return formatter.toValue(o);
-            throw new IllegalTypeException();
-        });
+        constructors.put(name, (o, context) -> formatter.transform(o));
         return this;
     }
 

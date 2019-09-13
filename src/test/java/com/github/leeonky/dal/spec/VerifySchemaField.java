@@ -26,10 +26,6 @@ class VerifySchemaField extends Base {
         A, B
     }
 
-    public static class InstantValue {
-        public static final Formatters.Instant instant = Formatters.Instant.equalTo("1999-10-10T11:12:13Z");
-    }
-
     public static class InstantNowValue {
         public static final Formatters.Instant instant = Formatters.Instant.now();
     }
@@ -58,8 +54,16 @@ class VerifySchemaField extends Base {
         public Formatters.Integer integer = Formatters.Integer.negative();
     }
 
-    public static class EnumValue {
-        public Formatters.Enum<E> e = Formatters.Enum.equalTo(E.B);
+    public static class NumberValue {
+        public Formatters.Number number = Formatters.Number.equalTo(1);
+    }
+
+    public static class PositiveNumberValue {
+        public Formatters.Number number = Formatters.Number.positive();
+    }
+
+    public static class NegativeNumberValue {
+        public Formatters.Number number = Formatters.Number.negative();
     }
 
     @Nested
@@ -148,12 +152,6 @@ class VerifySchemaField extends Base {
 
     @Nested
     class Instant {
-        @Test
-        void support_verify_instant_value() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(InstantValue.class);
-            assertPass(new JSONObject("{\"instant\": \"1999-10-10T11:12:13Z\"}"), "is InstantValue");
-            assertFailed(new JSONObject("{\"instant\": \"1999-10-10T11:12:14Z\"}"), "is InstantValue");
-        }
 
         @Test
         void support_verify_instant_now_value() throws JSONException {
@@ -164,13 +162,35 @@ class VerifySchemaField extends Base {
     }
 
     @Nested
-    class Enum {
+    class Number {
 
         @Test
         void support_equal_to() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(EnumValue.class);
-            assertPass(new JSONObject("{\"e\": \"B\"}"), "is EnumValue");
-            assertFailed(new JSONObject("{\"e\": \"A\"}"), "is EnumValue");
+            dataAssert.getRuntimeContextBuilder().registerSchema(NumberValue.class);
+            assertPass(new JSONObject("{\"number\": 1}"), "is NumberValue");
+            assertPass(new JSONObject("{\"number\": 1.0}"), "is NumberValue");
+            assertFailed(new JSONObject("{\"number\": 1.1}"), "is NumberValue");
+            assertFailed(new JSONObject("{\"number\": \"1\"}"), "is NumberValue");
+        }
+
+        @Test
+        void support_positive_number() throws JSONException {
+            dataAssert.getRuntimeContextBuilder().registerSchema(PositiveNumberValue.class);
+            assertPass(new JSONObject("{\"number\": 1}"), "is PositiveNumberValue");
+            assertPass(new JSONObject("{\"number\": 1.0}"), "is PositiveNumberValue");
+            assertFailed(new JSONObject("{\"number\": 0.0}"), "is PositiveNumberValue");
+            assertFailed(new JSONObject("{\"number\": 0}"), "is PositiveNumberValue");
+            assertFailed(new JSONObject("{\"number\": -1}"), "is PositiveNumberValue");
+        }
+
+        @Test
+        void support_negative_number() throws JSONException {
+            dataAssert.getRuntimeContextBuilder().registerSchema(NegativeNumberValue.class);
+            assertPass(new JSONObject("{\"number\": -1}"), "is NegativeNumberValue");
+            assertPass(new JSONObject("{\"number\": -1.0}"), "is NegativeNumberValue");
+            assertFailed(new JSONObject("{\"number\": 0.0}"), "is NegativeNumberValue");
+            assertFailed(new JSONObject("{\"number\": 0}"), "is NegativeNumberValue");
+            assertFailed(new JSONObject("{\"number\": 1}"), "is NegativeNumberValue");
         }
     }
 }

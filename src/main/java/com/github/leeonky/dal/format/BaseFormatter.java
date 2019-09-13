@@ -13,10 +13,6 @@ public abstract class BaseFormatter<T, R> implements Formatter<T, R> {
         inputType = (Class<T>) guessInputType(getClass().getGenericSuperclass());
     }
 
-    protected BaseFormatter(Class<T> inputType) {
-        this.inputType = inputType;
-    }
-
     public static Class<?> guessInputType(Type type) {
         if (type instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) type;
