@@ -13,6 +13,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.util.BeanClass.getClassName;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.StreamSupport.stream;
@@ -35,7 +37,7 @@ public class SchemaVerifier {
             type = Stream.of(subType.types())
                     .filter(t -> t.value().equals(value))
                     .map(SubType.Type::type)
-                    .findFirst().orElseThrow(() -> new IllegalStateException(String.format("Cannot guess sub type through property type value[%s]", value)));
+                    .findFirst().orElseThrow(() -> new IllegalStateException(format("Cannot guess sub type through property type value[%s]", value)));
         }
         return (BeanClass<T>) BeanClass.create(type);
     }
@@ -103,21 +105,30 @@ public class SchemaVerifier {
         else if (fieldType.isArray())
             return verifyArray(subPrefix, fieldType.getComponentType(), (Object[]) schemaProperty);
         else if (Type.class.isAssignableFrom(fieldType))
-            return verifyWrappedType((Type<Object>) schemaProperty, genericType);
+            return verifyWrappedType(subPrefix, (Type<Object>) schemaProperty, genericType);
         else
-            return verifyType(schemaProperty, fieldType);
+            return verifyType(subPrefix, schemaProperty, fieldType);
     }
 
-    private boolean verifyWrappedType(Type<Object> schemaProperty, GenericType genericType) {
+    private boolean verifyWrappedType(String subPrefix, Type<Object> schemaProperty, GenericType genericType) {
         if (schemaProperty != null)
-            return schemaProperty.verify(object.getInstance());
-        return genericType.getGenericTypeParameter(0).get().getRawType().isInstance(object.getInstance());
+            return schemaProperty.verify(object.getInstance())
+                    || errorLog("Field `%s` is invalid\n", subPrefix);
+        Class<?> rawType = genericType.getGenericTypeParameter(0)
+                .orElseThrow(() -> new IllegalStateException(format("%s should specify generic type", subPrefix))).getRawType();
+        return rawType.isInstance(object.getInstance())
+                || errorLog("Expected field `%s` for type [%s], but was [%s]\n", subPrefix,
+                rawType.getName(), getClassName(object.getInstance()));
     }
 
-    private boolean verifyType(Object schemaProperty, Class<?> fieldType) {
+    private boolean verifyType(String subPrefix, Object schemaProperty, Class<?> fieldType) {
         if (schemaProperty != null)
-            return Objects.equals(schemaProperty, object.getInstance());
-        return fieldType.isInstance(object.getInstance());
+            return Objects.equals(schemaProperty, object.getInstance())
+                    || errorLog("Expected field `%s` equal to %s[%s], but was %s[%s]\n", subPrefix,
+                    getClassName(schemaProperty), schemaProperty, getClassName(object.getInstance()), object.getInstance());
+        return fieldType.isInstance(object.getInstance())
+                || errorLog("Expected field `%s` for type [%s], but was [%s]\n", subPrefix,
+                fieldType.getName(), getClassName(object.getInstance()));
     }
 
     private boolean verifyArray(String subPrefix, Class<?> elementType, Object[] schemaProperty) {
@@ -126,13 +137,13 @@ public class SchemaVerifier {
         if (schemaProperty == null)
             return range(0, wrappedObjectList.size())
                     .allMatch(i -> wrappedObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(
-                            String.format("%s[%d]", subPrefix, i), GenericType.createGenericType(elementType), null));
+                            format("%s[%d]", subPrefix, i), GenericType.createGenericType(elementType), null));
         else {
             List<Object> schemaPropertyList = asList(schemaProperty);
             return shouldBeSameSize(subPrefix, wrappedObjectList, schemaPropertyList)
                     && range(0, wrappedObjectList.size())
                     .allMatch(i -> wrappedObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(
-                            String.format("%s[%d]", subPrefix, i), GenericType.createGenericType(elementType), schemaPropertyList.get(i)));
+                            format("%s[%d]", subPrefix, i), GenericType.createGenericType(elementType), schemaPropertyList.get(i)));
         }
     }
 
@@ -154,19 +165,19 @@ public class SchemaVerifier {
 
         if (schemaProperties == null)
             return range(0, wrappedObjectList.size())
-                    .allMatch(i -> wrappedObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(String.format("%s[%d]", subPrefix, i), subGenericType, null));
+                    .allMatch(i -> wrappedObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(format("%s[%d]", subPrefix, i), subGenericType, null));
         else {
             List<Object> schemaPropertyList = stream(schemaProperties.spliterator(), false)
                     .collect(Collectors.toList());
             return shouldBeSameSize(subPrefix, wrappedObjectList, schemaPropertyList)
                     && range(0, wrappedObjectList.size())
-                    .allMatch(i -> wrappedObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(String.format("%s[%d]", subPrefix, i), subGenericType, schemaPropertyList.get(i)));
+                    .allMatch(i -> wrappedObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(format("%s[%d]", subPrefix, i), subGenericType, schemaPropertyList.get(i)));
         }
     }
 
     private boolean verifyMap(String subPrefix, GenericType genericType, Map<?, Object> schemaProperty) {
         GenericType subGenericType = genericType.getGenericTypeParameter(1).orElseThrow(() ->
-                new IllegalArgumentException(String.format("`%s` should be generic type", subPrefix)));
+                new IllegalArgumentException(format("`%s` should be generic type", subPrefix)));
         if (schemaProperty == null)
             return object.getPropertyReaderNames().stream()
                     .allMatch(key -> object.getWrappedPropertyValue(key).createSchemaVerifier().verifySchemaInGenericType(subPrefix + "." + key, subGenericType, null));
