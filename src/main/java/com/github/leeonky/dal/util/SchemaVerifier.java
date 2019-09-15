@@ -8,10 +8,7 @@ import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.GenericType;
 import com.github.leeonky.util.PropertyReader;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -104,7 +101,14 @@ public class SchemaVerifier {
             return verifyMap(subPrefix, genericType, (Map) schemaProperty);
         else if (fieldType.isArray())
             return verifyArray(subPrefix, fieldType.getComponentType(), (Object[]) schemaProperty);
-        return true;
+        else
+            return verifyType(schemaProperty, fieldType);
+    }
+
+    private boolean verifyType(Object schemaProperty, Class<?> fieldType) {
+        if (schemaProperty != null)
+            return Objects.equals(schemaProperty, object.getInstance());
+        return fieldType.isInstance(object.getInstance());
     }
 
     private boolean verifyArray(String subPrefix, Class<?> elementType, Object[] schemaProperty) {

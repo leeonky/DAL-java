@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static java.util.Arrays.asList;
 
-class VerifySchemaField extends Base {
+class VerifySchemaFormatterField extends Base {
     @BeforeEach
     void registerJsonType() {
         dataAssert.getRuntimeContextBuilder()
