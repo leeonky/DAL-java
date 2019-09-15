@@ -59,7 +59,7 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerSchema(String name, Class<?> clazz) {
         schemas.add(clazz);
-        return registerSchema(name, (bw) -> bw.createSchemaVerifier().verify(clazz, ""));
+        return registerSchema(name, (bw) -> bw.createSchemaVerifier().verify(clazz, null, ""));
     }
 
     public RuntimeContextBuilder registerSchema(String name, Function<WrappedObject, Boolean> predicate) {

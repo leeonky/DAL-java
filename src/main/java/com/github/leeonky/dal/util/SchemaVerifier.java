@@ -41,12 +41,12 @@ public class SchemaVerifier {
         return (BeanClass<T>) BeanClass.create(type);
     }
 
-    public boolean verify(Class<?> clazz, String subPrefix) {
+    public boolean verify(Class<?> clazz, Object schemaInstance, String subPrefix) {
         Set<String> propertyReaderNames = object.getPropertyReaderNames();
         BeanClass<Object> schema = getPolymorphicSchemaType(clazz);
         return noMoreUnexpectedField(schema, schema.getPropertyReaders().keySet(), propertyReaderNames)
                 && allMandatoryPropertyShouldBeExist(schema, propertyReaderNames)
-                && allPropertyValueShouldBeValid(subPrefix, schema, schema.newInstance());
+                && allPropertyValueShouldBeValid(subPrefix, schema, schemaInstance == null ? schema.newInstance() : schemaInstance);
     }
 
     private boolean noMoreUnexpectedField(BeanClass polymorphicBeanClass, Set<String> expectedFields, Set<String> actualFields) {
@@ -96,7 +96,7 @@ public class SchemaVerifier {
         if (Formatter.class.isAssignableFrom(fieldType)) {
             return verifyFormatterValue(subPrefix, getOrCreateFormatter(schemaProperty, genericType));
         } else if (runtimeContext.isRegistered(fieldType))
-            return object.createSchemaVerifier().verify(fieldType, subPrefix);
+            return object.createSchemaVerifier().verify(fieldType, schemaProperty, subPrefix);
         else if (Iterable.class.isAssignableFrom(fieldType))
             return verifyList(subPrefix, genericType, (Iterable) schemaProperty);
         else if (Map.class.isAssignableFrom(fieldType))

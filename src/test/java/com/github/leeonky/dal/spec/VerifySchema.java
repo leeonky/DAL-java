@@ -132,6 +132,21 @@ class VerifySchema extends Base {
         public Formatters.URL url;
     }
 
+    public static class FieldValue {
+        public Formatters.Number integer;
+
+        public FieldValue() {
+        }
+
+        public FieldValue(int i) {
+            integer = Formatters.Number.equalTo(i);
+        }
+    }
+
+    public static class SchemaWithInstance {
+        public FieldValue fieldValue = new FieldValue(1);
+    }
+
     @Nested
     class RegisterSchemaType {
         @BeforeEach
@@ -258,5 +273,24 @@ class VerifySchema extends Base {
 
     }
 
+    @Nested
+    class VerifySchemaWithInstance {
+
+        @BeforeEach
+        void registerJson() {
+            dataAssert.getRuntimeContextBuilder()
+                    .registerPropertyAccessor(JSONObject.class, new JsonPropertyAccessor())
+                    .registerListAccessor(JSONArray.class, new JSONArrayListAccessor())
+                    .registerSchema(FieldValue.class)
+                    .registerSchema(SchemaWithInstance.class)
+            ;
+        }
+
+        @Test
+        void should_support_verfiy_field_in_schema_type_with_instance() throws JSONException {
+            assertPass(new JSONObject("{\"fieldValue\": {\"integer\": 1}}"), "is SchemaWithInstance");
+            assertFailed(new JSONObject("{\"fieldValue\": {\"integer\": 2}}"), "is SchemaWithInstance");
+        }
+    }
 }
 

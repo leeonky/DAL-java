@@ -30,7 +30,7 @@ public class Expression extends Node {
     public Object evaluate(RuntimeContext context) {
         try {
             Object result = operator.calculate(node1, node2, context);
-            if (operator.isNeedInspect() && Boolean.class.isInstance(result) && !(boolean) result)
+            if (operator.isNeedInspect() && (result instanceof Boolean) && !(boolean) result)
                 System.err.println("Warning: Expression `" + inspect() + "` got false.");
             return result;
         } catch (IllegalArgumentException ex) {

@@ -45,7 +45,6 @@ public class Formatters {
         }
     }
 
-    @Deprecated
     public static class PositiveInteger extends Integer {
         @Override
         public BigInteger convert(java.lang.Number input) {
@@ -216,7 +215,6 @@ public class Formatters {
         }
     }
 
-    @Deprecated
     public static class PositiveNumber extends BaseFormatter<java.lang.Number, BigDecimal> {
 
         @Override
@@ -228,7 +226,6 @@ public class Formatters {
         }
     }
 
-    @Deprecated
     public static class ZeroNumber extends BaseFormatter<java.lang.Number, java.lang.Integer> {
 
         @Override
