@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.StreamSupport.stream;
 
@@ -101,7 +102,25 @@ public class SchemaVerifier {
             return verifyList(subPrefix, genericType, (Iterable) schemaProperty);
         else if (Map.class.isAssignableFrom(fieldType))
             return verifyMap(subPrefix, genericType, (Map) schemaProperty);
+        else if (fieldType.isArray())
+            return verifyArray(subPrefix, fieldType.getComponentType(), (Object[]) schemaProperty);
         return true;
+    }
+
+    private boolean verifyArray(String subPrefix, Class<?> elementType, Object[] schemaProperty) {
+        List<WrappedObject> wrappedObjectList = stream(object.getWrappedList().spliterator(), false)
+                .collect(Collectors.toList());
+        if (schemaProperty == null)
+            return range(0, wrappedObjectList.size())
+                    .allMatch(i -> wrappedObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(
+                            String.format("%s[%d]", subPrefix, i), GenericType.createGenericType(elementType), null));
+        else {
+            List<Object> schemaPropertyList = asList(schemaProperty);
+            return shouldBeSameSize(subPrefix, wrappedObjectList, schemaPropertyList)
+                    && range(0, wrappedObjectList.size())
+                    .allMatch(i -> wrappedObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(
+                            String.format("%s[%d]", subPrefix, i), GenericType.createGenericType(elementType), schemaPropertyList.get(i)));
+        }
     }
 
     @SuppressWarnings("unchecked")

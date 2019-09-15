@@ -39,6 +39,10 @@ class VerifySchemaField extends Base {
         public List<Formatters.Integer> integerList = asList(Formatters.Integer.equalTo(1), Formatters.Integer.equalTo(2));
     }
 
+    public static class IntegerArrayValue {
+        public Formatters.Integer[] integerArray = new Formatters.Integer[]{Formatters.Integer.equalTo(1), Formatters.Integer.equalTo(2)};
+    }
+
     public static class IntegerMapValue {
         public Map<String, Formatters.Integer> integerMap = new HashMap<String, Formatters.Integer>() {{
             put("a", Formatters.Integer.equalTo(1));
@@ -97,6 +101,22 @@ class VerifySchemaField extends Base {
             assertFailed(new JSONObject("{" +
                     "\"integerList\": [1, 3]" +
                     "}"), "is IntegerListValue");
+        }
+
+        @Test
+        void support_verify_integer_array() throws JSONException {
+            dataAssert.getRuntimeContextBuilder().registerSchema(IntegerArrayValue.class);
+            assertPass(new JSONObject("{" +
+                    "\"integerArray\": [1, 2]" +
+                    "}"), "is IntegerArrayValue");
+
+            assertFailed(new JSONObject("{" +
+                    "\"integerArray\": [1]" +
+                    "}"), "is IntegerArrayValue");
+
+            assertFailed(new JSONObject("{" +
+                    "\"integerArray\": [1, 3]" +
+                    "}"), "is IntegerArrayValue");
         }
 
         @Test

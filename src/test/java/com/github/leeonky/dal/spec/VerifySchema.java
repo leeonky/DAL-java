@@ -69,6 +69,10 @@ class VerifySchema extends Base {
         public List<RightFieldAndType> list;
     }
 
+    public static class NestedArray {
+        public RightFieldAndType[] array;
+    }
+
     public static class NestedNestedList {
         public List<List<RightFieldAndType>> list;
     }
@@ -158,6 +162,7 @@ class VerifySchema extends Base {
                     .registerSchema(AllowNullField.class)
                     .registerSchema(NestedType.class)
                     .registerSchema(NestedList.class)
+                    .registerSchema(NestedArray.class)
                     .registerSchema(NestedNestedList.class)
                     .registerSchema(NestedMap.class)
                     .registerSchema(NestedNestedMap.class)
@@ -209,6 +214,12 @@ class VerifySchema extends Base {
         void should_support_verify_nested_list_schema() throws JSONException {
             assertPass(new JSONObject("{\"list\": [{\"id\": 1}]}"), "is NestedList");
             assertFailed(new JSONObject("{\"list\": [{\"id\": 0}]}"), "is NestedList");
+        }
+
+        @Test
+        void should_support_verify_nested_array_schema() throws JSONException {
+            assertPass(new JSONObject("{\"array\": [{\"id\": 1}]}"), "is NestedArray");
+            assertFailed(new JSONObject("{\"array\": [{\"id\": 0}]}"), "is NestedArray");
         }
 
         @Test
