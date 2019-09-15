@@ -170,6 +170,7 @@ class VerifySchema extends Base {
                     .registerSchema(V.class)
                     .registerSchema(VList.class)
                     .registerSchema(NestedAbstract.class)
+                    .registerSchema(NestedSubType.class)
             ;
         }
 

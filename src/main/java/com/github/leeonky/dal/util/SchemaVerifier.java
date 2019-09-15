@@ -2,6 +2,7 @@ package com.github.leeonky.dal.util;
 
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.format.Formatter;
+import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.SubType;
 import com.github.leeonky.util.BeanClass;
@@ -101,8 +102,16 @@ public class SchemaVerifier {
             return verifyMap(subPrefix, genericType, (Map) schemaProperty);
         else if (fieldType.isArray())
             return verifyArray(subPrefix, fieldType.getComponentType(), (Object[]) schemaProperty);
+        else if (Type.class.isAssignableFrom(fieldType))
+            return verifyWrappedType((Type<Object>) schemaProperty, genericType);
         else
             return verifyType(schemaProperty, fieldType);
+    }
+
+    private boolean verifyWrappedType(Type<Object> schemaProperty, GenericType genericType) {
+        if (schemaProperty != null)
+            return schemaProperty.verify(object.getInstance());
+        return genericType.getGenericTypeParameter(0).get().getRawType().isInstance(object.getInstance());
     }
 
     private boolean verifyType(Object schemaProperty, Class<?> fieldType) {
