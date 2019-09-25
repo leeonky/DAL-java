@@ -75,7 +75,7 @@ public class Formatters {
             return greaterThan(0);
         }
 
-        private static Integer greaterThan(long expect) {
+        public static Integer greaterThan(long expect) {
             return new Integer() {
                 @Override
                 public boolean isValidValue(BigInteger value) {
@@ -89,7 +89,7 @@ public class Formatters {
             };
         }
 
-        private static Integer lessThan(long expect) {
+        public static Integer lessThan(long expect) {
             return new Integer() {
                 @Override
                 public boolean isValidValue(BigInteger value) {
@@ -178,7 +178,7 @@ public class Formatters {
             return greaterThan(0);
         }
 
-        private static Number greaterThan(java.lang.Number expect) {
+        public static Number greaterThan(java.lang.Number expect) {
             return new Number() {
                 @Override
                 public boolean isValidValue(BigDecimal value) {
@@ -196,7 +196,7 @@ public class Formatters {
             return lessThan(0);
         }
 
-        private static Number lessThan(java.lang.Number expect) {
+        public static Number lessThan(java.lang.Number expect) {
             return new Number() {
                 @Override
                 public boolean isValidValue(BigDecimal value) {
