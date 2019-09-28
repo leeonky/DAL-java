@@ -84,7 +84,7 @@ public class Formatters {
 
                 @Override
                 public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Integer greater than %d", expect);
+                    return java.lang.String.format("Integer greater than [%d]", expect);
                 }
             };
         }
@@ -98,13 +98,41 @@ public class Formatters {
 
                 @Override
                 public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Integer less than %d", expect);
+                    return java.lang.String.format("Integer less than [%d]", expect);
                 }
             };
         }
 
         public static Integer negative() {
             return lessThan(0);
+        }
+
+        public static Integer greaterOrEqualTo(long expect) {
+            return new Integer() {
+                @Override
+                public boolean isValidValue(BigInteger value) {
+                    return value.compareTo(BigInteger.valueOf(expect)) >= 0;
+                }
+
+                @Override
+                public java.lang.String getFormatterName() {
+                    return java.lang.String.format("Integer greater or equal to [%d]", expect);
+                }
+            };
+        }
+
+        public static Integer lessOrEqualTo(long expect) {
+            return new Integer() {
+                @Override
+                public boolean isValidValue(BigInteger value) {
+                    return value.compareTo(BigInteger.valueOf(expect)) <= 0;
+                }
+
+                @Override
+                public java.lang.String getFormatterName() {
+                    return java.lang.String.format("Integer less or equal to [%d]", expect);
+                }
+            };
         }
 
         @Override
