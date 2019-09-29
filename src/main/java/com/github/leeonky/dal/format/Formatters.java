@@ -197,7 +197,7 @@ public class Formatters {
 
                 @Override
                 public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Number equal to %s", expect);
+                    return java.lang.String.format("Number equal to [%s]", expect);
                 }
             };
         }
@@ -215,7 +215,7 @@ public class Formatters {
 
                 @Override
                 public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Number greater than %s", expect);
+                    return java.lang.String.format("Number greater than [%s]", expect);
                 }
             };
         }
@@ -233,7 +233,35 @@ public class Formatters {
 
                 @Override
                 public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Number less than %s", expect);
+                    return java.lang.String.format("Number less than [%s]", expect);
+                }
+            };
+        }
+
+        public static Number greaterOrEqualTo(java.lang.Number expect) {
+            return new Number() {
+                @Override
+                public boolean isValidValue(BigDecimal value) {
+                    return value.compareTo(new BigDecimal(expect.toString())) >= 0;
+                }
+
+                @Override
+                public java.lang.String getFormatterName() {
+                    return java.lang.String.format("Number greater or equal to [%s]", expect);
+                }
+            };
+        }
+
+        public static Number lessOrEqualTo(java.lang.Number expect) {
+            return new Number() {
+                @Override
+                public boolean isValidValue(BigDecimal value) {
+                    return value.compareTo(new BigDecimal(expect.toString())) <= 0;
+                }
+
+                @Override
+                public java.lang.String getFormatterName() {
+                    return java.lang.String.format("Number less or equal to [%s]", expect);
                 }
             };
         }

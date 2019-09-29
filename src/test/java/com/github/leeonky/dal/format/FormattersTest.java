@@ -3,6 +3,7 @@ package com.github.leeonky.dal.format;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,71 +14,141 @@ class FormattersTest {
 
     @Nested
     class IntegerHelper {
-        Formatters.Integer positive = Formatters.Integer.positive();
+        Formatters.Integer integer = Formatters.Integer.positive();
 
         @Test
         void positive() {
-            positive = Formatters.Integer.positive();
+            integer = Formatters.Integer.positive();
 
-            assertTrue(positive.isValidValue(new BigInteger("1")));
-            assertFalse(positive.isValidValue(new BigInteger("0")));
-            assertFalse(positive.isValidValue(new BigInteger("-1")));
+            assertTrue(integer.isValidValue(new BigInteger("1")));
+            assertFalse(integer.isValidValue(new BigInteger("0")));
+            assertFalse(integer.isValidValue(new BigInteger("-1")));
 
-            assertThat(positive.getFormatterName()).isEqualTo("Integer greater than [0]");
+            assertThat(integer.getFormatterName()).isEqualTo("Integer greater than [0]");
         }
 
         @Test
         void equal() {
-            positive = Formatters.Integer.equalTo(1);
+            integer = Formatters.Integer.equalTo(1);
 
-            assertTrue(positive.isValidValue(new BigInteger("1")));
-            assertFalse(positive.isValidValue(new BigInteger("0")));
+            assertTrue(integer.isValidValue(new BigInteger("1")));
+            assertFalse(integer.isValidValue(new BigInteger("0")));
 
-            assertThat(positive.getFormatterName()).isEqualTo("Integer equal to [1]");
+            assertThat(integer.getFormatterName()).isEqualTo("Integer equal to [1]");
         }
 
         @Test
         void greater() {
-            positive = Formatters.Integer.greaterThan(1);
+            integer = Formatters.Integer.greaterThan(1);
 
-            assertTrue(positive.isValidValue(new BigInteger("2")));
-            assertFalse(positive.isValidValue(new BigInteger("1")));
-            assertFalse(positive.isValidValue(new BigInteger("0")));
+            assertTrue(integer.isValidValue(new BigInteger("2")));
+            assertFalse(integer.isValidValue(new BigInteger("1")));
+            assertFalse(integer.isValidValue(new BigInteger("0")));
 
-            assertThat(positive.getFormatterName()).isEqualTo("Integer greater than [1]");
+            assertThat(integer.getFormatterName()).isEqualTo("Integer greater than [1]");
         }
 
         @Test
         void less() {
-            positive = Formatters.Integer.lessThan(1);
+            integer = Formatters.Integer.lessThan(1);
 
-            assertTrue(positive.isValidValue(new BigInteger("0")));
-            assertFalse(positive.isValidValue(new BigInteger("1")));
-            assertFalse(positive.isValidValue(new BigInteger("2")));
+            assertTrue(integer.isValidValue(new BigInteger("0")));
+            assertFalse(integer.isValidValue(new BigInteger("1")));
+            assertFalse(integer.isValidValue(new BigInteger("2")));
 
-            assertThat(positive.getFormatterName()).isEqualTo("Integer less than [1]");
+            assertThat(integer.getFormatterName()).isEqualTo("Integer less than [1]");
         }
 
         @Test
         void greater_or_equal() {
-            positive = Formatters.Integer.greaterOrEqualTo(1);
+            integer = Formatters.Integer.greaterOrEqualTo(1);
 
-            assertTrue(positive.isValidValue(new BigInteger("2")));
-            assertTrue(positive.isValidValue(new BigInteger("1")));
-            assertFalse(positive.isValidValue(new BigInteger("0")));
+            assertTrue(integer.isValidValue(new BigInteger("2")));
+            assertTrue(integer.isValidValue(new BigInteger("1")));
+            assertFalse(integer.isValidValue(new BigInteger("0")));
 
-            assertThat(positive.getFormatterName()).isEqualTo("Integer greater or equal to [1]");
+            assertThat(integer.getFormatterName()).isEqualTo("Integer greater or equal to [1]");
         }
 
         @Test
         void less_or_equal() {
-            positive = Formatters.Integer.lessOrEqualTo(1);
+            integer = Formatters.Integer.lessOrEqualTo(1);
 
-            assertTrue(positive.isValidValue(new BigInteger("0")));
-            assertTrue(positive.isValidValue(new BigInteger("1")));
-            assertFalse(positive.isValidValue(new BigInteger("2")));
+            assertTrue(integer.isValidValue(new BigInteger("0")));
+            assertTrue(integer.isValidValue(new BigInteger("1")));
+            assertFalse(integer.isValidValue(new BigInteger("2")));
 
-            assertThat(positive.getFormatterName()).isEqualTo("Integer less or equal to [1]");
+            assertThat(integer.getFormatterName()).isEqualTo("Integer less or equal to [1]");
+        }
+    }
+
+    @Nested
+    class NumberHelper {
+        Formatters.Number positive = Formatters.Number.positive();
+
+        @Test
+        void positive() {
+            positive = Formatters.Number.positive();
+
+            assertTrue(positive.isValidValue(new BigDecimal("1")));
+            assertFalse(positive.isValidValue(new BigDecimal("0")));
+            assertFalse(positive.isValidValue(new BigDecimal("-1")));
+
+            assertThat(positive.getFormatterName()).isEqualTo("Number greater than [0]");
+        }
+
+        @Test
+        void equal() {
+            positive = Formatters.Number.equalTo(1);
+
+            assertTrue(positive.isValidValue(new BigDecimal("1")));
+            assertFalse(positive.isValidValue(new BigDecimal("0")));
+
+            assertThat(positive.getFormatterName()).isEqualTo("Number equal to [1]");
+        }
+
+        @Test
+        void greater() {
+            positive = Formatters.Number.greaterThan(1);
+
+            assertTrue(positive.isValidValue(new BigDecimal("2")));
+            assertFalse(positive.isValidValue(new BigDecimal("1")));
+            assertFalse(positive.isValidValue(new BigDecimal("0")));
+
+            assertThat(positive.getFormatterName()).isEqualTo("Number greater than [1]");
+        }
+
+        @Test
+        void less() {
+            positive = Formatters.Number.lessThan(1);
+
+            assertTrue(positive.isValidValue(new BigDecimal("0")));
+            assertFalse(positive.isValidValue(new BigDecimal("1")));
+            assertFalse(positive.isValidValue(new BigDecimal("2")));
+
+            assertThat(positive.getFormatterName()).isEqualTo("Number less than [1]");
+        }
+
+        @Test
+        void greater_or_equal() {
+            positive = Formatters.Number.greaterOrEqualTo(1);
+
+            assertTrue(positive.isValidValue(new BigDecimal("2")));
+            assertTrue(positive.isValidValue(new BigDecimal("1")));
+            assertFalse(positive.isValidValue(new BigDecimal("0")));
+
+            assertThat(positive.getFormatterName()).isEqualTo("Number greater or equal to [1]");
+        }
+
+        @Test
+        void less_or_equal() {
+            positive = Formatters.Number.lessOrEqualTo(1);
+
+            assertTrue(positive.isValidValue(new BigDecimal("0")));
+            assertTrue(positive.isValidValue(new BigDecimal("1")));
+            assertFalse(positive.isValidValue(new BigDecimal("2")));
+
+            assertThat(positive.getFormatterName()).isEqualTo("Number less or equal to [1]");
         }
     }
 }
