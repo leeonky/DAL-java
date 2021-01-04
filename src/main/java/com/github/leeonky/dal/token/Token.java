@@ -61,6 +61,7 @@ public class Token {
         return value;
     }
 
+    @SuppressWarnings("unchecked")
     public List<String> getProperties() {
         return (List<String>) value;
     }
