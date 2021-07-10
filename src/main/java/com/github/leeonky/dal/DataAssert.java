@@ -13,10 +13,19 @@ public class DataAssert {
     }
 
     public AssertResult assertData(Object actual, String expression) {
-        Object result = dalCompiler.compile(new SourceCode(expression)).evaluate(runtimeContextBuilder.build(actual));
+        Object result = evaluate(actual, expression);
         if (result instanceof Boolean)
             return (boolean) result ? AssertResult.passedResult()
                     : AssertResult.failedResult(actual, expression);
         throw new IllegalStateException("Verification result should be boolean but '" + getClassName(result) + "'");
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T evaluate(Object root, String expression) {
+        return (T) dalCompiler.compile(new SourceCode(expression)).evaluate(runtimeContextBuilder.build(root));
+    }
+
+    public DALCompiler getDalCompiler() {
+        return dalCompiler;
     }
 }
