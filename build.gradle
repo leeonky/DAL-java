@@ -3,6 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
     }
 }
 
@@ -18,6 +19,7 @@ jacoco {
 
 apply plugin: 'java'
 apply plugin: 'signing'
+apply plugin: 'info.solidsoft.pitest'
 
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
@@ -30,7 +32,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.0.16' + System.env.VERSION_SCOPE
+version = '0.0.17' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -52,10 +54,19 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
     testAnnotationProcessor('org.projectlombok:lombok:1.18.4')
     testCompile('org.projectlombok:lombok:1.18.4')
+
+    pitest 'io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.3.1'
 }
 
 test {
     useJUnitPlatform()
+}
+
+pitest {
+    targetClasses = ['com.github.leeonky.dal.*']
+    excludedClasses = ['com.github.leeonky.dal.spec.*']
+    outputFormats = ['HTML2']
+    junit5PluginVersion = "0.12"
 }
 
 publishing {
