@@ -139,7 +139,7 @@ public class Token {
                     operator = new Operator.Or();
                     break;
                 default:
-                    throw new SyntaxException(getPositionBegin(), "not support operator " + operatorString + " yet");
+                    throw new SyntaxException(getPositionBegin(), "not support operator `" + operatorString + "` yet");
             }
         }
         operator.setPosition(getPositionBegin());

@@ -95,7 +95,7 @@ class DALCompilerTest {
 
         @Test
         void not_supported_operator() {
-            assertSyntaxException("&1", 0, "not support operator & yet");
+            assertSyntaxException("&1", 0, "not support operator `&` yet");
         }
 
         @Test
