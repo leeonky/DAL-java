@@ -295,6 +295,16 @@ class VerifySchema extends Base {
 
             assertPass(new JSONObject("{\"id\": 1, \"unexpected\": 2}"), "is VerifySchema.IgnoreUnexpectedField");
         }
+
+        @Test
+        void should_support_assertion_schema_expressions() throws JSONException {
+            dataAssert.getRuntimeContextBuilder()
+                    .registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class)
+                    .registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
+
+            assertPass(new JSONObject("{\"id\": 1}"),
+                    "is VerifySchema.RightFieldAndType | VerifySchema.IgnoreUnexpectedField");
+        }
     }
 
     @Nested

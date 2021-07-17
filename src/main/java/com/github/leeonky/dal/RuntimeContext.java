@@ -12,11 +12,11 @@ public class RuntimeContext {
     private final TypeData<PropertyAccessor> propertyAccessors;
     private final TypeData<ListAccessor> listAccessors;
     private final LinkedList<Object> wrappedValueStack = new LinkedList<>();
-    private final Map<String, Constructor> constructors;
+    private final Map<String, ConstructorViaSchema> constructors;
     private final Set<Class<?>> schemas;
 
     public RuntimeContext(Object inputValue, TypeData<PropertyAccessor> propertyAccessors,
-                          Map<String, Constructor> constructors, TypeData<ListAccessor> listAccessors, Set<Class<?>> schemas) {
+                          Map<String, ConstructorViaSchema> constructors, TypeData<ListAccessor> listAccessors, Set<Class<?>> schemas) {
         this.schemas = schemas;
         wrappedValueStack.push(inputValue);
         this.constructors = constructors;
@@ -37,7 +37,7 @@ public class RuntimeContext {
         }
     }
 
-    public Optional<Constructor> searchConstructor(String type) {
+    public Optional<ConstructorViaSchema> searchConstructor(String type) {
         return Optional.ofNullable(constructors.get(type));
     }
 

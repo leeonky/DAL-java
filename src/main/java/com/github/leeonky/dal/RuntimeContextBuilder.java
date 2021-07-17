@@ -17,7 +17,7 @@ import java.util.function.Function;
 public class RuntimeContextBuilder {
     private final TypeData<PropertyAccessor> propertyAccessors = new TypeData<>();
     private final TypeData<ListAccessor> listAccessors = new TypeData<>();
-    private final Map<String, Constructor> constructors = new LinkedHashMap<>();
+    private final Map<String, ConstructorViaSchema> constructors = new LinkedHashMap<>();
     private final Set<Class<?>> schemas = new HashSet<>();
 
     public RuntimeContextBuilder() {

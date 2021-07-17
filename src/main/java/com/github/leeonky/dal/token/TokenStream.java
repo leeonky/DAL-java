@@ -2,11 +2,9 @@ package com.github.leeonky.dal.token;
 
 import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.BracketNode;
+import com.github.leeonky.dal.ast.SchemaAssertionExpression;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 
@@ -75,5 +73,23 @@ public class TokenStream {
         return currentType() == Token.Type.OPERATOR &&
                 (withoutIntention ? UNARY_OPERATORS_WITHOUT_INTENTION : UNARY_OPERATORS)
                         .contains(tokens.get(index).getValue());
+    }
+
+    public Iterable<SchemaAssertionExpression.Operator> getSchemaOperators() {
+        return () -> new Iterator<SchemaAssertionExpression.Operator>() {
+            @Override
+            public boolean hasNext() {
+                return hasTokens() && currentType() == Token.Type.OPERATOR
+                        && (tokens.get(index).getValue().equals("|"));
+            }
+
+            @Override
+            public SchemaAssertionExpression.Operator next() {
+                Object opt = pop().getValue();
+                if ("|".equals(opt))
+                    return SchemaAssertionExpression.Operator.AND;
+                throw new IllegalStateException();
+            }
+        };
     }
 }

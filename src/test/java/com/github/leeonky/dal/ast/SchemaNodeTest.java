@@ -14,7 +14,7 @@ class SchemaNodeTest {
         SchemaNode schemaNode = new SchemaNode("Type");
         schemaNode.setPositionBegin(10);
         final RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                () -> schemaNode.evaluate(new RuntimeContextBuilder().build(null)));
+                () -> schemaNode.getConstructorViaSchema(new RuntimeContextBuilder().build(null)));
 
         assertThat(runtimeException).hasMessage("Schema 'Type' not registered")
                 .hasFieldOrPropertyWithValue("position", 10);

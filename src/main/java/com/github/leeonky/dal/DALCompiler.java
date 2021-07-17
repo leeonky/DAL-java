@@ -28,11 +28,17 @@ public class DALCompiler {
     private Node compileExpression(TokenStream tokenStream, BracketNode bracketNode, boolean referenceInput) {
         Node node = compileOneNode(tokenStream, referenceInput).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expect a value"));
         while (tokenStream.hasTokens() && !tokenStream.isCurrentEndBracketAndTakeThenFinishBracket(bracketNode)) {
-            if (tokenStream.isCurrentKeywordAndTake(IS))
+            if (tokenStream.isCurrentKeywordAndTake(IS)) {
                 node = new SchemaAssertionExpression(node,
                         compileTypeNode(tokenStream).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "operand of `is` must be a type")),
                         (tokenStream.hasTokens() && tokenStream.isCurrentKeywordAndTake(WHICH)) ? compileExpression(tokenStream, bracketNode, false) : new ConstNode(true));
-            else
+                for (SchemaAssertionExpression.Operator operator : tokenStream.getSchemaOperators()) {
+                    //TODO support and/or list
+                    //TODO imcomplete type list
+                    ((SchemaAssertionExpression) node).appendSchema(operator,
+                            compileTypeNode(tokenStream).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "require type list")));
+                }
+            } else
                 node = new Expression(node, tokenStream.pop().toOperator(false),
                         compileOneNode(tokenStream, false).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished")))
                         .adjustOperatorOrder();
