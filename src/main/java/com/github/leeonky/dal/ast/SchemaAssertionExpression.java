@@ -22,28 +22,30 @@ public class SchemaAssertionExpression extends Node {
 
     @Override
     public Object evaluate(RuntimeContext context) {
-        Object value;
         try {
-            if (operator == Operator.AND) {
-                Object[] objects = schemaNodes.stream().map(schemaNode ->
-                        verifyAndConvertAsSchemaType(context, schemaNode)).toArray();
-                value = objects[objects.length - 1];
-            } else {
-                SchemaNode schemaNode = schemaNodes.get(0);
-                value = verifyAndConvertAsSchemaType(context, schemaNode);
+            ObjectRef objectRef = new ObjectRef();
+            if (isFailed(context, objectRef)) {
+                System.err.println("Warning: Type assertion `" + inspect() + "` got false.");
+                return false;
             }
-            return context.wrapInputValueAndEvaluate(value, assertion);
-        } catch (IllegalTypeException ignore) {
-            System.err.println("Warning: Type assertion `" + inspect() + "` got false.");
-            return false;
+            return context.wrapInputValueAndEvaluate(objectRef.instance, assertion);
+        } catch (IllegalStateException e) {
+            throw new RuntimeException(e.getMessage(), getPositionBegin());
         }
     }
 
-    private Object verifyAndConvertAsSchemaType(RuntimeContext context, SchemaNode schemaNode) {
+    private boolean isFailed(RuntimeContext context, ObjectRef objectRef) {
+        return operator == Operator.AND ? !schemaNodes.stream().allMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef))
+                : schemaNodes.stream().noneMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
+    }
+
+    private boolean verifyAndConvertAsSchemaType(RuntimeContext context, SchemaNode schemaNode, ObjectRef objectRef) {
         try {
-            return schemaNode.getConstructorViaSchema(context).apply(instance.evaluate(context), context);
-        } catch (IllegalStateException e) {
-            throw new RuntimeException(e.getMessage(), schemaNode.getPositionBegin());
+            objectRef.instance = schemaNode.getConstructorViaSchema(context).apply(instance.evaluate(context), context);
+            return true;
+        } catch (IllegalTypeException ignore) {
+            System.err.println("Warning: Type assertion `" + schemaNode.inspect() + "` got false.");
+            return false;
         }
     }
 
@@ -52,20 +54,27 @@ public class SchemaAssertionExpression extends Node {
         return obj instanceof SchemaAssertionExpression
                 && Objects.equals(instance, ((SchemaAssertionExpression) obj).instance)
                 && Objects.equals(schemaNodes, ((SchemaAssertionExpression) obj).schemaNodes)
+                && Objects.equals(operator, ((SchemaAssertionExpression) obj).operator)
                 && Objects.equals(assertion, ((SchemaAssertionExpression) obj).assertion);
     }
 
     @Override
     public String inspect() {
+        //TODO inspect schema list
         return String.format("%s is %s which %s", instance.inspect(), schemaNodes.get(0).inspect(), assertion.inspect());
     }
 
     public void appendSchema(Operator operator, SchemaNode schemaNode) {
+        this.operator = operator;
         schemaNodes.add(schemaNode);
         //TODO check operator
     }
 
     public enum Operator {
         NONE, AND, OR
+    }
+
+    class ObjectRef {
+        public Object instance;
     }
 }

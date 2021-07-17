@@ -33,8 +33,7 @@ public class DALCompiler {
                         compileTypeNode(tokenStream).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "operand of `is` must be a type")),
                         (tokenStream.hasTokens() && tokenStream.isCurrentKeywordAndTake(WHICH)) ? compileExpression(tokenStream, bracketNode, false) : new ConstNode(true));
                 for (SchemaAssertionExpression.Operator operator : tokenStream.getSchemaOperators()) {
-                    //TODO support and/or list
-                    //TODO imcomplete type list
+                    //TODO imcomplete type list checking
                     ((SchemaAssertionExpression) node).appendSchema(operator,
                             compileTypeNode(tokenStream).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "require type list")));
                 }

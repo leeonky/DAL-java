@@ -297,13 +297,43 @@ class VerifySchema extends Base {
         }
 
         @Test
-        void should_support_assertion_schema_expressions() throws JSONException {
+        void should_support_assertion_schema_list_opt_and_result_true() throws JSONException {
             dataAssert.getRuntimeContextBuilder()
                     .registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class)
                     .registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
 
             assertPass(new JSONObject("{\"id\": 1}"),
                     "is VerifySchema.RightFieldAndType | VerifySchema.IgnoreUnexpectedField");
+        }
+
+        @Test
+        void should_support_assertion_schema_list_opt_and_result_false() throws JSONException {
+            dataAssert.getRuntimeContextBuilder()
+                    .registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class)
+                    .registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
+
+            assertFailed(new JSONObject("{\"id\": 1, \"unexpected\": 2}"),
+                    "is VerifySchema.RightFieldAndType | VerifySchema.IgnoreUnexpectedField");
+        }
+
+        @Test
+        void should_support_assertion_schema_list_opt_or_result_true() throws JSONException {
+            dataAssert.getRuntimeContextBuilder()
+                    .registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class)
+                    .registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
+
+            assertPass(new JSONObject("{\"id\": 1, \"unexpected\": 2}"),
+                    "is VerifySchema.RightFieldAndType / VerifySchema.IgnoreUnexpectedField");
+        }
+
+        @Test
+        void should_support_assertion_schema_list_opt_or_result_false() throws JSONException {
+            dataAssert.getRuntimeContextBuilder()
+                    .registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class)
+                    .registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
+
+            assertFailed(new JSONObject("{\"unexpected1\": 1, \"unexpected2\": 2}"),
+                    "is VerifySchema.RightFieldAndType / VerifySchema.IgnoreUnexpectedField");
         }
     }
 

@@ -80,15 +80,16 @@ public class TokenStream {
             @Override
             public boolean hasNext() {
                 return hasTokens() && currentType() == Token.Type.OPERATOR
-                        && (tokens.get(index).getValue().equals("|"));
+                        && ("|".equals(tokens.get(index).getValue())
+                        || "/".equals(tokens.get(index).getValue()));
             }
 
             @Override
             public SchemaAssertionExpression.Operator next() {
-                Object opt = pop().getValue();
-                if ("|".equals(opt))
+                if ("|".equals(pop().getValue()))
                     return SchemaAssertionExpression.Operator.AND;
-                throw new IllegalStateException();
+                else
+                    return SchemaAssertionExpression.Operator.OR;
             }
         };
     }
