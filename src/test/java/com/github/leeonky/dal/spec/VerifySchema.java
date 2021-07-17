@@ -2,6 +2,7 @@ package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.dal.type.AllowNull;
+import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.dal.type.SubType;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import lombok.Getter;
@@ -56,6 +57,7 @@ class VerifySchema extends Base {
         public Formatters.PositiveInteger id;
     }
 
+    @Partial
     public static class IgnoreUnexpectedField {
         public Formatters.PositiveInteger id;
     }
@@ -287,11 +289,11 @@ class VerifySchema extends Base {
             assertPass(new JSONObject("{\"id\": 1}"), "is VerifySchema.RightFieldAndType");
         }
 
-        //        @Test
+        @Test
         void should_support_partially_field_assertion() throws JSONException {
             dataAssert.getRuntimeContextBuilder().registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class);
 
-            assertPass(new JSONObject("{\"id\": 1, \"unexpected\": 2}"), "follows VerifySchema.RightFieldAndType");
+            assertPass(new JSONObject("{\"id\": 1, \"unexpected\": 2}"), "is VerifySchema.IgnoreUnexpectedField");
         }
     }
 

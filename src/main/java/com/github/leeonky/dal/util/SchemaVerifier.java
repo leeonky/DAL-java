@@ -4,6 +4,7 @@ import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.type.AllowNull;
+import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.dal.type.SubType;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyReader;
@@ -45,13 +46,14 @@ public class SchemaVerifier {
     public boolean verify(Class<?> clazz, Object schemaInstance, String subPrefix) {
         Set<String> propertyReaderNames = object.getPropertyReaderNames();
         BeanClass<Object> schema = getPolymorphicSchemaType(clazz);
-        return noMoreUnexpectedField(schema, schema.getPropertyReaders().keySet(), propertyReaderNames)
+        return (clazz.getAnnotation(Partial.class) != null ||
+                noMoreUnexpectedField(schema, schema.getPropertyReaders().keySet(), propertyReaderNames))
                 && allMandatoryPropertyShouldBeExist(schema, propertyReaderNames)
                 && allPropertyValueShouldBeValid(subPrefix, schema,
                 schemaInstance == null ? schema.newInstance() : schemaInstance);
     }
 
-    private boolean noMoreUnexpectedField(BeanClass polymorphicBeanClass, Set<String> expectedFields, Set<String> actualFields) {
+    private <T> boolean noMoreUnexpectedField(BeanClass<T> polymorphicBeanClass, Set<String> expectedFields, Set<String> actualFields) {
         return actualFields.stream()
                 .allMatch(f -> shouldNotContainsUnexpectedField(polymorphicBeanClass, expectedFields, f));
     }
@@ -77,7 +79,7 @@ public class SchemaVerifier {
         return propertyReader.getAnnotation(AllowNull.class) != null && propertyValueWrapper.isNull();
     }
 
-    private boolean shouldNotContainsUnexpectedField(BeanClass polymorphicBeanClass, Set<String> expectedFields, String f) {
+    private <T> boolean shouldNotContainsUnexpectedField(BeanClass<T> polymorphicBeanClass, Set<String> expectedFields, String f) {
         return expectedFields.contains(f)
                 || errorLog("Unexpected field `%s` for type %s[%s]\n", f, polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
@@ -103,7 +105,7 @@ public class SchemaVerifier {
         else if (type.isCollection())
             return verifyCollection(subPrefix, type.getElementType(), schemaProperty);
         else if (Map.class.isAssignableFrom(fieldType))
-            return verifyMap(subPrefix, type, (Map) schemaProperty);
+            return verifyMap(subPrefix, type, (Map<?, Object>) schemaProperty);
         else if (Type.class.isAssignableFrom(fieldType))
             return verifyWrappedType(subPrefix, (Type<Object>) schemaProperty, type);
         else

@@ -8,6 +8,7 @@ import java.util.Objects;
 public class SchemaNode extends Node {
     private final String schema;
 
+    //TODO support and/or list
     public SchemaNode(String schema) {
         this.schema = schema;
     }
