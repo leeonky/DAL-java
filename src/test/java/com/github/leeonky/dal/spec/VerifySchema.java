@@ -56,6 +56,10 @@ class VerifySchema extends Base {
         public Formatters.PositiveInteger id;
     }
 
+    public static class IgnoreUnexpectedField {
+        public Formatters.PositiveInteger id;
+    }
+
     public static class AllowNullField {
         @AllowNull
         public Formatters.PositiveInteger id;
@@ -278,11 +282,17 @@ class VerifySchema extends Base {
 
         @Test
         void should_support_with_parent_type_name() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(RightFieldAndType.class, SIMPLE_NAME_WITH_PARENT);
+            dataAssert.getRuntimeContextBuilder().registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
 
             assertPass(new JSONObject("{\"id\": 1}"), "is VerifySchema.RightFieldAndType");
         }
 
+        //        @Test
+        void should_support_partially_field_assertion() throws JSONException {
+            dataAssert.getRuntimeContextBuilder().registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class);
+
+            assertPass(new JSONObject("{\"id\": 1, \"unexpected\": 2}"), "follows VerifySchema.RightFieldAndType");
+        }
     }
 
     @Nested
@@ -299,7 +309,7 @@ class VerifySchema extends Base {
         }
 
         @Test
-        void should_support_verfiy_field_in_schema_type_with_instance() throws JSONException {
+        void should_support_verify_field_in_schema_type_with_instance() throws JSONException {
             assertPass(new JSONObject("{\"fieldValue\": {\"integer\": 1}}"), "is SchemaWithInstance");
             assertFailed(new JSONObject("{\"fieldValue\": {\"integer\": 2}}"), "is SchemaWithInstance");
         }

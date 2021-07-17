@@ -29,7 +29,7 @@ public class DALCompiler {
         Node node = compileOneNode(tokenStream, referenceInput).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expect a value"));
         while (tokenStream.hasTokens() && !tokenStream.isCurrentEndBracketAndTakeThenFinishBracket(bracketNode)) {
             if (tokenStream.isCurrentKeywordAndTake(IS))
-                node = new TypeAssertionExpression(node,
+                node = new SchemaAssertionExpression(node,
                         compileTypeNode(tokenStream).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "operand of `is` must be a type")),
                         (tokenStream.hasTokens() && tokenStream.isCurrentKeywordAndTake(WHICH)) ? compileExpression(tokenStream, bracketNode, false) : new ConstNode(true));
             else
@@ -79,10 +79,10 @@ public class DALCompiler {
         return node;
     }
 
-    private Optional<TypeNode> compileTypeNode(TokenStream tokenStream) {
-        TypeNode node = null;
+    private Optional<SchemaNode> compileTypeNode(TokenStream tokenStream) {
+        SchemaNode node = null;
         if (tokenStream.hasTokens() && tokenStream.currentType() == Token.Type.WORD) {
-            node = new TypeNode(tokenStream.pop().getValue().toString());
+            node = new SchemaNode(tokenStream.pop().getValue().toString());
             node.setPositionBegin(tokenStream.getPosition());
         }
         return ofNullable(node);

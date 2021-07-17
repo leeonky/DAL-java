@@ -233,18 +233,18 @@ class DALCompilerTest {
 
         @Test
         void is_type_expression() {
-            assertCompileNode("is String", new TypeAssertionExpression(
+            assertCompileNode("is String", new SchemaAssertionExpression(
                     InputNode.INSTANCE,
-                    new TypeNode("String"),
+                    new SchemaNode("String"),
                     new ConstNode(true)
             ));
         }
 
         @Test
         void is_type_expression_and_which_assertion() {
-            assertCompileNode("is String which .empty", new TypeAssertionExpression(
+            assertCompileNode("is String which .empty", new SchemaAssertionExpression(
                     InputNode.INSTANCE,
-                    new TypeNode("String"),
+                    new SchemaNode("String"),
                     new PropertyNode(InputNode.INSTANCE, asList("empty"))
             ));
         }

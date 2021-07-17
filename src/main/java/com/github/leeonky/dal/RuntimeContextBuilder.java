@@ -53,13 +53,13 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerSchema(Class<?> clazz) {
-        return registerSchema(clazz, NameStrategy.SIMPLE_NAME);
+    public RuntimeContextBuilder registerSchema(Class<?> schema) {
+        return registerSchema(NameStrategy.SIMPLE_NAME, schema);
     }
 
-    public RuntimeContextBuilder registerSchema(String name, Class<?> clazz) {
-        schemas.add(clazz);
-        return registerSchema(name, (bw) -> bw.createSchemaVerifier().verify(clazz, null, ""));
+    public RuntimeContextBuilder registerSchema(String name, Class<?> schema) {
+        schemas.add(schema);
+        return registerSchema(name, (bw) -> bw.createSchemaVerifier().verify(schema, null, ""));
     }
 
     public RuntimeContextBuilder registerSchema(String name, Function<WrappedObject, Boolean> predicate) {
@@ -81,7 +81,7 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerSchema(Class<?> clazz, NameStrategy nameStrategy) {
-        return registerSchema(nameStrategy.toName(clazz), clazz);
+    public RuntimeContextBuilder registerSchema(NameStrategy nameStrategy, Class<?> schema) {
+        return registerSchema(nameStrategy.toName(schema), schema);
     }
 }
