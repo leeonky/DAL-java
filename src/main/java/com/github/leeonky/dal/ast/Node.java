@@ -15,7 +15,5 @@ public abstract class Node {
         this.positionBegin = positionBegin;
     }
 
-    public String inspect() {
-        return null;
-    }
+    public abstract String inspect();
 }
