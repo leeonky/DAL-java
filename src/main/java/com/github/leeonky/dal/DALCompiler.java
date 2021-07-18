@@ -26,23 +26,28 @@ public class DALCompiler {
     }
 
     private Node compileExpression(TokenStream tokenStream, BracketNode bracketNode, boolean referenceInput) {
-        Node node = compileOneNode(tokenStream, referenceInput).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expect a value"));
+        Node node = compileOneNode(tokenStream, referenceInput)
+                .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expect a value"));
         while (tokenStream.hasTokens() && !tokenStream.isCurrentEndBracketAndTakeThenFinishBracket(bracketNode)) {
             if (tokenStream.isCurrentKeywordAndTake(IS)) {
-                node = new SchemaAssertionExpression(node,
-                        compileTypeNode(tokenStream).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "operand of `is` must be a type")),
-                        (tokenStream.hasTokens() && tokenStream.isCurrentKeywordAndTake(WHICH)) ? compileExpression(tokenStream, bracketNode, false) : new ConstNode(true));
+                node = new SchemaAssertionExpression(node, compileTypeNode(tokenStream).orElseThrow(() ->
+                        new SyntaxException(tokenStream.getPosition(), "operand of `is` must be a type")),
+                        compileWhichClause(tokenStream, bracketNode));
                 for (SchemaAssertionExpression.Operator operator : tokenStream.getSchemaOperators()) {
-                    //TODO imcomplete type list checking
-                    ((SchemaAssertionExpression) node).appendSchema(operator,
-                            compileTypeNode(tokenStream).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "require type list")));
+                    ((SchemaAssertionExpression) node).appendSchema(operator, compileTypeNode(tokenStream)
+                            .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "Schema expression not finished")));
                 }
             } else
                 node = new Expression(node, tokenStream.pop().toOperator(false),
-                        compileOneNode(tokenStream, false).orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression not finished")))
+                        compileOneNode(tokenStream, false).orElseThrow(() ->
+                                new SyntaxException(tokenStream.getPosition(), "expression not finished")))
                         .adjustOperatorOrder();
         }
         return node;
+    }
+
+    private Node compileWhichClause(TokenStream tokenStream, BracketNode bracketNode) {
+        return (tokenStream.hasTokens() && tokenStream.isCurrentKeywordAndTake(WHICH)) ? compileExpression(tokenStream, bracketNode, false) : new ConstNode(true);
     }
 
     private Optional<Node> compileOneNode(TokenStream tokenStream, boolean isFirstNode) {
@@ -87,8 +92,9 @@ public class DALCompiler {
     private Optional<SchemaNode> compileTypeNode(TokenStream tokenStream) {
         SchemaNode node = null;
         if (tokenStream.hasTokens() && tokenStream.currentType() == Token.Type.WORD) {
+            int position = tokenStream.getPosition();
             node = new SchemaNode(tokenStream.pop().getValue().toString());
-            node.setPositionBegin(tokenStream.getPosition());
+            node.setPositionBegin(position);
         }
         return ofNullable(node);
     }

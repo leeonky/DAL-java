@@ -2,11 +2,13 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
+import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.token.IllegalTypeException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class SchemaAssertionExpression extends Node {
     private final Node instance;
@@ -35,7 +37,8 @@ public class SchemaAssertionExpression extends Node {
     }
 
     private boolean isFailed(RuntimeContext context, ObjectRef objectRef) {
-        return operator == Operator.AND ? !schemaNodes.stream().allMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef))
+        return operator == Operator.AND ?
+                !schemaNodes.stream().allMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef))
                 : schemaNodes.stream().noneMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
     }
 
@@ -60,18 +63,27 @@ public class SchemaAssertionExpression extends Node {
 
     @Override
     public String inspect() {
-        //TODO inspect schema list
-        return String.format("%s is %s which %s", instance.inspect(), schemaNodes.get(0).inspect(), assertion.inspect());
+        String assertionClause = assertion.inspect();
+        String whichClause = "true".equals(assertionClause) ? "" : String.format(" which %s", assertionClause);
+        return String.format("%s is %s%s", instance.inspect(), schemaNodes.stream().map(SchemaNode::inspect)
+                .collect(Collectors.joining(" " + operator.value + " ")), whichClause);
     }
 
     public void appendSchema(Operator operator, SchemaNode schemaNode) {
+        if (this.operator != Operator.NONE && this.operator != operator)
+            throw new SyntaxException(schemaNode.getPositionBegin(), "Schema operator should be consistent");
         this.operator = operator;
         schemaNodes.add(schemaNode);
-        //TODO check operator
     }
 
     public enum Operator {
-        NONE, AND, OR
+        NONE(""), AND("|"), OR("/");
+
+        private final String value;
+
+        Operator(String value) {
+            this.value = value;
+        }
     }
 
     class ObjectRef {

@@ -3,6 +3,7 @@ package com.github.leeonky.dal;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+//TODO convert to class
 public enum NameStrategy {
     SIMPLE_NAME_WITH_PARENT() {
         @Override
