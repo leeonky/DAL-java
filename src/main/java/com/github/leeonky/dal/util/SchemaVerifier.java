@@ -3,6 +3,7 @@ package com.github.leeonky.dal.util;
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
+import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.dal.type.SubType;
@@ -108,13 +109,22 @@ public class SchemaVerifier {
             return verifyMap(subPrefix, type, (Map<?, Object>) schemaProperty);
         else if (Type.class.isAssignableFrom(fieldType))
             return verifyWrappedType(subPrefix, (Type<Object>) schemaProperty, type);
+        else if (Value.class.isAssignableFrom(fieldType))
+            return verifyWrappedValue(subPrefix, (Value<Object>) schemaProperty, type);
         else
             return verifyType(subPrefix, schemaProperty, fieldType);
+    }
+
+    private boolean verifyWrappedValue(String subPrefix, Value<Object> schemaProperty, BeanClass<?> type) {
+        return schemaProperty.verify(runtimeContext, object.getInstance())
+                //TODO customer error message
+                || errorLog("Field `%s` is invalid\n", subPrefix);
     }
 
     private boolean verifyWrappedType(String subPrefix, Type<Object> schemaProperty, BeanClass<?> genericType) {
         if (schemaProperty != null)
             return schemaProperty.verify(object.getInstance())
+                    //TODO customer error message
                     || errorLog("Field `%s` is invalid\n", subPrefix);
         Class<?> rawType = genericType.getTypeArguments(0)
                 .orElseThrow(() -> new IllegalStateException(format("%s should specify generic type", subPrefix))).getType();

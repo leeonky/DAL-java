@@ -9,6 +9,9 @@ import java.time.format.DateTimeParseException;
 import static java.lang.Enum.valueOf;
 
 public class Formatters {
+    /**
+     * Use com.github.leeonky.dal.format.Type
+     */
     @Deprecated
     public static class String extends BaseFormatter<java.lang.String, java.lang.String> {
         @Override

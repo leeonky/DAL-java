@@ -5,6 +5,7 @@ import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import com.github.leeonky.dal.util.TypeData;
 import com.github.leeonky.dal.util.WrappedObject;
+import com.github.leeonky.util.Converter;
 
 import java.util.*;
 
@@ -14,6 +15,7 @@ public class RuntimeContext {
     private final LinkedList<Object> wrappedValueStack = new LinkedList<>();
     private final Map<String, ConstructorViaSchema> constructors;
     private final Set<Class<?>> schemas;
+    private final Converter converter = Converter.createDefault();
 
     public RuntimeContext(Object inputValue, TypeData<PropertyAccessor> propertyAccessors,
                           Map<String, ConstructorViaSchema> constructors, TypeData<ListAccessor> listAccessors, Set<Class<?>> schemas) {
@@ -80,5 +82,9 @@ public class RuntimeContext {
 
     public boolean isRegisteredList(Object instance) {
         return listAccessors.containsType(instance);
+    }
+
+    public Converter getConverter() {
+        return converter;
     }
 }
