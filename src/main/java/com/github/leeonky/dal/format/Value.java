@@ -7,7 +7,52 @@ import java.util.Objects;
 public class Value<T> {
 
     public static <T> Value<T> equalTo(T value) {
-        return new EqualTo<>(value);
+        return new Value<T>() {
+            @Override
+            public boolean verify(T instance) {
+                return Objects.equals(value, instance);
+            }
+        };
+    }
+
+    public static <T> Value<T> nullReference() {
+        return equalTo(null);
+    }
+
+    public static <T extends Comparable<T>> Value<T> lessThan(T value) {
+        return new Value<T>() {
+            @Override
+            public boolean verify(T instance) {
+                return Objects.requireNonNull(instance).compareTo(value) < 0;
+            }
+        };
+    }
+
+    public static <T extends Comparable<T>> Value<T> greaterThan(T value) {
+        return new Value<T>() {
+            @Override
+            public boolean verify(T instance) {
+                return Objects.requireNonNull(instance).compareTo(value) > 0;
+            }
+        };
+    }
+
+    public static <T extends Comparable<T>> Value<T> lessOrEqualTo(T value) {
+        return new Value<T>() {
+            @Override
+            public boolean verify(T instance) {
+                return Objects.requireNonNull(instance).compareTo(value) <= 0;
+            }
+        };
+    }
+
+    public static <T extends Comparable<T>> Value<T> greaterOrEqualTo(T value) {
+        return new Value<T>() {
+            @Override
+            public boolean verify(T instance) {
+                return Objects.requireNonNull(instance).compareTo(value) >= 0;
+            }
+        };
     }
 
     public Object convertAs(RuntimeContext runtimeContext, Object instance, Class<?> target) {
@@ -16,18 +61,5 @@ public class Value<T> {
 
     public boolean verify(T instance) {
         return true;
-    }
-
-    public static class EqualTo<T> extends Value<T> {
-        private final T value;
-
-        protected EqualTo(T value) {
-            this.value = value;
-        }
-
-        @Override
-        public boolean verify(T instance) {
-            return Objects.equals(value, instance);
-        }
     }
 }

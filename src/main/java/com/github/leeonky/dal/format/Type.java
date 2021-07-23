@@ -13,3 +13,5 @@ public interface Type<T> {
 
     boolean verify(T value);
 }
+
+//TODO > >= < <=

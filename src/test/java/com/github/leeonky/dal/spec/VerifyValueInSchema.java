@@ -46,17 +46,88 @@ public class VerifyValueInSchema extends Base {
         }}, "is MatchNull");
     }
 
+    @Test
+    void verify_number_comparison() {
+        dataAssert.getRuntimeContextBuilder()
+                .registerSchema(MatchLessThan2.class)
+                .registerSchema(MatchGreaterThan3.class)
+                .registerSchema(MatchLessOrEqualTo3.class)
+                .registerSchema(MatchGreaterOrEqualTo3.class)
+        ;
+
+        assertPass(new HashMap<String, Object>() {{
+            put("value", "0");
+        }}, "is MatchLessThan2");
+        assertPass(new HashMap<String, Object>() {{
+            put("value", 0);
+        }}, "is MatchLessThan2");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is MatchLessThan2");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", 3);
+        }}, "is MatchLessThan2");
+
+        assertPass(new HashMap<String, Object>() {{
+            put("value", "2");
+        }}, "is MatchLessOrEqualTo3");
+        assertPass(new HashMap<String, Object>() {{
+            put("value", 3);
+        }}, "is MatchLessOrEqualTo3");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", 4);
+        }}, "is MatchLessOrEqualTo3");
+
+        assertPass(new HashMap<String, Object>() {{
+            put("value", "4");
+        }}, "is MatchGreaterThan3");
+        assertPass(new HashMap<String, Object>() {{
+            put("value", 4);
+        }}, "is MatchGreaterThan3");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", 3);
+        }}, "is MatchGreaterThan3");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is MatchGreaterThan3");
+
+        assertPass(new HashMap<String, Object>() {{
+            put("value", "3");
+        }}, "is MatchGreaterOrEqualTo3");
+        assertPass(new HashMap<String, Object>() {{
+            put("value", 4);
+        }}, "is MatchGreaterOrEqualTo3");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is MatchGreaterOrEqualTo3");
+    }
+
     public static class MatchString {
         public Value<String> value = Value.equalTo("1");
     }
 
     public static class MatchNull {
-        public Value<String> value = Value.equalTo(null);
+        public Value<String> value = Value.nullReference();
+    }
+
+    public static class MatchLessThan2 {
+        public Value<Integer> value = Value.lessThan(2);
+    }
+
+    public static class MatchGreaterThan3 {
+        public Value<Integer> value = Value.greaterThan(3);
+    }
+
+    public static class MatchLessOrEqualTo3 {
+        public Value<Integer> value = Value.lessOrEqualTo(3);
+    }
+
+    public static class MatchGreaterOrEqualTo3 {
+        public Value<Integer> value = Value.greaterOrEqualTo(3);
     }
 
     //TODO given field `Value` is null
     //TODO return null value
-    //TODO default build in Value (eq greater less...)
     //TODO customer convert method
     //TODO matches "1"
     //TODO matches Value (convert and check value(if have))
