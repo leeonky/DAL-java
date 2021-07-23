@@ -115,8 +115,11 @@ public class SchemaVerifier {
             return verifyType(subPrefix, schemaProperty, fieldType);
     }
 
-    private boolean verifyWrappedValue(String subPrefix, Value<Object> schemaProperty, BeanClass<?> type) {
-        return schemaProperty.verify(runtimeContext, object.getInstance())
+    private boolean verifyWrappedValue(String subPrefix, Value<Object> schemaProperty, BeanClass<?> genericType) {
+        Class<?> rawType = genericType.getTypeArguments(0)
+                //TODO missing test
+                .orElseThrow(() -> new IllegalStateException(format("%s should specify generic type", subPrefix))).getType();
+        return schemaProperty.verify(schemaProperty.convertAs(runtimeContext, object.getInstance(), rawType))
                 //TODO customer error message
                 || errorLog("Field `%s` is invalid\n", subPrefix);
     }
