@@ -116,12 +116,24 @@ public class SchemaVerifier {
     }
 
     private boolean verifyWrappedValue(String subPrefix, Value<Object> schemaProperty, BeanClass<?> genericType) {
-        Class<?> rawType = genericType.getTypeArguments(0)
+        Class<?> rawType = genericType.getTypeArguments(0).orElseThrow(() ->
                 //TODO missing test
-                .orElseThrow(() -> new IllegalStateException(format("%s should specify generic type", subPrefix))).getType();
-        return schemaProperty.verify(schemaProperty.convertAs(runtimeContext, object.getInstance(), rawType))
-                //TODO customer error message
-                || errorLog("Field `%s` is invalid\n", subPrefix);
+                new IllegalStateException(format("%s should specify generic type", subPrefix))).getType();
+        if (schemaProperty != null)
+            return schemaProperty.verify(schemaProperty.convertAs(runtimeContext, object.getInstance(), rawType))
+                    //TODO customer error message
+                    || errorLog("Field `%s` is invalid\n", subPrefix);
+        try {
+            if (object.isNull()) {
+                return errorLog("Can not convert null field `%s` to type [%s], use @AllowNull to verify nullable field\n",
+                        subPrefix, rawType.getName());
+            }
+            runtimeContext.getConverter().convert(rawType, object.getInstance());
+            return true;
+        } catch (Exception ignore) {
+            return errorLog("Can not convert field `%s` (%s: %s) to type [%s]\n", subPrefix,
+                    getClassName(object.getInstance()), object.getInstance(), rawType.getName());
+        }
     }
 
     private boolean verifyWrappedType(String subPrefix, Type<Object> schemaProperty, BeanClass<?> genericType) {

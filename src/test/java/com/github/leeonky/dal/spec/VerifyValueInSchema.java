@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.format.Value;
+import com.github.leeonky.dal.type.AllowNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -102,6 +103,27 @@ public class VerifyValueInSchema extends Base {
         }}, "is MatchGreaterOrEqualTo3");
     }
 
+    @Test
+    void verify_type() {
+        dataAssert.getRuntimeContextBuilder()
+                .registerSchema(MatchType.class)
+                .registerSchema(MatchTypeWithNull.class);
+
+        assertPass(new HashMap<String, Object>() {{
+            put("value", "0");
+        }}, "is MatchType");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", "invalid int");
+        }}, "is MatchType");
+
+        assertPass(new HashMap<String, Object>() {{
+            put("value", null);
+        }}, "is MatchTypeWithNull");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", null);
+        }}, "is MatchType");
+    }
+
     public static class MatchString {
         public Value<String> value = Value.equalTo("1");
     }
@@ -126,8 +148,15 @@ public class VerifyValueInSchema extends Base {
         public Value<Integer> value = Value.greaterOrEqualTo(3);
     }
 
-    //TODO given field `Value` is null
-    //TODO return null value
+    public static class MatchType {
+        public Value<Integer> value;
+    }
+
+    public static class MatchTypeWithNull {
+        @AllowNull
+        public Value<Integer> value;
+    }
+
     //TODO customer convert method
     //TODO matches "1"
     //TODO matches Value (convert and check value(if have))
