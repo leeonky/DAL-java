@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.util;
 
+import com.github.leeonky.dal.IllegalFieldException;
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
@@ -116,18 +117,22 @@ public class SchemaVerifier {
     }
 
     private boolean verifyWrappedValue(String subPrefix, Value<Object> schemaProperty, BeanClass<?> genericType) {
-        Class<?> rawType = genericType.getTypeArguments(0).orElseThrow(() ->
-                //TODO missing test
-                new IllegalStateException(format("%s should specify generic type", subPrefix))).getType();
+        Optional<BeanClass<?>> typeArgument = genericType.getTypeArguments(0);
         if (schemaProperty != null)
-            return schemaProperty.verify(schemaProperty.convertAs(runtimeContext, object.getInstance(), rawType))
-                    //TODO customer error message
-                    || errorLog("Field `%s` is invalid\n", subPrefix);
+            try {
+                return schemaProperty.verify(schemaProperty.convertAs(runtimeContext, object.getInstance(),
+                        typeArgument.orElse(null)))
+                        //TODO customer error message
+                        || errorLog("Field `%s` is invalid\n", subPrefix);
+            } catch (IllegalFieldException ignore) {
+                throw illegalStateExcpetion(subPrefix);
+            }
+        Class<?> rawType = typeArgument.orElseThrow(() ->
+                illegalStateExcpetion(subPrefix)).getType();
         try {
-            if (object.isNull()) {
+            if (object.isNull())
                 return errorLog("Can not convert null field `%s` to type [%s], use @AllowNull to verify nullable field\n",
                         subPrefix, rawType.getName());
-            }
             runtimeContext.getConverter().convert(rawType, object.getInstance());
             return true;
         } catch (Exception ignore) {
@@ -136,13 +141,17 @@ public class SchemaVerifier {
         }
     }
 
+    private IllegalStateException illegalStateExcpetion(String subPrefix) {
+        return new IllegalStateException(format("%s should specify generic type", subPrefix));
+    }
+
     private boolean verifyWrappedType(String subPrefix, Type<Object> schemaProperty, BeanClass<?> genericType) {
         if (schemaProperty != null)
             return schemaProperty.verify(object.getInstance())
                     //TODO customer error message
                     || errorLog("Field `%s` is invalid\n", subPrefix);
         Class<?> rawType = genericType.getTypeArguments(0)
-                .orElseThrow(() -> new IllegalStateException(format("%s should specify generic type", subPrefix))).getType();
+                .orElseThrow(() -> illegalStateExcpetion(subPrefix)).getType();
         return rawType.isInstance(object.getInstance())
                 || errorLog("Expected field `%s` for type [%s], but was [%s]\n", subPrefix,
                 rawType.getName(), getClassName(object.getInstance()));

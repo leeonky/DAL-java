@@ -1,6 +1,8 @@
 package com.github.leeonky.dal.format;
 
+import com.github.leeonky.dal.IllegalFieldException;
 import com.github.leeonky.dal.RuntimeContext;
+import com.github.leeonky.util.BeanClass;
 
 import java.util.Objects;
 
@@ -55,8 +57,10 @@ public class Value<T> {
         };
     }
 
-    public Object convertAs(RuntimeContext runtimeContext, Object instance, Class<?> target) {
-        return runtimeContext.getConverter().tryConvert(target, instance);
+    public T convertAs(RuntimeContext runtimeContext, Object instance, BeanClass<?> type) {
+        if (type == null)
+            throw new IllegalFieldException();
+        return (T) runtimeContext.getConverter().tryConvert(type.getType(), instance);
     }
 
     public boolean verify(T instance) {

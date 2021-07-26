@@ -1,10 +1,16 @@
 package com.github.leeonky.dal.spec;
 
+import com.github.leeonky.dal.RuntimeContext;
+import com.github.leeonky.dal.RuntimeException;
 import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.type.AllowNull;
+import com.github.leeonky.util.BeanClass;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class VerifyValueInSchema extends Base {
 
@@ -124,6 +130,16 @@ public class VerifyValueInSchema extends Base {
         }}, "is MatchType");
     }
 
+    @Test
+    void missing_type_arg() {
+        dataAssert.getRuntimeContextBuilder()
+                .registerSchema(MissingTypeArg.class);
+
+        assertThrows(RuntimeException.class, () -> dataAssert.assertData(new HashMap<String, Object>() {{
+            put("value", 1);
+        }}, "is MissingTypeArg"));
+    }
+
     public static class MatchString {
         public Value<String> value = Value.equalTo("1");
     }
@@ -157,7 +173,49 @@ public class VerifyValueInSchema extends Base {
         public Value<Integer> value;
     }
 
-    //TODO customer convert method
+    public static class MatchInvalidValue {
+        public Value<Integer> value;
+    }
+
+    public static class MissingTypeArg {
+        public Value<?> value;
+    }
+
+    public static class CustomizedConverter {
+        public Value<?> value = new ToIntegerAndIncrease();
+    }
+
+    public static class ToIntegerAndIncrease extends Value<Integer> {
+
+        @Override
+        public Integer convertAs(RuntimeContext runtimeContext, Object instance, BeanClass<?> type) {
+            return (int) instance + 1;
+        }
+
+        @Override
+        public boolean verify(Integer instance) {
+            return instance.equals(2);
+        }
+    }
+
+    @Nested
+    class Converter {
+
+        @Test
+        void customized_converter() {
+            dataAssert.getRuntimeContextBuilder()
+                    .registerSchema(CustomizedConverter.class);
+
+            assertPass(new HashMap<String, Object>() {{
+                put("value", 1);
+            }}, "is CustomizedConverter");
+
+            assertFailed(new HashMap<String, Object>() {{
+                put("value", 2);
+            }}, "is CustomizedConverter");
+        }
+    }
+
     //TODO matches "1"
     //TODO matches Value (convert and check value(if have))
     //TODO matches /abcd/
