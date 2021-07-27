@@ -92,6 +92,7 @@ public class SchemaVerifier {
                 polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
+    //TODO add \n in method
     private boolean errorLog(String format, Object... params) {
         System.err.printf(format, params);
         return false;
@@ -149,11 +150,12 @@ public class SchemaVerifier {
         if (schemaProperty != null)
             return schemaProperty.verify(object.getInstance())
                     //TODO customer error message
-                    || errorLog("Field `%s` is invalid\n", subPrefix);
+                    || errorLog(schemaProperty.errorMessage(subPrefix, object.getInstance()));
+//                    || errorLog("Field `%s` is invalid\n", subPrefix);
         Class<?> rawType = genericType.getTypeArguments(0)
                 .orElseThrow(() -> illegalStateExcpetion(subPrefix)).getType();
         return rawType.isInstance(object.getInstance())
-                || errorLog("Expected field `%s` for type [%s], but was [%s]\n", subPrefix,
+                || errorLog("Expected field `%s` is type [%s], but was [%s]\n", subPrefix,
                 rawType.getName(), getClassName(object.getInstance()));
     }
 
@@ -163,7 +165,7 @@ public class SchemaVerifier {
                     || errorLog("Expected field `%s` equal to %s[%s], but was %s[%s]\n", subPrefix,
                     getClassName(schemaProperty), schemaProperty, getClassName(object.getInstance()), object.getInstance());
         return fieldType.isInstance(object.getInstance())
-                || errorLog("Expected field `%s` for type [%s], but was [%s]\n", subPrefix,
+                || errorLog("Expected field `%s` is type [%s], but was [%s]\n", subPrefix,
                 fieldType.getName(), getClassName(object.getInstance()));
     }
 
