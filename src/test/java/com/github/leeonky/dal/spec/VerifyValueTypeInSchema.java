@@ -91,6 +91,88 @@ class VerifyValueTypeInSchema extends Base {
         }, "Expect field `.stringValue` [world] to be null, but was not.");
     }
 
+    @Test
+    void verify_number_comparison() {
+        dataAssert.getRuntimeContextBuilder()
+                .registerSchema(VerifyValueTypeInSchema.LessThan2.class)
+                .registerSchema(VerifyValueTypeInSchema.GreaterThan3.class)
+                .registerSchema(VerifyValueTypeInSchema.LessOrEqualTo3.class)
+                .registerSchema(VerifyValueTypeInSchema.GreaterOrEqualTo3.class)
+        ;
+
+        assertPass(new HashMap<String, Object>() {{
+            put("value", 0);
+        }}, "is LessThan2");
+        assertPass(new HashMap<String, Object>() {{
+            put("value", 0);
+        }}, "is LessThan2");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is LessThan2");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", 3);
+        }}, "is LessThan2");
+
+        assertPass(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is LessOrEqualTo3");
+        assertPass(new HashMap<String, Object>() {{
+            put("value", 3);
+        }}, "is LessOrEqualTo3");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", 4);
+        }}, "is LessOrEqualTo3");
+
+        assertPass(new HashMap<String, Object>() {{
+            put("value", 4);
+        }}, "is GreaterThan3");
+        assertPass(new HashMap<String, Object>() {{
+            put("value", 4);
+        }}, "is GreaterThan3");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", 3);
+        }}, "is GreaterThan3");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is GreaterThan3");
+
+        assertPass(new HashMap<String, Object>() {{
+            put("value", 3);
+        }}, "is GreaterOrEqualTo3");
+        assertPass(new HashMap<String, Object>() {{
+            put("value", 4);
+        }}, "is GreaterOrEqualTo3");
+        assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is GreaterOrEqualTo3");
+    }
+
+    @Test
+    void customized_message() {
+        dataAssert.getRuntimeContextBuilder()
+                .registerSchema(VerifyValueTypeInSchema.LessThan2.class)
+                .registerSchema(VerifyValueTypeInSchema.GreaterThan3.class)
+                .registerSchema(VerifyValueTypeInSchema.LessOrEqualTo3.class)
+                .registerSchema(VerifyValueTypeInSchema.GreaterOrEqualTo3.class)
+        ;
+
+        assertErrorContains(() -> assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is LessThan2"), "Expect field `.value` [2] to be less than [2], but was not.");
+
+        assertErrorContains(() -> assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is GreaterThan3"), "Expect field `.value` [2] to be greater than [3], but was not.");
+
+        assertErrorContains(() -> assertFailed(new HashMap<String, Object>() {{
+            put("value", 4);
+        }}, "is LessOrEqualTo3"), "Expect field `.value` [4] to be less or equal to [3], but was not.");
+
+        assertErrorContains(() -> assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is GreaterOrEqualTo3"), "Expect field `.value` [2] to be greater or equal to [3], but was not.");
+    }
+
     public static class JavaTypeInSchema {
         public String stringValue;
     }
@@ -109,5 +191,21 @@ class VerifyValueTypeInSchema extends Base {
 
     public static class WrappedJavaTypeNullReferenceInSchema {
         public Type<String> stringValue = Type.nullReference();
+    }
+
+    public static class LessThan2 {
+        public Type<Integer> value = Type.lessThan(2);
+    }
+
+    public static class GreaterThan3 {
+        public Type<Integer> value = Type.greaterThan(3);
+    }
+
+    public static class LessOrEqualTo3 {
+        public Type<Integer> value = Type.lessOrEqualTo(3);
+    }
+
+    public static class GreaterOrEqualTo3 {
+        public Type<Integer> value = Type.greaterOrEqualTo(3);
     }
 }

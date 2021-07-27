@@ -11,13 +11,13 @@ public class Value<T> {
     public static <T> Value<T> equalTo(T value) {
         return new Value<T>() {
             @Override
-            public boolean verify(T instance) {
-                return Objects.equals(value, instance);
+            public boolean verify(T actual) {
+                return Objects.equals(value, actual);
             }
 
             @Override
-            public String errorMessage(String field, Object instance) {
-                return String.format("Expect field `%s` [%s] to be equal to [%s], but was not.", field, instance, value);
+            public String errorMessage(String field, Object actual) {
+                return String.format("Expect field `%s` [%s] to be equal to [%s], but was not.", field, actual, value);
             }
         };
     }
@@ -25,13 +25,13 @@ public class Value<T> {
     public static <T> Value<T> nullReference() {
         return new Value<T>() {
             @Override
-            public boolean verify(T instance) {
-                return instance == null;
+            public boolean verify(T actual) {
+                return actual == null;
             }
 
             @Override
-            public String errorMessage(String field, Object instance) {
-                return String.format("Expect field `%s` [%s] to be null, but was not.", field, instance);
+            public String errorMessage(String field, Object actual) {
+                return String.format("Expect field `%s` [%s] to be null, but was not.", field, actual);
             }
         };
     }
@@ -39,13 +39,13 @@ public class Value<T> {
     public static <T extends Comparable<T>> Value<T> lessThan(T value) {
         return new Value<T>() {
             @Override
-            public boolean verify(T instance) {
-                return Objects.requireNonNull(instance).compareTo(value) < 0;
+            public boolean verify(T actual) {
+                return Objects.requireNonNull(actual).compareTo(value) < 0;
             }
 
             @Override
-            public String errorMessage(String field, Object instance) {
-                return String.format("Expect field `%s` [%s] to be less than [%s], but was not.", field, instance, value);
+            public String errorMessage(String field, Object actual) {
+                return String.format("Expect field `%s` [%s] to be less than [%s], but was not.", field, actual, value);
             }
         };
     }
@@ -53,13 +53,13 @@ public class Value<T> {
     public static <T extends Comparable<T>> Value<T> greaterThan(T value) {
         return new Value<T>() {
             @Override
-            public boolean verify(T instance) {
-                return Objects.requireNonNull(instance).compareTo(value) > 0;
+            public boolean verify(T actual) {
+                return Objects.requireNonNull(actual).compareTo(value) > 0;
             }
 
             @Override
-            public String errorMessage(String field, Object instance) {
-                return String.format("Expect field `%s` [%s] to be greater than [%s], but was not.", field, instance, value);
+            public String errorMessage(String field, Object actual) {
+                return String.format("Expect field `%s` [%s] to be greater than [%s], but was not.", field, actual, value);
             }
         };
     }
@@ -67,13 +67,13 @@ public class Value<T> {
     public static <T extends Comparable<T>> Value<T> lessOrEqualTo(T value) {
         return new Value<T>() {
             @Override
-            public boolean verify(T instance) {
-                return Objects.requireNonNull(instance).compareTo(value) <= 0;
+            public boolean verify(T actual) {
+                return Objects.requireNonNull(actual).compareTo(value) <= 0;
             }
 
             @Override
-            public String errorMessage(String field, Object instance) {
-                return String.format("Expect field `%s` [%s] to be less or equal to [%s], but was not.", field, instance, value);
+            public String errorMessage(String field, Object actual) {
+                return String.format("Expect field `%s` [%s] to be less or equal to [%s], but was not.", field, actual, value);
             }
         };
     }
@@ -81,13 +81,13 @@ public class Value<T> {
     public static <T extends Comparable<T>> Value<T> greaterOrEqualTo(T value) {
         return new Value<T>() {
             @Override
-            public boolean verify(T instance) {
-                return Objects.requireNonNull(instance).compareTo(value) >= 0;
+            public boolean verify(T actual) {
+                return Objects.requireNonNull(actual).compareTo(value) >= 0;
             }
 
             @Override
-            public String errorMessage(String field, Object instance) {
-                return String.format("Expect field `%s` [%s] to be greater or equal to [%s], but was not.", field, instance, value);
+            public String errorMessage(String field, Object actual) {
+                return String.format("Expect field `%s` [%s] to be greater or equal to [%s], but was not.", field, actual, value);
             }
         };
     }
@@ -99,11 +99,11 @@ public class Value<T> {
         return (T) runtimeContext.getConverter().tryConvert(type.getType(), instance);
     }
 
-    public boolean verify(T instance) {
+    public boolean verify(T actual) {
         return true;
     }
 
-    public String errorMessage(String field, Object instance) {
+    public String errorMessage(String field, Object actual) {
         return String.format("Field `%s` is invalid", field);
     }
 }

@@ -31,6 +31,63 @@ public class Type<T> {
         };
     }
 
+    public static <T extends Comparable<T>> Type<T> lessThan(T value) {
+        return new Type<T>() {
+            @Override
+            public boolean verify(T actual) {
+                return Objects.requireNonNull(actual).compareTo(value) < 0;
+            }
+
+            @Override
+            public String errorMessage(String field, Object actual) {
+                return String.format("Expect field `%s` [%s] to be less than [%s], but was not.", field, actual, value);
+            }
+        };
+    }
+
+    public static <T extends Comparable<T>> Type<T> greaterThan(T value) {
+        return new Type<T>() {
+
+            @Override
+            public boolean verify(T actual) {
+                return Objects.requireNonNull(actual).compareTo(value) > 0;
+            }
+
+            @Override
+            public String errorMessage(String field, Object actual) {
+                return String.format("Expect field `%s` [%s] to be greater than [%s], but was not.", field, actual, value);
+            }
+        };
+    }
+
+    public static <T extends Comparable<T>> Type<T> lessOrEqualTo(T value) {
+        return new Type<T>() {
+            @Override
+            public boolean verify(T actual) {
+                return Objects.requireNonNull(actual).compareTo(value) <= 0;
+            }
+
+            @Override
+            public String errorMessage(String field, Object actual) {
+                return String.format("Expect field `%s` [%s] to be less or equal to [%s], but was not.", field, actual, value);
+            }
+        };
+    }
+
+    public static <T extends Comparable<T>> Type<T> greaterOrEqualTo(T value) {
+        return new Type<T>() {
+            @Override
+            public boolean verify(T actual) {
+                return Objects.requireNonNull(actual).compareTo(value) >= 0;
+            }
+
+            @Override
+            public String errorMessage(String field, Object actual) {
+                return String.format("Expect field `%s` [%s] to be greater or equal to [%s], but was not.", field, actual, value);
+            }
+        };
+    }
+
     public boolean verify(T value) {
         return true;
     }
@@ -39,5 +96,3 @@ public class Type<T> {
         return String.format("Field `%s` is invalid", field);
     }
 }
-
-//TODO > >= < <=

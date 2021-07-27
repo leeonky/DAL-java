@@ -140,6 +140,7 @@ public class VerifyValueInSchema extends Base {
         }}, "is MissingTypeArg"));
     }
 
+    //TODO use words matches
     @Test
     void customized_message() {
         dataAssert.getRuntimeContextBuilder()
@@ -229,8 +230,8 @@ public class VerifyValueInSchema extends Base {
         }
 
         @Override
-        public boolean verify(Integer instance) {
-            return instance.equals(2);
+        public boolean verify(Integer actual) {
+            return actual.equals(2);
         }
     }
 
