@@ -83,18 +83,17 @@ public class SchemaVerifier {
 
     private <T> boolean shouldNotContainsUnexpectedField(BeanClass<T> polymorphicBeanClass, Set<String> expectedFields, String f) {
         return expectedFields.contains(f)
-                || errorLog("Unexpected field `%s` for type %s[%s]\n", f, polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
+                || errorLog("Unexpected field `%s` for type %s[%s]", f, polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
     private <T> boolean shouldContainsField(Set<String> actualFields, BeanClass<T> polymorphicBeanClass, PropertyReader<T> propertyReader) {
         return actualFields.contains(propertyReader.getName())
-                || errorLog("Expected field `%s` for type %s[%s], but does not exist\n", propertyReader.getName(),
+                || errorLog("Expected field `%s` for type %s[%s], but does not exist", propertyReader.getName(),
                 polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
-    //TODO add \n in method
     private boolean errorLog(String format, Object... params) {
-        System.err.printf(format, params);
+        System.err.printf(format + "%n", params);
         return false;
     }
 
@@ -118,27 +117,33 @@ public class SchemaVerifier {
     }
 
     private boolean verifyWrappedValue(String subPrefix, Value<Object> schemaProperty, BeanClass<?> genericType) {
-        Optional<BeanClass<?>> typeArgument = genericType.getTypeArguments(0);
+        BeanClass<?> type = genericType.getTypeArguments(0).orElse(null);
         if (schemaProperty != null)
-            try {
-                return schemaProperty.verify(schemaProperty.convertAs(runtimeContext, object.getInstance(),
-                        typeArgument.orElse(null)))
-                        //TODO customer error message
-                        || errorLog("Field `%s` is invalid\n", subPrefix);
-            } catch (IllegalFieldException ignore) {
-                throw illegalStateExcpetion(subPrefix);
-            }
-        Class<?> rawType = typeArgument.orElseThrow(() ->
-                illegalStateExcpetion(subPrefix)).getType();
+            return verifyByValue(subPrefix, schemaProperty, type);
+        if (type == null)
+            throw illegalStateExcpetion(subPrefix);
+        return verifyValueViaType(subPrefix, type.getType());
+    }
+
+    private boolean verifyValueViaType(String subPrefix, Class<?> rawType) {
         try {
             if (object.isNull())
-                return errorLog("Can not convert null field `%s` to type [%s], use @AllowNull to verify nullable field\n",
+                return errorLog("Can not convert null field `%s` to type [%s], use @AllowNull to verify nullable field",
                         subPrefix, rawType.getName());
             runtimeContext.getConverter().convert(rawType, object.getInstance());
             return true;
         } catch (Exception ignore) {
-            return errorLog("Can not convert field `%s` (%s: %s) to type [%s]\n", subPrefix,
+            return errorLog("Can not convert field `%s` (%s: %s) to type [%s]", subPrefix,
                     getClassName(object.getInstance()), object.getInstance(), rawType.getName());
+        }
+    }
+
+    private boolean verifyByValue(String subPrefix, Value<Object> schemaProperty, BeanClass<?> type) {
+        try {
+            return schemaProperty.verify(schemaProperty.convertAs(runtimeContext, object.getInstance(), type))
+                    || errorLog(schemaProperty.errorMessage(subPrefix, object.getInstance()));
+        } catch (IllegalFieldException ignore) {
+            throw illegalStateExcpetion(subPrefix);
         }
     }
 
@@ -149,23 +154,21 @@ public class SchemaVerifier {
     private boolean verifyWrappedType(String subPrefix, Type<Object> schemaProperty, BeanClass<?> genericType) {
         if (schemaProperty != null)
             return schemaProperty.verify(object.getInstance())
-                    //TODO customer error message
                     || errorLog(schemaProperty.errorMessage(subPrefix, object.getInstance()));
-//                    || errorLog("Field `%s` is invalid\n", subPrefix);
         Class<?> rawType = genericType.getTypeArguments(0)
                 .orElseThrow(() -> illegalStateExcpetion(subPrefix)).getType();
         return rawType.isInstance(object.getInstance())
-                || errorLog("Expected field `%s` is type [%s], but was [%s]\n", subPrefix,
+                || errorLog("Expected field `%s` is type [%s], but was [%s]", subPrefix,
                 rawType.getName(), getClassName(object.getInstance()));
     }
 
     private boolean verifyType(String subPrefix, Object schemaProperty, Class<?> fieldType) {
         if (schemaProperty != null)
             return Objects.equals(schemaProperty, object.getInstance())
-                    || errorLog("Expected field `%s` equal to %s[%s], but was %s[%s]\n", subPrefix,
+                    || errorLog("Expected field `%s` equal to %s[%s], but was %s[%s]", subPrefix,
                     getClassName(schemaProperty), schemaProperty, getClassName(object.getInstance()), object.getInstance());
         return fieldType.isInstance(object.getInstance())
-                || errorLog("Expected field `%s` is type [%s], but was [%s]\n", subPrefix,
+                || errorLog("Expected field `%s` is type [%s], but was [%s]", subPrefix,
                 fieldType.getName(), getClassName(object.getInstance()));
     }
 
@@ -210,13 +213,13 @@ public class SchemaVerifier {
 
     private boolean shouldBeSameSize(String subPrefix, Collection<?> wrappedObjectList, Collection<?> schemaPropertyList) {
         return wrappedObjectList.size() == schemaPropertyList.size()
-                || errorLog("Expected field `%s` should be size [%d], but was size [%d]\n", subPrefix,
+                || errorLog("Expected field `%s` should be size [%d], but was size [%d]", subPrefix,
                 schemaPropertyList.size(), wrappedObjectList.size());
     }
 
     private boolean verifyFormatterValue(String subPrefix, Formatter<Object, Object> formatter) {
         return formatter.isValid(object.getInstance())
-                || errorLog("Expected field `%s` should be in `%s`, but was [%s]\n", subPrefix,
+                || errorLog("Expected field `%s` should be in `%s`, but was [%s]", subPrefix,
                 formatter.getFormatterName(), object.getInstance());
     }
 }

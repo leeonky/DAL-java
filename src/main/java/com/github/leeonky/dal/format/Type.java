@@ -11,8 +11,8 @@ public class Type<T> {
             }
 
             @Override
-            public String errorMessage(String property, Object actual) {
-                return String.format("Expect field `%s` [%s] to be equal to [%s], but was not.", property, actual, expect);
+            public String errorMessage(String field, Object actual) {
+                return String.format("Expect field `%s` [%s] to be equal to [%s], but was not.", field, actual, expect);
             }
         };
     }
@@ -25,8 +25,8 @@ public class Type<T> {
             }
 
             @Override
-            public String errorMessage(String property, Object actual) {
-                return String.format("Expect field `%s` [%s] to be null, but was not.", property, actual);
+            public String errorMessage(String field, Object actual) {
+                return String.format("Expect field `%s` [%s] to be null, but was not.", field, actual);
             }
         };
     }
@@ -35,8 +35,8 @@ public class Type<T> {
         return true;
     }
 
-    public String errorMessage(String property, Object actual) {
-        return String.format("Field `%s` is invalid", property);
+    public String errorMessage(String field, Object actual) {
+        return String.format("Field `%s` is invalid", field);
     }
 }
 

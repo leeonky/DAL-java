@@ -3,11 +3,7 @@ package com.github.leeonky.dal.spec;
 import com.github.leeonky.dal.format.Type;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.HashMap;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class VerifyValueTypeInSchema extends Base {
 
@@ -93,19 +89,6 @@ class VerifyValueTypeInSchema extends Base {
                 stringValue = "world";
             }}, "is WrappedJavaTypeNullReferenceInSchema");
         }, "Expect field `.stringValue` [world] to be null, but was not.");
-    }
-
-    private void assertErrorContains(Runnable codeBlock, String errorMessage) {
-        PrintStream systemErr = System.err;
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        PrintStream err = new PrintStream(os);
-        System.setErr(err);
-        try {
-            codeBlock.run();
-            assertThat(os.toString()).contains(errorMessage);
-        } finally {
-            System.setErr(systemErr);
-        }
     }
 
     public static class JavaTypeInSchema {

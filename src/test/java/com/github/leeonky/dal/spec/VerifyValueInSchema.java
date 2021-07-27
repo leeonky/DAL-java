@@ -16,41 +16,41 @@ public class VerifyValueInSchema extends Base {
 
     @Test
     void verify_without_type_convert() {
-        dataAssert.getRuntimeContextBuilder().registerSchema(MatchString.class);
+        dataAssert.getRuntimeContextBuilder().registerSchema(MatchString1.class);
 
         assertPass(new HashMap<String, Object>() {{
             put("value", "1");
-        }}, "is MatchString");
+        }}, "is MatchString1");
 
         assertFailed(new HashMap<String, Object>() {{
             put("value", "2");
-        }}, "is MatchString");
+        }}, "is MatchString1");
     }
 
     @Test
     void should_convert_to_target_type_in_verification() {
-        dataAssert.getRuntimeContextBuilder().registerSchema(MatchString.class);
+        dataAssert.getRuntimeContextBuilder().registerSchema(MatchString1.class);
 
         assertPass(new HashMap<String, Object>() {{
             put("value", 1);
-        }}, "is MatchString");
+        }}, "is MatchString1");
 
         assertFailed(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is MatchString");
+        }}, "is MatchString1");
     }
 
     @Test
     void verify_null_value() {
-        dataAssert.getRuntimeContextBuilder().registerSchema(MatchNull.class);
+        dataAssert.getRuntimeContextBuilder().registerSchema(MatchNullValue.class);
 
         assertPass(new HashMap<String, Object>() {{
             put("value", null);
-        }}, "is MatchNull");
+        }}, "is MatchNullValue");
 
         assertFailed(new HashMap<String, Object>() {{
             put("value", 0);
-        }}, "is MatchNull");
+        }}, "is MatchNullValue");
     }
 
     @Test
@@ -113,7 +113,7 @@ public class VerifyValueInSchema extends Base {
     void verify_type() {
         dataAssert.getRuntimeContextBuilder()
                 .registerSchema(MatchType.class)
-                .registerSchema(MatchTypeWithNull.class);
+                .registerSchema(MatchTypeWithNullableValue.class);
 
         assertPass(new HashMap<String, Object>() {{
             put("value", "0");
@@ -124,7 +124,7 @@ public class VerifyValueInSchema extends Base {
 
         assertPass(new HashMap<String, Object>() {{
             put("value", null);
-        }}, "is MatchTypeWithNull");
+        }}, "is MatchTypeWithNullableValue");
         assertFailed(new HashMap<String, Object>() {{
             put("value", null);
         }}, "is MatchType");
@@ -140,11 +140,47 @@ public class VerifyValueInSchema extends Base {
         }}, "is MissingTypeArg"));
     }
 
-    public static class MatchString {
+    @Test
+    void customized_message() {
+        dataAssert.getRuntimeContextBuilder()
+                .registerSchema(MatchString1.class)
+                .registerSchema(MatchNullValue.class)
+                .registerSchema(MatchLessThan2.class)
+                .registerSchema(MatchGreaterThan3.class)
+                .registerSchema(MatchLessOrEqualTo3.class)
+                .registerSchema(MatchGreaterOrEqualTo3.class)
+        ;
+
+        assertErrorContains(() -> assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is MatchString1"), "Expect field `.value` [2] to be equal to [1], but was not.");
+
+        assertErrorContains(() -> assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is MatchNullValue"), "Expect field `.value` [2] to be null, but was not.");
+
+        assertErrorContains(() -> assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is MatchLessThan2"), "Expect field `.value` [2] to be less than [2], but was not.");
+
+        assertErrorContains(() -> assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is MatchGreaterThan3"), "Expect field `.value` [2] to be greater than [3], but was not.");
+
+        assertErrorContains(() -> assertFailed(new HashMap<String, Object>() {{
+            put("value", 4);
+        }}, "is MatchLessOrEqualTo3"), "Expect field `.value` [4] to be less or equal to [3], but was not.");
+
+        assertErrorContains(() -> assertFailed(new HashMap<String, Object>() {{
+            put("value", 2);
+        }}, "is MatchGreaterOrEqualTo3"), "Expect field `.value` [2] to be greater or equal to [3], but was not.");
+    }
+
+    public static class MatchString1 {
         public Value<String> value = Value.equalTo("1");
     }
 
-    public static class MatchNull {
+    public static class MatchNullValue {
         public Value<String> value = Value.nullReference();
     }
 
@@ -168,7 +204,7 @@ public class VerifyValueInSchema extends Base {
         public Value<Integer> value;
     }
 
-    public static class MatchTypeWithNull {
+    public static class MatchTypeWithNullableValue {
         @AllowNull
         public Value<Integer> value;
     }
