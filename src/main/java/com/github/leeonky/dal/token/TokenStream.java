@@ -93,4 +93,13 @@ public class TokenStream {
             }
         };
     }
+
+    public boolean isCurrentBeginRegex() {
+//        return currentType() == Token.Type.BEGIN_REGEX;
+        //TODO
+        boolean equals = "/".equals(tokens.get(index).getValue());
+        if (equals)
+            tokens.clear();
+        return equals;
+    }
 }

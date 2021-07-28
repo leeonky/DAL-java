@@ -10,6 +10,7 @@ import static java.util.Arrays.asList;
 
 public class Scanner {
     public static final Set<Character> CHAR_SPLIT = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!'));
+    //TODO missing matches
     public static final List<String> MULTI_CHAR_OPTS = asList(">=", "<=", "&&", "||", "!=");
     public static final Set<String> KEYWORD_SETS = new HashSet<>(asList(IS, WHICH));
 

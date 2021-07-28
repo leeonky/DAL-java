@@ -153,23 +153,37 @@ class BasicVerify extends Base {
     @Nested
     class Matches {
 
-        @Test
-        void support_operator_matches() {
-            assertPass(1, "matches 1");
-            assertFailed(1, "matches 2");
+        @Nested
+        class MatchesValue {
+
+            @Test
+            void support_operator_matches() {
+                assertPass(1, "matches 1");
+                assertFailed(1, "matches 2");
+            }
+
+            @Test
+            void support_convert_to_target_type_before_matches_value() {
+                assertPass("1", "matches 1");
+                assertFailed("1", "matches 2");
+            }
+
+            @Test
+            void process_null() {
+                assertFailed(1, "matches null");
+                assertFailed(null, "matches 1");
+                assertPass(null, "matches null");
+            }
         }
 
-        @Test
-        void support_convert_to_target_type_before_matches_value() {
-            assertPass("1", "matches 1");
-            assertFailed("1", "matches 2");
-        }
+        @Nested
+        class MatchesRegex {
 
-        @Test
-        void process_null() {
-            assertFailed(1, "matches null");
-            assertFailed(null, "matches 1");
-            assertPass(null, "matches null");
+            @Test
+            void support_matches_regex() {
+                assertPass(1, "matches /1/");
+                assertFailed(2, "matches /1/");
+            }
         }
     }
 }

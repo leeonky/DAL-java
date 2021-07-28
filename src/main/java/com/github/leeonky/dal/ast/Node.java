@@ -5,7 +5,9 @@ import com.github.leeonky.dal.RuntimeContext;
 public abstract class Node {
     private int positionBegin;
 
-    public abstract Object evaluate(RuntimeContext context);
+    public Object evaluate(RuntimeContext context) {
+        throw new IllegalStateException();
+    }
 
     public int getPositionBegin() {
         return positionBegin;
@@ -16,4 +18,8 @@ public abstract class Node {
     }
 
     public abstract String inspect();
+
+    public boolean evaluable() {
+        return true;
+    }
 }

@@ -13,11 +13,6 @@ public class SchemaNode extends Node {
         this.schema = schema;
     }
 
-    @Override
-    public Object evaluate(RuntimeContext context) {
-        throw new IllegalStateException();
-    }
-
     public ConstructorViaSchema getConstructorViaSchema(RuntimeContext context) {
         return context.searchConstructor(schema).orElseThrow(() ->
                 new RuntimeException("Schema '" + schema + "' not registered", getPositionBegin()));
@@ -31,5 +26,10 @@ public class SchemaNode extends Node {
     @Override
     public String inspect() {
         return schema;
+    }
+
+    @Override
+    public boolean evaluable() {
+        return false;
     }
 }

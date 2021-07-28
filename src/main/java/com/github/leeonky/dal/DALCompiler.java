@@ -47,13 +47,15 @@ public class DALCompiler {
     }
 
     private Node compileWhichClause(TokenStream tokenStream, BracketNode bracketNode) {
-        return (tokenStream.hasTokens() && tokenStream.isCurrentKeywordAndTake(WHICH)) ? compileExpression(tokenStream, bracketNode, false) : new ConstNode(true);
+        return (tokenStream.hasTokens() && tokenStream.isCurrentKeywordAndTake(WHICH)) ?
+                compileExpression(tokenStream, bracketNode, false) : new ConstNode(true);
     }
 
     private Optional<Node> compileOneNode(TokenStream tokenStream, boolean isFirstNode) {
         if (tokenStream.hasTokens() && tokenStream.isSingleUnaryOperator(isFirstNode))
-            return of(new Expression(new ConstNode(null), tokenStream.pop().toOperator(true), compileOneNode(tokenStream, false)
-                    .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expect a value"))));
+            return of(new Expression(new ConstNode(null), tokenStream.pop().toOperator(true),
+                    compileOneNode(tokenStream, false)
+                            .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expect a value"))));
         return ofNullable(compilePropertyOrIndexChain(tokenStream, compileOperand(tokenStream, isFirstNode)));
     }
 
@@ -83,6 +85,9 @@ public class DALCompiler {
                 node = InputNode.INSTANCE;
             else if (tokenStream.isCurrentBeginBracket())
                 node = compileBracket(tokenStream);
+            else if (tokenStream.isCurrentBeginRegex())
+                //TODO
+                node = new RegexNode("1");
         }
         if (isFirstNode && node == null)
             node = InputNode.INSTANCE;

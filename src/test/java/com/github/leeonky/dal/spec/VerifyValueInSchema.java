@@ -252,6 +252,5 @@ public class VerifyValueInSchema extends Base {
         }
     }
 
-    //TODO matches Value (convert and check value(if have))
     //TODO matches /abcd/
 }
