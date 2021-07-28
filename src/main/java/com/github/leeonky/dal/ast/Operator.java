@@ -5,6 +5,7 @@ import com.github.leeonky.dal.util.Calculator;
 import com.github.leeonky.dal.util.ListAccessor;
 
 import java.lang.reflect.Array;
+import java.util.Objects;
 import java.util.Optional;
 
 public abstract class Operator {
@@ -255,6 +256,22 @@ public abstract class Operator {
         @Override
         public String inspect(Node node1, Node node2) {
             return String.format("%s[%s]", node1.inspect(), node2.inspect());
+        }
+    }
+
+    public static class Matches extends Operator {
+
+        public Matches() {
+            super(PRECEDENCE_LOGIC_COMPARE_OPT, "matches", true);
+        }
+
+        @Override
+        public Object calculate(Node node1, Node node2, RuntimeContext context) {
+            Object v1 = node1.evaluate(context);
+            Object v2 = node2.evaluate(context);
+            if (v2 == null)
+                return Objects.equals(v1, v2);
+            return Objects.equals(context.getConverter().convert(v2.getClass(), v1), v2);
         }
     }
 }

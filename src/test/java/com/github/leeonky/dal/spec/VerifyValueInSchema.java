@@ -140,7 +140,6 @@ public class VerifyValueInSchema extends Base {
         }}, "is MissingTypeArg"));
     }
 
-    //TODO use words matches
     @Test
     void customized_message() {
         dataAssert.getRuntimeContextBuilder()
@@ -253,7 +252,6 @@ public class VerifyValueInSchema extends Base {
         }
     }
 
-    //TODO matches "1"
     //TODO matches Value (convert and check value(if have))
     //TODO matches /abcd/
 }

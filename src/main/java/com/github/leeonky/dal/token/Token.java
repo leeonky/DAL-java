@@ -138,6 +138,9 @@ public class Token {
                 case "||":
                     operator = new Operator.Or();
                     break;
+                case "matches":
+                    operator = new Operator.Matches();
+                    break;
                 default:
                     throw new SyntaxException(getPositionBegin(), "not support operator `" + operatorString + "` yet");
             }

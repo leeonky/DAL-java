@@ -149,4 +149,27 @@ class BasicVerify extends Base {
             assertRuntimeException("", " = .fun", 3, "Get property 'fun' failed, property can be public field, getter or customer type getter");
         }
     }
+
+    @Nested
+    class Matches {
+
+        @Test
+        void support_operator_matches() {
+            assertPass(1, "matches 1");
+            assertFailed(1, "matches 2");
+        }
+
+        @Test
+        void support_convert_to_target_type_before_matches_value() {
+            assertPass("1", "matches 1");
+            assertFailed("1", "matches 2");
+        }
+
+        @Test
+        void process_null() {
+            assertFailed(1, "matches null");
+            assertFailed(null, "matches 1");
+            assertPass(null, "matches null");
+        }
+    }
 }
