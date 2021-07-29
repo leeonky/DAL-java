@@ -3,8 +3,19 @@ package com.github.leeonky.dal.token;
 import com.github.leeonky.dal.SyntaxException;
 
 class RegexTokenCandidate extends TokenCandidate {
-    private boolean isEscape = false;
     private int codeLength = 0;
+    private final EscapeFlag escapeFlag = new EscapeFlag('\\') {
+
+        @Override
+        protected void defaultAction(int c) {
+            RegexTokenCandidate.super.append(c);
+        }
+
+        @Override
+        protected void triggerAction(int c) {
+            getEscapedChar(c).chars().forEach(RegexTokenCandidate.super::append);
+        }
+    };
 
     RegexTokenCandidate(SourceCode sourceCode) {
         super(sourceCode);
@@ -13,45 +24,33 @@ class RegexTokenCandidate extends TokenCandidate {
     @Override
     protected Token toToken() {
         if (!isFinished())
-            //TODO missing UT
             throw new SyntaxException(getStartPosition() + codeLength + 1, "regex should end with '/'");
         return Token.regexToken(content());
     }
 
     @Override
-    protected boolean append(char c) {
+    protected boolean append(int c) {
         codeLength++;
-        if (isEscape) {
-            super.append(getEscapedChar(c));
-            isEscape = false;
-        } else {
-            if (c == '\\') {
-                isEscape = true;
-                return true;
-            }
-            super.append(c);
-        }
-        return false;
+        return escapeFlag.consume(c);
     }
 
-    private char getEscapedChar(char c) {
-        //TODO missing UT
+    private String getEscapedChar(int c) {
         switch (c) {
             case '/':
-                return '/';
+                return "/";
             case 't':
-                return '\t';
+                return "\t";
             case 'n':
-                return '\n';
+                return "\n";
             case '\\':
-                return '\\';
+                return "\\\\";
             default:
                 throw new SyntaxException(getStartPosition() + codeLength, "unsupported escape char");
         }
     }
 
     @Override
-    protected boolean isDiscardBeginChar() {
+    protected boolean needDiscardBeginChar() {
         return true;
     }
 

@@ -3,8 +3,20 @@ package com.github.leeonky.dal.token;
 import com.github.leeonky.dal.SyntaxException;
 
 class DoubleQuotationStringTokenCandidate extends TokenCandidate {
-    private boolean isEscape = false;
     private int codeLength = 0;
+
+    private final EscapeFlag escapeFlag = new EscapeFlag('\\') {
+
+        @Override
+        protected void defaultAction(int c) {
+            DoubleQuotationStringTokenCandidate.super.append(c);
+        }
+
+        @Override
+        protected void triggerAction(int c) {
+            DoubleQuotationStringTokenCandidate.super.append(getEscapedChar(c));
+        }
+    };
 
     DoubleQuotationStringTokenCandidate(SourceCode sourceCode) {
         super(sourceCode);
@@ -18,22 +30,12 @@ class DoubleQuotationStringTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    protected boolean append(char c) {
+    protected boolean append(int c) {
         codeLength++;
-        if (isEscape) {
-            super.append(getEscapedChar(c));
-            isEscape = false;
-        } else {
-            if (c == '\\') {
-                isEscape = true;
-                return true;
-            }
-            super.append(c);
-        }
-        return false;
+        return escapeFlag.consume(c);
     }
 
-    private char getEscapedChar(char c) {
+    private char getEscapedChar(int c) {
         switch (c) {
             case '"':
                 return '"';
@@ -49,7 +51,7 @@ class DoubleQuotationStringTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    protected boolean isDiscardBeginChar() {
+    protected boolean needDiscardBeginChar() {
         return true;
     }
 

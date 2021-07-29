@@ -17,12 +17,12 @@ public abstract class TokenCandidate {
         this.split = split;
         startPosition = sourceCode.getPosition();
         char c = sourceCode.takeChar();
-        if (!isDiscardBeginChar())
+        if (!needDiscardBeginChar())
             stringBuilder.append(c);
     }
 
-    protected boolean append(char c) {
-        stringBuilder.append(c);
+    protected boolean append(int c) {
+        stringBuilder.append((char) c);
         return false;
     }
 
@@ -32,7 +32,7 @@ public abstract class TokenCandidate {
 
     protected abstract Token toToken();
 
-    protected boolean isDiscardBeginChar() {
+    protected boolean needDiscardBeginChar() {
         return false;
     }
 

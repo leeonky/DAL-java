@@ -11,7 +11,7 @@ class PropertyTokenCandidate extends TokenCandidate {
     }
 
     @Override
-    protected boolean isDiscardBeginChar() {
+    protected boolean needDiscardBeginChar() {
         return true;
     }
 }
