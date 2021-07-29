@@ -6,7 +6,7 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.Objects;
 
-public class Value<T> {
+public abstract class Value<T> {
 
     public static <T> Value<T> equalTo(T value) {
         return new Value<T>() {
@@ -99,9 +99,7 @@ public class Value<T> {
         return (T) runtimeContext.getConverter().tryConvert(type.getType(), instance);
     }
 
-    public boolean verify(T actual) {
-        return true;
-    }
+    public abstract boolean verify(T actual);
 
     public String errorMessage(String field, Object actual) {
         return String.format("Field `%s` is invalid", field);

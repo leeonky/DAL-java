@@ -11,6 +11,20 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class FormattersTest {
+    public static abstract class BaseNumber<R> extends BaseFormatter<Number, R> {
+    }
+
+    public static class IntegerEq5 extends BaseNumber<BigInteger> {
+        @Override
+        public BigInteger convert(Number input) {
+            return null;
+        }
+
+        @Override
+        public boolean isValidValue(BigInteger value) {
+            return value.equals(new BigInteger("5"));
+        }
+    }
 
     @Nested
     class IntegerHelper {
@@ -149,6 +163,16 @@ class FormattersTest {
             assertFalse(positive.isValidValue(new BigDecimal("2")));
 
             assertThat(positive.getFormatterName()).isEqualTo("Number less or equal to [1]");
+        }
+    }
+
+    @Nested
+    class Formatter {
+
+        @Test
+        void guess_type_from_nested_generic_type_args() {
+            assertThat(BaseFormatter.guessInputType(IntegerEq5.class))
+                    .isEqualTo(Number.class);
         }
     }
 }

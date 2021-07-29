@@ -133,11 +133,16 @@ public class VerifyValueInSchema extends Base {
     @Test
     void missing_type_arg() {
         dataAssert.getRuntimeContextBuilder()
-                .registerSchema(MissingTypeArg.class);
+                .registerSchema(MissingTypeArg.class)
+                .registerSchema(MissingTypeArgButGivenValue.class);
 
         assertThrows(RuntimeException.class, () -> dataAssert.assertData(new HashMap<String, Object>() {{
             put("value", 1);
         }}, "is MissingTypeArg"));
+
+        assertThrows(RuntimeException.class, () -> dataAssert.assertData(new HashMap<String, Object>() {{
+            put("value", 1);
+        }}, "is MissingTypeArgButGivenValue"));
     }
 
     @Test
@@ -215,6 +220,10 @@ public class VerifyValueInSchema extends Base {
 
     public static class MissingTypeArg {
         public Value<?> value;
+    }
+
+    public static class MissingTypeArgButGivenValue {
+        public Value<?> value = Value.equalTo(1);
     }
 
     public static class CustomizedConverter {

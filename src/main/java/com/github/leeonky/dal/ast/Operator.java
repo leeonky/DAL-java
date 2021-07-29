@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.RuntimeContext;
-import com.github.leeonky.dal.RuntimeException;
 import com.github.leeonky.dal.util.Calculator;
 import com.github.leeonky.dal.util.ListAccessor;
 
@@ -276,11 +275,8 @@ public abstract class Operator {
                 if (v2 == null)
                     return Objects.equals(v1, v2);
                 return Objects.equals(context.getConverter().convert(v2.getClass(), v1), v2);
-            } else {
-                if (node2 instanceof RegexNode)
-                    return ((RegexNode) node2).matches(context.getConverter().convert(String.class, v1));
-                throw new RuntimeException("Invalid matches expression", node2.getPositionBegin());
             }
+            return ((RegexNode) node2).matches(context.getConverter().convert(String.class, v1));
         }
     }
 }

@@ -20,9 +20,8 @@ public abstract class BaseFormatter<T, R> implements Formatter<T, R> {
                 return (Class<?>) parameterizedType.getActualTypeArguments()[0];
             else
                 return guessInputType(parameterizedType.getRawType());
-        } else if (type instanceof Class)
+        } else
             return guessInputType(((Class) type).getGenericSuperclass());
-        throw new IllegalStateException("Cannot guess input type.");
     }
 
     public static <T, R> R toValueOrThrowIllegalTypeException(T arg, ParseBlock<T, R> parseBlock) {

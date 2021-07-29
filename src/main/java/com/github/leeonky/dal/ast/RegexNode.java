@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.ast;
 
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
@@ -29,10 +28,5 @@ public class RegexNode extends Node {
     @Override
     public boolean equals(Object o) {
         return o instanceof RegexNode && ((RegexNode) o).pattern.toString().equals(pattern.toString());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(pattern.toString());
     }
 }
