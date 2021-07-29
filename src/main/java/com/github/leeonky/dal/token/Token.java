@@ -6,6 +6,7 @@ import com.github.leeonky.dal.ast.Operator;
 import java.util.List;
 import java.util.Objects;
 
+import static com.github.leeonky.dal.DALCompiler.MATCHES;
 import static java.util.Arrays.asList;
 
 public class Token {
@@ -142,7 +143,7 @@ public class Token {
                 case "||":
                     operator = new Operator.Or();
                     break;
-                case "matches":
+                case MATCHES:
                     operator = new Operator.Matches();
                     break;
                 default:
@@ -153,9 +154,8 @@ public class Token {
         return operator;
     }
 
-    //TODO to be replaced by singleton ==
     public boolean isOperatorMatches() {
-        return getType() == Type.OPERATOR && getValue().equals("matches");
+        return getType() == Type.OPERATOR && getValue().equals(MATCHES);
     }
 
     public enum Type {

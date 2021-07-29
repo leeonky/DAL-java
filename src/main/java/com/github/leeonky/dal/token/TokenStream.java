@@ -94,15 +94,7 @@ public class TokenStream {
         };
     }
 
-    public boolean isCurrentBeginRegex() {
-        boolean b = currentType() == Token.Type.REGEX;
-        if (b)
-            tokens.clear();
-        return b;
-        //TODO
-//        boolean equals = "/".equals(tokens.get(index).getValue());
-//        if (equals)
-//            tokens.clear();
-//        return equals;
+    public boolean isCurrentRegexNode() {
+        return currentType() == Token.Type.REGEX;
     }
 }

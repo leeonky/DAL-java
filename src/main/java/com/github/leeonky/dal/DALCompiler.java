@@ -86,9 +86,8 @@ public class DALCompiler {
                 node = InputNode.INSTANCE;
             else if (tokenStream.isCurrentBeginBracket())
                 node = compileBracket(tokenStream);
-            else if (tokenStream.isCurrentBeginRegex())
-                //TODO
-                node = new RegexNode("1");
+            else if (tokenStream.isCurrentRegexNode())
+                node = new RegexNode((String) tokenStream.pop().getValue());
         }
         if (isFirstNode && node == null)
             node = InputNode.INSTANCE;

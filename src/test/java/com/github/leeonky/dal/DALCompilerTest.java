@@ -197,6 +197,12 @@ class DALCompilerTest {
         void compile_regex() {
             assertCompileNode("matches /1/",
                     new Expression(InputNode.INSTANCE, new Operator.Matches(), new RegexNode("1")));
+
+            assertCompileNode("matches /1 2/",
+                    new Expression(InputNode.INSTANCE, new Operator.Matches(), new RegexNode("1 2")));
+
+            assertCompileNode("matches /1\\/2/",
+                    new Expression(InputNode.INSTANCE, new Operator.Matches(), new RegexNode("1/2")));
         }
     }
 

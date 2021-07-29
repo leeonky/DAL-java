@@ -22,7 +22,7 @@ class WordTokenCandidate extends TokenCandidate {
         if (OR.equals(content))
             return operatorToken("||");
         if (MATCHES.equals(content))
-            return operatorToken("matches");
+            return operatorToken(MATCHES);
         if (Scanner.KEYWORD_SETS.contains(content))
             return keyWordToken(content);
         return wordToken(content);
