@@ -45,7 +45,6 @@ public class Expression extends Node {
         return obj instanceof Expression
                 && Objects.equals(node1, ((Expression) obj).node1)
                 && Objects.equals(node2, ((Expression) obj).node2)
-                && Objects.equals(operator, ((Expression) obj).operator)
                 && Objects.equals(operator, ((Expression) obj).operator);
     }
 

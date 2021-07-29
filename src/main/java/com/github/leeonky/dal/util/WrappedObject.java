@@ -37,13 +37,13 @@ public class WrappedObject {
     }
 
     public Object getPropertyValue(String name) {
+        if ("size".equals(name) && isList())
+            return getListSize();
         if (name.contains(".")) {
             String[] split = name.split("\\.", 2);
             return getWrappedPropertyValue(split[0]).getPropertyValue(split[1]);
         }
-        return instance instanceof Map ?
-                ((Map) instance).get(name)
-                : getPropertyFromType(name);
+        return instance instanceof Map ? ((Map) instance).get(name) : getPropertyFromType(name);
     }
 
     public WrappedObject getWrappedPropertyValue(String name) {

@@ -2,7 +2,6 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
-import com.github.leeonky.dal.util.WrappedObject;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,28 +9,20 @@ import java.util.Objects;
 public class PropertyNode extends Node {
     private final Node instanceNode;
     private final List<String> properties;
+    private final String propertyChain;
 
     public PropertyNode(Node instanceNode, List<String> properties) {
         this.instanceNode = instanceNode;
         this.properties = properties;
+        propertyChain = String.join(".", properties);
     }
 
     @Override
     public Object evaluate(RuntimeContext context) {
-        Object instance = instanceNode.evaluate(context);
-        for (String name : properties)
-            instance = getPropertyValue(instance, name, context);
-        return instance;
-    }
-
-    private Object getPropertyValue(Object instance, String name, RuntimeContext context) {
-        WrappedObject wrappedObject = context.wrap(instance);
-        if ("size".equals(name) && wrappedObject.isList())
-            return wrappedObject.getListSize();
         try {
-            return wrappedObject.getPropertyValue(name);
+            return context.wrap(instanceNode.evaluate(context)).getPropertyValue(propertyChain);
         } catch (Exception e) {
-            throw new RuntimeException("Get property '" + name + "' failed, property can be public field, getter or customer type getter",
+            throw new RuntimeException("Get property '" + propertyChain + "' failed, property can be public field, getter or customer type getter",
                     getPositionBegin());
         }
     }

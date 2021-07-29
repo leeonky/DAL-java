@@ -260,6 +260,4 @@ public class VerifyValueInSchema extends Base {
             }}, "is CustomizedConverter");
         }
     }
-
-    //TODO matches alias ~ ?
 }
