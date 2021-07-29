@@ -23,7 +23,7 @@ class NumberTokenCandidateFactory implements TokenCandidateFactory {
     }
 
     @Override
-    public boolean isBegin(SourceCode sourceCode) {
+    public boolean isBegin(SourceCode sourceCode, Token lastToken) {
         return Character.isDigit(sourceCode.getChar());
     }
 }

@@ -4,6 +4,5 @@ interface TokenCandidateFactory {
 
     TokenCandidate createTokenCandidate(SourceCode sourceCode);
 
-    boolean isBegin(SourceCode sourceCode);
-
+    boolean isBegin(SourceCode sourceCode, Token lastToken);
 }

@@ -14,7 +14,7 @@ class OperatorTokenCandidate extends TokenCandidate {
     @Override
     protected boolean isUnexpectedChar(char c) {
         String operatorCandidate = content() + c;
-        return !Scanner.MULTI_CHAR_OPTS.stream().anyMatch(opt -> opt.startsWith(operatorCandidate));
+        return Scanner.MULTI_CHAR_OPTS.stream().noneMatch(opt -> opt.startsWith(operatorCandidate));
     }
 
 }
@@ -28,7 +28,7 @@ class OperatorTokenCandidateFactory implements TokenCandidateFactory {
     }
 
     @Override
-    public boolean isBegin(SourceCode sourceCode) {
+    public boolean isBegin(SourceCode sourceCode, Token lastToken) {
         switch (sourceCode.getChar()) {
             case '=':
             case '>':
@@ -36,11 +36,11 @@ class OperatorTokenCandidateFactory implements TokenCandidateFactory {
             case '+':
             case '-':
             case '*':
-            case '/':
             case '&':
             case '|':
             case '!':
-                return true;
+            case '/':
+                return lastToken == null || !lastToken.isOperatorMatches();
         }
         return false;
     }

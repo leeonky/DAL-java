@@ -76,11 +76,12 @@ class DALCompilerTest {
     class SimpleExpression {
 
         private void assertCompileOperator(String sourceCode, Operator operator) {
-            assertCompileNode(sourceCode + "1", new Expression(InputNode.INSTANCE, operator, new ConstNode(new BigDecimal(1))));
+            assertCompileNode(sourceCode + " 1", new Expression(InputNode.INSTANCE, operator, new ConstNode(new BigDecimal(1))));
         }
 
         @Test
         void should_support_follow_operators() {
+            assertCompileOperator("matches", new Operator.Matches());
             assertCompileOperator("=", new Operator.Equal());
             assertCompileOperator("!=", new Operator.NotEqual());
             assertCompileOperator(">", new Operator.Greater());
@@ -186,6 +187,16 @@ class DALCompilerTest {
         @Test
         void miss_begin_bracket_should_raise_error() {
             assertSyntaxException("1)", 1, "missed begin bracket");
+        }
+    }
+
+    @Nested
+    class Regex {
+
+        @Test
+        void compile_regex() {
+            assertCompileNode("matches /1/",
+                    new Expression(InputNode.INSTANCE, new Operator.Matches(), new RegexNode("1")));
         }
     }
 

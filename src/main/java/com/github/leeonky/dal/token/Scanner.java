@@ -10,7 +10,6 @@ import static java.util.Arrays.asList;
 
 public class Scanner {
     public static final Set<Character> CHAR_SPLIT = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!'));
-    //TODO missing matches
     public static final List<String> MULTI_CHAR_OPTS = asList(">=", "<=", "&&", "||", "!=");
     public static final Set<String> KEYWORD_SETS = new HashSet<>(asList(IS, WHICH));
 
@@ -22,24 +21,27 @@ public class Scanner {
             BeginBracketTokenCandidateFactory.INSTANCE,
             EndBracketTokenCandidateFactory.INSTANCE,
             SingleQuotationStringTokenCandidateFactory.INSTANCE,
-            DoubleQuotationStringTokenCandidateFactory.INSTANCE
+            DoubleQuotationStringTokenCandidateFactory.INSTANCE,
+            RegexTokenCandidateFactory.INSTANCE
     );
 
     public TokenStream scan(SourceCode sourceCode) {
         TokenStream tokenStream = new TokenStream();
+        Token lastToken = null;
         while (sourceCode.hasContent()) {
             int begin = sourceCode.getPosition();
-            Token token = takeTokenCandidate(sourceCode).getToken(sourceCode);
+            Token token = takeTokenCandidate(sourceCode, lastToken).getToken(sourceCode);
             token.setPositionBegin(begin);
             token.setPositionEnd(sourceCode.getPosition());
             tokenStream.appendToken(token);
+            lastToken = token;
         }
         return tokenStream;
     }
 
-    private TokenCandidate takeTokenCandidate(SourceCode sourceCode) {
+    private TokenCandidate takeTokenCandidate(SourceCode sourceCode, Token lastToken) {
         return factories.stream()
-                .filter(f -> f.isBegin(sourceCode))
+                .filter(f -> f.isBegin(sourceCode, lastToken))
                 .map(f -> f.createTokenCandidate(sourceCode))
                 .findFirst().orElseGet(() -> new WordTokenCandidate(sourceCode));
     }

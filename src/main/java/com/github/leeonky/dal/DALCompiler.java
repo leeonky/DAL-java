@@ -19,6 +19,7 @@ public class DALCompiler {
     public static final String FALSE = "false";
     public static final String AND = "and";
     public static final String OR = "or";
+    public static final String MATCHES = "matches";
     private Scanner scanner = new Scanner();
 
     public Node compile(SourceCode sourceCode) {

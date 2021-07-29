@@ -41,7 +41,7 @@ class SingleQuotationStringTokenCandidateFactory implements TokenCandidateFactor
     }
 
     @Override
-    public boolean isBegin(SourceCode sourceCode) {
+    public boolean isBegin(SourceCode sourceCode, Token lastToken) {
         return sourceCode.getChar() == '\'';
     }
 }

@@ -9,6 +9,7 @@ import java.lang.reflect.Array;
 import java.util.Objects;
 import java.util.Optional;
 
+//TODO use singleton instance of operator
 public abstract class Operator {
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
     private static final int PRECEDENCE_LOGIC_COMPARE_OPT = 210;

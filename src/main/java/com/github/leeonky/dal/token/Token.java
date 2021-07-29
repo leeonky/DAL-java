@@ -42,6 +42,10 @@ public class Token {
         return new Token(Type.BEGIN_BRACKET, "(");
     }
 
+    public static Token regexToken(String regex) {
+        return new Token(Type.REGEX, regex);
+    }
+
     public static Token endBracketToken() {
         return new Token(Type.END_BRACKET, ")");
     }
@@ -149,7 +153,12 @@ public class Token {
         return operator;
     }
 
+    //TODO to be replaced by singleton ==
+    public boolean isOperatorMatches() {
+        return getType() == Type.OPERATOR && getValue().equals("matches");
+    }
+
     public enum Type {
-        WORD, PROPERTY, CONST_INDEX, OPERATOR, BEGIN_BRACKET, END_BRACKET, KEY_WORD, CONST_VALUE, BEGIN_REGEX, END_REGEX
+        WORD, PROPERTY, CONST_INDEX, OPERATOR, BEGIN_BRACKET, END_BRACKET, KEY_WORD, CONST_VALUE, REGEX
     }
 }
