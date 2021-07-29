@@ -144,7 +144,10 @@ public class Token {
                     operator = new Operator.Or();
                     break;
                 case MATCHES:
-                    operator = new Operator.Matches();
+                    operator = new Operator.Matches(MATCHES);
+                    break;
+                case "~":
+                    operator = new Operator.Matches("~");
                     break;
                 default:
                     throw new SyntaxException(getPositionBegin(), "not support operator `" + operatorString + "` yet");
@@ -155,7 +158,7 @@ public class Token {
     }
 
     public boolean isOperatorMatches() {
-        return getType() == Type.OPERATOR && getValue().equals(MATCHES);
+        return getType() == Type.OPERATOR && (getValue().equals("~") || getValue().equals(MATCHES));
     }
 
     public enum Type {

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
+import static com.github.leeonky.dal.DALCompiler.MATCHES;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,7 +82,8 @@ class DALCompilerTest {
 
         @Test
         void should_support_follow_operators() {
-            assertCompileOperator("matches", new Operator.Matches());
+            assertCompileOperator("matches", new Operator.Matches(MATCHES));
+            assertCompileOperator("~", new Operator.Matches(MATCHES));
             assertCompileOperator("=", new Operator.Equal());
             assertCompileOperator("!=", new Operator.NotEqual());
             assertCompileOperator(">", new Operator.Greater());
@@ -196,13 +198,13 @@ class DALCompilerTest {
         @Test
         void compile_regex() {
             assertCompileNode("matches /1/",
-                    new Expression(InputNode.INSTANCE, new Operator.Matches(), new RegexNode("1")));
+                    new Expression(InputNode.INSTANCE, new Operator.Matches(MATCHES), new RegexNode("1")));
 
             assertCompileNode("matches /1 2/",
-                    new Expression(InputNode.INSTANCE, new Operator.Matches(), new RegexNode("1 2")));
+                    new Expression(InputNode.INSTANCE, new Operator.Matches(MATCHES), new RegexNode("1 2")));
 
             assertCompileNode("matches /1\\/2/",
-                    new Expression(InputNode.INSTANCE, new Operator.Matches(), new RegexNode("1/2")));
+                    new Expression(InputNode.INSTANCE, new Operator.Matches(MATCHES), new RegexNode("1/2")));
         }
 
         @Test
@@ -213,7 +215,7 @@ class DALCompilerTest {
         @Test
         void escape_char() {
             assertCompileNode("matches /\\/\\t\\n\\\\/",
-                    new Expression(InputNode.INSTANCE, new Operator.Matches(), new RegexNode("/\t\n\\\\")));
+                    new Expression(InputNode.INSTANCE, new Operator.Matches(MATCHES), new RegexNode("/\t\n\\\\")));
         }
 
         @Test

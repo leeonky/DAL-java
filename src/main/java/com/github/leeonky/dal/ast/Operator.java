@@ -8,8 +8,6 @@ import java.lang.reflect.Array;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.github.leeonky.dal.DALCompiler.MATCHES;
-
 public abstract class Operator {
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
     private static final int PRECEDENCE_LOGIC_COMPARE_OPT = 210;
@@ -263,8 +261,8 @@ public abstract class Operator {
 
     public static class Matches extends Operator {
 
-        public Matches() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, MATCHES, true);
+        public Matches(String symbol) {
+            super(PRECEDENCE_LOGIC_COMPARE_OPT, symbol, true);
         }
 
         @Override

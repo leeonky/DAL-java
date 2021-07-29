@@ -30,6 +30,7 @@ class OperatorTokenCandidateFactory implements TokenCandidateFactory {
     @Override
     public boolean isBegin(SourceCode sourceCode, Token lastToken) {
         switch (sourceCode.getChar()) {
+            case '~':
             case '=':
             case '>':
             case '<':
