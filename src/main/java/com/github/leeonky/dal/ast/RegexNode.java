@@ -23,9 +23,7 @@ public class RegexNode extends Node {
     }
 
     public boolean matches(String actual) {
-        boolean matches = pattern.matcher(actual).matches();
-        //TODO error log
-        return matches;
+        return pattern.matcher(actual).matches();
     }
 
     @Override

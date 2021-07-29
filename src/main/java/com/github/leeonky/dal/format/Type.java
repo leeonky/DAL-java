@@ -2,8 +2,8 @@ package com.github.leeonky.dal.format;
 
 import java.util.Objects;
 
-public class Type<T> {
-    public static <T> Type<T> equalTo(T expect) {
+public interface Type<T> {
+    static <T> Type<T> equalTo(T expect) {
         return new Type<T>() {
             @Override
             public boolean verify(T actual) {
@@ -17,7 +17,7 @@ public class Type<T> {
         };
     }
 
-    public static <T> Type<T> nullReference() {
+    static <T> Type<T> nullReference() {
         return new Type<T>() {
             @Override
             public boolean verify(T obj) {
@@ -31,7 +31,7 @@ public class Type<T> {
         };
     }
 
-    public static <T extends Comparable<T>> Type<T> lessThan(T value) {
+    static <T extends Comparable<T>> Type<T> lessThan(T value) {
         return new Type<T>() {
             @Override
             public boolean verify(T actual) {
@@ -45,7 +45,7 @@ public class Type<T> {
         };
     }
 
-    public static <T extends Comparable<T>> Type<T> greaterThan(T value) {
+    static <T extends Comparable<T>> Type<T> greaterThan(T value) {
         return new Type<T>() {
 
             @Override
@@ -60,7 +60,7 @@ public class Type<T> {
         };
     }
 
-    public static <T extends Comparable<T>> Type<T> lessOrEqualTo(T value) {
+    static <T extends Comparable<T>> Type<T> lessOrEqualTo(T value) {
         return new Type<T>() {
             @Override
             public boolean verify(T actual) {
@@ -74,7 +74,7 @@ public class Type<T> {
         };
     }
 
-    public static <T extends Comparable<T>> Type<T> greaterOrEqualTo(T value) {
+    static <T extends Comparable<T>> Type<T> greaterOrEqualTo(T value) {
         return new Type<T>() {
             @Override
             public boolean verify(T actual) {
@@ -88,11 +88,7 @@ public class Type<T> {
         };
     }
 
-    public boolean verify(T value) {
-        return true;
-    }
+    boolean verify(T value);
 
-    public String errorMessage(String field, Object actual) {
-        return String.format("Field `%s` is invalid", field);
-    }
+    String errorMessage(String field, Object actual);
 }
