@@ -8,17 +8,16 @@ import com.github.leeonky.dal.util.PropertyAccessor;
 import com.github.leeonky.dal.util.TypeData;
 import com.github.leeonky.dal.util.WrappedObject;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
 public class RuntimeContextBuilder {
     private final TypeData<PropertyAccessor> propertyAccessors = new TypeData<>();
     private final TypeData<ListAccessor> listAccessors = new TypeData<>();
     private final Map<String, ConstructorViaSchema> constructors = new LinkedHashMap<>();
-    private final Set<Class<?>> schemas = new HashSet<>();
+    private final Map<String, Class<?>> schemas = new HashMap<>();
 
     public RuntimeContextBuilder() {
         registerValueFormat(new Formatters.String());
@@ -58,7 +57,7 @@ public class RuntimeContextBuilder {
     }
 
     public RuntimeContextBuilder registerSchema(String name, Class<?> schema) {
-        schemas.add(schema);
+        schemas.put(name, schema);
         return registerSchema(name, (bw) -> bw.createSchemaVerifier().verify(schema, null, ""));
     }
 

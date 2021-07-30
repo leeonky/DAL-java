@@ -1,6 +1,7 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.ast.SchemaNode;
 import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import com.github.leeonky.dal.util.TypeData;
@@ -10,17 +11,23 @@ import com.github.leeonky.util.Converter;
 import java.util.*;
 
 public class RuntimeContext {
+    private final LinkedList<SchemaType> schemaTypesStack = new LinkedList<>();
     private final TypeData<PropertyAccessor> propertyAccessors;
     private final TypeData<ListAccessor> listAccessors;
     private final LinkedList<Object> wrappedValueStack = new LinkedList<>();
     private final Map<String, ConstructorViaSchema> constructors;
     private final Set<Class<?>> schemas;
+    private final Map<String, Class<?>> schemaMap;
     private final Converter converter = Converter.createDefault();
 
     public RuntimeContext(Object inputValue, TypeData<PropertyAccessor> propertyAccessors,
-                          Map<String, ConstructorViaSchema> constructors, TypeData<ListAccessor> listAccessors, Set<Class<?>> schemas) {
-        this.schemas = schemas;
+                          Map<String, ConstructorViaSchema> constructors, TypeData<ListAccessor> listAccessors,
+                          Map<String, Class<?>> schemas) {
+        this.schemas = new HashSet<>(schemas.values());
+        schemaMap = schemas;
         wrappedValueStack.push(inputValue);
+        //TODO null object
+        schemaTypesStack.push(new SchemaType(null));
         this.constructors = constructors;
         this.propertyAccessors = propertyAccessors;
         this.listAccessors = listAccessors;
@@ -30,12 +37,16 @@ public class RuntimeContext {
         return wrappedValueStack.getFirst();
     }
 
-    public Object wrapInputValueAndEvaluate(Object value, Node node) {
+    public Object wrapInputValueAndEvaluate(Object value, Node node, SchemaNode schemaNode) {
         try {
             wrappedValueStack.push(value);
+            //TODO null object
+            schemaTypesStack.push(new SchemaType(schemaMap.get(schemaNode.getSchema())));
             return node.evaluate(this);
         } finally {
             wrappedValueStack.pop();
+            //TODO need test
+            schemaTypesStack.pop();
         }
     }
 
@@ -86,5 +97,9 @@ public class RuntimeContext {
 
     public Converter getConverter() {
         return converter;
+    }
+
+    public String transformToFieldChain(List<String> aliases) {
+        return String.join(".", schemaTypesStack.getFirst().transformToFieldChain(new LinkedList<>(aliases)));
     }
 }

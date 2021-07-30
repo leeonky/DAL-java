@@ -9,21 +9,20 @@ import java.util.Objects;
 public class PropertyNode extends Node {
     private final Node instanceNode;
     private final List<String> properties;
-    private final String propertyChain;
 
     public PropertyNode(Node instanceNode, List<String> properties) {
         this.instanceNode = instanceNode;
         this.properties = properties;
-        propertyChain = String.join(".", properties);
     }
 
     @Override
     public Object evaluate(RuntimeContext context) {
+        String propertyChain = context.transformToFieldChain(properties);
         try {
             return context.wrap(instanceNode.evaluate(context)).getPropertyValue(propertyChain);
         } catch (Exception e) {
-            throw new RuntimeException("Get property '" + propertyChain + "' failed, property can be public field, getter or customer type getter",
-                    getPositionBegin());
+            throw new RuntimeException("Get property '" + propertyChain +
+                    "' failed, property can be public field, getter or customer type getter", getPositionBegin());
         }
     }
 
