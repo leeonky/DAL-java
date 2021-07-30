@@ -3,10 +3,8 @@ package com.github.leeonky.dal;
 import com.github.leeonky.dal.type.FieldAlias;
 import com.github.leeonky.dal.type.FieldAliases;
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.PropertyReader;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,17 +15,15 @@ public class SchemaType {
         this.schema = schema;
     }
 
-    public SchemaType getFieldSchema(String field) {
-        PropertyReader<?> propertyReader = null;
-        if (schema != null) {
-            //TODO result 0 may be a chain
-            propertyReader = BeanClass.create(schema).getPropertyReaders().get(field);
+    private SchemaType getFieldSchema(String field) {
+        try {
+            return new SchemaType(BeanClass.create(schema).getPropertyChainReader(field).getTypeClass());
+        } catch (Exception ignore) {
+            return new SchemaType(null);
         }
-        return propertyReader == null ? new SchemaType(null) : new SchemaType(propertyReader.getTypeClass());
     }
 
     private String fetchFieldChain(String name) {
-        Class<?> schema = this.schema;
         if (schema != null) {
             FieldAliases fieldAliases = schema.getAnnotation(FieldAliases.class);
             if (fieldAliases != null)
@@ -40,19 +36,13 @@ public class SchemaType {
         return name;
     }
 
-    //TODO move logic to object
-    //TODO nested schema
     //TODO nested in List element
-    //TODO schemaType class maybe null
-    //TODO maybe no next level property
     public List<String> transformToFieldChain(LinkedList<String> aliases) {
-        if (aliases.isEmpty())
-            return Collections.emptyList();
         String fieldChain = fetchFieldChain(aliases.pop());
-        //TODO fieldChain maybe a chain
-        return new ArrayList<String>() {{
-            add(fieldChain);
-            addAll(getFieldSchema(fieldChain).transformToFieldChain(aliases));
-        }};
+        List<String> result = new ArrayList<>();
+        result.add(fieldChain);
+        if (!aliases.isEmpty())
+            result.addAll(getFieldSchema(fieldChain).transformToFieldChain(aliases));
+        return result;
     }
 }
