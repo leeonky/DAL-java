@@ -57,12 +57,13 @@ public class WrappedObject {
         return size;
     }
 
-    public Iterable getList() {
+    @SuppressWarnings("unchecked")
+    public Iterable<Object> getList() {
         return runtimeContext.gitList(instance)
                 .orElseGet(() -> {
                     if (instance instanceof Iterable)
-                        return (Iterable) instance;
-                    return () -> new Iterator() {
+                        return (Iterable<Object>) instance;
+                    return () -> new Iterator<Object>() {
                         private final int length = Array.getLength(instance);
                         private int index = 0;
 

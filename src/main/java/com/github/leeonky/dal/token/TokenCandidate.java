@@ -45,11 +45,19 @@ public abstract class TokenCandidate {
     }
 
     Token getToken(SourceCode sourceCode) {
-        while (sourceCode.notEnd()
-                && !isDiscardedSuffix(sourceCode)
-                && !isUnexpectedChar(sourceCode.getChar()))
-            while (append(sourceCode.takeChar()) && sourceCode.notEnd()) ;
+        while (sourceCode.notEnd() && isDiscardedPrefix(sourceCode.getChar()))
+            sourceCode.takeChar();
+        while (sourceCode.notEnd() && !isDiscardedSuffix(sourceCode) && !isUnexpectedChar(sourceCode.getChar()))
+            takeEscapedChar(sourceCode);
         return toToken();
+    }
+
+    protected boolean isDiscardedPrefix(char c) {
+        return false;
+    }
+
+    private void takeEscapedChar(SourceCode sourceCode) {
+        while (append(sourceCode.takeChar()) && sourceCode.notEnd()) ;
     }
 
     protected String discardedSuffix() {

@@ -56,7 +56,7 @@ public class RuntimeContext {
     }
 
     @SuppressWarnings("unchecked")
-    public Optional<Set> findPropertyReaderNames(Object instance) {
+    public Optional<Set<String>> findPropertyReaderNames(Object instance) {
         return propertyAccessors.getData(instance)
                 .map(f -> f.getPropertyNames(instance));
     }
@@ -75,7 +75,7 @@ public class RuntimeContext {
     }
 
     @SuppressWarnings("unchecked")
-    public Optional<Iterable> gitList(Object instance) {
+    public Optional<Iterable<Object>> gitList(Object instance) {
         return listAccessors.getData(instance)
                 .map(l -> l.toIterable(instance));
     }

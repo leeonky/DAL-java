@@ -14,6 +14,11 @@ class PropertyTokenCandidate extends TokenCandidate {
     protected boolean needDiscardBeginChar() {
         return true;
     }
+
+    @Override
+    protected boolean isDiscardedPrefix(char c) {
+        return Character.isWhitespace(c);
+    }
 }
 
 class PropertyTokenCandidateFactory implements TokenCandidateFactory {
