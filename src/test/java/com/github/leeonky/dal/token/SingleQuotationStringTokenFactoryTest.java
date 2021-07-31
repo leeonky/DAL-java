@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SingleQuotationStringTokenFactoryTest {
-    private final SingleQuotationStringTokenFactory tokenFactory = new SingleQuotationStringTokenFactory();
+    private final TokenFactory tokenFactory = new SingleQuotationStringTokenFactory();
 
     @Test
     void return_empty_when_no_code() {
