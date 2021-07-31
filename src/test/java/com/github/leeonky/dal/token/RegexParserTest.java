@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RegexParserTest {
 
     private void assertString(String code, String expect) {
-        TextParser parser = new RegexParser();
+        TokenParser parser = new RegexParser();
         for (char c : code.toCharArray())
             parser.feed(c);
         assertThat(parser.value()).isEqualTo(expect);

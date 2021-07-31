@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.token;
 
-public abstract class QuotationStringParser extends TextParser {
+abstract class QuotationStringParser extends TokenParser {
 
     private final char finishedChar;
     private int startEndCount = 0;
@@ -16,11 +16,69 @@ public abstract class QuotationStringParser extends TextParser {
 
     @Override
     protected boolean isFinishedChar(char c) {
-        return c == finishedChar && ++startEndCount > 1;
+        return c == finishedChar;
     }
 
     @Override
-    protected String getContent(StringBuffer stringBuffer) {
-        return stringBuffer.subSequence(1, stringBuffer.length() - 1).toString();
+    protected boolean trimFirstChar() {
+        return true;
+    }
+}
+
+class SingleQuotationStringParser extends QuotationStringParser {
+
+    SingleQuotationStringParser() {
+        super('\'');
+    }
+
+    @Override
+    protected String escape(char c) {
+        switch (c) {
+            case '\'':
+            case '\\':
+                return String.valueOf(c);
+            default:
+                return "\\" + c;
+        }
+    }
+}
+
+class DoubleQuotationStringParser extends QuotationStringParser {
+
+    protected DoubleQuotationStringParser() {
+        super('"');
+    }
+
+    @Override
+    protected String escape(char c) {
+        switch (c) {
+            case '\\':
+            case '"':
+                return String.valueOf(c);
+            case 't':
+                return "\t";
+            case 'n':
+                return "\n";
+            default:
+                return "\\" + c;
+        }
+    }
+}
+
+class RegexParser extends QuotationStringParser {
+
+    protected RegexParser() {
+        super('/');
+    }
+
+    @Override
+    protected String escape(char c) {
+        switch (c) {
+            case '\\':
+            case '/':
+                return String.valueOf(c);
+            default:
+                return "\\" + c;
+        }
     }
 }

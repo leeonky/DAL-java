@@ -1,20 +1,9 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.SyntaxException;
-
-public abstract class QuotationTokenFactory implements TokenFactory {
-
-    private final String errorMessage;
-    private final char startChar;
-
-    public QuotationTokenFactory(char startChar, String errorMessage) {
-        this.startChar = startChar;
-        this.errorMessage = errorMessage;
-    }
-
+public abstract class NumberPropertyTokenFactory implements TokenFactory {
     @Override
     public Token fetchToken(SourceCode sourceCode, Token previous) {
-        if (sourceCode.notEnd() && sourceCode.getChar() == startChar)
+        if (sourceCode.notEnd() && Character.isDigit(sourceCode.getChar()))
             return parseConstValueToken(sourceCode);
         return null;
     }
@@ -25,8 +14,10 @@ public abstract class QuotationTokenFactory implements TokenFactory {
         int codeLength = 0;
         while (sourceCode.notEnd() && parser.feed(sourceCode.takeChar()))
             codeLength++;
-        if (!parser.isFinished())
-            throw new SyntaxException(startPosition + codeLength, errorMessage);
+        if (parser.isFinished())
+            sourceCode.seek(-1);
+//        if (!parser.isFinished())
+//            throw new SyntaxException(startPosition + codeLength, errorMessage);
         return createToken(parser.value());
     }
 

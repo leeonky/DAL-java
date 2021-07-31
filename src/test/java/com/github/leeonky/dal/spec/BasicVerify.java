@@ -65,8 +65,8 @@ class BasicVerify extends Base {
 
         @Test
         void verify_calculation() {
-            assertPass(1, "=1");
             assertPass(null, "1=1");
+            assertPass(1, "=1");
 
             assertPass(17, "=2+3*4+4/2+1");
             assertPass(null, "2+3*4+4/2+1=2+3*4+4/2+1");

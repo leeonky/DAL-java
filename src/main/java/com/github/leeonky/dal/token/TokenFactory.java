@@ -11,7 +11,7 @@ class SingleQuotationStringTokenFactory extends QuotationTokenFactory {
     }
 
     @Override
-    protected TextParser createParser() {
+    protected TokenParser createParser() {
         return new SingleQuotationStringParser();
     }
 
@@ -27,7 +27,7 @@ class DoubleQuotationStringTokenFactory extends QuotationTokenFactory {
     }
 
     @Override
-    protected TextParser createParser() {
+    protected TokenParser createParser() {
         return new DoubleQuotationStringParser();
     }
 
@@ -44,7 +44,7 @@ class RegexTokenFactory extends QuotationTokenFactory {
     }
 
     @Override
-    protected TextParser createParser() {
+    protected TokenParser createParser() {
         return new RegexParser();
     }
 

@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DoubleQuotationStringParserTest {
 
     private void assertString(String code, String expect) {
-        TextParser parser = new DoubleQuotationStringParser();
+        TokenParser parser = new DoubleQuotationStringParser();
         for (char c : code.toCharArray())
             parser.feed(c);
         assertThat(parser.value()).isEqualTo(expect);

@@ -10,12 +10,11 @@ import static com.github.leeonky.dal.DALCompiler.WHICH;
 import static java.util.Arrays.asList;
 
 public class Scanner {
-    public static final Set<Character> CHAR_SPLIT = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!'));
+    public static final Set<Character> CHAR_SPLIT = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']'));
     public static final List<String> MULTI_CHAR_OPTS = asList(">=", "<=", "&&", "||", "!=");
     public static final Set<String> KEYWORD_SETS = new HashSet<>(asList(IS, WHICH));
 
     private List<TokenCandidateFactory> tokenCandidateFactories = asList(
-            NumberTokenCandidateFactory.INSTANCE,
             PropertyTokenCandidateFactory.INSTANCE,
             AccessElementTokenCandidateFactory.INSTANCE,
             OperatorTokenCandidateFactory.INSTANCE,
@@ -24,6 +23,7 @@ public class Scanner {
     );
 
     private List<TokenFactory> tokenFactories = asList(
+            new NumberTokenFactory(),
             new SingleQuotationStringTokenFactory(),
             new DoubleQuotationStringTokenFactory(),
             new RegexTokenFactory()

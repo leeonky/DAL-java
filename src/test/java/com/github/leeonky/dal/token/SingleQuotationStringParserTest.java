@@ -6,10 +6,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SingleQuotationStringParserTest {
-    TextParser parser = new SingleQuotationStringParser();
+    TokenParser parser = new SingleQuotationStringParser();
 
     private void assertString(String code, String expect) {
-        TextParser parser = new SingleQuotationStringParser();
+        TokenParser parser = new SingleQuotationStringParser();
         for (char c : code.toCharArray())
             parser.feed(c);
         assertThat(parser.value()).isEqualTo(expect);
