@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.token;
 
 public interface TokenFactory {
-    Token fetchToken(SourceCode sourceCode);
+    Token fetchToken(SourceCode sourceCode, Token previous);
 }
 
 class SingleQuotationStringTokenFactory extends QuotationTokenFactory {
@@ -14,6 +14,11 @@ class SingleQuotationStringTokenFactory extends QuotationTokenFactory {
     protected TextParser createParser() {
         return new SingleQuotationStringParser();
     }
+
+    @Override
+    protected Token createToken(String value) {
+        return Token.constValueToken(value);
+    }
 }
 
 class DoubleQuotationStringTokenFactory extends QuotationTokenFactory {
@@ -24,5 +29,34 @@ class DoubleQuotationStringTokenFactory extends QuotationTokenFactory {
     @Override
     protected TextParser createParser() {
         return new DoubleQuotationStringParser();
+    }
+
+    @Override
+    protected Token createToken(String value) {
+        return Token.constValueToken(value);
+    }
+}
+
+class RegexTokenFactory extends QuotationTokenFactory {
+
+    public RegexTokenFactory() {
+        super('/', "regex should end with `/`");
+    }
+
+    @Override
+    protected TextParser createParser() {
+        return new RegexParser();
+    }
+
+    @Override
+    protected Token createToken(String value) {
+        return Token.regexToken(value);
+    }
+
+    @Override
+    public Token fetchToken(SourceCode sourceCode, Token previous) {
+        if (previous != null && previous.isOperatorMatches())
+            return super.fetchToken(sourceCode, previous);
+        return null;
     }
 }

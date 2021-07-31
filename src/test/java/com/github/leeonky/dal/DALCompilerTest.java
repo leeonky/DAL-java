@@ -203,30 +203,8 @@ class DALCompilerTest {
 
         @Test
         void compile_regex() {
-            assertCompileNode("matches /1/",
+            assertCompileNode(" matches /1/",
                     new Expression(InputNode.INSTANCE, new Operator.Matches(MATCHES), new RegexNode("1")));
-
-            assertCompileNode("matches /1 2/",
-                    new Expression(InputNode.INSTANCE, new Operator.Matches(MATCHES), new RegexNode("1 2")));
-
-            assertCompileNode("matches /1\\/2/",
-                    new Expression(InputNode.INSTANCE, new Operator.Matches(MATCHES), new RegexNode("1/2")));
-        }
-
-        @Test
-        void regex_not_finished() {
-            assertSyntaxException("matches /1", 10, "regex should end with '/'");
-        }
-
-        @Test
-        void escape_char() {
-            assertCompileNode("matches /\\/\\t\\n\\\\/",
-                    new Expression(InputNode.INSTANCE, new Operator.Matches(MATCHES), new RegexNode("/\t\n\\\\")));
-        }
-
-        @Test
-        void invalid_escape_char() {
-            assertSyntaxException("matches /\\a/", 10, "unsupported escape char");
         }
     }
 

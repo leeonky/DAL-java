@@ -20,13 +20,13 @@ public class Scanner {
             AccessElementTokenCandidateFactory.INSTANCE,
             OperatorTokenCandidateFactory.INSTANCE,
             BeginBracketTokenCandidateFactory.INSTANCE,
-            EndBracketTokenCandidateFactory.INSTANCE,
-            RegexTokenCandidateFactory.INSTANCE
+            EndBracketTokenCandidateFactory.INSTANCE
     );
 
     private List<TokenFactory> tokenFactories = asList(
             new SingleQuotationStringTokenFactory(),
-            new DoubleQuotationStringTokenFactory()
+            new DoubleQuotationStringTokenFactory(),
+            new RegexTokenFactory()
     );
 
     private Token lastToken;
@@ -36,7 +36,7 @@ public class Scanner {
         lastToken = null;
         while (sourceCode.hasContent()) {
             int begin = sourceCode.getPosition();
-            Token token = tokenFactories.stream().map(tokenFactory -> tokenFactory.fetchToken(sourceCode))
+            Token token = tokenFactories.stream().map(tokenFactory -> tokenFactory.fetchToken(sourceCode, lastToken))
                     .filter(Objects::nonNull).findFirst().orElseGet(() ->
                             takeTokenCandidate(sourceCode, lastToken).fetchToken(sourceCode));
             token.setPositionBegin(begin);

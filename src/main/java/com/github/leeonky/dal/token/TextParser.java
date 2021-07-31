@@ -80,3 +80,21 @@ class DoubleQuotationStringParser extends QuotationStringParser {
         }
     }
 }
+
+class RegexParser extends QuotationStringParser {
+
+    protected RegexParser() {
+        super('/');
+    }
+
+    @Override
+    protected String escape(char c) {
+        switch (c) {
+            case '\\':
+            case '/':
+                return String.valueOf(c);
+            default:
+                return "\\" + c;
+        }
+    }
+}

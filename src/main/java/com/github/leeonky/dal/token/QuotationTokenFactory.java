@@ -13,7 +13,7 @@ public abstract class QuotationTokenFactory implements TokenFactory {
     }
 
     @Override
-    public Token fetchToken(SourceCode sourceCode) {
+    public Token fetchToken(SourceCode sourceCode, Token previous) {
         if (sourceCode.notEnd() && sourceCode.getChar() == startChar)
             return parseConstValueToken(sourceCode);
         return null;
@@ -27,8 +27,10 @@ public abstract class QuotationTokenFactory implements TokenFactory {
             codeLength++;
         if (!parser.isFinished())
             throw new SyntaxException(startPosition + codeLength, errorMessage);
-        return Token.constValueToken(parser.value());
+        return createToken(parser.value());
     }
+
+    protected abstract Token createToken(String value);
 
     protected abstract TextParser createParser();
 }
