@@ -15,6 +15,7 @@ class PropertyTokenCandidate extends TokenCandidate {
         return true;
     }
 
+    //TODO to process . a . b
     @Override
     protected boolean isDiscardedPrefix(char c) {
         return Character.isWhitespace(c);

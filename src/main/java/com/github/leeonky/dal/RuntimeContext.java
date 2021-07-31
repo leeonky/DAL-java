@@ -1,7 +1,6 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.SchemaNode;
 import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import com.github.leeonky.dal.util.TypeData;
@@ -37,11 +36,11 @@ public class RuntimeContext {
         return wrappedValueStack.getFirst();
     }
 
-    public Object wrapInputValueAndEvaluate(Object value, Node node, SchemaNode schemaNode) {
+    public Object wrapInputValueAndEvaluate(Object value, Node node, String schema) {
         try {
             wrappedValueStack.push(value);
             //TODO null object
-            schemaTypesStack.push(new SchemaType(schemaMap.get(schemaNode.getSchema())));
+            schemaTypesStack.push(new SchemaType(schemaMap.get(schema)));
             return node.evaluate(this);
         } finally {
             wrappedValueStack.pop();

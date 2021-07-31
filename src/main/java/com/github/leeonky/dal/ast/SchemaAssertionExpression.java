@@ -30,7 +30,7 @@ public class SchemaAssertionExpression extends Node {
                 System.err.println("Warning: Type assertion `" + inspect() + "` got false.");
                 return false;
             }
-            return context.wrapInputValueAndEvaluate(objectRef.instance, assertion, schemaNodes.get(0));
+            return context.wrapInputValueAndEvaluate(objectRef.instance, assertion, schemaNodes.get(0).getSchema());
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), getPositionBegin());
         }

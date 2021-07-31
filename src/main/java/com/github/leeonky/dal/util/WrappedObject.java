@@ -39,6 +39,7 @@ public class WrappedObject {
     public Object getPropertyValue(String name) {
         if ("size".equals(name) && isList())
             return getListSize();
+        //TODO name contains escaped property name contains '.'
         if (name.contains(".")) {
             String[] split = name.split("\\.", 2);
             return getWrappedPropertyValue(split[0]).getPropertyValue(split[1]);

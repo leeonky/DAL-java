@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static java.util.Arrays.asList;
+
 public class SchemaType {
     public final Class<?> schema;
 
@@ -23,21 +25,24 @@ public class SchemaType {
         }
     }
 
+    //TODO nested is list element
     private String fetchFieldChain(String name) {
-        if (schema != null) {
-            FieldAliases fieldAliases = schema.getAnnotation(FieldAliases.class);
-            if (fieldAliases != null)
-                for (FieldAlias fieldAlias : fieldAliases.value()) {
-                    if (fieldAlias.alias().equals(name)) {
-                        return fieldAlias.field();
-                    }
-                }
-        }
-        return name;
+        return allAliases().stream().filter(fieldAlias -> fieldAlias.alias().equals(name))
+                .map(FieldAlias::field).findFirst().orElse(name);
+    }
+
+    private List<FieldAlias> allAliases() {
+        List<FieldAlias> aliases = new ArrayList<>();
+        FieldAliases fieldAliases = schema.getAnnotation(FieldAliases.class);
+        if (fieldAliases != null)
+            aliases.addAll(asList(fieldAliases.value()));
+        return aliases;
     }
 
     //TODO nested in List element
     public List<String> transformToFieldChain(LinkedList<String> aliases) {
+        if (schema == null)
+            return aliases;
         String fieldChain = fetchFieldChain(aliases.pop());
         List<String> result = new ArrayList<>();
         result.add(fieldChain);
