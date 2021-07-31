@@ -20,6 +20,6 @@ class WordTokenCandidateTest {
 
     private void assertToken(String code, Token token) {
         SourceCode sourceCode = new SourceCode(code);
-        assertThat(new WordTokenCandidate(sourceCode).getToken(sourceCode)).isEqualTo(token);
+        assertThat(new WordTokenCandidate(sourceCode).fetchToken(sourceCode)).isEqualTo(token);
     }
 }

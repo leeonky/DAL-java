@@ -140,7 +140,7 @@ class ScannerTest {
         @Test
         void should_begin_and_end_with_single_quotation() {
             assertScanTokens("'a''b'", constValueToken("a"), constValueToken("b"));
-            assertCompileError(" 'xx   ", 7, "string should end with '\''");
+            assertCompileError(" 'xx   ", 7, "string should end with `'`");
         }
 
         @Test
@@ -149,7 +149,12 @@ class ScannerTest {
             assertScanTokens("' a '", constValueToken(" a "));
         }
 
-        //TODO escape ' \
+        @Test
+        void should_support_escape_chars() {
+            assertScanTokens("'\\a'", constValueToken("\\a"));
+            assertScanTokens("'\\''", constValueToken("'"));
+            assertScanTokens("'\\\\'", constValueToken("\\"));
+        }
     }
 
     @Nested

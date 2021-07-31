@@ -44,7 +44,7 @@ public abstract class TokenCandidate {
         return Character.isWhitespace(c) || c == '[' || split.contains(c);
     }
 
-    public Token getToken(SourceCode sourceCode) {
+    public Token fetchToken(SourceCode sourceCode) {
         while (sourceCode.notEnd() && needIgnoreBegin(sourceCode.getChar()))
             sourceCode.takeChar();
         while (sourceCode.notEnd() && !isDiscardedSuffix(sourceCode) && !isUnexpectedChar(sourceCode.getChar()))
