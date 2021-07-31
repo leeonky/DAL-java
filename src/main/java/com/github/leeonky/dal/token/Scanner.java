@@ -21,11 +21,13 @@ public class Scanner {
             OperatorTokenCandidateFactory.INSTANCE,
             BeginBracketTokenCandidateFactory.INSTANCE,
             EndBracketTokenCandidateFactory.INSTANCE,
-            DoubleQuotationStringTokenCandidateFactory.INSTANCE,
             RegexTokenCandidateFactory.INSTANCE
     );
 
-    private List<TokenFactory> tokenFactories = asList(new SingleQuotationStringTokenFactory());
+    private List<TokenFactory> tokenFactories = asList(
+            new SingleQuotationStringTokenFactory(),
+            new DoubleQuotationStringTokenFactory()
+    );
 
     private Token lastToken;
 

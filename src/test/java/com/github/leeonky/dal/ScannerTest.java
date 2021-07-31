@@ -138,22 +138,8 @@ class ScannerTest {
     class SingleQuotationStringToken {
 
         @Test
-        void should_begin_and_end_with_single_quotation() {
-            assertScanTokens("'a''b'", constValueToken("a"), constValueToken("b"));
-            assertCompileError(" 'xx   ", 7, "string should end with `'`");
-        }
-
-        @Test
-        void should_support_blank_in_string() {
-            assertScanTokens("'  '", constValueToken("  "));
-            assertScanTokens("' a '", constValueToken(" a "));
-        }
-
-        @Test
-        void should_support_escape_chars() {
-            assertScanTokens("'\\a'", constValueToken("\\a"));
-            assertScanTokens("'\\''", constValueToken("'"));
-            assertScanTokens("'\\\\'", constValueToken("\\"));
+        void should_ignore_blank_around_string() {
+            assertScanTokens(" 'a' 'b'", constValueToken("a"), constValueToken("b"));
         }
     }
 
@@ -161,38 +147,8 @@ class ScannerTest {
     class DoubleQuotationStringToken {
 
         @Test
-        void contains_no_escape_char() {
-            assertScanTokens("\"a\"", constValueToken("a"));
-        }
-
-        @Test
-        void should_end_with_end_single_quotation() {
-            assertCompileError(" \"xx   ", 7, "string should end with '\"'");
-        }
-
-        @Test
-        void should_support_some_escape_char() {
-            assertScanTokens("\"\\\"\"", constValueToken("\""));
-            assertScanTokens("\"\\t\"", constValueToken("\t"));
-            assertScanTokens("\"\\n\"", constValueToken("\n"));
-            assertScanTokens("\"\\\\\"", constValueToken("\\"));
-            assertScanTokens("\"\\n\\n\"", constValueToken("\n\n"));
-        }
-
-        @Test
-        void escape_char_should_be_finished() {
-            assertCompileError("\"a\\", 3, "string should end with '\"'");
-        }
-
-        @Test
-        void unsupported_escape_char_should_raise_error() {
-            assertCompileError("\"a\\a", 3, "unsupported escape char");
-        }
-
-        @Test
-        void should_support_blank_in_string() {
-            assertScanTokens("\"  \"", constValueToken("  "));
-            assertScanTokens("\" a \"", constValueToken(" a "));
+        void should_ignore_blank_around_string() {
+            assertScanTokens(" \"a\" \"b\"", constValueToken("a"), constValueToken("b"));
         }
     }
 

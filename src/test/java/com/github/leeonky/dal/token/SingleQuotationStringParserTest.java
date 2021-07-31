@@ -21,8 +21,10 @@ class SingleQuotationStringParserTest {
     }
 
     @Test
-    void one_char() {
+    void complex_string() {
         assertString("'a'", "a");
+        assertString("'abc'", "abc");
+        assertString("' '", " ");
     }
 
     @Test
