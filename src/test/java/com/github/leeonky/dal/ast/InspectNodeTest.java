@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class InspertNodeTest {
+class InspectNodeTest {
 
     @Test
     void input_node_is_empty_string() {

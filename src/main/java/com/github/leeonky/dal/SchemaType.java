@@ -44,6 +44,8 @@ public class SchemaType {
         if (schema == null)
             return aliases;
         String fieldChain = fetchFieldChain(aliases.pop());
+        //TODO field lead to another alias
+        //TODO part of field chain is another alias
         List<String> result = new ArrayList<>();
         result.add(fieldChain);
         if (!aliases.isEmpty())

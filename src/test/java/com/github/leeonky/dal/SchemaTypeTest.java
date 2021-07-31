@@ -6,13 +6,20 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SchemaTypeTest {
+    private void assertTransform(Class<?> schema, List<String> list, String... chains) {
+        assertThat((new SchemaType(schema).transformToFieldChain(new LinkedList<>(list))))
+                .containsExactly(chains);
+    }
+
     @FieldAliases({
             @FieldAlias(alias = "ProductCost", field = "product.count"),
+            @FieldAlias(alias = "DuplicatedProductCost", field = "ProductCost"),
     })
     public static class Order {
     }
@@ -33,26 +40,24 @@ class SchemaTypeTest {
 
         @Test
         void simple_transform() {
-            assertThat((new SchemaType(Order.class).transformToFieldChain(new LinkedList<>(asList("ProductCost")))))
-                    .containsExactly("product.count");
+            assertTransform(Order.class, asList("ProductCost"), "product.count");
         }
 
         @Test
         void field_alias_chain() {
-            assertThat((new SchemaType(Report.class).transformToFieldChain(new LinkedList<>(asList("order", "ProductCost")))))
-                    .containsExactly("order", "product.count");
+            assertTransform(Report.class, asList("order", "ProductCost"), "order", "product.count");
         }
 
         @Test
         void alias_field_chain() {
+            assertTransform(Order.class, asList("ProductCost", "currency"), "product.count", "currency");
             assertThat((new SchemaType(Order.class).transformToFieldChain(new LinkedList<>(asList("ProductCost", "currency")))))
                     .containsExactly("product.count", "currency");
         }
 
         @Test
         void alias_alias_chain() {
-            assertThat((new SchemaType(User.class).transformToFieldChain(new LinkedList<>(asList("ReportOrder", "ProductCost")))))
-                    .containsExactly("report.order", "product.count");
+            assertTransform(User.class, asList("ReportOrder", "ProductCost"), "report.order", "product.count");
         }
     }
 }

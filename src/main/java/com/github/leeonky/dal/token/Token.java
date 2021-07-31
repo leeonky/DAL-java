@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.github.leeonky.dal.DALCompiler.MATCHES;
+import static java.text.MessageFormat.format;
 import static java.util.Arrays.asList;
 
 public class Token {
@@ -159,6 +160,12 @@ public class Token {
 
     public boolean isOperatorMatches() {
         return getType() == Type.OPERATOR && (getValue().equals("~") || getValue().equals(MATCHES));
+    }
+
+    @Override
+    public String toString() {
+        return format("Token'{'type={0}, value={1}, positionBegin={2}, positionEnd={3}'}'",
+                type, value, positionBegin, positionEnd);
     }
 
     public enum Type {

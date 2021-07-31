@@ -15,9 +15,8 @@ class PropertyTokenCandidate extends TokenCandidate {
         return true;
     }
 
-    //TODO to process . a . b
     @Override
-    protected boolean isDiscardedPrefix(char c) {
+    protected boolean needIgnoreBegin(char c) {
         return Character.isWhitespace(c);
     }
 }
@@ -35,6 +34,5 @@ class PropertyTokenCandidateFactory implements TokenCandidateFactory {
     public boolean isBegin(SourceCode sourceCode, Token lastToken) {
         return sourceCode.getChar() == '.';
     }
-
 }
 

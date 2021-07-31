@@ -44,15 +44,15 @@ public abstract class TokenCandidate {
         return Character.isWhitespace(c) || c == '[' || split.contains(c);
     }
 
-    Token getToken(SourceCode sourceCode) {
-        while (sourceCode.notEnd() && isDiscardedPrefix(sourceCode.getChar()))
+    public Token getToken(SourceCode sourceCode) {
+        while (sourceCode.notEnd() && needIgnoreBegin(sourceCode.getChar()))
             sourceCode.takeChar();
         while (sourceCode.notEnd() && !isDiscardedSuffix(sourceCode) && !isUnexpectedChar(sourceCode.getChar()))
             takeEscapedChar(sourceCode);
         return toToken();
     }
 
-    protected boolean isDiscardedPrefix(char c) {
+    protected boolean needIgnoreBegin(char c) {
         return false;
     }
 

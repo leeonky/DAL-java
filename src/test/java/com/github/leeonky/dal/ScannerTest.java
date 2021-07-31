@@ -88,6 +88,15 @@ class ScannerTest {
         void should_support_access_property_via_bracket() {
             assertScanTokens("[ a - key]", propertyToken(" a - key"));
         }
+
+        //        @Test
+//        TODO skip
+        void should_support_escape_char_in_bracket() {
+            assertScanTokens("['0']", propertyToken("0"));
+            assertScanTokens("[']']", propertyToken("]"));
+            assertScanTokens("['\\'']", propertyToken("'"));
+            assertScanTokens("['\\\\']", propertyToken("\\"));
+        }
     }
 
     @Nested
@@ -139,6 +148,8 @@ class ScannerTest {
             assertScanTokens("'  '", constValueToken("  "));
             assertScanTokens("' a '", constValueToken(" a "));
         }
+
+        //TODO escape ' \
     }
 
     @Nested

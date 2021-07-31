@@ -49,6 +49,7 @@ class DALCompilerTest {
         @Test
         void access_property_list_of_root_value() {
             assertCompileNode(".sub .result", new PropertyNode(new PropertyNode(InputNode.INSTANCE, singletonList("sub")), singletonList("result")));
+            assertCompileNode(". sub . result", new PropertyNode(new PropertyNode(InputNode.INSTANCE, singletonList("sub")), singletonList("result")));
         }
 
         @Test
