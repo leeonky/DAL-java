@@ -11,13 +11,14 @@ import static java.util.Arrays.asList;
 
 public class Scanner {
     public static final Set<Character> CHAR_SPLIT = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']'));
+    public static final Set<Character> TOKEN_SPLIT = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ' ', '\t', '\n'));
+    public static final Set<Character> OPERATOR_CHAR = new HashSet<>(asList('-', '!', '=', '>', '<', '+', '*', '/', '~', '&', '|'));
     public static final List<String> MULTI_CHAR_OPTS = asList(">=", "<=", "&&", "||", "!=");
     public static final Set<String> KEYWORD_SETS = new HashSet<>(asList(IS, WHICH));
 
     private List<TokenCandidateFactory> tokenCandidateFactories = asList(
             PropertyTokenCandidateFactory.INSTANCE,
             AccessElementTokenCandidateFactory.INSTANCE,
-            OperatorTokenCandidateFactory.INSTANCE,
             BeginBracketTokenCandidateFactory.INSTANCE,
             EndBracketTokenCandidateFactory.INSTANCE
     );
@@ -26,7 +27,8 @@ public class Scanner {
             new NumberTokenFactory(),
             new SingleQuotationStringTokenFactory(),
             new DoubleQuotationStringTokenFactory(),
-            new RegexTokenFactory()
+            new RegexTokenFactory(),
+            new OperatorTokenFactory()
     );
 
     private Token lastToken;

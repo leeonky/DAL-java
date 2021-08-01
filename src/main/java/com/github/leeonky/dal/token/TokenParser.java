@@ -12,12 +12,20 @@ public abstract class TokenParser {
         if (isFinished())
             throw new IllegalArgumentException("content is finished!");
         if (toggleEscape())
-            content.append(escape(c));
+            append(escape(c));
         else if (isEscapeChar(c))
             isEscape = true;
         else if (!trimFirstCharOnceIfNeeded() && !(isFinished = isFinishedChar(c)))
-            content.append(c);
+            append(c);
         return !isFinished();
+    }
+
+    protected void append(char c) {
+        content.append(c);
+    }
+
+    protected void append(String escape) {
+        content.append(escape);
     }
 
     private boolean toggleEscape() {
@@ -25,7 +33,11 @@ public abstract class TokenParser {
     }
 
     private boolean trimFirstCharOnceIfNeeded() {
-        return content.length() == 0 && !isFirstCharSkipped && trimFirstChar() && (isFirstCharSkipped = true);
+        return isEmpty() && !isFirstCharSkipped && trimFirstChar() && (isFirstCharSkipped = true);
+    }
+
+    protected boolean isEmpty() {
+        return content.length() == 0;
     }
 
     public boolean canFinish() {
@@ -45,6 +57,10 @@ public abstract class TokenParser {
     public String value() {
         if (!canFinish())
             throw new IllegalStateException("can not finish or content is finished");
+        return content();
+    }
+
+    protected String content() {
         return content.toString();
     }
 }

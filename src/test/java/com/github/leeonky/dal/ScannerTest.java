@@ -207,7 +207,7 @@ class ScannerTest {
         void split_operator_token() {
             assertScanTokens("= =", operatorToken("="), operatorToken("="));
 
-            assertScanTokens("==", operatorToken("="), operatorToken("="));
+            assertScanTokens("==", operatorToken("=="));
 
             assertScanTokens("=1", operatorToken("="), constValueToken(new BigDecimal(1)));
 
