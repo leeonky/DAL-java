@@ -88,4 +88,5 @@ class VerifySchemaFieldAlias extends Base {
     }
 
     //TODO alias same with field
+    //TODO alias to list element
 }

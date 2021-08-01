@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
+import com.github.leeonky.util.BeanClass;
 
 import java.util.List;
 import java.util.Objects;
@@ -19,8 +20,9 @@ public class PropertyNode extends Node {
     public Object evaluate(RuntimeContext context) {
         String propertyChain = context.transformToFieldChain(properties);
         try {
-            return context.wrap(instanceNode.evaluate(context)).getPropertyValueBk(propertyChain);
+            return context.wrap(instanceNode.evaluate(context)).getValue(BeanClass.toChainNodes(propertyChain).toArray());
         } catch (Exception e) {
+            //TODO log original and alias
             throw new RuntimeException("Get property '" + propertyChain +
                     "' failed, property can be public field, getter or customer type getter", getPositionBegin());
         }

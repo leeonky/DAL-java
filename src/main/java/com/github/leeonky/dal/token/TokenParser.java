@@ -1,7 +1,11 @@
 package com.github.leeonky.dal.token;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public abstract class TokenParser {
-    private final StringBuffer content = new StringBuffer();
+    protected final List<Character> content = new ArrayList<>();
     private boolean isEscape = false;
     private boolean isFinished = false;
     private boolean isFirstCharSkipped = false;
@@ -12,20 +16,13 @@ public abstract class TokenParser {
         if (isFinished())
             throw new IllegalArgumentException("content is finished!");
         if (toggleEscape())
-            append(escape(c));
+            for (char c1 : escape(c).toCharArray())
+                content.add(c1);
         else if (isEscapeChar(c))
             isEscape = true;
         else if (!trimFirstCharOnceIfNeeded() && !(isFinished = isFinishedChar(c)))
-            append(c);
+            content.add(c);
         return !isFinished();
-    }
-
-    protected void append(char c) {
-        content.append(c);
-    }
-
-    protected void append(String escape) {
-        content.append(escape);
     }
 
     private boolean toggleEscape() {
@@ -33,13 +30,10 @@ public abstract class TokenParser {
     }
 
     private boolean trimFirstCharOnceIfNeeded() {
-        return isEmpty() && !isFirstCharSkipped && trimFirstChar() && (isFirstCharSkipped = true);
+        return content.size() == 0 && !isFirstCharSkipped && trimFirstChar() && (isFirstCharSkipped = true);
     }
 
-    protected boolean isEmpty() {
-        return content.length() == 0;
-    }
-
+    //TODO to be refactored
     public boolean canFinish() {
         return isFinished();
     }
@@ -57,10 +51,6 @@ public abstract class TokenParser {
     public String value() {
         if (!canFinish())
             throw new IllegalStateException("can not finish or content is finished");
-        return content();
-    }
-
-    protected String content() {
-        return content.toString();
+        return content.stream().map(Object::toString).collect(Collectors.joining());
     }
 }

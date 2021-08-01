@@ -3,7 +3,6 @@ package com.github.leeonky.dal.token;
 abstract class QuotationStringParser extends TokenParser {
 
     private final char finishedChar;
-    private int startEndCount = 0;
 
     protected QuotationStringParser(char finishedChar) {
         this.finishedChar = finishedChar;
