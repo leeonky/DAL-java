@@ -22,10 +22,10 @@ import static java.util.stream.IntStream.range;
 import static java.util.stream.StreamSupport.stream;
 
 public class SchemaVerifier {
-    private final WrappedObject object;
+    private final DataObject object;
     private final RuntimeContext runtimeContext;
 
-    public SchemaVerifier(RuntimeContext runtimeContext, WrappedObject object) {
+    public SchemaVerifier(RuntimeContext runtimeContext, DataObject object) {
         this.runtimeContext = runtimeContext;
         this.object = object;
     }
@@ -35,7 +35,7 @@ public class SchemaVerifier {
         Class<?> type = superSchemaType;
         SubType subType = superSchemaType.getAnnotation(SubType.class);
         if (subType != null) {
-            Object value = object.getPropertyValue(subType.property());
+            Object value = object.getPropertyValueBk(subType.property());
             type = Stream.of(subType.types())
                     .filter(t -> t.value().equals(value))
                     .map(SubType.Type::type)
@@ -69,7 +69,7 @@ public class SchemaVerifier {
     private <T> boolean allPropertyValueShouldBeValid(String subPrefix, BeanClass<T> polymorphicBeanClass, T schemaInstance) {
         return polymorphicBeanClass.getPropertyReaders().values().stream()
                 .allMatch(propertyReader -> {
-                    WrappedObject wrappedPropertyValue = object.getWrappedPropertyValue(propertyReader.getName());
+                    DataObject wrappedPropertyValue = object.getWrappedPropertyValue(propertyReader.getName());
                     return allowNullAndIsNull(propertyReader, wrappedPropertyValue)
                             || wrappedPropertyValue.createSchemaVerifier()
                             .verifySchemaInGenericType(subPrefix + "." + propertyReader.getName(),
@@ -77,7 +77,7 @@ public class SchemaVerifier {
                 });
     }
 
-    private <T> boolean allowNullAndIsNull(PropertyReader<T> propertyReader, WrappedObject propertyValueWrapper) {
+    private <T> boolean allowNullAndIsNull(PropertyReader<T> propertyReader, DataObject propertyValueWrapper) {
         return propertyReader.getAnnotation(AllowNull.class) != null && propertyValueWrapper.isNull();
     }
 
@@ -173,17 +173,17 @@ public class SchemaVerifier {
     }
 
     private boolean verifyCollection(String subPrefix, BeanClass<?> elementType, Object schemaProperties) {
-        List<WrappedObject> wrappedObjectList = stream(object.getWrappedList().spliterator(), false)
+        List<DataObject> dataObjectList = stream(object.getWrappedList().spliterator(), false)
                 .collect(toList());
         if (schemaProperties == null)
-            return range(0, wrappedObjectList.size())
-                    .allMatch(i -> wrappedObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(
+            return range(0, dataObjectList.size())
+                    .allMatch(i -> dataObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(
                             format("%s[%d]", subPrefix, i), elementType, null));
         else {
             List<Object> schemaPropertyList = arrayCollectionToStream(schemaProperties).collect(toList());
-            return shouldBeSameSize(subPrefix, wrappedObjectList, schemaPropertyList)
-                    && range(0, wrappedObjectList.size())
-                    .allMatch(i -> wrappedObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(
+            return shouldBeSameSize(subPrefix, dataObjectList, schemaPropertyList)
+                    && range(0, dataObjectList.size())
+                    .allMatch(i -> dataObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(
                             format("%s[%d]", subPrefix, i), elementType, schemaPropertyList.get(i)));
         }
     }

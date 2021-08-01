@@ -1,10 +1,10 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.util.DataObject;
 import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import com.github.leeonky.dal.util.TypeData;
-import com.github.leeonky.dal.util.WrappedObject;
 import com.github.leeonky.util.Converter;
 
 import java.util.*;
@@ -57,8 +57,8 @@ public class RuntimeContext {
         return listAccessors.getData(object);
     }
 
-    public WrappedObject wrap(Object instance) {
-        return new WrappedObject(instance, this);
+    public DataObject wrap(Object instance) {
+        return new DataObject(instance, this);
     }
 
     public boolean isRegistered(Class<?> fieldType) {

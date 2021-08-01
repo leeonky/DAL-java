@@ -4,7 +4,7 @@ import com.github.leeonky.dal.util.ListAccessor;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-class JSONArrayListAccessor implements ListAccessor<JSONArray> {
+public class JSONArrayListAccessor implements ListAccessor<JSONArray> {
     @Override
     public Object get(JSONArray jsonArray, int index) {
         try {

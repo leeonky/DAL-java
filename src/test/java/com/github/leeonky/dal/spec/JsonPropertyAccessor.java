@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-class JsonPropertyAccessor implements PropertyAccessor<JSONObject> {
+public class JsonPropertyAccessor implements PropertyAccessor<JSONObject> {
     @Override
     public Object getValue(JSONObject instance, String name) {
         try {

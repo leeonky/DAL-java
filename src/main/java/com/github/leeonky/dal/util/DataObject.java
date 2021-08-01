@@ -5,14 +5,17 @@ import com.github.leeonky.util.BeanClass;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.StreamSupport;
 
-public class WrappedObject {
+import static java.util.Arrays.asList;
+
+public class DataObject {
     private final RuntimeContext runtimeContext;
     private final Object instance;
     private final BeanClass<Object> beanClass;
 
     @SuppressWarnings("unchecked")
-    public WrappedObject(Object instance, RuntimeContext context) {
+    public DataObject(Object instance, RuntimeContext context) {
         this.instance = instance;
         beanClass = instance == null ? null : (BeanClass<Object>) BeanClass.create(instance.getClass());
         runtimeContext = context;
@@ -36,19 +39,23 @@ public class WrappedObject {
                 });
     }
 
-    public Object getPropertyValue(String name) {
+    //TODO to be replaced
+    @Deprecated
+    public Object getPropertyValueBk(String name) {
         if ("size".equals(name) && isList())
             return getListSize();
         //TODO name contains escaped property name contains '.'
         if (name.contains(".")) {
             String[] split = name.split("\\.", 2);
-            return getWrappedPropertyValue(split[0]).getPropertyValue(split[1]);
+            return getWrappedPropertyValue(split[0]).getPropertyValueBk(split[1]);
         }
-        return instance instanceof Map ? ((Map) instance).get(name) : getPropertyFromType(name);
+        return instance instanceof Map ? ((Map) instance).get(name) : getPropertyValue(name);
     }
 
-    public WrappedObject getWrappedPropertyValue(String name) {
-        return runtimeContext.wrap(getPropertyValue(name));
+    //TODO to be replaced
+    @Deprecated
+    public DataObject getWrappedPropertyValue(String name) {
+        return runtimeContext.wrap(getPropertyValueBk(name));
     }
 
     public int getListSize() {
@@ -81,14 +88,16 @@ public class WrappedObject {
                 });
     }
 
-    public Iterable<WrappedObject> getWrappedList() {
-        List<WrappedObject> result = new ArrayList<>();
+    public Iterable<DataObject> getWrappedList() {
+        List<DataObject> result = new ArrayList<>();
         for (Object object : getList())
             result.add(runtimeContext.wrap(object));
         return result;
     }
 
-    private Object getPropertyFromType(String name) {
+    private Object getPropertyValue(String name) {
+        if (instance instanceof Map)
+            return ((Map<?, ?>) instance).get(name);
         return runtimeContext.getPropertyValue(instance, name)
                 .orElseGet(() -> beanClass.getPropertyValue(instance, name));
     }
@@ -99,5 +108,28 @@ public class WrappedObject {
 
     public SchemaVerifier createSchemaVerifier() {
         return new SchemaVerifier(runtimeContext, this);
+    }
+
+    public Object getValue(Object... properties) {
+        return getValue(new LinkedList<>(asList(properties)));
+    }
+
+    private Object getValue(LinkedList<Object> properties) {
+        Object object = getValue(properties.removeFirst());
+        return properties.isEmpty() ? object : runtimeContext.wrap(object).getValue(properties);
+    }
+
+    private Object getValue(Object property) {
+        if (isList()) {
+            if ("size".equals(property))
+                return getListSize();
+            return getElement((int) property);
+        }
+        return getPropertyValue((String) property);
+    }
+
+    private Object getElement(int index) {
+        return StreamSupport.stream(getList().spliterator(), false).skip(index).findFirst()
+                .orElseThrow(() -> new IndexOutOfBoundsException("Index out of range: " + index));
     }
 }

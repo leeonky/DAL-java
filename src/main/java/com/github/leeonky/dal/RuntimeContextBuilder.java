@@ -3,10 +3,10 @@ package com.github.leeonky.dal;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.dal.token.IllegalTypeException;
+import com.github.leeonky.dal.util.DataObject;
 import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import com.github.leeonky.dal.util.TypeData;
-import com.github.leeonky.dal.util.WrappedObject;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -35,7 +35,7 @@ public class RuntimeContextBuilder {
 
         registerValueFormat(new Formatters.Boolean());
 
-        registerSchema("List", WrappedObject::isList);
+        registerSchema("List", DataObject::isList);
     }
 
     public RuntimeContext build(Object inputValue) {
@@ -61,7 +61,7 @@ public class RuntimeContextBuilder {
         return registerSchema(name, (bw) -> bw.createSchemaVerifier().verify(schema, null, ""));
     }
 
-    public RuntimeContextBuilder registerSchema(String name, Function<WrappedObject, Boolean> predicate) {
+    public RuntimeContextBuilder registerSchema(String name, Function<DataObject, Boolean> predicate) {
         constructors.put(name, (o, context) -> {
             if (o != null && predicate.apply(context.wrap(o)))
                 return o;

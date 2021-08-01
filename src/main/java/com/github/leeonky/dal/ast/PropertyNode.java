@@ -19,7 +19,7 @@ public class PropertyNode extends Node {
     public Object evaluate(RuntimeContext context) {
         String propertyChain = context.transformToFieldChain(properties);
         try {
-            return context.wrap(instanceNode.evaluate(context)).getPropertyValue(propertyChain);
+            return context.wrap(instanceNode.evaluate(context)).getPropertyValueBk(propertyChain);
         } catch (Exception e) {
             throw new RuntimeException("Get property '" + propertyChain +
                     "' failed, property can be public field, getter or customer type getter", getPositionBegin());

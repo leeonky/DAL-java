@@ -5,7 +5,6 @@ import com.github.leeonky.dal.RuntimeContext;
 import java.util.Objects;
 
 public class ConstNode extends Node {
-    public static final ConstNode NULL_CONST_NODE = new ConstNode(null);
 
     private final Object value;
 
