@@ -13,14 +13,11 @@ public class Scanner {
     public static final Set<Character> CHAR_SPLIT = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']'));
     public static final Set<Character> TOKEN_SPLIT = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ' ', '\t', '\n'));
     public static final Set<Character> OPERATOR_CHAR = new HashSet<>(asList('-', '!', '=', '>', '<', '+', '*', '/', '~', '&', '|'));
-    public static final List<String> MULTI_CHAR_OPTS = asList(">=", "<=", "&&", "||", "!=");
     public static final Set<String> KEYWORD_SETS = new HashSet<>(asList(IS, WHICH));
 
     private List<TokenCandidateFactory> tokenCandidateFactories = asList(
             PropertyTokenCandidateFactory.INSTANCE,
-            AccessElementTokenCandidateFactory.INSTANCE,
-            BeginBracketTokenCandidateFactory.INSTANCE,
-            EndBracketTokenCandidateFactory.INSTANCE
+            AccessElementTokenCandidateFactory.INSTANCE
     );
 
     private List<TokenFactory> tokenFactories = asList(
@@ -28,7 +25,9 @@ public class Scanner {
             new SingleQuotationStringTokenFactory(),
             new DoubleQuotationStringTokenFactory(),
             new RegexTokenFactory(),
-            new OperatorTokenFactory()
+            new OperatorTokenFactory(),
+            new BeginBracketTokenFactory(),
+            new EndBracketTokenFactory()
     );
 
     private Token lastToken;
