@@ -28,12 +28,12 @@ class SingleQuotationStringTokenFactoryTest {
     }
 
     @Test
-    void fetch_2_string() {
-        SourceCode sourceCode = new SourceCode("'hello''world'");
-        assertThat(tokenFactory.fetchToken(sourceCode, null))
-                .isEqualTo(Token.constValueToken("hello"));
-        assertThat(tokenFactory.fetchToken(sourceCode, null))
-                .isEqualTo(Token.constValueToken("world"));
+    void seek_to_right_position_after_fetch_token() {
+        SourceCode sourceCode = new SourceCode("'hello'=");
+
+        tokenFactory.fetchToken(sourceCode, null);
+
+        assertThat(sourceCode.getChar()).isEqualTo('=');
     }
 
     @Test

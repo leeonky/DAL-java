@@ -1,58 +1,67 @@
 package com.github.leeonky.dal.token;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-class SingleQuotationStringParserTest {
-    TokenParser parser = new SingleQuotationStringParser();
+class SingleQuotationStringParserTest extends ParserTestBase {
 
-    private void assertString(String code, String expect) {
-        TokenParser parser = new SingleQuotationStringParser();
-        for (char c : code.toCharArray())
-            parser.feed(c);
-        assertThat(parser.value()).isEqualTo(expect);
+    @Override
+    protected TokenParser createParser() {
+        return new SingleQuotationStringParser();
     }
 
-    @Test
-    void empty_string() {
-        assertString("''", "");
+    @Nested
+    class Parse {
+
+        @Test
+        void should_not_contains_quotations() {
+            assertString("''", "");
+            assertString("'a'", "a");
+        }
+
+        @Test
+        void escape_char() {
+            assertString("'\\''", "'");
+            assertString("'\\\\'", "\\");
+        }
+
+        @Test
+        void keep_origin_when_not_supported_escape_char() {
+            assertString("'\\a'", "\\a");
+        }
     }
 
-    @Test
-    void complex_string() {
-        assertString("'a'", "a");
-        assertString("'abc'", "abc");
-        assertString("' '", " ");
+    @Nested
+    class CanFinish {
+
+        @Test
+        void do_not_allow_get_value_when_parser_not_start() {
+            assertThrows(IllegalStateException.class, () -> parse(""));
+        }
+
+        @Test
+        void do_not_allow_get_value_when_parser_not_finished() {
+            assertThrows(IllegalStateException.class, () -> parse("'incomplete string"));
+        }
     }
 
-    @Test
-    void escape_char() {
-        assertString("'\\''", "'");
-        assertString("'\\\\'", "\\");
-    }
+    @Nested
+    class IsFinished {
 
-    @Test
-    void no_escape_char() {
-        assertString("'\\a'", "\\a");
-    }
+        @Test
+        void should_raise_error_when_parser_finished() {
+            TokenParser parser = createParserWithCode("''");
 
-    @Test
-    void return_true_when_string_finish() {
-        assertTrue(parser.feed('\''));
-        assertTrue(parser.feed('a'));
-        assertFalse(parser.feed('\''));
-    }
+            assertThrows(IllegalArgumentException.class, () -> parser.feed(' '));
+        }
 
-    @Test
-    void should_raise_error_when_no_data() {
-        assertThrows(IllegalStateException.class, () -> assertString("", "any"));
-        assertThrows(IllegalStateException.class, () -> assertString("'", "any"));
-    }
-
-    @Test
-    void should_raise_error_when_feed_more_than_one_string() {
-        assertThrows(IllegalArgumentException.class, () -> assertString("'a''b'", "any"));
+        @Test
+        void not_finished_with_out_feed_last_quotation() {
+            assertTrue(createParser().feed('\''));
+            assertTrue(createParserWithCode("'").feed('o'));
+            assertFalse(createParserWithCode("'").feed('\''));
+        }
     }
 }

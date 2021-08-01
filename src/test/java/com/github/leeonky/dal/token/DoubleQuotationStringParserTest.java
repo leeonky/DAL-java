@@ -1,40 +1,69 @@
 package com.github.leeonky.dal.token;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-class DoubleQuotationStringParserTest {
+class DoubleQuotationStringParserTest extends ParserTestBase {
 
-    private void assertString(String code, String expect) {
-        TokenParser parser = new DoubleQuotationStringParser();
-        for (char c : code.toCharArray())
-            parser.feed(c);
-        assertThat(parser.value()).isEqualTo(expect);
+    @Override
+    protected TokenParser createParser() {
+        return new DoubleQuotationStringParser();
     }
 
-    @Test
-    void empty_string() {
-        assertString("\"\"", "");
+    @Nested
+    class Parse {
+
+        @Test
+        void should_not_contains_quotations() {
+            assertString("\"\"", "");
+            assertString("\"a\"", "a");
+        }
+
+        @Test
+        void escape_char() {
+            assertString("\"\\\\\"", "\\");
+            assertString("\"\\t\"", "\t");
+            assertString("\"\\n\"", "\n");
+            assertString("\"\\\"\"", "\"");
+        }
+
+        @Test
+        void keep_origin_when_not_supported_escape_char() {
+            assertString("\"\\h\"", "\\h");
+        }
     }
 
-    @Test
-    void complex_string() {
-        assertString("\"a\"", "a");
-        assertString("\"abc\"", "abc");
-        assertString("\" \"", " ");
+    @Nested
+    class CanFinish {
+
+        @Test
+        void do_not_allow_get_value_when_parser_not_start() {
+            assertThrows(IllegalStateException.class, () -> parse(""));
+        }
+
+        @Test
+        void do_not_allow_get_value_when_parser_not_finished() {
+            assertThrows(IllegalStateException.class, () -> parse("\"incomplete string"));
+        }
     }
 
-    @Test
-    void escape_char() {
-        assertString("\"\\\\\"", "\\");
-        assertString("\"\\t\"", "\t");
-        assertString("\"\\n\"", "\n");
-        assertString("\"\\\"\"", "\"");
-    }
+    @Nested
+    class IsFinished {
 
-    @Test
-    void keep_origin_when_not_supported_escape_char() {
-        assertString("\"\\h\"", "\\h");
+        @Test
+        void should_raise_error_when_parser_finished() {
+            TokenParser parser = createParserWithCode("\"\"");
+
+            assertThrows(IllegalArgumentException.class, () -> parser.feed(' '));
+        }
+
+        @Test
+        void not_finished_with_out_feed_last_quotation() {
+            assertTrue(createParser().feed('"'));
+            assertTrue(createParserWithCode("\"").feed('o'));
+            assertFalse(createParserWithCode("\"").feed('"'));
+        }
     }
 }

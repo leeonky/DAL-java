@@ -28,6 +28,15 @@ class DoubleQuotationStringTokenFactoryTest {
     }
 
     @Test
+    void seek_to_right_position_after_fetch_token() {
+        SourceCode sourceCode = new SourceCode("\"hello\"=");
+
+        tokenFactory.fetchToken(sourceCode, null);
+
+        assertThat(sourceCode.getChar()).isEqualTo('=');
+    }
+
+    @Test
     void raise_error_when_string_not_complete() {
         assertThat(assertThrows(SyntaxException.class, () -> tokenFactory.fetchToken(new SourceCode("\"hello"), null)))
                 .hasMessage("string should end with `\"`").hasFieldOrPropertyWithValue("position", 6);

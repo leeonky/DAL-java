@@ -1,83 +1,87 @@
 package com.github.leeonky.dal.token;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-class OperatorParserTest {
-    OperatorParser parser = new OperatorParser();
+class OperatorParserTest extends ParserTestBase {
 
-    private void assertOperator(String code, String expect) {
-        OperatorParser parser = new OperatorParser();
-        for (char c : code.toCharArray())
-            parser.feed(c);
-        assertThat(parser.value()).isEqualTo(expect);
+    @Override
+    protected TokenParser createParser() {
+        return new OperatorParser();
     }
 
-    @Test
-    void code_end_with_operator() {
-        assertOperator("-", "-");
-        assertOperator("!", "!");
-        assertOperator("=", "=");
-        assertOperator(">", ">");
-        assertOperator("<", "<");
-        assertOperator("+", "+");
-        assertOperator("*", "*");
-        assertOperator("/", "/");
-        assertOperator("~", "~");
+    @Nested
+    class Parse {
 
-        assertOperator(">=", ">=");
-        assertOperator("<=", "<=");
-        assertOperator("!=", "!=");
-        assertOperator("&&", "&&");
-        assertOperator("||", "||");
+        @Test
+        void get_whole_string() {
+            assertString("-a", "-");
+            assertString("!a", "!");
+            assertString("=a", "=");
+            assertString(">a", ">");
+            assertString("<a", "<");
+            assertString("+a", "+");
+            assertString("*a", "*");
+            assertString("/a", "/");
+            assertString("~a", "~");
+            assertString(">=a", ">=");
+            assertString("<=a", "<=");
+            assertString("!=a", "!=");
+            assertString("&&a", "&&");
+            assertString("||a", "||");
+        }
+
+        @Test
+        void distinguish_regex_after_operator_matches() {
+            assertString("~/", "~");
+        }
     }
 
-    @Test
-    void operator_before_opt() {
-        assertOperator("-a", "-");
-        assertOperator("!a", "!");
-        assertOperator("=a", "=");
-        assertOperator(">a", ">");
-        assertOperator("<a", "<");
-        assertOperator("+a", "+");
-        assertOperator("*a", "*");
-        assertOperator("/a", "/");
-        assertOperator("~a", "~");
+    @Nested
+    class CanFinish {
 
-        assertOperator(">=a", ">=");
-        assertOperator("<=a", "<=");
-        assertOperator("!=a", "!=");
-        assertOperator("&&a", "&&");
-        assertOperator("||a", "||");
+        @Test
+        void do_not_allow_get_value_when_parser_not_start() {
+            assertThrows(IllegalStateException.class, () -> parse(""));
+        }
+
+        @Test
+        void allow_get_value_when_parser_not_finished() {
+            assertString("-", "-");
+            assertString("!", "!");
+            assertString("=", "=");
+            assertString(">", ">");
+            assertString("<", "<");
+            assertString("+", "+");
+            assertString("*", "*");
+            assertString("/", "/");
+            assertString("~", "~");
+
+            assertString(">=", ">=");
+            assertString("<=", "<=");
+            assertString("!=", "!=");
+            assertString("&&", "&&");
+            assertString("||", "||");
+        }
     }
 
-    @Test
-    void distinguish_matches_regex() {
-        assertOperator("~/", "~");
-    }
+    @Nested
+    class IsFinished {
 
-    @Test
-    void not_finished_status() {
-        assertTrue(parser.feed('-'));
-    }
+        @Test
+        void should_raise_error_when_parser_finished() {
+            TokenParser parser = createParserWithCode("- ");
 
-    @Test
-    void finished_status() {
-        parser.feed('-');
-        assertFalse(parser.feed('a'));
-    }
+            assertThrows(IllegalArgumentException.class, () -> parser.feed(' '));
+        }
 
-    @Test
-    void should_not_finish() {
-        assertFalse(parser.canFinish());
-    }
-
-    @Test
-    void can_be_finished() {
-        parser.feed('-');
-        assertTrue(parser.canFinish());
+        @Test
+        void not_finished_with_out_unexpected_char() {
+            assertTrue(createParser().feed('-'));
+            assertTrue(createParserWithCode("-").feed('-'));
+            assertFalse(createParserWithCode("-").feed('1'));
+        }
     }
 }

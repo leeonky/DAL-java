@@ -1,71 +1,88 @@
 package com.github.leeonky.dal.token;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-class NumberParserTest {
-    NumberParser parser = new NumberParser();
+//TODO word parser
+class NumberParserTest extends ParserTestBase {
 
-    private void assertNumber(String code, String expect) {
-        NumberParser parser = new NumberParser();
-        for (char c : code.toCharArray())
-            parser.feed(c);
-        assertThat(parser.value()).isEqualTo(expect);
+    @Override
+    protected TokenParser createParser() {
+        return new NumberParser();
     }
 
-    @Test
-    void parse_integer() {
-        assertNumber("1", "1");
+    @Nested
+    class Parse {
+
+        @Test
+        void get_whole_string() {
+            assertString("1 ", "1");
+            assertString("1\t", "1");
+            assertString("1\n", "1");
+            assertString("1(", "1");
+            assertString("1)", "1");
+            assertString("1=", "1");
+            assertString("1>", "1");
+            assertString("1<", "1");
+            assertString("1+", "1");
+            assertString("1-", "1");
+            assertString("1*", "1");
+            assertString("1/", "1");
+            assertString("1&", "1");
+            assertString("1|", "1");
+            assertString("1!", "1");
+            assertString("1[", "1");
+            assertString("1]", "1");
+        }
     }
 
-    @Test
-    void parse_double() {
-        assertNumber("1.1", "1.1");
+    @Nested
+    class CanFinish {
+
+        @Test
+        void do_not_allow_get_value_when_parser_not_start() {
+            assertThrows(IllegalStateException.class, () -> parse(""));
+        }
+
+        @Test
+        void allow_get_value_when_parser_not_finished() {
+            assertString("1.1", "1.1");
+        }
     }
 
-    @Test
-    void token_split_after_parse_integer() {
-        assertNumber("1 ", "1");
-        assertNumber("1\t", "1");
-        assertNumber("1\n", "1");
-        assertNumber("1(", "1");
-        assertNumber("1)", "1");
-        assertNumber("1=", "1");
-        assertNumber("1>", "1");
-        assertNumber("1<", "1");
-        assertNumber("1+", "1");
-        assertNumber("1-", "1");
-        assertNumber("1*", "1");
-        assertNumber("1/", "1");
-        assertNumber("1&", "1");
-        assertNumber("1|", "1");
-        assertNumber("1!", "1");
-        assertNumber("1[", "1");
-        assertNumber("1]", "1");
-    }
+    @Nested
+    class IsFinished {
 
-    @Test
-    void not_finished_status() {
-        assertTrue(parser.feed('1'));
-    }
+        @Test
+        void should_raise_error_when_parser_finished() {
+            TokenParser parser = createParserWithCode("1 ");
 
-    @Test
-    void finished_status() {
-        parser.feed('1');
-        assertFalse(parser.feed(' '));
-    }
+            assertThrows(IllegalArgumentException.class, () -> parser.feed(' '));
+        }
 
-    @Test
-    void should_not_finish() {
-        assertFalse(parser.canFinish());
-    }
-
-    @Test
-    void can_be_finished() {
-        parser.feed('1');
-        assertTrue(parser.canFinish());
+        @Test
+        void not_finished_with_out_unexpected_char() {
+            assertTrue(createParser().feed('1'));
+            assertTrue(createParserWithCode("1").feed('1'));
+            assertFalse(createParserWithCode("0").feed(' '));
+            assertFalse(createParserWithCode("0").feed('\t'));
+            assertFalse(createParserWithCode("0").feed('\n'));
+            assertFalse(createParserWithCode("0").feed('('));
+            assertFalse(createParserWithCode("0").feed(')'));
+            assertFalse(createParserWithCode("0").feed('='));
+            assertFalse(createParserWithCode("0").feed('>'));
+            assertFalse(createParserWithCode("0").feed('<'));
+            assertFalse(createParserWithCode("0").feed('+'));
+            assertFalse(createParserWithCode("0").feed('-'));
+            assertFalse(createParserWithCode("0").feed('*'));
+            assertFalse(createParserWithCode("0").feed('/'));
+            assertFalse(createParserWithCode("0").feed('&'));
+            assertFalse(createParserWithCode("0").feed('|'));
+            assertFalse(createParserWithCode("0").feed('!'));
+            assertFalse(createParserWithCode("0").feed('['));
+            assertFalse(createParserWithCode("0").feed(']'));
+        }
     }
 }

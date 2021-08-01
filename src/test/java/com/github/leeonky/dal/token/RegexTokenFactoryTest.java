@@ -35,6 +35,15 @@ class RegexTokenFactoryTest {
     }
 
     @Test
+    void seek_to_right_position_after_fetch_token() {
+        SourceCode sourceCode = new SourceCode("/hello/=");
+
+        tokenFactory.fetchToken(sourceCode, OPT_MATCHES);
+
+        assertThat(sourceCode.getChar()).isEqualTo('=');
+    }
+
+    @Test
     void raise_error_when_string_not_complete() {
         assertThat(assertThrows(SyntaxException.class, () -> tokenFactory.fetchToken(new SourceCode("/hello"), OPT_MATCHES)))
                 .hasMessage("regex should end with `/`").hasFieldOrPropertyWithValue("position", 6);
