@@ -25,7 +25,7 @@ class NumberParser extends FreeTextParser {
     protected boolean isFinishedChar(char c) {
         canFinish = true;
         //canFinish = (canFinish || c is contain) TODO
-        return Scanner.TOKEN_SPLIT.contains(c);
+        return Scanner.TOKEN_DELIMITER.contains(c);
     }
 
     @Override

@@ -11,7 +11,7 @@ import static java.util.Arrays.asList;
 
 public class Scanner {
     public static final Set<Character> CHAR_SPLIT = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']'));
-    public static final Set<Character> TOKEN_SPLIT = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ' ', '\t', '\n'));
+    public static final Set<Character> TOKEN_DELIMITER = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ' ', '\t', '\n'));
     public static final Set<Character> OPERATOR_CHAR = new HashSet<>(asList('-', '!', '=', '>', '<', '+', '*', '/', '~', '&', '|'));
     public static final Set<String> KEYWORD_SETS = new HashSet<>(asList(IS, WHICH));
 

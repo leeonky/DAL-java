@@ -2,8 +2,6 @@ package com.github.leeonky.dal.token;
 
 import com.github.leeonky.dal.SyntaxException;
 
-import java.math.BigDecimal;
-
 abstract class NumberPropertyTokenFactory implements TokenFactory {
     @Override
     public Token fetchToken(SourceCode sourceCode, Token previous) {
@@ -30,32 +28,6 @@ abstract class NumberPropertyTokenFactory implements TokenFactory {
     protected abstract Token createToken(String value);
 
     protected abstract TokenParser createParser();
-}
-
-class NumberTokenFactory extends NumberPropertyTokenFactory {
-
-    @Override
-    protected Token createToken(String value) {
-        return Token.constValueToken(getNumber(value));
-    }
-
-    @Override
-    protected TokenParser createParser() {
-        return new NumberParser();
-    }
-
-    private Number getNumber(String value) {
-        try {
-            return BigDecimal.valueOf(Long.decode(value));
-        } catch (NumberFormatException ignore) {
-            return new BigDecimal(value);
-        }
-    }
-
-    @Override
-    protected boolean matches(char c, Token previous) {
-        return Character.isDigit(c);
-    }
 }
 
 class OperatorTokenFactory extends NumberPropertyTokenFactory {

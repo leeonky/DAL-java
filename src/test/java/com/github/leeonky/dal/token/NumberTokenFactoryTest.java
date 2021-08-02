@@ -1,49 +1,78 @@
 package com.github.leeonky.dal.token;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 
+import static com.github.leeonky.dal.token.Token.constValueToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NumberTokenFactoryTest {
-    private final TokenFactory tokenFactory = new NumberTokenFactory();
-
-    @Test
-    void return_empty_when_no_code() {
-        assertThat(tokenFactory.fetchToken(new SourceCode(""), null))
-                .isNull();
+    private TokenFactory createTokenFactory() {
+        return new NumberTokenFactory();
     }
 
-    @Test
-    void return_empty_when_first_char_is_not_digital() {
-        assertThat(tokenFactory.fetchToken(new SourceCode("not start with digital"), null))
-                .isNull();
+    private void shouldParse(String code, String value) {
+        assertThat(parseToken(code)).isEqualTo(constValueToken(new BigDecimal(value)));
     }
 
-    @Test
-    void should_return_number_token_when_given_valid_code() {
-        assertThat(tokenFactory.fetchToken(new SourceCode("100"), null))
-                .isEqualTo(Token.constValueToken(new BigDecimal("100")));
+    private Token parseToken(String s) {
+        return createTokenFactory().fetchToken(new SourceCode(s), null);
     }
 
-    @Test
-    void support_hex_digits() {
-        assertThat(tokenFactory.fetchToken(new SourceCode("0x100"), null))
-                .isEqualTo(Token.constValueToken(new BigDecimal("256")));
+    @Nested
+    class CodeMatches {
+
+        @Test
+        void return_empty_when_no_code() {
+            assertThat(parseToken("")).isNull();
+        }
+
+        @Test
+        void return_empty_when_first_char_is_not_digital() {
+            assertThat(parseToken("not start with digital")).isNull();
+        }
     }
 
-    @Test
-    void support_double_to_big_decimal() {
-        assertThat(tokenFactory.fetchToken(new SourceCode("0.123"), null))
-                .isEqualTo(Token.constValueToken(new BigDecimal("0.123")));
+    @Nested
+    class HasDelimiter {
+
+        @Test
+        void should_return_number_token_when_given_valid_code() {
+            shouldParse("100 ", "100");
+        }
+
+        @Test
+        void support_hex_digits() {
+            shouldParse("0x100 ", "256");
+        }
+
+        @Test
+        void support_double_to_big_decimal() {
+            shouldParse("0.123 ", "0.123");
+        }
+
+        @ParameterizedTest
+        @ValueSource(chars = {'(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ' ', '\t', '\n'})
+        void finish_parse_and_source_code_seek_back_to_delimiter(char c) {
+            TokenFactory tokenFactory = createTokenFactory();
+            SourceCode sourceCode = new SourceCode("100" + c);
+            assertThat(tokenFactory.fetchToken(sourceCode, null))
+                    .isEqualTo(constValueToken(new BigDecimal("100")));
+            assertThat(sourceCode.getChar()).isEqualTo(c);
+        }
     }
 
-    @Test
-    void should_rollback_last_end_char_in_source_code() {
-        SourceCode sourceCode = new SourceCode("1=");
-        tokenFactory.fetchToken(sourceCode, null);
+    @Nested
+    class NoDelimiter {
 
-        assertThat(sourceCode.getChar()).isEqualTo('=');
+        @Test
+        void allow_get_value_when_parser_not_finished() {
+            shouldParse("0.123", "0.123");
+        }
     }
 }
+
