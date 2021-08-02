@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.token;
 
-abstract class NoEscapeTextParser extends TokenParser {
+abstract class FreeTextParser extends TokenParser {
     @Override
     protected String escape(char c) {
         throw new IllegalStateException();
@@ -18,7 +18,7 @@ abstract class NoEscapeTextParser extends TokenParser {
 }
 
 //TODO extract super class
-class NumberParser extends NoEscapeTextParser {
+class NumberParser extends FreeTextParser {
     private boolean canFinish = false;
 
     @Override
@@ -35,7 +35,7 @@ class NumberParser extends NoEscapeTextParser {
 }
 
 //TODO extract super class
-class OperatorParser extends NoEscapeTextParser {
+class OperatorParser extends FreeTextParser {
     private boolean canFinish = false;
 
     @Override
@@ -54,10 +54,23 @@ class OperatorParser extends NoEscapeTextParser {
     }
 }
 
-class PropertyIndexParser extends NoEscapeTextParser {
+class PropertyIndexParser extends FreeTextParser {
 
     @Override
     protected boolean isFinishedChar(char c) {
         return c == ']';
+    }
+}
+
+class PropertyChainParser extends NumberParser {
+
+    @Override
+    protected boolean trimFirstChar() {
+        return true;
+    }
+
+    @Override
+    protected boolean trimWhiteSpaceChar() {
+        return true;
     }
 }

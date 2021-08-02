@@ -42,6 +42,7 @@ class DALCompilerTest {
         }
 
         @Test
+            //TODO to be removed
         void space_after_dot() {
             assertCompileNode(". \t\nresult", new PropertyNode(InputNode.INSTANCE, singletonList("result")));
         }
@@ -49,7 +50,6 @@ class DALCompilerTest {
         @Test
         void access_property_list_of_root_value() {
             assertCompileNode(".sub .result", new PropertyNode(new PropertyNode(InputNode.INSTANCE, singletonList("sub")), singletonList("result")));
-            assertCompileNode(". sub . result", new PropertyNode(new PropertyNode(InputNode.INSTANCE, singletonList("sub")), singletonList("result")));
         }
 
         @Test

@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.token;
 
+import com.github.leeonky.dal.SyntaxException;
+
 import java.math.BigDecimal;
 
 abstract class NumberPropertyTokenFactory implements TokenFactory {
@@ -12,7 +14,7 @@ abstract class NumberPropertyTokenFactory implements TokenFactory {
 
     protected abstract boolean matches(char c, Token previous);
 
-    private Token parseConstValueToken(SourceCode sourceCode) {
+    protected Token parseConstValueToken(SourceCode sourceCode) {
         int startPosition = sourceCode.getPosition();
         TokenParser parser = createParser();
         int codeLength = 0;
@@ -71,5 +73,37 @@ class OperatorTokenFactory extends NumberPropertyTokenFactory {
     @Override
     protected boolean matches(char c, Token previous) {
         return Scanner.OPERATOR_CHAR.contains(c) && (!(c == '/' && previous != null && previous.isOperatorMatches()));
+    }
+}
+
+class PropertyChainTokenFactory extends NumberPropertyTokenFactory {
+
+    @Override
+    protected Token parseConstValueToken(SourceCode sourceCode) {
+        int startPosition = sourceCode.getPosition();
+        TokenParser parser = createParser();
+        int codeLength = 0;
+        while (sourceCode.notEnd() && parser.feed(sourceCode.takeChar()))
+            codeLength++;
+        if (parser.isFinished())
+            sourceCode.seek(-1);
+        if (!parser.canFinish())
+            throw new SyntaxException(startPosition + codeLength, "property chain not finished");
+        return createToken(parser.value());
+    }
+
+    @Override
+    protected boolean matches(char c, Token previous) {
+        return '.' == c;
+    }
+
+    @Override
+    protected Token createToken(String value) {
+        return Token.propertyToken(value.split("\\."));
+    }
+
+    @Override
+    protected TokenParser createParser() {
+        return new PropertyChainParser();
     }
 }

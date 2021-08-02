@@ -16,11 +16,11 @@ public class Scanner {
     public static final Set<String> KEYWORD_SETS = new HashSet<>(asList(IS, WHICH));
 
     private List<TokenCandidateFactory> tokenCandidateFactories = asList(
-            PropertyTokenCandidateFactory.INSTANCE,
             AccessElementTokenCandidateFactory.INSTANCE
     );
 
     private List<TokenFactory> tokenFactories = asList(
+            new PropertyChainTokenFactory(),
             new NumberTokenFactory(),
             new SingleQuotationStringTokenFactory(),
             new DoubleQuotationStringTokenFactory(),

@@ -20,7 +20,7 @@ public abstract class TokenParser {
                 content.add(c1);
         else if (isEscapeChar(c))
             isEscape = true;
-        else if (!trimFirstCharOnceIfNeeded() && !(isFinished = isFinishedChar(c)))
+        else if (!trimFirstCharOnceIfNeeded() && !trimWhiteSpaceIfNeeded(c) && !(isFinished = isFinishedChar(c)))
             content.add(c);
         return !isFinished();
     }
@@ -31,6 +31,14 @@ public abstract class TokenParser {
 
     private boolean trimFirstCharOnceIfNeeded() {
         return content.size() == 0 && !isFirstCharSkipped && trimFirstChar() && (isFirstCharSkipped = true);
+    }
+
+    private boolean trimWhiteSpaceIfNeeded(char c) {
+        return content.size() == 0 && trimWhiteSpaceChar() && Character.isWhitespace(c);
+    }
+
+    protected boolean trimWhiteSpaceChar() {
+        return false;
     }
 
     //TODO to be refactored
