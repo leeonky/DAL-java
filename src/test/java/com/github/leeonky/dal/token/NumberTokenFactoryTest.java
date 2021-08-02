@@ -41,7 +41,7 @@ class NumberTokenFactoryTest {
     class HasDelimiter {
 
         @Test
-        void should_return_number_token_when_given_valid_code() {
+        void should_return_token_when_given_valid_code() {
             shouldParse("100 ", "100");
         }
 

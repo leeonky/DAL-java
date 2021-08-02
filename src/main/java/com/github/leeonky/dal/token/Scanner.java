@@ -20,7 +20,7 @@ public class Scanner {
     );
 
     private List<TokenFactory> tokenFactories = asList(
-            new PropertyChainTokenFactory(),
+            new PropertyTokenFactory(),
             new NumberTokenFactory(),
             new SingleQuotationStringTokenFactory(),
             new DoubleQuotationStringTokenFactory(),

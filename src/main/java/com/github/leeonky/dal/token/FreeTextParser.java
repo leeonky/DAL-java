@@ -61,16 +61,3 @@ class PropertyIndexParser extends FreeTextParser {
         return c == ']';
     }
 }
-
-class PropertyChainParser extends NumberParser {
-
-    @Override
-    protected boolean trimFirstChar() {
-        return true;
-    }
-
-    @Override
-    protected boolean trimWhiteSpaceChar() {
-        return true;
-    }
-}
