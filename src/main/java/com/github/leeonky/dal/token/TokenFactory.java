@@ -15,14 +15,58 @@ public interface TokenFactory {
     Token fetchToken(SourceCode sourceCode, Token previous);
 }
 
+interface StartWith {
+    StartWith DIGITAL = sourceCode -> Character.isDigit(sourceCode.getChar());
+
+    static StartWith CHARACTER(char c) {
+        return sourceCode -> sourceCode.getChar() == c;
+    }
+
+    boolean matches(SourceCode sourceCode);
+}
+
+interface FirstChar {
+    FirstChar TRIM = SourceCode::takeChar;
+    FirstChar NOT_TRIM = sourceCode -> {
+    };
+
+    void process(SourceCode sourceCode);
+}
+
+interface StartWhiteSpace {
+    StartWhiteSpace TRIM = () -> true;
+    StartWhiteSpace NO_TRIM = () -> false;
+
+    boolean isTrim();
+}
+
+interface EndWith {
+    EndWith TOKEN_DELIMITER = Scanner.TOKEN_DELIMITER::contains;
+
+    boolean matches(char c);
+}
+
 abstract class TokenFactoryBase implements TokenFactory {
+    private final StartWith startWith;
+    private final FirstChar firstChar;
+    private final StartWhiteSpace startWhiteSpace;
+    private final EndWith endWith;
+
+    protected TokenFactoryBase(StartWith startWith, FirstChar firstChar, StartWhiteSpace startWhiteSpace, EndWith endWith) {
+        this.startWith = startWith;
+        this.firstChar = firstChar;
+        this.startWhiteSpace = startWhiteSpace;
+        this.endWith = endWith;
+    }
+
     @Override
     public Token fetchToken(SourceCode sourceCode, Token previous) {
-        if (sourceCode.notEnd() && isMatched(sourceCode)) {
-            while (sourceCode.notEnd() && isLeftTrim(sourceCode.getChar()))
+        if (sourceCode.notEnd() && startWith.matches(sourceCode)) {
+            firstChar.process(sourceCode);
+            while (sourceCode.isWhitespaceChar() && startWhiteSpace.isTrim())
                 sourceCode.takeChar();
             List<Character> content = new ArrayList<>();
-            while (sourceCode.notEnd() && !isEnded(sourceCode.getChar()))
+            while (sourceCode.notEnd() && !endWith.matches(sourceCode.getChar()))
                 content.add(sourceCode.takeChar());
             try {
                 return createToken(content.stream().map(Objects::toString).collect(Collectors.joining()));
@@ -33,30 +77,13 @@ abstract class TokenFactoryBase implements TokenFactory {
         return null;
     }
 
-    protected abstract boolean isLeftTrim(char c);
-
-    protected abstract boolean isEnded(char c);
-
-    protected abstract boolean isMatched(SourceCode sourceCode);
-
     protected abstract Token createToken(String content);
 }
 
 class NumberTokenFactory extends TokenFactoryBase {
 
-    @Override
-    protected boolean isLeftTrim(char c) {
-        return false;
-    }
-
-    @Override
-    protected boolean isEnded(char c) {
-        return Scanner.TOKEN_DELIMITER.contains(c);
-    }
-
-    @Override
-    protected boolean isMatched(SourceCode sourceCode) {
-        return Character.isDigit(sourceCode.getChar());
+    NumberTokenFactory() {
+        super(StartWith.DIGITAL, FirstChar.NOT_TRIM, StartWhiteSpace.NO_TRIM, EndWith.TOKEN_DELIMITER);
     }
 
     @Override
@@ -70,14 +97,9 @@ class NumberTokenFactory extends TokenFactoryBase {
 }
 
 class PropertyTokenFactory extends TokenFactoryBase {
-    @Override
-    protected boolean isEnded(char c) {
-        return Scanner.TOKEN_DELIMITER.contains(c);
-    }
 
-    @Override
-    protected boolean isMatched(SourceCode sourceCode) {
-        return sourceCode.getChar() == '.';
+    PropertyTokenFactory() {
+        super(StartWith.CHARACTER('.'), FirstChar.TRIM, StartWhiteSpace.TRIM, EndWith.TOKEN_DELIMITER);
     }
 
     @Override
@@ -86,10 +108,4 @@ class PropertyTokenFactory extends TokenFactoryBase {
             throw new IllegalTokenContentException("property chain not finished");
         return propertyToken(content.split("\\."));
     }
-
-    @Override
-    protected boolean isLeftTrim(char c) {
-        return c == '.' || Character.isWhitespace(c);
-    }
-
 }

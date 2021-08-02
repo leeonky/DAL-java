@@ -18,23 +18,6 @@ abstract class FreeTextParser extends TokenParser {
 }
 
 //TODO extract super class
-class NumberParser extends FreeTextParser {
-    private boolean canFinish = false;
-
-    @Override
-    protected boolean isFinishedChar(char c) {
-        canFinish = true;
-        //canFinish = (canFinish || c is contain) TODO
-        return Scanner.TOKEN_DELIMITER.contains(c);
-    }
-
-    @Override
-    public boolean canFinish() {
-        return canFinish;
-    }
-}
-
-//TODO extract super class
 class OperatorParser extends FreeTextParser {
     private boolean canFinish = false;
 
