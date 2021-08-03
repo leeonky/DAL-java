@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class NumberTokenFactoryTest {
     private TokenFactory createTokenFactory() {
-        return new NumberTokenFactory();
+        return TokenFactory.createNumberTokenFactory();
     }
 
     private void shouldParse(String code, String value) {

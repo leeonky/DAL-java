@@ -17,26 +17,6 @@ abstract class FreeTextParser extends TokenParser {
     }
 }
 
-//TODO extract super class
-class OperatorParser extends FreeTextParser {
-    private boolean canFinish = false;
-
-    @Override
-    protected boolean isFinishedChar(char c) {
-        canFinish = true;
-        return !Scanner.OPERATOR_CHAR.contains(c) || (isOnlyMatchesOperator() && c == '/');
-    }
-
-    private boolean isOnlyMatchesOperator() {
-        return content.size() == 1 && content.get(0).equals('~');
-    }
-
-    @Override
-    public boolean canFinish() {
-        return canFinish;
-    }
-}
-
 class PropertyIndexParser extends FreeTextParser {
 
     @Override

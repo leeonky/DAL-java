@@ -44,8 +44,4 @@ public class SourceCode {
     public void seek(int p) {
         offset += p;
     }
-
-    public boolean isWhitespaceChar() {
-        return notEnd() && Character.isWhitespace(getChar());
-    }
 }

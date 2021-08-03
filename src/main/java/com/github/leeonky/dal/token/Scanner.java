@@ -20,12 +20,12 @@ public class Scanner {
     );
 
     private List<TokenFactory> tokenFactories = asList(
-            new PropertyTokenFactory(),
-            new NumberTokenFactory(),
+            TokenFactory.createPropertyTokenFactory(),
+            TokenFactory.createNumberTokenFactory(),
             new SingleQuotationStringTokenFactory(),
             new DoubleQuotationStringTokenFactory(),
             new RegexTokenFactory(),
-            new OperatorTokenFactory(),
+            TokenFactory.createOperatorTokenFactory(),
             new BeginBracketTokenFactory(),
             new EndBracketTokenFactory()
     );

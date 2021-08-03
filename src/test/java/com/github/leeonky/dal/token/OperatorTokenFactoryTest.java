@@ -1,48 +1,85 @@
 package com.github.leeonky.dal.token;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import static com.github.leeonky.dal.token.Token.operatorToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class OperatorTokenFactoryTest {
-    private final TokenFactory tokenFactory = new OperatorTokenFactory();
 
-    @Test
-    void return_empty_when_no_code() {
-        assertThat(tokenFactory.fetchToken(new SourceCode(""), null))
-                .isNull();
+    private TokenFactory createTokenFactory() {
+        return TokenFactory.createOperatorTokenFactory();
     }
 
-    @Test
-    void return_empty_when_first_char_is_not_char() {
-        assertThat(tokenFactory.fetchToken(new SourceCode("not start with operator char"), null))
-                .isNull();
+    private void shouldParse(String code, String value) {
+        assertThat(parseToken(code)).isEqualTo(operatorToken(value));
     }
 
-
-    @Test
-    void should_return_operator_token_when_given_valid_code() {
-        assertThat(tokenFactory.fetchToken(new SourceCode("+"), null))
-                .isEqualTo(Token.operatorToken("+"));
+    private Token parseToken(String s) {
+        return createTokenFactory().fetchToken(new SourceCode(s), null);
     }
 
-    @Test
-    void should_return_empty_when_last_token_is_operator_matches() {
-        assertThat(tokenFactory.fetchToken(new SourceCode("/"), Token.operatorToken("~")))
-                .isNull();
+    @Nested
+    class CodeMatches {
 
-        assertThat(tokenFactory.fetchToken(new SourceCode("+"), Token.operatorToken("~")))
-                .isEqualTo(Token.operatorToken("+"));
+        @Test
+        void return_empty_when_no_code() {
+            assertThat(parseToken("")).isNull();
+        }
 
-        assertThat(tokenFactory.fetchToken(new SourceCode("/"), null))
-                .isEqualTo(Token.operatorToken("/"));
+        @Test
+        void return_empty_when_first_char_is_not_digital() {
+            assertThat(parseToken("not start with operator char")).isNull();
+        }
+
+        @Test
+        void should_return_empty_when_last_token_is_operator_matches() {
+            assertThat(createTokenFactory().fetchToken(new SourceCode("/"), Token.operatorToken("~")))
+                    .isNull();
+
+            assertThat(createTokenFactory().fetchToken(new SourceCode("+"), Token.operatorToken("~")))
+                    .isEqualTo(Token.operatorToken("+"));
+
+            assertThat(createTokenFactory().fetchToken(new SourceCode("/"), null))
+                    .isEqualTo(Token.operatorToken("/"));
+        }
+
     }
 
-    @Test
-    void should_rollback_last_end_char_in_source_code() {
-        SourceCode sourceCode = new SourceCode("+1");
-        tokenFactory.fetchToken(sourceCode, null);
+    @Nested
+    class HasDelimiter {
 
-        assertThat(sourceCode.getChar()).isEqualTo('1');
+        @Test
+        void should_return_token_when_given_valid_code() {
+            shouldParse("+ ", "+");
+        }
+
+        @Test
+        void distinguish_regex_after_operator_matches() {
+            shouldParse("~/ ", "~");
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"-", "!", "=", ">", "<", "+", "*", "/", "~", ">=", "<=", "!=", "&&", "||"})
+        void finish_parse_and_source_code_seek_back_to_delimiter(String opt) {
+            TokenFactory tokenFactory = createTokenFactory();
+            SourceCode sourceCode = new SourceCode(opt + "a");
+            assertThat(tokenFactory.fetchToken(sourceCode, null))
+                    .isEqualTo(operatorToken(opt));
+            assertThat(sourceCode.getChar()).isEqualTo('a');
+        }
+    }
+
+    @Nested
+    class NoDelimiter {
+
+        @ParameterizedTest
+        @ValueSource(strings = {"-", "!", "=", ">", "<", "+", "*", "/", "~", ">=", "<=", "!=", "&&", "||"})
+        void allow_get_value_when_parser_not_finished(String opt) {
+            shouldParse(opt, opt);
+        }
     }
 }

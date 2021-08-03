@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PropertyTokenFactoryTest {
     private TokenFactory createTokenFactory() {
-        return new PropertyTokenFactory();
+        return TokenFactory.createPropertyTokenFactory();
     }
 
     private void shouldParse(String code, String... values) {
