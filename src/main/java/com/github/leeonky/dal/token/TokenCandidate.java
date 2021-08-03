@@ -16,7 +16,7 @@ public abstract class TokenCandidate {
     public TokenCandidate(SourceCode sourceCode, Set<Character> split) {
         this.split = split;
         startPosition = sourceCode.getPosition();
-        char c = sourceCode.takeChar();
+        char c = sourceCode.takeCurrentChar();
         if (!needDiscardBeginChar())
             stringBuilder.append(c);
     }
@@ -45,9 +45,9 @@ public abstract class TokenCandidate {
     }
 
     public Token fetchToken(SourceCode sourceCode) {
-        while (sourceCode.notEnd() && needIgnoreBegin(sourceCode.getChar()))
-            sourceCode.takeChar();
-        while (sourceCode.notEnd() && !isDiscardedSuffix(sourceCode) && !isUnexpectedChar(sourceCode.getChar()))
+        while (sourceCode.notEnd() && needIgnoreBegin(sourceCode.currentChar()))
+            sourceCode.takeCurrentChar();
+        while (sourceCode.notEnd() && !isDiscardedSuffix(sourceCode) && !isUnexpectedChar(sourceCode.currentChar()))
             takeEscapedChar(sourceCode);
         return toToken();
     }
@@ -57,7 +57,7 @@ public abstract class TokenCandidate {
     }
 
     private void takeEscapedChar(SourceCode sourceCode) {
-        while (append(sourceCode.takeChar()) && sourceCode.notEnd()) ;
+        while (append(sourceCode.takeCurrentChar()) && sourceCode.notEnd()) ;
     }
 
     protected String discardedSuffix() {

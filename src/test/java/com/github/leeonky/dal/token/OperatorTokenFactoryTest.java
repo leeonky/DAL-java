@@ -69,7 +69,7 @@ class OperatorTokenFactoryTest {
             SourceCode sourceCode = new SourceCode(opt + "a");
             assertThat(tokenFactory.fetchToken(sourceCode, null))
                     .isEqualTo(operatorToken(opt));
-            assertThat(sourceCode.getChar()).isEqualTo('a');
+            assertThat(sourceCode.currentChar()).isEqualTo('a');
         }
     }
 

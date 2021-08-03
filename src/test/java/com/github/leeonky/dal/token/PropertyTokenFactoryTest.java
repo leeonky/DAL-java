@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PropertyTokenFactoryTest {
     private TokenFactory createTokenFactory() {
-        return TokenFactory.createPropertyTokenFactory();
+        return TokenFactory.createBeanPropertyTokenFactory();
     }
 
     private void shouldParse(String code, String... values) {
@@ -64,7 +64,7 @@ class PropertyTokenFactoryTest {
             SourceCode sourceCode = new SourceCode(".a" + c);
             assertThat(tokenFactory.fetchToken(sourceCode, null))
                     .isEqualTo(propertyToken("a"));
-            assertThat(sourceCode.getChar()).isEqualTo(c);
+            assertThat(sourceCode.currentChar()).isEqualTo(c);
         }
 
         @Test

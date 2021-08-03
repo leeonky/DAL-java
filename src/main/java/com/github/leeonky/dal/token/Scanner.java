@@ -20,7 +20,7 @@ public class Scanner {
     );
 
     private List<TokenFactory> tokenFactories = asList(
-            TokenFactory.createPropertyTokenFactory(),
+            TokenFactory.createBeanPropertyTokenFactory(),
             TokenFactory.createNumberTokenFactory(),
             new SingleQuotationStringTokenFactory(),
             new DoubleQuotationStringTokenFactory(),

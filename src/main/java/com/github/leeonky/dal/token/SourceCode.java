@@ -19,17 +19,23 @@ public class SourceCode {
     }
 
     public SourceCode trimLeft() {
-        while (offset < charBuffer.length && Character.isWhitespace(getChar()))
+        while (offset < charBuffer.length && Character.isWhitespace(currentChar()))
             offset++;
         return this;
     }
 
-    public char getChar() {
+    public char currentChar() {
+        return getChar(offset);
+    }
+
+    private char getChar(int offset) {
+        if (offset >= charBuffer.length)
+            throw new NoMoreSourceCodeException();
         return charBuffer[offset];
     }
 
-    public char takeChar() {
-        return charBuffer[offset++];
+    public char takeCurrentChar() {
+        return getChar(offset++);
     }
 
     public boolean hasContent() {

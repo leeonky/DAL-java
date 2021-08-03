@@ -35,6 +35,11 @@ class NumberTokenFactoryTest {
         void return_empty_when_first_char_is_not_digital() {
             assertThat(parseToken("not start with digital")).isNull();
         }
+
+        @Test
+        void return_empty_when_invalid_number() {
+            assertThat(parseToken("1ab")).isNull();
+        }
     }
 
     @Nested
@@ -62,7 +67,7 @@ class NumberTokenFactoryTest {
             SourceCode sourceCode = new SourceCode("100" + c);
             assertThat(tokenFactory.fetchToken(sourceCode, null))
                     .isEqualTo(constValueToken(new BigDecimal("100")));
-            assertThat(sourceCode.getChar()).isEqualTo(c);
+            assertThat(sourceCode.currentChar()).isEqualTo(c);
         }
     }
 

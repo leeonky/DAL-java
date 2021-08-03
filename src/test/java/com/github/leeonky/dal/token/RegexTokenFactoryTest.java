@@ -40,7 +40,7 @@ class RegexTokenFactoryTest {
 
         tokenFactory.fetchToken(sourceCode, OPT_MATCHES);
 
-        assertThat(sourceCode.getChar()).isEqualTo('=');
+        assertThat(sourceCode.currentChar()).isEqualTo('=');
     }
 
     @Test

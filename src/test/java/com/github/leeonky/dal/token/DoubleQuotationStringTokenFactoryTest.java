@@ -33,7 +33,7 @@ class DoubleQuotationStringTokenFactoryTest {
 
         tokenFactory.fetchToken(sourceCode, null);
 
-        assertThat(sourceCode.getChar()).isEqualTo('=');
+        assertThat(sourceCode.currentChar()).isEqualTo('=');
     }
 
     @Test

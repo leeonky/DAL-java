@@ -27,6 +27,6 @@ class EndBracketTokenFactoryTest {
         SourceCode sourceCode = new SourceCode(")1");
         tokenFactory.fetchToken(sourceCode, null);
 
-        assertThat(sourceCode.getChar()).isEqualTo('1');
+        assertThat(sourceCode.currentChar()).isEqualTo('1');
     }
 }

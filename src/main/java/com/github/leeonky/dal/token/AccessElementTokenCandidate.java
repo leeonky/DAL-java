@@ -50,6 +50,6 @@ class AccessElementTokenCandidateFactory implements TokenCandidateFactory {
 
     @Override
     public boolean isBegin(SourceCode sourceCode, Token lastToken) {
-        return sourceCode.getChar() == '[';
+        return sourceCode.currentChar() == '[';
     }
 }

@@ -10,8 +10,8 @@ abstract class OneCharTokenFactory implements TokenFactory {
 
     @Override
     public Token fetchToken(SourceCode sourceCode, Token previous) {
-        if (sourceCode.notEnd() && sourceCode.getChar() == target) {
-            sourceCode.takeChar();
+        if (sourceCode.notEnd() && sourceCode.currentChar() == target) {
+            sourceCode.takeCurrentChar();
             return createToken();
         }
         return null;

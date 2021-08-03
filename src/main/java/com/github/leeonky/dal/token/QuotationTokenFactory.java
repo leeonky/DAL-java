@@ -14,7 +14,7 @@ public abstract class QuotationTokenFactory implements TokenFactory {
 
     @Override
     public Token fetchToken(SourceCode sourceCode, Token previous) {
-        if (sourceCode.notEnd() && sourceCode.getChar() == startChar)
+        if (sourceCode.notEnd() && sourceCode.currentChar() == startChar)
             return parseConstValueToken(sourceCode);
         return null;
     }
@@ -23,7 +23,7 @@ public abstract class QuotationTokenFactory implements TokenFactory {
         int startPosition = sourceCode.getPosition();
         TokenParser parser = createParser();
         int codeLength = 0;
-        while (sourceCode.notEnd() && parser.feed(sourceCode.takeChar()))
+        while (sourceCode.notEnd() && parser.feed(sourceCode.takeCurrentChar()))
             codeLength++;
         if (!parser.isFinished())
             throw new SyntaxException(startPosition + codeLength, errorMessage);
