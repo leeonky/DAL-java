@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.token.Token.constValueToken;
+import static com.github.leeonky.dal.token.Token.propertyToken;
 
 public interface TokenFactory {
     static TokenFactory createNumberTokenFactory() {
@@ -37,6 +38,33 @@ public interface TokenFactory {
     }
 
     static TokenFactory createBeanPropertyTokenFactory() {
+
+        return new TokenFactoryBase(
+                StartWith.CHARACTER('.'),
+                LeftTrim.TRIM_FIRST_CHAR_AND_WHITESPACE,
+                EndWith.NO_MORE_SOURCE_CODE.or(EndWith.TOKEN_DELIMITER)) {
+            @Override
+            protected Token createToken(String content) {
+                if (content.isEmpty())
+                    throw new IllegalTokenContentException("property chain not finished");
+                return propertyToken(content.split("\\."));
+            }
+        };
+    }
+
+    static TokenFactory createOperatorTokenFactory() {
+        return new TokenFactoryBase(
+                StartWith.OPERATOR.and(StartWith.not(StartWith.REGEX_AFTER_MATCHES)),
+                LeftTrim.NOTHING,
+                EndWith.NO_MORE_SOURCE_CODE.or(EndWith.NOT_OPERATOR).or(EndWith.REGEX_AFTER_MATCHES)) {
+            @Override
+            protected Token createToken(String content) {
+                return Token.operatorToken(content);
+            }
+        };
+    }
+
+    static TokenFactory createSingleQuotedStringTokenFactory() {
         return new TokenFactoryBase(
                 StartWith.CHARACTER('\''),
                 LeftTrim.TRIM_FIRST_CHAR,
