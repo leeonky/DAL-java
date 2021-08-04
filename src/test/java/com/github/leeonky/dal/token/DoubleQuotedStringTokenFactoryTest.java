@@ -3,19 +3,17 @@ package com.github.leeonky.dal.token;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.token.Token.constValueToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SingleQuotedStringTokenFactoryTest extends TokenFactoryTestBase {
-
+class DoubleQuotedStringTokenFactoryTest extends TokenFactoryTestBase {
     @Override
-    protected Token createToken(String value) {
-        return constValueToken(value);
+    protected TokenFactory createTokenFactory() {
+        return TokenFactory.createDoubleQuotedStringTokenFactory();
     }
 
     @Override
-    protected TokenFactory createTokenFactory() {
-        return TokenFactory.createSingleQuotedStringTokenFactory();
+    protected Token createToken(String value) {
+        return Token.constValueToken(value);
     }
 
     @Nested
@@ -23,7 +21,7 @@ class SingleQuotedStringTokenFactoryTest extends TokenFactoryTestBase {
 
         @Test
         void return_empty_when_first_char_is_not_digital() {
-            assertThat(parseToken("not start with single quoted")).isNull();
+            assertThat(parseToken("not start with double quoted")).isNull();
         }
     }
 
@@ -32,13 +30,15 @@ class SingleQuotedStringTokenFactoryTest extends TokenFactoryTestBase {
 
         @Test
         void escape_char() {
-            shouldParse("'\\''", "'");
-            shouldParse("'\\\\'", "\\");
+            shouldParse("\"\\\\\"", "\\");
+            shouldParse("\"\\t\"", "\t");
+            shouldParse("\"\\n\"", "\n");
+            shouldParse("\"\\\"\"", "\"");
         }
 
         @Test
         void keep_origin_when_not_supported_escape_char() {
-            shouldParse("'\\a'", "\\a");
+            shouldParse("\"\\h\"", "\\h");
         }
     }
 
@@ -47,13 +47,13 @@ class SingleQuotedStringTokenFactoryTest extends TokenFactoryTestBase {
 
         @Test
         void should_return_token_when_given_valid_code() {
-            shouldParse("''", "");
-            shouldParse("'hello'", "hello");
+            shouldParse("\"\"", "");
+            shouldParse("\"hello\"", "hello");
         }
 
         @Test
         void seek_to_right_position_after_fetch_token() {
-            SourceCode sourceCode = new SourceCode("'hello'=");
+            SourceCode sourceCode = new SourceCode("\"hello\"=");
 
             createTokenFactory().fetchToken(sourceCode, null);
 
@@ -66,12 +66,12 @@ class SingleQuotedStringTokenFactoryTest extends TokenFactoryTestBase {
 
         @Test
         void allow_get_value_when_parser_not_finished() {
-            assertThat(invalidSyntaxCode("'no end"))
-                    .hasMessage("string should end with `'`")
+            assertThat(invalidSyntaxCode("\"no end"))
+                    .hasMessage("string should end with `\"`")
                     .hasFieldOrPropertyWithValue("position", 7);
 
-            assertThat(invalidSyntaxCode("'escape is not complete\\"))
-                    .hasMessage("string should end with `'`")
+            assertThat(invalidSyntaxCode("\"escape is not complete\\"))
+                    .hasMessage("string should end with `\"`")
                     .hasFieldOrPropertyWithValue("position", 24);
         }
     }

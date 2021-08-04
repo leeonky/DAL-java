@@ -1,49 +1,48 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.SyntaxException;
-
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
-import static com.github.leeonky.dal.token.SourceCodeMatches.CHARACTER;
-import static com.github.leeonky.dal.token.Token.constValueToken;
+import static com.github.leeonky.dal.token.ContextMatches.*;
+import static com.github.leeonky.dal.token.ContextPredicate.AFTER_OPERATOR_MATCHES;
+import static com.github.leeonky.dal.token.ContextPredicate.AFTER_TOKEN_MATCHES;
+import static com.github.leeonky.dal.token.EndWith.before;
 import static com.github.leeonky.dal.token.Token.propertyToken;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 public interface TokenFactory {
     static TokenFactory createNumberTokenFactory() {
         return new TokenFactoryBase(
-                StartWith.DIGITAL,
-                LeftTrim.NOTHING,
-                EndWith.NO_MORE_SOURCE_CODE.or(EndWith.TOKEN_DELIMITER)) {
-            @Override
-            protected Token createToken(String content) {
-                try {
-                    return constValueToken(BigDecimal.valueOf(Long.decode(content)));
-                } catch (NumberFormatException ignore) {
-                    return constValueToken(new BigDecimal(content));
-                }
-            }
+                StartWith.included(DIGITAL),
+                Content.allChars(),
+                EndWith.NO_MORE_SOURCE_CODE.or(before(TOKEN_DELIMITER))) {
 
             @Override
-            public Token fetchToken(SourceCode sourceCode, Token previous) {
+            protected Token createToken(String content) {
+                return getNumber(content).map(Token::constValueToken).orElse(null);
+            }
+
+            private Optional<Number> getNumber(String content) {
                 try {
-                    return super.fetchToken(sourceCode, previous);
-                } catch (NumberFormatException ignore) {
-                    return null;
+                    return of(BigDecimal.valueOf(Long.decode(content)));
+                } catch (NumberFormatException e) {
+                    try {
+                        return of(new BigDecimal(content));
+                    } catch (Exception exception) {
+                        return empty();
+                    }
                 }
             }
         };
     }
 
     static TokenFactory createBeanPropertyTokenFactory() {
-
         return new TokenFactoryBase(
-                StartWith.CHARACTER('.'),
-                LeftTrim.TRIM_FIRST_CHAR_AND_WHITESPACE,
-                EndWith.NO_MORE_SOURCE_CODE.or(EndWith.TOKEN_DELIMITER)) {
+                StartWith.excluded(CHARACTER('.')),
+                //TODO to be refactor
+                Content.leftTrim(Content.allChars()),
+                EndWith.NO_MORE_SOURCE_CODE.or(before(TOKEN_DELIMITER))) {
             @Override
             protected Token createToken(String content) {
                 if (content.isEmpty())
@@ -55,9 +54,12 @@ public interface TokenFactory {
 
     static TokenFactory createOperatorTokenFactory() {
         return new TokenFactoryBase(
-                StartWith.OPERATOR.and(StartWith.not(StartWith.REGEX_AFTER_MATCHES)),
-                LeftTrim.NOTHING,
-                EndWith.NO_MORE_SOURCE_CODE.or(EndWith.NOT_OPERATOR).or(EndWith.REGEX_AFTER_MATCHES)) {
+                StartWith.included(OPERATOR.except(CHARACTER('/').when(AFTER_TOKEN_MATCHES))),
+                Content.allChars(),
+                EndWith.NO_MORE_SOURCE_CODE
+                        .or(before(not(OPERATOR)))
+                        .or(before(CHARACTER('/').when(AFTER_OPERATOR_MATCHES)))) {
+
             @Override
             protected Token createToken(String content) {
                 return Token.operatorToken(content);
@@ -66,12 +68,12 @@ public interface TokenFactory {
     }
 
     static TokenFactory createSingleQuotedStringTokenFactory() {
-        return new TokenFactoryBase2(
-                StartWith2.excluded(CHARACTER('\'')),
+        return new TokenFactoryBase(
+                StartWith.excluded(CHARACTER('\'')),
                 Content.allChars()
                         .escape("\\'", '\'')
                         .escape("\\\\", '\\'),
-                EndWith2.excluded(CHARACTER('\'')).orThrow("string should end with `'`")) {
+                EndWith.excluded(CHARACTER('\'')).orThrow("string should end with `'`")) {
 
             @Override
             protected Token createToken(String content) {
@@ -80,106 +82,37 @@ public interface TokenFactory {
         };
     }
 
+    static TokenFactory createDoubleQuotedStringTokenFactory() {
+        return new TokenFactoryBase(
+                StartWith.excluded(CHARACTER('"')),
+                Content.allChars()
+                        .escape("\\\"", '"')
+                        .escape("\\t", '\t')
+                        .escape("\\n", '\n')
+                        .escape("\\\\", '\\'),
+                EndWith.excluded(CHARACTER('"')).orThrow("string should end with `\"`")) {
+
+            @Override
+            protected Token createToken(String content) {
+                return Token.constValueToken(content);
+            }
+        };
+    }
+
+    static TokenFactory createRegexTokenFactory() {
+        return new TokenFactoryBase(
+                StartWith.excluded(CHARACTER('/').when(AFTER_TOKEN_MATCHES)),
+                Content.allChars()
+                        .escape("\\\\", '\\')
+                        .escape("\\/", '/'),
+                EndWith.excluded(CHARACTER('/')).orThrow("regex should end with `/`")) {
+
+            @Override
+            protected Token createToken(String content) {
+                return Token.regexToken(content);
+            }
+        };
+    }
+
     Token fetchToken(SourceCode sourceCode, Token previous);
-}
-
-interface StartWith {
-    StartWith DIGITAL = (sourceCode, previous) -> Character.isDigit(sourceCode.currentChar());
-    StartWith OPERATOR = (sourceCode, previous) -> Scanner.OPERATOR_CHAR.contains(sourceCode.currentChar());
-    StartWith REGEX_AFTER_MATCHES = (sourceCode, previous) ->
-            sourceCode.currentChar() == '/' && previous != null && previous.isOperatorMatches();
-
-    static StartWith CHARACTER(char c) {
-        return (sourceCode, previous) -> sourceCode.currentChar() == c;
-    }
-
-    static StartWith not(StartWith startWith) {
-        return (sourceCode, previous) -> !startWith.matches(sourceCode, previous);
-    }
-
-    boolean matches(SourceCode sourceCode, Token previous);
-
-    default StartWith and(StartWith another) {
-        return (sourceCode, previous) -> matches(sourceCode, previous) && another.matches(sourceCode, previous);
-    }
-}
-
-interface LeftTrim {
-    LeftTrim NOTHING = sourceCode -> sourceCode;
-    LeftTrim TRIM_FIRST_CHAR = sourceCode -> {
-        sourceCode.takeCurrentChar();
-        return sourceCode;
-    };
-    LeftTrim TRIM_FIRST_CHAR_AND_WHITESPACE = sourceCode -> TRIM_FIRST_CHAR.process(sourceCode).trimLeft();
-
-    SourceCode process(SourceCode sourceCode);
-}
-
-interface EndWith {
-    EndWith TOKEN_DELIMITER = (sourceCode, content) -> Scanner.TOKEN_DELIMITER.contains(sourceCode.currentChar());
-    EndWith NO_MORE_SOURCE_CODE = (sourceCode, content) -> !sourceCode.notEnd();
-    EndWith REGEX_AFTER_MATCHES = (sourceCode, content) -> content.size() == 1 && content.get(0).equals('~');
-    EndWith NOT_OPERATOR = (sourceCode, content) -> !Scanner.OPERATOR_CHAR.contains(sourceCode.currentChar());
-
-    static EndWith CHARACTER(char endChar) {
-        return (sourceCode, content) -> Objects.equals(sourceCode.currentChar(), endChar);
-    }
-
-    boolean matches(SourceCode sourceCode, List<Character> content);
-
-    default EndWith or(EndWith another) {
-        return (sourceCode, content) -> matches(sourceCode, content) || another.matches(sourceCode, content);
-    }
-
-    default EndWith orThrow(String errorMessage) {
-        return (sourceCode, content) -> {
-            try {
-                return matches(sourceCode, content);
-            } catch (NoMoreSourceCodeException ignore) {
-                throw new SyntaxException(sourceCode.getPosition(), errorMessage);
-            }
-        };
-    }
-
-    default EndWith thenDropLastChar() {
-        return (sourceCode, content) -> {
-            boolean matches = matches(sourceCode, content);
-            if (matches)
-                sourceCode.takeCurrentChar();
-            return matches;
-        };
-    }
-}
-
-abstract class TokenFactoryBase implements TokenFactory {
-    private final StartWith startWith;
-    private final LeftTrim leftTrim;
-    private final EndWith endWith;
-
-    protected TokenFactoryBase(StartWith startWith, LeftTrim leftTrim, EndWith endWith) {
-        this.startWith = startWith;
-        this.leftTrim = leftTrim;
-        this.endWith = endWith;
-    }
-
-    @Override
-    public Token fetchToken(SourceCode sourceCode, Token previous) {
-        if (sourceCode.notEnd() && startWith.matches(sourceCode, previous))
-            try {
-                return createToken(parseContent(leftTrim.process(sourceCode)));
-            } catch (IllegalTokenContentException e) {
-                throw new SyntaxException(sourceCode.getPosition(), e.getMessage());
-            }
-        return null;
-    }
-
-    private String parseContent(SourceCode sourceCode) {
-        List<Character> content = new ArrayList<>();
-        while (!endWith.matches(sourceCode, content)) {
-            content.add(sourceCode.takeCurrentChar());
-        }
-        return content.stream().map(Objects::toString).collect(Collectors.joining());
-    }
-
-    protected abstract Token createToken(String content);
 }

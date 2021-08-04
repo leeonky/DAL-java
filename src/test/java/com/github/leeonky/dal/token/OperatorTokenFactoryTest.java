@@ -26,11 +26,6 @@ class OperatorTokenFactoryTest {
     class CodeMatches {
 
         @Test
-        void return_empty_when_no_code() {
-            assertThat(parseToken("")).isNull();
-        }
-
-        @Test
         void return_empty_when_first_char_is_not_digital() {
             assertThat(parseToken("not start with operator char")).isNull();
         }

@@ -10,26 +10,20 @@ import java.math.BigDecimal;
 import static com.github.leeonky.dal.token.Token.constValueToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class NumberTokenFactoryTest {
-    private TokenFactory createTokenFactory() {
+class NumberTokenFactoryTest extends TokenFactoryTestBase {
+
+    @Override
+    protected TokenFactory createTokenFactory() {
         return TokenFactory.createNumberTokenFactory();
     }
 
-    private void shouldParse(String code, String value) {
-        assertThat(parseToken(code)).isEqualTo(constValueToken(new BigDecimal(value)));
-    }
-
-    private Token parseToken(String s) {
-        return createTokenFactory().fetchToken(new SourceCode(s), null);
+    @Override
+    protected Token createToken(String value) {
+        return constValueToken(new BigDecimal(value));
     }
 
     @Nested
     class CodeMatches {
-
-        @Test
-        void return_empty_when_no_code() {
-            assertThat(parseToken("")).isNull();
-        }
 
         @Test
         void return_empty_when_first_char_is_not_digital() {
@@ -38,13 +32,12 @@ class NumberTokenFactoryTest {
 
         @Test
         void return_empty_when_invalid_number() {
-            assertThat(parseToken("1ab")).isNull();
+            assertThat(parseToken("1ab ")).isNull();
         }
     }
 
     @Nested
-    class HasDelimiter {
-
+    class Parse {
         @Test
         void should_return_token_when_given_valid_code() {
             shouldParse("100 ", "100");
@@ -59,6 +52,10 @@ class NumberTokenFactoryTest {
         void support_double_to_big_decimal() {
             shouldParse("0.123 ", "0.123");
         }
+    }
+
+    @Nested
+    class HasDelimiter {
 
         @ParameterizedTest
         @ValueSource(chars = {'(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ' ', '\t', '\n'})

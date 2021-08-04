@@ -23,8 +23,8 @@ public class Scanner {
             TokenFactory.createBeanPropertyTokenFactory(),
             TokenFactory.createNumberTokenFactory(),
             TokenFactory.createSingleQuotedStringTokenFactory(),
-            new DoubleQuotationStringTokenFactory(),
-            new RegexTokenFactory(),
+            TokenFactory.createDoubleQuotedStringTokenFactory(),
+            TokenFactory.createRegexTokenFactory(),
             TokenFactory.createOperatorTokenFactory(),
             new BeginBracketTokenFactory(),
             new EndBracketTokenFactory()
