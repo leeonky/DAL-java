@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.token.Token.constValueToken;
-import static com.github.leeonky.dal.token.Token.propertyToken;
 
 public interface TokenFactory {
     static TokenFactory createNumberTokenFactory() {
@@ -39,43 +38,12 @@ public interface TokenFactory {
 
     static TokenFactory createBeanPropertyTokenFactory() {
         return new TokenFactoryBase(
-                StartWith.CHARACTER('.'),
-                LeftTrim.TRIM_FIRST_CHAR_AND_WHITESPACE,
-                EndWith.NO_MORE_SOURCE_CODE.or(EndWith.TOKEN_DELIMITER)) {
+                StartWith.CHARACTER('\''),
+                LeftTrim.TRIM_FIRST_CHAR,
+                EndWith.CHARACTER('\'').orThrow("string should end with `'`").thenDropLastChar()) {
             @Override
             protected Token createToken(String content) {
-                if (content.isEmpty())
-                    throw new IllegalTokenContentException("property chain not finished");
-                return propertyToken(content.split("\\."));
-            }
-        };
-    }
-
-    static TokenFactory createOperatorTokenFactory() {
-        return new TokenFactoryBase(
-                StartWith.OPERATOR.and(StartWith.not(StartWith.REGEX_AFTER_MATCHES)),
-                LeftTrim.NOTHING,
-                EndWith.NO_MORE_SOURCE_CODE.or(EndWith.NOT_OPERATOR).or(EndWith.REGEX_AFTER_MATCHES)) {
-            @Override
-            protected Token createToken(String content) {
-                return Token.operatorToken(content);
-            }
-        };
-    }
-
-    static TokenFactory createRawTextPropertyTokenFactory() {
-        return new TokenFactoryBase(
-                StartWith.ANY_CHAR,
-                LeftTrim.NOTHING,
-                EndWith.CHARACTER(']').orThrow("property chain not finished")) {
-
-            @Override
-            protected Token createToken(String content) {
-                try {
-                    return Token.constIndexToken(Integer.decode(content));
-                } catch (NumberFormatException ignore) {
-                    return Token.propertyToken(content);
-                }
+                return Token.constValueToken(content);
             }
         };
     }
@@ -88,7 +56,6 @@ interface StartWith {
     StartWith OPERATOR = (sourceCode, previous) -> Scanner.OPERATOR_CHAR.contains(sourceCode.currentChar());
     StartWith REGEX_AFTER_MATCHES = (sourceCode, previous) ->
             sourceCode.currentChar() == '/' && previous != null && previous.isOperatorMatches();
-    StartWith ANY_CHAR = (sourceCode, previous) -> true;
 
     static StartWith CHARACTER(char c) {
         return (sourceCode, previous) -> sourceCode.currentChar() == c;
@@ -139,6 +106,15 @@ interface EndWith {
             } catch (NoMoreSourceCodeException ignore) {
                 throw new SyntaxException(sourceCode.getPosition(), errorMessage);
             }
+        };
+    }
+
+    default EndWith thenDropLastChar() {
+        return (sourceCode, content) -> {
+            boolean matches = matches(sourceCode, content);
+            if (matches)
+                sourceCode.takeCurrentChar();
+            return matches;
         };
     }
 }
