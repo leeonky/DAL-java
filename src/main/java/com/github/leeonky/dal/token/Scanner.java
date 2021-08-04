@@ -22,7 +22,7 @@ public class Scanner {
     private List<TokenFactory> tokenFactories = asList(
             TokenFactory.createBeanPropertyTokenFactory(),
             TokenFactory.createNumberTokenFactory(),
-            new SingleQuotationStringTokenFactory(),
+            TokenFactory.createSingleQuotedStringTokenFactory(),
             new DoubleQuotationStringTokenFactory(),
             new RegexTokenFactory(),
             TokenFactory.createOperatorTokenFactory(),

@@ -25,13 +25,22 @@ class SingleQuotedStringTokenFactoryTest {
     class CodeMatches {
 
         @Test
-        void return_empty_when_no_code() {
-            assertThat(parseToken("")).isNull();
+        void return_empty_when_first_char_is_not_digital() {
+            assertThat(parseToken("not start with single quoted")).isNull();
+        }
+    }
+
+    @Nested
+    class Escape {
+        @Test
+        void escape_char() {
+            shouldParse("'\\''", "'");
+            shouldParse("'\\\\'", "\\");
         }
 
         @Test
-        void return_empty_when_first_char_is_not_digital() {
-            assertThat(parseToken("not start with single quoted")).isNull();
+        void keep_origin_when_not_supported_escape_char() {
+            shouldParse("'\\a'", "\\a");
         }
     }
 
@@ -58,23 +67,11 @@ class SingleQuotedStringTokenFactoryTest {
 
         @Test
         void allow_get_value_when_parser_not_finished() {
-            assertThat(assertThrows(SyntaxException.class, () -> createTokenFactory().fetchToken(new SourceCode("'hello"), null)))
-                    .hasMessage("string should end with `'`").hasFieldOrPropertyWithValue("position", 6);
+            assertThat(assertThrows(SyntaxException.class, () -> createTokenFactory().fetchToken(new SourceCode("'no end"), null)))
+                    .hasMessage("string should end with `'`").hasFieldOrPropertyWithValue("position", 7);
+
+            assertThat(assertThrows(SyntaxException.class, () -> createTokenFactory().fetchToken(new SourceCode("'escape is not complete\\"), null)))
+                    .hasMessage("string should end with `'`").hasFieldOrPropertyWithValue("position", 24);
         }
     }
-
-//    @Nested
-//    class Parse {
-//
-//        @Test
-//        void escape_char() {
-//            assertString("'\\''", "'");
-//            assertString("'\\\\'", "\\");
-//        }
-//
-//        @Test
-//        void keep_origin_when_not_supported_escape_char() {
-//            assertString("'\\a'", "\\a");
-//        }
-//    }
 }

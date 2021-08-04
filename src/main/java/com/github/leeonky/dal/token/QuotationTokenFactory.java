@@ -35,23 +35,6 @@ public abstract class QuotationTokenFactory implements TokenFactory {
     protected abstract TokenParser createParser();
 }
 
-class SingleQuotationStringTokenFactory extends QuotationTokenFactory {
-
-    public SingleQuotationStringTokenFactory() {
-        super('\'', "string should end with `'`");
-    }
-
-    @Override
-    protected TokenParser createParser() {
-        return new SingleQuotationStringParser();
-    }
-
-    @Override
-    protected Token createToken(String value) {
-        return Token.constValueToken(value);
-    }
-}
-
 class DoubleQuotationStringTokenFactory extends QuotationTokenFactory {
     public DoubleQuotationStringTokenFactory() {
         super('"', "string should end with `\"`");

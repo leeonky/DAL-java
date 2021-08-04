@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.token.SourceCodeMatches.CHARACTER;
 import static com.github.leeonky.dal.token.Token.constValueToken;
 import static com.github.leeonky.dal.token.Token.propertyToken;
 
@@ -65,10 +66,13 @@ public interface TokenFactory {
     }
 
     static TokenFactory createSingleQuotedStringTokenFactory() {
-        return new TokenFactoryBase(
-                StartWith.CHARACTER('\''),
-                LeftTrim.TRIM_FIRST_CHAR,
-                EndWith.CHARACTER('\'').orThrow("string should end with `'`").thenDropLastChar()) {
+        return new TokenFactoryBase2(
+                StartWith2.excluded(CHARACTER('\'')),
+                Content.allChars()
+                        .escape("\\'", '\'')
+                        .escape("\\\\", '\\'),
+                EndWith2.excluded(CHARACTER('\'')).orThrow("string should end with `'`")) {
+
             @Override
             protected Token createToken(String content) {
                 return Token.constValueToken(content);
@@ -171,8 +175,9 @@ abstract class TokenFactoryBase implements TokenFactory {
 
     private String parseContent(SourceCode sourceCode) {
         List<Character> content = new ArrayList<>();
-        while (!endWith.matches(sourceCode, content))
+        while (!endWith.matches(sourceCode, content)) {
             content.add(sourceCode.takeCurrentChar());
+        }
         return content.stream().map(Objects::toString).collect(Collectors.joining());
     }
 
