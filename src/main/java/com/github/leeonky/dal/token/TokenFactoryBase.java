@@ -127,7 +127,6 @@ interface ContextMatches {
     }
 }
 
-
 //TODO to refactor
 interface Content {
     static Content allChars() {

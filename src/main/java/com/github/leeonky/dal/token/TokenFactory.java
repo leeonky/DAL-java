@@ -3,20 +3,12 @@ package com.github.leeonky.dal.token;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import static com.github.leeonky.dal.token.ContextMatches.*;
-import static com.github.leeonky.dal.token.ContextPredicate.AFTER_OPERATOR_MATCHES;
-import static com.github.leeonky.dal.token.ContextPredicate.AFTER_TOKEN_MATCHES;
-import static com.github.leeonky.dal.token.EndWith.before;
-import static com.github.leeonky.dal.token.Token.propertyToken;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-
 public interface TokenFactory {
     static TokenFactory createNumberTokenFactory() {
         return new TokenFactoryBase(
-                StartWith.included(DIGITAL),
+                StartWith.included(ContextMatches.DIGITAL),
                 Content.allChars(),
-                EndWith.NO_MORE_SOURCE_CODE.or(before(TOKEN_DELIMITER))) {
+                EndWith.NO_MORE_SOURCE_CODE.or(EndWith.before(ContextMatches.TOKEN_DELIMITER))) {
 
             @Override
             protected Token createToken(String content) {
@@ -25,12 +17,12 @@ public interface TokenFactory {
 
             private Optional<Number> getNumber(String content) {
                 try {
-                    return of(BigDecimal.valueOf(Long.decode(content)));
+                    return Optional.of(BigDecimal.valueOf(Long.decode(content)));
                 } catch (NumberFormatException e) {
                     try {
-                        return of(new BigDecimal(content));
+                        return Optional.of(new BigDecimal(content));
                     } catch (Exception exception) {
-                        return empty();
+                        return Optional.empty();
                     }
                 }
             }
@@ -39,26 +31,26 @@ public interface TokenFactory {
 
     static TokenFactory createBeanPropertyTokenFactory() {
         return new TokenFactoryBase(
-                StartWith.excluded(CHARACTER('.')),
+                StartWith.excluded(ContextMatches.CHARACTER('.')),
                 //TODO to be refactor
                 Content.leftTrim(Content.allChars()),
-                EndWith.NO_MORE_SOURCE_CODE.or(before(TOKEN_DELIMITER))) {
+                EndWith.NO_MORE_SOURCE_CODE.or(EndWith.before(ContextMatches.TOKEN_DELIMITER))) {
             @Override
             protected Token createToken(String content) {
                 if (content.isEmpty())
                     throw new IllegalTokenContentException("property chain not finished");
-                return propertyToken(content.split("\\."));
+                return Token.propertyToken(content.split("\\."));
             }
         };
     }
 
     static TokenFactory createOperatorTokenFactory() {
         return new TokenFactoryBase(
-                StartWith.included(OPERATOR.except(CHARACTER('/').when(AFTER_TOKEN_MATCHES))),
+                StartWith.included(ContextMatches.OPERATOR.except(ContextMatches.CHARACTER('/').when(ContextPredicate.AFTER_TOKEN_MATCHES))),
                 Content.allChars(),
                 EndWith.NO_MORE_SOURCE_CODE
-                        .or(before(not(OPERATOR)))
-                        .or(before(CHARACTER('/').when(AFTER_OPERATOR_MATCHES)))) {
+                        .or(EndWith.before(ContextMatches.not(ContextMatches.OPERATOR)))
+                        .or(EndWith.before(ContextMatches.CHARACTER('/').when(ContextPredicate.AFTER_OPERATOR_MATCHES)))) {
 
             @Override
             protected Token createToken(String content) {
@@ -69,11 +61,11 @@ public interface TokenFactory {
 
     static TokenFactory createSingleQuotedStringTokenFactory() {
         return new TokenFactoryBase(
-                StartWith.excluded(CHARACTER('\'')),
+                StartWith.excluded(ContextMatches.CHARACTER('\'')),
                 Content.allChars()
                         .escape("\\'", '\'')
                         .escape("\\\\", '\\'),
-                EndWith.excluded(CHARACTER('\'')).orThrow("string should end with `'`")) {
+                EndWith.excluded(ContextMatches.CHARACTER('\'')).orThrow("string should end with `'`")) {
 
             @Override
             protected Token createToken(String content) {
@@ -84,13 +76,13 @@ public interface TokenFactory {
 
     static TokenFactory createDoubleQuotedStringTokenFactory() {
         return new TokenFactoryBase(
-                StartWith.excluded(CHARACTER('"')),
+                StartWith.excluded(ContextMatches.CHARACTER('"')),
                 Content.allChars()
                         .escape("\\\"", '"')
                         .escape("\\t", '\t')
                         .escape("\\n", '\n')
                         .escape("\\\\", '\\'),
-                EndWith.excluded(CHARACTER('"')).orThrow("string should end with `\"`")) {
+                EndWith.excluded(ContextMatches.CHARACTER('"')).orThrow("string should end with `\"`")) {
 
             @Override
             protected Token createToken(String content) {
@@ -101,11 +93,11 @@ public interface TokenFactory {
 
     static TokenFactory createRegexTokenFactory() {
         return new TokenFactoryBase(
-                StartWith.excluded(CHARACTER('/').when(AFTER_TOKEN_MATCHES)),
+                StartWith.excluded(ContextMatches.CHARACTER('/').when(ContextPredicate.AFTER_TOKEN_MATCHES)),
                 Content.allChars()
                         .escape("\\\\", '\\')
                         .escape("\\/", '/'),
-                EndWith.excluded(CHARACTER('/')).orThrow("regex should end with `/`")) {
+                EndWith.excluded(ContextMatches.CHARACTER('/')).orThrow("regex should end with `/`")) {
 
             @Override
             protected Token createToken(String content) {

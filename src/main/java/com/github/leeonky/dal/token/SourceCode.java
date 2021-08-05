@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.token;
 
+import static com.github.leeonky.dal.util.IfThen.when;
+
 public class SourceCode {
     private int offset = 0;
     private char[] charBuffer;
@@ -49,5 +51,9 @@ public class SourceCode {
 
     public void seek(int p) {
         offset += p;
+    }
+
+    public boolean startsWithThenSeek(String prefix) {
+        return when(startsWith(prefix)).then(() -> seek(prefix.length()));
     }
 }
