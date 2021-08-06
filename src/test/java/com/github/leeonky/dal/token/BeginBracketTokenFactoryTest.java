@@ -5,13 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class BeginBracketTokenFactoryTest {
-    private final TokenFactory tokenFactory = new BeginBracketTokenFactory();
+    private final TokenFactory tokenFactory = TokenFactory.createBeginBracketTokenFactory();
 
     @Test
     void return_empty_when_does_not_match_code() {
-        assertThat(tokenFactory.fetchToken(new SourceCode(""), null))
-                .isNull();
-
         assertThat(tokenFactory.fetchToken(new SourceCode("["), null))
                 .isNull();
     }

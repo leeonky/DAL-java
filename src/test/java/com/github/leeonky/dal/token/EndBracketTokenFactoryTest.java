@@ -5,13 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class EndBracketTokenFactoryTest {
-    private final TokenFactory tokenFactory = new EndBracketTokenFactory();
+    private final TokenFactory tokenFactory = TokenFactory.createEndBracketTokenFactory();
 
     @Test
     void return_empty_when_does_not_match_code() {
-        assertThat(tokenFactory.fetchToken(new SourceCode(""), null))
-                .isNull();
-
         assertThat(tokenFactory.fetchToken(new SourceCode("["), null))
                 .isNull();
     }

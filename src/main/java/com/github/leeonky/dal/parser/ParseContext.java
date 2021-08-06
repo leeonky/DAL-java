@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.parser;
 
+import com.github.leeonky.dal.token.Scanner;
 import com.github.leeonky.dal.token.SourceCode;
 import com.github.leeonky.dal.token.Token;
 
@@ -19,5 +20,9 @@ class ParseContext {
 
     public boolean isLastTokenOperatorMatches() {
         return last != null && last.isOperatorMatches();
+    }
+
+    public boolean isParsingCodeOperatorMatches() {
+        return content.size() == 1 && Scanner.OPT_MATCHES == content.get(0);
     }
 }

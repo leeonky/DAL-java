@@ -57,5 +57,13 @@ public interface TokenFactory {
                 .createAs(REGEX_TOKEN);
     }
 
+    static TokenFactory createBeginBracketTokenFactory() {
+        return equalToCharacter('(').createAs(BEGIN_BRACKET_TOKEN);
+    }
+
+    static TokenFactory createEndBracketTokenFactory() {
+        return equalToCharacter(')').createAs(END_BRACKET_TOKEN);
+    }
+
     Token fetchToken(SourceCode sourceCode, Token previous);
 }

@@ -169,6 +169,11 @@ class TokenStartEndTest {
     }
 
     @Nested
+    class Always {
+
+    }
+
+    @Nested
     class LogicOr {
 
         @Test

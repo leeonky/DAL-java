@@ -7,6 +7,7 @@ import java.util.Set;
 
 import static com.github.leeonky.dal.DALCompiler.IS;
 import static com.github.leeonky.dal.DALCompiler.WHICH;
+import static com.github.leeonky.dal.token.TokenFactory.*;
 import static java.util.Arrays.asList;
 
 public class Scanner {
@@ -17,19 +18,19 @@ public class Scanner {
     public static final Set<String> KEYWORD_SETS = new HashSet<>(asList(IS, WHICH));
     public static final char OPT_MATCHES = '~';
 
-    private List<TokenCandidateFactory> tokenCandidateFactories = asList(
+    private final List<TokenCandidateFactory> tokenCandidateFactories = asList(
             AccessElementTokenCandidateFactory.INSTANCE
     );
 
-    private List<TokenFactory> tokenFactories = asList(
-            TokenFactory.createBeanPropertyTokenFactory(),
-            TokenFactory.createNumberTokenFactory(),
-            TokenFactory.createSingleQuotedStringTokenFactory(),
-            TokenFactory.createDoubleQuotedStringTokenFactory(),
-            TokenFactory.createRegexTokenFactory(),
-            TokenFactory.createOperatorTokenFactory(),
-            new BeginBracketTokenFactory(),
-            new EndBracketTokenFactory()
+    private final List<TokenFactory> tokenFactories = asList(
+            createBeanPropertyTokenFactory(),
+            createNumberTokenFactory(),
+            createSingleQuotedStringTokenFactory(),
+            createDoubleQuotedStringTokenFactory(),
+            createRegexTokenFactory(),
+            createOperatorTokenFactory(),
+            createBeginBracketTokenFactory(),
+            createEndBracketTokenFactory()
     );
 
     private Token lastToken;

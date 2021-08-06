@@ -46,6 +46,12 @@ class SourceCodeMatcherTest {
         }
 
         @Test
+        void always() {
+            assertTrue(SourceCodeMatcher.ANY_CHARACTERS.matches(createContext('a')));
+            assertTrue(SourceCodeMatcher.ANY_CHARACTERS.matches(createContext('1')));
+        }
+
+        @Test
         void one_specified_char() {
             assertThat(allCharMatchesBy(SourceCodeMatcher.CHARACTER('a')))
                     .isEqualTo(new HashSet<>(singletonList('a')));

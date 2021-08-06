@@ -11,6 +11,11 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.parser.SourceCodeGetter.ALL_CHARACTERS;
+import static com.github.leeonky.dal.parser.SourceCodeMatcher.ANY_CHARACTERS;
+import static com.github.leeonky.dal.parser.SourceCodeMatcher.CHARACTER;
+import static com.github.leeonky.dal.parser.TokenStartEnd.*;
+
 public class NewTokenFactory {
     public static final Function<String, Token> CONST_NUMBER_TOKEN = content ->
             getNumber(content).map(Token::constValueToken).orElse(null);
@@ -24,6 +29,8 @@ public class NewTokenFactory {
     };
     public static final Function<String, Token> CONST_STRING_TOKEN = Token::constValueToken;
     public static final Function<String, Token> REGEX_TOKEN = Token::regexToken;
+    public static final Function<String, Token> BEGIN_BRACKET_TOKEN = s -> Token.beginBracketToken();
+    public static final Function<String, Token> END_BRACKET_TOKEN = s -> Token.endBracketToken();
 
     private final TokenStartEnd start;
 
@@ -47,6 +54,10 @@ public class NewTokenFactory {
         }
     }
 
+    public static Content.EndWith equalToCharacter(char a) {
+        return startWith(included(CHARACTER(a))).take(ALL_CHARACTERS).endWith(END_OF_CODE.or(before(ANY_CHARACTERS)));
+    }
+
     public Content take(SourceCodeGetter sourceCodeGetter) {
         return new Content(sourceCodeGetter);
     }
@@ -59,14 +70,14 @@ public class NewTokenFactory {
             this.sourceCodeGetter = sourceCodeGetter;
         }
 
-        public End endWith(TokenStartEnd end) {
-            return new End(end);
+        public EndWith endWith(TokenStartEnd end) {
+            return new EndWith(end);
         }
 
-        public class End {
+        public class EndWith {
             private final TokenStartEnd end;
 
-            public End(TokenStartEnd end) {
+            public EndWith(TokenStartEnd end) {
                 this.end = end;
             }
 
