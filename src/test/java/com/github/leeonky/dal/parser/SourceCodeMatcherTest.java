@@ -145,7 +145,7 @@ class SourceCodeMatcherTest {
 
             @Test
             void parsed_code_is_opt_matches() {
-                assertTrue(givenParsedCode("~"));
+                assertTrue(givenParsedCode(":"));
             }
 
             @Test
@@ -155,7 +155,7 @@ class SourceCodeMatcherTest {
 
             @Test
             void not_matched_code() {
-                assertFalse(givenParsedCode("~~"));
+                assertFalse(givenParsedCode("::"));
             }
 
             private boolean givenParsedCode(String code) {

@@ -11,12 +11,16 @@ import static com.github.leeonky.dal.token.TokenFactory.*;
 import static java.util.Arrays.asList;
 
 public class Scanner {
-    public static final Set<Character> CHAR_SPLIT = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']'));
-    public static final Set<Character> TOKEN_DELIMITER = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ' ', '\t', '\n'));
-    public static final Set<Character> OPERATOR_CHAR = new HashSet<>(asList('-', '!', '=', '>', '<', '+', '*', '/', '~', '&', '|'));
+    //TODO to be removed use TOKEN_DELIMITER
+    public static final Set<Character> CHAR_SPLIT = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ':'));
+    public static final Set<Character> TOKEN_DELIMITER = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ':', ' ', '\t', '\n'));
+    public static final Set<Character> OPERATOR_CHAR = new HashSet<>(asList('-', '!', '=', '>', '<', '+', '*', '/', ':', '&', '|'));
     public static final Set<Character> DIGITAL_CHAR = new HashSet<>(asList('1', '2', '3', '4', '5', '6', '7', '8', '9', '0'));
     public static final Set<String> KEYWORD_SETS = new HashSet<>(asList(IS, WHICH));
-    public static final char OPT_MATCHES = '~';
+
+    //TODO use opt :
+    public static final char OPT_MATCHES = ':';
+    public static final String OPT_MATCHES_STRING = ":";
 
     private final List<TokenCandidateFactory> tokenCandidateFactories = asList(
             AccessElementTokenCandidateFactory.INSTANCE

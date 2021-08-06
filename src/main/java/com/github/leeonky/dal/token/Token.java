@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.github.leeonky.dal.DALCompiler.MATCHES;
+import static com.github.leeonky.dal.token.Scanner.OPT_MATCHES_STRING;
 import static java.text.MessageFormat.format;
 import static java.util.Arrays.asList;
 
@@ -44,6 +45,7 @@ public class Token {
         return new Token(Type.BEGIN_BRACKET, "(");
     }
 
+    //TODO support = regex matches regex without target value to string
     public static Token regexToken(String regex) {
         return new Token(Type.REGEX, regex);
     }
@@ -147,8 +149,8 @@ public class Token {
                 case MATCHES:
                     operator = new Operator.Matches(MATCHES);
                     break;
-                case "~":
-                    operator = new Operator.Matches("~");
+                case OPT_MATCHES_STRING:
+                    operator = new Operator.Matches(OPT_MATCHES_STRING);
                     break;
                 default:
                     throw new SyntaxException(getPositionBegin(), "not support operator `" + operatorString + "` yet");
@@ -158,8 +160,9 @@ public class Token {
         return operator;
     }
 
+    //TODO matches = :
     public boolean isOperatorMatches() {
-        return getType() == Type.OPERATOR && (getValue().equals("~") || getValue().equals(MATCHES));
+        return getType() == Type.OPERATOR && (getValue().equals(OPT_MATCHES_STRING) || getValue().equals(MATCHES));
     }
 
     @Override

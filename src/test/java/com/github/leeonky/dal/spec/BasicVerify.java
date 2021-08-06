@@ -160,16 +160,16 @@ class BasicVerify extends Base {
             void support_operator_matches() {
                 assertPass(1, "matches 1");
                 assertFailed(1, "matches 2");
-                assertPass(1, "~ 1");
-                assertFailed(1, "~ 2");
+                assertPass(1, ": 1");
+                assertFailed(1, ": 2");
             }
 
             @Test
             void support_convert_to_target_type_before_matches_value() {
                 assertPass("1", "matches 1");
                 assertFailed("1", "matches 2");
-                assertPass("1", "~ 1");
-                assertFailed("1", "~ 2");
+                assertPass("1", ": 1");
+                assertFailed("1", ": 2");
             }
 
             @Test
@@ -178,9 +178,9 @@ class BasicVerify extends Base {
                 assertFailed(null, "matches 1");
                 assertPass(null, "matches null");
 
-                assertFailed(1, "~ null");
-                assertFailed(null, "~ 1");
-                assertPass(null, "~ null");
+                assertFailed(1, ": null");
+                assertFailed(null, ": 1");
+                assertPass(null, ": null");
             }
         }
 
@@ -191,8 +191,8 @@ class BasicVerify extends Base {
             void support_matches_regex() {
                 assertPass(1, "matches /1/");
                 assertFailed(2, "matches /1/");
-                assertPass(1, "~ /1/");
-                assertFailed(2, "~ /1/");
+                assertPass(1, ": /1/");
+                assertFailed(2, ": /1/");
             }
         }
     }

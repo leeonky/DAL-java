@@ -83,7 +83,7 @@ class DALCompilerTest {
         @Test
         void should_support_follow_operators() {
             assertCompileOperator("matches", new Operator.Matches(MATCHES));
-            assertCompileOperator("~", new Operator.Matches(MATCHES));
+            assertCompileOperator(":", new Operator.Matches(MATCHES));
             assertCompileOperator("=", new Operator.Equal());
             assertCompileOperator("!=", new Operator.NotEqual());
             assertCompileOperator(">", new Operator.Greater());

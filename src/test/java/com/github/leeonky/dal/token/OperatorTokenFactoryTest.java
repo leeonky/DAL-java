@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import static com.github.leeonky.dal.token.Scanner.OPT_MATCHES_STRING;
 import static com.github.leeonky.dal.token.Token.operatorToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,10 +33,10 @@ class OperatorTokenFactoryTest {
 
         @Test
         void should_return_empty_when_last_token_is_operator_matches() {
-            assertThat(createTokenFactory().fetchToken(new SourceCode("/"), Token.operatorToken("~")))
+            assertThat(createTokenFactory().fetchToken(new SourceCode("/"), Token.operatorToken(OPT_MATCHES_STRING)))
                     .isNull();
 
-            assertThat(createTokenFactory().fetchToken(new SourceCode("+"), Token.operatorToken("~")))
+            assertThat(createTokenFactory().fetchToken(new SourceCode("+"), Token.operatorToken(OPT_MATCHES_STRING)))
                     .isEqualTo(Token.operatorToken("+"));
 
             assertThat(createTokenFactory().fetchToken(new SourceCode("/"), null))
@@ -54,11 +55,11 @@ class OperatorTokenFactoryTest {
 
         @Test
         void distinguish_regex_after_operator_matches() {
-            shouldParse("~/ ", "~");
+            shouldParse(":/ ", ":");
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"-", "!", "=", ">", "<", "+", "*", "/", "~", ">=", "<=", "!=", "&&", "||"})
+        @ValueSource(strings = {"-", "!", "=", ">", "<", "+", "*", "/", ":", ">=", "<=", "!=", "&&", "||"})
         void finish_parse_and_source_code_seek_back_to_delimiter(String opt) {
             TokenFactory tokenFactory = createTokenFactory();
             SourceCode sourceCode = new SourceCode(opt + "a");
@@ -72,7 +73,7 @@ class OperatorTokenFactoryTest {
     class NoDelimiter {
 
         @ParameterizedTest
-        @ValueSource(strings = {"-", "!", "=", ">", "<", "+", "*", "/", "~", ">=", "<=", "!=", "&&", "||"})
+        @ValueSource(strings = {"-", "!", "=", ">", "<", "+", "*", "/", ":", ">=", "<=", "!=", "&&", "||"})
         void allow_get_value_when_parser_not_finished(String opt) {
             shouldParse(opt, opt);
         }

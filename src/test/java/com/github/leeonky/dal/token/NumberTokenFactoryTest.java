@@ -58,7 +58,7 @@ class NumberTokenFactoryTest extends TokenFactoryTestBase {
     class HasDelimiter {
 
         @ParameterizedTest
-        @ValueSource(chars = {'(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ' ', '\t', '\n'})
+        @ValueSource(chars = {'(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ' ', ':', '\t', '\n'})
         void finish_parse_and_source_code_seek_back_to_delimiter(char c) {
             TokenFactory tokenFactory = createTokenFactory();
             SourceCode sourceCode = new SourceCode("100" + c);
