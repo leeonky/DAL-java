@@ -1,15 +1,17 @@
 package com.github.leeonky.dal.token;
 
+import com.github.leeonky.dal.parser.ParsingContext;
+
 import static com.github.leeonky.dal.parser.NewTokenFactory.*;
-import static com.github.leeonky.dal.parser.SourceCodeGetter.ALL_CHARACTERS;
-import static com.github.leeonky.dal.parser.SourceCodeGetter.leftTrim;
-import static com.github.leeonky.dal.parser.SourceCodeMatcher.*;
+import static com.github.leeonky.dal.parser.ParsingContext.*;
+import static com.github.leeonky.dal.parser.SourceCodeMatcher.not;
+import static com.github.leeonky.dal.parser.TokenContent.ALL_CHARACTERS;
+import static com.github.leeonky.dal.parser.TokenContent.leftTrim;
 import static com.github.leeonky.dal.parser.TokenStartEnd.*;
 
 public interface TokenFactory {
     static TokenFactory createNumberTokenFactory() {
         return startWith(included(DIGITAL))
-                .take(ALL_CHARACTERS)
                 .endWith(END_OF_CODE.or(before(DELIMITER)))
                 .createAs(CONST_NUMBER_TOKEN);
     }
@@ -23,7 +25,6 @@ public interface TokenFactory {
 
     static TokenFactory createOperatorTokenFactory() {
         return startWith(included(OPERATOR.except(CHARACTER('/').when(AFTER_TOKEN_MATCHES))))
-                .take(ALL_CHARACTERS)
                 .endWith(END_OF_CODE.or(before(not(OPERATOR))).or(before(CHARACTER('/').when(AFTER_OPERATOR_MATCHES))))
                 .createAs(OPERATOR_TOKEN);
     }
@@ -65,5 +66,5 @@ public interface TokenFactory {
         return equalToCharacter(')').createAs(END_BRACKET_TOKEN);
     }
 
-    Token fetchToken(SourceCode sourceCode, Token previous);
+    Token fetchToken(ParsingContext context);
 }

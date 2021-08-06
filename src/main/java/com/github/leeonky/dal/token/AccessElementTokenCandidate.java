@@ -49,7 +49,7 @@ class AccessElementTokenCandidateFactory implements TokenCandidateFactory {
     }
 
     @Override
-    public boolean isBegin(SourceCode sourceCode, Token lastToken) {
+    public boolean isBegin(SourceCode sourceCode) {
         return sourceCode.currentChar() == '[';
     }
 }

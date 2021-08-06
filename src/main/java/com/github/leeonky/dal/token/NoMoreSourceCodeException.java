@@ -1,4 +1,10 @@
 package com.github.leeonky.dal.token;
 
-public class NoMoreSourceCodeException extends RuntimeException {
+import com.github.leeonky.dal.DalException;
+
+public class NoMoreSourceCodeException extends DalException {
+
+    protected NoMoreSourceCodeException(int position) {
+        super("at the end of source code", position);
+    }
 }

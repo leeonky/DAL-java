@@ -1,27 +1,22 @@
 package com.github.leeonky.dal.parser;
 
-import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.token.IllegalTokenContentException;
 import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenFactory;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.parser.SourceCodeGetter.ALL_CHARACTERS;
-import static com.github.leeonky.dal.parser.SourceCodeMatcher.ANY_CHARACTERS;
-import static com.github.leeonky.dal.parser.SourceCodeMatcher.CHARACTER;
-import static com.github.leeonky.dal.parser.TokenStartEnd.*;
+import static com.github.leeonky.dal.parser.ParsingContext.ANY_CHARACTERS;
+import static com.github.leeonky.dal.parser.ParsingContext.CHARACTER;
+import static com.github.leeonky.dal.parser.TokenContent.ALL_CHARACTERS;
+import static com.github.leeonky.dal.parser.TokenStartEnd.before;
 
 public class NewTokenFactory {
     public static final Function<String, Token> CONST_NUMBER_TOKEN = content ->
             getNumber(content).map(Token::constValueToken).orElse(null);
-
     public static final Function<String, Token> OPERATOR_TOKEN = Token::operatorToken;
-
     public static final Function<String, Token> PROPERTY_TOKEN = content -> {
         if (content.isEmpty())
             throw new IllegalTokenContentException("property chain not finished");
@@ -42,6 +37,10 @@ public class NewTokenFactory {
         return new NewTokenFactory(startEnd);
     }
 
+    public static Content.EndWith equalToCharacter(char c) {
+        return startWith(ParsingContext.included(CHARACTER(c))).take(ALL_CHARACTERS).endWith(ParsingContext.END_OF_CODE.or(before(ANY_CHARACTERS)));
+    }
+
     private static Optional<Number> getNumber(String content) {
         try {
             return Optional.of(BigDecimal.valueOf(Long.decode(content)));
@@ -54,20 +53,20 @@ public class NewTokenFactory {
         }
     }
 
-    public static Content.EndWith equalToCharacter(char a) {
-        return startWith(included(CHARACTER(a))).take(ALL_CHARACTERS).endWith(END_OF_CODE.or(before(ANY_CHARACTERS)));
+    public Content take(TokenContent tokenContent) {
+        return new Content(tokenContent);
     }
 
-    public Content take(SourceCodeGetter sourceCodeGetter) {
-        return new Content(sourceCodeGetter);
+    public Content.EndWith endWith(TokenStartEnd end) {
+        return take(ALL_CHARACTERS).endWith(end);
     }
 
     public class Content {
 
-        private final SourceCodeGetter sourceCodeGetter;
+        private final TokenContent tokenContent;
 
-        public Content(SourceCodeGetter sourceCodeGetter) {
-            this.sourceCodeGetter = sourceCodeGetter;
+        public Content(TokenContent tokenContent) {
+            this.tokenContent = tokenContent;
         }
 
         public EndWith endWith(TokenStartEnd end) {
@@ -82,20 +81,7 @@ public class NewTokenFactory {
             }
 
             public TokenFactory createAs(Function<String, Token> creator) {
-                return (sourceCode, previous) -> {
-                    ParseContext context = new ParseContext(sourceCode, previous);
-                    if (start.matches(context)) {
-                        sourceCodeGetter.preprocess(context.sourceCode);
-                        while (!end.matches(context))
-                            context.content.add(sourceCodeGetter.getChar(context.sourceCode));
-                        try {
-                            return creator.apply(context.content.stream().map(Objects::toString).collect(Collectors.joining()));
-                        } catch (IllegalTokenContentException e) {
-                            throw new SyntaxException(sourceCode.getPosition(), e.getMessage());
-                        }
-                    }
-                    return null;
-                };
+                return context -> context.parseToken(start, tokenContent, end, creator);
             }
         }
     }

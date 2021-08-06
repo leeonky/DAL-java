@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.token;
 
 import com.github.leeonky.dal.SyntaxException;
+import com.github.leeonky.dal.parser.ParsingContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -15,7 +16,8 @@ public abstract class TokenFactoryTestBase {
     protected abstract Token createToken(String value);
 
     protected Token parseToken(String s) {
-        return createTokenFactory().fetchToken(new SourceCode(s), previousToken());
+        final SourceCode sourceCode = new SourceCode(s);
+        return createTokenFactory().fetchToken(new ParsingContext(sourceCode, previousToken()));
     }
 
     protected Token previousToken() {
@@ -23,6 +25,6 @@ public abstract class TokenFactoryTestBase {
     }
 
     protected SyntaxException invalidSyntaxCode(String s) {
-        return assertThrows(SyntaxException.class, () -> createTokenFactory().fetchToken(new SourceCode(s), previousToken()));
+        return assertThrows(SyntaxException.class, () -> createTokenFactory().fetchToken(new ParsingContext(new SourceCode(s), previousToken())));
     }
 }

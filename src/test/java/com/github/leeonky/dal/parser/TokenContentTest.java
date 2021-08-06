@@ -4,11 +4,11 @@ import com.github.leeonky.dal.token.SourceCode;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.parser.SourceCodeGetter.ALL_CHARACTERS;
-import static com.github.leeonky.dal.parser.SourceCodeGetter.leftTrim;
+import static com.github.leeonky.dal.parser.TokenContent.ALL_CHARACTERS;
+import static com.github.leeonky.dal.parser.TokenContent.leftTrim;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SourceCodeGetterTest {
+class TokenContentTest {
 
     @Nested
     class GetChar {
@@ -24,7 +24,7 @@ class SourceCodeGetterTest {
         @Test
         void support_escape() {
             SourceCode sourceCode = new SourceCode("ab=cd");
-            SourceCodeGetter taker = ALL_CHARACTERS
+            TokenContent taker = ALL_CHARACTERS
                     .escape("ab", 'x')
                     .escape("cd", 'y');
 
@@ -36,7 +36,7 @@ class SourceCodeGetterTest {
         @Test
         void copied_getter_with_the_same_behavior() {
             SourceCode sourceCode = new SourceCode("ab=cd");
-            SourceCodeGetter taker = ALL_CHARACTERS
+            TokenContent taker = ALL_CHARACTERS
                     .escape("ab", 'x')
                     .escape("cd", 'y').copy();
 
@@ -48,7 +48,7 @@ class SourceCodeGetterTest {
 
     @Nested
     class LeftTrim {
-        SourceCodeGetter taker = leftTrim(ALL_CHARACTERS);
+        TokenContent taker = leftTrim(ALL_CHARACTERS);
 
         @Test
         void left_trim_white_space() {

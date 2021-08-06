@@ -32,7 +32,7 @@ public class SourceCode {
 
     private char getChar(int offset) {
         if (offset >= charBuffer.length)
-            throw new NoMoreSourceCodeException();
+            throw new NoMoreSourceCodeException(getPosition());
         return charBuffer[offset];
     }
 

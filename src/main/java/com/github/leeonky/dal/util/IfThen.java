@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.util;
 
+import java.util.function.Supplier;
+
 public class IfThen {
     private final boolean bool;
 
@@ -15,5 +17,11 @@ public class IfThen {
         if (bool)
             runnable.run();
         return bool;
+    }
+
+    public <T> T thenReturn(Supplier<T> supplier) {
+        if (bool)
+            return supplier.get();
+        return null;
     }
 }

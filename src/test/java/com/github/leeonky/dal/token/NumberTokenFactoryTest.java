@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.token;
 
+import com.github.leeonky.dal.parser.ParsingContext;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -62,7 +63,7 @@ class NumberTokenFactoryTest extends TokenFactoryTestBase {
         void finish_parse_and_source_code_seek_back_to_delimiter(char c) {
             TokenFactory tokenFactory = createTokenFactory();
             SourceCode sourceCode = new SourceCode("100" + c);
-            assertThat(tokenFactory.fetchToken(sourceCode, null))
+            assertThat(tokenFactory.fetchToken(new ParsingContext(sourceCode, null)))
                     .isEqualTo(constValueToken(new BigDecimal("100")));
             assertThat(sourceCode.currentChar()).isEqualTo(c);
         }

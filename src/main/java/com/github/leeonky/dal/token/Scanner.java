@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.token;
 
+import com.github.leeonky.dal.parser.ParsingContext;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -17,11 +19,10 @@ public class Scanner {
     public static final Set<Character> OPERATOR_CHAR = new HashSet<>(asList('-', '!', '=', '>', '<', '+', '*', '/', ':', '&', '|'));
     public static final Set<Character> DIGITAL_CHAR = new HashSet<>(asList('1', '2', '3', '4', '5', '6', '7', '8', '9', '0'));
     public static final Set<String> KEYWORD_SETS = new HashSet<>(asList(IS, WHICH));
-
-    //TODO use opt :
     public static final char OPT_MATCHES = ':';
     public static final String OPT_MATCHES_STRING = ":";
 
+    //TODO to be replaced
     private final List<TokenCandidateFactory> tokenCandidateFactories = asList(
             AccessElementTokenCandidateFactory.INSTANCE
     );
@@ -37,27 +38,26 @@ public class Scanner {
             createEndBracketTokenFactory()
     );
 
-    private Token lastToken;
-
     public TokenStream scan(SourceCode sourceCode) {
         TokenStream tokenStream = new TokenStream();
-        lastToken = null;
+        ParsingContext context = new ParsingContext(sourceCode, null);
         while (sourceCode.hasContent()) {
             int begin = sourceCode.getPosition();
-            Token token = tokenFactories.stream().map(tokenFactory -> tokenFactory.fetchToken(sourceCode, lastToken))
+            Token token = tokenFactories.stream()
+                    .map(tokenFactory -> tokenFactory.fetchToken(context))
                     .filter(Objects::nonNull).findFirst().orElseGet(() ->
-                            takeTokenCandidate(sourceCode, lastToken).fetchToken(sourceCode));
+                            takeTokenCandidate(sourceCode).fetchToken(sourceCode));
             token.setPositionBegin(begin);
             token.setPositionEnd(sourceCode.getPosition());
             tokenStream.appendToken(token);
-            lastToken = token;
+            context.last = token;
         }
         return tokenStream;
     }
 
-    private TokenCandidate takeTokenCandidate(SourceCode sourceCode, Token lastToken) {
+    private TokenCandidate takeTokenCandidate(SourceCode sourceCode) {
         return tokenCandidateFactories.stream()
-                .filter(f -> f.isBegin(sourceCode, lastToken))
+                .filter(f -> f.isBegin(sourceCode))
                 .map(f -> f.createTokenCandidate(sourceCode))
                 .findFirst().orElseGet(() -> new WordTokenCandidate(sourceCode));
     }

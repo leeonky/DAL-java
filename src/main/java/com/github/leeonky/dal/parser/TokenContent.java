@@ -5,24 +5,21 @@ import com.github.leeonky.dal.token.SourceCode;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-//TODO rename
-public class SourceCodeGetter {
+public class TokenContent {
 
-    public static final SourceCodeGetter ALL_CHARACTERS = new SourceCodeGetter();
+    public static final TokenContent ALL_CHARACTERS = new TokenContent();
     private Consumer<SourceCode> preprocessor;
-    //TODO rename
     private Function<SourceCode, Character> charGetter;
 
-    private SourceCodeGetter() {
+    private TokenContent() {
         preprocessor = sourceCode -> {
         };
         charGetter = SourceCode::takeCurrentChar;
     }
 
-    //TODO call super
-    //TODO extract method to support call super preprocessor
-    public static SourceCodeGetter leftTrim(SourceCodeGetter getter) {
-        SourceCodeGetter copy = getter.copy();
+    //TODO not call super
+    public static TokenContent leftTrim(TokenContent getter) {
+        TokenContent copy = getter.copy();
         copy.preprocessor = SourceCode::trimLeft;
         return copy;
     }
@@ -35,17 +32,16 @@ public class SourceCodeGetter {
         return charGetter.apply(sourceCode);
     }
 
-    //TODO extract method to support call super getChar
-    public SourceCodeGetter escape(String replace, char c) {
-        SourceCodeGetter copy = copy();
+    public TokenContent escape(String replace, char c) {
+        TokenContent copy = copy();
         copy.charGetter = sourceCode -> sourceCode.startsWithThenSeek(replace) ? c : getChar(sourceCode);
         return copy;
     }
 
-    public SourceCodeGetter copy() {
-        SourceCodeGetter sourceCodeGetter = new SourceCodeGetter();
-        sourceCodeGetter.charGetter = charGetter;
-        sourceCodeGetter.preprocessor = preprocessor;
-        return sourceCodeGetter;
+    public TokenContent copy() {
+        TokenContent tokenContent = new TokenContent();
+        tokenContent.charGetter = charGetter;
+        tokenContent.preprocessor = preprocessor;
+        return tokenContent;
     }
 }
