@@ -9,84 +9,75 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
+import static java.util.Collections.singleton;
+
 class VerifySchemaFieldAlias extends Base {
 
     @BeforeEach
     void registerSchema() {
         dataAssert.getRuntimeContextBuilder()
                 .registerSchema(Order.class)
-                .registerSchema(Product.class)
-                .registerSchema(Report.class)
-                .registerSchema(Sku.class)
+                .registerSchema(User.class)
         ;
     }
 
     @Test
-    void support_define_field_alias() {
+    void support_define_property_alias() {
         assertPass(new HashMap<String, Object>() {{
-            put("total", 1);
-        }}, "is Order which .TotalCost = 1");
+            put("id", "001");
+        }}, "is Order which .aliasOfId = '001'");
     }
 
     @Test
-    void support_define_field_chain_alias() {
+    void recursive_alias() {
         assertPass(new HashMap<String, Object>() {{
-            put("product", new HashMap<String, Object>() {{
-                put("cost", 1);
-            }});
-        }}, "is Order which .ProductCost = 1");
+            put("id", "001");
+        }}, "is Order which .aliasOfAliasId = '001'");
     }
 
     @Test
-    void support_field_alias_style_chain() {
+    void access_array_in_alias() {
         assertPass(new HashMap<String, Object>() {{
-            put("order", new HashMap<String, Object>() {{
-                put("product", new HashMap<String, Object>() {{
-                    put("cost", 1);
-                }});
-            }});
-        }}, "is Report which .order.ProductCost = 1");
+            put("lines", singleton(new HashMap<String, Object>() {{
+                put("amount", "100");
+            }}));
+        }}, "is Order which .firstLine.amount = '100'");
     }
 
     @Test
-    void support_alias_alias_style_chain() {
+    void access_property_chain_in_alias() {
         assertPass(new HashMap<String, Object>() {{
-            put("product", new HashMap<String, Object>() {{
-                put("sku", new HashMap<String, Object>() {{
-                    put("count", 10);
-                }});
+            put("user", new HashMap<String, Object>() {{
+                put("name", 1);
             }});
-        }}, "is Order which .ProductSku.SkuCount = 10");
+        }}, "is Order which .userName = 1");
+    }
+
+    @Test
+    void use_alias_in_sub_property() {
+        assertPass(new HashMap<String, Object>() {{
+            put("user", new HashMap<String, Object>() {{
+                put("age", 30);
+            }});
+        }}, "is Order which .user.aliasOfAge = 30");
     }
 
     @Partial
     @FieldAliases({
-            @FieldAlias(alias = "ProductCost", field = "product.cost"),
-            @FieldAlias(alias = "TotalCost", field = "total"),
-            @FieldAlias(alias = "ProductSku", field = "product.sku"),
+            @FieldAlias(alias = "aliasOfId", field = "id"),
+            @FieldAlias(alias = "aliasOfAliasId", field = "aliasOfId"),
+            @FieldAlias(alias = "firstLine", field = "lines[0]"),
+            @FieldAlias(alias = "userName", field = "user.name"),
     })
     public static class Order {
         @AllowNull
-        public Product product;
-    }
-
-    @Partial
-    public static class Product {
-        @AllowNull
-        public Sku sku;
+        public User user;
     }
 
     @Partial
     @FieldAliases({
-            @FieldAlias(alias = "SkuCount", field = "count"),
+            @FieldAlias(alias = "aliasOfAge", field = "age"),
     })
-    public static class Sku {
+    public static class User {
     }
-
-    public static class Report {
-        public Order order;
-    }
-
-    //TODO alias same with field *****
-    //TODO alias to list element
 }
