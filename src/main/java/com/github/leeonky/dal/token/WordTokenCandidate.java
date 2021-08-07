@@ -3,7 +3,7 @@ package com.github.leeonky.dal.token;
 import static com.github.leeonky.dal.DALCompiler.*;
 import static com.github.leeonky.dal.token.Token.*;
 
-//TODO to be replaced
+//TODO to be replaced *****
 class WordTokenCandidate extends TokenCandidate {
     WordTokenCandidate(SourceCode sourceCode) {
         super(sourceCode, Scanner.CHAR_SPLIT);

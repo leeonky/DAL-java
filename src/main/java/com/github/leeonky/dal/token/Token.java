@@ -44,7 +44,7 @@ public class Token {
         return new Token(Type.BEGIN_BRACKET, "(");
     }
 
-    //TODO support = regex matches regex without target value to string
+    //TODO support for opt '=' regex matches regex without target value to string
     public static Token regexToken(String regex) {
         return new Token(Type.REGEX, regex);
     }

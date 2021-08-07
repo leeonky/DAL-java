@@ -15,14 +15,22 @@ public class SchemaType {
     private final Object fromProperty;
     private final SchemaType parent;
 
-    public SchemaType(BeanClass<?> schema) {
+    private SchemaType(BeanClass<?> schema) {
         this(schema, null, null);
     }
 
-    public SchemaType(BeanClass<?> schema, Object fromProperty, SchemaType parent) {
+    private SchemaType(BeanClass<?> schema, Object fromProperty, SchemaType parent) {
         this.schema = schema;
         this.fromProperty = fromProperty;
         this.parent = parent;
+    }
+
+    public static SchemaType create(BeanClass<?> schema) {
+        return new SchemaType(schema);
+    }
+
+    public static SchemaType createRoot() {
+        return new SchemaType(null);
     }
 
     private String fetchFieldChain(String name) {

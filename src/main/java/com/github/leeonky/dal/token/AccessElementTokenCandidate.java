@@ -4,7 +4,7 @@ import com.github.leeonky.dal.SyntaxException;
 
 import static java.lang.Integer.parseInt;
 
-//TODO move logic to PropertyTokenCandidate
+//TODO move logic to PropertyTokenCandidate *****
 class AccessElementTokenCandidate extends TokenCandidate {
 
     AccessElementTokenCandidate(SourceCode sourceCode) {

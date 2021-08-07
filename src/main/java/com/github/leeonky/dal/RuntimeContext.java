@@ -21,7 +21,7 @@ public class RuntimeContext {
     private final Set<Class<?>> schemas;
     private final Map<String, BeanClass<?>> schemaMap;
     private final Converter converter = Converter.createDefault();
-    private int schemaTypePushDepth = 0, schemaTypePopDepth = 0;
+    private int schemaTypeRecursivePushDepth = 0, schemaTypeRecursivePopDepth = 0;
 
     public RuntimeContext(Object inputValue, TypeData<PropertyAccessor> propertyAccessors,
                           Map<String, ConstructorViaSchema> constructors, TypeData<ListAccessor> listAccessors,
@@ -29,8 +29,7 @@ public class RuntimeContext {
         this.schemas = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
         schemaMap = schemas;
         wrappedValueStack.push(inputValue);
-        //TODO null object
-        schemaTypesStack.push(new SchemaType(null));
+        schemaTypesStack.push(SchemaType.createRoot());
         this.constructors = constructors;
         this.propertyAccessors = propertyAccessors;
         this.listAccessors = listAccessors;
@@ -43,12 +42,10 @@ public class RuntimeContext {
     public Object wrapInputValueAndEvaluate(Object value, Node node, String schema) {
         try {
             wrappedValueStack.push(value);
-            //TODO null object
-            schemaTypesStack.push(new SchemaType(schemaMap.get(schema)));
+            schemaTypesStack.push(SchemaType.create(schemaMap.get(schema)));
             return node.evaluate(this);
         } finally {
             wrappedValueStack.pop();
-            //TODO need test
             schemaTypesStack.pop();
         }
     }
@@ -99,19 +96,24 @@ public class RuntimeContext {
     }
 
     public Object getAliasValue(Supplier<Object> input, Object alias) {
-        schemaTypePushDepth++;
+        schemaTypeRecursivePushDepth++;
         DataObject dataObject = wrap(input.get());
-        SchemaType currentSchema = schemaTypesStack.getFirst();
-        SchemaType subSchema = currentSchema.access(alias);
-        schemaTypesStack.push(subSchema);
         try {
-            return dataObject.getValue(subSchema.getPropertyChainBefore(currentSchema).toArray());
+            return dataObject.getValue(evaluateAliasToPropertyChain(alias));
         } finally {
-            schemaTypePopDepth++;
-            if (schemaTypePushDepth == schemaTypePopDepth) {
-                for (schemaTypePopDepth = 0; schemaTypePushDepth > 0; schemaTypePushDepth--)
-                    schemaTypesStack.pop();
-            }
+            if (schemaTypeRecursivePushDepth == ++schemaTypeRecursivePopDepth)
+                popSchemaTypeAndResetDepthVar();
         }
+    }
+
+    private Object[] evaluateAliasToPropertyChain(Object alias) {
+        SchemaType currentSchema = schemaTypesStack.getFirst();
+        schemaTypesStack.push(currentSchema.access(alias));
+        return schemaTypesStack.getFirst().getPropertyChainBefore(currentSchema).toArray();
+    }
+
+    private void popSchemaTypeAndResetDepthVar() {
+        for (schemaTypeRecursivePopDepth = 0; schemaTypeRecursivePushDepth > 0; schemaTypeRecursivePushDepth--)
+            schemaTypesStack.pop();
     }
 }

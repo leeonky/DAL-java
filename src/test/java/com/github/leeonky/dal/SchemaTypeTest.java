@@ -36,29 +36,8 @@ class SchemaTypeTest {
     }
 
     @Nested
-    class PropertyChain {
-        SchemaType schemaType = new SchemaType(null, null, null);
-        SchemaType sub1 = new SchemaType(null, "field1", schemaType);
-        SchemaType sub2 = new SchemaType(null, "field2", sub1);
-
-        @Test
-        void return_empty_when_get_chain_from_self() {
-            assertThat(schemaType.getPropertyChainBefore(schemaType)).isEmpty();
-        }
-
-        @Test
-        void return_field_chain() {
-            assertThat(sub1.getPropertyChainBefore(schemaType))
-                    .containsExactly("field1");
-
-            assertThat(sub2.getPropertyChainBefore(schemaType))
-                    .containsExactly("field1", "field2");
-        }
-    }
-
-    @Nested
     class AccessProperty {
-        SchemaType schemaOrder = new SchemaType(BeanClass.create(Order.class), null, null);
+        SchemaType schemaOrder = SchemaType.create(BeanClass.create(Order.class));
 
         @Test
         void access_property_directly() {
