@@ -16,8 +16,8 @@ class PropertyTokenFactoryTest {
         return TokenFactory.createBeanPropertyTokenFactory();
     }
 
-    private void shouldParse(String code, String... values) {
-        assertThat(parseToken(code)).isEqualTo(propertyToken(values));
+    private void shouldParse(String code, String value) {
+        assertThat(parseToken(code)).isEqualTo(propertyToken(value));
     }
 
     private Token parseToken(String s) {
@@ -51,7 +51,6 @@ class PropertyTokenFactoryTest {
         @Test
         void should_return_token_when_given_valid_code() {
             shouldParse(".a ", "a");
-            shouldParse(".a.b ", "a", "b");
         }
 
         @ParameterizedTest

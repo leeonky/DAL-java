@@ -9,12 +9,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PropertyNodeTest {
@@ -22,25 +19,20 @@ class PropertyNodeTest {
 
     @Test
     void access_property_through_public_field() {
-        assertProperty(new Bean().setField(1), Collections.singletonList("field"), 1);
+        assertProperty(new Bean().setField(1), "field", 1);
     }
 
     @Test
     void access_property_through_public_get_method() {
-        assertProperty(new Bean().setMethod(1), Collections.singletonList("method"), 1);
-        assertProperty(new Bean().setBooleanValue(true), Collections.singletonList("booleanValue"), true);
-    }
-
-    @Test
-    void access_property_list() {
-        assertProperty(new Bean().setSubBean(new Bean().setField(1)), asList("subBean", "field"), 1);
+        assertProperty(new Bean().setMethod(1), "method", 1);
+        assertProperty(new Bean().setBooleanValue(true), "booleanValue", true);
     }
 
     @Test
     void access_map_value() {
         assertProperty(new HashMap<String, String>() {{
             put("key", "value");
-        }}, Collections.singletonList("key"), "value");
+        }}, "key", "value");
     }
 
     @Test
@@ -66,11 +58,11 @@ class PropertyNodeTest {
             }
         });
 
-        assertProperty(new JSONObject("{\"key\": \"value\"}"), Collections.singletonList("key"), "value");
+        assertProperty(new JSONObject("{\"key\": \"value\"}"), "key", "value");
     }
 
-    private void assertProperty(Object instance, List<String> properties, Object expected) {
-        Object value = new PropertyNode(new ConstNode(instance), properties)
+    private void assertProperty(Object instance, String property, Object expected) {
+        Object value = new PropertyNode(new ConstNode(instance), property)
                 .evaluate(runtimeContextBuilder.build(null));
 
         assertThat(value).isEqualTo(expected);

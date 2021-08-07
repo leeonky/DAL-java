@@ -2,31 +2,29 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
-import com.github.leeonky.util.BeanClass;
 
-import java.util.List;
 import java.util.Objects;
 
-//TODO single mode
+import static java.lang.String.format;
+
 public class PropertyNode extends Node {
     private final Node instanceNode;
+    private final Object name;
 
-    private final List<String> properties;
-
-    public PropertyNode(Node instanceNode, List<String> properties) {
+    public PropertyNode(Node instanceNode, Object property) {
         this.instanceNode = instanceNode;
-        this.properties = properties;
+        name = property;
     }
 
     @Override
     public Object evaluate(RuntimeContext context) {
-        String propertyChain = context.transformToFieldChain(properties);
         try {
-            return context.wrap(instanceNode.evaluate(context)).getValue(BeanClass.toChainNodes(propertyChain).toArray());
+            return context.getAliasValue(context.wrap(instanceNode.evaluate(context)), name);
         } catch (Exception e) {
             //TODO log original and alias
-            throw new RuntimeException("Get property '" + propertyChain +
-                    "' failed, property can be public field, getter or customer type getter", getPositionBegin());
+            throw new RuntimeException(
+                    format("Get property via `%s` failed, property can be public field, getter or customer type getter",
+                            inspect()), getPositionBegin());
         }
     }
 
@@ -34,11 +32,11 @@ public class PropertyNode extends Node {
     public boolean equals(Object obj) {
         return obj instanceof PropertyNode
                 && Objects.equals(instanceNode, ((PropertyNode) obj).instanceNode)
-                && Objects.equals(properties, ((PropertyNode) obj).properties);
+                && Objects.equals(name, ((PropertyNode) obj).name);
     }
 
     @Override
     public String inspect() {
-        return String.format("%s.%s", instanceNode.inspect(), String.join(".", properties));
+        return format("%s.%s", instanceNode.inspect(), name);
     }
 }

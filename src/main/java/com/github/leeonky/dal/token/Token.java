@@ -9,7 +9,6 @@ import java.util.Objects;
 import static com.github.leeonky.dal.DALCompiler.MATCHES;
 import static com.github.leeonky.dal.token.Scanner.OPT_MATCHES_STRING;
 import static java.text.MessageFormat.format;
-import static java.util.Arrays.asList;
 
 public class Token {
     private final Type type;
@@ -25,8 +24,8 @@ public class Token {
         return new Token(Type.WORD, value);
     }
 
-    public static Token propertyToken(String... properties) {
-        return new Token(Type.PROPERTY, asList(properties));
+    public static Token propertyToken(String property) {
+        return new Token(Type.PROPERTY, property);
     }
 
     public static Token constIndexToken(int value) {

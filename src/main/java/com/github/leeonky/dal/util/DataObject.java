@@ -42,9 +42,8 @@ public class DataObject {
     //TODO to be replaced
     @Deprecated
     public Object getPropertyValueBk(String name) {
-        if ("size".equals(name) && isList())
+        if ("size" .equals(name) && isList())
             return getListSize();
-        //TODO name contains escaped property name contains '.'
         if (name.contains(".")) {
             String[] split = name.split("\\.", 2);
             return getWrappedPropertyValue(split[0]).getPropertyValueBk(split[1]);
@@ -121,7 +120,7 @@ public class DataObject {
 
     private Object getValue(Object property) {
         if (isList()) {
-            if ("size".equals(property))
+            if ("size" .equals(property))
                 return getListSize();
             return getElement((int) property);
         }

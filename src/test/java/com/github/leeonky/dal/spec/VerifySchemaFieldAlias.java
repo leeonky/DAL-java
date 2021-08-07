@@ -87,6 +87,6 @@ class VerifySchemaFieldAlias extends Base {
         public Order order;
     }
 
-    //TODO alias same with field
+    //TODO alias same with field *****
     //TODO alias to list element
 }

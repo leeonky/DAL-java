@@ -65,7 +65,7 @@ public class DALCompiler {
             Token token = tokenStream.pop();
             switch (token.getType()) {
                 case PROPERTY:
-                    node = new PropertyNode(node, token.getProperties());
+                    node = new PropertyNode(node, token.getValue());
                     node.setPositionBegin(token.getPositionBegin());
                     break;
                 case CONST_INDEX:

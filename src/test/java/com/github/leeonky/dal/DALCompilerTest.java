@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 
 import static com.github.leeonky.dal.DALCompiler.MATCHES;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -38,12 +36,12 @@ class DALCompilerTest {
 
         @Test
         void access_property_of_root_value() {
-            assertCompileNode(".result", new PropertyNode(InputNode.INSTANCE, singletonList("result")));
+            assertCompileNode(".result", new PropertyNode(InputNode.INSTANCE, "result"));
         }
 
         @Test
         void access_property_list_of_root_value() {
-            assertCompileNode(".sub .result", new PropertyNode(new PropertyNode(InputNode.INSTANCE, singletonList("sub")), singletonList("result")));
+            assertCompileNode(".sub .result", new PropertyNode(new PropertyNode(InputNode.INSTANCE, "sub"), "result"));
         }
 
         @Test
@@ -53,14 +51,14 @@ class DALCompilerTest {
 
         @Test
         void access_one_const_value_property_ignore_root_value() {
-            assertCompileNode("''.empty", new PropertyNode(new ConstNode(""), singletonList("empty")));
+            assertCompileNode("''.empty", new PropertyNode(new ConstNode(""), "empty"));
         }
 
         @Test
         void access_property_after_bracket() {
             BracketNode bracketNode = new BracketNode();
             bracketNode.setNode(new ConstNode(""));
-            assertCompileNode("('').empty", new PropertyNode(bracketNode, singletonList("empty")));
+            assertCompileNode("('').empty", new PropertyNode(bracketNode, "empty"));
         }
     }
 
@@ -258,7 +256,7 @@ class DALCompilerTest {
             assertCompileNode("is String which .empty", new SchemaAssertionExpression(
                     InputNode.INSTANCE,
                     new SchemaNode("String"),
-                    new PropertyNode(InputNode.INSTANCE, asList("empty"))
+                    new PropertyNode(InputNode.INSTANCE, "empty")
             ));
         }
     }

@@ -7,7 +7,7 @@ import static com.github.leeonky.dal.parser.ParsingContext.*;
 import static com.github.leeonky.dal.parser.SourceCodeMatcher.not;
 import static com.github.leeonky.dal.parser.TokenContent.ALL_CHARACTERS;
 import static com.github.leeonky.dal.parser.TokenContent.leftTrim;
-import static com.github.leeonky.dal.parser.TokenStartEnd.*;
+import static com.github.leeonky.dal.parser.TokenStartEnd.before;
 
 public interface TokenFactory {
     static TokenFactory createNumberTokenFactory() {
@@ -19,7 +19,7 @@ public interface TokenFactory {
     static TokenFactory createBeanPropertyTokenFactory() {
         return startWith(excluded(CHARACTER('.')))
                 .take(leftTrim(ALL_CHARACTERS))
-                .endWith(END_OF_CODE.or(before(DELIMITER)))
+                .endWith(END_OF_CODE.or(before(DELIMITER)).or(before(CHARACTER('.'))))
                 .createAs(PROPERTY_TOKEN);
     }
 

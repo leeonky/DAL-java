@@ -80,11 +80,7 @@ class ScannerTest {
             assertScanTokens(".a", propertyToken("a"));
         }
 
-        @Test
-        void should_support_property_chain() {
-            assertScanTokens(".a.x", propertyToken("a", "x"));
-        }
-
+        //TODO should use [' a- key']
         @Test
         void should_support_access_property_via_bracket() {
             assertScanTokens("[ a - key]", propertyToken(" a - key"));

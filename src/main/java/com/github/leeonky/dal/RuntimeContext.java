@@ -100,7 +100,15 @@ public class RuntimeContext {
         return converter;
     }
 
-    public String transformToFieldChain(List<String> aliases) {
-        return String.join(".", schemaTypesStack.getFirst().transformToFieldChain(new LinkedList<>(aliases)));
+    public Object getAliasValue(DataObject object, Object alias) {
+        SchemaType first = schemaTypesStack.getFirst();
+        SchemaType sub = first.access(alias);
+        schemaTypesStack.push(sub);
+        try {
+            return object.getValue(sub.getPropertyChainBefore(first).toArray());
+        } finally {
+            //TODO need test ****
+//            schemaTypesStack.pop();
+        }
     }
 }

@@ -20,7 +20,7 @@ public class NewTokenFactory {
     public static final Function<String, Token> PROPERTY_TOKEN = content -> {
         if (content.isEmpty())
             throw new IllegalTokenContentException("property chain not finished");
-        return Token.propertyToken(content.split("\\."));
+        return Token.propertyToken(content);
     };
     public static final Function<String, Token> CONST_STRING_TOKEN = Token::constValueToken;
     public static final Function<String, Token> REGEX_TOKEN = Token::regexToken;
