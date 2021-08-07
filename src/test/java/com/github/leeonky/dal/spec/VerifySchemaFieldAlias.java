@@ -62,6 +62,19 @@ class VerifySchemaFieldAlias extends Base {
         }}, "is Order which .user.aliasOfAge = 30");
     }
 
+    @Test
+    void should_work_for_use_alias_in_complex_expression() {
+        assertPass(new HashMap<String, Object>() {{
+            put("id", "001");
+            put("lines", singleton(new HashMap<String, Object>() {{
+                put("amount", "100");
+            }}));
+            put("user", new HashMap<String, Object>() {{
+                put("age", 30);
+            }});
+        }}, "is Order which .aliasOfId = '001' and .user.aliasOfAge = 30 and .firstLine.amount = '100'");
+    }
+
     @Partial
     @FieldAliases({
             @FieldAlias(alias = "aliasOfId", field = "id"),

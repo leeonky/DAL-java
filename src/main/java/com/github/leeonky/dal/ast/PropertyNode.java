@@ -19,7 +19,7 @@ public class PropertyNode extends Node {
     @Override
     public Object evaluate(RuntimeContext context) {
         try {
-            return context.getAliasValue(context.wrap(instanceNode.evaluate(context)), name);
+            return context.getAliasValue(() -> instanceNode.evaluate(context), name);
         } catch (Exception e) {
             //TODO log original and alias
             throw new RuntimeException(

@@ -9,6 +9,7 @@ import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class RuntimeContext {
@@ -20,6 +21,7 @@ public class RuntimeContext {
     private final Set<Class<?>> schemas;
     private final Map<String, BeanClass<?>> schemaMap;
     private final Converter converter = Converter.createDefault();
+    private int schemaTypePushDepth = 0, schemaTypePopDepth = 0;
 
     public RuntimeContext(Object inputValue, TypeData<PropertyAccessor> propertyAccessors,
                           Map<String, ConstructorViaSchema> constructors, TypeData<ListAccessor> listAccessors,
@@ -69,27 +71,23 @@ public class RuntimeContext {
 
     @SuppressWarnings("unchecked")
     public Optional<Set<String>> findPropertyReaderNames(Object instance) {
-        return propertyAccessors.getData(instance)
-                .map(f -> f.getPropertyNames(instance));
+        return propertyAccessors.getData(instance).map(f -> f.getPropertyNames(instance));
     }
 
     @SuppressWarnings("unchecked")
     public Boolean isNull(Object instance) {
-        return propertyAccessors.getData(instance)
-                .map(p -> p.isNull(instance))
+        return propertyAccessors.getData(instance).map(p -> p.isNull(instance))
                 .orElseGet(() -> Objects.equals(instance, null));
     }
 
     @SuppressWarnings("unchecked")
     public Optional<Object> getPropertyValue(Object instance, String name) {
-        return propertyAccessors.getData(instance)
-                .map(p -> p.getValue(instance, name));
+        return propertyAccessors.getData(instance).map(p -> p.getValue(instance, name));
     }
 
     @SuppressWarnings("unchecked")
     public Optional<Iterable<Object>> gitList(Object instance) {
-        return listAccessors.getData(instance)
-                .map(l -> l.toIterable(instance));
+        return listAccessors.getData(instance).map(l -> l.toIterable(instance));
     }
 
     public boolean isRegisteredList(Object instance) {
@@ -100,15 +98,20 @@ public class RuntimeContext {
         return converter;
     }
 
-    public Object getAliasValue(DataObject object, Object alias) {
-        SchemaType first = schemaTypesStack.getFirst();
-        SchemaType sub = first.access(alias);
-        schemaTypesStack.push(sub);
+    public Object getAliasValue(Supplier<Object> input, Object alias) {
+        schemaTypePushDepth++;
+        DataObject dataObject = wrap(input.get());
+        SchemaType currentSchema = schemaTypesStack.getFirst();
+        SchemaType subSchema = currentSchema.access(alias);
+        schemaTypesStack.push(subSchema);
         try {
-            return object.getValue(sub.getPropertyChainBefore(first).toArray());
+            return dataObject.getValue(subSchema.getPropertyChainBefore(currentSchema).toArray());
         } finally {
-            //TODO need test ****
-//            schemaTypesStack.pop();
+            schemaTypePopDepth++;
+            if (schemaTypePushDepth == schemaTypePopDepth) {
+                for (schemaTypePopDepth = 0; schemaTypePushDepth > 0; schemaTypePushDepth--)
+                    schemaTypesStack.pop();
+            }
         }
     }
 }
