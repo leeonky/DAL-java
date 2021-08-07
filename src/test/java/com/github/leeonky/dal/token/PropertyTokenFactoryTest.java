@@ -11,18 +11,15 @@ import static com.github.leeonky.dal.token.Token.propertyToken;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class PropertyTokenFactoryTest {
-    private TokenFactory createTokenFactory() {
+class PropertyTokenFactoryTest extends TokenFactoryTestBase {
+    @Override
+    protected TokenFactory createTokenFactory() {
         return TokenFactory.createBeanPropertyTokenFactory();
     }
 
-    private void shouldParse(String code, String value) {
-        assertThat(parseToken(code)).isEqualTo(propertyToken(value));
-    }
-
-    private Token parseToken(String s) {
-        final SourceCode sourceCode = new SourceCode(s);
-        return createTokenFactory().fetchToken(new ParsingContext(sourceCode, null));
+    @Override
+    protected Token createToken(String value) {
+        return Token.propertyToken(value);
     }
 
     @Nested

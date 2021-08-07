@@ -10,19 +10,16 @@ import static com.github.leeonky.dal.token.Scanner.OPT_MATCHES_STRING;
 import static com.github.leeonky.dal.token.Token.operatorToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class OperatorTokenFactoryTest {
+class OperatorTokenFactoryTest extends TokenFactoryTestBase {
 
-    private TokenFactory createTokenFactory() {
+    @Override
+    protected TokenFactory createTokenFactory() {
         return TokenFactory.createOperatorTokenFactory();
     }
 
-    private void shouldParse(String code, String value) {
-        assertThat(parseToken(code)).isEqualTo(operatorToken(value));
-    }
-
-    private Token parseToken(String s) {
-        final SourceCode sourceCode = new SourceCode(s);
-        return createTokenFactory().fetchToken(new ParsingContext(sourceCode, null));
+    @Override
+    protected Token createToken(String value) {
+        return Token.operatorToken(value);
     }
 
     @Nested
