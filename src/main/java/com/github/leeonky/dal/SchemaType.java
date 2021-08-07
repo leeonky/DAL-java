@@ -7,25 +7,33 @@ import com.github.leeonky.util.BeanClass;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Arrays.asList;
 
 public class SchemaType {
-    public final Class<?> schema;
+    public final BeanClass<?> schema;
+    private final Object fromProperty;
+    private final SchemaType parent;
 
-    public SchemaType(Class<?> schema) {
+    public SchemaType(BeanClass<?> schema) {
+        this(schema, null, null);
+    }
+
+    public SchemaType(BeanClass<?> schema, Object fromProperty, SchemaType parent) {
         this.schema = schema;
+        this.fromProperty = fromProperty;
+        this.parent = parent;
     }
 
     private SchemaType getFieldSchema(String field) {
         try {
-            return new SchemaType(BeanClass.create(schema).getPropertyChainReader(field).getTypeClass());
+            return new SchemaType(schema.getPropertyChainReader(field).getType());
         } catch (Exception ignore) {
             return new SchemaType(null);
         }
     }
 
-    //TODO nested is list element
     private String fetchFieldChain(String name) {
         return allAliases().stream().filter(fieldAlias -> fieldAlias.alias().equals(name))
                 .map(FieldAlias::field).findFirst().orElse(name);
@@ -33,13 +41,16 @@ public class SchemaType {
 
     private List<FieldAlias> allAliases() {
         List<FieldAlias> aliases = new ArrayList<>();
-        FieldAliases fieldAliases = schema.getAnnotation(FieldAliases.class);
-        if (fieldAliases != null)
-            aliases.addAll(asList(fieldAliases.value()));
+        if (schema != null) {
+            FieldAliases fieldAliases = schema.getType().getAnnotation(FieldAliases.class);
+            if (fieldAliases != null)
+                aliases.addAll(asList(fieldAliases.value()));
+        }
         return aliases;
     }
 
     //TODO nested in List element
+    //TODO to be removed
     public List<String> transformToFieldChain(LinkedList<String> aliases) {
         if (schema == null)
             return aliases;
@@ -51,5 +62,36 @@ public class SchemaType {
         if (!aliases.isEmpty())
             result.addAll(getFieldSchema(fieldChain).transformToFieldChain(aliases));
         return result;
+    }
+
+    public SchemaType access(Object alias) {
+        if (alias instanceof Integer)
+            return subSchema(alias);
+        String property = fetchFieldChain((String) alias);
+        if (Objects.equals(property, alias))
+            return subSchema(property);
+        List<Object> chain = BeanClass.toChainNodes(property);
+        return chain.stream().skip(1).reduce(access(chain.get(0)), SchemaType::access, (o1, o2) -> {
+            throw new IllegalStateException("Not allow parallel here!");
+        });
+    }
+
+    private SchemaType subSchema(Object property) {
+        try {
+            if (property instanceof Integer)
+                return new SchemaType(schema.getElementType(), property, this);
+            else
+                return new SchemaType(schema.getPropertyChainReader((String) property).getType(), property, this);
+        } catch (Exception e) {
+            return new SchemaType(null, property, this);
+        }
+    }
+
+    public List<Object> getPropertyChainBefore(SchemaType schemaOrder) {
+        if (schemaOrder == this)
+            return new ArrayList<>();
+        List<Object> chain = parent.getPropertyChainBefore(schemaOrder);
+        chain.add(fromProperty);
+        return chain;
     }
 }

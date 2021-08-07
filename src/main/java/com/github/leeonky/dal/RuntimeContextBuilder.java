@@ -7,6 +7,7 @@ import com.github.leeonky.dal.util.DataObject;
 import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import com.github.leeonky.dal.util.TypeData;
+import com.github.leeonky.util.BeanClass;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -17,7 +18,7 @@ public class RuntimeContextBuilder {
     private final TypeData<PropertyAccessor> propertyAccessors = new TypeData<>();
     private final TypeData<ListAccessor> listAccessors = new TypeData<>();
     private final Map<String, ConstructorViaSchema> constructors = new LinkedHashMap<>();
-    private final Map<String, Class<?>> schemas = new HashMap<>();
+    private final Map<String, BeanClass<?>> schemas = new HashMap<>();
 
     public RuntimeContextBuilder() {
         registerValueFormat(new Formatters.String());
@@ -57,7 +58,7 @@ public class RuntimeContextBuilder {
     }
 
     public RuntimeContextBuilder registerSchema(String name, Class<?> schema) {
-        schemas.put(name, schema);
+        schemas.put(name, BeanClass.create(schema));
         return registerSchema(name, (bw) -> bw.createSchemaVerifier().verify(schema, null, ""));
     }
 

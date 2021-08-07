@@ -5,9 +5,11 @@ import com.github.leeonky.dal.util.DataObject;
 import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
 import com.github.leeonky.dal.util.TypeData;
+import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RuntimeContext {
     private final LinkedList<SchemaType> schemaTypesStack = new LinkedList<>();
@@ -16,13 +18,13 @@ public class RuntimeContext {
     private final LinkedList<Object> wrappedValueStack = new LinkedList<>();
     private final Map<String, ConstructorViaSchema> constructors;
     private final Set<Class<?>> schemas;
-    private final Map<String, Class<?>> schemaMap;
+    private final Map<String, BeanClass<?>> schemaMap;
     private final Converter converter = Converter.createDefault();
 
     public RuntimeContext(Object inputValue, TypeData<PropertyAccessor> propertyAccessors,
                           Map<String, ConstructorViaSchema> constructors, TypeData<ListAccessor> listAccessors,
-                          Map<String, Class<?>> schemas) {
-        this.schemas = new HashSet<>(schemas.values());
+                          Map<String, BeanClass<?>> schemas) {
+        this.schemas = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
         schemaMap = schemas;
         wrappedValueStack.push(inputValue);
         //TODO null object

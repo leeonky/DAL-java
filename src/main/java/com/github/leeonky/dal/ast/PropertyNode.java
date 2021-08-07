@@ -7,8 +7,10 @@ import com.github.leeonky.util.BeanClass;
 import java.util.List;
 import java.util.Objects;
 
+//TODO single mode
 public class PropertyNode extends Node {
     private final Node instanceNode;
+
     private final List<String> properties;
 
     public PropertyNode(Node instanceNode, List<String> properties) {

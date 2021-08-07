@@ -12,6 +12,7 @@ import static com.github.leeonky.dal.token.Token.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+//TODO clean some duplicated UT
 class ScannerTest {
 
     @Test
