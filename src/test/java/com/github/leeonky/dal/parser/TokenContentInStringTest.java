@@ -4,11 +4,11 @@ import com.github.leeonky.dal.token.SourceCode;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.parser.TokenContent.ALL_CHARACTERS;
-import static com.github.leeonky.dal.parser.TokenContent.leftTrim;
+import static com.github.leeonky.dal.parser.TokenContentInString.ALL_CHARACTERS;
+import static com.github.leeonky.dal.parser.TokenContentInString.leftTrim;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TokenContentTest {
+class TokenContentInStringTest {
 
     @Nested
     class GetChar {
@@ -24,7 +24,7 @@ class TokenContentTest {
         @Test
         void support_escape() {
             SourceCode sourceCode = new SourceCode("ab=cd");
-            TokenContent taker = ALL_CHARACTERS
+            TokenContentInString taker = ALL_CHARACTERS
                     .escape("ab", 'x')
                     .escape("cd", 'y');
 
@@ -36,7 +36,7 @@ class TokenContentTest {
         @Test
         void copied_getter_with_the_same_behavior() {
             SourceCode sourceCode = new SourceCode("ab=cd");
-            TokenContent taker = ALL_CHARACTERS
+            TokenContentInString taker = ALL_CHARACTERS
                     .escape("ab", 'x')
                     .escape("cd", 'y').copy();
 
@@ -48,13 +48,13 @@ class TokenContentTest {
 
     @Nested
     class LeftTrim {
-        TokenContent taker = leftTrim(ALL_CHARACTERS);
+        TokenContentInString content = leftTrim(ALL_CHARACTERS);
 
         @Test
         void left_trim_white_space() {
             SourceCode sourceCode = new SourceCode("  a");
 
-            taker.preprocess(sourceCode);
+            content.preprocess(sourceCode);
 
             assertThat(sourceCode.currentChar()).isEqualTo('a');
         }
@@ -63,9 +63,11 @@ class TokenContentTest {
         void copied_getter_with_the_same_behavior() {
             SourceCode sourceCode = new SourceCode("  a");
 
-            taker.copy().preprocess(sourceCode);
+            content.copy().preprocess(sourceCode);
 
             assertThat(sourceCode.currentChar()).isEqualTo('a');
         }
     }
+
+    //right trim
 }

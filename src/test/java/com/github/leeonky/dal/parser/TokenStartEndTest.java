@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.github.leeonky.dal.parser.NewTokenFactory.CONST_STRING_TOKEN;
 import static com.github.leeonky.dal.parser.ParsingContext.*;
-import static com.github.leeonky.dal.parser.TokenContent.ALL_CHARACTERS;
+import static com.github.leeonky.dal.parser.TokenContentInString.ALL_CHARACTERS;
 import static com.github.leeonky.dal.parser.TokenStartEnd.before;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;

@@ -3,7 +3,7 @@ package com.github.leeonky.dal.token;
 import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.Operator;
 
-import java.util.List;
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import static com.github.leeonky.dal.DALCompiler.MATCHES;
@@ -24,7 +24,7 @@ public class Token {
         return new Token(Type.WORD, value);
     }
 
-    public static Token propertyToken(String property) {
+    public static Token propertyToken(Object property) {
         return new Token(Type.PROPERTY, property);
     }
 
@@ -68,11 +68,6 @@ public class Token {
         return value;
     }
 
-    @SuppressWarnings("unchecked")
-    public List<String> getProperties() {
-        return (List<String>) value;
-    }
-
     public Type getType() {
         return type;
     }
@@ -81,16 +76,18 @@ public class Token {
         return positionEnd;
     }
 
-    public void setPositionEnd(int positionEnd) {
+    public Token setPositionEnd(int positionEnd) {
         this.positionEnd = positionEnd;
+        return this;
     }
 
     public int getPositionBegin() {
         return positionBegin;
     }
 
-    public void setPositionBegin(int positionBegin) {
+    public Token setPositionBegin(int positionBegin) {
         this.positionBegin = positionBegin;
+        return this;
     }
 
     public Operator toOperator(boolean isUnaryOperator) {
@@ -168,6 +165,17 @@ public class Token {
     public String toString() {
         return format("Token'{'type={0}, value={1}, positionBegin={2}, positionEnd={3}'}'",
                 type, value, positionBegin, positionEnd);
+    }
+
+    public Object getPropertyOrIndex() {
+        if (value instanceof BigDecimal) {
+            try {
+                return Integer.valueOf(value.toString());
+            } catch (NumberFormatException ignore) {
+                throw new SyntaxException(getPositionBegin(), "must be integer");
+            }
+        }
+        return getValue();
     }
 
     public enum Type {

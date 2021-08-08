@@ -35,6 +35,9 @@ class NumberTokenFactoryTest extends TokenFactoryTestBase {
         void return_empty_when_invalid_number() {
             assertThat(parseToken("1ab ")).isNull();
         }
+
+        //TODO seek position back when invalid number
+        //TODO do not change last when invalid number
     }
 
     @Nested

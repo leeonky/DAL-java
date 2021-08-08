@@ -5,8 +5,9 @@ import com.github.leeonky.dal.parser.ParsingContext;
 import static com.github.leeonky.dal.parser.NewTokenFactory.*;
 import static com.github.leeonky.dal.parser.ParsingContext.*;
 import static com.github.leeonky.dal.parser.SourceCodeMatcher.not;
-import static com.github.leeonky.dal.parser.TokenContent.ALL_CHARACTERS;
-import static com.github.leeonky.dal.parser.TokenContent.leftTrim;
+import static com.github.leeonky.dal.parser.TokenContentInString.ALL_CHARACTERS;
+import static com.github.leeonky.dal.parser.TokenContentInString.leftTrim;
+import static com.github.leeonky.dal.parser.TokenContentInToken.byFactories;
 import static com.github.leeonky.dal.parser.TokenStartEnd.before;
 
 public interface TokenFactory {
@@ -64,6 +65,14 @@ public interface TokenFactory {
 
     static TokenFactory createEndBracketTokenFactory() {
         return equalToCharacter(')').createAs(END_BRACKET_TOKEN);
+    }
+
+    static TokenFactory createBracketPropertyTokenFactory() {
+        TokenFactory numberTokenFactory = createNumberTokenFactory();
+        return startWith(excluded(CHARACTER('[').except(AFTER_TOKEN_MATCHES)))
+                .take(byFactories(numberTokenFactory))
+                .endWith(excluded(CHARACTER(']')))
+                .createAs(BRACKET_PROPERTY_TOKEN);
     }
 
     Token fetchToken(ParsingContext context);

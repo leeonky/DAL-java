@@ -55,18 +55,35 @@ public class ParsingContext {
                 when(sourceCodeMatcher.matches(context)).then(context.sourceCode::takeCurrentChar));
     }
 
-    public Token parseToken(TokenStartEnd start, TokenContent tokenContent, TokenStartEnd end,
+    public Token parseToken(TokenStartEnd start, TokenContentInString content, TokenStartEnd end,
                             Function<String, Token> constructor) {
+        int position = sourceCode.getPosition();
         return when(start.matches(this)).thenReturn(() -> {
-            parseContent(tokenContent, end);
-            return createToken(constructor);
+            parseContent(content, end);
+            Token token = createToken(constructor);
+            if (token != null)
+                return token.setPositionBegin(position).setPositionEnd(sourceCode.getPosition());
+            return null;
         });
     }
 
-    private void parseContent(TokenContent tokenContent, TokenStartEnd end) {
-        tokenContent.preprocess(sourceCode);
+    public Token parseToken(TokenStartEnd start, TokenContentInToken content, TokenStartEnd end,
+                            Function<Token, Token> constructor) {
+        int position = sourceCode.getPosition();
+        return when(start.matches(this)).thenReturn(() -> {
+            content.preprocess(sourceCode);
+            //TODO end of ]
+            last = constructor.apply(content.getToken(this));
+            last.setPositionBegin(position);
+            last.setPositionEnd(sourceCode.getPosition());
+            return last;
+        });
+    }
+
+    private void parseContent(TokenContentInString content, TokenStartEnd end) {
+        content.preprocess(sourceCode);
         while (!end.matches(this))
-            parsedCode.feed(tokenContent.getChar(sourceCode));
+            parsedCode.feed(content.getChar(sourceCode));
     }
 
     private Token createToken(Function<String, Token> constructor) {

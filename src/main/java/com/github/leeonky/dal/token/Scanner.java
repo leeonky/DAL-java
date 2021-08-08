@@ -47,6 +47,7 @@ public class Scanner {
                     .map(tokenFactory -> tokenFactory.fetchToken(context))
                     .filter(Objects::nonNull).findFirst().orElseGet(() ->
                             takeTokenCandidate(sourceCode).fetchToken(sourceCode));
+            //TODO move inside token create
             token.setPositionBegin(begin);
             token.setPositionEnd(sourceCode.getPosition());
             tokenStream.appendToken(token);
