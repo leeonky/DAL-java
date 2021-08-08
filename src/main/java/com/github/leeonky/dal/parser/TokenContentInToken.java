@@ -7,38 +7,31 @@ import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
 
-public class TokenContentInToken extends ContentPreprocessor<Token, TokenContentInToken> {
+public class TokenContentInToken {
     private Function<ParsingContext, Token> tokenGetter = context -> null;
 
     private TokenContentInToken() {
-        super();
     }
 
     public static TokenContentInToken byFactory(TokenFactory factory) {
         return new TokenContentInToken().setTokenGetter(factory::fetchToken);
     }
 
-    protected TokenContentInToken setTokenGetter(Function<ParsingContext, Token> tokenGetter) {
-        this.tokenGetter = tokenGetter;
-        return this;
+    public TokenContentInToken or(TokenFactory tokenFactory) {
+        return copy().setTokenGetter(context -> ofNullable(tokenGetter.apply(context))
+                .orElseGet(() -> tokenFactory.fetchToken(context)));
     }
 
     Token getToken(ParsingContext context) {
         return tokenGetter.apply(context);
     }
 
-    @Override
-    protected TokenContentInToken newInstance() {
-        return new TokenContentInToken();
-    }
-
-    @Override
     protected TokenContentInToken copy() {
-        return super.copy().setTokenGetter(tokenGetter);
+        return new TokenContentInToken().setTokenGetter(tokenGetter);
     }
 
-    public TokenContentInToken or(TokenFactory tokenFactory) {
-        return copy().setTokenGetter(context -> ofNullable(tokenGetter.apply(context))
-                .orElseGet(() -> tokenFactory.fetchToken(context)));
+    private TokenContentInToken setTokenGetter(Function<ParsingContext, Token> tokenGetter) {
+        this.tokenGetter = tokenGetter;
+        return this;
     }
 }

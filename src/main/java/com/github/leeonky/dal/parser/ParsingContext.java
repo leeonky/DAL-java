@@ -31,8 +31,7 @@ public class ParsingContext {
     private final SourceCode sourceCode;
     private final ParsedCode parsedCode = new ParsedCode();
 
-    //TODO to be private
-    public Token last;
+    private Token last;
 
     public ParsingContext(SourceCode sourceCode, Token last) {
         this.sourceCode = sourceCode;

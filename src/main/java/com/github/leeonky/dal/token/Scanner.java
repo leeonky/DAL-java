@@ -38,15 +38,10 @@ public class Scanner {
         //TODO move tokenStream in ParsingContext
         ParsingContext context = new ParsingContext(sourceCode, null);
         while (sourceCode.hasContent()) {
-            int begin = sourceCode.getPosition();
             Token token = tokenFactories.stream()
                     .map(tokenFactory -> tokenFactory.fetchToken(context))
                     .filter(Objects::nonNull).findFirst().get();
-            //TODO move inside token create
-            token.setPositionBegin(begin);
-            token.setPositionEnd(sourceCode.getPosition());
             tokenStream.appendToken(token);
-            context.last = token;
         }
         return tokenStream;
     }
