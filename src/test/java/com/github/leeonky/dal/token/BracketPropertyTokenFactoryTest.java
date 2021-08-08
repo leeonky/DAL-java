@@ -41,8 +41,14 @@ class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
             assertThat(createTokenFactory().fetchToken(new ParsingContext(sourceCode, OPT_MATCHES)))
                     .isNull();
         }
-    }
 
+        @Test
+        void should_raise_error_when_unexpected_token() {
+            assertThat(invalidSyntaxCode("[+]"))
+                    .hasMessage("Unexpected token")
+                    .hasFieldOrPropertyWithValue("position", 1);
+        }
+    }
 
     @Nested
     class Parse {

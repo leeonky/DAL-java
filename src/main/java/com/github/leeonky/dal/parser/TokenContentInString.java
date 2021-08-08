@@ -4,6 +4,7 @@ import com.github.leeonky.dal.token.SourceCode;
 
 import java.util.function.Function;
 
+//TODO inline back...
 public class TokenContentInString extends ContentPreprocessor<String, TokenContentInString> {
     public static final TokenContentInString ALL_CHARACTERS = new TokenContentInString();
     private Function<SourceCode, Character> charGetter = SourceCode::takeCurrentChar;

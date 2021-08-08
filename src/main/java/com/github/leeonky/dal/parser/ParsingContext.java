@@ -74,14 +74,16 @@ public class ParsingContext {
         int position = sourceCode.getPosition();
         //TODO same logic with scanner
         return when(start.matches(this)).thenReturn(() -> {
-            List<Token> temp = new ArrayList<>();
+            List<Token> tokens = new ArrayList<>();
             while (!end.matches(this)) {
-                //TODO maybe null
-                temp.add(content.getToken(this));
+                Token token = content.getToken(this);
+                if (token == null)
+                    throw new SyntaxException(sourceCode.getPosition(), "Unexpected token");
+                tokens.add(token);
                 sourceCode.trimLeft();
             }
             try {
-                last = constructor.apply(temp);
+                last = constructor.apply(tokens);
                 last.setPositionBegin(position);
                 last.setPositionEnd(sourceCode.getPosition());
             } catch (IllegalTokenContentException e) {

@@ -7,7 +7,6 @@ import java.util.function.Function;
 
 import static java.util.Optional.ofNullable;
 
-//TODO missing UT
 public class TokenContentInToken extends ContentPreprocessor<Token, TokenContentInToken> {
     private Function<ParsingContext, Token> tokenGetter = context -> null;
 

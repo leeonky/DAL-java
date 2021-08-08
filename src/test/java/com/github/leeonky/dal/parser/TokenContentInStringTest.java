@@ -68,6 +68,4 @@ class TokenContentInStringTest {
             assertThat(sourceCode.currentChar()).isEqualTo('a');
         }
     }
-
-    //right trim
 }
