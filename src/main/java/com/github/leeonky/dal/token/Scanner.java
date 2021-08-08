@@ -40,6 +40,7 @@ public class Scanner {
 
     public TokenStream scan(SourceCode sourceCode) {
         TokenStream tokenStream = new TokenStream();
+        //TODO move tokenStream in ParsingContext
         ParsingContext context = new ParsingContext(sourceCode, null);
         while (sourceCode.hasContent()) {
             int begin = sourceCode.getPosition();

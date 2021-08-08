@@ -36,8 +36,8 @@ class NumberTokenFactoryTest extends TokenFactoryTestBase {
             assertThat(parseToken("1ab ")).isNull();
         }
 
-        //TODO seek position back when invalid number
-        //TODO do not change last when invalid number
+        //TODO seek position back when invalid number ****
+        //TODO do not change last when invalid number ****
     }
 
     @Nested

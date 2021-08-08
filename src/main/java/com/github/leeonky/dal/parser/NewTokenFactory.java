@@ -26,7 +26,11 @@ public class NewTokenFactory {
     public static final Function<String, Token> REGEX_TOKEN = Token::regexToken;
     public static final Function<String, Token> BEGIN_BRACKET_TOKEN = s -> Token.beginBracketToken();
     public static final Function<String, Token> END_BRACKET_TOKEN = s -> Token.endBracketToken();
-    public static final Function<Token, Token> BRACKET_PROPERTY_TOKEN = token -> Token.propertyToken(token.getPropertyOrIndex());
+    public static final Function<Token, Token> BRACKET_PROPERTY_TOKEN = token -> {
+        if (token == null)
+            throw new IllegalTokenContentException("should given property or array index");
+        return Token.propertyToken(token.getPropertyOrIndex());
+    };
 
     private final TokenStartEnd start;
 

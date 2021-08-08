@@ -13,7 +13,7 @@ public class TokenContentInToken extends ContentPreprocessor<Token, TokenContent
         super();
     }
 
-    public static TokenContentInToken byFactories(TokenFactory factory) {
+    public static TokenContentInToken byFactory(TokenFactory factory) {
         return new TokenContentInToken().setTokenGetter(factory::fetchToken);
     }
 

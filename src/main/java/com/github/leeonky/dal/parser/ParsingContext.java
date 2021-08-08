@@ -70,12 +70,20 @@ public class ParsingContext {
     public Token parseToken(TokenStartEnd start, TokenContentInToken content, TokenStartEnd end,
                             Function<Token, Token> constructor) {
         int position = sourceCode.getPosition();
+        //TODO same logic with scanner
         return when(start.matches(this)).thenReturn(() -> {
-            content.preprocess(sourceCode);
-            //TODO end of ]
-            last = constructor.apply(content.getToken(this));
-            last.setPositionBegin(position);
-            last.setPositionEnd(sourceCode.getPosition());
+            Token temp = null;
+            //TODO skip white space
+            while (!end.matches(this)) {
+                temp = content.getToken(this);
+            }
+            try {
+                last = constructor.apply(temp);
+                last.setPositionBegin(position);
+                last.setPositionEnd(sourceCode.getPosition());
+            } catch (IllegalTokenContentException e) {
+                throw new SyntaxException(sourceCode.getPosition() - 1, e.getMessage());
+            }
             return last;
         });
     }
@@ -90,8 +98,7 @@ public class ParsingContext {
         try {
             return last = constructor.apply(parsedCode.takeContent());
         } catch (IllegalTokenContentException e) {
-            throw new SyntaxException(sourceCode.getPosition(), e.getMessage());
+            throw new SyntaxException(sourceCode.getPosition() - 1, e.getMessage());
         }
     }
-
 }

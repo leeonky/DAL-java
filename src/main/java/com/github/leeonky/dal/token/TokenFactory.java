@@ -7,7 +7,7 @@ import static com.github.leeonky.dal.parser.ParsingContext.*;
 import static com.github.leeonky.dal.parser.SourceCodeMatcher.not;
 import static com.github.leeonky.dal.parser.TokenContentInString.ALL_CHARACTERS;
 import static com.github.leeonky.dal.parser.TokenContentInString.leftTrim;
-import static com.github.leeonky.dal.parser.TokenContentInToken.byFactories;
+import static com.github.leeonky.dal.parser.TokenContentInToken.byFactory;
 import static com.github.leeonky.dal.parser.TokenStartEnd.before;
 
 public interface TokenFactory {
@@ -70,8 +70,8 @@ public interface TokenFactory {
     static TokenFactory createBracketPropertyTokenFactory() {
         TokenFactory numberTokenFactory = createNumberTokenFactory();
         return startWith(excluded(CHARACTER('[').except(AFTER_TOKEN_MATCHES)))
-                .take(byFactories(numberTokenFactory))
-                .endWith(excluded(CHARACTER(']')))
+                .take(byFactory(numberTokenFactory))
+                .endWith(excluded(CHARACTER(']')).orThrow("should end with `]`"))
                 .createAs(BRACKET_PROPERTY_TOKEN);
     }
 

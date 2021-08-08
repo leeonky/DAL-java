@@ -63,7 +63,7 @@ class PropertyTokenFactoryTest extends TokenFactoryTestBase {
         @Test
         void do_not_allow_get_value_when_no_value() {
             assertThat(assertThrows(SyntaxException.class, () -> parseToken(". ")))
-                    .hasMessage("property chain not finished").hasFieldOrPropertyWithValue("position", 2);
+                    .hasMessage("property chain not finished").hasFieldOrPropertyWithValue("position", 1);
         }
     }
 
@@ -78,7 +78,7 @@ class PropertyTokenFactoryTest extends TokenFactoryTestBase {
         @Test
         void do_not_allow_get_value_when_no_value() {
             assertThat(assertThrows(SyntaxException.class, () -> parseToken(".")))
-                    .hasMessage("property chain not finished").hasFieldOrPropertyWithValue("position", 1);
+                    .hasMessage("property chain not finished").hasFieldOrPropertyWithValue("position", 0);
         }
     }
 }
