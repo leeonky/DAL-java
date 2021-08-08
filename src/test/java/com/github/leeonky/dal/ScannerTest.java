@@ -59,20 +59,6 @@ class ScannerTest {
     }
 
     @Nested
-    class ConstIndexToken {
-
-        @Test
-        void should_support_const_integer_index() {
-            assertScanTokens("[1]", constIndexToken(1));
-        }
-
-        @Test
-        void should_end_with_end_bracket() {
-            assertCompileError(" [xx   ", 7, "missed ']'");
-        }
-    }
-
-    @Nested
     class PropertyToken {
 
         @Test
@@ -80,19 +66,9 @@ class ScannerTest {
             assertScanTokens(".a", propertyToken("a"));
         }
 
-        //TODO should use [' a- key']
         @Test
-        void should_support_access_property_via_bracket() {
-            assertScanTokens("[ a - key]", propertyToken(" a - key"));
-        }
-
-        //        @Test
-//        TODO skip
-        void should_support_escape_char_in_bracket() {
-            assertScanTokens("['0']", propertyToken("0"));
-            assertScanTokens("[']']", propertyToken("]"));
-            assertScanTokens("['\\'']", propertyToken("'"));
-            assertScanTokens("['\\\\']", propertyToken("\\"));
+        void should_support_const_integer_index() {
+            assertScanTokens("[1]", propertyToken(1));
         }
     }
 
@@ -173,7 +149,7 @@ class ScannerTest {
             assertScanTokens("11(", constValueToken(new BigDecimal(11)), beginBracketToken());
             assertScanTokens("11)", constValueToken(new BigDecimal(11)), endBracketToken());
 
-            assertScanTokens("11[1]", constValueToken(new BigDecimal(11)), constIndexToken(1));
+            assertScanTokens("11[1]", constValueToken(new BigDecimal(11)), propertyToken(1));
         }
 
         @Test
@@ -182,7 +158,7 @@ class ScannerTest {
 
             assertScanTokens("a=", wordToken("a"), operatorToken("="));
 
-            assertScanTokens("a[0]", wordToken("a"), constIndexToken(0));
+            assertScanTokens("a[0]", wordToken("a"), propertyToken(0));
 
             assertScanTokens("a(", wordToken("a"), beginBracketToken());
             assertScanTokens("a)", wordToken("a"), endBracketToken());
@@ -192,7 +168,7 @@ class ScannerTest {
         void split_property_token() {
             assertScanTokens(".a .b", propertyToken("a"), propertyToken("b"));
 
-            assertScanTokens(".a[1]", propertyToken("a"), constIndexToken(1));
+            assertScanTokens(".a[1]", propertyToken("a"), propertyToken(1));
 
             assertScanTokens(".a=", propertyToken("a"), operatorToken("="));
 
@@ -215,7 +191,7 @@ class ScannerTest {
 
             assertScanTokens("=.a", operatorToken("="), propertyToken("a"));
 
-            assertScanTokens("=[0]", operatorToken("="), constIndexToken(0));
+            assertScanTokens("=[0]", operatorToken("="), propertyToken(0));
 
             assertScanTokens("='0'", operatorToken("="), constValueToken("0"));
 

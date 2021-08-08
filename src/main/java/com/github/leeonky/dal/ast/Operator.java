@@ -2,11 +2,8 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.util.Calculator;
-import com.github.leeonky.dal.util.ListAccessor;
 
-import java.lang.reflect.Array;
 import java.util.Objects;
-import java.util.Optional;
 
 public abstract class Operator {
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
@@ -225,37 +222,6 @@ public abstract class Operator {
         @Override
         public String inspect(Node node1, Node node2) {
             return "-" + node2.inspect();
-        }
-    }
-
-    public static class Index extends Operator {
-
-        public Index() {
-            super(PRECEDENCE_UNARY_OPERATION, null, false);
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            Object v1 = node1.evaluate(context);
-            Object v2 = node2.evaluate(context);
-            Optional<ListAccessor> optionalArrayType = context.searchListAccessor(v1);
-            int index = (int) v2;
-            if (optionalArrayType.isPresent())
-                return optionalArrayType.get().get(v1, index);
-            else if (v1 instanceof Iterable) {
-                int i = 0;
-                for (Object object : (Iterable) v1)
-                    if (i++ == index)
-                        return object;
-                throw new ArrayIndexOutOfBoundsException();
-            }
-            return Array.get(v1, index);
-        }
-
-        @Override
-        public String inspect(Node node1, Node node2) {
-            return String.format("%s[%s]", node1.inspect(), node2.inspect());
         }
     }
 

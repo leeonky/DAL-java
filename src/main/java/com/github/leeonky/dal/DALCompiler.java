@@ -63,16 +63,8 @@ public class DALCompiler {
     private Node compilePropertyOrIndexChain(TokenStream tokenStream, Node node) {
         while (tokenStream.hasTokens() && tokenStream.isCurrentSingleEvaluateNode()) {
             Token token = tokenStream.pop();
-            switch (token.getType()) {
-                case PROPERTY:
-                    node = new PropertyNode(node, token.getValue());
-                    node.setPositionBegin(token.getPositionBegin());
-                    break;
-                case CONST_INDEX:
-                    node = new Expression(node, new Operator.Index(), new ConstNode(token.getValue()));
-                    node.setPositionBegin(token.getPositionBegin());
-                    break;
-            }
+            node = new PropertyNode(node, token.getValue());
+            node.setPositionBegin(token.getPositionBegin());
         }
         return node;
     }

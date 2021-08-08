@@ -141,7 +141,7 @@ class BasicVerify extends Base {
         void should_support_access_property_via_bracket() {
             assertPass(new HashMap<String, String>() {{
                 put(" a key ", "value");
-            }}, "[ a key ] = 'value'");
+            }}, "[' a key '] = 'value'");
         }
 
         @Test

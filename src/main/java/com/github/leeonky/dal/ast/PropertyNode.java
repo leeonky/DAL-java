@@ -20,6 +20,8 @@ public class PropertyNode extends Node {
     public Object evaluate(RuntimeContext context) {
         try {
             return context.getAliasValue(() -> instanceNode.evaluate(context), name);
+        } catch (IndexOutOfBoundsException ex) {
+            throw new RuntimeException(ex.getMessage(), getPositionBegin());
         } catch (Exception e) {
             //TODO log original and alias
             throw new RuntimeException(
@@ -37,6 +39,6 @@ public class PropertyNode extends Node {
 
     @Override
     public String inspect() {
-        return format("%s.%s", instanceNode.inspect(), name);
+        return format(name instanceof String ? "%s.%s" : "%s[%s]", instanceNode.inspect(), name);
     }
 }

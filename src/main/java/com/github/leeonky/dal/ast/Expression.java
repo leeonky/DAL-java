@@ -35,8 +35,6 @@ public class Expression extends Node {
             return result;
         } catch (IllegalArgumentException ex) {
             throw new RuntimeException(ex.getMessage(), operator.getPosition());
-        } catch (ArrayIndexOutOfBoundsException ex) {
-            throw new RuntimeException("Array index out of range", operator.getPosition());
         }
     }
 

@@ -28,10 +28,6 @@ public class Token {
         return new Token(Type.PROPERTY, property);
     }
 
-    public static Token constIndexToken(int value) {
-        return new Token(Type.CONST_INDEX, value);
-    }
-
     public static Token operatorToken(String value) {
         return new Token(Type.OPERATOR, value);
     }
@@ -179,6 +175,6 @@ public class Token {
     }
 
     public enum Type {
-        WORD, PROPERTY, CONST_INDEX, OPERATOR, BEGIN_BRACKET, END_BRACKET, KEY_WORD, CONST_VALUE, REGEX
+        WORD, PROPERTY, OPERATOR, BEGIN_BRACKET, END_BRACKET, KEY_WORD, CONST_VALUE, REGEX
     }
 }

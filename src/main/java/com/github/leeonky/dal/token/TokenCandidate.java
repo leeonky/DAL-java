@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.token;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public abstract class TokenCandidate {
@@ -8,10 +7,6 @@ public abstract class TokenCandidate {
     private final StringBuilder stringBuilder = new StringBuilder();
     private final Set<Character> split;
     private boolean finished = false;
-
-    public TokenCandidate(SourceCode sourceCode) {
-        this(sourceCode, new HashSet<>());
-    }
 
     public TokenCandidate(SourceCode sourceCode, Set<Character> split) {
         this.split = split;
@@ -36,10 +31,6 @@ public abstract class TokenCandidate {
         return false;
     }
 
-    protected int getStartPosition() {
-        return startPosition;
-    }
-
     protected boolean isUnexpectedChar(char c) {
         return Character.isWhitespace(c) || c == '[' || split.contains(c);
     }
@@ -62,10 +53,6 @@ public abstract class TokenCandidate {
 
     protected String discardedSuffix() {
         return null;
-    }
-
-    protected boolean isFinished() {
-        return finished;
     }
 
     private boolean isDiscardedSuffix(SourceCode sourceCode) {

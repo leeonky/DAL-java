@@ -22,12 +22,8 @@ public class Scanner {
     public static final char OPT_MATCHES = ':';
     public static final String OPT_MATCHES_STRING = ":";
 
-    //TODO to be replaced
-    private final List<TokenCandidateFactory> tokenCandidateFactories = asList(
-            AccessElementTokenCandidateFactory.INSTANCE
-    );
-
     private final List<TokenFactory> tokenFactories = asList(
+            createBracketPropertyTokenFactory(),
             createBeanPropertyTokenFactory(),
             createNumberTokenFactory(),
             createSingleQuotedStringTokenFactory(),
@@ -58,9 +54,6 @@ public class Scanner {
     }
 
     private TokenCandidate takeTokenCandidate(SourceCode sourceCode) {
-        return tokenCandidateFactories.stream()
-                .filter(f -> f.isBegin(sourceCode))
-                .map(f -> f.createTokenCandidate(sourceCode))
-                .findFirst().orElseGet(() -> new WordTokenCandidate(sourceCode));
+        return new WordTokenCandidate(sourceCode);
     }
 }

@@ -67,7 +67,7 @@ class DALCompilerTest {
 
         @Test
         void support_access_array_by_const_index() {
-            assertCompileNode("[0]", new Expression(InputNode.INSTANCE, new Operator.Index(), new ConstNode(0)));
+            assertCompileNode("[0]", new PropertyNode(InputNode.INSTANCE, 0));
         }
     }
 

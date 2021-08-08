@@ -38,7 +38,7 @@ public class TokenStream {
     }
 
     public boolean isCurrentSingleEvaluateNode() {
-        return currentType() == Token.Type.PROPERTY || currentType() == Token.Type.CONST_INDEX;
+        return currentType() == Token.Type.PROPERTY;
     }
 
     public int getPosition() {
@@ -80,13 +80,13 @@ public class TokenStream {
             @Override
             public boolean hasNext() {
                 return hasTokens() && currentType() == Token.Type.OPERATOR
-                        && ("|".equals(tokens.get(index).getValue())
-                        || "/".equals(tokens.get(index).getValue()));
+                        && ("|" .equals(tokens.get(index).getValue())
+                        || "/" .equals(tokens.get(index).getValue()));
             }
 
             @Override
             public SchemaAssertionExpression.Operator next() {
-                if ("|".equals(pop().getValue()))
+                if ("|" .equals(pop().getValue()))
                     return SchemaAssertionExpression.Operator.AND;
                 else
                     return SchemaAssertionExpression.Operator.OR;
