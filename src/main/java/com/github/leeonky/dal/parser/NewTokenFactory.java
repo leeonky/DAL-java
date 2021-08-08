@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.parser;
 
 import com.github.leeonky.dal.token.IllegalTokenContentException;
+import com.github.leeonky.dal.token.Scanner;
 import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenFactory;
 
@@ -9,10 +10,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.github.leeonky.dal.DALCompiler.*;
 import static com.github.leeonky.dal.parser.ParsingContext.ANY_CHARACTERS;
 import static com.github.leeonky.dal.parser.ParsingContext.CHARACTER;
 import static com.github.leeonky.dal.parser.TokenContentInString.ALL_CHARACTERS;
 import static com.github.leeonky.dal.parser.TokenStartEnd.before;
+import static com.github.leeonky.dal.token.Token.*;
 
 public class NewTokenFactory {
     public static final Function<String, Token> CONST_NUMBER_TOKEN = content ->
@@ -31,6 +34,23 @@ public class NewTokenFactory {
         if (token.size() != 1)
             throw new IllegalTokenContentException("should given one property or array index in `[]`");
         return Token.propertyToken(token.get(0).getPropertyOrIndex());
+    };
+    public static final Function<String, Token> WORD_TOKEN = content -> {
+        if (NULL.equals(content))
+            return constValueToken(null);
+        if (TRUE.equals(content))
+            return constValueToken(true);
+        if (FALSE.equals(content))
+            return constValueToken(false);
+        if (AND.equals(content))
+            return operatorToken("&&");
+        if (OR.equals(content))
+            return operatorToken("||");
+        if (MATCHES.equals(content))
+            return operatorToken(MATCHES);
+        if (Scanner.KEYWORD_SETS.contains(content))
+            return keyWordToken(content);
+        return wordToken(content);
     };
 
     private final TokenStartEnd start;

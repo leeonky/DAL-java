@@ -13,8 +13,6 @@ import static com.github.leeonky.dal.token.TokenFactory.*;
 import static java.util.Arrays.asList;
 
 public class Scanner {
-    //TODO to be removed use TOKEN_DELIMITER
-    public static final Set<Character> CHAR_SPLIT = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ':'));
     public static final Set<Character> TOKEN_DELIMITER = new HashSet<>(asList('(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ':', ' ', '\t', '\n'));
     public static final Set<Character> OPERATOR_CHAR = new HashSet<>(asList('-', '!', '=', '>', '<', '+', '*', '/', ':', '&', '|'));
     public static final Set<Character> DIGITAL_CHAR = new HashSet<>(asList('1', '2', '3', '4', '5', '6', '7', '8', '9', '0'));
@@ -31,7 +29,8 @@ public class Scanner {
             createRegexTokenFactory(),
             createOperatorTokenFactory(),
             createBeginBracketTokenFactory(),
-            createEndBracketTokenFactory()
+            createEndBracketTokenFactory(),
+            createWordTokenFactory()
     );
 
     public TokenStream scan(SourceCode sourceCode) {
@@ -42,8 +41,7 @@ public class Scanner {
             int begin = sourceCode.getPosition();
             Token token = tokenFactories.stream()
                     .map(tokenFactory -> tokenFactory.fetchToken(context))
-                    .filter(Objects::nonNull).findFirst().orElseGet(() ->
-                            takeTokenCandidate(sourceCode).fetchToken(sourceCode));
+                    .filter(Objects::nonNull).findFirst().get();
             //TODO move inside token create
             token.setPositionBegin(begin);
             token.setPositionEnd(sourceCode.getPosition());
@@ -51,9 +49,5 @@ public class Scanner {
             context.last = token;
         }
         return tokenStream;
-    }
-
-    private TokenCandidate takeTokenCandidate(SourceCode sourceCode) {
-        return new WordTokenCandidate(sourceCode);
     }
 }

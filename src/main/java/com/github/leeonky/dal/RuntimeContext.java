@@ -54,10 +54,6 @@ public class RuntimeContext {
         return Optional.ofNullable(constructors.get(type));
     }
 
-    public Optional<ListAccessor> searchListAccessor(Object object) {
-        return listAccessors.getData(object);
-    }
-
     public DataObject wrap(Object instance) {
         return new DataObject(instance, this);
     }

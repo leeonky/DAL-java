@@ -76,5 +76,12 @@ public interface TokenFactory {
                 .createAs(BRACKET_PROPERTY_TOKEN);
     }
 
+    static TokenFactory createWordTokenFactory() {
+        return startWith(included(ANY_CHARACTERS))
+                .take(ALL_CHARACTERS)
+                .endWith(END_OF_CODE.or(before(DELIMITER)))
+                .createAs(WORD_TOKEN);
+    }
+
     Token fetchToken(ParsingContext context);
 }
