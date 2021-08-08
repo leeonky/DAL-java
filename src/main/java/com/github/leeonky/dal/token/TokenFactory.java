@@ -68,9 +68,10 @@ public interface TokenFactory {
     }
 
     static TokenFactory createBracketPropertyTokenFactory() {
-        TokenFactory numberTokenFactory = createNumberTokenFactory();
         return startWith(excluded(CHARACTER('[').except(AFTER_TOKEN_MATCHES)))
-                .take(byFactory(numberTokenFactory))
+                .take(byFactory(createNumberTokenFactory())
+                        .or(createSingleQuotedStringTokenFactory())
+                        .or(createDoubleQuotedStringTokenFactory()))
                 .endWith(excluded(CHARACTER(']')).orThrow("should end with `]`"))
                 .createAs(BRACKET_PROPERTY_TOKEN);
     }

@@ -62,6 +62,24 @@ class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
                         .hasFieldOrPropertyWithValue("position", 1);
             }
         }
+
+        @Nested
+        class SingleQuotedString {
+
+            @Test
+            void support_array_access() {
+                assertThat(parseToken("['key']")).isEqualTo(Token.propertyToken("key"));
+            }
+        }
+
+        @Nested
+        class DoubleQuotedString {
+
+            @Test
+            void support_array_access() {
+                assertThat(parseToken("[\"key\"]")).isEqualTo(Token.propertyToken("key"));
+            }
+        }
     }
 
     @Nested
@@ -79,7 +97,13 @@ class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
         @Test
         void do_not_allow_get_value_when_no_value() {
             assertThat(assertThrows(SyntaxException.class, () -> parseToken("[]")))
-                    .hasMessage("should given property or array index").hasFieldOrPropertyWithValue("position", 1);
+                    .hasMessage("should given one property or array index in `[]`").hasFieldOrPropertyWithValue("position", 1);
+        }
+
+        @Test
+        void do_not_allow_more_than_one_sub_token() {
+            assertThat(assertThrows(SyntaxException.class, () -> parseToken("[1 2]")))
+                    .hasMessage("should given one property or array index in `[]`").hasFieldOrPropertyWithValue("position", 4);
         }
     }
 
@@ -92,6 +116,4 @@ class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
                     .hasMessage("should end with `]`").hasFieldOrPropertyWithValue("position", 2);
         }
     }
-
-    //TODO contains more than one token: [1 2]
 }

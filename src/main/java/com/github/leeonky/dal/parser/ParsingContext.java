@@ -6,6 +6,8 @@ import com.github.leeonky.dal.token.Scanner;
 import com.github.leeonky.dal.token.SourceCode;
 import com.github.leeonky.dal.token.Token;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -68,14 +70,15 @@ public class ParsingContext {
     }
 
     public Token parseToken(TokenStartEnd start, TokenContentInToken content, TokenStartEnd end,
-                            Function<Token, Token> constructor) {
+                            Function<List<Token>, Token> constructor) {
         int position = sourceCode.getPosition();
         //TODO same logic with scanner
         return when(start.matches(this)).thenReturn(() -> {
-            Token temp = null;
-            //TODO skip white space
+            List<Token> temp = new ArrayList<>();
             while (!end.matches(this)) {
-                temp = content.getToken(this);
+                //TODO maybe null
+                temp.add(content.getToken(this));
+                sourceCode.trimLeft();
             }
             try {
                 last = constructor.apply(temp);

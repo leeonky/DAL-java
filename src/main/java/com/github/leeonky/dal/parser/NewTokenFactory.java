@@ -5,6 +5,7 @@ import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenFactory;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -26,10 +27,10 @@ public class NewTokenFactory {
     public static final Function<String, Token> REGEX_TOKEN = Token::regexToken;
     public static final Function<String, Token> BEGIN_BRACKET_TOKEN = s -> Token.beginBracketToken();
     public static final Function<String, Token> END_BRACKET_TOKEN = s -> Token.endBracketToken();
-    public static final Function<Token, Token> BRACKET_PROPERTY_TOKEN = token -> {
-        if (token == null)
-            throw new IllegalTokenContentException("should given property or array index");
-        return Token.propertyToken(token.getPropertyOrIndex());
+    public static final Function<List<Token>, Token> BRACKET_PROPERTY_TOKEN = token -> {
+        if (token.size() != 1)
+            throw new IllegalTokenContentException("should given one property or array index in `[]`");
+        return Token.propertyToken(token.get(0).getPropertyOrIndex());
     };
 
     private final TokenStartEnd start;
@@ -113,7 +114,7 @@ public class NewTokenFactory {
                 this.end = end;
             }
 
-            public TokenFactory createAs(Function<Token, Token> creator) {
+            public TokenFactory createAs(Function<List<Token>, Token> creator) {
                 return context -> context.parseToken(start, content, end, creator);
             }
         }
