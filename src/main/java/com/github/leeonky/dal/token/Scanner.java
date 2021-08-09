@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.parser.ParsingContext;
+import com.github.leeonky.dal.parser.TokenParser;
 
 import java.util.HashSet;
 import java.util.List;
@@ -36,7 +36,7 @@ public class Scanner {
     public TokenStream scan(SourceCode sourceCode) {
         TokenStream tokenStream = new TokenStream();
         //TODO move tokenStream in ParsingContext
-        ParsingContext context = new ParsingContext(sourceCode, null);
+        TokenParser context = new TokenParser(sourceCode);
         while (sourceCode.hasContent()) {
             Token token = tokenFactories.stream()
                     .map(tokenFactory -> tokenFactory.fetchToken(context))

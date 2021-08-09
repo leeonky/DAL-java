@@ -7,16 +7,16 @@ public abstract class SourceCodeMatcher {
         return createSourceCodeMatcher(context -> !matcher.matches(context));
     }
 
-    static SourceCodeMatcher createSourceCodeMatcher(Predicate<ParsingContext> predicate) {
+    public static SourceCodeMatcher createSourceCodeMatcher(Predicate<TokenParser> predicate) {
         return new SourceCodeMatcher() {
             @Override
-            boolean matches(ParsingContext context) {
+            boolean matches(TokenParser context) {
                 return predicate.test(context);
             }
         };
     }
 
-    abstract boolean matches(ParsingContext context);
+    abstract boolean matches(TokenParser context);
 
     public SourceCodeMatcher when(SourceCodeMatcher matcher) {
         return createSourceCodeMatcher(context -> matches(context) && matcher.matches(context));

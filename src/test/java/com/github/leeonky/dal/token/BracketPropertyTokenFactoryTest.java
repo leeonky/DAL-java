@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.token;
 
 import com.github.leeonky.dal.SyntaxException;
-import com.github.leeonky.dal.parser.ParsingContext;
+import com.github.leeonky.dal.parser.TokenParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +38,9 @@ class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
         @Test
         void return_empty_when_bracket_after_matches() {
             SourceCode sourceCode = new SourceCode("[");
-            assertThat(createTokenFactory().fetchToken(new ParsingContext(sourceCode, OPT_MATCHES)))
+            TokenStream tokenStream = new TokenStream();
+            tokenStream.appendToken(OPT_MATCHES);
+            assertThat(createTokenFactory().fetchToken(new TokenParser(sourceCode, tokenStream)))
                     .isNull();
         }
 
@@ -95,7 +97,7 @@ class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
         void seek_to_right_position_after_fetch_token() {
             SourceCode sourceCode = new SourceCode("[0]=");
 
-            createTokenFactory().fetchToken(new ParsingContext(sourceCode, null));
+            createTokenFactory().fetchToken(new TokenParser(sourceCode));
 
             assertThat(sourceCode.currentChar()).isEqualTo('=');
         }

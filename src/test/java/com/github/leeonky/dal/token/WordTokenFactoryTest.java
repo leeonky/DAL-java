@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.parser.ParsingContext;
+import com.github.leeonky.dal.parser.TokenParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class WordTokenFactoryTest {
 
     private void assertToken(String code, Token token) {
-        assertThat(TokenFactory.createWordTokenFactory().fetchToken(new ParsingContext(new SourceCode(code), null)))
+        assertThat(TokenFactory.createWordTokenFactory().fetchToken(new TokenParser(new SourceCode(code))))
                 .isEqualTo(token);
     }
 
@@ -50,7 +50,7 @@ class WordTokenFactoryTest {
         void finish_parse_and_source_code_seek_back_to_delimiter(char c) {
             TokenFactory tokenFactory = TokenFactory.createWordTokenFactory();
             SourceCode sourceCode = new SourceCode("Order.Detail" + c);
-            assertThat(tokenFactory.fetchToken(new ParsingContext(sourceCode, null)))
+            assertThat(tokenFactory.fetchToken(new TokenParser(sourceCode)))
                     .isEqualTo(wordToken("Order.Detail"));
             assertThat(sourceCode.currentChar()).isEqualTo(c);
         }

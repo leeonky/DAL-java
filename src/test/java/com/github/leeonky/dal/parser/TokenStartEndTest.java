@@ -5,8 +5,8 @@ import com.github.leeonky.dal.token.SourceCode;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.parser.ParsingContext.*;
 import static com.github.leeonky.dal.parser.TokenContentInString.ALL_CHARACTERS;
+import static com.github.leeonky.dal.parser.TokenParser.*;
 import static com.github.leeonky.dal.parser.TokenStartEnd.before;
 import static com.github.leeonky.dal.token.TokenFactory.CONST_STRING_TOKEN;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,31 +16,31 @@ class TokenStartEndTest {
 
     private SourceCode sourceCode;
 
-    private ParsingContext givenParseContextBySourceCode(String sourceCode) {
-        return new ParsingContext(this.sourceCode = new SourceCode(sourceCode), null);
+    private TokenParser givenParseContextBySourceCode(String sourceCode) {
+        return new TokenParser(this.sourceCode = new SourceCode(sourceCode));
     }
 
-    private Object getParsedCode(ParsingContext context) {
+    private Object getParsedCode(TokenParser context) {
         return context.parseToken(excluded(ANY_CHARACTERS), ALL_CHARACTERS, before(ANY_CHARACTERS), CONST_STRING_TOKEN).getValue();
     }
 
     @Nested
     class Include {
 
-        private boolean includedMatches(SourceCodeMatcher character, ParsingContext context) {
-            return ParsingContext.included(character).matches(context);
+        private boolean includedMatches(SourceCodeMatcher character, TokenParser context) {
+            return TokenParser.included(character).matches(context);
         }
 
         @Test
         void should_return_true_when_code_matches() {
-            ParsingContext context = givenParseContextBySourceCode("a");
+            TokenParser context = givenParseContextBySourceCode("a");
 
             assertThat(includedMatches(CHARACTER('a'), context)).isTrue();
         }
 
         @Test
         void should_seek_source_code_to_next_char() {
-            ParsingContext context = givenParseContextBySourceCode("ab");
+            TokenParser context = givenParseContextBySourceCode("ab");
 
             includedMatches(CHARACTER('a'), context);
 
@@ -49,7 +49,7 @@ class TokenStartEndTest {
 
         @Test
         void should_include_matches_char_in_code() {
-            ParsingContext context = givenParseContextBySourceCode("abc");
+            TokenParser context = givenParseContextBySourceCode("abc");
 
             includedMatches(CHARACTER('a'), context);
 
@@ -58,7 +58,7 @@ class TokenStartEndTest {
 
         @Test
         void should_return_false_when_not_match_and_keep_origin_status() {
-            ParsingContext context = givenParseContextBySourceCode("a");
+            TokenParser context = givenParseContextBySourceCode("a");
 
             assertThat(includedMatches(CHARACTER('x'), context)).isFalse();
         }
@@ -67,20 +67,20 @@ class TokenStartEndTest {
     @Nested
     class Exclude {
 
-        private boolean excludedMatches(SourceCodeMatcher character, ParsingContext context) {
+        private boolean excludedMatches(SourceCodeMatcher character, TokenParser context) {
             return excluded(character).matches(context);
         }
 
         @Test
         void should_return_true_when_code_matches() {
-            ParsingContext context = givenParseContextBySourceCode("a");
+            TokenParser context = givenParseContextBySourceCode("a");
 
             assertThat(excludedMatches(CHARACTER('a'), context)).isTrue();
         }
 
         @Test
         void should_seek_source_code_to_next_char() {
-            ParsingContext context = givenParseContextBySourceCode("ab");
+            TokenParser context = givenParseContextBySourceCode("ab");
 
             excludedMatches(CHARACTER('a'), context);
 
@@ -89,7 +89,7 @@ class TokenStartEndTest {
 
         @Test
         void should_not_include_matches_char_in_code() {
-            ParsingContext context = givenParseContextBySourceCode("abc");
+            TokenParser context = givenParseContextBySourceCode("abc");
 
             excludedMatches(CHARACTER('a'), context);
 
@@ -98,7 +98,7 @@ class TokenStartEndTest {
 
         @Test
         void should_return_false_when_not_match_and_keep_origin_status() {
-            ParsingContext context = givenParseContextBySourceCode("a");
+            TokenParser context = givenParseContextBySourceCode("a");
 
             assertThat(excludedMatches(CHARACTER('x'), context)).isFalse();
         }
@@ -107,20 +107,20 @@ class TokenStartEndTest {
     @Nested
     class Before {
 
-        private boolean beforeMatches(SourceCodeMatcher character, ParsingContext context) {
+        private boolean beforeMatches(SourceCodeMatcher character, TokenParser context) {
             return before(character).matches(context);
         }
 
         @Test
         void should_return_true_when_code_matches() {
-            ParsingContext context = givenParseContextBySourceCode("a");
+            TokenParser context = givenParseContextBySourceCode("a");
 
             assertThat(beforeMatches(CHARACTER('a'), context)).isTrue();
         }
 
         @Test
         void should_keep_matches_source_code_position() {
-            ParsingContext context = givenParseContextBySourceCode("ab");
+            TokenParser context = givenParseContextBySourceCode("ab");
 
             beforeMatches(CHARACTER('a'), context);
 
@@ -129,7 +129,7 @@ class TokenStartEndTest {
 
         @Test
         void should_not_include_matches_char_in_code() {
-            ParsingContext context = givenParseContextBySourceCode("abc");
+            TokenParser context = givenParseContextBySourceCode("abc");
 
             beforeMatches(CHARACTER('a'), context);
 
@@ -138,7 +138,7 @@ class TokenStartEndTest {
 
         @Test
         void should_return_false_when_not_match_and_keep_origin_status() {
-            ParsingContext context = givenParseContextBySourceCode("a");
+            TokenParser context = givenParseContextBySourceCode("a");
 
             assertThat(beforeMatches(CHARACTER('x'), context)).isFalse();
         }
@@ -147,20 +147,20 @@ class TokenStartEndTest {
     @Nested
     class EndOfCode {
 
-        private boolean matchEndOfCode(ParsingContext context) {
-            return ParsingContext.END_OF_CODE.matches(context);
+        private boolean matchEndOfCode(TokenParser context) {
+            return TokenParser.END_OF_CODE.matches(context);
         }
 
         @Test
         void should_return_true_when_no_more_code() {
-            ParsingContext context = givenParseContextBySourceCode("");
+            TokenParser context = givenParseContextBySourceCode("");
 
             assertThat(matchEndOfCode(context)).isTrue();
         }
 
         @Test
         void should_return_false_when_has_any_code() {
-            ParsingContext context = givenParseContextBySourceCode("any code");
+            TokenParser context = givenParseContextBySourceCode("any code");
 
             assertThat(matchEndOfCode(context)).isFalse();
         }
@@ -171,9 +171,9 @@ class TokenStartEndTest {
 
         @Test
         void support_logic_or() {
-            ParsingContext context = givenParseContextBySourceCode("a");
+            TokenParser context = givenParseContextBySourceCode("a");
 
-            assertThat(ParsingContext.END_OF_CODE.or(ParsingContext.included(CHARACTER('a'))).matches(context)).isTrue();
+            assertThat(TokenParser.END_OF_CODE.or(TokenParser.included(CHARACTER('a'))).matches(context)).isTrue();
         }
     }
 
@@ -182,7 +182,7 @@ class TokenStartEndTest {
 
         @Test
         void should_throw_exception_with_message_when_no_more_code() {
-            ParsingContext context = givenParseContextBySourceCode("");
+            TokenParser context = givenParseContextBySourceCode("");
 
             assertThat(assertThrows(SyntaxException.class, () ->
                     excluded(OPERATOR).orThrow("error").matches(context)))

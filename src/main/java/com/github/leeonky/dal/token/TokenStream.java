@@ -29,8 +29,10 @@ public class TokenStream {
         return new ArrayList<>(tokens);
     }
 
-    public void appendToken(Token token) {
+    public Token appendToken(Token token) {
+        //TODO token not null
         tokens.add(token);
+        return token;
     }
 
     public Token.Type currentType() {
@@ -80,13 +82,13 @@ public class TokenStream {
             @Override
             public boolean hasNext() {
                 return hasTokens() && currentType() == Token.Type.OPERATOR
-                        && ("|" .equals(tokens.get(index).getValue())
-                        || "/" .equals(tokens.get(index).getValue()));
+                        && ("|".equals(tokens.get(index).getValue())
+                        || "/".equals(tokens.get(index).getValue()));
             }
 
             @Override
             public SchemaAssertionExpression.Operator next() {
-                if ("|" .equals(pop().getValue()))
+                if ("|".equals(pop().getValue()))
                     return SchemaAssertionExpression.Operator.AND;
                 else
                     return SchemaAssertionExpression.Operator.OR;
@@ -96,5 +98,13 @@ public class TokenStream {
 
     public boolean isCurrentRegexNode() {
         return currentType() == Token.Type.REGEX;
+    }
+
+    public boolean isLastTokenOperatorMatches() {
+        return !tokens.isEmpty() && tokens.get(tokens.size() - 1).isOperatorMatches();
+    }
+
+    public int size() {
+        return tokens.size();
     }
 }

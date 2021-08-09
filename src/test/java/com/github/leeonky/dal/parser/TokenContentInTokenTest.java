@@ -17,7 +17,7 @@ class TokenContentInTokenTest {
     @Nested
     class ByFactory {
         private Token parseToken(String sourceCode, TokenContentInToken content) {
-            return content.getToken(new ParsingContext(new SourceCode(sourceCode), null));
+            return content.getToken(new TokenParser(new SourceCode(sourceCode)));
         }
 
         @Test

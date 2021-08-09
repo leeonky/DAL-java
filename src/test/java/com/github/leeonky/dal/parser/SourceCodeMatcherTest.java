@@ -4,6 +4,7 @@ import com.github.leeonky.dal.DALCompiler;
 import com.github.leeonky.dal.token.Scanner;
 import com.github.leeonky.dal.token.SourceCode;
 import com.github.leeonky.dal.token.Token;
+import com.github.leeonky.dal.token.TokenStream;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -12,8 +13,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.github.leeonky.dal.parser.ParsingContext.ANY_CHARACTERS;
-import static com.github.leeonky.dal.parser.ParsingContext.included;
+import static com.github.leeonky.dal.parser.TokenParser.ANY_CHARACTERS;
+import static com.github.leeonky.dal.parser.TokenParser.included;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,8 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SourceCodeMatcherTest {
 
-    private ParsingContext createContext(char c) {
-        return new ParsingContext(new SourceCode(String.valueOf(c)), null);
+    private TokenParser createContext(char c) {
+        return new TokenParser(new SourceCode(String.valueOf(c)));
     }
 
     @Nested
@@ -31,19 +32,19 @@ class SourceCodeMatcherTest {
 
         @Test
         void digital() {
-            assertThat(allCharMatchesBy(ParsingContext.DIGITAL))
+            assertThat(allCharMatchesBy(TokenParser.DIGITAL))
                     .isEqualTo(new HashSet<>(asList('1', '2', '3', '4', '5', '6', '7', '8', '9', '0')));
         }
 
         @Test
         void delimiter() {
-            assertThat(allCharMatchesBy(ParsingContext.DELIMITER))
+            assertThat(allCharMatchesBy(TokenParser.DELIMITER))
                     .isEqualTo(Scanner.TOKEN_DELIMITER);
         }
 
         @Test
         void operator() {
-            assertThat(allCharMatchesBy(ParsingContext.OPERATOR))
+            assertThat(allCharMatchesBy(TokenParser.OPERATOR))
                     .isEqualTo(Scanner.OPERATOR_CHAR);
         }
 
@@ -55,7 +56,7 @@ class SourceCodeMatcherTest {
 
         @Test
         void one_specified_char() {
-            assertThat(allCharMatchesBy(ParsingContext.CHARACTER('a')))
+            assertThat(allCharMatchesBy(TokenParser.CHARACTER('a')))
                     .isEqualTo(new HashSet<>(singletonList('a')));
         }
 
@@ -118,7 +119,10 @@ class SourceCodeMatcherTest {
         class LastTokenOptMatches {
 
             private boolean givenLastToken(Token last) {
-                return ParsingContext.AFTER_TOKEN_MATCHES.matches(new ParsingContext(null, last));
+                TokenStream tokenStream = new TokenStream();
+                if (last != null)
+                    tokenStream.appendToken(last);
+                return TokenParser.AFTER_TOKEN_MATCHES.matches(new TokenParser(null, tokenStream));
             }
 
             @Test
@@ -156,10 +160,10 @@ class SourceCodeMatcherTest {
             }
 
             private boolean givenParsedCode(String code) {
-                ParsingContext context = new ParsingContext(new SourceCode(code), null);
+                TokenParser context = new TokenParser(new SourceCode(code));
                 for (char c : code.toCharArray())
                     included(ANY_CHARACTERS).matches(context);
-                return ParsingContext.AFTER_OPERATOR_MATCHES.matches(context);
+                return TokenParser.AFTER_OPERATOR_MATCHES.matches(context);
             }
         }
     }

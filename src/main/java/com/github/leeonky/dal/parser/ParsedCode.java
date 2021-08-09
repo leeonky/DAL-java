@@ -24,4 +24,10 @@ public class ParsedCode {
     public void feed(char c) {
         content.add(c);
     }
+
+    public void feed(ParsedCode parsedCode) {
+        content.addAll(parsedCode.content);
+        //TODO need test
+//        parsedCode.content.clear();
+    }
 }

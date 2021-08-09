@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.token;
 
 import com.github.leeonky.dal.SyntaxException;
-import com.github.leeonky.dal.parser.ParsingContext;
+import com.github.leeonky.dal.parser.TokenParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -55,7 +55,7 @@ class PropertyTokenFactoryTest extends TokenFactoryTestBase {
         void finish_parse_and_source_code_seek_back_to_delimiter(char c) {
             TokenFactory tokenFactory = createTokenFactory();
             SourceCode sourceCode = new SourceCode(".a" + c);
-            assertThat(tokenFactory.fetchToken(new ParsingContext(sourceCode, null)))
+            assertThat(tokenFactory.fetchToken(new TokenParser(sourceCode)))
                     .isEqualTo(propertyToken("a"));
             assertThat(sourceCode.currentChar()).isEqualTo(c);
         }

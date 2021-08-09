@@ -1,20 +1,19 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.parser.ParsingContext;
+import com.github.leeonky.dal.parser.TokenParser;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
 import static com.github.leeonky.dal.DALCompiler.*;
 import static com.github.leeonky.dal.parser.NewTokenFactory.equalToCharacter;
 import static com.github.leeonky.dal.parser.NewTokenFactory.startWith;
-import static com.github.leeonky.dal.parser.ParsingContext.*;
 import static com.github.leeonky.dal.parser.SourceCodeMatcher.not;
 import static com.github.leeonky.dal.parser.TokenContentInString.ALL_CHARACTERS;
 import static com.github.leeonky.dal.parser.TokenContentInString.leftTrim;
 import static com.github.leeonky.dal.parser.TokenContentInToken.byFactory;
+import static com.github.leeonky.dal.parser.TokenParser.*;
 import static com.github.leeonky.dal.parser.TokenStartEnd.before;
 import static com.github.leeonky.dal.token.Token.*;
 
@@ -31,10 +30,10 @@ public interface TokenFactory {
     Function<String, Token> REGEX_TOKEN = Token::regexToken;
     Function<String, Token> BEGIN_BRACKET_TOKEN = s -> Token.beginBracketToken();
     Function<String, Token> END_BRACKET_TOKEN = s -> Token.endBracketToken();
-    Function<List<Token>, Token> BRACKET_PROPERTY_TOKEN = token -> {
-        if (token.size() != 1)
+    Function<TokenStream, Token> BRACKET_PROPERTY_TOKEN = tokenStream -> {
+        if (tokenStream.size() != 1)
             throw new IllegalTokenContentException("should given one property or array index in `[]`");
-        return Token.propertyToken(token.get(0).getPropertyOrIndex());
+        return Token.propertyToken(tokenStream.pop().getPropertyOrIndex());
     };
     Function<String, Token> WORD_TOKEN = content -> {
         if (NULL.equals(content))
@@ -138,5 +137,5 @@ public interface TokenFactory {
         }
     }
 
-    Token fetchToken(ParsingContext context);
+    Token fetchToken(TokenParser context);
 }

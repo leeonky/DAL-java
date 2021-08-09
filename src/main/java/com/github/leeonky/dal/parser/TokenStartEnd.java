@@ -10,16 +10,16 @@ public abstract class TokenStartEnd {
         return createTokenStartEnd(sourceCodeMatcher::matches);
     }
 
-    static TokenStartEnd createTokenStartEnd(Predicate<ParsingContext> predicate) {
+    static TokenStartEnd createTokenStartEnd(Predicate<TokenParser> predicate) {
         return new TokenStartEnd() {
             @Override
-            boolean matches(ParsingContext context) {
+            boolean matches(TokenParser context) {
                 return predicate.test(context);
             }
         };
     }
 
-    abstract boolean matches(ParsingContext context);
+    abstract boolean matches(TokenParser context);
 
     public TokenStartEnd or(TokenStartEnd another) {
         return createTokenStartEnd(context -> matches(context) || another.matches(context));

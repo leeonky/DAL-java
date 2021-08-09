@@ -1,44 +1,43 @@
 package com.github.leeonky.dal.parser;
 
 import com.github.leeonky.dal.SyntaxException;
-import com.github.leeonky.dal.token.IllegalTokenContentException;
-import com.github.leeonky.dal.token.Scanner;
-import com.github.leeonky.dal.token.SourceCode;
-import com.github.leeonky.dal.token.Token;
+import com.github.leeonky.dal.token.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.parser.SourceCodeMatcher.createSourceCodeMatcher;
-import static com.github.leeonky.dal.util.IfThen.when;
+import static com.github.leeonky.dal.util.IfThenFactory.when;
+import static com.github.leeonky.dal.util.IfThenFactory.whenNonNull;
 
-public class ParsingContext {
+public class TokenParser {
     public static final SourceCodeMatcher DIGITAL = oneCharMatcher(Scanner.DIGITAL_CHAR::contains);
     public static final SourceCodeMatcher DELIMITER = oneCharMatcher(Scanner.TOKEN_DELIMITER::contains);
     public static final SourceCodeMatcher OPERATOR = oneCharMatcher(Scanner.OPERATOR_CHAR::contains);
     public static final SourceCodeMatcher AFTER_TOKEN_MATCHES = createSourceCodeMatcher(context ->
-            context.last != null && context.last.isOperatorMatches());
+            context.tokenStream.isLastTokenOperatorMatches());
     public static final SourceCodeMatcher AFTER_OPERATOR_MATCHES = createSourceCodeMatcher(context ->
             context.parsedCode.isOperatorMatches());
     public static final SourceCodeMatcher ANY_CHARACTERS = createSourceCodeMatcher(context ->
             context.sourceCode.notEnd());
     public static final TokenStartEnd END_OF_CODE = TokenStartEnd.createTokenStartEnd(context ->
             !context.sourceCode.notEnd());
-
     private final SourceCode sourceCode;
+    private final TokenStream tokenStream;
     private final ParsedCode parsedCode = new ParsedCode();
 
-    private Token last;
-
-    public ParsingContext(SourceCode sourceCode, Token last) {
-        this.sourceCode = sourceCode;
-        this.last = last;
+    public TokenParser(SourceCode sourceCode) {
+        this(sourceCode, new TokenStream());
     }
 
-    private static SourceCodeMatcher oneCharMatcher(Predicate<Character> predicate) {
+    public TokenParser(SourceCode sourceCode, TokenStream tokenStream) {
+        this.sourceCode = sourceCode;
+        this.tokenStream = tokenStream;
+    }
+
+    public static SourceCodeMatcher oneCharMatcher(Predicate<Character> predicate) {
         return createSourceCodeMatcher(context -> predicate.test(context.sourceCode.currentChar()));
     }
 
@@ -56,51 +55,54 @@ public class ParsingContext {
                 when(sourceCodeMatcher.matches(context)).then(context.sourceCode::takeCurrentChar));
     }
 
+    public Token parseToken(TokenStartEnd start, TokenContentInToken content, TokenStartEnd end,
+                            Function<TokenStream, Token> constructor) {
+        //TODO same logic with scanner
+        return parseTokenWithSourceCodePosition(start, () -> {
+            TokenParser subContext = createSubContext();
+            parseTokenStreamContent(content, end, subContext);
+            return constructor.apply(subContext.tokenStream);
+        });
+    }
+
     public Token parseToken(TokenStartEnd start, TokenContentInString content, TokenStartEnd end,
                             Function<String, Token> constructor) {
-        int position = sourceCode.getPosition();
-        return when(start.matches(this)).thenReturn(() -> {
-            parseContent(content, end);
-            Token token = createToken(constructor);
-            if (token != null)
-                return token.setPositionBegin(position).setPositionEnd(sourceCode.getPosition());
-            return null;
+        return parseTokenWithSourceCodePosition(start, () -> {
+            parseStringContent(content, end);
+            return constructor.apply(parsedCode.takeContent());
         });
     }
 
-    public Token parseToken(TokenStartEnd start, TokenContentInToken content, TokenStartEnd end,
-                            Function<List<Token>, Token> constructor) {
-        int position = sourceCode.getPosition();
-        //TODO same logic with scanner
-        return when(start.matches(this)).thenReturn(() -> {
-            List<Token> tokens = new ArrayList<>();
-            while (!end.matches(this)) {
-                Token token = content.getToken(this);
-                if (token == null)
-                    throw new SyntaxException(sourceCode.getPosition(), "Unexpected token");
-                tokens.add(token);
-                sourceCode.trimLeft();
-            }
-            try {
-                last = constructor.apply(tokens);
-                last.setPositionBegin(position);
-                last.setPositionEnd(sourceCode.getPosition());
-            } catch (IllegalTokenContentException e) {
-                throw new SyntaxException(sourceCode.getPosition() - 1, e.getMessage());
-            }
-            return last;
-        });
+    private void parseTokenStreamContent(TokenContentInToken content, TokenStartEnd end, TokenParser subContext) {
+        while (!end.matches(subContext)) {
+            if (content.getToken(subContext) == null)
+                throw new SyntaxException(sourceCode.getPosition(), "Unexpected token");
+            sourceCode.trimLeft();
+        }
     }
 
-    private void parseContent(TokenContentInString content, TokenStartEnd end) {
+    private TokenParser createSubContext() {
+        TokenParser subContext = new TokenParser(sourceCode);
+        subContext.parsedCode.feed(parsedCode);
+        return subContext;
+    }
+
+    private void parseStringContent(TokenContentInString content, TokenStartEnd end) {
         content.preprocess(sourceCode);
         while (!end.matches(this))
             parsedCode.feed(content.getChar(sourceCode));
     }
 
-    private Token createToken(Function<String, Token> constructor) {
+    private Token parseTokenWithSourceCodePosition(TokenStartEnd start, Supplier<Token> supplier) {
+        int position = sourceCode.getPosition();
+        return when(start.matches(this)).thenReturn(() -> (Token)
+                whenNonNull(tokenStream.appendToken(getToken(supplier))).thenReturn(token ->
+                        token.setPositionBegin(position).setPositionEnd(sourceCode.getPosition())));
+    }
+
+    private Token getToken(Supplier<Token> supplier) {
         try {
-            return last = constructor.apply(parsedCode.takeContent());
+            return supplier.get();
         } catch (IllegalTokenContentException e) {
             throw new SyntaxException(sourceCode.getPosition() - 1, e.getMessage());
         }

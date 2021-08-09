@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.token;
 
-import static com.github.leeonky.dal.util.IfThen.when;
+import static com.github.leeonky.dal.util.IfThenFactory.when;
 
 public class SourceCode {
     private int offset = 0;

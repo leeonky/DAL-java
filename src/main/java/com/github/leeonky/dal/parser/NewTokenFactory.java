@@ -2,13 +2,13 @@ package com.github.leeonky.dal.parser;
 
 import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenFactory;
+import com.github.leeonky.dal.token.TokenStream;
 
-import java.util.List;
 import java.util.function.Function;
 
-import static com.github.leeonky.dal.parser.ParsingContext.ANY_CHARACTERS;
-import static com.github.leeonky.dal.parser.ParsingContext.CHARACTER;
 import static com.github.leeonky.dal.parser.TokenContentInString.ALL_CHARACTERS;
+import static com.github.leeonky.dal.parser.TokenParser.ANY_CHARACTERS;
+import static com.github.leeonky.dal.parser.TokenParser.CHARACTER;
 import static com.github.leeonky.dal.parser.TokenStartEnd.before;
 
 public class NewTokenFactory {
@@ -24,7 +24,7 @@ public class NewTokenFactory {
     }
 
     public static StringContent.EndWith equalToCharacter(char c) {
-        return startWith(ParsingContext.included(CHARACTER(c))).take(ALL_CHARACTERS).endWith(ParsingContext.END_OF_CODE.or(before(ANY_CHARACTERS)));
+        return startWith(TokenParser.included(CHARACTER(c))).take(ALL_CHARACTERS).endWith(TokenParser.END_OF_CODE.or(before(ANY_CHARACTERS)));
     }
 
     public StringContent take(TokenContentInString content) {
@@ -82,7 +82,7 @@ public class NewTokenFactory {
                 this.end = end;
             }
 
-            public TokenFactory createAs(Function<List<Token>, Token> creator) {
+            public TokenFactory createAs(Function<TokenStream, Token> creator) {
                 return context -> context.parseToken(start, content, end, creator);
             }
         }

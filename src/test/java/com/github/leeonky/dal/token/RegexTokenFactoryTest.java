@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.token;
 
 import com.github.leeonky.dal.DALCompiler;
-import com.github.leeonky.dal.parser.ParsingContext;
+import com.github.leeonky.dal.parser.TokenParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -35,14 +35,12 @@ public class RegexTokenFactoryTest extends TokenFactoryTestBase {
 
         @Test
         void return_empty_when_previous_token_is_not_opt_matches() {
-            assertThat(createTokenFactory().fetchToken(new ParsingContext(new SourceCode("/hello/"), null)))
-                    .isNull();
+            assertThat(parseToken("/hello/", null)).isNull();
         }
 
         @Test
         void should_return_regex_token_when_given_valid_code() {
-            assertThat(createTokenFactory().fetchToken(new ParsingContext(new SourceCode("/hello/"), OPT_MATCHES)))
-                    .isEqualTo(Token.regexToken("hello"));
+            assertThat(parseToken("/hello/", OPT_MATCHES)).isEqualTo(Token.regexToken("hello"));
         }
     }
 
@@ -80,7 +78,9 @@ public class RegexTokenFactoryTest extends TokenFactoryTestBase {
         void seek_to_right_position_after_fetch_token() {
             SourceCode sourceCode = new SourceCode("/hello/=");
 
-            createTokenFactory().fetchToken(new ParsingContext(sourceCode, OPT_MATCHES));
+            TokenStream tokenStream = new TokenStream();
+            tokenStream.appendToken(OPT_MATCHES);
+            createTokenFactory().fetchToken(new TokenParser(sourceCode, tokenStream));
 
             assertThat(sourceCode.currentChar()).isEqualTo('=');
         }

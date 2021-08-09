@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.parser.ParsingContext;
+import com.github.leeonky.dal.parser.TokenParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -32,16 +32,13 @@ class OperatorTokenFactoryTest extends TokenFactoryTestBase {
 
         @Test
         void should_return_empty_when_last_token_is_operator_matches() {
-            final SourceCode sourceCode = new SourceCode("/");
-            assertThat(createTokenFactory().fetchToken(new ParsingContext(sourceCode, Token.operatorToken(OPT_MATCHES_STRING))))
+            assertThat(parseToken("/", Token.operatorToken(OPT_MATCHES_STRING)))
                     .isNull();
 
-            final SourceCode sourceCode1 = new SourceCode("+");
-            assertThat(createTokenFactory().fetchToken(new ParsingContext(sourceCode1, Token.operatorToken(OPT_MATCHES_STRING))))
+            assertThat(parseToken("+", Token.operatorToken(OPT_MATCHES_STRING)))
                     .isEqualTo(Token.operatorToken("+"));
 
-            final SourceCode sourceCode2 = new SourceCode("/");
-            assertThat(createTokenFactory().fetchToken(new ParsingContext(sourceCode2, null)))
+            assertThat(parseToken("/", null))
                     .isEqualTo(Token.operatorToken("/"));
         }
 
@@ -65,7 +62,7 @@ class OperatorTokenFactoryTest extends TokenFactoryTestBase {
         void finish_parse_and_source_code_seek_back_to_delimiter(String opt) {
             TokenFactory tokenFactory = createTokenFactory();
             SourceCode sourceCode = new SourceCode(opt + "a");
-            assertThat(tokenFactory.fetchToken(new ParsingContext(sourceCode, null)))
+            assertThat(tokenFactory.fetchToken(new TokenParser(sourceCode)))
                     .isEqualTo(operatorToken(opt));
             assertThat(sourceCode.currentChar()).isEqualTo('a');
         }
