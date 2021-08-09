@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.token;
 
 import com.github.leeonky.dal.DALCompiler;
-import com.github.leeonky.dal.parser.TokenParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -21,8 +20,8 @@ public class RegexTokenFactoryTest extends TokenFactoryTestBase {
     }
 
     @Override
-    protected Token createToken(String value) {
-        return Token.regexToken(value);
+    protected Token createToken(Object value) {
+        return Token.regexToken((String) value);
     }
 
     @Nested
@@ -76,13 +75,7 @@ public class RegexTokenFactoryTest extends TokenFactoryTestBase {
 
         @Test
         void seek_to_right_position_after_fetch_token() {
-            SourceCode sourceCode = new SourceCode("/hello/=");
-
-            TokenStream tokenStream = new TokenStream();
-            tokenStream.appendToken(OPT_MATCHES);
-            createTokenFactory().fetchToken(new TokenParser(sourceCode, tokenStream));
-
-            assertThat(sourceCode.currentChar()).isEqualTo('=');
+            assertThat(nextCharOf("/hello/=")).isEqualTo('=');
         }
     }
 

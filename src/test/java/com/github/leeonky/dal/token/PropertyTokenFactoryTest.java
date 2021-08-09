@@ -1,13 +1,11 @@
 package com.github.leeonky.dal.token;
 
 import com.github.leeonky.dal.SyntaxException;
-import com.github.leeonky.dal.parser.TokenParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static com.github.leeonky.dal.token.Token.propertyToken;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -18,7 +16,7 @@ class PropertyTokenFactoryTest extends TokenFactoryTestBase {
     }
 
     @Override
-    protected Token createToken(String value) {
+    protected Token createToken(Object value) {
         return Token.propertyToken(value);
     }
 
@@ -53,11 +51,7 @@ class PropertyTokenFactoryTest extends TokenFactoryTestBase {
         @ParameterizedTest
         @ValueSource(chars = {'(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ':', ' ', '\t', '\n'})
         void finish_parse_and_source_code_seek_back_to_delimiter(char c) {
-            TokenFactory tokenFactory = createTokenFactory();
-            SourceCode sourceCode = new SourceCode(".a" + c);
-            assertThat(tokenFactory.fetchToken(new TokenParser(sourceCode)))
-                    .isEqualTo(propertyToken("a"));
-            assertThat(sourceCode.currentChar()).isEqualTo(c);
+            assertThat(nextCharOf(".a" + c)).isEqualTo(c);
         }
 
         @Test

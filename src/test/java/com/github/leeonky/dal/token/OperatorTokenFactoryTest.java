@@ -1,13 +1,11 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.parser.TokenParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static com.github.leeonky.dal.token.Scanner.OPT_MATCHES_STRING;
-import static com.github.leeonky.dal.token.Token.operatorToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class OperatorTokenFactoryTest extends TokenFactoryTestBase {
@@ -18,8 +16,8 @@ class OperatorTokenFactoryTest extends TokenFactoryTestBase {
     }
 
     @Override
-    protected Token createToken(String value) {
-        return Token.operatorToken(value);
+    protected Token createToken(Object value) {
+        return Token.operatorToken((String) value);
     }
 
     @Nested
@@ -60,11 +58,7 @@ class OperatorTokenFactoryTest extends TokenFactoryTestBase {
         @ParameterizedTest
         @ValueSource(strings = {"-", "!", "=", ">", "<", "+", "*", "/", ":", ">=", "<=", "!=", "&&", "||"})
         void finish_parse_and_source_code_seek_back_to_delimiter(String opt) {
-            TokenFactory tokenFactory = createTokenFactory();
-            SourceCode sourceCode = new SourceCode(opt + "a");
-            assertThat(tokenFactory.fetchToken(new TokenParser(sourceCode)))
-                    .isEqualTo(operatorToken(opt));
-            assertThat(sourceCode.currentChar()).isEqualTo('a');
+            assertThat(nextCharOf(opt + "a")).isEqualTo('a');
         }
     }
 

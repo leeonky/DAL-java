@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.parser.TokenParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SingleQuotedStringTokenFactoryTest extends TokenFactoryTestBase {
 
     @Override
-    protected Token createToken(String value) {
+    protected Token createToken(Object value) {
         return constValueToken(value);
     }
 
@@ -54,11 +53,7 @@ class SingleQuotedStringTokenFactoryTest extends TokenFactoryTestBase {
 
         @Test
         void seek_to_right_position_after_fetch_token() {
-            SourceCode sourceCode = new SourceCode("'hello'=");
-
-            createTokenFactory().fetchToken(new TokenParser(sourceCode));
-
-            assertThat(sourceCode.currentChar()).isEqualTo('=');
+            assertThat(nextCharOf("'hello'=")).isEqualTo('=');
         }
     }
 

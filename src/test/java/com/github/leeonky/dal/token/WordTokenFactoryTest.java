@@ -9,15 +9,21 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static com.github.leeonky.dal.token.Token.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WordTokenFactoryTest {
+class WordTokenFactoryTest extends TokenFactoryTestBase {
 
     private void assertToken(String code, Token token) {
         assertThat(TokenFactory.createWordTokenFactory().fetchToken(new TokenParser(new SourceCode(code))))
                 .isEqualTo(token);
     }
 
-    private void assertWordToken(String hello, String o) {
-        assertToken(hello, wordToken(o));
+    @Override
+    protected TokenFactory createTokenFactory() {
+        return TokenFactory.createWordTokenFactory();
+    }
+
+    @Override
+    protected Token createToken(Object value) {
+        return Token.wordToken(value);
     }
 
     @Nested
@@ -36,10 +42,10 @@ class WordTokenFactoryTest {
 
         @Test
         void other_word_token() {
-            assertWordToken("hello ", "hello");
-            assertWordToken("order.product ", "order.product");
-            assertWordToken("_001 ", "_001");
-            assertWordToken("order_1 ", "order_1");
+            shouldParse("hello ", "hello");
+            shouldParse("order.product ", "order.product");
+            shouldParse("_001 ", "_001");
+            shouldParse("order_1 ", "order_1");
         }
     }
 
@@ -48,11 +54,7 @@ class WordTokenFactoryTest {
         @ParameterizedTest
         @ValueSource(chars = {'(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ' ', ':', '\t', '\n'})
         void finish_parse_and_source_code_seek_back_to_delimiter(char c) {
-            TokenFactory tokenFactory = TokenFactory.createWordTokenFactory();
-            SourceCode sourceCode = new SourceCode("Order.Detail" + c);
-            assertThat(tokenFactory.fetchToken(new TokenParser(sourceCode)))
-                    .isEqualTo(wordToken("Order.Detail"));
-            assertThat(sourceCode.currentChar()).isEqualTo(c);
+            assertThat(nextCharOf("Order.Detail" + c)).isEqualTo(c);
         }
     }
 
@@ -61,7 +63,7 @@ class WordTokenFactoryTest {
 
         @Test
         void allow_get_value_when_parser_not_finished() {
-            assertWordToken("order", "order");
+            shouldParse("order", "order");
         }
     }
 }

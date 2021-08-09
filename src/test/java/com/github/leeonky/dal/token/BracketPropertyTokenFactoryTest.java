@@ -1,13 +1,10 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.SyntaxException;
-import com.github.leeonky.dal.parser.TokenParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.github.leeonky.dal.token.Scanner.OPT_MATCHES_STRING;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
 
@@ -19,12 +16,8 @@ class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
     }
 
     @Override
-    protected Token createToken(String value) {
-        try {
-            return Token.propertyToken(Integer.valueOf(value));
-        } catch (NumberFormatException e) {
-            return Token.propertyToken(value);
-        }
+    protected Token createToken(Object value) {
+        return Token.propertyToken(value);
     }
 
     @Nested
@@ -37,10 +30,7 @@ class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
 
         @Test
         void return_empty_when_bracket_after_matches() {
-            SourceCode sourceCode = new SourceCode("[");
-            TokenStream tokenStream = new TokenStream();
-            tokenStream.appendToken(OPT_MATCHES);
-            assertThat(createTokenFactory().fetchToken(new TokenParser(sourceCode, tokenStream)))
+            assertThat(parseToken("[", OPT_MATCHES))
                     .isNull();
         }
 
@@ -95,23 +85,21 @@ class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
 
         @Test
         void seek_to_right_position_after_fetch_token() {
-            SourceCode sourceCode = new SourceCode("[0]=");
-
-            createTokenFactory().fetchToken(new TokenParser(sourceCode));
-
-            assertThat(sourceCode.currentChar()).isEqualTo('=');
+            assertThat(nextCharOf("[0]=")).isEqualTo('=');
         }
 
         @Test
         void do_not_allow_get_value_when_no_value() {
-            assertThat(assertThrows(SyntaxException.class, () -> parseToken("[]")))
-                    .hasMessage("should given one property or array index in `[]`").hasFieldOrPropertyWithValue("position", 1);
+            assertThat(invalidSyntaxCode("[]"))
+                    .hasMessage("should given one property or array index in `[]`")
+                    .hasFieldOrPropertyWithValue("position", 1);
         }
 
         @Test
         void do_not_allow_more_than_one_sub_token() {
-            assertThat(assertThrows(SyntaxException.class, () -> parseToken("[1 2]")))
-                    .hasMessage("should given one property or array index in `[]`").hasFieldOrPropertyWithValue("position", 4);
+            assertThat(invalidSyntaxCode("[1 2]"))
+                    .hasMessage("should given one property or array index in `[]`")
+                    .hasFieldOrPropertyWithValue("position", 4);
         }
     }
 
@@ -120,8 +108,9 @@ class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
 
         @Test
         void do_not_allow_get_value_when_no_value() {
-            assertThat(assertThrows(SyntaxException.class, () -> parseToken("[1")))
-                    .hasMessage("should end with `]`").hasFieldOrPropertyWithValue("position", 2);
+            assertThat(invalidSyntaxCode("[1"))
+                    .hasMessage("should end with `]`")
+                    .hasFieldOrPropertyWithValue("position", 2);
         }
     }
 }

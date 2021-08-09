@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.parser.TokenParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,8 +18,8 @@ class NumberTokenFactoryTest extends TokenFactoryTestBase {
     }
 
     @Override
-    protected Token createToken(String value) {
-        return constValueToken(new BigDecimal(value));
+    protected Token createToken(Object value) {
+        return constValueToken(new BigDecimal((String) value));
     }
 
     @Nested
@@ -64,11 +63,7 @@ class NumberTokenFactoryTest extends TokenFactoryTestBase {
         @ParameterizedTest
         @ValueSource(chars = {'(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ' ', ':', '\t', '\n'})
         void finish_parse_and_source_code_seek_back_to_delimiter(char c) {
-            TokenFactory tokenFactory = createTokenFactory();
-            SourceCode sourceCode = new SourceCode("100" + c);
-            assertThat(tokenFactory.fetchToken(new TokenParser(sourceCode)))
-                    .isEqualTo(constValueToken(new BigDecimal("100")));
-            assertThat(sourceCode.currentChar()).isEqualTo(c);
+            assertThat(nextCharOf("100" + c)).isEqualTo(c);
         }
     }
 

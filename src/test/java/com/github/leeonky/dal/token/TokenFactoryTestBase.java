@@ -9,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public abstract class TokenFactoryTestBase {
     protected abstract TokenFactory createTokenFactory();
 
-    protected void shouldParse(String code, String value) {
+    protected void shouldParse(String code, Object value) {
         assertThat(parseToken(code)).isEqualTo(createToken(value));
     }
 
-    protected abstract Token createToken(String value);
+    protected abstract Token createToken(Object value);
 
     protected Token parseToken(String sourceCode) {
         return parseToken(sourceCode, previousToken());
@@ -32,5 +32,15 @@ public abstract class TokenFactoryTestBase {
 
     protected SyntaxException invalidSyntaxCode(String s) {
         return assertThrows(SyntaxException.class, () -> parseToken(s, previousToken()));
+    }
+
+    protected char nextCharOf(String code) {
+        SourceCode sourceCode = new SourceCode(code);
+        TokenStream tokenStream = new TokenStream();
+        Token token = previousToken();
+        if (token != null)
+            tokenStream.appendToken(token);
+        createTokenFactory().fetchToken(new TokenParser(sourceCode, tokenStream));
+        return sourceCode.currentChar();
     }
 }
