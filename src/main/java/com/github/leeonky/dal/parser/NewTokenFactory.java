@@ -59,7 +59,7 @@ public class NewTokenFactory {
             }
 
             public TokenFactory createAs(Function<String, Token> creator) {
-                return context -> context.parseToken(start, content, end, creator);
+                return parser -> parser.parseToken(start, content, end, creator);
             }
         }
     }
@@ -83,7 +83,7 @@ public class NewTokenFactory {
             }
 
             public TokenFactory createAs(Function<TokenStream, Token> creator) {
-                return context -> context.parseToken(start, content, end, creator);
+                return parser -> parser.parseToken(start, content, end, creator);
             }
         }
     }

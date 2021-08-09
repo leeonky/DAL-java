@@ -16,14 +16,14 @@ public class TokenParser {
     public static final SourceCodeMatcher DIGITAL = oneCharMatcher(Scanner.DIGITAL_CHAR::contains);
     public static final SourceCodeMatcher DELIMITER = oneCharMatcher(Scanner.TOKEN_DELIMITER::contains);
     public static final SourceCodeMatcher OPERATOR = oneCharMatcher(Scanner.OPERATOR_CHAR::contains);
-    public static final SourceCodeMatcher AFTER_TOKEN_MATCHES = createSourceCodeMatcher(context ->
-            context.tokenStream.isLastTokenOperatorMatches());
-    public static final SourceCodeMatcher AFTER_OPERATOR_MATCHES = createSourceCodeMatcher(context ->
-            context.parsedCode.isOperatorMatches());
-    public static final SourceCodeMatcher ANY_CHARACTERS = createSourceCodeMatcher(context ->
-            context.sourceCode.notEnd());
-    public static final TokenStartEnd END_OF_CODE = TokenStartEnd.createTokenStartEnd(context ->
-            !context.sourceCode.notEnd());
+    public static final SourceCodeMatcher AFTER_TOKEN_MATCHES = createSourceCodeMatcher(parser ->
+            parser.tokenStream.isLastTokenOperatorMatches());
+    public static final SourceCodeMatcher AFTER_OPERATOR_MATCHES = createSourceCodeMatcher(parser ->
+            parser.parsedCode.isOperatorMatches());
+    public static final SourceCodeMatcher ANY_CHARACTERS = createSourceCodeMatcher(parser ->
+            parser.sourceCode.notEnd());
+    public static final TokenStartEnd END_OF_CODE = TokenStartEnd.createTokenStartEnd(parser ->
+            !parser.sourceCode.notEnd());
     private final SourceCode sourceCode;
     private final TokenStream tokenStream;
     private final ParsedCode parsedCode = new ParsedCode();
@@ -38,7 +38,7 @@ public class TokenParser {
     }
 
     public static SourceCodeMatcher oneCharMatcher(Predicate<Character> predicate) {
-        return createSourceCodeMatcher(context -> predicate.test(context.sourceCode.currentChar()));
+        return createSourceCodeMatcher(parser -> predicate.test(parser.sourceCode.currentChar()));
     }
 
     public static SourceCodeMatcher CHARACTER(char a) {
@@ -46,22 +46,22 @@ public class TokenParser {
     }
 
     public static TokenStartEnd included(SourceCodeMatcher sourceCodeMatcher) {
-        return TokenStartEnd.createTokenStartEnd(context -> when(sourceCodeMatcher.matches(context))
-                .then(() -> context.parsedCode.feed(context.sourceCode.takeCurrentChar())));
+        return TokenStartEnd.createTokenStartEnd(parser -> when(sourceCodeMatcher.matches(parser))
+                .then(() -> parser.parsedCode.feed(parser.sourceCode.takeCurrentChar())));
     }
 
     public static TokenStartEnd excluded(SourceCodeMatcher sourceCodeMatcher) {
-        return TokenStartEnd.createTokenStartEnd(context ->
-                when(sourceCodeMatcher.matches(context)).then(context.sourceCode::takeCurrentChar));
+        return TokenStartEnd.createTokenStartEnd(parser ->
+                when(sourceCodeMatcher.matches(parser)).then(parser.sourceCode::takeCurrentChar));
     }
 
     Token parseToken(TokenStartEnd start, TokenContentInToken content, TokenStartEnd end,
                      Function<TokenStream, Token> constructor) {
         //TODO same logic with scanner
         return parseTokenWithSourceCodePosition(start, () -> {
-            TokenParser subContext = createSubContext();
-            parseTokenStreamContent(content, end, subContext);
-            return constructor.apply(subContext.tokenStream);
+            TokenParser subParser = createSubContext();
+            parseTokenStreamContent(content, end, subParser);
+            return constructor.apply(subParser.tokenStream);
         });
     }
 

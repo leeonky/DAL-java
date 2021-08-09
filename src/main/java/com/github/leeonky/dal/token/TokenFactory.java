@@ -137,5 +137,5 @@ public interface TokenFactory {
         }
     }
 
-    Token fetchToken(TokenParser context);
+    Token fetchToken(TokenParser parser);
 }

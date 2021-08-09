@@ -13,22 +13,22 @@ public abstract class TokenStartEnd {
     static TokenStartEnd createTokenStartEnd(Predicate<TokenParser> predicate) {
         return new TokenStartEnd() {
             @Override
-            boolean matches(TokenParser context) {
-                return predicate.test(context);
+            boolean matches(TokenParser parser) {
+                return predicate.test(parser);
             }
         };
     }
 
-    abstract boolean matches(TokenParser context);
+    abstract boolean matches(TokenParser parser);
 
     public TokenStartEnd or(TokenStartEnd another) {
-        return createTokenStartEnd(context -> matches(context) || another.matches(context));
+        return createTokenStartEnd(parser -> matches(parser) || another.matches(parser));
     }
 
     public TokenStartEnd orThrow(String message) {
-        return createTokenStartEnd(context -> {
+        return createTokenStartEnd(parser -> {
             try {
-                return matches(context);
+                return matches(parser);
             } catch (NoMoreSourceCodeException exception) {
                 throw new SyntaxException(exception.getPosition(), message);
             }

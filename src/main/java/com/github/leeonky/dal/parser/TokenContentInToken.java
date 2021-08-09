@@ -8,7 +8,7 @@ import java.util.function.Function;
 import static java.util.Optional.ofNullable;
 
 public class TokenContentInToken {
-    private Function<TokenParser, Token> tokenGetter = context -> null;
+    private Function<TokenParser, Token> tokenGetter = parser -> null;
 
     private TokenContentInToken() {
     }
@@ -18,12 +18,12 @@ public class TokenContentInToken {
     }
 
     public TokenContentInToken or(TokenFactory tokenFactory) {
-        return copy().setTokenGetter(context -> ofNullable(tokenGetter.apply(context))
-                .orElseGet(() -> tokenFactory.fetchToken(context)));
+        return copy().setTokenGetter(parser -> ofNullable(tokenGetter.apply(parser))
+                .orElseGet(() -> tokenFactory.fetchToken(parser)));
     }
 
-    Token getToken(TokenParser context) {
-        return tokenGetter.apply(context);
+    Token getToken(TokenParser parser) {
+        return tokenGetter.apply(parser);
     }
 
     protected TokenContentInToken copy() {

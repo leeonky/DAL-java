@@ -73,7 +73,7 @@ class SourceCodeMatcherTest {
         public static final boolean MATCH = true;
 
         private SourceCodeMatcher constMatcher(final boolean match) {
-            return SourceCodeMatcher.createSourceCodeMatcher(context -> match);
+            return SourceCodeMatcher.createSourceCodeMatcher(parser -> match);
         }
 
         @Nested
@@ -160,10 +160,10 @@ class SourceCodeMatcherTest {
             }
 
             private boolean givenParsedCode(String code) {
-                TokenParser context = new TokenParser(new SourceCode(code));
+                TokenParser parser = new TokenParser(new SourceCode(code));
                 for (char c : code.toCharArray())
-                    included(ANY_CHARACTERS).matches(context);
-                return TokenParser.AFTER_OPERATOR_MATCHES.matches(context);
+                    included(ANY_CHARACTERS).matches(parser);
+                return TokenParser.AFTER_OPERATOR_MATCHES.matches(parser);
             }
         }
     }
