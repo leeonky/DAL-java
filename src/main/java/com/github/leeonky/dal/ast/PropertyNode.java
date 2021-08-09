@@ -23,10 +23,9 @@ public class PropertyNode extends Node {
         } catch (IndexOutOfBoundsException ex) {
             throw new RuntimeException(ex.getMessage(), getPositionBegin());
         } catch (Exception e) {
-            //TODO log original and alias
-            throw new RuntimeException(
-                    format("Get property via `%s` failed, property can be public field, getter or customer type getter",
-                            inspect()), getPositionBegin());
+            throw new RuntimeException(format(
+                    "Get property via `%s` failed, property can be public field, getter or customer type getter",
+                    inspect()), getPositionBegin());
         }
     }
 

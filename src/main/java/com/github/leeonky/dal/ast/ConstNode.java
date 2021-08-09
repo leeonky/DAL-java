@@ -8,7 +8,6 @@ public class ConstNode extends Node {
 
     private final Object value;
 
-    //TODO add inspect input source code arg
     public ConstNode(Object value) {
         this.value = value;
     }

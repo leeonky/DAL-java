@@ -27,7 +27,6 @@ public class ParsedCode {
 
     public void feed(ParsedCode parsedCode) {
         content.addAll(parsedCode.content);
-        //TODO need test
-//        parsedCode.content.clear();
+        parsedCode.content.clear();
     }
 }
