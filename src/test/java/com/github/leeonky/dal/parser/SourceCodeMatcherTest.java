@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.parser;
 
-import com.github.leeonky.dal.DALCompiler;
-import com.github.leeonky.dal.token.Scanner;
+import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.token.SourceCode;
 import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenStream;
@@ -39,13 +38,13 @@ class SourceCodeMatcherTest {
         @Test
         void delimiter() {
             assertThat(allCharMatchesBy(TokenParser.DELIMITER))
-                    .isEqualTo(Scanner.TOKEN_DELIMITER);
+                    .isEqualTo(Constants.TOKEN_DELIMITER);
         }
 
         @Test
         void operator() {
             assertThat(allCharMatchesBy(TokenParser.OPERATOR))
-                    .isEqualTo(Scanner.OPERATOR_CHAR);
+                    .isEqualTo(Constants.OPERATOR_CHAR);
         }
 
         @Test
@@ -127,7 +126,7 @@ class SourceCodeMatcherTest {
 
             @Test
             void last_opt_token_matches() {
-                assertTrue(givenLastToken(Token.operatorToken(DALCompiler.MATCHES)));
+                assertTrue(givenLastToken(Token.operatorToken(Constants.KeyWords.MATCHES)));
             }
 
             @Test

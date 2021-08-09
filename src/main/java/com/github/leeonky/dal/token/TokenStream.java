@@ -25,10 +25,6 @@ public class TokenStream {
         return index < tokens.size();
     }
 
-    public List<Token> allTokens() {
-        return new ArrayList<>(tokens);
-    }
-
     public Token appendToken(Token token) {
         tokens.add(Objects.requireNonNull(token));
         return token;

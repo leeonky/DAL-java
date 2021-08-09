@@ -1,13 +1,13 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.DALCompiler;
+import com.github.leeonky.dal.Constants;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class RegexTokenFactoryTest extends TokenFactoryTestBase {
-    private static final Token OPT_MATCHES = Token.operatorToken(DALCompiler.MATCHES);
+    private static final Token OPT_MATCHES = Token.operatorToken(Constants.KeyWords.MATCHES);
 
     @Override
     protected Token previousToken() {

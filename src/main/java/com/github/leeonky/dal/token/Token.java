@@ -6,8 +6,8 @@ import com.github.leeonky.dal.ast.Operator;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import static com.github.leeonky.dal.DALCompiler.MATCHES;
-import static com.github.leeonky.dal.token.Scanner.OPT_MATCHES_STRING;
+import static com.github.leeonky.dal.Constants.KeyWords.MATCHES;
+import static com.github.leeonky.dal.Constants.OPT_MATCHES_STRING;
 import static java.text.MessageFormat.format;
 
 public class Token {
@@ -51,6 +51,10 @@ public class Token {
 
     public static Token keyWordToken(String keyWord) {
         return new Token(Type.KEY_WORD, keyWord);
+    }
+
+    public static Token treeToken(TokenStream tokenStream) {
+        return new Token(Type.TREE, tokenStream);
     }
 
     @Override
@@ -174,7 +178,11 @@ public class Token {
         return getValue();
     }
 
+    public TokenStream getTokenStream() {
+        return (TokenStream) value;
+    }
+
     public enum Type {
-        WORD, PROPERTY, OPERATOR, BEGIN_BRACKET, END_BRACKET, KEY_WORD, CONST_VALUE, REGEX
+        WORD, PROPERTY, OPERATOR, BEGIN_BRACKET, END_BRACKET, KEY_WORD, CONST_VALUE, REGEX, TREE
     }
 }

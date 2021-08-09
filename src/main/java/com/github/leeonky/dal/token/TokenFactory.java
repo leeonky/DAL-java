@@ -1,12 +1,12 @@
 package com.github.leeonky.dal.token;
 
+import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.parser.TokenParser;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.github.leeonky.dal.DALCompiler.*;
 import static com.github.leeonky.dal.parser.NewTokenFactory.equalToCharacter;
 import static com.github.leeonky.dal.parser.NewTokenFactory.startWith;
 import static com.github.leeonky.dal.parser.SourceCodeMatcher.not;
@@ -36,22 +36,23 @@ public interface TokenFactory {
         return Token.propertyToken(tokenStream.pop().getPropertyOrIndex());
     };
     Function<String, Token> WORD_TOKEN = content -> {
-        if (NULL.equals(content))
+        if (Constants.KeyWords.NULL.equals(content))
             return constValueToken(null);
-        if (TRUE.equals(content))
+        if (Constants.KeyWords.TRUE.equals(content))
             return constValueToken(true);
-        if (FALSE.equals(content))
+        if (Constants.KeyWords.FALSE.equals(content))
             return constValueToken(false);
-        if (AND.equals(content))
+        if (Constants.KeyWords.AND.equals(content))
             return operatorToken("&&");
-        if (OR.equals(content))
+        if (Constants.KeyWords.OR.equals(content))
             return operatorToken("||");
-        if (MATCHES.equals(content))
-            return operatorToken(MATCHES);
-        if (Scanner.KEYWORD_SETS.contains(content))
+        if (Constants.KeyWords.MATCHES.equals(content))
+            return operatorToken(Constants.KeyWords.MATCHES);
+        if (Constants.KEYWORD_SETS.contains(content))
             return keyWordToken(content);
         return wordToken(content);
     };
+    Function<TokenStream, Token> TOKEN_TREE = Token::treeToken;
 
     static TokenFactory createNumberTokenFactory() {
         return startWith(included(DIGITAL))
@@ -135,6 +136,22 @@ public interface TokenFactory {
                 return Optional.empty();
             }
         }
+    }
+
+    static TokenFactory createDALTokenFactory() {
+        return startWith(BEGIN_OF_CODE)
+                .take(byFactory(createBracketPropertyTokenFactory())
+                        .or(createBeanPropertyTokenFactory())
+                        .or(createNumberTokenFactory())
+                        .or(createSingleQuotedStringTokenFactory())
+                        .or(createDoubleQuotedStringTokenFactory())
+                        .or(createRegexTokenFactory())
+                        .or(createOperatorTokenFactory())
+                        .or(createBeginBracketTokenFactory())
+                        .or(createEndBracketTokenFactory())
+                        .or(createWordTokenFactory()))
+                .endWith(END_OF_CODE)
+                .createAs(TOKEN_TREE);
     }
 
     Token fetchToken(TokenParser parser);

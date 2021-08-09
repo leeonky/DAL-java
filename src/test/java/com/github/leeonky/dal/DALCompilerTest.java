@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static com.github.leeonky.dal.DALCompiler.MATCHES;
+import static com.github.leeonky.dal.Constants.KeyWords.MATCHES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

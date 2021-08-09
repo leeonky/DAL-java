@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static com.github.leeonky.dal.token.Scanner.OPT_MATCHES_STRING;
+import static com.github.leeonky.dal.Constants.OPT_MATCHES_STRING;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class OperatorTokenFactoryTest extends TokenFactoryTestBase {

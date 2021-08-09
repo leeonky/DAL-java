@@ -3,7 +3,7 @@ package com.github.leeonky.dal.token;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.token.Scanner.OPT_MATCHES_STRING;
+import static com.github.leeonky.dal.Constants.OPT_MATCHES_STRING;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
@@ -51,6 +51,11 @@ class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
             @Test
             void support_array_access() {
                 assertThat(parseToken("[1]")).isEqualTo(Token.propertyToken(1));
+            }
+
+            @Test
+            void support_trim_white_space() {
+                assertThat(parseToken("[ 1 ]")).isEqualTo(Token.propertyToken(1));
             }
 
             @Test

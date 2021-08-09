@@ -1,7 +1,11 @@
 package com.github.leeonky.dal.parser;
 
+import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
-import com.github.leeonky.dal.token.*;
+import com.github.leeonky.dal.token.IllegalTokenContentException;
+import com.github.leeonky.dal.token.SourceCode;
+import com.github.leeonky.dal.token.Token;
+import com.github.leeonky.dal.token.TokenStream;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -13,9 +17,9 @@ import static com.github.leeonky.dal.util.IfThenFactory.when;
 import static com.github.leeonky.dal.util.IfThenFactory.whenNonNull;
 
 public class TokenParser {
-    public static final SourceCodeMatcher DIGITAL = oneCharMatcher(Scanner.DIGITAL_CHAR::contains);
-    public static final SourceCodeMatcher DELIMITER = oneCharMatcher(Scanner.TOKEN_DELIMITER::contains);
-    public static final SourceCodeMatcher OPERATOR = oneCharMatcher(Scanner.OPERATOR_CHAR::contains);
+    public static final SourceCodeMatcher DIGITAL = oneCharMatcher(Constants.DIGITAL_CHAR::contains);
+    public static final SourceCodeMatcher DELIMITER = oneCharMatcher(Constants.TOKEN_DELIMITER::contains);
+    public static final SourceCodeMatcher OPERATOR = oneCharMatcher(Constants.OPERATOR_CHAR::contains);
     public static final SourceCodeMatcher AFTER_TOKEN_MATCHES = createSourceCodeMatcher(parser ->
             parser.tokenStream.isLastTokenOperatorMatches());
     public static final SourceCodeMatcher AFTER_OPERATOR_MATCHES = createSourceCodeMatcher(parser ->
@@ -24,6 +28,7 @@ public class TokenParser {
             parser.sourceCode.notEnd());
     public static final TokenStartEnd END_OF_CODE = TokenStartEnd.createTokenStartEnd(parser ->
             !parser.sourceCode.notEnd());
+    public static final TokenStartEnd BEGIN_OF_CODE = TokenStartEnd.createTokenStartEnd(parser -> true);
     private final SourceCode sourceCode;
     private final TokenStream tokenStream;
     private final ParsedCode parsedCode = new ParsedCode();
@@ -57,7 +62,6 @@ public class TokenParser {
 
     Token parseToken(TokenStartEnd start, TokenContentInToken content, TokenStartEnd end,
                      Function<TokenStream, Token> constructor) {
-        //TODO same logic with scanner
         return parseTokenWithSourceCodePosition(start, () -> {
             TokenParser subParser = createSubContext();
             parseTokenStreamContent(content, end, subParser);
@@ -75,9 +79,11 @@ public class TokenParser {
 
     private void parseTokenStreamContent(TokenContentInToken content, TokenStartEnd end, TokenParser subContext) {
         while (!end.matches(subContext)) {
-            if (content.getToken(subContext) == null)
-                throw new SyntaxException(sourceCode.getPosition(), "Unexpected token");
-            sourceCode.trimLeft();
+            if (sourceCode.hasContent()) {
+                if (content.getToken(subContext) == null)
+                    throw new SyntaxException(sourceCode.getPosition(), "Unexpected token");
+                sourceCode.trimLeft();
+            }
         }
     }
 
