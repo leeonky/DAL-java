@@ -55,8 +55,8 @@ public class TokenParser {
                 when(sourceCodeMatcher.matches(context)).then(context.sourceCode::takeCurrentChar));
     }
 
-    public Token parseToken(TokenStartEnd start, TokenContentInToken content, TokenStartEnd end,
-                            Function<TokenStream, Token> constructor) {
+    Token parseToken(TokenStartEnd start, TokenContentInToken content, TokenStartEnd end,
+                     Function<TokenStream, Token> constructor) {
         //TODO same logic with scanner
         return parseTokenWithSourceCodePosition(start, () -> {
             TokenParser subContext = createSubContext();
@@ -65,8 +65,8 @@ public class TokenParser {
         });
     }
 
-    public Token parseToken(TokenStartEnd start, TokenContentInString content, TokenStartEnd end,
-                            Function<String, Token> constructor) {
+    Token parseToken(TokenStartEnd start, TokenContentInString content, TokenStartEnd end,
+                     Function<String, Token> constructor) {
         return parseTokenWithSourceCodePosition(start, () -> {
             parseStringContent(content, end);
             return constructor.apply(parsedCode.takeContent());
@@ -96,8 +96,11 @@ public class TokenParser {
     private Token parseTokenWithSourceCodePosition(TokenStartEnd start, Supplier<Token> supplier) {
         int position = sourceCode.getPosition();
         return when(start.matches(this)).thenReturn(() -> (Token)
-                whenNonNull(tokenStream.appendToken(getToken(supplier))).thenReturn(token ->
-                        token.setPositionBegin(position).setPositionEnd(sourceCode.getPosition())));
+                whenNonNull(getToken(supplier))
+                        .canReturn(token -> tokenStream.appendToken(token)
+                                .setPositionBegin(position)
+                                .setPositionEnd(sourceCode.getPosition())
+                        ).orElse(() -> sourceCode.seek(position - sourceCode.getPosition())));
     }
 
     private Token getToken(Supplier<Token> supplier) {

@@ -35,12 +35,15 @@ class NumberTokenFactoryTest extends TokenFactoryTestBase {
             assertThat(parseToken("1ab ")).isNull();
         }
 
-        //TODO seek position back when invalid number ****
-        //TODO do not change last when invalid number ****
+        @Test
+        void should_return_code_position_when_parse_invalid_number() {
+            assertThat(nextCharOf("1ab ")).isEqualTo('1');
+        }
     }
 
     @Nested
     class Parse {
+
         @Test
         void should_return_token_when_given_valid_code() {
             shouldParse("100 ", "100");

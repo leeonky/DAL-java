@@ -39,10 +39,23 @@ public class IfThenFactory {
             this.value = value;
         }
 
-        public R thenReturn(Function<T, R> function) {
-            if (value != null)
-                return function.apply(value);
-            return null;
+        public Else canReturn(Function<T, R> function) {
+            return new Else(function);
+        }
+
+        public class Else {
+            private final Function<T, R> nonNull;
+
+            public Else(Function<T, R> nonNull) {
+                this.nonNull = nonNull;
+            }
+
+            public R orElse(Runnable run) {
+                if (value != null)
+                    return nonNull.apply(value);
+                run.run();
+                return null;
+            }
         }
     }
 }

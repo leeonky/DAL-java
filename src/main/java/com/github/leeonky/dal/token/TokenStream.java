@@ -30,8 +30,7 @@ public class TokenStream {
     }
 
     public Token appendToken(Token token) {
-        //TODO token not null
-        tokens.add(token);
+        tokens.add(Objects.requireNonNull(token));
         return token;
     }
 
