@@ -154,5 +154,12 @@ public interface TokenFactory {
                 .createAs(TOKEN_TREE);
     }
 
+    static TokenFactory createPropertyChainFactory() {
+        return startWith(BEGIN_OF_CODE)
+                .take(byFactory(createBeanPropertyTokenFactory())
+                        .or(createBracketPropertyTokenFactory()))
+                .endWith(END_OF_CODE).createAs(TOKEN_TREE);
+    }
+
     Token fetchToken(TokenParser parser);
 }

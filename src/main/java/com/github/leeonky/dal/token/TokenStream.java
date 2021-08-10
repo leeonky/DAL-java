@@ -5,6 +5,7 @@ import com.github.leeonky.dal.ast.BracketNode;
 import com.github.leeonky.dal.ast.SchemaAssertionExpression;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 
@@ -101,5 +102,9 @@ public class TokenStream {
 
     public int size() {
         return tokens.size();
+    }
+
+    public Stream<Token> stream() {
+        return tokens.stream();
     }
 }

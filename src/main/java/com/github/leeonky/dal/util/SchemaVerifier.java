@@ -35,8 +35,7 @@ public class SchemaVerifier {
         Class<?> type = superSchemaType;
         SubType subType = superSchemaType.getAnnotation(SubType.class);
         if (subType != null) {
-            //TODO support escape code in subType.property()
-            Object value = object.getPropertyValueBk(subType.property());
+            Object value = object.getValue(CodeHelper.INSTANCE.toChainNodes(subType.property()).toArray());
             type = Stream.of(subType.types())
                     .filter(t -> t.value().equals(value))
                     .map(SubType.Type::type)

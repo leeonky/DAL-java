@@ -2,6 +2,7 @@ package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.type.FieldAlias;
 import com.github.leeonky.dal.type.FieldAliases;
+import com.github.leeonky.dal.util.CodeHelper;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.ArrayList;
@@ -54,8 +55,7 @@ public class SchemaType {
         String property = fetchFieldChain((String) alias);
         if (Objects.equals(property, alias))
             return subSchema(property);
-        //TODO support escape code
-        List<Object> chain = BeanClass.toChainNodes(property);
+        List<Object> chain = CodeHelper.INSTANCE.toChainNodes(property);
         return chain.stream().skip(1).reduce(access(chain.get(0)), SchemaType::access, (o1, o2) -> {
             throw new IllegalStateException("Not allow parallel here!");
         });

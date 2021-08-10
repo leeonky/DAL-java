@@ -16,7 +16,8 @@ class SchemaTypeTest {
             @FieldAlias(alias = "aliasOfId", field = "id"),
             @FieldAlias(alias = "aliasOfAliasId", field = "aliasOfId"),
             @FieldAlias(alias = "aliasOfUserName", field = "user.name"),
-            @FieldAlias(alias = "firstLine", field = "lines[0]")
+            @FieldAlias(alias = "firstLine", field = "lines[0]"),
+            @FieldAlias(alias = "containsWhiteSpace", field = "sub[' a ']")
     })
     public static class Order {
         public User user;
@@ -94,6 +95,13 @@ class SchemaTypeTest {
             SchemaType subSchema = schemaOrder.access("firstLine");
 
             assertThat(subSchema.getPropertyChainBefore(schemaOrder)).containsExactly("lines", 0);
+        }
+
+        @Test
+        void support_escape_char_in_alias() {
+            SchemaType subSchema = schemaOrder.access("containsWhiteSpace");
+
+            assertThat(subSchema.getPropertyChainBefore(schemaOrder)).containsExactly("sub", " a ");
         }
     }
 }
