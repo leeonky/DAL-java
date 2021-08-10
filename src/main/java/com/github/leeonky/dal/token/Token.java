@@ -134,13 +134,16 @@ public class Token {
                     operator = new Operator.Division();
                     break;
                 case "&&":
-                    operator = new Operator.And();
+                    operator = new Operator.And("&&");
                     break;
                 case "||":
                     operator = new Operator.Or();
                     break;
                 case Constants.Operators.MATCH:
                     operator = new Operator.Matcher();
+                    break;
+                case ",":
+                    operator = new Operator.Comma();
                     break;
                 default:
                     throw new SyntaxException(getPositionBegin(), "not support operator `" + operatorString + "` yet");

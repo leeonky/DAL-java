@@ -209,8 +209,8 @@ class DALCompilerTest {
 
         @Test
         void simple_logic_and() {
-            assertCompileNode("&& true", new Expression(InputNode.INSTANCE, new Operator.And(), new ConstNode(true)));
-            assertCompileNode("and true", new Expression(InputNode.INSTANCE, new Operator.And(), new ConstNode(true)));
+            assertCompileNode("&& true", new Expression(InputNode.INSTANCE, new Operator.And("&&"), new ConstNode(true)));
+            assertCompileNode("and true", new Expression(InputNode.INSTANCE, new Operator.And("&&"), new ConstNode(true)));
         }
 
         @Test

@@ -61,7 +61,7 @@ class OperatorTokenFactoryTest extends TokenFactoryTestBase {
         }
 
         @ParameterizedTest
-        @ValueSource(strings = {"-", "!", "=", ">", "<", "+", "*", "/", ":", ">=", "<=", "!=", "&&", "||"})
+        @ValueSource(strings = {"-", "!", "=", ">", "<", "+", "*", "/", ":", ">=", "<=", "!=", "&&", "||", ","})
         void finish_parse_and_source_code_seek_back_to_delimiter(String opt) {
             assertThat(nextCharOf(opt + "a")).isEqualTo('a');
         }
@@ -71,7 +71,7 @@ class OperatorTokenFactoryTest extends TokenFactoryTestBase {
     class NoDelimiter {
 
         @ParameterizedTest
-        @ValueSource(strings = {"-", "!", "=", ">", "<", "+", "*", "/", ":", ">=", "<=", "!=", "&&", "||"})
+        @ValueSource(strings = {"-", "!", "=", ">", "<", "+", "*", "/", ":", ">=", "<=", "!=", "&&", "||", ","})
         void allow_get_value_when_parser_not_finished(String opt) {
             shouldParse(opt, opt);
         }

@@ -175,8 +175,8 @@ public abstract class Operator {
     }
 
     public static class And extends Operator {
-        public And() {
-            super(PRECEDENCE_LOGIC_COMBINATION_OPT, "&&", true);
+        public And(String inspect) {
+            super(PRECEDENCE_LOGIC_COMBINATION_OPT, inspect, true);
         }
 
         @Override
@@ -267,6 +267,12 @@ public abstract class Operator {
             if (type.isInstance(value2) && value1 != null && !type.isInstance(value1))
                 throw new RuntimeException(String.format("Cannot matches between type '%s' and '%s'",
                         getClassName(value1), type.getName()), getPosition());
+        }
+    }
+
+    public static class Comma extends And {
+        public Comma() {
+            super("&&");
         }
     }
 }

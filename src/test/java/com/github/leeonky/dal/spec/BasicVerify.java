@@ -89,6 +89,14 @@ class BasicVerify extends Base {
         }
 
         @Test
+        void alias_of_operator_and() {
+            assertPass(null, "true , true");
+            assertFailed(null, "true , false");
+            assertFailed(null, "false , true");
+            assertFailed(null, "false , false");
+        }
+
+        @Test
         void expression_operand_type_should_be_matched() {
             assertRuntimeException(null, " + 1", 1, "Can not plus 'null' and 'java.math.BigDecimal'");
             assertRuntimeException(null, " > 1", 1, "Can not compare [null] and [1]");

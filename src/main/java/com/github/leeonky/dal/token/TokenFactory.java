@@ -44,6 +44,7 @@ public interface TokenFactory {
             return constValueToken(true);
         if (FALSE.equals(content))
             return constValueToken(false);
+        //TODO use and or
         if (AND.equals(content))
             return operatorToken("&&");
         if (OR.equals(content))
