@@ -48,7 +48,7 @@ class TokenStartEndTest {
         }
 
         @Test
-        void should_include_matches_char_in_code() {
+        void should_include_matched_char_in_code() {
             TokenParser parser = givenParseContextBySourceCode("abc");
 
             includedMatches(CHARACTER('a'), parser);
@@ -88,7 +88,7 @@ class TokenStartEndTest {
         }
 
         @Test
-        void should_not_include_matches_char_in_code() {
+        void should_not_include_matched_char_in_code() {
             TokenParser parser = givenParseContextBySourceCode("abc");
 
             excludedMatches(CHARACTER('a'), parser);
@@ -119,7 +119,7 @@ class TokenStartEndTest {
         }
 
         @Test
-        void should_keep_matches_source_code_position() {
+        void should_keep_matcher_source_code_position() {
             TokenParser parser = givenParseContextBySourceCode("ab");
 
             beforeMatches(CHARACTER('a'), parser);
@@ -128,7 +128,7 @@ class TokenStartEndTest {
         }
 
         @Test
-        void should_not_include_matches_char_in_code() {
+        void should_not_include_matcher_char_in_code() {
             TokenParser parser = givenParseContextBySourceCode("abc");
 
             beforeMatches(CHARACTER('a'), parser);

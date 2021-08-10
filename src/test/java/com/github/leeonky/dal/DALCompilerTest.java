@@ -79,7 +79,7 @@ class DALCompilerTest {
 
         @Test
         void should_support_follow_operators() {
-            assertCompileOperator(":", new Operator.Matches());
+            assertCompileOperator(":", new Operator.Matcher());
             assertCompileOperator("=", new Operator.Equal());
             assertCompileOperator("!=", new Operator.NotEqual());
             assertCompileOperator(">", new Operator.Greater());
@@ -194,7 +194,7 @@ class DALCompilerTest {
         @Test
         void compile_match_regex() {
             assertCompileNode(" : /1/",
-                    new Expression(InputNode.INSTANCE, new Operator.Matches(), new RegexNode("1")));
+                    new Expression(InputNode.INSTANCE, new Operator.Matcher(), new RegexNode("1")));
         }
 
         @Test

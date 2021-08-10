@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
 
-    public static final Token OPT_MATCHES = Token.operatorToken(Constants.Operators.MATCH);
+    public static final Token OPT_MATCHER = Token.operatorToken(Constants.Operators.MATCH);
 
     @Override
     protected TokenFactory createTokenFactory() {
@@ -29,8 +29,8 @@ class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
         }
 
         @Test
-        void return_empty_when_bracket_after_matches() {
-            assertThat(parseToken("[", OPT_MATCHES))
+        void return_empty_when_bracket_after_matcher() {
+            assertThat(parseToken("[", OPT_MATCHER))
                     .isNull();
         }
 

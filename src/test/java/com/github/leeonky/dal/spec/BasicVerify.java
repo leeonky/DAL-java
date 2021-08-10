@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -188,28 +189,70 @@ class BasicVerify extends Base {
     @Nested
     class Matches {
 
-        @Nested
-        class MatchesValue {
+        @Test
+        void number_value() {
+            assertPass(1, ": 1.0");
+            assertPass(1, ": 1");
+            assertPass(1.0, ": 1");
+            assertPass(1L, ": 1");
 
-            @Test
-            void support_operator_matches() {
-                assertPass(1, ": 1");
-                assertFailed(1, ": 2");
-            }
-
-            @Test
-            void support_convert_to_target_type_before_matches_value() {
-                assertPass("1", ": 1");
-                assertFailed("1", ": 2");
-            }
-
-            @Test
-            void process_null() {
-                assertFailed(1, ": null");
-                assertFailed(null, ": 1");
-                assertPass(null, ": null");
-            }
+            assertFailed(1, ": 2");
         }
 
+        @Test
+        void boolean_value() {
+            assertPass(true, ": true");
+            assertPass(false, ": false");
+            assertFailed(true, ": false");
+            assertFailed(false, ": true");
+        }
+
+        @Test
+        void string_value() {
+            assertPass("abc", ": 'abc'");
+            assertFailed("abc", ": 'xyz'");
+        }
+
+        @Test
+        void object_to_string() {
+            assertPass(Instant.parse("2000-10-10T00:00:01Z"), ": '2000-10-10T00:00:01Z'");
+            assertFailed(Instant.parse("2010-10-10T00:00:01Z"), ": '2000-10-10T00:00:01Z'");
+        }
+
+        @Test
+        void do_not_allow_auto_convert_to_number() {
+            assertRuntimeException("1", ": 1", 0, "Cannot matches between type 'java.lang.String' and 'java.lang.Number'");
+        }
+
+        @Test
+        void do_not_allow_auto_convert_to_boolean() {
+            assertRuntimeException("true", ": true", 0, "Cannot matches between type 'java.lang.String' and 'java.lang.Boolean'");
+        }
+
+        @Test
+        void do_not_allow_number_auto_convert_to_string() {
+            assertRuntimeException(1, ": '1'", 0, "Cannot matches between type 'java.lang.Number' and 'java.lang.String'");
+        }
+
+        @Test
+        void do_not_allow_boolean_auto_convert_to_string() {
+            assertRuntimeException(true, ": 'true'", 0, "Cannot matches between type 'java.lang.Boolean' and 'java.lang.String'");
+        }
+
+        @Test
+        void null_value_matching() {
+            assertPass(null, ": null");
+            assertFailed(1, ": null");
+            assertFailed(0, ": null");
+            assertFailed(true, ": null");
+            assertFailed(false, ": null");
+            assertFailed("", ": null");
+            assertFailed(null, ": 1");
+            assertFailed(null, ": 0");
+            assertFailed(null, ": true");
+            assertFailed(null, ": false");
+            assertFailed(null, ": ''");
+            assertFailed(null, ": 'any string'");
+        }
     }
 }

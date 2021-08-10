@@ -7,6 +7,8 @@ import com.github.leeonky.dal.util.Calculator;
 
 import java.util.Objects;
 
+import static com.github.leeonky.util.BeanClass.getClassName;
+
 public abstract class Operator {
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
     private static final int PRECEDENCE_LOGIC_COMPARE_OPT = 210;
@@ -232,9 +234,9 @@ public abstract class Operator {
         }
     }
 
-    public static class Matches extends Operator {
+    public static class Matcher extends Operator {
 
-        public Matches() {
+        public Matcher() {
             super(PRECEDENCE_LOGIC_COMPARE_OPT, Constants.Operators.MATCH, true);
         }
 
@@ -245,9 +247,26 @@ public abstract class Operator {
                 Object value2 = node2.evaluate(context);
                 if (value2 == null)
                     return Objects.equals(value1, null);
-                return Objects.equals(context.getConverter().convert(value2.getClass(), value1), value2);
+                shouldBeSameTypeIfTypeIs(Number.class, value1, value2);
+                shouldBeSameTypeIfTypeIs(Boolean.class, value1, value2);
+                invalidTypeToMatchStringValue(Number.class, value1, value2);
+                invalidTypeToMatchStringValue(Boolean.class, value1, value2);
+                return Calculator.equals(context.getConverter().convert(value2.getClass(), value1), value2);
+
             }
             return ((RegexNode) node2).matches(context.getConverter().convert(String.class, value1));
+        }
+
+        private void invalidTypeToMatchStringValue(Class<?> type, Object value1, Object value2) {
+            if (type.isInstance(value1) && value2 instanceof String)
+                throw new RuntimeException(String.format("Cannot matches between type '%s' and 'java.lang.String'",
+                        type.getName()), getPosition());
+        }
+
+        private void shouldBeSameTypeIfTypeIs(Class<?> type, Object value1, Object value2) {
+            if (type.isInstance(value2) && value1 != null && !type.isInstance(value1))
+                throw new RuntimeException(String.format("Cannot matches between type '%s' and '%s'",
+                        getClassName(value1), type.getName()), getPosition());
         }
     }
 }

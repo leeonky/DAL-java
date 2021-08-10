@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class OperatorTokenFactoryTest extends TokenFactoryTestBase {
 
-    private static final Token OPT_MATCHES = Token.operatorToken(Constants.Operators.MATCH);
+    private static final Token OPT_MATCHER = Token.operatorToken(Constants.Operators.MATCH);
     private static final Token OPT_EQ = Token.operatorToken(Constants.Operators.EQ);
 
     @Override
@@ -33,8 +33,8 @@ class OperatorTokenFactoryTest extends TokenFactoryTestBase {
         }
 
         @Test
-        void should_return_empty_when_last_token_is_operator_matches_or_eq() {
-            assertThat(parseToken("/", OPT_MATCHES))
+        void should_return_empty_when_last_token_is_operator_matcher_or_eq() {
+            assertThat(parseToken("/", OPT_MATCHER))
                     .isNull();
 
             assertThat(parseToken("/", OPT_EQ))

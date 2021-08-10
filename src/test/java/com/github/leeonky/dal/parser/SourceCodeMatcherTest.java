@@ -78,7 +78,7 @@ class SourceCodeMatcherTest {
         class When {
 
             @Test
-            void return_matches_when_matches_and_when_condition_matches() {
+            void return_match_when_matches_and_when_condition_matches() {
                 assertThat(constMatcher(MATCH).when(constMatcher(MATCH)).matches(null)).isEqualTo(MATCH);
             }
 
@@ -93,17 +93,17 @@ class SourceCodeMatcherTest {
         @Nested
         class Except {
             @Test
-            void return_matches_when_matches_and_not_exception() {
+            void return_match_when_matches_and_not_exception() {
                 assertThat(constMatcher(MATCH).except(constMatcher(!MATCH)).matches(null)).isEqualTo(MATCH);
             }
 
             @Test
-            void return_not_matches_when_matches_but_has_exception() {
+            void return_not_match_when_matches_but_has_exception() {
                 assertThat(constMatcher(MATCH).except(constMatcher(MATCH)).matches(null)).isEqualTo(!MATCH);
             }
 
             @Test
-            void return_not_matches_when_not_matches_no_matter_exception() {
+            void return_not_match_when_not_matches_no_matter_exception() {
                 assertThat(constMatcher(!MATCH).except(constMatcher(MATCH)).matches(null)).isEqualTo(!MATCH);
                 assertThat(constMatcher(!MATCH).except(constMatcher(!MATCH)).matches(null)).isEqualTo(!MATCH);
             }

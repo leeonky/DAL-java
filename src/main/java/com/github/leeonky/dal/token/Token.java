@@ -7,8 +7,6 @@ import com.github.leeonky.dal.ast.Operator;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import static java.text.MessageFormat.format;
-
 public class Token {
     private final Type type;
     private final Object value;
@@ -142,7 +140,7 @@ public class Token {
                     operator = new Operator.Or();
                     break;
                 case Constants.Operators.MATCH:
-                    operator = new Operator.Matches();
+                    operator = new Operator.Matcher();
                     break;
                 default:
                     throw new SyntaxException(getPositionBegin(), "not support operator `" + operatorString + "` yet");
@@ -155,12 +153,6 @@ public class Token {
     public boolean judgement() {
         return getType() == Type.OPERATOR
                 && (getValue().equals(Constants.Operators.MATCH) || getValue().equals(Constants.Operators.EQ));
-    }
-
-    @Override
-    public String toString() {
-        return format("Token'{'type={0}, value={1}, positionBegin={2}, positionEnd={3}'}'",
-                type, value, positionBegin, positionEnd);
     }
 
     public Object getPropertyOrIndex() {
