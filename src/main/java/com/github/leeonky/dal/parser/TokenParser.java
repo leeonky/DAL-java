@@ -20,10 +20,6 @@ public class TokenParser {
     public static final SourceCodeMatcher DIGITAL = oneCharMatcher(Constants.DIGITAL_CHAR::contains);
     public static final SourceCodeMatcher DELIMITER = oneCharMatcher(Constants.TOKEN_DELIMITER::contains);
     public static final SourceCodeMatcher OPERATOR = oneCharMatcher(Constants.OPERATOR_CHAR::contains);
-    public static final SourceCodeMatcher AFTER_TOKEN_MATCHES = createSourceCodeMatcher(parser ->
-            parser.tokenStream.isLastTokenOperatorMatches());
-    public static final SourceCodeMatcher AFTER_OPERATOR_MATCHES = createSourceCodeMatcher(parser ->
-            parser.parsedCode.isOperatorMatches());
     public static final SourceCodeMatcher ANY_CHARACTERS = createSourceCodeMatcher(parser ->
             parser.sourceCode.notEnd());
     public static final TokenStartEnd END_OF_CODE = TokenStartEnd.createTokenStartEnd(parser ->
@@ -42,7 +38,15 @@ public class TokenParser {
         this.tokenStream = tokenStream;
     }
 
-    public static SourceCodeMatcher oneCharMatcher(Predicate<Character> predicate) {
+    public static SourceCodeMatcher after(Predicate<Token> predicate) {
+        return createSourceCodeMatcher(parser -> parser.tokenStream.lastToken().map(predicate::test).orElse(false));
+    }
+
+    public static SourceCodeMatcher after(String code) {
+        return createSourceCodeMatcher(parser -> parser.parsedCode.isSourceCode(code));
+    }
+
+    private static SourceCodeMatcher oneCharMatcher(Predicate<Character> predicate) {
         return createSourceCodeMatcher(parser -> predicate.test(parser.sourceCode.currentChar()));
     }
 

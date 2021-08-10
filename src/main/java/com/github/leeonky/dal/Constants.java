@@ -12,8 +12,6 @@ public class Constants {
     public static final Set<Character> OPERATOR_CHAR = new HashSet<>(asList('-', '!', '=', '>', '<', '+', '*', '/', ':', '&', '|'));
     public static final Set<Character> DIGITAL_CHAR = new HashSet<>(asList('1', '2', '3', '4', '5', '6', '7', '8', '9', '0'));
     public static final Set<String> KEYWORD_SETS = new HashSet<>(asList(IS, WHICH));
-    public static final char OPT_MATCHES = ':';
-    public static final String OPT_MATCHES_STRING = ":";
 
     public static class KeyWords {
         public static final String WHICH = "which";
@@ -23,5 +21,10 @@ public class Constants {
         public static final String FALSE = "false";
         public static final String AND = "and";
         public static final String OR = "or";
+    }
+
+    public static class Operators {
+        public static final String MATCH = ":";
+        public static final String EQ = "=";
     }
 }

@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class RegexTokenFactoryTest extends TokenFactoryTestBase {
-    private static final Token OPT_MATCHES = Token.operatorToken(Constants.OPT_MATCHES_STRING);
+    private static final Token OPT_MATCHES = Token.operatorToken(Constants.Operators.MATCH);
+    private static final Token OPT_EQ = Token.operatorToken(Constants.Operators.EQ);
 
     @Override
     protected Token previousToken() {
@@ -33,13 +34,14 @@ public class RegexTokenFactoryTest extends TokenFactoryTestBase {
         }
 
         @Test
-        void return_empty_when_previous_token_is_not_opt_matches() {
+        void return_empty_when_previous_token_is_not_opt_matches_or_eq() {
             assertThat(parseToken("/hello/", null)).isNull();
         }
 
         @Test
         void should_return_regex_token_when_given_valid_code() {
             assertThat(parseToken("/hello/", OPT_MATCHES)).isEqualTo(Token.regexToken("hello"));
+            assertThat(parseToken("/hello/", OPT_EQ)).isEqualTo(Token.regexToken("hello"));
         }
     }
 

@@ -1,14 +1,14 @@
 package com.github.leeonky.dal.token;
 
+import com.github.leeonky.dal.Constants;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.Constants.OPT_MATCHES_STRING;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
 
-    public static final Token OPT_MATCHES = Token.operatorToken(OPT_MATCHES_STRING);
+    public static final Token OPT_MATCHES = Token.operatorToken(Constants.Operators.MATCH);
 
     @Override
     protected TokenFactory createTokenFactory() {

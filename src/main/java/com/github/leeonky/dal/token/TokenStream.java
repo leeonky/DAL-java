@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.Optional.of;
 
 public class TokenStream {
     private static final Set<String> UNARY_OPERATORS_WITHOUT_INTENTION = new HashSet<>(asList("!"));
@@ -96,8 +97,8 @@ public class TokenStream {
         return currentType() == Token.Type.REGEX;
     }
 
-    public boolean isLastTokenOperatorMatches() {
-        return !tokens.isEmpty() && tokens.get(tokens.size() - 1).isOperatorMatches();
+    public Optional<Token> lastToken() {
+        return tokens.isEmpty() ? Optional.empty() : of(tokens.get(tokens.size() - 1));
     }
 
     public int size() {

@@ -12,12 +12,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.github.leeonky.dal.parser.TokenParser.ANY_CHARACTERS;
-import static com.github.leeonky.dal.parser.TokenParser.included;
+import static com.github.leeonky.dal.parser.SourceCodeMatcher.createSourceCodeMatcher;
+import static com.github.leeonky.dal.parser.TokenParser.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SourceCodeMatcherTest {
@@ -72,7 +71,7 @@ class SourceCodeMatcherTest {
         public static final boolean MATCH = true;
 
         private SourceCodeMatcher constMatcher(final boolean match) {
-            return SourceCodeMatcher.createSourceCodeMatcher(parser -> match);
+            return createSourceCodeMatcher(parser -> match);
         }
 
         @Nested
@@ -109,60 +108,84 @@ class SourceCodeMatcherTest {
                 assertThat(constMatcher(!MATCH).except(constMatcher(!MATCH)).matches(null)).isEqualTo(!MATCH);
             }
         }
+
+        @Nested
+        class Or {
+
+            @Test
+            void return_true() {
+                assertThat(createSourceCodeMatcher(tokenParser -> true)
+                        .or(createSourceCodeMatcher(tokenParser -> false))
+                        .matches(null)).isTrue();
+
+                assertThat(createSourceCodeMatcher(tokenParser -> false)
+                        .or(createSourceCodeMatcher(tokenParser -> true))
+                        .matches(null)).isTrue();
+
+                assertThat(createSourceCodeMatcher(tokenParser -> true)
+                        .or(createSourceCodeMatcher(tokenParser -> true))
+                        .matches(null)).isTrue();
+            }
+
+            @Test
+            void return_false() {
+                assertThat(createSourceCodeMatcher(tokenParser -> false)
+                        .or(createSourceCodeMatcher(tokenParser -> false))
+                        .matches(null)).isFalse();
+            }
+        }
     }
 
     @Nested
     class StatusMatches {
 
         @Nested
-        class LastTokenOptMatches {
-
-            private boolean givenLastToken(Token last) {
-                TokenStream tokenStream = new TokenStream();
-                if (last != null)
-                    tokenStream.appendToken(last);
-                return TokenParser.AFTER_TOKEN_MATCHES.matches(new TokenParser(null, tokenStream));
+        class AfterCode {
+            private TokenParser givenParsedCode(String code) {
+                TokenParser parser = new TokenParser(new SourceCode(code));
+                for (char c : code.toCharArray())
+                    included(ANY_CHARACTERS).matches(parser);
+                return parser;
             }
 
             @Test
-            void last_opt_token_matches() {
-                assertTrue(givenLastToken(Token.operatorToken(Constants.OPT_MATCHES_STRING)));
-            }
+            void matches_after_same_code_string() {
+                TokenParser parser = givenParsedCode("abc");
 
-            @Test
-            void last_token_invalid() {
-                assertFalse(givenLastToken(Token.constValueToken(1)));
-            }
-
-            @Test
-            void last_token_not_exist() {
-                assertFalse(givenLastToken(null));
+                assertThat(after("abc").matches(parser)).isTrue();
+                assertThat(after("ab").matches(parser)).isFalse();
+                assertThat(after("abcd").matches(parser)).isFalse();
             }
         }
 
         @Nested
-        class ParsedCodeIsOptMatches {
+        class AfterToken {
 
             @Test
-            void parsed_code_is_opt_matches() {
-                assertTrue(givenParsedCode(":"));
+            void dose_not_match_when_last_token_is_null() {
+                TokenParser parser = new TokenParser(null);
+
+                assertThat(after(token -> true).matches(parser)).isFalse();
             }
 
             @Test
-            void no_code() {
-                assertFalse(givenParsedCode(""));
+            void dose_not_match_when_last_token_is_not_matches() {
+                TokenParser parser = givenLastToken(Token.constValueToken(100));
+
+                assertThat(after(token -> (int) token.getValue() != 100).matches(parser)).isFalse();
             }
 
             @Test
-            void not_matched_code() {
-                assertFalse(givenParsedCode("::"));
+            void matches_when_last_token_matches() {
+                TokenParser parser = givenLastToken(Token.constValueToken(100));
+
+                assertThat(after(token -> (int) token.getValue() == 100).matches(parser)).isTrue();
             }
 
-            private boolean givenParsedCode(String code) {
-                TokenParser parser = new TokenParser(new SourceCode(code));
-                for (char c : code.toCharArray())
-                    included(ANY_CHARACTERS).matches(parser);
-                return TokenParser.AFTER_OPERATOR_MATCHES.matches(parser);
+            private TokenParser givenLastToken(Token token) {
+                TokenStream tokenStream = new TokenStream();
+                tokenStream.appendToken(token);
+                return new TokenParser(null, tokenStream);
             }
         }
     }

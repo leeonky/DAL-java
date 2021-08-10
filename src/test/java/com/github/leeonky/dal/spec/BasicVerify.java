@@ -184,6 +184,8 @@ class BasicVerify extends Base {
                 assertPass(1, ": /1/");
                 assertFailed(2, ": /1/");
             }
+
+            //TODO Support = /1/
         }
     }
 }

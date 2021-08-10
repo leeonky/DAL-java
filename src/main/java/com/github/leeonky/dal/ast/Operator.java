@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.util.Calculator;
 
@@ -227,8 +228,8 @@ public abstract class Operator {
 
     public static class Matches extends Operator {
 
-        public Matches(String symbol) {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, symbol, true);
+        public Matches() {
+            super(PRECEDENCE_LOGIC_COMPARE_OPT, Constants.Operators.MATCH, true);
         }
 
         @Override

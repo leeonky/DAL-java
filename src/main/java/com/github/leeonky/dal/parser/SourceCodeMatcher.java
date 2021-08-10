@@ -25,4 +25,8 @@ public abstract class SourceCodeMatcher {
     public SourceCodeMatcher except(SourceCodeMatcher matcher) {
         return when(not(matcher));
     }
+
+    public SourceCodeMatcher or(SourceCodeMatcher sourceCodeMatcher) {
+        return createSourceCodeMatcher(parser -> matches(parser) || sourceCodeMatcher.matches(parser));
+    }
 }

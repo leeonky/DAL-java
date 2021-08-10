@@ -1,12 +1,12 @@
 package com.github.leeonky.dal.token;
 
+import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.Operator;
 
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import static com.github.leeonky.dal.Constants.OPT_MATCHES_STRING;
 import static java.text.MessageFormat.format;
 
 public class Token {
@@ -141,8 +141,8 @@ public class Token {
                 case "||":
                     operator = new Operator.Or();
                     break;
-                case OPT_MATCHES_STRING:
-                    operator = new Operator.Matches(OPT_MATCHES_STRING);
+                case Constants.Operators.MATCH:
+                    operator = new Operator.Matches();
                     break;
                 default:
                     throw new SyntaxException(getPositionBegin(), "not support operator `" + operatorString + "` yet");
@@ -152,9 +152,9 @@ public class Token {
         return operator;
     }
 
-    //TODO matches = :
-    public boolean isOperatorMatches() {
-        return getType() == Type.OPERATOR && getValue().equals(OPT_MATCHES_STRING);
+    public boolean judgement() {
+        return getType() == Type.OPERATOR
+                && (getValue().equals(Constants.Operators.MATCH) || getValue().equals(Constants.Operators.EQ));
     }
 
     @Override

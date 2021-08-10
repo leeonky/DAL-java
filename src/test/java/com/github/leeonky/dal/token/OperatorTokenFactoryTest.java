@@ -1,14 +1,17 @@
 package com.github.leeonky.dal.token;
 
+import com.github.leeonky.dal.Constants;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static com.github.leeonky.dal.Constants.OPT_MATCHES_STRING;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class OperatorTokenFactoryTest extends TokenFactoryTestBase {
+
+    private static final Token OPT_MATCHES = Token.operatorToken(Constants.Operators.MATCH);
+    private static final Token OPT_EQ = Token.operatorToken(Constants.Operators.EQ);
 
     @Override
     protected TokenFactory createTokenFactory() {
@@ -23,18 +26,19 @@ class OperatorTokenFactoryTest extends TokenFactoryTestBase {
     @Nested
     class CodeMatches {
 
+
         @Test
         void return_empty_when_first_char_is_not_digital() {
             assertThat(parseToken("not start with operator char")).isNull();
         }
 
         @Test
-        void should_return_empty_when_last_token_is_operator_matches() {
-            assertThat(parseToken("/", Token.operatorToken(OPT_MATCHES_STRING)))
+        void should_return_empty_when_last_token_is_operator_matches_or_eq() {
+            assertThat(parseToken("/", OPT_MATCHES))
                     .isNull();
 
-            assertThat(parseToken("+", Token.operatorToken(OPT_MATCHES_STRING)))
-                    .isEqualTo(Token.operatorToken("+"));
+            assertThat(parseToken("/", OPT_EQ))
+                    .isNull();
 
             assertThat(parseToken("/", null))
                     .isEqualTo(Token.operatorToken("/"));
@@ -51,8 +55,9 @@ class OperatorTokenFactoryTest extends TokenFactoryTestBase {
         }
 
         @Test
-        void distinguish_regex_after_operator_matches() {
+        void distinguish_regex_after_operator_judgement() {
             shouldParse(":/ ", ":");
+            shouldParse("=/ ", "=");
         }
 
         @ParameterizedTest

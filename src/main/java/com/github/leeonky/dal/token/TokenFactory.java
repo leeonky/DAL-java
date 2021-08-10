@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.github.leeonky.dal.Constants.KeyWords.*;
+import static com.github.leeonky.dal.Constants.Operators;
 import static com.github.leeonky.dal.parser.NewTokenFactory.equalToCharacter;
 import static com.github.leeonky.dal.parser.NewTokenFactory.startWith;
 import static com.github.leeonky.dal.parser.SourceCodeMatcher.not;
@@ -36,15 +38,15 @@ public interface TokenFactory {
         return Token.propertyToken(tokenStream.pop().getPropertyOrIndex());
     };
     Function<String, Token> WORD_TOKEN = content -> {
-        if (Constants.KeyWords.NULL.equals(content))
+        if (NULL.equals(content))
             return constValueToken(null);
-        if (Constants.KeyWords.TRUE.equals(content))
+        if (TRUE.equals(content))
             return constValueToken(true);
-        if (Constants.KeyWords.FALSE.equals(content))
+        if (FALSE.equals(content))
             return constValueToken(false);
-        if (Constants.KeyWords.AND.equals(content))
+        if (AND.equals(content))
             return operatorToken("&&");
-        if (Constants.KeyWords.OR.equals(content))
+        if (OR.equals(content))
             return operatorToken("||");
         if (Constants.KEYWORD_SETS.contains(content))
             return keyWordToken(content);
@@ -66,8 +68,8 @@ public interface TokenFactory {
     }
 
     static TokenFactory createOperatorTokenFactory() {
-        return startWith(included(OPERATOR.except(CHARACTER('/').when(AFTER_TOKEN_MATCHES))))
-                .endWith(END_OF_CODE.or(before(not(OPERATOR))).or(before(CHARACTER('/').when(AFTER_OPERATOR_MATCHES))))
+        return startWith(included(OPERATOR.except(CHARACTER('/').when(after(Token::judgement)))))
+                .endWith(END_OF_CODE.or(before(not(OPERATOR))).or(before(CHARACTER('/').when(after(Operators.MATCH).or(after(Operators.EQ))))))
                 .createAs(OPERATOR_TOKEN);
     }
 
@@ -92,7 +94,7 @@ public interface TokenFactory {
     }
 
     static TokenFactory createRegexTokenFactory() {
-        return startWith(excluded(CHARACTER('/').when(AFTER_TOKEN_MATCHES)))
+        return startWith(excluded(CHARACTER('/').when(after(Token::judgement))))
                 .take(ALL_CHARACTERS
                         .escape("\\\\", '\\')
                         .escape("\\/", '/'))
@@ -109,7 +111,7 @@ public interface TokenFactory {
     }
 
     static TokenFactory createBracketPropertyTokenFactory() {
-        return startWith(excluded(CHARACTER('[').except(AFTER_TOKEN_MATCHES)))
+        return startWith(excluded(CHARACTER('[').except(after(Token::judgement))))
                 .take(byFactory(createNumberTokenFactory())
                         .or(createSingleQuotedStringTokenFactory())
                         .or(createDoubleQuotedStringTokenFactory()))
