@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class RegexTokenFactoryTest extends TokenFactoryTestBase {
-    private static final Token OPT_MATCHES = Token.operatorToken(Constants.KeyWords.MATCHES);
+    private static final Token OPT_MATCHES = Token.operatorToken(Constants.OPT_MATCHES_STRING);
 
     @Override
     protected Token previousToken() {

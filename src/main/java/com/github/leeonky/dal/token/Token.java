@@ -6,7 +6,6 @@ import com.github.leeonky.dal.ast.Operator;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import static com.github.leeonky.dal.Constants.KeyWords.MATCHES;
 import static com.github.leeonky.dal.Constants.OPT_MATCHES_STRING;
 import static java.text.MessageFormat.format;
 
@@ -142,9 +141,6 @@ public class Token {
                 case "||":
                     operator = new Operator.Or();
                     break;
-                case MATCHES:
-                    operator = new Operator.Matches(MATCHES);
-                    break;
                 case OPT_MATCHES_STRING:
                     operator = new Operator.Matches(OPT_MATCHES_STRING);
                     break;
@@ -158,7 +154,7 @@ public class Token {
 
     //TODO matches = :
     public boolean isOperatorMatches() {
-        return getType() == Type.OPERATOR && (getValue().equals(OPT_MATCHES_STRING) || getValue().equals(MATCHES));
+        return getType() == Type.OPERATOR && getValue().equals(OPT_MATCHES_STRING);
     }
 
     @Override

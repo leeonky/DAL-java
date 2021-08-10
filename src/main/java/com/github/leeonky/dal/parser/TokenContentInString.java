@@ -14,7 +14,6 @@ public class TokenContentInString {
     private TokenContentInString() {
     }
 
-    //TODO not call super
     public static TokenContentInString leftTrim(TokenContentInString getter) {
         return getter.copy().setPreprocessor(SourceCode::trimLeft);
     }

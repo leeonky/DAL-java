@@ -126,7 +126,7 @@ class SourceCodeMatcherTest {
 
             @Test
             void last_opt_token_matches() {
-                assertTrue(givenLastToken(Token.operatorToken(Constants.KeyWords.MATCHES)));
+                assertTrue(givenLastToken(Token.operatorToken(Constants.OPT_MATCHES_STRING)));
             }
 
             @Test

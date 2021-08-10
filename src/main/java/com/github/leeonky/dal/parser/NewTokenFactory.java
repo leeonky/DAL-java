@@ -24,7 +24,9 @@ public class NewTokenFactory {
     }
 
     public static StringContent.EndWith equalToCharacter(char c) {
-        return startWith(TokenParser.included(CHARACTER(c))).take(ALL_CHARACTERS).endWith(TokenParser.END_OF_CODE.or(before(ANY_CHARACTERS)));
+        return startWith(TokenParser.included(CHARACTER(c)))
+                .take(ALL_CHARACTERS)
+                .endWith(TokenParser.END_OF_CODE.or(before(ANY_CHARACTERS)));
     }
 
     public StringContent take(TokenContentInString content) {

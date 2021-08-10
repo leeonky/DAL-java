@@ -46,8 +46,6 @@ public interface TokenFactory {
             return operatorToken("&&");
         if (Constants.KeyWords.OR.equals(content))
             return operatorToken("||");
-        if (Constants.KeyWords.MATCHES.equals(content))
-            return operatorToken(Constants.KeyWords.MATCHES);
         if (Constants.KEYWORD_SETS.contains(content))
             return keyWordToken(content);
         return wordToken(content);

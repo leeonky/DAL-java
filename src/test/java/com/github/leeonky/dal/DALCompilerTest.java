@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
-import static com.github.leeonky.dal.Constants.KeyWords.MATCHES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -80,8 +79,7 @@ class DALCompilerTest {
 
         @Test
         void should_support_follow_operators() {
-            assertCompileOperator("matches", new Operator.Matches(MATCHES));
-            assertCompileOperator(":", new Operator.Matches(MATCHES));
+            assertCompileOperator(":", new Operator.Matches(Constants.OPT_MATCHES_STRING));
             assertCompileOperator("=", new Operator.Equal());
             assertCompileOperator("!=", new Operator.NotEqual());
             assertCompileOperator(">", new Operator.Greater());
@@ -195,9 +193,10 @@ class DALCompilerTest {
 
         @Test
         void compile_regex() {
-            assertCompileNode(" matches /1/",
-                    new Expression(InputNode.INSTANCE, new Operator.Matches(MATCHES), new RegexNode("1")));
+            assertCompileNode(" : /1/",
+                    new Expression(InputNode.INSTANCE, new Operator.Matches(Constants.OPT_MATCHES_STRING), new RegexNode("1")));
         }
+        //TODO support = /1/
     }
 
     @Nested
