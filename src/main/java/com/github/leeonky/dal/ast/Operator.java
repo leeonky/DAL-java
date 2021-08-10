@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.RuntimeContext;
+import com.github.leeonky.dal.RuntimeException;
 import com.github.leeonky.dal.util.Calculator;
 
 import java.util.Objects;
@@ -58,7 +59,12 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            return Calculator.equals(node1.evaluate(context), node2.evaluate(context));
+            Object value1 = node1.evaluate(context);
+            if (node2.evaluable())
+                return Calculator.equals(value1, node2.evaluate(context));
+            if (value1 instanceof String)
+                return ((RegexNode) node2).matches((String) value1);
+            throw new RuntimeException("Operator eq before regex need a string input value", getPosition());
         }
     }
 
@@ -234,14 +240,14 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            Object v1 = node1.evaluate(context);
+            Object value1 = node1.evaluate(context);
             if (node2.evaluable()) {
-                Object v2 = node2.evaluate(context);
-                if (v2 == null)
-                    return Objects.equals(v1, v2);
-                return Objects.equals(context.getConverter().convert(v2.getClass(), v1), v2);
+                Object value2 = node2.evaluate(context);
+                if (value2 == null)
+                    return Objects.equals(value1, null);
+                return Objects.equals(context.getConverter().convert(value2.getClass(), value1), value2);
             }
-            return ((RegexNode) node2).matches(context.getConverter().convert(String.class, v1));
+            return ((RegexNode) node2).matches(context.getConverter().convert(String.class, value1));
         }
     }
 }
