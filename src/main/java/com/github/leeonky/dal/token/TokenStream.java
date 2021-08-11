@@ -33,7 +33,13 @@ public class TokenStream {
     }
 
     public Token.Type currentType() {
-        return tokens.get(index).getType();
+        return currentToken().getType();
+    }
+
+    private Token currentToken() {
+        if (tokens.size() <= index)
+            throw new NoMoreTokenException();
+        return tokens.get(index);
     }
 
     public boolean isCurrentSingleEvaluateNode() {
@@ -41,11 +47,11 @@ public class TokenStream {
     }
 
     public int getPosition() {
-        return hasTokens() ? tokens.get(index).getPositionBegin() : (index > 0 ? tokens.get(index - 1).getPositionEnd() : 0);
+        return hasTokens() ? currentToken().getPositionBegin() : (index > 0 ? tokens.get(index - 1).getPositionEnd() : 0);
     }
 
     public boolean isCurrentKeywordAndTake(String keyword) {
-        final Token token = tokens.get(index);
+        final Token token = currentToken();
         if (token.getType() == Token.Type.KEY_WORD && keyword.equals(token.getValue())) {
             index++;
             return true;
@@ -71,7 +77,7 @@ public class TokenStream {
     public boolean isSingleUnaryOperator(boolean withoutIntention) {
         return currentType() == Token.Type.OPERATOR &&
                 (withoutIntention ? UNARY_OPERATORS_WITHOUT_INTENTION : UNARY_OPERATORS)
-                        .contains(tokens.get(index).getValue());
+                        .contains(currentToken().getValue());
     }
 
     public Iterable<SchemaAssertionExpression.Operator> getSchemaOperators() {
@@ -79,8 +85,8 @@ public class TokenStream {
             @Override
             public boolean hasNext() {
                 return hasTokens() && currentType() == Token.Type.OPERATOR
-                        && ("|".equals(tokens.get(index).getValue())
-                        || "/".equals(tokens.get(index).getValue()));
+                        && ("|".equals(currentToken().getValue())
+                        || "/".equals(currentToken().getValue()));
             }
 
             @Override

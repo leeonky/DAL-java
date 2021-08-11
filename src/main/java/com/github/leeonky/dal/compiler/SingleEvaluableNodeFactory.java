@@ -1,6 +1,8 @@
 package com.github.leeonky.dal.compiler;
 
+import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.token.NoMoreTokenException;
 
 import java.util.List;
 import java.util.Objects;
@@ -16,9 +18,18 @@ class SingleEvaluableNodeFactory implements NodeFactory {
 
     @Override
     public Node fetchNode(NodeParser nodeParser) {
-        return parsePropertyChain(nodeParser, nodeFactories.stream()
-                .map(factory -> factory.fetchNode(nodeParser))
-                .filter(Objects::nonNull).findFirst().orElse(null));
+        try {
+            return parsePropertyChain(nodeParser, nodeFactories.stream()
+                    .map(factory -> factory.fetchNode(nodeParser))
+                    .filter(Objects::nonNull).findFirst()
+                    .orElseThrow(() -> noValueException(nodeParser)));
+        } catch (NoMoreTokenException ignore) {
+            throw noValueException(nodeParser);
+        }
+    }
+
+    private SyntaxException noValueException(NodeParser nodeParser) {
+        return new SyntaxException(nodeParser.tokenStream.getPosition(), "expect a value");
     }
 
     private Node parsePropertyChain(NodeParser nodeParser, Node node) {

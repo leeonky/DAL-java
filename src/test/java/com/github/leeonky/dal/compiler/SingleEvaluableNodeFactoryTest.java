@@ -16,9 +16,17 @@ class SingleEvaluableNodeFactoryTest extends NodeFactoryTestBase {
     }
 
     @Test
-    void return_null_when_dost_not_match() {
-        assertThat(fetchNodeWhenGivenToken(operatorToken("+")))
-                .isNull();
+    void raise_error_when_not_matches() {
+        assertThat(invalidSyntaxToken(givenToken(operatorToken("+"), 100)))
+                .hasFieldOrPropertyWithValue("position", 100)
+                .hasMessage("expect a value");
+    }
+
+    @Test
+    void raise_error_when_no_token() {
+        assertThat(invalidSyntaxToken(givenToken()))
+                .hasFieldOrPropertyWithValue("position", 0)
+                .hasMessage("expect a value");
     }
 
     @Test
