@@ -12,24 +12,33 @@ import java.util.stream.Collectors;
 
 
 //TODO need clean code
-public class ExpressionIsSchema extends Node {
+public class TypeExpression extends Node {
     private final Node instance;
     private final List<SchemaNode> schemaNodes = new ArrayList<>();
+    private final ObjectRef objectRef = new ObjectRef();
     private Operator operator = Operator.NONE;
 
-    public ExpressionIsSchema(Node instance, SchemaNode node) {
+    public TypeExpression(Node instance, SchemaNode node) {
         this.instance = instance;
         schemaNodes.add(node);
+    }
+
+    public Object getTypeInstance() {
+        return objectRef.instance;
+    }
+
+    public String getSchemaName() {
+        return schemaNodes.get(0).getSchema();
     }
 
     @Override
     public Object evaluate(RuntimeContext context) {
         try {
-            ObjectRef objectRef = new ObjectRef();
             if (isFailed(context, objectRef)) {
                 System.err.println("Warning: Type assertion `" + inspect() + "` got false.");
                 return false;
             }
+            //TODO tobe removed
             return context.wrapInputValueAndEvaluate(objectRef.instance, getAssertion(), schemaNodes.get(0).getSchema());
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), getPositionBegin());
@@ -59,14 +68,15 @@ public class ExpressionIsSchema extends Node {
     @Override
     public boolean equals(Object obj) {
         return obj != null && obj.getClass().equals(getClass())
-                && Objects.equals(instance, ((ExpressionIsSchema) obj).instance)
-                && Objects.equals(schemaNodes, ((ExpressionIsSchema) obj).schemaNodes)
-                && Objects.equals(operator, ((ExpressionIsSchema) obj).operator);
+                && Objects.equals(instance, ((TypeExpression) obj).instance)
+                && Objects.equals(schemaNodes, ((TypeExpression) obj).schemaNodes)
+                && Objects.equals(operator, ((TypeExpression) obj).operator);
     }
 
     @Override
     public String inspect() {
         String assertionClause = getAssertion().inspect();
+        //TODO to be removed whichClause
         String whichClause = "true".equals(assertionClause) ? "" : String.format(" which %s", assertionClause);
         return String.format("%s is %s%s", instance.inspect(), schemaNodes.stream().map(SchemaNode::inspect)
                 .collect(Collectors.joining(" " + operator.value + " ")), whichClause);
@@ -77,6 +87,10 @@ public class ExpressionIsSchema extends Node {
             throw new SyntaxException(schemaNode.getPositionBegin(), "Schema operator should be consistent");
         this.operator = operator;
         schemaNodes.add(schemaNode);
+    }
+
+    final public TypeWhichExpression which(Node whichClause) {
+        return new TypeWhichExpression(this, whichClause);
     }
 
     public enum Operator {

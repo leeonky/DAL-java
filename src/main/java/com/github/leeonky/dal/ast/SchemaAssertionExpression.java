@@ -3,7 +3,8 @@ package com.github.leeonky.dal.ast;
 import java.util.Objects;
 
 //TODO need clean code
-public class SchemaAssertionExpression extends ExpressionIsSchema {
+@Deprecated
+public class SchemaAssertionExpression extends TypeExpression {
     private final Node assertion;
 
     public SchemaAssertionExpression(Node instance, SchemaNode schemaNode, Node assertion) {

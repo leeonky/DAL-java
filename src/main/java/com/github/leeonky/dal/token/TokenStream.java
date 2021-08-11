@@ -51,8 +51,7 @@ public class TokenStream {
     }
 
     public boolean isCurrentKeywordAndTake(String keyword) {
-        final Token token = currentToken();
-        if (token.getType() == Token.Type.KEY_WORD && keyword.equals(token.getValue())) {
+        if (hasTokens() && currentToken().getType() == Token.Type.KEY_WORD && keyword.equals(currentToken().getValue())) {
             index++;
             return true;
         }

@@ -121,7 +121,7 @@ class SingleNodeFactoryTest {
         @Test
         void raiser_error_when_bracket_has_no_data() {
             assertThat(invalidSyntaxToken(givenToken(beginBracketToken(), 100)))
-                    .hasMessage("expect a value")
+                    .hasMessage("expect a value or expression")
                     .hasFieldOrPropertyWithValue("position", 100);
         }
 

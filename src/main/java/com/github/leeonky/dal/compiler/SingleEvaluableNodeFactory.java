@@ -29,7 +29,7 @@ class SingleEvaluableNodeFactory implements NodeFactory {
     }
 
     private SyntaxException noValueException(NodeParser nodeParser) {
-        return new SyntaxException(nodeParser.tokenStream.getPosition(), "expect a value");
+        return new SyntaxException(nodeParser.tokenStream.getPosition(), "expect a value or expression");
     }
 
     private Node parsePropertyChain(NodeParser nodeParser, Node node) {

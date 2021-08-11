@@ -335,31 +335,6 @@ class VerifySchema extends Base {
             assertFailed(new JSONObject("{\"unexpected1\": 1, \"unexpected2\": 2}"),
                     "is VerifySchema.RightFieldAndType / VerifySchema.IgnoreUnexpectedField");
         }
-
-        @Test
-        void should_raise_error_when_schema_list_operator_different() throws JSONException {
-            dataAssert.getRuntimeContextBuilder()
-                    .registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class)
-                    .registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
-
-            assertRuntimeException(new JSONObject("{\"unexpected1\": 1, \"unexpected2\": 2}"),
-                    "is VerifySchema.RightFieldAndType / VerifySchema.IgnoreUnexpectedField | VerifySchema.RightFieldAndType",
-                    73, "Schema operator should be consistent");
-        }
-
-        @Test
-        void should_raise_error_when_schema_list_not_finished() throws JSONException {
-            dataAssert.getRuntimeContextBuilder()
-                    .registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
-
-            assertRuntimeException(new JSONObject("{\"unexpected1\": 1, \"unexpected2\": 2}"),
-                    "is VerifySchema.RightFieldAndType / which true",
-                    36, "Schema expression not finished");
-
-            assertRuntimeException(new JSONObject("{\"unexpected1\": 1, \"unexpected2\": 2}"),
-                    "is VerifySchema.RightFieldAndType /",
-                    35, "Schema expression not finished");
-        }
     }
 
     @Nested

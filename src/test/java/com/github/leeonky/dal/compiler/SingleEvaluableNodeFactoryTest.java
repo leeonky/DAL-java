@@ -19,14 +19,14 @@ class SingleEvaluableNodeFactoryTest extends NodeFactoryTestBase {
     void raise_error_when_not_matches() {
         assertThat(invalidSyntaxToken(givenToken(operatorToken("+"), 100)))
                 .hasFieldOrPropertyWithValue("position", 100)
-                .hasMessage("expect a value");
+                .hasMessage("expect a value or expression");
     }
 
     @Test
     void raise_error_when_no_token() {
         assertThat(invalidSyntaxToken(givenToken()))
                 .hasFieldOrPropertyWithValue("position", 0)
-                .hasMessage("expect a value");
+                .hasMessage("expect a value or expression");
     }
 
     @Test
