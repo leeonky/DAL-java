@@ -12,37 +12,36 @@ import java.util.function.Function;
 
 import static com.github.leeonky.dal.compiler.NodeFactory.createConstNodeFactory;
 import static com.github.leeonky.dal.compiler.NodeFactory.createPropertyNodeFactory;
+import static com.github.leeonky.dal.compiler.SingleTokenNodeFactory.singleTokenNodeFactory;
 import static java.util.Arrays.asList;
 
 public interface NodeFactory {
 
     static NodeFactory createConstNodeFactory() {
-        return new SingleTokenNodeFactory(Token.Type.CONST_VALUE, ConstNode::new);
+        return singleTokenNodeFactory(Token.Type.CONST_VALUE, ConstNode::new);
     }
 
     static NodeFactory createEvaluableNodeFactory() {
-        return new EvaluableNodeFactory();
+        return new SingleEvaluableNodeFactory();
     }
 
     static NodeFactory createRegexNodeFactory() {
-        return new SingleTokenNodeFactory(Token.Type.REGEX, regex -> new RegexNode((String) regex));
+        return singleTokenNodeFactory(Token.Type.REGEX, regex -> new RegexNode((String) regex));
     }
 
     static NodeFactory createPropertyNodeFactory() {
-        return nodeParser -> {
-            if (nodeParser.tokenStream.currentType() == Token.Type.PROPERTY) {
-                Token token = nodeParser.tokenStream.pop();
-                return new PropertyNode(nodeParser.getThisNode(), token.getValue())
-                        .setPositionBegin(token.getPositionBegin());
+        return new SingleTokenNodeFactory(Token.Type.PROPERTY) {
+            @Override
+            protected Node createNode(NodeParser nodeParser, Object value) {
+                return new PropertyNode(nodeParser.getThisNode(), value);
             }
-            return null;
         };
     }
 
     Node fetchNode(NodeParser nodeParser);
 }
 
-class EvaluableNodeFactory implements NodeFactory {
+class SingleEvaluableNodeFactory implements NodeFactory {
     private final NodeFactory propertyNodeFactory = createPropertyNodeFactory();
     private final List<NodeFactory> nodeFactories = asList(
             createConstNodeFactory(),
@@ -60,21 +59,30 @@ class EvaluableNodeFactory implements NodeFactory {
     }
 }
 
-class SingleTokenNodeFactory implements NodeFactory {
+abstract class SingleTokenNodeFactory implements NodeFactory {
     private final Token.Type tokenType;
-    private final Function<Object, Node> creator;
 
-    public SingleTokenNodeFactory(Token.Type constValue, Function<Object, Node> creator) {
+    public SingleTokenNodeFactory(Token.Type constValue) {
         tokenType = constValue;
-        this.creator = creator;
+    }
+
+    public static SingleTokenNodeFactory singleTokenNodeFactory(Token.Type type, Function<Object, Node> creator) {
+        return new SingleTokenNodeFactory(type) {
+            @Override
+            protected Node createNode(NodeParser nodeParser, Object value) {
+                return creator.apply(value);
+            }
+        };
     }
 
     @Override
     public Node fetchNode(NodeParser nodeParser) {
         if (nodeParser.tokenStream.currentType() == tokenType) {
             Token token = nodeParser.tokenStream.pop();
-            return creator.apply(token.getValue()).setPositionBegin(token.getPositionBegin());
+            return createNode(nodeParser, token.getValue()).setPositionBegin(token.getPositionBegin());
         }
         return null;
     }
+
+    protected abstract Node createNode(NodeParser nodeParser, Object value);
 }
