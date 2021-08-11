@@ -15,6 +15,7 @@ import static java.util.Optional.ofNullable;
 public class DALCompiler {
     public Node compile(SourceCode sourceCode) {
         TokenStream tokenStream = createDALTokenFactory().fetchToken(new TokenParser(sourceCode)).getTokenStream();
+//        return NodeFactory.createExpressionNodeFactory().fetchNode(new NodeParser(tokenStream));
         return compileExpression(tokenStream, null, true);
     }
 

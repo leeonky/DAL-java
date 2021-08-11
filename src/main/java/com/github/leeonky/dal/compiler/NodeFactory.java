@@ -33,7 +33,7 @@ public interface NodeFactory {
 
     static NodeFactory createExpressionNodeFactory() {
         NodeFactory nodeFactory = NodeFactory.createSingleEvaluableNodeFactory();
-        return nodeParser -> ExpressionFactory.INSTANCE.parseExpression(nodeParser, nodeFactory.fetchNode(nodeParser));
+        return nodeParser -> ExpressionParser.INSTANCE.apply(nodeParser, nodeFactory.fetchNode(nodeParser));
     }
 
     static NodeFactory createBracketNodeFactory() {
