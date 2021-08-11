@@ -4,17 +4,17 @@ import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenStream;
 
-abstract class NodeFactoryTestBase {
+public abstract class NodeFactoryTestBase {
 
-    GivenToken givenToken(Token token, int positionBegin) {
+    public GivenToken givenToken(Token token, int positionBegin) {
         return givenToken().givenToken(token, positionBegin);
     }
 
-    GivenToken givenToken(Token token) {
+    public GivenToken givenToken(Token token) {
         return givenToken().givenToken(token, 0);
     }
 
-    GivenToken givenToken() {
+    public GivenToken givenToken() {
         return new GivenToken();
     }
 
@@ -28,18 +28,18 @@ abstract class NodeFactoryTestBase {
 
     protected abstract NodeFactory getDefaultNodeFactory();
 
-    class GivenToken {
+    public class GivenToken {
         protected TokenStream tokenStream = new TokenStream();
 
-        Node fetchNodeBy(NodeFactory factory) {
+        public Node fetchNodeBy(NodeFactory factory) {
             return factory.fetchNode(new NodeParser(tokenStream));
         }
 
-        Node fetchNode() {
+        public Node fetchNode() {
             return getDefaultNodeFactory().fetchNode(new NodeParser(tokenStream));
         }
 
-        GivenToken givenToken(Token token, int positionBegin) {
+        public GivenToken givenToken(Token token, int positionBegin) {
             token.setPositionBegin(positionBegin);
             tokenStream.appendToken(token);
             return this;

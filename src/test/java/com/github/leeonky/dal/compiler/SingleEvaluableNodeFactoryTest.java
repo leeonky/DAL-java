@@ -12,7 +12,7 @@ class SingleEvaluableNodeFactoryTest extends NodeFactoryTestBase {
 
     @Override
     protected NodeFactory getDefaultNodeFactory() {
-        return NodeFactory.createEvaluableNodeFactory();
+        return NodeFactory.createSingleEvaluableNodeFactory();
     }
 
     @Test
