@@ -5,7 +5,8 @@ import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.ast.PropertyNode;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.token.Token.*;
+import static com.github.leeonky.dal.token.Token.constValueToken;
+import static com.github.leeonky.dal.token.Token.propertyToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SingleEvaluableNodeFactoryTest extends NodeFactoryTestBase {
@@ -17,15 +18,21 @@ class SingleEvaluableNodeFactoryTest extends NodeFactoryTestBase {
 
     @Test
     void raise_error_when_not_matches() {
-        assertThat(invalidSyntaxToken(givenToken(operatorToken("+"), 100)))
-                .hasFieldOrPropertyWithValue("position", 100)
+        GivenCode givenCode = givenCode("1(");
+        givenCode.fetchNode();
+
+        assertThat(invalidSyntaxToken(givenCode))
+                .hasFieldOrPropertyWithValue("position", 1)
                 .hasMessage("expect a value or expression");
     }
 
     @Test
     void raise_error_when_no_token() {
-        assertThat(invalidSyntaxToken(givenToken()))
-                .hasFieldOrPropertyWithValue("position", 0)
+        GivenCode givenCode = givenCode("1");
+        givenCode.fetchNode();
+
+        assertThat(invalidSyntaxToken(givenCode))
+                .hasFieldOrPropertyWithValue("position", 1)
                 .hasMessage("expect a value or expression");
     }
 

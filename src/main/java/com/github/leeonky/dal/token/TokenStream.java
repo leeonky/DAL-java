@@ -113,4 +113,8 @@ public class TokenStream {
     public Stream<Token> stream() {
         return tokens.stream();
     }
+
+    public boolean isFromBegining() {
+        return index == 0;
+    }
 }

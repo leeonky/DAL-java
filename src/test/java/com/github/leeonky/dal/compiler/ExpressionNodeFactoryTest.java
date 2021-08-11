@@ -3,6 +3,7 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.RuntimeContextBuilder;
 import com.github.leeonky.dal.ast.ConstNode;
 import com.github.leeonky.dal.ast.Expression;
+import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.token.Token;
 import org.junit.jupiter.api.Nested;
@@ -21,13 +22,17 @@ class ExpressionNodeFactoryTest extends NodeFactoryTestBase {
 
     @Test
     void return_single_node_when_no_operator() {
-        Node node = givenToken(Token.constValueToken("str"), 10)
-                .fetchNode();
+        Node node = givenToken(Token.constValueToken("str"), 10).fetchNode();
 
         assertThat(node)
                 .isInstanceOf(ConstNode.class)
                 .hasFieldOrPropertyWithValue("value", "str")
                 .hasFieldOrPropertyWithValue("positionBegin", 10);
+    }
+
+    @Test
+    void auto_reference_this_when_the_first_operand_not_exist() {
+        assertThat(givenCode("").fetchNode()).isEqualTo(InputNode.INSTANCE);
     }
 
     @Nested
@@ -67,5 +72,4 @@ class ExpressionNodeFactoryTest extends NodeFactoryTestBase {
                     .isEqualTo(BigDecimal.valueOf(5));
         }
     }
-
 }

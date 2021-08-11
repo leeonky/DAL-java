@@ -5,9 +5,9 @@ import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.parser.TokenParser;
 import com.github.leeonky.dal.token.SourceCode;
 import com.github.leeonky.dal.token.Token;
-import com.github.leeonky.dal.token.TokenFactory;
 import com.github.leeonky.dal.token.TokenStream;
 
+import static com.github.leeonky.dal.token.TokenFactory.createDALTokenFactory;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public abstract class NodeFactoryTestBase {
@@ -51,10 +51,11 @@ public abstract class NodeFactoryTestBase {
 
     public class GivenToken extends FetchNode {
         protected TokenStream tokenStream = new TokenStream();
+        protected NodeParser nodeParser = new NodeParser(tokenStream);
 
         @Override
         public Node fetchNodeBy(NodeFactory factory) {
-            return factory.fetchNode(new NodeParser(tokenStream));
+            return factory.fetchNode(nodeParser);
         }
 
         public GivenToken givenToken(Token token, int positionBegin) {
@@ -69,16 +70,16 @@ public abstract class NodeFactoryTestBase {
     }
 
     public class GivenCode extends FetchNode {
-        private final String code;
+        private final NodeParser nodeParser;
 
         public GivenCode(String code) {
-            this.code = code;
+            nodeParser = new NodeParser(createDALTokenFactory()
+                    .fetchToken(new TokenParser(new SourceCode(code))).getTokenStream());
         }
 
         @Override
         public Node fetchNodeBy(NodeFactory factory) {
-            return factory.fetchNode(new NodeParser(TokenFactory.createDALTokenFactory()
-                    .fetchToken(new TokenParser(new SourceCode(code))).getTokenStream()));
+            return factory.fetchNode(nodeParser);
         }
     }
 }
