@@ -7,7 +7,11 @@ import com.github.leeonky.dal.token.TokenStream;
 abstract class NodeFactoryTestBase {
 
     GivenToken givenToken(Token token, int positionBegin) {
-        return new GivenToken().givenToken(token, positionBegin);
+        return givenToken().givenToken(token, positionBegin);
+    }
+
+    GivenToken givenToken(Token token) {
+        return givenToken().givenToken(token, 0);
     }
 
     GivenToken givenToken() {
@@ -39,6 +43,10 @@ abstract class NodeFactoryTestBase {
             token.setPositionBegin(positionBegin);
             tokenStream.appendToken(token);
             return this;
+        }
+
+        public GivenToken givenToken(Token token) {
+            return givenToken(token, 0);
         }
     }
 }
