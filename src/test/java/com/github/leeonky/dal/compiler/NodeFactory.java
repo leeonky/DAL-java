@@ -7,9 +7,9 @@ import com.github.leeonky.dal.token.Token;
 public interface NodeFactory {
 
     static NodeFactory createConstNodeFactory() {
-        return compiler -> {
-            if (compiler.tokenStream.hasTokens() && compiler.tokenStream.currentType() == Token.Type.CONST_VALUE) {
-                Token token = compiler.tokenStream.pop();
+        return nodeParser -> {
+            if (nodeParser.tokenStream.hasTokens() && nodeParser.tokenStream.currentType() == Token.Type.CONST_VALUE) {
+                Token token = nodeParser.tokenStream.pop();
                 return new ConstNode(token.getValue())
                         .setPositionBegin(token.getPositionBegin());
             }
@@ -17,5 +17,9 @@ public interface NodeFactory {
         };
     }
 
-    Node fetchNode(Compiler compiler);
+    static NodeFactory createEvaluableNodeFactory() {
+        return createConstNodeFactory();
+    }
+
+    Node fetchNode(NodeParser nodeParser);
 }

@@ -39,4 +39,21 @@ class NodeFactoryTest {
                     .isNull();
         }
     }
+
+    @Nested
+    class FetchEvaluableNode extends NodeFactoryTestBase {
+
+        @Override
+        protected NodeFactory getDefaultNodeFactory() {
+            return NodeFactory.createEvaluableNodeFactory();
+        }
+
+        @Test
+        void support_const_value() {
+            assertThat(fetchNodeWhenGivenToken(constValueToken("const string"), 10))
+                    .isInstanceOf(ConstNode.class)
+                    .hasFieldOrPropertyWithValue("value", "const string")
+                    .hasFieldOrPropertyWithValue("positionBegin", 10);
+        }
+    }
 }

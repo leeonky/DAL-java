@@ -7,10 +7,7 @@ import com.github.leeonky.dal.token.TokenStream;
 abstract class NodeFactoryTestBase {
 
     GivenToken givenToken(Token token, int positionBegin) {
-        token.setPositionBegin(positionBegin);
-        GivenToken givenToken = new GivenToken();
-        givenToken.tokenStream.appendToken(token);
-        return givenToken;
+        return new GivenToken().givenToken(token, positionBegin);
     }
 
     GivenToken givenToken() {
@@ -31,11 +28,17 @@ abstract class NodeFactoryTestBase {
         protected TokenStream tokenStream = new TokenStream();
 
         Node fetchNodeBy(NodeFactory factory) {
-            return factory.fetchNode(new Compiler(tokenStream));
+            return factory.fetchNode(new NodeParser(tokenStream));
         }
 
         Node fetchNode() {
-            return getDefaultNodeFactory().fetchNode(new Compiler(tokenStream));
+            return getDefaultNodeFactory().fetchNode(new NodeParser(tokenStream));
+        }
+
+        GivenToken givenToken(Token token, int positionBegin) {
+            token.setPositionBegin(positionBegin);
+            tokenStream.appendToken(token);
+            return this;
         }
     }
 }
