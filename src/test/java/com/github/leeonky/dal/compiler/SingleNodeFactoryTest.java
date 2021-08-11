@@ -95,6 +95,12 @@ class SingleNodeFactoryTest {
         }
 
         @Test
+        void return_empty_when_not_matches() {
+            assertThat(fetchNodeWhenGivenToken(constValueToken("not start with (")))
+                    .isNull();
+        }
+
+        @Test
         void support_single_node_wrapped_with_bracket() {
             Node node = givenToken(beginBracketToken(), 10)
                     .givenToken(Token.constValueToken("str"))

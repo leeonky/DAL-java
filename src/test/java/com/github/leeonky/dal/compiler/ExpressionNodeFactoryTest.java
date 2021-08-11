@@ -1,10 +1,13 @@
 package com.github.leeonky.dal.compiler;
 
+import com.github.leeonky.dal.RuntimeContextBuilder;
 import com.github.leeonky.dal.ast.ConstNode;
 import com.github.leeonky.dal.ast.Expression;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.token.Token;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,5 +55,11 @@ class ExpressionNodeFactoryTest extends NodeFactoryTestBase {
                 .isInstanceOf(Expression.class)
                 .hasFieldOrPropertyWithValue("positionBegin", 10);
         assertThat(node.inspect()).isEqualTo("'hello' + 'world' + 'goodbye'");
+    }
+
+    @Test
+    void should_change_expression_by_operator_precedence() {
+        assertThat(givenCode("1+2*2").fetchNode().evaluate(new RuntimeContextBuilder().build(null)))
+                .isEqualTo(BigDecimal.valueOf(5));
     }
 }
