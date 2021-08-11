@@ -46,8 +46,9 @@ public abstract class Operator {
         return position;
     }
 
-    public void setPosition(int position) {
+    public Operator setPosition(int position) {
         this.position = position;
+        return this;
     }
 
     public String inspect(Node node1, Node node2) {
@@ -191,8 +192,8 @@ public abstract class Operator {
     }
 
     public static class Or extends Operator {
-        public Or() {
-            super(PRECEDENCE_LOGIC_COMBINATION_OPT, "||", true);
+        public Or(String inspect) {
+            super(PRECEDENCE_LOGIC_COMBINATION_OPT, inspect, true);
         }
 
         @Override

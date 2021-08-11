@@ -37,7 +37,6 @@ public class Token {
         return new Token(Type.BEGIN_BRACKET, "(");
     }
 
-    //TODO support for opt '=' regex matches regex without target value to string
     public static Token regexToken(String regex) {
         return new Token(Type.REGEX, regex);
     }
@@ -134,10 +133,12 @@ public class Token {
                     operator = new Operator.Division();
                     break;
                 case "&&":
-                    operator = new Operator.And("&&");
+                case Constants.KeyWords.AND:
+                    operator = new Operator.And(operatorString);
                     break;
                 case "||":
-                    operator = new Operator.Or();
+                case Constants.KeyWords.OR:
+                    operator = new Operator.Or(operatorString);
                     break;
                 case Constants.Operators.MATCH:
                     operator = new Operator.Matcher();
@@ -149,8 +150,7 @@ public class Token {
                     throw new SyntaxException(getPositionBegin(), "not support operator `" + operatorString + "` yet");
             }
         }
-        operator.setPosition(getPositionBegin());
-        return operator;
+        return operator.setPosition(getPositionBegin());
     }
 
     public boolean judgement() {

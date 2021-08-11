@@ -44,11 +44,10 @@ public interface TokenFactory {
             return constValueToken(true);
         if (FALSE.equals(content))
             return constValueToken(false);
-        //TODO use and or
         if (AND.equals(content))
-            return operatorToken("&&");
+            return operatorToken(AND);
         if (OR.equals(content))
-            return operatorToken("||");
+            return operatorToken(OR);
         if (Constants.KEYWORD_SETS.contains(content))
             return keyWordToken(content);
         return wordToken(content);

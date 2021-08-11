@@ -47,14 +47,14 @@ class ExpressionTest {
     void assert_logic_combination() {
         assertCalculate(true, new Operator.And("&&"), true, true);
 
-        assertCalculate(true, new Operator.Or(), false, true);
+        assertCalculate(true, new Operator.Or("||"), false, true);
 
         assertCalculate(null, new Operator.Not(), true, false);
     }
 
     @Test
     void should_support_short_circuit_expression() {
-        assertTrue((boolean) new Expression(new ConstNode(true), new Operator.Or(), new ConstNode(null)).evaluate(new RuntimeContextBuilder().build(null)));
+        assertTrue((boolean) new Expression(new ConstNode(true), new Operator.Or("||"), new ConstNode(null)).evaluate(new RuntimeContextBuilder().build(null)));
         assertFalse((boolean) new Expression(new ConstNode(false), new Operator.And("&&"), new ConstNode(null)).evaluate(new RuntimeContextBuilder().build(null)));
     }
 

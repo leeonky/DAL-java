@@ -36,8 +36,8 @@ class WordTokenFactoryTest extends TokenFactoryTestBase {
             assertToken("which ", keyWordToken("which"));
             assertToken("true ", constValueToken(true));
             assertToken("false ", constValueToken(false));
-            assertToken("and ", operatorToken("&&"));
-            assertToken("or ", operatorToken("||"));
+            assertToken("and ", operatorToken("and"));
+            assertToken("or ", operatorToken("or"));
         }
 
         @Test
@@ -52,7 +52,7 @@ class WordTokenFactoryTest extends TokenFactoryTestBase {
     @Nested
     class HasDelimiter {
         @ParameterizedTest
-        @ValueSource(chars = {'(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', '[', ']', ' ', ':', '\t', '\n'})
+        @ValueSource(chars = {'(', ')', '=', '>', '<', '+', '-', '*', '/', '&', '|', '!', ',', '[', ']', ' ', ':', '\t', '\n'})
         void finish_parse_and_source_code_seek_back_to_delimiter(char c) {
             assertThat(nextCharOf("Order.Detail" + c)).isEqualTo(c);
         }
