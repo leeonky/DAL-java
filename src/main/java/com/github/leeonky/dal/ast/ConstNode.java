@@ -27,7 +27,7 @@ public class ConstNode extends Node {
         if (value == null)
             return "null";
         if (value instanceof String)
-            return String.format("'%s'", value.toString());
+            return String.format("'%s'", value);
         return value.toString();
     }
 }

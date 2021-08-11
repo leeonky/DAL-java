@@ -53,6 +53,8 @@ public class Token {
         return new Token(Type.TREE, tokenStream);
     }
 
+
+    //TODO to be removed
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Token
