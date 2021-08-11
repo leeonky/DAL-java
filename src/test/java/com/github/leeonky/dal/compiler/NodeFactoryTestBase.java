@@ -1,10 +1,16 @@
 package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.parser.TokenParser;
+import com.github.leeonky.dal.token.SourceCode;
 import com.github.leeonky.dal.token.Token;
+import com.github.leeonky.dal.token.TokenFactory;
 import com.github.leeonky.dal.token.TokenStream;
 
 public abstract class NodeFactoryTestBase {
+    public GivenCode givenCode(String code) {
+        return new GivenCode(code);
+    }
 
     public GivenToken givenToken(Token token, int positionBegin) {
         return givenToken().givenToken(token, positionBegin);
@@ -36,7 +42,7 @@ public abstract class NodeFactoryTestBase {
         }
 
         public Node fetchNode() {
-            return getDefaultNodeFactory().fetchNode(new NodeParser(tokenStream));
+            return fetchNodeBy(getDefaultNodeFactory());
         }
 
         public GivenToken givenToken(Token token, int positionBegin) {
@@ -47,6 +53,23 @@ public abstract class NodeFactoryTestBase {
 
         public GivenToken givenToken(Token token) {
             return givenToken(token, 0);
+        }
+    }
+
+    public class GivenCode {
+        private final String code;
+
+        public GivenCode(String code) {
+            this.code = code;
+        }
+
+        public Node fetchNodeBy(NodeFactory factory) {
+            return factory.fetchNode(new NodeParser(TokenFactory.createDALTokenFactory()
+                    .fetchToken(new TokenParser(new SourceCode(code))).getTokenStream()));
+        }
+
+        public Node fetchNode() {
+            return fetchNodeBy(getDefaultNodeFactory());
         }
     }
 }

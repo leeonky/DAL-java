@@ -1,9 +1,7 @@
 package com.github.leeonky.dal.compiler;
 
-import com.github.leeonky.dal.ast.ConstNode;
-import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.PropertyNode;
-import com.github.leeonky.dal.ast.RegexNode;
+import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.token.Token;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -85,6 +83,33 @@ class SingleNodeFactoryTest {
         void return_null_when_dost_not_match() {
             assertThat(fetchNodeWhenGivenToken(operatorToken("+")))
                     .isNull();
+        }
+    }
+
+    @Nested
+    class FetchBracketNode extends NodeFactoryTestBase {
+
+        @Override
+        protected NodeFactory getDefaultNodeFactory() {
+            return NodeFactory.createBracketNodeFactory();
+        }
+
+        @Test
+        void support_single_node_wrapped_with_bracket() {
+            Node node = givenToken(Token.beginBracketToken(), 10)
+                    .givenToken(Token.constValueToken("str"))
+                    .givenToken(Token.endBracketToken())
+                    .fetchNode();
+
+            assertThat(node).isInstanceOf(BracketNode.class)
+                    .hasFieldOrPropertyWithValue("positionBegin", 10);
+
+            assertThat(node.inspect()).isEqualTo("('str')");
+        }
+
+        @Test
+        void support_expression_node_wrapped_with_bracket() {
+            assertThat(givenCode("(1+1)").fetchNode().inspect()).isEqualTo("(1 + 1)");
         }
     }
 }
