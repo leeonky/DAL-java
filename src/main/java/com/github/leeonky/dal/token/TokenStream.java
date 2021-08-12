@@ -36,7 +36,8 @@ public class TokenStream {
         return currentToken().getType();
     }
 
-    private Token currentToken() {
+    //TODO to be private
+    public Token currentToken() {
         if (tokens.size() <= index)
             throw new NoMoreTokenException();
         return tokens.get(index);
@@ -73,6 +74,7 @@ public class TokenStream {
         return false;
     }
 
+    @Deprecated
     public boolean isSingleUnaryOperator(boolean withoutIntention) {
         return currentType() == Token.Type.OPERATOR &&
                 (withoutIntention ? UNARY_OPERATORS_WITHOUT_INTENTION : UNARY_OPERATORS)
@@ -116,5 +118,15 @@ public class TokenStream {
 
     public boolean isFromBeginning() {
         return index == 0;
+    }
+
+    public Optional<Token> tryFetchUnaryOperator() {
+        return Optional.ofNullable(isCurrentUnaryOperator() ? pop() : null);
+    }
+
+    private boolean isCurrentUnaryOperator() {
+        return currentType() == Token.Type.OPERATOR &&
+                (isFromBeginning() ? UNARY_OPERATORS_WITHOUT_INTENTION : UNARY_OPERATORS)
+                        .contains(currentToken().getValue());
     }
 }

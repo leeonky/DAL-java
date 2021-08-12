@@ -3,7 +3,6 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.RuntimeContextBuilder;
 import com.github.leeonky.dal.ast.ConstNode;
 import com.github.leeonky.dal.ast.Expression;
-import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.token.Token;
 import org.junit.jupiter.api.Nested;
@@ -32,7 +31,12 @@ class ExpressionNodeFactoryTest extends NodeFactoryTestBase {
 
     @Test
     void auto_reference_this_when_the_first_operand_not_exist() {
-        assertThat(givenCode("").fetchNode()).isEqualTo(InputNode.INSTANCE);
+        Node node = givenCode("+1").fetchNode();
+
+        assertThat(node).isInstanceOf(Expression.class);
+
+        assertThat(node.evaluate(new RuntimeContextBuilder().build(1)))
+                .isEqualTo(BigDecimal.valueOf(2));
     }
 
     @Nested

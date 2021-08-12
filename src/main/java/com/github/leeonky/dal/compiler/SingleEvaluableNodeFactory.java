@@ -1,11 +1,14 @@
 package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.SyntaxException;
+import com.github.leeonky.dal.ast.Expression;
 import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.token.Token;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.github.leeonky.dal.compiler.NodeFactory.*;
 import static java.util.Arrays.asList;
@@ -22,10 +25,15 @@ class SingleEvaluableNodeFactory implements NodeFactory {
     public Node fetchNode(NodeParser nodeParser) {
         if (!nodeParser.tokenStream.hasTokens())
             return giveDefault(nodeParser);
-        return parsePropertyChain(nodeParser, nodeFactories.stream()
-                .map(factory -> factory.fetchNode(nodeParser))
-                .filter(Objects::nonNull).findFirst()
-                .orElseGet(() -> giveDefault(nodeParser)));
+
+        //TODO to be refactor
+        Optional<Token> opt = nodeParser.tokenStream.tryFetchUnaryOperator();
+        return opt.map(token -> (Node) new Expression(null, token.toOperator(true), fetchNode(nodeParser)))
+                .orElseGet(() -> parsePropertyChain(nodeParser, nodeFactories.stream()
+                        .map(factory -> factory.fetchNode(nodeParser))
+                        .filter(Objects::nonNull).findFirst()
+                        .orElseGet(() -> giveDefault(nodeParser))));
+
     }
 
     private Node giveDefault(NodeParser nodeParser) {

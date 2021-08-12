@@ -1,10 +1,11 @@
 package com.github.leeonky.dal.compiler;
 
-import com.github.leeonky.dal.ast.BracketNode;
-import com.github.leeonky.dal.ast.ConstNode;
-import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.PropertyNode;
+import com.github.leeonky.dal.RuntimeContextBuilder;
+import com.github.leeonky.dal.ast.*;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
 
 import static com.github.leeonky.dal.token.Token.constValueToken;
 import static com.github.leeonky.dal.token.Token.propertyToken;
@@ -15,6 +16,11 @@ class SingleEvaluableNodeFactoryTest extends NodeFactoryTestBase {
     @Override
     protected NodeFactory getDefaultNodeFactory() {
         return NodeFactory.createSingleEvaluableNodeFactory();
+    }
+
+    @Test
+    void auto_reference_this_when_code_is_empty() {
+        assertThat(givenCode("").fetchNode()).isEqualTo(InputNode.INSTANCE);
     }
 
     @Test
@@ -91,5 +97,40 @@ class SingleEvaluableNodeFactoryTest extends NodeFactoryTestBase {
 
         assertThat(node).isInstanceOf(BracketNode.class);
         assertThat(node.inspect()).isEqualTo("(1 + 1)");
+    }
+
+    @Nested
+    class SingleUnaryOperator {
+
+        @Test
+        void support_minus() {
+            GivenCode code = givenCode("1 -1");
+            code.fetchNode();
+
+            Node node = code.fetchNode();
+
+            assertThat(node).isInstanceOf(Expression.class);
+            assertThat(node.inspect()).isEqualTo("-1");
+        }
+
+        @Test
+        void should_not_parse_as_minus_when_start_with_minus() {
+            Node node = givenCode("-1").fetchNodeBy(NodeFactory.createExpressionNodeFactory());
+
+            assertThat(node).isInstanceOf(Expression.class);
+
+            assertThat(node.evaluate(new RuntimeContextBuilder().build(1)))
+                    .isEqualTo(BigDecimal.valueOf(0));
+        }
+
+        @Test
+        void support_logic_not() {
+            Node node = givenCode("!true").fetchNode();
+
+            assertThat(node).isInstanceOf(Expression.class);
+
+            assertThat(node.evaluate(new RuntimeContextBuilder().build(1)))
+                    .isEqualTo(false);
+        }
     }
 }
