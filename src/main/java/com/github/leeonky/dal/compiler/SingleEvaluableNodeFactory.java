@@ -51,6 +51,7 @@ class SingleEvaluableNodeFactory implements NodeFactory {
             if (next != null)
                 return parsePropertyChain(nodeParser, next);
         }
+        nodeParser.setThis(InputNode.INSTANCE);
         return node;
     }
 }

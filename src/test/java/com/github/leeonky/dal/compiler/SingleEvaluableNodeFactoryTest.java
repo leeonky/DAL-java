@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
+import static com.github.leeonky.dal.compiler.NodeFactory.createExpressionNodeFactory;
 import static com.github.leeonky.dal.token.Token.constValueToken;
 import static com.github.leeonky.dal.token.Token.propertyToken;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,6 +98,14 @@ class SingleEvaluableNodeFactoryTest extends NodeFactoryTestBase {
 
         assertThat(node).isInstanceOf(BracketNode.class);
         assertThat(node.inspect()).isEqualTo("(1 + 1)");
+    }
+
+    @Test
+    void should_reset_this_before_return() {
+        GivenCode givenCode = givenCode(".a : /1/ .b");
+        givenCode.fetchNodeBy(createExpressionNodeFactory());
+
+        assertThat(givenCode.fetchNode().inspect()).isEqualTo(".b");
     }
 
     @Nested

@@ -16,6 +16,7 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
     private final OperatorExpressionFactory operatorExpressionFactory = new OperatorExpressionFactory();
     private final SchemaExpressionFactory schemaExpressionFactory = new SchemaExpressionFactory();
     private final NodeFactory regexNodeFactory = NodeFactory.createRegexNodeFactory();
+    private final NodeFactory expressionNodeFactory = NodeFactory.createExpressionNodeFactory();
 
     @Override
     public Node apply(NodeParser nodeParser, Node first) {
@@ -61,7 +62,7 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
                 nodeParser.tokenStream.getSchemaOperators().forEach(opt ->
                         typeExpression.appendSchema(opt, parseSchema(nodeParser)));
                 if (nodeParser.tokenStream.isCurrentKeywordAndTake(Constants.KeyWords.WHICH))
-                    return typeExpression.which(singleEvaluableNodeFactory.fetchNode(nodeParser));
+                    return typeExpression.which(expressionNodeFactory.fetchNode(nodeParser));
                 return typeExpression;
             }
             return null;

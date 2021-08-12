@@ -22,6 +22,14 @@ class TypeWhichExpressionTest extends NodeFactoryTestBase {
     }
 
     @Test
+    void support_type_which_complex_expression() {
+        Node node = givenCode("1 is Integer which true and true").fetchNode();
+
+        assertThat(node).isInstanceOf(TypeWhichExpression.class);
+        assertThat(node.inspect()).isEqualTo("1 is Integer which true and true");
+    }
+
+    @Test
     void should_raise_error_when_no_clause() {
         assertThat(invalidSyntaxToken(givenCode("1 is Integer which")))
                 .hasMessage("expect a value or expression")
