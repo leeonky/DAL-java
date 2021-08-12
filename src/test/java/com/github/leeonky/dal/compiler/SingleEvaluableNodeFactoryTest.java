@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.compiler;
 
+import com.github.leeonky.dal.ast.BracketNode;
 import com.github.leeonky.dal.ast.ConstNode;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.ast.PropertyNode;
@@ -18,11 +19,11 @@ class SingleEvaluableNodeFactoryTest extends NodeFactoryTestBase {
 
     @Test
     void raise_error_when_not_matches() {
-        GivenCode givenCode = givenCode("1(");
+        GivenCode givenCode = givenCode("1 +");
         givenCode.fetchNode();
 
         assertThat(invalidSyntaxToken(givenCode))
-                .hasFieldOrPropertyWithValue("position", 1)
+                .hasFieldOrPropertyWithValue("position", 2)
                 .hasMessage("expect a value or expression");
     }
 
@@ -74,5 +75,21 @@ class SingleEvaluableNodeFactoryTest extends NodeFactoryTestBase {
         assertThat(givenToken(constValueToken("string"))
                 .givenToken(propertyToken("empty"))
                 .fetchNode().inspect()).isEqualTo("'string'.empty");
+    }
+
+    @Test
+    void support_bracket_node_with_single_value() {
+        Node node = givenCode("(2)").fetchNode();
+
+        assertThat(node).isInstanceOf(BracketNode.class);
+        assertThat(node.inspect()).isEqualTo("(2)");
+    }
+
+    @Test
+    void support_bracket_node_with_expression() {
+        Node node = givenCode("(1+1)").fetchNode();
+
+        assertThat(node).isInstanceOf(BracketNode.class);
+        assertThat(node.inspect()).isEqualTo("(1 + 1)");
     }
 }

@@ -8,7 +8,7 @@ import com.github.leeonky.dal.token.Token;
 import static com.github.leeonky.dal.compiler.NodeFactory.createExpressionNodeFactory;
 
 public class BracketNodeFactory implements NodeFactory {
-    private final NodeFactory expressionNodeFactory = createExpressionNodeFactory();
+    private static final NodeFactory expressionNodeFactory = createExpressionNodeFactory();
 
     @Override
     public Node fetchNode(NodeParser nodeParser) {

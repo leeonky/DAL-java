@@ -7,12 +7,14 @@ import com.github.leeonky.dal.ast.Node;
 import java.util.List;
 import java.util.Objects;
 
+import static com.github.leeonky.dal.compiler.NodeFactory.*;
 import static java.util.Arrays.asList;
 
 class SingleEvaluableNodeFactory implements NodeFactory {
-    private final NodeFactory propertyNodeFactory = NodeFactory.createPropertyNodeFactory();
-    private final List<NodeFactory> nodeFactories = asList(
-            NodeFactory.createConstNodeFactory(),
+    private static final NodeFactory propertyNodeFactory = createPropertyNodeFactory();
+    private static final List<NodeFactory> nodeFactories = asList(
+            createConstNodeFactory(),
+            createBracketNodeFactory(),
             propertyNodeFactory
     );
 
@@ -27,7 +29,7 @@ class SingleEvaluableNodeFactory implements NodeFactory {
     }
 
     private Node giveDefault(NodeParser nodeParser) {
-        if (nodeParser.tokenStream.isFromBegining())
+        if (nodeParser.tokenStream.isFromBeginning())
             return InputNode.INSTANCE;
         throw noValueException(nodeParser);
     }
