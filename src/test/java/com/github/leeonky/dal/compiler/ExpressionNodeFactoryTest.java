@@ -76,4 +76,26 @@ class ExpressionNodeFactoryTest extends NodeFactoryTestBase {
                     .isEqualTo(BigDecimal.valueOf(5));
         }
     }
+
+    @Nested
+    class SecondOperand {
+
+        @Nested
+        class Regex {
+
+            @Test
+            void equal_to_regex() {
+                Node node = givenCode("= /1/").fetchNode();
+
+                assertThat(node.inspect()).isEqualTo(" = /1/");
+            }
+
+            @Test
+            void matches_with_regex() {
+                Node node = givenCode(": /1/").fetchNode();
+
+                assertThat(node.inspect()).isEqualTo(" : /1/");
+            }
+        }
+    }
 }

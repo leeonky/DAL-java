@@ -15,6 +15,7 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
     private final NodeFactory singleEvaluableNodeFactory = NodeFactory.createSingleEvaluableNodeFactory();
     private final OperatorExpressionFactory operatorExpressionFactory = new OperatorExpressionFactory();
     private final SchemaExpressionFactory schemaExpressionFactory = new SchemaExpressionFactory();
+    private final NodeFactory regexNodeFactory = NodeFactory.createRegexNodeFactory();
 
     @Override
     public Node apply(NodeParser nodeParser, Node first) {
@@ -34,11 +35,20 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
         @Override
         public Node apply(NodeParser nodeParser, Node first) {
             if (nodeParser.tokenStream.currentType() == Token.Type.OPERATOR) {
-                return new Expression(first,
-                        nodeParser.tokenStream.pop().toOperator(false),
-                        singleEvaluableNodeFactory.fetchNode(nodeParser)).adjustOperatorOrder();
+                Token operatorToken = nodeParser.tokenStream.pop();
+                return new Expression(first, operatorToken.toOperator(false),
+                        getSecondOperand(operatorToken, nodeParser)).adjustOperatorOrder();
             }
             return null;
+        }
+
+        private Node getSecondOperand(Token operatorToken, NodeParser nodeParser) {
+            if (operatorToken.judgement()) {
+                Node node = regexNodeFactory.fetchNode(nodeParser);
+                if (node != null)
+                    return node;
+            }
+            return singleEvaluableNodeFactory.fetchNode(nodeParser);
         }
     }
 
