@@ -32,6 +32,8 @@ public interface TokenFactory {
     Function<String, Token> REGEX_TOKEN = Token::regexToken;
     Function<String, Token> OPENING_PARENTHESIS_TOKEN = s -> Token.openingParenthesisToken();
     Function<String, Token> CLOSING_PARENTHESIS_TOKEN = s -> Token.closingParenthesisToken();
+    Function<String, Token> OPENING_BRACKET_TOKEN = s -> Token.openingBracketToken();
+    Function<String, Token> CLOSING_BRACKET_TOKEN = s -> Token.closingBracketToken();
     Function<TokenStream, Token> BRACKET_PROPERTY_TOKEN = tokenStream -> {
         if (tokenStream.size() != 1)
             throw new IllegalTokenContentException("should given one property or array index in `[]`");
@@ -159,6 +161,14 @@ public interface TokenFactory {
                 .take(byFactory(createBeanPropertyTokenFactory())
                         .or(createBracketPropertyTokenFactory()))
                 .endWith(END_OF_CODE).createAs(TOKEN_TREE);
+    }
+
+    static TokenFactory createOpeningBracketTokenFactory() {
+        return equalToCharacter('[').createAs(OPENING_BRACKET_TOKEN);
+    }
+
+    static TokenFactory createClosingBracketTokenFactory() {
+        return equalToCharacter(']').createAs(CLOSING_BRACKET_TOKEN);
     }
 
     Token fetchToken(TokenParser parser);
