@@ -27,6 +27,11 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
                 expression = schemaExpressionFactory.apply(nodeParser, first);
             if (expression != null)
                 return apply(nodeParser, expression.setPositionBegin(first.getPositionBegin()));
+            if (nodeParser.tokenStream.currentType() == Token.Type.END_BRACKET) {
+                if (nodeParser.bracketCount == 0)
+                    throw new SyntaxException(nodeParser.tokenStream.getPosition(), "missed begin bracket");
+                return first;
+            }
         }
         return first;
     }
@@ -37,8 +42,10 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
         public Node apply(NodeParser nodeParser, Node first) {
             if (nodeParser.tokenStream.currentType() == Token.Type.OPERATOR) {
                 Token operatorToken = nodeParser.tokenStream.pop();
-                return new Expression(first, operatorToken.toOperator(false),
-                        getSecondOperand(operatorToken, nodeParser)).adjustOperatorOrder();
+                if (nodeParser.tokenStream.hasTokens())
+                    return new Expression(first, operatorToken.toOperator(false),
+                            getSecondOperand(operatorToken, nodeParser)).adjustOperatorOrder();
+                throw new SyntaxException(nodeParser.tokenStream.getPosition(), "expression is not finished");
             }
             return null;
         }

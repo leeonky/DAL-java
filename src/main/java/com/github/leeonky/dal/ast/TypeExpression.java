@@ -7,7 +7,6 @@ import com.github.leeonky.dal.token.IllegalTypeException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -63,14 +62,6 @@ public class TypeExpression extends Node {
             System.err.println("Warning: Type assertion `" + schemaNode.inspect() + "` got false.");
             return false;
         }
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj != null && obj.getClass().equals(getClass())
-                && Objects.equals(instance, ((TypeExpression) obj).instance)
-                && Objects.equals(schemaNodes, ((TypeExpression) obj).schemaNodes)
-                && Objects.equals(operator, ((TypeExpression) obj).operator);
     }
 
     @Override

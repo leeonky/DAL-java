@@ -7,7 +7,7 @@ import com.github.leeonky.dal.token.TokenStream;
 public class NodeParser {
     //TODO to be private
     final TokenStream tokenStream;
-
+    int bracketCount = 0;
     private Node thisNode = InputNode.INSTANCE;
 
     public NodeParser(TokenStream tokenStream) {

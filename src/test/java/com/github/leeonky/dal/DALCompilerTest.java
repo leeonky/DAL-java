@@ -99,12 +99,7 @@ class DALCompilerTest {
 
         @Test
         void should_raise_error_when_expression_not_finished_1() {
-            assertSyntaxException("=", 1, "expression not finished");
-        }
-
-        @Test
-        void should_raise_error_when_expression_not_finished_2() {
-            assertSyntaxException("= =", 2, "expression not finished");
+            assertSyntaxException("=", 1, "expression is not finished");
         }
 
         @Test
@@ -179,7 +174,7 @@ class DALCompilerTest {
 
         @Test
         void miss_end_bracket_should_raise_error() {
-            assertSyntaxException("(1", 0, "missed end bracket");
+            assertSyntaxException("(1", 2, "missed end bracket");
         }
 
         @Test
@@ -239,28 +234,6 @@ class DALCompilerTest {
                     new Expression(new ConstNode(null), new Operator.Not(), new ConstNode(true))
                     , new Operator.Equal(),
                     new ConstNode(false)
-            ));
-        }
-    }
-
-    @Nested
-    class InstanceOf {
-
-        @Test
-        void is_type_expression() {
-            assertCompileNode("is String", new SchemaAssertionExpression(
-                    InputNode.INSTANCE,
-                    new SchemaNode("String"),
-                    new ConstNode(true)
-            ));
-        }
-
-        @Test
-        void is_type_expression_and_which_assertion() {
-            assertCompileNode("is String which .empty", new SchemaAssertionExpression(
-                    InputNode.INSTANCE,
-                    new SchemaNode("String"),
-                    new PropertyNode(InputNode.INSTANCE, "empty")
             ));
         }
     }

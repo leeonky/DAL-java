@@ -4,7 +4,6 @@ import com.github.leeonky.dal.RuntimeContext;
 
 public class BracketNode extends Node {
     private Node node;
-    private boolean finished = false;
 
     @Override
     public Object evaluate(RuntimeContext context) {
@@ -21,12 +20,7 @@ public class BracketNode extends Node {
         return this;
     }
 
-    public boolean isFinished() {
-        return finished;
-    }
-
     public BracketNode finishBracket() {
-        finished = true;
         return this;
     }
 

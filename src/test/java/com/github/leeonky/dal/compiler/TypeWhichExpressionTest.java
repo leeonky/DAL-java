@@ -35,4 +35,5 @@ class TypeWhichExpressionTest extends NodeFactoryTestBase {
                 .hasMessage("expect a value or expression")
                 .hasFieldOrPropertyWithValue("position", 18);
     }
+    //TODO raise error when no clause
 }

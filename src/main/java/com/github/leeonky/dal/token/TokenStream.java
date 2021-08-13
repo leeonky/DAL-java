@@ -1,8 +1,6 @@
 package com.github.leeonky.dal.token;
 
-import com.github.leeonky.dal.SyntaxException;
-import com.github.leeonky.dal.ast.BracketNode;
-import com.github.leeonky.dal.ast.SchemaAssertionExpression;
+import com.github.leeonky.dal.ast.TypeExpression.Operator;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -43,10 +41,6 @@ public class TokenStream {
         return tokens.get(index);
     }
 
-    public boolean isCurrentSingleEvaluateNode() {
-        return currentType() == Token.Type.PROPERTY;
-    }
-
     public int getPosition() {
         return hasTokens() ? currentToken().getPositionBegin() : (index > 0 ? tokens.get(index - 1).getPositionEnd() : 0);
     }
@@ -63,26 +57,8 @@ public class TokenStream {
         return currentType() == Token.Type.BEGIN_BRACKET;
     }
 
-    public boolean isCurrentEndBracketAndTakeThenFinishBracket(BracketNode bracketNode) {
-        if (currentType() == Token.Type.END_BRACKET) {
-            if (bracketNode == null)
-                throw new SyntaxException(index, "missed begin bracket");
-            bracketNode.finishBracket();
-            index++;
-            return true;
-        }
-        return false;
-    }
-
-    @Deprecated
-    public boolean isSingleUnaryOperator(boolean withoutIntention) {
-        return currentType() == Token.Type.OPERATOR &&
-                (withoutIntention ? UNARY_OPERATORS_WITHOUT_INTENTION : UNARY_OPERATORS)
-                        .contains(currentToken().getValue());
-    }
-
-    public Iterable<SchemaAssertionExpression.Operator> getSchemaOperators() {
-        return () -> new Iterator<SchemaAssertionExpression.Operator>() {
+    public Iterable<Operator> getSchemaOperators() {
+        return () -> new Iterator<Operator>() {
             @Override
             public boolean hasNext() {
                 return hasTokens() && currentType() == Token.Type.OPERATOR
@@ -91,17 +67,13 @@ public class TokenStream {
             }
 
             @Override
-            public SchemaAssertionExpression.Operator next() {
+            public Operator next() {
                 if ("|".equals(pop().getValue()))
-                    return SchemaAssertionExpression.Operator.AND;
+                    return Operator.AND;
                 else
-                    return SchemaAssertionExpression.Operator.OR;
+                    return Operator.OR;
             }
         };
-    }
-
-    public boolean isCurrentRegexNode() {
-        return currentType() == Token.Type.REGEX;
     }
 
     public Optional<Token> lastToken() {

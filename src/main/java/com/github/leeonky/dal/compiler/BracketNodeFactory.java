@@ -13,6 +13,7 @@ public class BracketNodeFactory implements NodeFactory {
     @Override
     public Node fetchNode(NodeParser nodeParser) {
         if (nodeParser.tokenStream.isCurrentBeginBracket()) {
+            nodeParser.bracketCount++;
             nodeParser.tokenStream.pop();
 
             //TODO move to constructor
@@ -28,7 +29,7 @@ public class BracketNodeFactory implements NodeFactory {
                 throw new SyntaxException(nodeParser.tokenStream.getPosition(), "unexpected token, ')' expected");
 
             //TODO does not needed
-            bracketNode.finishBracket();
+            nodeParser.bracketCount--;
             return bracketNode.setPositionBegin(10);
         }
         return null;
