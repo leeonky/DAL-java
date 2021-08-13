@@ -32,7 +32,6 @@ class SingleEvaluableNodeFactory implements NodeFactory {
                         .map(factory -> factory.fetchNode(nodeParser))
                         .filter(Objects::nonNull).findFirst()
                         .orElseGet(() -> giveDefault(nodeParser))));
-
     }
 
     private Node giveDefault(NodeParser nodeParser) {

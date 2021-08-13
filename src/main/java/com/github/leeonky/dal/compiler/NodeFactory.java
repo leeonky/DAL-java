@@ -6,12 +6,15 @@ import com.github.leeonky.dal.ast.PropertyNode;
 import com.github.leeonky.dal.ast.RegexNode;
 import com.github.leeonky.dal.token.Token;
 
-import static com.github.leeonky.dal.compiler.SingleTokenNodeFactory.singleTokenNodeFactory;
-
 public interface NodeFactory {
 
     static NodeFactory createConstNodeFactory() {
-        return singleTokenNodeFactory(Token.Type.CONST_VALUE, ConstNode::new);
+        return new SingleTokenNodeFactory(Token.Type.CONST_VALUE) {
+            @Override
+            protected Node createNode(NodeParser nodeParser, Object value) {
+                return new ConstNode(value);
+            }
+        };
     }
 
     static NodeFactory createSingleEvaluableNodeFactory() {
@@ -19,7 +22,12 @@ public interface NodeFactory {
     }
 
     static NodeFactory createRegexNodeFactory() {
-        return singleTokenNodeFactory(Token.Type.REGEX, regex -> new RegexNode((String) regex));
+        return new SingleTokenNodeFactory(Token.Type.REGEX) {
+            @Override
+            protected Node createNode(NodeParser nodeParser, Object value) {
+                return new RegexNode((String) value);
+            }
+        };
     }
 
     static NodeFactory createPropertyNodeFactory() {

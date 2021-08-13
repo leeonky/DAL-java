@@ -55,8 +55,7 @@ class DALCompilerTest {
 
         @Test
         void access_property_after_bracket() {
-            BracketNode bracketNode = new BracketNode();
-            bracketNode.setNode(new ConstNode(""));
+            BracketNode bracketNode = new BracketNode(new ConstNode(""));
             assertCompileNode("('').empty", new PropertyNode(bracketNode, "empty"));
         }
     }
@@ -169,7 +168,7 @@ class DALCompilerTest {
 
         @Test
         void compile_simple_bracket() {
-            assertCompileNode("(1)", new BracketNode().setNode(new ConstNode(new BigDecimal(1))).finishBracket());
+            assertCompileNode("(1)", new BracketNode(new ConstNode(new BigDecimal(1))).finishBracket());
         }
 
         @Test

@@ -20,7 +20,7 @@ public class CodeHelper {
         s = s.trim();
         if (!s.startsWith("["))
             s = "." + s;
-        return chainNodeTokenFactory.fetchToken(new TokenParser(new SourceCode(s))).getTokenStream().stream()
+        return chainNodeTokenFactory.fetchToken(new TokenParser(new SourceCode(s))).getTokenStream().tokens()
                 .map(Token::getValue).collect(Collectors.toList());
     }
 }

@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 
-//TODO need clean code
 public class TypeExpression extends Node {
     private final Node instance;
     private final List<SchemaNode> schemaNodes = new ArrayList<>();
@@ -33,19 +33,13 @@ public class TypeExpression extends Node {
     @Override
     public Object evaluate(RuntimeContext context) {
         try {
-            if (isFailed(context, objectRef)) {
+            boolean failed = isFailed(context, objectRef);
+            if (failed)
                 System.err.println("Warning: Type assertion `" + inspect() + "` got false.");
-                return false;
-            }
-            //TODO tobe removed
-            return context.wrapInputValueAndEvaluate(objectRef.instance, getAssertion(), schemaNodes.get(0).getSchema());
+            return !failed;
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), getPositionBegin());
         }
-    }
-
-    protected Node getAssertion() {
-        return new ConstNode(true);
     }
 
     private boolean isFailed(RuntimeContext context, ObjectRef objectRef) {
@@ -66,11 +60,8 @@ public class TypeExpression extends Node {
 
     @Override
     public String inspect() {
-        String assertionClause = getAssertion().inspect();
-        //TODO to be removed whichClause
-        String whichClause = "true".equals(assertionClause) ? "" : String.format(" which %s", assertionClause);
-        return String.format("%s is %s%s", instance.inspect(), schemaNodes.stream().map(SchemaNode::inspect)
-                .collect(Collectors.joining(" " + operator.value + " ")), whichClause);
+        return format("%s is %s", instance.inspect(), schemaNodes.stream().map(SchemaNode::inspect)
+                .collect(Collectors.joining(" " + operator.value + " ")));
     }
 
     public void appendSchema(Operator operator, SchemaNode schemaNode) {

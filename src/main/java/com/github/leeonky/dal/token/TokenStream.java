@@ -1,8 +1,11 @@
 package com.github.leeonky.dal.token;
 
+import com.github.leeonky.dal.SyntaxException;
+import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.ast.TypeExpression.Operator;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -53,10 +56,6 @@ public class TokenStream {
         return false;
     }
 
-    public boolean isCurrentBeginBracket() {
-        return currentType() == Token.Type.BEGIN_BRACKET;
-    }
-
     public Iterable<Operator> getSchemaOperators() {
         return () -> new Iterator<Operator>() {
             @Override
@@ -84,7 +83,7 @@ public class TokenStream {
         return tokens.size();
     }
 
-    public Stream<Token> stream() {
+    public Stream<Token> tokens() {
         return tokens.stream();
     }
 
@@ -100,5 +99,19 @@ public class TokenStream {
         return currentType() == Token.Type.OPERATOR &&
                 (isFromBeginning() ? UNARY_OPERATORS_WITHOUT_INTENTION : UNARY_OPERATORS)
                         .contains(currentToken().getValue());
+    }
+
+    public Node popBracket(Supplier<Node> supplier) {
+        if (currentType() == Token.Type.BEGIN_BRACKET) {
+            pop();
+            Node node = supplier.get();
+            if (!hasTokens())
+                throw new SyntaxException(getPosition(), "missed end bracket");
+            if (currentType() != Token.Type.END_BRACKET)
+                throw new SyntaxException(getPosition(), "unexpected token, ')' expected");
+            pop();
+            return node;
+        }
+        return null;
     }
 }

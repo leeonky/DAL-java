@@ -3,7 +3,11 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.RuntimeContext;
 
 public class BracketNode extends Node {
-    private Node node;
+    private final Node node;
+
+    public BracketNode(Node node) {
+        this.node = node;
+    }
 
     @Override
     public Object evaluate(RuntimeContext context) {
@@ -13,11 +17,6 @@ public class BracketNode extends Node {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof BracketNode && node.equals(((BracketNode) obj).node);
-    }
-
-    public BracketNode setNode(Node node) {
-        this.node = node;
-        return this;
     }
 
     public BracketNode finishBracket() {
