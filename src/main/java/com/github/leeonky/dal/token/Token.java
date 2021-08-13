@@ -33,16 +33,16 @@ public class Token {
         return new Token(Type.CONST_VALUE, value);
     }
 
-    public static Token beginBracketToken() {
-        return new Token(Type.BEGIN_BRACKET, "(");
+    public static Token openingParenthesisToken() {
+        return new Token(Type.OPENING_PARENTHESIS, "(");
     }
 
     public static Token regexToken(String regex) {
         return new Token(Type.REGEX, regex);
     }
 
-    public static Token endBracketToken() {
-        return new Token(Type.END_BRACKET, ")");
+    public static Token closingParenthesisToken() {
+        return new Token(Type.CLOSING_PARENTHESIS, ")");
     }
 
     public static Token keyWordToken(String keyWord) {
@@ -176,6 +176,6 @@ public class Token {
     }
 
     public enum Type {
-        WORD, PROPERTY, OPERATOR, BEGIN_BRACKET, END_BRACKET, KEY_WORD, CONST_VALUE, REGEX, TREE
+        WORD, PROPERTY, OPERATOR, OPENING_PARENTHESIS, CLOSING_PARENTHESIS, KEY_WORD, CONST_VALUE, REGEX, TREE
     }
 }

@@ -39,8 +39,8 @@ class DALTokenFactorTest {
         assertThat(tokenStream.pop()).isEqualTo(Token.constValueToken("str2"));
         assertThat(tokenStream.pop()).isEqualTo(Token.operatorToken(":"));
         assertThat(tokenStream.pop()).isEqualTo(Token.regexToken("abc"));
-        assertThat(tokenStream.pop()).isEqualTo(Token.beginBracketToken());
-        assertThat(tokenStream.pop()).isEqualTo(Token.endBracketToken());
+        assertThat(tokenStream.pop()).isEqualTo(Token.openingParenthesisToken());
+        assertThat(tokenStream.pop()).isEqualTo(Token.closingParenthesisToken());
         assertThat(tokenStream.pop()).isEqualTo(Token.keyWordToken(Constants.KeyWords.WHICH));
     }
 

@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 public class NodeParser {
     //TODO to be private
     final TokenStream tokenStream;
-    private int bracketCount = 0;
+    private int parenthesisCount = 0;
     private Node thisNode = InputNode.INSTANCE;
 
     public NodeParser(TokenStream tokenStream) {
@@ -25,16 +25,16 @@ public class NodeParser {
         return thisNode;
     }
 
-    public Node compileNodeInBracket(Supplier<Node> nodeFactory) {
-        return tokenStream.popBracket(() -> {
-            bracketCount++;
+    public Node compileNodeInParentheses(Supplier<Node> nodeFactory) {
+        return tokenStream.popParenthesis(() -> {
+            parenthesisCount++;
             Node node = nodeFactory.get();
-            bracketCount--;
+            parenthesisCount--;
             return node;
         });
     }
 
-    public boolean isInBracket() {
-        return bracketCount == 0;
+    public boolean isInParentheses() {
+        return parenthesisCount == 0;
     }
 }

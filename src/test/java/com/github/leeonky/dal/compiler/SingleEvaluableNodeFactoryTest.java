@@ -85,18 +85,18 @@ class SingleEvaluableNodeFactoryTest extends NodeFactoryTestBase {
     }
 
     @Test
-    void support_bracket_node_with_single_value() {
+    void support_parentheses_node_with_single_value() {
         Node node = givenCode("(2)").fetchNode();
 
-        assertThat(node).isInstanceOf(BracketNode.class);
+        assertThat(node).isInstanceOf(ParenthesesNode.class);
         assertThat(node.inspect()).isEqualTo("(2)");
     }
 
     @Test
-    void support_bracket_node_with_expression() {
+    void support_parentheses_node_with_expression() {
         Node node = givenCode("(1+1)").fetchNode();
 
-        assertThat(node).isInstanceOf(BracketNode.class);
+        assertThat(node).isInstanceOf(ParenthesesNode.class);
         assertThat(node.inspect()).isEqualTo("(1 + 1)");
     }
 

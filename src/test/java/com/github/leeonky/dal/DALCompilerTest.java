@@ -54,9 +54,9 @@ class DALCompilerTest {
         }
 
         @Test
-        void access_property_after_bracket() {
-            BracketNode bracketNode = new BracketNode(new ConstNode(""));
-            assertCompileNode("('').empty", new PropertyNode(bracketNode, "empty"));
+        void access_property_after_parentheses() {
+            ParenthesesNode parenthesesNode = new ParenthesesNode(new ConstNode(""));
+            assertCompileNode("('').empty", new PropertyNode(parenthesesNode, "empty"));
         }
     }
 
@@ -164,21 +164,21 @@ class DALCompilerTest {
     }
 
     @Nested
-    class BracketInExpression {
+    class ParenthesesInExpression {
 
         @Test
-        void compile_simple_bracket() {
-            assertCompileNode("(1)", new BracketNode(new ConstNode(new BigDecimal(1))).finishBracket());
+        void compile_simple_parentheses() {
+            assertCompileNode("(1)", new ParenthesesNode(new ConstNode(new BigDecimal(1))));
         }
 
         @Test
-        void miss_end_bracket_should_raise_error() {
-            assertSyntaxException("(1", 2, "missed end bracket");
+        void miss_closing_parenthesis_should_raise_error() {
+            assertSyntaxException("(1", 2, "missed ')'");
         }
 
         @Test
-        void miss_begin_bracket_should_raise_error() {
-            assertSyntaxException("1)", 1, "missed begin bracket");
+        void miss_opening_parenthesis_should_raise_error() {
+            assertSyntaxException("1)", 1, "missed '('");
         }
     }
 

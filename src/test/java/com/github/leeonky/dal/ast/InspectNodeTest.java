@@ -25,7 +25,7 @@ class InspectNodeTest {
     }
 
     @Test
-    void support_inspect_bracket_node() {
+    void support_inspect_parentheses_node() {
         inspectAssert("(100)", "(100)");
     }
 

@@ -30,8 +30,8 @@ public interface TokenFactory {
     };
     Function<String, Token> CONST_STRING_TOKEN = Token::constValueToken;
     Function<String, Token> REGEX_TOKEN = Token::regexToken;
-    Function<String, Token> BEGIN_BRACKET_TOKEN = s -> Token.beginBracketToken();
-    Function<String, Token> END_BRACKET_TOKEN = s -> Token.endBracketToken();
+    Function<String, Token> OPENING_PARENTHESIS_TOKEN = s -> Token.openingParenthesisToken();
+    Function<String, Token> CLOSING_PARENTHESIS_TOKEN = s -> Token.closingParenthesisToken();
     Function<TokenStream, Token> BRACKET_PROPERTY_TOKEN = tokenStream -> {
         if (tokenStream.size() != 1)
             throw new IllegalTokenContentException("should given one property or array index in `[]`");
@@ -102,12 +102,12 @@ public interface TokenFactory {
                 .createAs(REGEX_TOKEN);
     }
 
-    static TokenFactory createBeginBracketTokenFactory() {
-        return equalToCharacter('(').createAs(BEGIN_BRACKET_TOKEN);
+    static TokenFactory createOpeningParenthesisTokenFactory() {
+        return equalToCharacter('(').createAs(OPENING_PARENTHESIS_TOKEN);
     }
 
-    static TokenFactory createEndBracketTokenFactory() {
-        return equalToCharacter(')').createAs(END_BRACKET_TOKEN);
+    static TokenFactory createClosingParenthesisTokenFactory() {
+        return equalToCharacter(')').createAs(CLOSING_PARENTHESIS_TOKEN);
     }
 
     static TokenFactory createBracketPropertyTokenFactory() {
@@ -147,8 +147,8 @@ public interface TokenFactory {
                         .or(createDoubleQuotedStringTokenFactory())
                         .or(createRegexTokenFactory())
                         .or(createOperatorTokenFactory())
-                        .or(createBeginBracketTokenFactory())
-                        .or(createEndBracketTokenFactory())
+                        .or(createOpeningParenthesisTokenFactory())
+                        .or(createClosingParenthesisTokenFactory())
                         .or(createWordTokenFactory()))
                 .endWith(END_OF_CODE)
                 .createAs(TOKEN_TREE);

@@ -101,13 +101,13 @@ public class TokenStream {
                         .contains(currentToken().getValue());
     }
 
-    public Node popBracket(Supplier<Node> supplier) {
-        if (currentType() == Token.Type.BEGIN_BRACKET) {
+    public Node popParenthesis(Supplier<Node> supplier) {
+        if (currentType() == Token.Type.OPENING_PARENTHESIS) {
             pop();
             Node node = supplier.get();
             if (!hasTokens())
-                throw new SyntaxException(getPosition(), "missed end bracket");
-            if (currentType() != Token.Type.END_BRACKET)
+                throw new SyntaxException(getPosition(), "missed ')'");
+            if (currentType() != Token.Type.CLOSING_PARENTHESIS)
                 throw new SyntaxException(getPosition(), "unexpected token, ')' expected");
             pop();
             return node;

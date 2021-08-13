@@ -34,7 +34,7 @@ class ExpressionNodeFactoryTest extends NodeFactoryTestBase {
     void should_check_end_bracket() {
         assertThat(invalidSyntaxToken(givenCode("1)")))
                 .hasFieldOrPropertyWithValue("position", 1)
-                .hasMessage("missed begin bracket");
+                .hasMessage("missed '('");
     }
 
     @Test

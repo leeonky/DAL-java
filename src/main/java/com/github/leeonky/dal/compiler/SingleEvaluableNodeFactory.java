@@ -16,7 +16,7 @@ class SingleEvaluableNodeFactory implements NodeFactory {
     private static final NodeFactory propertyNodeFactory = createPropertyNodeFactory();
     private static final List<NodeFactory> nodeFactories = asList(
             createConstNodeFactory(),
-            createBracketNodeFactory(),
+            createParenthesesNodeFactory(),
             propertyNodeFactory
     );
 

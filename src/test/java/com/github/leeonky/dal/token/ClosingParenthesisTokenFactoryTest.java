@@ -4,16 +4,16 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class EndBracketTokenFactoryTest extends TokenFactoryTestBase {
+class ClosingParenthesisTokenFactoryTest extends TokenFactoryTestBase {
 
     @Override
     protected TokenFactory createTokenFactory() {
-        return TokenFactory.createEndBracketTokenFactory();
+        return TokenFactory.createClosingParenthesisTokenFactory();
     }
 
     @Override
     protected Token createToken(Object value) {
-        return Token.endBracketToken();
+        return Token.closingParenthesisToken();
     }
 
     @Test
@@ -23,7 +23,7 @@ class EndBracketTokenFactoryTest extends TokenFactoryTestBase {
 
     @Test
     void return_token_when_matches_code() {
-        assertThat(parseToken(")")).isEqualTo(Token.endBracketToken());
+        assertThat(parseToken(")")).isEqualTo(Token.closingParenthesisToken());
     }
 
     @Test

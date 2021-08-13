@@ -87,11 +87,11 @@ class SingleNodeFactoryTest {
     }
 
     @Nested
-    class FetchBracketNode extends NodeFactoryTestBase {
+    class FetchParenthesesNode extends NodeFactoryTestBase {
 
         @Override
         protected NodeFactory getDefaultNodeFactory() {
-            return NodeFactory.createBracketNodeFactory();
+            return NodeFactory.createParenthesesNodeFactory();
         }
 
         @Test
@@ -101,34 +101,34 @@ class SingleNodeFactoryTest {
         }
 
         @Test
-        void support_single_node_wrapped_with_bracket() {
-            Node node = givenToken(beginBracketToken(), 10)
+        void support_single_node_wrapped_with_parentheses() {
+            Node node = givenToken(openingParenthesisToken(), 10)
                     .givenToken(Token.constValueToken("str"))
-                    .givenToken(Token.endBracketToken())
+                    .givenToken(Token.closingParenthesisToken())
                     .fetchNode();
 
-            assertThat(node).isInstanceOf(BracketNode.class)
+            assertThat(node).isInstanceOf(ParenthesesNode.class)
                     .hasFieldOrPropertyWithValue("positionBegin", 10);
 
             assertThat(node.inspect()).isEqualTo("('str')");
         }
 
         @Test
-        void support_expression_node_wrapped_with_bracket() {
+        void support_expression_node_wrapped_with_parentheses() {
             assertThat(givenCode("(1+1)").fetchNode().inspect()).isEqualTo("(1 + 1)");
         }
 
         @Test
-        void raiser_error_when_bracket_has_no_data() {
-            assertThat(invalidSyntaxToken(givenToken(beginBracketToken(), 100)))
+        void raiser_error_when_parentheses_has_no_data() {
+            assertThat(invalidSyntaxToken(givenToken(openingParenthesisToken(), 100)))
                     .hasMessage("expect a value or expression")
                     .hasFieldOrPropertyWithValue("position", 100);
         }
 
         @Test
-        void raiser_error_when_bracket_not_finished() {
+        void raiser_error_when_parentheses_not_finished() {
             assertThat(invalidSyntaxToken(givenCode("(1")))
-                    .hasMessage("missed end bracket")
+                    .hasMessage("missed ')'")
                     .hasFieldOrPropertyWithValue("position", 2);
         }
 

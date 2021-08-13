@@ -44,8 +44,8 @@ public interface NodeFactory {
         return nodeParser -> ExpressionParser.INSTANCE.apply(nodeParser, nodeFactory.fetchNode(nodeParser));
     }
 
-    static NodeFactory createBracketNodeFactory() {
-        return new BracketNodeFactory();
+    static NodeFactory createParenthesesNodeFactory() {
+        return new ParenthesesNodeFactory();
     }
 
     Node fetchNode(NodeParser nodeParser);

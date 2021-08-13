@@ -27,9 +27,9 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
                 expression = schemaExpressionFactory.apply(nodeParser, first);
             if (expression != null)
                 return apply(nodeParser, expression.setPositionBegin(first.getPositionBegin()));
-            if (nodeParser.tokenStream.currentType() == Token.Type.END_BRACKET) {
-                if (nodeParser.isInBracket())
-                    throw new SyntaxException(nodeParser.tokenStream.getPosition(), "missed begin bracket");
+            if (nodeParser.tokenStream.currentType() == Token.Type.CLOSING_PARENTHESIS) {
+                if (nodeParser.isInParentheses())
+                    throw new SyntaxException(nodeParser.tokenStream.getPosition(), "missed '('");
                 return first;
             }
         }
