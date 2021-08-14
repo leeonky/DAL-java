@@ -24,9 +24,4 @@ public class SchemaNode extends Node {
     public String getSchema() {
         return schema;
     }
-
-    @Override
-    public boolean evaluable() {
-        return false;
-    }
 }

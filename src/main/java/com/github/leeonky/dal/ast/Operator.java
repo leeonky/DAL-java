@@ -2,12 +2,7 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.RuntimeContext;
-import com.github.leeonky.dal.RuntimeException;
 import com.github.leeonky.dal.util.Calculator;
-
-import java.util.Objects;
-
-import static com.github.leeonky.util.BeanClass.getClassName;
 
 public abstract class Operator {
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
@@ -62,12 +57,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            Object value1 = node1.evaluate(context);
-            if (node2.evaluable())
-                return Calculator.equals(value1, node2.evaluate(context));
-            if (value1 instanceof String)
-                return ((RegexNode) node2).matches((String) value1);
-            throw new RuntimeException("Operator eq before regex need a string input value", getPosition());
+            return node2.judge(this, node1.evaluate(context), context);
         }
     }
 
@@ -238,31 +228,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            Object value1 = node1.evaluate(context);
-            if (node2.evaluable()) {
-                Object value2 = node2.evaluate(context);
-                if (value2 == null)
-                    return Objects.equals(value1, null);
-                shouldBeSameTypeIfTypeIs(Number.class, value1, value2);
-                shouldBeSameTypeIfTypeIs(Boolean.class, value1, value2);
-                invalidTypeToMatchStringValue(Number.class, value1, value2);
-                invalidTypeToMatchStringValue(Boolean.class, value1, value2);
-                return Calculator.equals(context.getConverter().convert(value2.getClass(), value1), value2);
-
-            }
-            return ((RegexNode) node2).matches(context.getConverter().convert(String.class, value1));
-        }
-
-        private void invalidTypeToMatchStringValue(Class<?> type, Object value1, Object value2) {
-            if (type.isInstance(value1) && value2 instanceof String)
-                throw new RuntimeException(String.format("Cannot matches between type '%s' and 'java.lang.String'",
-                        type.getName()), getPosition());
-        }
-
-        private void shouldBeSameTypeIfTypeIs(Class<?> type, Object value1, Object value2) {
-            if (type.isInstance(value2) && value1 != null && !type.isInstance(value1))
-                throw new RuntimeException(String.format("Cannot matches between type '%s' and '%s'",
-                        getClassName(value1), type.getName()), getPosition());
+            return node2.judge(this, node1.evaluate(context), context);
         }
     }
 

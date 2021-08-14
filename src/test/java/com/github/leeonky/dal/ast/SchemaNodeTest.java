@@ -19,11 +19,4 @@ class SchemaNodeTest {
         assertThat(runtimeException).hasMessage("Schema 'Type' not registered")
                 .hasFieldOrPropertyWithValue("position", 10);
     }
-
-    @Test
-    void not_support_evaluate() {
-        assertThat(schemaNode.evaluable()).isFalse();
-
-        assertThrows(IllegalStateException.class, () -> schemaNode.evaluate(null));
-    }
 }
