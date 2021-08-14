@@ -12,11 +12,8 @@ import java.util.function.BiFunction;
 
 public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
     public static final ExpressionParser INSTANCE = new ExpressionParser();
-    private final NodeFactory singleEvaluableNodeFactory = NodeFactory.createSingleEvaluableNodeFactory();
     private final OperatorExpressionFactory operatorExpressionFactory = new OperatorExpressionFactory();
     private final SchemaExpressionFactory schemaExpressionFactory = new SchemaExpressionFactory();
-    private final NodeFactory regexNodeFactory = NodeFactory.createRegexNodeFactory();
-    private final NodeFactory objectNodeFactory = NodeFactory.createObjectNodeFactory();
     private final NodeFactory rightOperandNodeFactory = NodeFactory.createRightOperandNodeFactory();
     private final NodeFactory expressionNodeFactory = NodeFactory.createExpressionNodeFactory();
 

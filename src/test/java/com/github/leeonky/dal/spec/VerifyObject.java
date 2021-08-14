@@ -21,6 +21,29 @@ class VerifyObject extends Base {
                 put("key", 1);
             }}, "= {}");
         }
+
+        @Test
+        void object_key_sets_should_be_equal_and_each_property_should_pass_then_return_pass() {
+            assertPass(new HashMap<String, Object>() {{
+                put("key", 1);
+            }}, "= {key: 1}");
+        }
+
+        @Test
+        void return_false_when_object_key_sets_not_equal() {
+            assertFailed(new HashMap<>(), "= {key: 1}");
+        }
+
+        @Test
+        void return_false_when_object_field_value_not_equal() {
+            assertFailed(new HashMap<String, Object>() {{
+                put("key", 1);
+            }}, "= {key: 2}");
+        }
+
+        //TODO property chain
+        //TODO process getClass property for java bean and size property of list
+        //TODO property is alias
     }
 
     @Nested
@@ -39,5 +62,10 @@ class VerifyObject extends Base {
         void null_does_not_match_empty_object() {
             assertFailed(null, ": {}");
         }
+
+        //TODO property
+        //TODO property chain
+        //TODO process getClass property for java bean and size property of list
+        //TODO property is alias
     }
 }

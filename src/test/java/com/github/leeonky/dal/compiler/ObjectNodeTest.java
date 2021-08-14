@@ -34,4 +34,12 @@ class ObjectNodeTest extends NodeFactoryTestBase {
                 .hasMessage("missed `}`")
                 .hasFieldOrPropertyWithValue("position", 1);
     }
+
+    @Test
+    void support_object_with_simple_judgement_expression() {
+        Node node = givenCode("{a: 1}").fetchNode();
+
+        assertThat(node).isInstanceOf(ObjectNode.class);
+        assertThat(node.inspect()).isEqualTo("{a : 1}");
+    }
 }

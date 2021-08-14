@@ -5,21 +5,22 @@ import com.github.leeonky.dal.RuntimeException;
 
 import java.util.Objects;
 
+import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 import static java.lang.String.format;
 
 public class PropertyNode extends Node {
     private final Node instanceNode;
     private final Object name;
-    private final boolean isBracket;
+    private final Type type;
 
-    public PropertyNode(Node instanceNode, Object property) {
-        this(instanceNode, property, false);
+    public PropertyNode(Node instanceNode, Object name) {
+        this(instanceNode, name, DOT);
     }
 
-    public PropertyNode(Node instanceNode, Object property, boolean isBracket) {
+    public PropertyNode(Node instanceNode, Object name, Type type) {
         this.instanceNode = instanceNode;
-        name = property;
-        this.isBracket = isBracket;
+        this.name = name;
+        this.type = type;
     }
 
     @Override
@@ -44,7 +45,35 @@ public class PropertyNode extends Node {
 
     @Override
     public String inspect() {
-        return format(isBracket ? (name instanceof String ? "%s['%s']" : "%s[%s]") : "%s.%s",
-                instanceNode.inspect(), name);
+        return type.format(instanceNode.inspect(), name);
+    }
+
+    //TODO to be removed
+    public Object getName() {
+        return name;
+    }
+
+    public enum Type {
+        DOT("%s.%s"),
+        IDENTIFIER("%s%s"),
+        BRACKET("%s[%s]") {
+            @Override
+            protected String valueString(Object value) {
+                return value instanceof String ? String.format("'%s'", value) : String.valueOf(value);
+            }
+        };
+        private final String format;
+
+        Type(String format) {
+            this.format = format;
+        }
+
+        protected String valueString(Object value) {
+            return String.valueOf(value);
+        }
+
+        public String format(String input, Object value) {
+            return String.format(format, input, valueString(value));
+        }
     }
 }

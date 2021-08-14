@@ -77,7 +77,7 @@ class SingleNodeFactoryTest {
             assertThat(node)
                     .isInstanceOf(PropertyNode.class)
                     .hasFieldOrPropertyWithValue("name", "name");
-            assertThat(node.inspect()).isEqualTo(".name");
+            assertThat(node.inspect()).isEqualTo("name");
         }
     }
 

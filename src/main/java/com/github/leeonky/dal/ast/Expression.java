@@ -16,6 +16,11 @@ public class Expression extends Node {
         this.operator = operator;
     }
 
+    //TODO to be removed
+    public PropertyNode getPropertyNode1() {
+        return (PropertyNode) node1;
+    }
+
     public Expression adjustOperatorOrder() {
         if (node1 instanceof Expression) {
             Expression expression1 = (Expression) node1;

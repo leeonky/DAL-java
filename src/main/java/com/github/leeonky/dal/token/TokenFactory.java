@@ -123,6 +123,7 @@ public interface TokenFactory {
                 .createAs(BRACKET_PROPERTY_TOKEN);
     }
 
+    //TODO word => identifier
     static TokenFactory createWordTokenFactory() {
         return startWith(included(ANY_CHARACTERS))
                 .take(ALL_CHARACTERS)

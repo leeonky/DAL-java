@@ -8,8 +8,10 @@ import static com.github.leeonky.dal.Constants.KeyWords.WHICH;
 import static java.util.Arrays.asList;
 
 public class Constants {
-    public static final Set<Character> TOKEN_DELIMITER = new HashSet<>(asList('=', '>', '<', '+', '-', '*', '/', ':', '&', '|', '!', ',', '(', ')', '[', ']', ' ', '\t', '\n'));
-    public static final Set<Character> OPERATOR_CHAR = new HashSet<>(asList('=', '>', '<', '+', '-', '*', '/', ':', '&', '|', '!', ','));
+    public static final Set<Character> TOKEN_DELIMITER = new HashSet<>(asList('=', '>', '<', '+', '-', '*', '/', ':',
+            '&', '|', '!', ',', '(', ')', '[', ']', '{', '}', ' ', '\t', '\n'));
+    public static final Set<Character> OPERATOR_CHAR = new HashSet<>(asList('=', '>', '<', '+', '-', '*', '/', ':',
+            '&', '|', '!', ','));
     public static final Set<Character> DIGITAL_CHAR = new HashSet<>(asList('1', '2', '3', '4', '5', '6', '7', '8', '9', '0'));
     public static final Set<String> KEYWORD_SETS = new HashSet<>(asList(IS, WHICH));
 
