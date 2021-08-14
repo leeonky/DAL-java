@@ -34,6 +34,8 @@ public interface TokenFactory {
     Function<String, Token> CLOSING_PARENTHESIS_TOKEN = s -> Token.closingParenthesisToken();
     Function<String, Token> OPENING_BRACKET_TOKEN = s -> Token.openingBracketToken();
     Function<String, Token> CLOSING_BRACKET_TOKEN = s -> Token.closingBracketToken();
+    Function<String, Token> OPENING_BRACE_TOKEN = s -> Token.openingBraceToken();
+    Function<String, Token> CLOSING_BRACE_TOKEN = s -> Token.closingBraceToken();
     Function<TokenStream, Token> BRACKET_PROPERTY_TOKEN = tokenStream -> {
         if (tokenStream.size() != 1)
             throw new IllegalTokenContentException("should given one property or array index in `[]`");
@@ -142,9 +144,7 @@ public interface TokenFactory {
 
     static TokenFactory createDALTokenFactory() {
         return startWith(BEGIN_OF_CODE)
-                .take(byFactory(createOpeningBracketTokenFactory())
-                        .or(createClosingBracketTokenFactory())
-                        .or(createBeanPropertyTokenFactory())
+                .take(byFactory(createBeanPropertyTokenFactory())
                         .or(createNumberTokenFactory())
                         .or(createSingleQuotedStringTokenFactory())
                         .or(createDoubleQuotedStringTokenFactory())
@@ -152,6 +152,10 @@ public interface TokenFactory {
                         .or(createOperatorTokenFactory())
                         .or(createOpeningParenthesisTokenFactory())
                         .or(createClosingParenthesisTokenFactory())
+                        .or(createOpeningBraceTokenFactory())
+                        .or(createClosingBraceTokenFactory())
+                        .or(createOpeningBracketTokenFactory())
+                        .or(createClosingBracketTokenFactory())
                         .or(createWordTokenFactory()))
                 .endWith(END_OF_CODE)
                 .createAs(TOKEN_TREE);
@@ -170,6 +174,14 @@ public interface TokenFactory {
 
     static TokenFactory createClosingBracketTokenFactory() {
         return equalToCharacter(']').createAs(CLOSING_BRACKET_TOKEN);
+    }
+
+    static TokenFactory createOpeningBraceTokenFactory() {
+        return equalToCharacter('{').createAs(OPENING_BRACE_TOKEN);
+    }
+
+    static TokenFactory createClosingBraceTokenFactory() {
+        return equalToCharacter('}').createAs(CLOSING_BRACE_TOKEN);
     }
 
     Token fetchToken(TokenParser parser);

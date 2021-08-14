@@ -61,6 +61,14 @@ public class Token {
         return new Token(Type.CLOSING_BRACKET, "]");
     }
 
+    public static Token openingBraceToken() {
+        return new Token(Type.OPENING_BRACE, "{");
+    }
+
+    public static Token closingBraceToken() {
+        return new Token(Type.CLOSING_BRACE, "}");
+    }
+
 
     //TODO to be removed
     @Override
@@ -187,6 +195,6 @@ public class Token {
 
     public enum Type {
         WORD, PROPERTY, OPERATOR, OPENING_PARENTHESIS, CLOSING_PARENTHESIS, KEY_WORD, CONST_VALUE, REGEX, TREE,
-        OPENING_BRACKET, CLOSING_BRACKET
+        OPENING_BRACKET, CLOSING_BRACKET, OPENING_BRACE, CLOSING_BRACE
     }
 }

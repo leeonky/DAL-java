@@ -31,9 +31,8 @@ class DALTokenFactorTest {
 
     @Test
     void could_parse_all_dal_tokens() {
-        TokenStream tokenStream = parseToken("[0] .id 100 'str1'\"str2\" : /abc/ ( ) which").getTokenStream();
+        TokenStream tokenStream = parseToken("[ ] .id 100 'str1'\"str2\" : /abc/ ( ) which { }").getTokenStream();
         assertThat(tokenStream.pop()).isEqualTo(Token.openingBracketToken());
-        assertThat(tokenStream.pop()).isEqualTo(Token.constValueToken(new BigDecimal(0)));
         assertThat(tokenStream.pop()).isEqualTo(Token.closingBracketToken());
         assertThat(tokenStream.pop()).isEqualTo(Token.propertyToken("id"));
         assertThat(tokenStream.pop()).isEqualTo(Token.constValueToken(BigDecimal.valueOf(100)));
@@ -44,6 +43,8 @@ class DALTokenFactorTest {
         assertThat(tokenStream.pop()).isEqualTo(Token.openingParenthesisToken());
         assertThat(tokenStream.pop()).isEqualTo(Token.closingParenthesisToken());
         assertThat(tokenStream.pop()).isEqualTo(Token.keyWordToken(Constants.KeyWords.WHICH));
+        assertThat(tokenStream.pop()).isEqualTo(Token.openingBraceToken());
+        assertThat(tokenStream.pop()).isEqualTo(Token.closingBraceToken());
     }
 
     private Token parseToken(String s) {
