@@ -69,6 +69,16 @@ class SingleNodeFactoryTest {
             assertThat(fetchNodeWhenGivenToken(operatorToken("+")))
                     .isNull();
         }
+
+        @Test
+        void support_ignore_start_dot_char() {
+            Node node = givenCode("name").fetchNode();
+
+            assertThat(node)
+                    .isInstanceOf(PropertyNode.class)
+                    .hasFieldOrPropertyWithValue("name", "name");
+            assertThat(node.inspect()).isEqualTo(".name");
+        }
     }
 
     @Nested

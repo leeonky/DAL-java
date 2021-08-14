@@ -112,6 +112,11 @@ class BasicVerify extends Base {
         }
 
         @Test
+        void should_support_ignore_begin_dot() {
+            assertPass("", "empty");
+        }
+
+        @Test
         void should_support_access_property_through_public_field() {
             assertPass(new Bean().setField(true), ".field");
         }

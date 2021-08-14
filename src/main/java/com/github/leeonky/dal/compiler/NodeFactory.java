@@ -47,6 +47,15 @@ public interface NodeFactory {
         };
     }
 
+    static NodeFactory createWordPropertyNodeFactory() {
+        return new SingleTokenNodeFactory(Token.Type.WORD) {
+            @Override
+            protected Node createNode(NodeParser nodeParser, Object value) {
+                return new PropertyNode(nodeParser.getThisNode(), value);
+            }
+        };
+    }
+
     static NodeFactory createExpressionNodeFactory() {
         NodeFactory nodeFactory = NodeFactory.createSingleEvaluableNodeFactory();
         return nodeParser -> ExpressionParser.INSTANCE.apply(nodeParser, nodeFactory.fetchNode(nodeParser));
