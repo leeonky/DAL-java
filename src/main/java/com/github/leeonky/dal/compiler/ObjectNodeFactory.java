@@ -19,14 +19,16 @@ class ObjectNodeFactory implements NodeFactory {
             ObjectNode objectNode = new ObjectNode();
             if (nodeParser.tokenStream.hasTokens()) {
                 //TODO refactor
-                Node node = propertyNodeFactory.fetchNode(nodeParser);
-                if (node != null)
-                    //TODO use JudgementExpression type
-                    objectNode.addJudgements(new Expression(
-                            node,
-                            nodeParser.tokenStream.pop().toOperator(false),
-                            //TODO expression not finished
-                            rightOperandNodeFactory.fetchNode(nodeParser)));
+                while (nodeParser.tokenStream.hasTokens() && nodeParser.tokenStream.currentType() != CLOSING_BRACE) {
+                    Node node = propertyNodeFactory.fetchNode(nodeParser);
+                    if (node != null)
+                        //TODO use JudgementExpression type
+                        objectNode.addJudgements(new Expression(
+                                node,
+                                nodeParser.tokenStream.pop().toOperator(false),
+                                //TODO expression not finished
+                                rightOperandNodeFactory.fetchNode(nodeParser)));
+                }
             }
             return objectNode;
         });

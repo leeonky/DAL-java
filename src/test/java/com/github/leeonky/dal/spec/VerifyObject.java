@@ -31,14 +31,17 @@ class VerifyObject extends Base {
 
         @Test
         void return_false_when_object_key_sets_not_equal() {
-            assertFailed(new HashMap<>(), "= {key: 1}");
+            assertFailed(new HashMap<String, Object>() {{
+                put("key", 1);
+            }}, "= {}");
         }
 
         @Test
-        void return_false_when_object_field_value_not_equal() {
+        void return_false_when_any_field_value_not_matches() {
             assertFailed(new HashMap<String, Object>() {{
-                put("key", 1);
-            }}, "= {key: 2}");
+                put("key1", '1');
+                put("key2", '2');
+            }}, "= {key1: '1' key2: 'not match'}");
         }
 
         //TODO property chain
@@ -61,6 +64,23 @@ class VerifyObject extends Base {
         @Test
         void null_does_not_match_empty_object() {
             assertFailed(null, ": {}");
+        }
+
+        @Test
+        void should_only_verify_expected_key_values_in_given_object() {
+            assertPass(new HashMap<String, Object>() {{
+                put("key", 1);
+                put("another key", 2);
+            }}, ": {key: 1}");
+        }
+
+        @Test
+        void return_false_when_any_field_verification_failed() {
+            assertFailed(new HashMap<String, Object>() {{
+                put("key1", '1');
+                put("key2", '2');
+                put("key3", '3');
+            }}, ": {key2: 'not match'}");
         }
 
         //TODO property

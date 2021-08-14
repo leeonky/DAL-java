@@ -32,7 +32,9 @@ public class ObjectNode extends Node {
 
     @Override
     public boolean judge(Operator.Matcher operator, Object input, RuntimeContext context) {
-        return input != null;
+        if (input != null)
+            return expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context));
+        return false;
     }
 
     public void addJudgements(Expression expression) {

@@ -42,4 +42,12 @@ class ObjectNodeTest extends NodeFactoryTestBase {
         assertThat(node).isInstanceOf(ObjectNode.class);
         assertThat(node.inspect()).isEqualTo("{a : 1}");
     }
+
+    @Test
+    void support_object_with_multi_judgement_expressions() {
+        Node node = givenCode("{a: 1 b: 2}").fetchNode();
+
+        assertThat(node).isInstanceOf(ObjectNode.class);
+        assertThat(node.inspect()).isEqualTo("{a : 1 b : 2}");
+    }
 }

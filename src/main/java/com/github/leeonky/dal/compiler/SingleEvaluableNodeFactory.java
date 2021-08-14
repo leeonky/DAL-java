@@ -13,11 +13,11 @@ import static com.github.leeonky.dal.compiler.NodeFactory.*;
 import static java.util.Arrays.asList;
 
 class SingleEvaluableNodeFactory implements NodeFactory {
-    private static final NodeFactory propertyNodeFactory = createPropertyNodeFactory();
+    private static final NodeFactory explicitPropertyNodeFactory = createExplicitPropertyNodeFactory();
     private static final List<NodeFactory> nodeFactories = asList(
             createConstNodeFactory(),
             createParenthesesNodeFactory(),
-            propertyNodeFactory
+            createPropertyNodeFactory()
     );
 
     @Override
@@ -46,7 +46,7 @@ class SingleEvaluableNodeFactory implements NodeFactory {
 
     private Node parsePropertyChain(NodeParser nodeParser, Node node) {
         if (nodeParser.setThis(node) != null && nodeParser.tokenStream.hasTokens()) {
-            Node next = propertyNodeFactory.fetchNode(nodeParser);
+            Node next = explicitPropertyNodeFactory.fetchNode(nodeParser);
             if (next != null)
                 return parsePropertyChain(nodeParser, next);
         }
