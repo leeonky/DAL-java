@@ -173,7 +173,7 @@ class DALCompilerTest {
 
         @Test
         void miss_closing_parenthesis_should_raise_error() {
-            assertSyntaxException("(1", 2, "missed ')'");
+            assertSyntaxException("(1", 2, "missed `)`");
         }
 
         @Test

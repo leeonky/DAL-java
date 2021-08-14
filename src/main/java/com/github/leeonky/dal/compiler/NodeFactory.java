@@ -65,6 +65,10 @@ public interface NodeFactory {
         return new ParenthesesNodeFactory();
     }
 
+    static NodeFactory createObjectNodeFactory() {
+        return new ObjectNodeFactory();
+    }
+
     Node fetchNode(NodeParser nodeParser);
 }
 

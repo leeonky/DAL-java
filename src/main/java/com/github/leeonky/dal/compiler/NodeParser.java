@@ -6,6 +6,9 @@ import com.github.leeonky.dal.token.TokenStream;
 
 import java.util.function.Supplier;
 
+import static com.github.leeonky.dal.token.Token.Type.CLOSING_PARENTHESIS;
+import static com.github.leeonky.dal.token.Token.Type.OPENING_PARENTHESIS;
+
 public class NodeParser {
     //TODO to be private
     final TokenStream tokenStream;
@@ -26,7 +29,7 @@ public class NodeParser {
     }
 
     public Node compileNodeInParentheses(Supplier<Node> nodeFactory) {
-        return tokenStream.popParenthesis(() -> {
+        return tokenStream.parseBetween(OPENING_PARENTHESIS, CLOSING_PARENTHESIS, ')', () -> {
             parenthesisCount++;
             Node node = nodeFactory.get();
             parenthesisCount--;

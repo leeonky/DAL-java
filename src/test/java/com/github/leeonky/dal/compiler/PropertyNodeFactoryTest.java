@@ -50,14 +50,14 @@ class PropertyNodeFactoryTest extends NodeFactoryTestBase {
     @Test
     void do_not_allow_more_than_one_sub_token() {
         assertThat(invalidSyntaxToken(givenCode("[1 2]")))
-                .hasMessage("should given one property or array index in `[]`")
+                .hasMessage("unexpected token, `]` expected")
                 .hasFieldOrPropertyWithValue("position", 3);
     }
 
     @Test
     void do_not_allow_get_value_when_not_finished_1() {
         assertThat(invalidSyntaxToken(givenCode("[1")))
-                .hasMessage("should end with `]`")
+                .hasMessage("missed `]`")
                 .hasFieldOrPropertyWithValue("position", 2);
     }
 

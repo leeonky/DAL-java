@@ -148,7 +148,7 @@ class SingleNodeFactoryTest {
         @Test
         void raiser_error_when_parentheses_not_finished() {
             assertThat(invalidSyntaxToken(givenCode("(1")))
-                    .hasMessage("missed ')'")
+                    .hasMessage("missed `)`")
                     .hasFieldOrPropertyWithValue("position", 2);
         }
 
@@ -156,7 +156,7 @@ class SingleNodeFactoryTest {
         @Test
         void raiser_error_when_got_unexpected_token() {
             assertThat(invalidSyntaxToken(givenCode("(1 1")))
-                    .hasMessage("unexpected token, ')' expected")
+                    .hasMessage("unexpected token, `)` expected")
                     .hasFieldOrPropertyWithValue("position", 3);
         }
     }

@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 
@@ -101,14 +102,14 @@ public class TokenStream {
                         .contains(currentToken().getValue());
     }
 
-    public Node popParenthesis(Supplier<Node> supplier) {
-        if (currentType() == Token.Type.OPENING_PARENTHESIS) {
+    public Node parseBetween(Token.Type opening, Token.Type closing, char closingChar, Supplier<Node> supplier) {
+        if (currentType() == opening) {
             pop();
             Node node = supplier.get();
             if (!hasTokens())
-                throw new SyntaxException(getPosition(), "missed ')'");
-            if (currentType() != Token.Type.CLOSING_PARENTHESIS)
-                throw new SyntaxException(getPosition(), "unexpected token, ')' expected");
+                throw new SyntaxException(getPosition(), format("missed `%c`", closingChar));
+            if (currentType() != closing)
+                throw new SyntaxException(getPosition(), format("unexpected token, `%c` expected", closingChar));
             pop();
             return node;
         }
