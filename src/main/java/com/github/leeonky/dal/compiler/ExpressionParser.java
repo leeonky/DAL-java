@@ -16,8 +16,9 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
     private final OperatorExpressionFactory operatorExpressionFactory = new OperatorExpressionFactory();
     private final SchemaExpressionFactory schemaExpressionFactory = new SchemaExpressionFactory();
     private final NodeFactory regexNodeFactory = NodeFactory.createRegexNodeFactory();
-    private final NodeFactory expressionNodeFactory = NodeFactory.createExpressionNodeFactory();
     private final NodeFactory objectNodeFactory = NodeFactory.createObjectNodeFactory();
+    private final NodeFactory rightOperandNodeFactory = NodeFactory.createRightOperandNodeFactory();
+    private final NodeFactory expressionNodeFactory = NodeFactory.createExpressionNodeFactory();
 
     @Override
     public Node apply(NodeParser nodeParser, Node first) {
@@ -45,22 +46,12 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
                 Token operatorToken = nodeParser.tokenStream.pop();
                 if (nodeParser.tokenStream.hasTokens())
                     return new Expression(first, operatorToken.toOperator(false),
-                            getSecondOperand(operatorToken, nodeParser)).adjustOperatorOrder();
+                            rightOperandNodeFactory.fetchNode(nodeParser)).adjustOperatorOrder();
                 throw new SyntaxException(nodeParser.tokenStream.getPosition(), "expression is not finished");
             }
             return null;
         }
 
-        private Node getSecondOperand(Token operatorToken, NodeParser nodeParser) {
-            if (operatorToken.judgement()) {
-                Node node = regexNodeFactory.fetchNode(nodeParser);
-                if (node == null)
-                    node = objectNodeFactory.fetchNode(nodeParser);
-                if (node != null)
-                    return node;
-            }
-            return singleEvaluableNodeFactory.fetchNode(nodeParser);
-        }
     }
 
     class SchemaExpressionFactory implements BiFunction<NodeParser, Node, Node> {
