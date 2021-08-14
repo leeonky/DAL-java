@@ -112,5 +112,23 @@ class ExpressionNodeFactoryTest extends NodeFactoryTestBase {
                 assertThat(node.inspect()).isEqualTo(" : /1/");
             }
         }
+
+        @Nested
+        class _Object {
+
+            @Test
+            void equal_to_object() {
+                Node node = givenCode("= {}").fetchNode();
+
+                assertThat(node.inspect()).isEqualTo(" = {}");
+            }
+
+            @Test
+            void matches_with_object() {
+                Node node = givenCode(": {}").fetchNode();
+
+                assertThat(node.inspect()).isEqualTo(" : {}");
+            }
+        }
     }
 }
