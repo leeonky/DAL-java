@@ -32,7 +32,9 @@ class DALTokenFactorTest {
     @Test
     void could_parse_all_dal_tokens() {
         TokenStream tokenStream = parseToken("[0] .id 100 'str1'\"str2\" : /abc/ ( ) which").getTokenStream();
-        assertThat(tokenStream.pop()).isEqualTo(Token.propertyToken(0));
+        assertThat(tokenStream.pop()).isEqualTo(Token.openingBracketToken());
+        assertThat(tokenStream.pop()).isEqualTo(Token.constValueToken(new BigDecimal(0)));
+        assertThat(tokenStream.pop()).isEqualTo(Token.closingBracketToken());
         assertThat(tokenStream.pop()).isEqualTo(Token.propertyToken("id"));
         assertThat(tokenStream.pop()).isEqualTo(Token.constValueToken(BigDecimal.valueOf(100)));
         assertThat(tokenStream.pop()).isEqualTo(Token.constValueToken("str1"));

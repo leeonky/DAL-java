@@ -55,6 +55,16 @@ class SingleNodeFactoryTest {
         }
 
         @Test
+        void matches_bracket_property_and_return_node() {
+            Node node = givenCode("[0]").fetchNode();
+
+            assertThat(node)
+                    .isInstanceOf(PropertyNode.class)
+                    .hasFieldOrPropertyWithValue("name", 0);
+            assertThat(node.inspect()).isEqualTo("[0]");
+        }
+
+        @Test
         void return_null_when_dost_not_match() {
             assertThat(fetchNodeWhenGivenToken(operatorToken("+")))
                     .isNull();

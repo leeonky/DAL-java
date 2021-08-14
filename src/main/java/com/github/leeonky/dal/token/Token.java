@@ -169,6 +169,8 @@ public class Token {
     }
 
     public Object getPropertyOrIndex() {
+        if (type != Type.CONST_VALUE)
+            throw new SyntaxException(getPositionBegin(), "should given one property or array index in `[]`");
         if (value instanceof BigDecimal) {
             try {
                 return Integer.valueOf(value.toString());

@@ -142,7 +142,8 @@ public interface TokenFactory {
 
     static TokenFactory createDALTokenFactory() {
         return startWith(BEGIN_OF_CODE)
-                .take(byFactory(createBracketPropertyTokenFactory())
+                .take(byFactory(createOpeningBracketTokenFactory())
+                        .or(createClosingBracketTokenFactory())
                         .or(createBeanPropertyTokenFactory())
                         .or(createNumberTokenFactory())
                         .or(createSingleQuotedStringTokenFactory())

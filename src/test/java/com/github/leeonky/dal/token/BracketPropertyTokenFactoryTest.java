@@ -113,6 +113,13 @@ class BracketPropertyTokenFactoryTest extends TokenFactoryTestBase {
 
         @Test
         void do_not_allow_get_value_when_no_value() {
+            assertThat(invalidSyntaxCode("["))
+                    .hasMessage("should end with `]`")
+                    .hasFieldOrPropertyWithValue("position", 1);
+        }
+
+        @Test
+        void do_not_allow_get_value_when_not_finished() {
             assertThat(invalidSyntaxCode("[1"))
                     .hasMessage("should end with `]`")
                     .hasFieldOrPropertyWithValue("position", 2);

@@ -31,6 +31,14 @@ public interface NodeFactory {
     }
 
     static NodeFactory createPropertyNodeFactory() {
+        return new PropertyNodeFactory();
+    }
+
+    static NodeFactory createBracketPropertyNodeFactory() {
+        return new BracketPropertyNodeFactory();
+    }
+
+    static NodeFactory createBeanPropertyNodeFactory() {
         return new SingleTokenNodeFactory(Token.Type.PROPERTY) {
             @Override
             protected Node createNode(NodeParser nodeParser, Object value) {
