@@ -13,10 +13,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class RuntimeContext {
+    //TODO private
+    public final LinkedList<Object> wrappedValueStack = new LinkedList<>();
     private final LinkedList<SchemaType> schemaTypesStack = new LinkedList<>();
     private final TypeData<PropertyAccessor> propertyAccessors;
     private final TypeData<ListAccessor> listAccessors;
-    private final LinkedList<Object> wrappedValueStack = new LinkedList<>();
     private final Map<String, ConstructorViaSchema> constructors;
     private final Set<Class<?>> schemas;
     private final Map<String, BeanClass<?>> schemaMap;

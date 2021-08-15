@@ -22,14 +22,14 @@ class ObjectNodeTest {
 
         @Test
         void empty_data_equal_to_empty_object() {
-            assertThat(objectNode.judge(OPERATOR, new HashMap<>(), runtimeContext)).isTrue();
+            assertThat(objectNode.judge(new ConstNode(new HashMap<>()), OPERATOR, runtimeContext)).isTrue();
         }
 
         @Test
         void not_equal_when_has_unexpected_field() {
-            assertThat(objectNode.judge(OPERATOR, new HashMap<String, Object>() {{
+            assertThat(objectNode.judge(new ConstNode(new HashMap<String, Object>() {{
                 put("unexpected", "field");
-            }}, runtimeContext)).isFalse();
+            }}), OPERATOR, runtimeContext)).isFalse();
         }
     }
 
@@ -40,14 +40,14 @@ class ObjectNodeTest {
 
         @Test
         void any_data_matches_empty_object() {
-            assertThat(objectNode.judge(MATCHER, new HashMap<String, Object>() {{
+            assertThat(objectNode.judge(new ConstNode(new HashMap<String, Object>() {{
                 put("any fields", "any value");
-            }}, runtimeContext)).isTrue();
+            }}), MATCHER, runtimeContext)).isTrue();
         }
 
         @Test
         void null_does_not_match_empty_object() {
-            assertThat(objectNode.judge(MATCHER, null, runtimeContext)).isFalse();
+            assertThat(objectNode.judge(new ConstNode(null), MATCHER, runtimeContext)).isFalse();
         }
     }
 }

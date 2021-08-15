@@ -15,19 +15,20 @@ public abstract class Node {
         throw new IllegalStateException();
     }
 
-    public boolean judge(Operator.Equal operator, Object input, RuntimeContext context) {
-        return Calculator.equals(input, evaluate(context));
+    public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
+        return Calculator.equals(actualNode.evaluate(context), evaluate(context));
     }
 
-    public boolean judge(Operator.Matcher operator, Object input, RuntimeContext context) {
-        Object value = evaluate(context);
-        if (value == null)
-            return Objects.equals(input, null);
-        shouldBeSameTypeIfTypeIs(Number.class, input, value, operator);
-        shouldBeSameTypeIfTypeIs(Boolean.class, input, value, operator);
-        invalidTypeToMatchStringValue(Number.class, input, value, operator);
-        invalidTypeToMatchStringValue(Boolean.class, input, value, operator);
-        return Calculator.equals(context.getConverter().convert(value.getClass(), input), value);
+    public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
+        Object expect = evaluate(context);
+        Object actual = actualNode.evaluate(context);
+        if (expect == null)
+            return Objects.equals(actual, null);
+        shouldBeSameTypeIfTypeIs(Number.class, actual, expect, operator);
+        shouldBeSameTypeIfTypeIs(Boolean.class, actual, expect, operator);
+        invalidTypeToMatchStringValue(Number.class, actual, expect, operator);
+        invalidTypeToMatchStringValue(Boolean.class, actual, expect, operator);
+        return Calculator.equals(context.getConverter().convert(expect.getClass(), actual), expect);
     }
 
     public int getPositionBegin() {

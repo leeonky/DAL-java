@@ -24,15 +24,16 @@ public class RegexNode extends Node {
     }
 
     @Override
-    public boolean judge(Operator.Equal operator, Object input, RuntimeContext context) {
-        if (input instanceof String)
-            return matches((String) input);
+    public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
+        Object actual = actualNode.evaluate(context);
+        if (actual instanceof String)
+            return matches((String) actual);
         throw new RuntimeException("Operator eq before regex need a string input value", operator.getPosition());
     }
 
     @Override
-    public boolean judge(Operator.Matcher operator, Object input, RuntimeContext context) {
-        return matches(context.getConverter().convert(String.class, input));
+    public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
+        return matches(context.getConverter().convert(String.class, actualNode.evaluate(context)));
     }
 
     @Override

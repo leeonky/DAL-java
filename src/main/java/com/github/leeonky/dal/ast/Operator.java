@@ -57,7 +57,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            return node2.judge(this, node1.evaluate(context), context);
+            return node2.judge(node1, this, context);
         }
     }
 
@@ -228,7 +228,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            return node2.judge(this, node1.evaluate(context), context);
+            return node2.judge(node1, this, context);
         }
     }
 

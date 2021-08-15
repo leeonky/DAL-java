@@ -43,10 +43,6 @@ class VerifyObject extends Base {
                 put("key2", '2');
             }}, "= {key1: '1' key2: 'not match'}");
         }
-
-        //TODO property chain
-        //TODO process getClass property for java bean and size property of list
-        //TODO property is alias
     }
 
     @Nested
@@ -82,10 +78,42 @@ class VerifyObject extends Base {
                 put("key3", '3');
             }}, ": {key2: 'not match'}");
         }
-
-        //TODO property
-        //TODO property chain
-        //TODO process getClass property for java bean and size property of list
-        //TODO property is alias
     }
+
+    @Nested
+    class NestedObject {
+
+        @Test
+        void support_match_nested_object() {
+            assertPass(new HashMap<String, Object>() {{
+                put("key1", 1);
+                put("key2", new HashMap<String, Object>() {{
+                    put("skey1", 3);
+                    put("skey2", 4);
+                }});
+            }}, "= {key1: 1 key2= {skey1: 3 skey2: 4}}");
+
+
+            assertFailed(new HashMap<String, Object>() {{
+                put("key1", 1);
+                put("key2", new HashMap<String, Object>() {{
+                    put("skey1", 3);
+                    put("skey2", 4);
+                }});
+            }}, "= {key2= {skey1: 3 skey2: 4}}");
+
+            assertFailed(new HashMap<String, Object>() {{
+                put("key1", 1);
+                put("key2", new HashMap<String, Object>() {{
+                    put("skey1", 3);
+                    put("skey2", 4);
+                }});
+            }}, "= {key1: 1 key2= {skey1: 3 skey2: 10000}}");
+        }
+    }
+
+    //TODO property chain
+    //TODO process getClass property for java bean and size property of list
+    //TODO property is alias
+    //TODO sub alias
 }
