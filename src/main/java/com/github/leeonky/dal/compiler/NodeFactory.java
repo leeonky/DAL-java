@@ -6,6 +6,7 @@ import com.github.leeonky.dal.ast.PropertyNode;
 import com.github.leeonky.dal.ast.RegexNode;
 import com.github.leeonky.dal.token.Token;
 
+import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.IDENTIFIER;
 
 public interface NodeFactory {
@@ -53,7 +54,11 @@ public interface NodeFactory {
         return new SingleTokenNodeFactory(Token.Type.WORD) {
             @Override
             protected Node createNode(NodeParser nodeParser, Object value) {
-                return new PropertyNode(nodeParser.getThisNode(), value, IDENTIFIER);
+                String[] names = ((String) value).split("\\.");
+                Node node = new PropertyNode(nodeParser.getThisNode(), names[0], IDENTIFIER);
+                for (int i = 1; i < names.length; i++)
+                    node = new PropertyNode(node, names[i], DOT);
+                return node;
             }
         };
     }

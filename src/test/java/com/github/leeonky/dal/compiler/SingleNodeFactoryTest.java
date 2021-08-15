@@ -79,6 +79,16 @@ class SingleNodeFactoryTest {
                     .hasFieldOrPropertyWithValue("name", "name");
             assertThat(node.inspect()).isEqualTo("name");
         }
+
+        @Test
+        void support_ignore_start_dot_char_for_property_chain() {
+            Node node = givenCode("product.name").fetchNode();
+
+            assertThat(node)
+                    .isInstanceOf(PropertyNode.class)
+                    .hasFieldOrPropertyWithValue("name", "name");
+            assertThat(node.inspect()).isEqualTo("product.name");
+        }
     }
 
     @Nested
