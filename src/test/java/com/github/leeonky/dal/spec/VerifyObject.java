@@ -110,8 +110,35 @@ class VerifyObject extends Base {
                 }});
             }}, "= {key1: 1 key2= {skey1: 3 skey2: 10000}}");
         }
+
+        @Test
+        void support_property_chain() {
+            assertPass(new HashMap<String, Object>() {{
+                put("key1", new HashMap<String, Object>() {{
+                    put("s1", 3);
+                    put("s2", 4);
+                }});
+                put("key2", 2);
+            }}, "= {key1.s1: 3 key1.s2: 4 key2: 2}");
+
+            assertFailed(new HashMap<String, Object>() {{
+                put("key1", new HashMap<String, Object>() {{
+                    put("s1", 3);
+                }});
+                put("key2", 2);
+            }}, "= {key1.s1: 3}");
+
+            assertFailed(new HashMap<String, Object>() {{
+                put("key1", new HashMap<String, Object>() {{
+                    put("s1", 3);
+                }});
+                put("key2", 2);
+            }}, "= {key1.s1: 2 key2: 2}");
+        }
     }
 
+    //TODO property
+    //TODO nested object
     //TODO property chain
     //TODO process getClass property for java bean and size property of list
     //TODO property is alias

@@ -25,7 +25,7 @@ public class ObjectNode extends Node {
         Set<String> dataFields = new LinkedHashSet<>(data.getPropertyReaderNames());
         //TODO property chain
         //TODO property alias
-        dataFields.removeAll(expressions.stream().map(expression -> expression.getPropertyNode1().getName()).collect(Collectors.toSet()));
+        dataFields.removeAll(expressions.stream().map(expression -> expression.getPropertyNode1().getRootName()).collect(Collectors.toSet()));
         if (!dataFields.isEmpty()) {
             System.err.printf("Warning: unexpected fields: %s\n", dataFields);
             return false;

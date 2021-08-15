@@ -49,7 +49,9 @@ public class PropertyNode extends Node {
     }
 
     //TODO to be removed
-    public Object getName() {
+    public Object getRootName() {
+        if (instanceNode instanceof PropertyNode)
+            return ((PropertyNode) instanceNode).getRootName();
         return name;
     }
 
