@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.cucumber.JSONArrayListAccessor;
-import com.github.leeonky.dal.cucumber.JsonPropertyAccessor;
+import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Partial;
@@ -164,7 +164,7 @@ class VerifySchema extends Base {
         @BeforeEach
         void registerJson() {
             dataAssert.getRuntimeContextBuilder()
-                    .registerPropertyAccessor(JSONObject.class, new JsonPropertyAccessor())
+                    .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
                     .registerListAccessor(JSONArray.class, new JSONArrayListAccessor())
                     .registerSchema(RightFieldAndType.class)
                     .registerSchema(AllowNullField.class)
@@ -345,7 +345,7 @@ class VerifySchema extends Base {
         @BeforeEach
         void registerJson() {
             dataAssert.getRuntimeContextBuilder()
-                    .registerPropertyAccessor(JSONObject.class, new JsonPropertyAccessor())
+                    .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
                     .registerListAccessor(JSONArray.class, new JSONArrayListAccessor())
                     .registerSchema(FieldValue.class)
                     .registerSchema(SchemaWithInstance.class)

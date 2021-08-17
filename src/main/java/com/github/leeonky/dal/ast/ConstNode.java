@@ -12,6 +12,14 @@ public class ConstNode extends Node {
         this.value = value;
     }
 
+    public static String inspectValue(Object value) {
+        if (value == null)
+            return "null";
+        if (value instanceof String)
+            return String.format("'%s'", value);
+        return value.toString();
+    }
+
     @Override
     public Object evaluate(RuntimeContext context) {
         return value;
@@ -24,10 +32,6 @@ public class ConstNode extends Node {
 
     @Override
     public String inspect() {
-        if (value == null)
-            return "null";
-        if (value instanceof String)
-            return String.format("'%s'", value);
-        return value.toString();
+        return inspectValue(value);
     }
 }

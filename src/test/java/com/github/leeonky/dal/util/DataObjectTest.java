@@ -2,7 +2,7 @@ package com.github.leeonky.dal.util;
 
 import com.github.leeonky.dal.RuntimeContextBuilder;
 import com.github.leeonky.dal.cucumber.JSONArrayListAccessor;
-import com.github.leeonky.dal.cucumber.JsonPropertyAccessor;
+import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -59,7 +59,7 @@ class DataObjectTest {
     @Nested
     class GetPropertyOrIndexValue {
         RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder()
-                .registerPropertyAccessor(JSONObject.class, new JsonPropertyAccessor())
+                .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
                 .registerListAccessor(JSONArray.class, new JSONArrayListAccessor());
 
         @Test

@@ -50,7 +50,9 @@ class ObjectNodeTest {
 
         @Test
         void null_does_not_match_empty_object() {
-            assertThat(objectNode.judge(new ConstNode(null), MATCHER, runtimeContext)).isFalse();
+            assertThrows(AssertionFailure.class, () ->
+                    objectNode.judge(new ConstNode(null), MATCHER, runtimeContext)
+            );
         }
     }
 

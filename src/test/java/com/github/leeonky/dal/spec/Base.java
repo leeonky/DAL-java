@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.spec;
 
+import com.github.leeonky.dal.AssertResult;
+import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.DataAssert;
 
 import java.io.ByteArrayOutputStream;
@@ -16,7 +18,17 @@ public class Base {
     }
 
     protected void assertFailed(Object input, String expression) {
-        assertFalse(dataAssert.assertData(input, expression).isPassed());
+        AssertResult assertResult = null;
+        AssertionFailure assertionFailure = null;
+        try {
+            assertResult = dataAssert.assertData(input, expression);
+        } catch (AssertionFailure failure) {
+            assertionFailure = failure;
+        }
+        if (assertResult != null)
+            assertFalse(assertResult.isPassed());
+        else
+            assertThat(assertionFailure).isNotNull();
     }
 
     protected void assertRuntimeException(Object input, String sourceCode, int position, String message) {

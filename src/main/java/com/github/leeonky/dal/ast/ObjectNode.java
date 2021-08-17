@@ -34,24 +34,24 @@ public class ObjectNode extends Node {
             String unexpectedFields = dataFields.stream().map(s -> format("`%s`", s)).collect(joining(", "));
             throw new AssertionFailure("unexpected fields " + unexpectedFields, operator.getPosition());
         }
-        return judgeAll(actual, context);
+        return judgeAll(actual, context, actualNode);
     }
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
-        return judgeAll(actualNode.evaluate(context), context);
+        return judgeAll(actualNode.evaluate(context), context, actualNode);
     }
 
-    private boolean judgeAll(Object input, RuntimeContext context) {
-        if (input != null)
-            try {
-                //TODO process sub schema
-                context.wrappedValueStack.push(input);
-                return expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context));
-            } finally {
-                context.wrappedValueStack.pop();
-            }
-        return false;
+    private boolean judgeAll(Object input, RuntimeContext context, Node actualNode) {
+        if (input == null)
+            throw new AssertionFailure("[null] does not match non-null object", actualNode.getPositionBegin());
+        try {
+            //TODO process sub schema
+            context.wrappedValueStack.push(input);
+            return expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context));
+        } finally {
+            context.wrappedValueStack.pop();
+        }
     }
 
     public void addJudgements(Expression expression) {
