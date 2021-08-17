@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeContextBuilder;
 import com.github.leeonky.dal.ast.Operator.Equal;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ObjectNodeTest {
 
@@ -27,9 +29,10 @@ class ObjectNodeTest {
 
         @Test
         void not_equal_when_has_unexpected_field() {
-            assertThat(objectNode.judge(new ConstNode(new HashMap<String, Object>() {{
-                put("unexpected", "field");
-            }}), EQUAL, runtimeContext)).isFalse();
+            assertThrows(AssertionFailure.class, () ->
+                    objectNode.judge(new ConstNode(new HashMap<String, Object>() {{
+                        put("unexpected", "field");
+                    }}), EQUAL, runtimeContext));
         }
     }
 

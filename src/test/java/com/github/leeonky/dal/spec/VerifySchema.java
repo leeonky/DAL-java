@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.spec;
 
+import com.github.leeonky.dal.cucumber.JSONArrayListAccessor;
+import com.github.leeonky.dal.cucumber.JsonPropertyAccessor;
 import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Partial;

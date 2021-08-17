@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.util;
 
 import com.github.leeonky.dal.RuntimeContextBuilder;
-import com.github.leeonky.dal.spec.JSONArrayListAccessor;
-import com.github.leeonky.dal.spec.JsonPropertyAccessor;
+import com.github.leeonky.dal.cucumber.JSONArrayListAccessor;
+import com.github.leeonky.dal.cucumber.JsonPropertyAccessor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;

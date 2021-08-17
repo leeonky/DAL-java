@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.spec;
+package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.util.PropertyAccessor;
 import org.json.JSONException;

@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.util.DataObject;
 
@@ -9,13 +10,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+
 public class ObjectNode extends Node {
 
     private final List<Expression> expressions = new ArrayList<>();
 
     @Override
     public String inspect() {
-        return String.format("{%s}", expressions.stream().map(Expression::inspect).collect(Collectors.joining(" ")));
+        return format("{%s}", expressions.stream().map(Expression::inspect).collect(joining(" ")));
     }
 
     @Override
@@ -27,8 +31,8 @@ public class ObjectNode extends Node {
         //TODO property alias
         dataFields.removeAll(expressions.stream().map(expression -> expression.getPropertyNode1().getRootName()).collect(Collectors.toSet()));
         if (!dataFields.isEmpty()) {
-            System.err.printf("Warning: unexpected fields: %s\n", dataFields);
-            return false;
+            String unexpectedFields = dataFields.stream().map(s -> format("`%s`", s)).collect(joining(", "));
+            throw new AssertionFailure("unexpected fields " + unexpectedFields, operator.getPosition());
         }
         return judgeAll(actual, context);
     }
