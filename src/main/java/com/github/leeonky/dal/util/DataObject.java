@@ -5,6 +5,7 @@ import com.github.leeonky.util.BeanClass;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static java.util.Arrays.asList;
@@ -108,6 +109,12 @@ public class DataObject {
         if (isList()) {
             if ("size".equals(property))
                 return getListSize();
+            if (property instanceof String) {
+                return StreamSupport.stream(getList().spliterator(), false)
+                        .map(runtimeContext::wrap)
+                        .map(e -> e.getValue(property))
+                        .collect(Collectors.toList());
+            }
             return getElement((int) property);
         }
         return getPropertyValue((String) property);

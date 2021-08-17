@@ -6,6 +6,8 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 import static java.util.Arrays.asList;
 
@@ -59,4 +61,22 @@ class VerifyList extends Base {
 
         assertPass(new JSONArray("[2]"), "is List which .size = 1 and [0] = 2");
     }
+
+    @Test
+    void support_mapping_list_element_property_to_new_list() {
+        assertPass(Arrays.asList(new HashMap<String, Object>() {{
+            put("value", 1);
+        }}, new HashMap<String, Object>() {{
+            put("value", 2);
+        }}), ".value = [1 2]");
+
+        assertFailed(Arrays.asList(new HashMap<String, Object>() {{
+            put("value", 1);
+        }}, new HashMap<String, Object>() {{
+            put("value", 2);
+        }}), ".value = [1 3]");
+    }
+
+    //TODO lines .@size .@[0]
+    //TODO mapping element sub schema processing
 }
