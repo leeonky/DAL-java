@@ -15,6 +15,7 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
     private final OperatorExpressionFactory operatorExpressionFactory = new OperatorExpressionFactory();
     private final SchemaExpressionFactory schemaExpressionFactory = new SchemaExpressionFactory();
     private final NodeFactory rightOperandNodeFactory = NodeFactory.createRightOperandNodeFactory();
+    private final NodeFactory singleEvaluableNodeFactory = NodeFactory.createSingleEvaluableNodeFactory();
     private final NodeFactory expressionNodeFactory = NodeFactory.createExpressionNodeFactory();
 
     @Override
@@ -43,7 +44,10 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
                 Token operatorToken = nodeParser.tokenStream.pop();
                 if (nodeParser.tokenStream.hasTokens())
                     return new Expression(first, operatorToken.toOperator(false),
-                            rightOperandNodeFactory.fetchNode(nodeParser)).adjustOperatorOrder();
+                            //TODO need UT
+                            operatorToken.judgement() ?
+                                    rightOperandNodeFactory.fetchNode(nodeParser) :
+                                    singleEvaluableNodeFactory.fetchNode(nodeParser)).adjustOperatorOrder();
                 throw new SyntaxException(nodeParser.tokenStream.getPosition(), "expression is not finished");
             }
             return null;

@@ -84,6 +84,10 @@ public interface NodeFactory {
         return new ExplicitPropertyNodeFactory();
     }
 
+    static NodeFactory createListNodeFactory() {
+        return new ListNodeFactory();
+    }
+
     Node fetchNode(NodeParser nodeParser);
 }
 

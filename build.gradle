@@ -47,7 +47,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.leeonky:bean-util:0.2.3'
+    implementation 'com.github.leeonky:bean-util:0.2.4'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.3.1")
     testImplementation 'org.assertj:assertj-core:3.10.0'
