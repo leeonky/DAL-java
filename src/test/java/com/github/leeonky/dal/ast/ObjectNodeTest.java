@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ObjectNodeTest {
 
-    public static final Equal OPERATOR = new Equal();
+    public static final Equal EQUAL = new Equal();
     public static final Operator.Matcher MATCHER = new Operator.Matcher();
 
     @Nested
@@ -22,14 +22,14 @@ class ObjectNodeTest {
 
         @Test
         void empty_data_equal_to_empty_object() {
-            assertThat(objectNode.judge(new ConstNode(new HashMap<>()), OPERATOR, runtimeContext)).isTrue();
+            assertThat(objectNode.judge(new ConstNode(new HashMap<>()), EQUAL, runtimeContext)).isTrue();
         }
 
         @Test
         void not_equal_when_has_unexpected_field() {
             assertThat(objectNode.judge(new ConstNode(new HashMap<String, Object>() {{
                 put("unexpected", "field");
-            }}), OPERATOR, runtimeContext)).isFalse();
+            }}), EQUAL, runtimeContext)).isFalse();
         }
     }
 
@@ -50,4 +50,6 @@ class ObjectNodeTest {
             assertThat(objectNode.judge(new ConstNode(null), MATCHER, runtimeContext)).isFalse();
         }
     }
+
+    //TODO missing judge UT
 }

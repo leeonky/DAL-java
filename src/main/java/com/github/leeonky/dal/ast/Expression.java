@@ -21,6 +21,10 @@ public class Expression extends Node {
         return (PropertyNode) node1;
     }
 
+    public Node getRightOperand() {
+        return node2;
+    }
+
     public Expression adjustOperatorOrder() {
         if (node1 instanceof Expression) {
             Expression expression1 = (Expression) node1;

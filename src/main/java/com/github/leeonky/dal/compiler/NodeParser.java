@@ -2,14 +2,18 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenStream;
 
+import java.util.LinkedList;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.token.Token.Type.CLOSING_PARENTHESIS;
 import static com.github.leeonky.dal.token.Token.Type.OPENING_PARENTHESIS;
 
 public class NodeParser {
+    //TODO to be private
+    public final LinkedList<Token> operators = new LinkedList<>();
     //TODO to be private
     final TokenStream tokenStream;
     private int parenthesisCount = 0;

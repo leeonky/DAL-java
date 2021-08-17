@@ -8,6 +8,7 @@ public class RightOperandNodeFactory implements NodeFactory {
     private final NodeFactory listNodeFactory = NodeFactory.createListNodeFactory();
     private final NodeFactory singleEvaluableNodeFactory = NodeFactory.createSingleEvaluableNodeFactory();
 
+    //TODO should fetch with previous operator ?
     @Override
     public Node fetchNode(NodeParser nodeParser) {
         Node node = regexNodeFactory.fetchNode(nodeParser);

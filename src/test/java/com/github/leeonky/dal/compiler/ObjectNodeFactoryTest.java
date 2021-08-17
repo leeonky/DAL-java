@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static com.github.leeonky.dal.token.Token.operatorToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ObjectNodeTest extends NodeFactoryTestBase {
+class ObjectNodeFactoryTest extends NodeFactoryTestBase {
 
     @Override
     protected NodeFactory getDefaultNodeFactory() {
@@ -50,4 +50,5 @@ class ObjectNodeTest extends NodeFactoryTestBase {
         assertThat(node).isInstanceOf(ObjectNode.class);
         assertThat(node.inspect()).isEqualTo("{a : 1 b : 2}");
     }
+    //TODO support comma
 }

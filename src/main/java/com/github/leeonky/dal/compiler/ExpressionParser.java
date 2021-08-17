@@ -42,13 +42,18 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
         public Node apply(NodeParser nodeParser, Node first) {
             if (nodeParser.tokenStream.currentType() == Token.Type.OPERATOR) {
                 Token operatorToken = nodeParser.tokenStream.pop();
-                if (nodeParser.tokenStream.hasTokens())
-                    return new Expression(first, operatorToken.toOperator(false),
-                            //TODO need UT
-                            operatorToken.judgement() ?
-                                    rightOperandNodeFactory.fetchNode(nodeParser) :
-                                    singleEvaluableNodeFactory.fetchNode(nodeParser)).adjustOperatorOrder();
-                throw new SyntaxException(nodeParser.tokenStream.getPosition(), "expression is not finished");
+                nodeParser.operators.push(operatorToken);
+                try {
+                    if (nodeParser.tokenStream.hasTokens())
+                        return new Expression(first, operatorToken.toOperator(false),
+                                //TODO need UT
+                                operatorToken.judgement() ?
+                                        rightOperandNodeFactory.fetchNode(nodeParser) :
+                                        singleEvaluableNodeFactory.fetchNode(nodeParser)).adjustOperatorOrder();
+                    throw new SyntaxException(nodeParser.tokenStream.getPosition(), "expression is not finished");
+                } finally {
+                    nodeParser.operators.pop();
+                }
             }
             return null;
         }
