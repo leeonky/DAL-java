@@ -50,16 +50,21 @@ public interface NodeFactory {
         };
     }
 
+    //TODO position
+    //TODO refactor
     static NodeFactory createWordPropertyNodeFactory() {
-        return new SingleTokenNodeFactory(Token.Type.WORD) {
-            @Override
-            protected Node createNode(NodeParser nodeParser, Object value) {
-                String[] names = ((String) value).split("\\.");
-                Node node = new PropertyNode(nodeParser.getThisNode(), names[0], IDENTIFIER);
+        return nodeParser -> {
+            if (nodeParser.tokenStream.currentType() == Token.Type.WORD) {
+                Token token = nodeParser.tokenStream.pop();
+                String[] names = ((String) token.getValue()).split("\\.");
+                Node node = new PropertyNode(nodeParser.getThisNode(), names[0], IDENTIFIER)
+                        .setPositionBegin(token.getPositionBegin());
                 for (int i = 1; i < names.length; i++)
-                    node = new PropertyNode(node, names[i], DOT);
+                    node = new PropertyNode(node, names[i], DOT)
+                            .setPositionBegin(node.getPositionBegin() + names[i - 1].length() + 1);
                 return node;
             }
+            return null;
         };
     }
 
