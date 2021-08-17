@@ -11,7 +11,7 @@ public class ParenthesesNodeFactory implements NodeFactory {
     @Override
     public Node fetchNode(NodeParser nodeParser) {
         return nodeParser.compileNodeInParentheses(() ->
-                new ParenthesesNode(expressionNodeFactory.fetchNode(nodeParser)).setPositionBegin(10));//TODO hardcode !!!
+                new ParenthesesNode(expressionNodeFactory.fetchNode(nodeParser)));
     }
 
 }

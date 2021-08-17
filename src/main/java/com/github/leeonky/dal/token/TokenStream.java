@@ -104,14 +104,14 @@ public class TokenStream {
 
     public Node parseBetween(Token.Type opening, Token.Type closing, char closingChar, Supplier<Node> supplier) {
         if (currentType() == opening) {
-            pop();
+            Token openingToken = pop();
             Node node = supplier.get();
             if (!hasTokens())
                 throw new SyntaxException(getPosition(), format("missed `%c`", closingChar));
             if (currentType() != closing)
                 throw new SyntaxException(getPosition(), format("unexpected token, `%c` expected", closingChar));
             pop();
-            return node;
+            return node.setPositionBegin(openingToken.getPositionBegin());
         }
         return null;
     }
