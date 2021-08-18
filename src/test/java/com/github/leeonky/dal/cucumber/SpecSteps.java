@@ -8,7 +8,7 @@ import io.cucumber.java.en.When;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public class Steps {
+public class SpecSteps {
     protected static DataAssert dataAssert = new DataAssert();
 
     static {
@@ -17,11 +17,11 @@ public class Steps {
                 .registerListAccessor(JSONArray.class, new JSONArrayListAccessor());
     }
 
-    private TestContext context;
+    private SpecContext context;
 
     @Before
     public void clearEnv() {
-        context = new TestContext();
+        context = new SpecContext();
     }
 
     @Given("the following input data:")
