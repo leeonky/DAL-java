@@ -4,35 +4,53 @@ import com.github.leeonky.dal.token.TokenFactory;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TestSteps {
 
-    TestContext testContext = new TestContext();
+    private Map<String, TokenFactory> factoryMap = new HashMap<String, TokenFactory>() {{
+        put("number", TokenFactory.createNumberTokenFactory());
+        put("regex", TokenFactory.createRegexTokenFactory());
+        put("identifier", TokenFactory.createIdentifierTokenFactory());
+        put("operator", TokenFactory.createOperatorTokenFactory());
+    }};
 
     @Given("the follow dal code:")
     public void the_follow_dal_code(String dalSourceCode) {
-        testContext.givenDalSourceCode(parseTabAndSpace(dalSourceCode));
-    }
-
-    @Then("got the following number token:")
-    public void got_the_following_number_token(String assertion) {
-        testContext.parseToken(TokenFactory.createNumberTokenFactory());
-        testContext.assertToken(assertion);
-    }
-
-    @Then("got the following identifier token:")
-    public void got_the_following_identifier_token(String assertion) {
-        testContext.parseToken(TokenFactory.createIdentifierTokenFactory());
-        testContext.assertToken(assertion);
+        TestContext.INSTANCE.givenDalSourceCode(parseTabAndSpace(dalSourceCode));
     }
 
     @Then("current offset char of source code is {string}")
     public void current_offset_char_of_source_code_is(String character) {
-        assertThat(testContext.getSourceCode().startsWith(parseTabAndSpace(character))).isTrue();
+        assertThat(TestContext.INSTANCE.getSourceCode().startsWith(parseTabAndSpace(character))).isTrue();
     }
 
     private String parseTabAndSpace(String code) {
         return code.replace("`TAB", "\t").replace("`SPACE", " ");
+    }
+
+    @Then("got the following {string} token:")
+    public void got_the_following_token(String factory, String assertion) {
+        parseTokenAs(factory);
+        TestContext.INSTANCE.assertToken(assertion);
+    }
+
+    @Given("take an {string} token")
+    public void parseTokenAs(String factory) {
+        TestContext.INSTANCE.parseToken(factoryMap.get(factory));
+    }
+
+    @Given("the follow dal code after operator {string}:")
+    public void the_follow_dal_code_after_operator(String operator, String dalSourceCode) {
+        TestContext.INSTANCE.givenDalSourceCode(operator + dalSourceCode);
+        parseTokenAs("operator");
+    }
+
+    @Then("failed to take {string} token with the following message:")
+    public void failed_to_take_token_with_the_following_message(String factory, String message) {
+        TestContext.INSTANCE.failedParseToken(factoryMap.get(factory), message);
     }
 }

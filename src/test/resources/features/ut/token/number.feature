@@ -5,7 +5,7 @@ Feature: number token
     """
     not starts with digital
     """
-    Then got the following number token:
+    Then got the following "number" token:
     """
     : null
     """
@@ -15,11 +15,11 @@ Feature: number token
     """
     12Invalid
     """
-    Then got the following number token:
+    Then got the following "number" token:
     """
     : null
     """
-    Then got the following identifier token:
+    Then got the following "identifier" token:
     """
     : {
       type: 'IDENTIFIER'
@@ -32,7 +32,7 @@ Feature: number token
     """
     <number>=1
     """
-    Then got the following number token:
+    Then got the following "number" token:
     """
     : {
       type: 'CONST_VALUE'
@@ -50,7 +50,7 @@ Feature: number token
     """
     100
     """
-    Then got the following number token:
+    Then got the following "number" token:
     """
     : {
       type: 'CONST_VALUE'
@@ -63,7 +63,7 @@ Feature: number token
     """
     100<delimiter>
     """
-    When got the following number token:
+    When got the following "number" token:
     """
     : {
       type: 'CONST_VALUE'
