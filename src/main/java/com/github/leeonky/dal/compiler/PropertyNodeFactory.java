@@ -3,7 +3,7 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.ast.Node;
 
 class PropertyNodeFactory implements NodeFactory {
-    private static final NodeFactory wordPropertyNodeFactory = NodeFactory.createWordPropertyNodeFactory();
+    private static final NodeFactory identifierPropertyNodeFactory = NodeFactory.createIdentifierPropertyNodeFactory();
     private static final NodeFactory explicitPropertyNodeFactory = NodeFactory.createExplicitPropertyNodeFactory();
 
     @Override
@@ -11,7 +11,7 @@ class PropertyNodeFactory implements NodeFactory {
         //TODO support property chain
         Node node = explicitPropertyNodeFactory.fetchNode(nodeParser);
         if (node == null)
-            node = wordPropertyNodeFactory.fetchNode(nodeParser);
+            node = identifierPropertyNodeFactory.fetchNode(nodeParser);
         return node;
     }
 }

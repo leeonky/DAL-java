@@ -41,7 +41,7 @@ public interface TokenFactory {
             throw new IllegalTokenContentException("should given one property or array index in `[]`");
         return Token.propertyToken(tokenStream.pop().getPropertyOrIndex());
     };
-    Function<String, Token> WORD_TOKEN = content -> {
+    Function<String, Token> IDENTIFIER_TOKEN = content -> {
         if (NULL.equals(content))
             return constValueToken(null);
         if (TRUE.equals(content))
@@ -54,7 +54,7 @@ public interface TokenFactory {
             return operatorToken(OR);
         if (Constants.KEYWORD_SETS.contains(content))
             return keyWordToken(content);
-        return wordToken(content);
+        return identifierToken(content);
     };
     Function<TokenStream, Token> TOKEN_TREE = Token::treeToken;
 
@@ -123,12 +123,11 @@ public interface TokenFactory {
                 .createAs(BRACKET_PROPERTY_TOKEN);
     }
 
-    //TODO word => identifier
-    static TokenFactory createWordTokenFactory() {
+    static TokenFactory createIdentifierTokenFactory() {
         return startWith(included(ANY_CHARACTERS))
                 .take(ALL_CHARACTERS)
                 .endWith(END_OF_CODE.or(before(DELIMITER)))
-                .createAs(WORD_TOKEN);
+                .createAs(IDENTIFIER_TOKEN);
     }
 
     static Optional<Number> getNumber(String content) {
@@ -157,7 +156,7 @@ public interface TokenFactory {
                         .or(createClosingBraceTokenFactory())
                         .or(createOpeningBracketTokenFactory())
                         .or(createClosingBracketTokenFactory())
-                        .or(createWordTokenFactory()))
+                        .or(createIdentifierTokenFactory()))
                 .endWith(END_OF_CODE)
                 .createAs(TOKEN_TREE);
     }

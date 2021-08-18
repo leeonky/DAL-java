@@ -52,9 +52,9 @@ public interface NodeFactory {
 
     //TODO position
     //TODO refactor
-    static NodeFactory createWordPropertyNodeFactory() {
+    static NodeFactory createIdentifierPropertyNodeFactory() {
         return nodeParser -> {
-            if (nodeParser.tokenStream.currentType() == Token.Type.WORD) {
+            if (nodeParser.tokenStream.currentType() == Token.Type.IDENTIFIER) {
                 Token token = nodeParser.tokenStream.pop();
                 String[] names = ((String) token.getValue()).split("\\.");
                 Node node = new PropertyNode(nodeParser.getThisNode(), names[0], IDENTIFIER)

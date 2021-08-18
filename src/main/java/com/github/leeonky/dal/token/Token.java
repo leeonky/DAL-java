@@ -17,8 +17,8 @@ public class Token {
         this.value = value;
     }
 
-    public static Token wordToken(Object value) {
-        return new Token(Type.WORD, value);
+    public static Token identifierToken(Object value) {
+        return new Token(Type.IDENTIFIER, value);
     }
 
     public static Token propertyToken(Object property) {
@@ -194,7 +194,7 @@ public class Token {
     }
 
     public enum Type {
-        WORD, PROPERTY, OPERATOR, OPENING_PARENTHESIS, CLOSING_PARENTHESIS, KEY_WORD, CONST_VALUE, REGEX, TREE,
+        IDENTIFIER, PROPERTY, OPERATOR, OPENING_PARENTHESIS, CLOSING_PARENTHESIS, KEY_WORD, CONST_VALUE, REGEX, TREE,
         OPENING_BRACKET, CLOSING_BRACKET, OPENING_BRACE, CLOSING_BRACE
     }
 }

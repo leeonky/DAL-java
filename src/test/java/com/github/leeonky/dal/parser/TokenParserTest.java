@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static com.github.leeonky.dal.parser.TokenContentInToken.byFactory;
 import static com.github.leeonky.dal.parser.TokenParser.*;
 import static com.github.leeonky.dal.token.TokenFactory.TOKEN_TREE;
-import static com.github.leeonky.dal.token.TokenFactory.createWordTokenFactory;
+import static com.github.leeonky.dal.token.TokenFactory.createIdentifierTokenFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TokenParserTest {
@@ -20,6 +20,6 @@ class TokenParserTest {
                 .take(byFactory(TokenFactory.createNumberTokenFactory()))
                 .endWith(excluded(CHARACTER('|'))).createAs(TOKEN_TREE).fetchToken(tokenParser);
 
-        assertThat(createWordTokenFactory().fetchToken(tokenParser).getValue()).isEqualTo("hello");
+        assertThat(createIdentifierTokenFactory().fetchToken(tokenParser).getValue()).isEqualTo("hello");
     }
 }

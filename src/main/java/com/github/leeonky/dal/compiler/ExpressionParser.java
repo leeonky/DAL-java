@@ -77,7 +77,7 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
 
         private SchemaNode parseSchema(NodeParser nodeParser) {
             if (nodeParser.tokenStream.hasTokens()) {
-                if (nodeParser.tokenStream.currentType() == Token.Type.WORD) {
+                if (nodeParser.tokenStream.currentType() == Token.Type.IDENTIFIER) {
                     Token token = nodeParser.tokenStream.pop();
                     return (SchemaNode) new SchemaNode((String) token.getValue()).setPositionBegin(token.getPositionBegin());
                 } else

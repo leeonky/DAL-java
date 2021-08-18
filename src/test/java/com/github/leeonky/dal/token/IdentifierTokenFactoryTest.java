@@ -9,21 +9,21 @@ import org.junit.jupiter.params.provider.ValueSource;
 import static com.github.leeonky.dal.token.Token.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class WordTokenFactoryTest extends TokenFactoryTestBase {
+class IdentifierTokenFactoryTest extends TokenFactoryTestBase {
 
     private void assertToken(String code, Token token) {
-        assertThat(TokenFactory.createWordTokenFactory().fetchToken(new TokenParser(new SourceCode(code))))
+        assertThat(TokenFactory.createIdentifierTokenFactory().fetchToken(new TokenParser(new SourceCode(code))))
                 .isEqualTo(token);
     }
 
     @Override
     protected TokenFactory createTokenFactory() {
-        return TokenFactory.createWordTokenFactory();
+        return TokenFactory.createIdentifierTokenFactory();
     }
 
     @Override
     protected Token createToken(Object value) {
-        return Token.wordToken(value);
+        return Token.identifierToken(value);
     }
 
     @Nested
@@ -41,7 +41,7 @@ class WordTokenFactoryTest extends TokenFactoryTestBase {
         }
 
         @Test
-        void other_word_token() {
+        void other_identifier_token() {
             shouldParse("hello ", "hello");
             shouldParse("order.product ", "order.product");
             shouldParse("_001 ", "_001");
