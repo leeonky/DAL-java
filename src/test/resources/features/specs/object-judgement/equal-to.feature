@@ -74,16 +74,17 @@ Feature: object= {...}
       = {
         key1: 'v1'
         key2: 'unmatched'
-        ^
+              ^
         key3: 'v3'
       }
     """
 
 
-
+# TODO null equal to {}
 #  TODO property
 #  TODO nested object
 #  TODO property chain
 #  TODO process getClass property for java bean and size property of list
 #  TODO property is alias
 #  TODO sub alias
+#  TODO support comma

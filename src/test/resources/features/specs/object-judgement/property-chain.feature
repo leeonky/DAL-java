@@ -80,7 +80,7 @@ Feature: {property.chain: ...}
       = {
         key1.s1: 3
         key2.s1: 100
-             ^
+                 ^
       }
     """
 

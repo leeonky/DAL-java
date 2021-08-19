@@ -1,11 +1,9 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
-import com.github.leeonky.dal.util.Calculator;
 
-import static com.github.leeonky.dal.ast.ConstNode.inspectValue;
+import static com.github.leeonky.dal.AssertionFailure.*;
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
 
@@ -17,27 +15,19 @@ public abstract class Node {
     }
 
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
-        return Calculator.equals(actualNode.evaluate(context), evaluate(context));
+        return assertEquals(actualNode.evaluate(context), evaluate(context), getPositionBegin());
     }
 
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
         Object expect = evaluate(context);
         Object actual = actualNode.evaluate(context);
-        if (expect == null) {
-            if (actual != null)
-                throw new AssertionFailure(format("[%s] does not match null", inspectValue(actual)),
-                        actualNode.getPositionBegin());
-            else
-                return true;
-        }
+        if (expect == null)
+            return assertMatchNull(actual, actualNode.getPositionBegin());
         shouldBeSameTypeIfTypeIs(Number.class, actual, expect, operator);
         shouldBeSameTypeIfTypeIs(Boolean.class, actual, expect, operator);
         invalidTypeToMatchStringValue(Number.class, actual, expect, operator);
         invalidTypeToMatchStringValue(Boolean.class, actual, expect, operator);
-        if (!Calculator.equals(context.getConverter().convert(expect.getClass(), actual), expect))
-            throw new AssertionFailure(format("expected [%s] matches [%s] but was not",
-                    inspectValue(actual), inspectValue(expect)), actualNode.getPositionBegin());
-        return true;
+        return assertMatch(expect, actual, getPositionBegin(), context.getConverter());
     }
 
     public int getPositionBegin() {

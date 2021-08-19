@@ -71,7 +71,7 @@ Feature: object: {...}
       : {
         key1: 'v1'
         key2: 'unmatched'
-        ^
+              ^
         key3: 'v3'
       }
     """

@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.AssertionFailure.assertUnexpectedFields;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
@@ -29,11 +30,9 @@ public class ObjectNode extends Node {
         Set<String> dataFields = new LinkedHashSet<>(data.getPropertyReaderNames());
         //TODO property chain
         //TODO property alias
-        dataFields.removeAll(expressions.stream().map(expression -> expression.getPropertyNode1().getRootName()).collect(Collectors.toSet()));
-        if (!dataFields.isEmpty()) {
-            String unexpectedFields = dataFields.stream().map(s -> format("`%s`", s)).collect(joining(", "));
-            throw new AssertionFailure("unexpected fields " + unexpectedFields, operator.getPosition());
-        }
+        dataFields.removeAll(expressions.stream().map(expression -> expression.getPropertyNode1().getRootName())
+                .collect(Collectors.toSet()));
+        assertUnexpectedFields(dataFields, operator.getPosition());
         return judgeAll(actual, context, actualNode);
     }
 
@@ -42,12 +41,11 @@ public class ObjectNode extends Node {
         return judgeAll(actualNode.evaluate(context), context, actualNode);
     }
 
-    private boolean judgeAll(Object input, RuntimeContext context, Node actualNode) {
-        if (input == null)
-            throw new AssertionFailure("[null] does not match non-null object", actualNode.getPositionBegin());
+    private boolean judgeAll(Object actual, RuntimeContext context, Node actualNode) {
+        AssertionFailure.assertNullMatch(actual, actualNode.getPositionBegin());
         try {
             //TODO process sub schema
-            context.wrappedValueStack.push(input);
+            context.wrappedValueStack.push(actual);
             return expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context));
         } finally {
             context.wrappedValueStack.pop();

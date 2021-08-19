@@ -43,8 +43,8 @@ class TestContext {
     }
 
     public void shouldPass() {
-        assertTrue(assertResult.isPassed());
         assertThat(dalException).isNull();
+        assertTrue(assertResult.isPassed());
     }
 
     public void executeDal(String dalSourceCode) {
