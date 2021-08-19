@@ -2,6 +2,7 @@ package com.github.leeonky.dal.util;
 
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.NoSuchAccessorException;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -85,7 +86,19 @@ public class DataObject {
         if (instance instanceof Map)
             return ((Map<?, ?>) instance).get(name);
         return runtimeContext.getPropertyValue(instance, name)
-                .orElseGet(() -> beanClass.getPropertyValue(instance, name));
+                .orElseGet(() -> getBeanPropertyValue(name));
+    }
+
+    private Object getBeanPropertyValue(String name) {
+        try {
+            return beanClass.getPropertyValue(instance, name);
+        } catch (NoSuchAccessorException ignore) {
+            try {
+                return beanClass.getType().getMethod(name).invoke(instance);
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 
     public boolean isNull() {

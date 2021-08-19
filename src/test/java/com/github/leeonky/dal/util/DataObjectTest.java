@@ -113,6 +113,11 @@ class DataObjectTest {
             assertDataAccess(new JSONArray().put("a").put(new Bean().setIntValue(100)), 100, 1, "intValue");
         }
 
+        @Test
+        void support_invoke_bean_no_args_method() {
+            assertDataAccess(new Bean().setIntValue(100), 100, "getIntValue");
+        }
+
         private void assertDataAccess(Object object, Object expected, Object... properties) {
             assertThat(runtimeContextBuilder.build(null).wrap(object).getValue(properties))
                     .isEqualTo(expected);
