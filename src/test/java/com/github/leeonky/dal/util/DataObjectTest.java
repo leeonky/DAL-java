@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -116,6 +117,11 @@ class DataObjectTest {
         @Test
         void support_invoke_bean_no_args_method() {
             assertDataAccess(new Bean().setIntValue(100), 100, "getIntValue");
+        }
+
+        @Test
+        void support_stream_size_as_list() {
+            assertDataAccess(Stream.of(1, 2), 2, "size");
         }
 
         private void assertDataAccess(Object object, Object expected, Object... properties) {

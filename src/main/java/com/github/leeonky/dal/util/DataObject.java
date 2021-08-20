@@ -7,6 +7,7 @@ import com.github.leeonky.util.NoSuchAccessorException;
 import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.Arrays.asList;
@@ -28,7 +29,9 @@ public class DataObject {
     }
 
     public boolean isList() {
-        return instance != null && (runtimeContext.isRegisteredList(instance) || instance instanceof Iterable || instance.getClass().isArray());
+        //TODO refactor
+        return instance != null && (runtimeContext.isRegisteredList(instance) || instance instanceof Iterable
+                || instance.getClass().isArray() || instance instanceof Stream);
     }
 
     @SuppressWarnings("unchecked")
@@ -58,6 +61,8 @@ public class DataObject {
                 .orElseGet(() -> {
                     if (instance instanceof Iterable)
                         return (Iterable<Object>) instance;
+                    if (instance instanceof Stream)
+                        return ((Stream<Object>) instance)::iterator;
                     return () -> new Iterator<Object>() {
                         private final int length = Array.getLength(instance);
                         private int index = 0;
@@ -114,8 +119,8 @@ public class DataObject {
     }
 
     private Object getValue(LinkedList<Object> properties) {
-        Object object = getValue(properties.removeFirst());
-        return properties.isEmpty() ? object : runtimeContext.wrap(object).getValue(properties);
+        return properties.isEmpty() ? instance :
+                runtimeContext.wrap(getValue(properties.removeFirst())).getValue(properties);
     }
 
     private Object getValue(Object property) {
