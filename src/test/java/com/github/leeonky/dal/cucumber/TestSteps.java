@@ -16,6 +16,7 @@ public class TestSteps {
         put("regex", TokenFactory.createRegexTokenFactory());
         put("identifier", TokenFactory.createIdentifierTokenFactory());
         put("operator", TokenFactory.createOperatorTokenFactory());
+        put("dal", TokenFactory.createDALTokenFactory());
     }};
 
     @Given("the follow dal code:")

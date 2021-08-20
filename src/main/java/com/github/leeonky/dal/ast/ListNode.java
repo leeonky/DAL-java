@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.AssertionFailure.assertListSize;
 import static java.lang.String.format;
+import static java.util.stream.StreamSupport.stream;
 
 public class ListNode extends Node {
     private final List<Expression> expressions = new ArrayList<>();
@@ -29,9 +30,9 @@ public class ListNode extends Node {
     }
 
     private boolean judgeAll(Node actualNode, RuntimeContext context, Operator operator) {
-        Object actual = actualNode.evaluate(context);
-        assertListSize(expressions.size(), context.wrap(actual).getListSize(), operator.getPosition());
-        return judgeAll(actual, context);
+        Object[] list = stream(context.wrap(actualNode.evaluate(context)).getList().spliterator(), false).toArray();
+        assertListSize(expressions.size(), list.length, operator.getPosition());
+        return judgeAll(list, context);
     }
 
     private boolean judgeAll(Object input, RuntimeContext context) {
