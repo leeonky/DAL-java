@@ -10,8 +10,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TestSteps {
-
-    private Map<String, TokenFactory> factoryMap = new HashMap<String, TokenFactory>() {{
+    private final Map<String, TokenFactory> factoryMap = new HashMap<String, TokenFactory>() {{
         put("number", TokenFactory.createNumberTokenFactory());
         put("regex", TokenFactory.createRegexTokenFactory());
         put("identifier", TokenFactory.createIdentifierTokenFactory());
@@ -23,6 +22,8 @@ public class TestSteps {
         put("]", TokenFactory.createClosingBracketTokenFactory());
         put("{", TokenFactory.createOpeningBraceTokenFactory());
         put("}", TokenFactory.createClosingBraceTokenFactory());
+        put("double-quoted-string", TokenFactory.createDoubleQuotedStringTokenFactory());
+        put("single-quoted-string", TokenFactory.createSingleQuotedStringTokenFactory());
     }};
 
     @Given("the follow dal code:")
