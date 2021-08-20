@@ -17,6 +17,12 @@ public class TestSteps {
         put("identifier", TokenFactory.createIdentifierTokenFactory());
         put("operator", TokenFactory.createOperatorTokenFactory());
         put("dal", TokenFactory.createDALTokenFactory());
+        put("(", TokenFactory.createOpeningParenthesisTokenFactory());
+        put(")", TokenFactory.createClosingParenthesisTokenFactory());
+        put("[", TokenFactory.createOpeningBracketTokenFactory());
+        put("]", TokenFactory.createClosingBracketTokenFactory());
+        put("{", TokenFactory.createOpeningBraceTokenFactory());
+        put("}", TokenFactory.createClosingBraceTokenFactory());
     }};
 
     @Given("the follow dal code:")
