@@ -161,6 +161,7 @@ public class Token {
                 case Constants.Operators.MATCH:
                     operator = new Operator.Matcher();
                     break;
+//                    not work in [] {}
                 case ",":
                     operator = new Operator.Comma();
                     break;
