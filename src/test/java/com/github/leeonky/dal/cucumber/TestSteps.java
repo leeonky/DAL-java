@@ -24,6 +24,7 @@ public class TestSteps {
         put("}", TokenFactory.createClosingBraceTokenFactory());
         put("double-quoted-string", TokenFactory.createDoubleQuotedStringTokenFactory());
         put("single-quoted-string", TokenFactory.createSingleQuotedStringTokenFactory());
+        put("keyWord", TokenFactory.createIdentifierTokenFactory());
     }};
 
     @Given("the follow dal code:")
