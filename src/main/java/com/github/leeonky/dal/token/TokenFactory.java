@@ -25,7 +25,7 @@ public interface TokenFactory {
     Function<String, Token> OPERATOR_TOKEN = Token::operatorToken;
     Function<String, Token> PROPERTY_TOKEN = content -> {
         if (content.isEmpty())
-            throw new IllegalTokenContentException("property chain not finished");
+            throw new IllegalTokenContentException("property not finished");
         return Token.propertyToken(content);
     };
     Function<String, Token> CONST_STRING_TOKEN = Token::constValueToken;
