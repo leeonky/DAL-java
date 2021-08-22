@@ -1,7 +1,7 @@
 Feature: compile to regex node
 
   Scenario: return null when does not match
-    Given the follow dal code:
+    Given the following dal code:
     """
     100
     """
@@ -11,7 +11,7 @@ Feature: compile to regex node
     """
 
   Scenario: compile to regex node
-    Given the follow dal code:
+    Given the following dal code:
     """
     'hello' = /hello/
     """
@@ -29,7 +29,7 @@ Feature: compile to regex node
     """
 
   Scenario: regex does not match
-    When assert by the follow code:
+    When assert by the following code:
     """
     'hello'= /unmatched/
     """
@@ -44,7 +44,7 @@ Feature: compile to regex node
     """
 
   Scenario: input value of 'equal to regex' must string type
-    When assert by the follow code:
+    When assert by the following code:
     """
     100= /100/
     """
@@ -59,7 +59,7 @@ Feature: compile to regex node
     """
 
   Scenario: convert input value to string when 'match to regex'
-    Then the follow assertion should be passed:
+    Then the following assertion should be passed:
     """
     100: /100/
     """

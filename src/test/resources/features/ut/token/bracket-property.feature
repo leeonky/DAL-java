@@ -1,7 +1,7 @@
 Feature: bracket property token
 
   Scenario: return null when first char dose not match
-    Given the follow dal code:
+    Given the following dal code:
     """
     not [
     """
@@ -11,7 +11,7 @@ Feature: bracket property token
     """
 
   Scenario Outline: return null when after judgement operator
-    Given the follow dal code:
+    Given the following dal code:
     """
     <judgement>[1]
     """
@@ -25,7 +25,7 @@ Feature: bracket property token
       | =         |
 
   Scenario: raise error when got invalid value in bracket
-    Given the follow dal code:
+    Given the following dal code:
     """
     [+]
     """
@@ -40,7 +40,7 @@ Feature: bracket property token
     """
 
   Scenario: access list element
-    Given the follow dal code:
+    Given the following dal code:
     """
     [100]=
     """
@@ -54,7 +54,7 @@ Feature: bracket property token
     And current offset char of source code is "="
 
   Scenario: raise error when list index is not integer
-    Given the follow dal code:
+    Given the following dal code:
     """
     [1.1]
     """
@@ -69,7 +69,7 @@ Feature: bracket property token
     """
 
   Scenario Outline: access object property
-    Given the follow dal code:
+    Given the following dal code:
     """
     [<code>]
     """
@@ -86,7 +86,7 @@ Feature: bracket property token
       | 'key2' | 'key2' |
 
   Scenario: white space in bracket
-    Given the follow dal code:
+    Given the following dal code:
     """
     [ 100 ]
     """
@@ -99,7 +99,7 @@ Feature: bracket property token
     """
 
   Scenario: raise error when no token in brackets
-    Given the follow dal code:
+    Given the following dal code:
     """
     []
     """
@@ -114,7 +114,7 @@ Feature: bracket property token
     """
 
   Scenario: raise error when more than one token in brackets
-    Given the follow dal code:
+    Given the following dal code:
     """
     [1 2]
     """
@@ -129,7 +129,7 @@ Feature: bracket property token
     """
 
   Scenario: raise error when missed closing ']'
-    Given the follow dal code:
+    Given the following dal code:
     """
     [100
     """
@@ -144,7 +144,7 @@ Feature: bracket property token
     """
 
   Scenario: raise error when missed token and closing ']'
-    Given the follow dal code:
+    Given the following dal code:
     """
     [
     """

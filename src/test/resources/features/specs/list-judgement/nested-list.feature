@@ -5,7 +5,7 @@ Feature: list: [[...]]
     """
       [[2, 3]]
     """
-    Then the follow assertion should be passed:
+    Then the following assertion should be passed:
     """
       = [[2 3]]
     """
@@ -15,7 +15,7 @@ Feature: list: [[...]]
     """
       [[2, 3]]
     """
-    When assert by the follow code:
+    When assert by the following code:
     """
       = [[2 4]]
     """

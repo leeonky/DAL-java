@@ -14,7 +14,7 @@ Feature: {property.chain: ...}
         }
       }
     """
-    Then the follow assertion should be passed:
+    Then the following assertion should be passed:
     """
       : {
         key1.s1: 3
@@ -34,7 +34,7 @@ Feature: {property.chain: ...}
         }
       }
     """
-    When assert by the follow code:
+    When assert by the following code:
     """
       = {
         key1.s1: 3
@@ -64,7 +64,7 @@ Feature: {property.chain: ...}
         }
       }
     """
-    When assert by the follow code:
+    When assert by the following code:
     """
       = {
         key1.s1: 3

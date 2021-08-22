@@ -1,7 +1,7 @@
 Feature: dal token
 
   Scenario: parse all dal tokens:  [ ] .id 100 'str1'"str2" : /abc/ ( ) which { }
-    Given the follow dal code:
+    Given the following dal code:
     """
     [ ] .id 100 'str1' "str2" : /abc/ ( ) which { }
     """
@@ -91,7 +91,7 @@ Feature: dal token
     """
 
   Scenario: return empty when no code
-    Given the follow dal code:
+    Given the following dal code:
     """
 
     """
@@ -104,7 +104,7 @@ Feature: dal token
     """
 
   Scenario: return empty when only white space
-    Given the follow dal code:
+    Given the following dal code:
     """
 
 

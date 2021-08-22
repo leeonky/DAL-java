@@ -5,7 +5,7 @@ Feature: object: {...}
     """
       <data>
     """
-    Then the follow assertion should be passed:
+    Then the following assertion should be passed:
     """
       : {}
     """
@@ -16,7 +16,7 @@ Feature: object: {...}
       | 100          |
 
   Scenario: null does not match {}
-    When assert by the follow code:
+    When assert by the following code:
     """
       null: {}
     """
@@ -38,7 +38,7 @@ Feature: object: {...}
         "key2": 2
       }
     """
-    Then the follow assertion should be passed:
+    Then the following assertion should be passed:
     """
       : {
         key1: 1
@@ -54,7 +54,7 @@ Feature: object: {...}
         "key3": "v3"
       }
     """
-    When assert by the follow code:
+    When assert by the following code:
     """
       : {
         key1: 'v1'
@@ -78,7 +78,7 @@ Feature: object: {...}
 
 #TODO move to basic judgement
   Scenario: non null does not match null
-    When assert by the follow code:
+    When assert by the following code:
     """
       1: null
     """
@@ -94,7 +94,7 @@ Feature: object: {...}
 
 #TODO move to basic judgement
   Scenario: null matches null
-    Then the follow assertion should be passed:
+    Then the following assertion should be passed:
     """
       null: null
     """

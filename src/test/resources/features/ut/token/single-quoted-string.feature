@@ -1,7 +1,7 @@
 Feature: 'string' token
 
   Scenario: return empty when first char is not matched
-    Given the follow dal code:
+    Given the following dal code:
     """
     not starts with '
     """
@@ -11,7 +11,7 @@ Feature: 'string' token
     """
 
   Scenario Outline: parse string and seek code to the next char
-    Given the follow dal code:
+    Given the following dal code:
     """
     '<str>'=
     """
@@ -29,7 +29,7 @@ Feature: 'string' token
       | hello |
 
   Scenario: parse string at the end of code
-    Given the follow dal code:
+    Given the following dal code:
     """
     'hello'
     """
@@ -42,7 +42,7 @@ Feature: 'string' token
     """
 
   Scenario: escape char
-    Given the follow dal code:
+    Given the following dal code:
     """
     '\\\''
     """
@@ -52,7 +52,7 @@ Feature: 'string' token
     """
 
   Scenario: keep original char when not valid escape char
-    Given the follow dal code:
+    Given the following dal code:
     """
     '\h'
     """
@@ -62,7 +62,7 @@ Feature: 'string' token
     """
 
   Scenario: syntax error: incomplete string
-    Given the follow dal code:
+    Given the following dal code:
     """
     'str
     """
@@ -77,7 +77,7 @@ Feature: 'string' token
     """
 
   Scenario: syntax error: incomplete escape char string
-    Given the follow dal code:
+    Given the following dal code:
     """
     'str\
     """

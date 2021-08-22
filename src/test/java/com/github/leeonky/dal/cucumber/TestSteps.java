@@ -34,9 +34,10 @@ public class TestSteps {
         put("const", NodeFactory.createConstNodeFactory());
         put("regex", NodeFactory.createRegexNodeFactory());
         put("expression", NodeFactory.createExpressionNodeFactory());
+        put("property", NodeFactory.createPropertyNodeFactory());
     }};
 
-    @Given("the follow dal code:")
+    @Given("the following dal code:")
     public void the_follow_dal_code(String dalSourceCode) {
         TestContext.INSTANCE.givenDalSourceCode(parseTabAndSpace(dalSourceCode));
     }
@@ -61,7 +62,7 @@ public class TestSteps {
         TestContext.INSTANCE.parseToken(tokenFactoryMap.get(factory));
     }
 
-    @Given("the follow dal code after operator {string}:")
+    @Given("the following dal code after operator {string}:")
     public void the_follow_dal_code_after_operator(String operator, String dalSourceCode) {
         TestContext.INSTANCE.givenDalSourceCode(operator + dalSourceCode);
         parseTokenAs("operator");

@@ -17,13 +17,13 @@ public class SpecSteps {
         TestContext.INSTANCE.givenInputByJson(json);
     }
 
-    @Then("the follow assertion should be passed:")
+    @Then("the following assertion should be passed:")
     public void the_follow_assertion_should_be_passed(String dalCode) {
         TestContext.INSTANCE.executeDal(dalCode);
         TestContext.INSTANCE.shouldPass();
     }
 
-    @When("assert by the follow code:")
+    @When("assert by the following code:")
     public void assert_by_the_follow_code(String sourceCode) {
         TestContext.INSTANCE.executeDal(sourceCode);
     }

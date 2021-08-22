@@ -1,7 +1,7 @@
 Feature: regex token
 
   Scenario Outline: return empty when first char is not /
-    Given the follow dal code after operator "<operator>":
+    Given the following dal code after operator "<operator>":
     """
     {}
     """
@@ -15,7 +15,7 @@ Feature: regex token
       | =        |
 
   Scenario Outline: regex must after judgement operator
-    Given the follow dal code after operator "<operator>":
+    Given the following dal code after operator "<operator>":
     """
     /hello/
     """
@@ -30,7 +30,7 @@ Feature: regex token
       | -        |
 
   Scenario Outline: regex must after judgement operator(= :)
-    Given the follow dal code after operator "<operator>":
+    Given the following dal code after operator "<operator>":
     """
     /hello/
     """
@@ -47,7 +47,7 @@ Feature: regex token
       | =        |
 
   Scenario Outline: 2 escape chars (\\ => \, \/ => /)
-    Given the follow dal code after operator "=":
+    Given the following dal code after operator "=":
     """
     <code>
     """
@@ -65,7 +65,7 @@ Feature: regex token
       | /\\keep/ | \\keep |
 
   Scenario: seek to next char after fetch token
-    Given the follow dal code after operator "=":
+    Given the following dal code after operator "=":
     """
     /regex/&
     """
@@ -73,7 +73,7 @@ Feature: regex token
     Then current offset char of source code is "&"
 
   Scenario: syntax error: incomplete regex
-    Given the follow dal code after operator "=":
+    Given the following dal code after operator "=":
     """
     /regex
     """
@@ -88,7 +88,7 @@ Feature: regex token
     """
 
   Scenario: syntax error: incomplete escape char regex
-    Given the follow dal code after operator "=":
+    Given the following dal code after operator "=":
     """
     /regex\
     """

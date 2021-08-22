@@ -1,7 +1,7 @@
 Feature: identifier token
 
   Scenario Outline: parse as key word
-    Given the follow dal code:
+    Given the following dal code:
     """
     <code>
     """
@@ -18,7 +18,7 @@ Feature: identifier token
       | which | which |
 
   Scenario Outline: parse as const value
-    Given the follow dal code:
+    Given the following dal code:
     """
     <code>
     """
@@ -36,7 +36,7 @@ Feature: identifier token
       | false | false |
 
   Scenario Outline: parse as operator
-    Given the follow dal code:
+    Given the following dal code:
     """
     <code>
     """
@@ -53,7 +53,7 @@ Feature: identifier token
       | or   | or    |
 
   Scenario Outline: parse as identifier
-    Given the follow dal code:
+    Given the following dal code:
     """
     <code>
     """
@@ -72,7 +72,7 @@ Feature: identifier token
       | order_1       | order_1       |
 
   Scenario Outline: identifier delimiter
-    Given the follow dal code:
+    Given the following dal code:
     """
     xxx<delimiter>
     """

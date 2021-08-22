@@ -5,7 +5,7 @@ Feature: list= [...]
     """
       [1, 2]
     """
-    Then the follow assertion should be passed:
+    Then the following assertion should be passed:
     """
       = [1 2]
     """
@@ -15,7 +15,7 @@ Feature: list= [...]
     """
       []
     """
-    Then the follow assertion should be passed:
+    Then the following assertion should be passed:
     """
       = []
     """
@@ -25,7 +25,7 @@ Feature: list= [...]
     """
       [1, 2]
     """
-    When assert by the follow code:
+    When assert by the following code:
     """
       = [1]
     """
@@ -44,7 +44,7 @@ Feature: list= [...]
     """
       [1, 2]
     """
-    When assert by the follow code:
+    When assert by the following code:
     """
       = [1 3]
     """

@@ -1,7 +1,7 @@
 Feature: compile to const node
 
   Scenario: return null when does not match
-    Given the follow dal code:
+    Given the following dal code:
     """
     +
     """
@@ -11,7 +11,7 @@ Feature: compile to const node
     """
 
   Scenario: compile to const node
-    Given the follow dal code:
+    Given the following dal code:
     """
       100
     """

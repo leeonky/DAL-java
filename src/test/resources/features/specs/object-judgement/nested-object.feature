@@ -11,7 +11,7 @@ Feature: {nested: {...}}
         }
       }
     """
-    Then the follow assertion should be passed:
+    Then the following assertion should be passed:
     """
       : {
         key1: 1
@@ -33,7 +33,7 @@ Feature: {nested: {...}}
         }
       }
     """
-    When assert by the follow code:
+    When assert by the following code:
     """
       : {
         key2: {

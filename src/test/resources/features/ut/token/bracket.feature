@@ -1,7 +1,7 @@
 Feature: bracket token
 
   Scenario Outline: return null when char dose not match
-    Given the follow dal code:
+    Given the following dal code:
     """
     =
     """
@@ -19,7 +19,7 @@ Feature: bracket token
       | }     |
 
   Scenario Outline: return corresponding token, end seek to next char after fetch token
-    Given the follow dal code:
+    Given the following dal code:
     """
     <brace>=
     """

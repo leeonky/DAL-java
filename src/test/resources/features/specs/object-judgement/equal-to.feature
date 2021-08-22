@@ -8,7 +8,7 @@ Feature: object= {...}
         "key2": 2
       }
     """
-    Then the follow assertion should be passed:
+    Then the following assertion should be passed:
     """
       = {
         key1: 1
@@ -21,7 +21,7 @@ Feature: object= {...}
     """
       {}
     """
-    Then the follow assertion should be passed:
+    Then the following assertion should be passed:
     """
       = {}
     """
@@ -34,7 +34,7 @@ Feature: object= {...}
         "key2": 200
       }
     """
-    When assert by the follow code:
+    When assert by the following code:
     """
       = {}
     """
@@ -57,7 +57,7 @@ Feature: object= {...}
         "key3": "v3"
       }
     """
-    When assert by the follow code:
+    When assert by the following code:
     """
       = {
         key1: 'v1'

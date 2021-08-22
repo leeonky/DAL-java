@@ -1,7 +1,7 @@
 Feature: operator token
 
   Scenario: return null when char dose not match
-    Given the follow dal code:
+    Given the following dal code:
     """
     not start with operator char
     """
@@ -11,7 +11,7 @@ Feature: operator token
     """
 
   Scenario Outline: not parse as / after judgement operator
-    Given the follow dal code after operator "<judgement>":
+    Given the following dal code after operator "<judgement>":
     """
     /
     """
@@ -25,7 +25,7 @@ Feature: operator token
       | :         |
 
   Scenario Outline: all supported operators, end seek to next char after fetching
-    Given the follow dal code:
+    Given the following dal code:
     """
     <operator>1
     """
@@ -56,7 +56,7 @@ Feature: operator token
       | ,        |
 
   Scenario Outline: all supported operators at the end of code
-    Given the follow dal code:
+    Given the following dal code:
     """
     <operator>
     """
@@ -86,7 +86,7 @@ Feature: operator token
       | ,        |
 
   Scenario Outline: distinguish regex after operator judgement
-    Given the follow dal code:
+    Given the following dal code:
     """
     <judgement>/
     """

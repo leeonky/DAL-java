@@ -1,7 +1,7 @@
 Feature: number token
 
   Scenario: return empty when first char is not digital
-    Given the follow dal code:
+    Given the following dal code:
     """
     not starts with digital
     """
@@ -11,7 +11,7 @@ Feature: number token
     """
 
   Scenario: return empty when invalid number, and source code offset should rollback to beginning
-    Given the follow dal code:
+    Given the following dal code:
     """
     12Invalid
     """
@@ -28,7 +28,7 @@ Feature: number token
     """
 
   Scenario Outline: parse number to const value token in any number format
-    Given the follow dal code:
+    Given the following dal code:
     """
     <number>=1
     """
@@ -46,7 +46,7 @@ Feature: number token
       | 0.1    | 0.1   |
 
   Scenario: number token can be finished by the end of source code
-    Given the follow dal code:
+    Given the following dal code:
     """
     100
     """
@@ -59,7 +59,7 @@ Feature: number token
     """
 
   Scenario Outline: delimiter after number token
-    Given the follow dal code:
+    Given the following dal code:
     """
     100<delimiter>
     """

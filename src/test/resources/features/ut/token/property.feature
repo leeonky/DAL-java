@@ -1,7 +1,7 @@
 Feature: property token
 
   Scenario: return empty when not start with dot
-    Given the follow dal code:
+    Given the following dal code:
     """
     not start with .
     """
@@ -11,7 +11,7 @@ Feature: property token
     """
 
   Scenario Outline: trim white space after dot
-    Given the follow dal code:
+    Given the following dal code:
     """
     .<white-space>a
     """
@@ -29,7 +29,7 @@ Feature: property token
       | `SPACE      |
 
   Scenario Outline: property delimiter
-    Given the follow dal code:
+    Given the following dal code:
     """
     .a<delimiter>
     """
@@ -64,7 +64,7 @@ Feature: property token
       | `SPACE    |
 
   Scenario: at the end of code
-    Given the follow dal code:
+    Given the following dal code:
     """
     .a
     """
@@ -77,7 +77,7 @@ Feature: property token
     """
 
   Scenario: do not allow empty property
-    Given the follow dal code:
+    Given the following dal code:
     """
     .
     """
@@ -92,7 +92,7 @@ Feature: property token
     """
 
   Scenario: do not allow empty property(has white space)
-    Given the follow dal code:
+    Given the following dal code:
     """
     .   
     """
