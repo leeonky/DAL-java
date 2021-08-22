@@ -57,3 +57,14 @@ Feature: list: [...]
       : [1 3]
            ^
     """
+
+#  TODO null equal to []
+#  TODO match
+#  TODO equal
+#  TODO skip element
+#  TODO ignore tails
+#  TODO element match
+#  TODO element equal
+#  TODO nested object
+#  TODO sub alias
+#  TODO support comma

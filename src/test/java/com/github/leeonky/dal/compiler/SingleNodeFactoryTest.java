@@ -1,39 +1,17 @@
 package com.github.leeonky.dal.compiler;
 
-import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.ast.ParenthesesNode;
+import com.github.leeonky.dal.ast.PropertyNode;
 import com.github.leeonky.dal.token.Token;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.compiler.NodeFactory.createConstNodeFactory;
 import static com.github.leeonky.dal.compiler.NodeFactory.createPropertyNodeFactory;
 import static com.github.leeonky.dal.token.Token.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SingleNodeFactoryTest {
-
-    @Nested
-    class FetchConstNode extends NodeFactoryTestBase {
-
-        @Override
-        protected NodeFactory getDefaultNodeFactory() {
-            return createConstNodeFactory();
-        }
-
-        @Test
-        void matches_and_return_node() {
-            assertThat(fetchNodeWhenGivenToken(constValueToken("const string"), 10))
-                    .isInstanceOf(ConstNode.class)
-                    .hasFieldOrPropertyWithValue("value", "const string")
-                    .hasFieldOrPropertyWithValue("positionBegin", 10);
-        }
-
-        @Test
-        void return_null_when_dost_not_match() {
-            assertThat(fetchNodeWhenGivenToken(operatorToken("+")))
-                    .isNull();
-        }
-    }
 
     @Nested
     class FetchPropertyNode extends NodeFactoryTestBase {
@@ -92,31 +70,6 @@ class SingleNodeFactoryTest {
     }
 
     @Nested
-    class FetchRegexNode extends NodeFactoryTestBase {
-
-        @Override
-        protected NodeFactory getDefaultNodeFactory() {
-            return NodeFactory.createRegexNodeFactory();
-        }
-
-        @Test
-        void matches_and_return_node() {
-            Node node = fetchNodeWhenGivenToken(regexToken("regex"), 10);
-
-            assertThat(node)
-                    .isInstanceOf(RegexNode.class)
-                    .hasFieldOrPropertyWithValue("positionBegin", 10);
-            assertThat(node.inspect()).isEqualTo("/regex/");
-        }
-
-        @Test
-        void return_null_when_dost_not_match() {
-            assertThat(fetchNodeWhenGivenToken(operatorToken("+")))
-                    .isNull();
-        }
-    }
-
-    @Nested
     class FetchParenthesesNode extends NodeFactoryTestBase {
 
         @Override
@@ -161,7 +114,6 @@ class SingleNodeFactoryTest {
                     .hasMessage("missed `)`")
                     .hasFieldOrPropertyWithValue("position", 2);
         }
-
 
         @Test
         void raiser_error_when_got_unexpected_token() {

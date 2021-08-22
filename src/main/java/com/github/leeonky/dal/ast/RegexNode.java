@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
 
@@ -19,8 +20,8 @@ public class RegexNode extends Node {
         return format("/%s/", pattern.toString());
     }
 
-    public boolean matches(String actual) {
-        return pattern.matcher(actual).matches();
+    private boolean matches(String actual) {
+        return AssertionFailure.assertRegexMatches(pattern, actual, getPositionBegin());
     }
 
     @Override
@@ -28,12 +29,13 @@ public class RegexNode extends Node {
         Object actual = actualNode.evaluate(context);
         if (actual instanceof String)
             return matches((String) actual);
-        throw new RuntimeException("Operator eq before regex need a string input value", operator.getPosition());
+        throw new RuntimeException("Operator = before regex need a string input value", operator.getPosition());
     }
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
-        return matches(context.getConverter().convert(String.class, actualNode.evaluate(context)));
+        return matches(context.getConverter().convert(String.class, actualNode.evaluate(context))
+        );
     }
 
     @Override

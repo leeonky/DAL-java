@@ -194,7 +194,7 @@ class BasicVerify extends Base {
 
             @Test
             void raise_error_when_type_is_not_string() {
-                assertRuntimeException(1, "= /1/", 0, "Operator eq before regex need a string input value");
+                assertRuntimeException(1, "= /1/", 0, "Operator = before regex need a string input value");
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.cucumber;
 
+import com.github.leeonky.dal.compiler.NodeFactory;
 import com.github.leeonky.dal.token.TokenFactory;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -10,7 +11,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TestSteps {
-    private final Map<String, TokenFactory> factoryMap = new HashMap<String, TokenFactory>() {{
+    private final Map<String, TokenFactory> tokenFactoryMap = new HashMap<String, TokenFactory>() {{
         put("number", TokenFactory.createNumberTokenFactory());
         put("regex", TokenFactory.createRegexTokenFactory());
         put("identifier", TokenFactory.createIdentifierTokenFactory());
@@ -27,6 +28,12 @@ public class TestSteps {
         put("keyWord", TokenFactory.createIdentifierTokenFactory());
         put("property", TokenFactory.createBeanPropertyTokenFactory());
         put("bracket-property", TokenFactory.createBracketPropertyTokenFactory());
+    }};
+
+    private final Map<String, NodeFactory> nodeFactoryMap = new HashMap<String, NodeFactory>() {{
+        put("const", NodeFactory.createConstNodeFactory());
+        put("regex", NodeFactory.createRegexNodeFactory());
+        put("expression", NodeFactory.createExpressionNodeFactory());
     }};
 
     @Given("the follow dal code:")
@@ -51,7 +58,7 @@ public class TestSteps {
 
     @Given("take an {string} token")
     public void parseTokenAs(String factory) {
-        TestContext.INSTANCE.parseToken(factoryMap.get(factory));
+        TestContext.INSTANCE.parseToken(tokenFactoryMap.get(factory));
     }
 
     @Given("the follow dal code after operator {string}:")
@@ -61,7 +68,18 @@ public class TestSteps {
     }
 
     @Then("failed to take {string} token with the following message:")
-    public void failed_to_take_token_with_the_following_message(String factory, String message) {
-        TestContext.INSTANCE.failedParseToken(factoryMap.get(factory), message);
+    public void failed_to_take_token_with_the_following_message(String tokenFactory, String message) {
+        TestContext.INSTANCE.failedParseToken(tokenFactoryMap.get(tokenFactory), message);
+    }
+
+    @Then("got the following {string} node:")
+    public void got_the_following_node(String nodeFactory, String assertion) {
+        TestContext.INSTANCE.compileNode(nodeFactoryMap.get(nodeFactory));
+        TestContext.INSTANCE.assertNode(assertion);
+    }
+
+    @Then("evaluate result is:")
+    public void evaluate_result_is(String assertion) {
+        TestContext.INSTANCE.assertEvaluateNode(assertion);
     }
 }

@@ -4,6 +4,7 @@ import com.github.leeonky.dal.util.Calculator;
 import com.github.leeonky.util.Converter;
 
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import static com.github.leeonky.dal.ast.ConstNode.inspectValue;
 import static java.lang.String.format;
@@ -11,7 +12,6 @@ import static java.util.stream.Collectors.joining;
 
 public class AssertionFailure extends DalException {
 
-    //TODO use factory method
     public AssertionFailure(String message, int position) {
         super(message, position);
     }
@@ -50,6 +50,13 @@ public class AssertionFailure extends DalException {
         if (!Calculator.equals(actual, expected))
             throw new AssertionFailure(format("expected [%s] equal to [%s] but was not",
                     inspectValue(actual), inspectValue(expected)), position);
+        return true;
+    }
+
+    public static boolean assertRegexMatches(Pattern pattern, String actual, int position) {
+        if (!pattern.matcher(actual).matches())
+            throw new AssertionFailure(format("expected [%s] matches /%s/ but was not",
+                    inspectValue(actual), pattern), position);
         return true;
     }
 }
