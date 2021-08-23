@@ -43,6 +43,7 @@ public class TestSteps {
         put("right-operand", NodeFactory.createRightOperandNodeFactory());
         put("expression", NodeFactory.createExpressionNodeFactory());
         put("object", NodeFactory.createObjectNodeFactory());
+        put("list", NodeFactory.createListNodeFactory());
     }};
 
     @Given("the following dal code:")
