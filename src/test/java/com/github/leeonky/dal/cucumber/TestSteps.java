@@ -35,6 +35,7 @@ public class TestSteps {
         put("regex", NodeFactory.createRegexNodeFactory());
         put("expression", NodeFactory.createExpressionNodeFactory());
         put("property", NodeFactory.createPropertyNodeFactory());
+        put("parentheses", NodeFactory.createParenthesesNodeFactory());
     }};
 
     @Given("the following dal code:")
@@ -71,6 +72,11 @@ public class TestSteps {
     @Then("failed to take {string} token with the following message:")
     public void failed_to_take_token_with_the_following_message(String tokenFactory, String message) {
         TestContext.INSTANCE.failedParseToken(tokenFactoryMap.get(tokenFactory), message);
+    }
+
+    @Then("failed to get {string} node with the following message:")
+    public void failed_to_get_node_with_the_following_message(String nodeFactory, String message) {
+        TestContext.INSTANCE.failedCompileNode(nodeFactoryMap.get(nodeFactory), message);
     }
 
     @Then("got the following {string} node:")

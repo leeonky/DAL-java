@@ -1,4 +1,4 @@
-Feature: compile to const node
+Feature: const node
 
   Scenario: return null when does not match
     Given the following dal code:
@@ -10,20 +10,25 @@ Feature: compile to const node
     : null
     """
 
-  Scenario: compile to const node
+  Scenario Outline: compile to const node
     Given the following dal code:
     """
-      100
+      <code>
     """
     Then got the following "const" node:
     """
     : {
       class.simpleName: 'ConstNode'
       positionBegin: 2
-      inspect: '100'
+      inspect: '<inspect>'
     }
     """
     And evaluate result is:
     """
-    : 100
+    : <evaluate>
     """
+    Examples:
+      | code  | inspect | evaluate |
+      | 100   | 100     | 100      |
+      | null  | null    | null     |
+      | 'str' | \'str\' | 'str'    |

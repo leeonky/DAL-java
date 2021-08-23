@@ -18,24 +18,6 @@ class InspectNodeTest {
     }
 
     @Test
-    void const_node_is_value_string() {
-        inspectAssert("'hello'", "'hello'");
-        inspectAssert("null", "null");
-        inspectAssert("100", "100");
-    }
-
-    @Test
-    void support_inspect_parentheses_node() {
-        inspectAssert("(100)", "(100)");
-    }
-
-    @Test
-    void support_inspect_property_node() {
-        inspectAssert(".product.name", ".product.name");
-        inspectAssert("''.empty", "''.empty");
-    }
-
-    @Test
     void support_inspect_expression() {
         inspectAssert("1=1", "1 = 1");
         inspectAssert("1+1", "1 + 1");

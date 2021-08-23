@@ -1,4 +1,4 @@
-Feature: compile to regex node
+Feature: regex node
 
   Scenario: return null when does not match
     Given the following dal code:

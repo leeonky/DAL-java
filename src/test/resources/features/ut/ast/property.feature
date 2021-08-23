@@ -1,4 +1,4 @@
-Feature: compile to property node
+Feature: property node
 
   Scenario: return null when does not match
     Given the following dal code:
@@ -32,7 +32,6 @@ Feature: compile to property node
     Then got the following "property" node:
     """
     : {
-      instanceNode.class.simpleName: 'InputNode'
       class.simpleName: 'PropertyNode'
       positionBegin: 2
       inspect: '[100]'
@@ -64,12 +63,6 @@ Feature: compile to property node
       class.simpleName: 'PropertyNode'
       positionBegin: 7
       inspect: 'user.name'
-      instanceNode: {
-        class.simpleName: 'PropertyNode'
-        positionBegin: 2
-        inspect: 'user'
-        instanceNode.class.simpleName: 'InputNode'
-      }
     }
     """
 
@@ -86,3 +79,6 @@ Feature: compile to property node
     """
     user.name = 'Tom'
     """
+
+
+#TODO    field alias

@@ -110,6 +110,12 @@ class TestContext {
         assertThat(dalException).hasMessage(message);
     }
 
+    public void failedCompileNode(NodeFactory factory, String message) {
+        TokenStream tokenStream = createDALTokenFactory().fetchToken(tokenParser).getTokenStream();
+        dalException = assertThrows(DalException.class, () -> factory.fetchNode(new NodeParser(tokenStream)));
+        assertThat(dalException).hasMessage(message);
+    }
+
     public void compileNode(NodeFactory nodeFactory) {
         TokenStream tokenStream = createDALTokenFactory().fetchToken(tokenParser).getTokenStream();
         node = nodeFactory.fetchNode(new NodeParser(tokenStream));
