@@ -11,6 +11,7 @@ import com.github.leeonky.dal.parser.TokenParser;
 import com.github.leeonky.dal.token.SourceCode;
 import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenFactory;
+import com.github.leeonky.dal.token.TokenStream;
 import lombok.SneakyThrows;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -43,6 +44,7 @@ class TestContext {
     private TokenParser tokenParser = null;
     private SourceCode sourceCode;
     private NodeParser nodeParser;
+    private TokenStream tokenStream;
 
     public static void reset() {
         INSTANCE = new TestContext();
@@ -116,9 +118,15 @@ class TestContext {
     }
 
     public void compileNode(NodeFactory nodeFactory) {
-        if (nodeParser == null)
-            nodeParser = new NodeParser(createDALTokenFactory().fetchToken(tokenParser).getTokenStream());
-        node = nodeFactory.fetchNode(nodeParser);
+        node = nodeFactory.fetchNode(getNodeParser());
+    }
+
+    private NodeParser getNodeParser() {
+        if (nodeParser == null) {
+            tokenStream = createDALTokenFactory().fetchToken(tokenParser).getTokenStream();
+            nodeParser = new NodeParser(tokenStream);
+        }
+        return nodeParser;
     }
 
     public void assertNode(String assertion) {
@@ -140,5 +148,11 @@ class TestContext {
             System.err.println(e.show(assertion));
             throw e;
         }
+    }
+
+    public void skipTokens(int skip) {
+        getNodeParser();
+        while (skip-- > 0)
+            tokenStream.pop();
     }
 }

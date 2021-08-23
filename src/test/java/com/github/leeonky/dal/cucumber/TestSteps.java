@@ -40,7 +40,9 @@ public class TestSteps {
         put("bean-property", NodeFactory.createBeanPropertyNodeFactory());
         put("bracket-property", NodeFactory.createBracketPropertyNodeFactory());
         put("single-evaluable", NodeFactory.createSingleEvaluableNodeFactory());
+        put("right-operand", NodeFactory.createRightOperandNodeFactory());
         put("expression", NodeFactory.createExpressionNodeFactory());
+        put("object", NodeFactory.createObjectNodeFactory());
     }};
 
     @Given("the following dal code:")
@@ -98,5 +100,12 @@ public class TestSteps {
     @Given("get an {string} node")
     public void get_an_node(String nodeFactory) {
         TestContext.INSTANCE.compileNode(nodeFactoryMap.get(nodeFactory));
+    }
+
+
+    @Given("the following dal code and skip {int} tokens:")
+    public void the_following_dal_code_and_skip_tokens(int skip, String dalSourceCode) {
+        TestContext.INSTANCE.givenDalSourceCode(dalSourceCode);
+        TestContext.INSTANCE.skipTokens(skip);
     }
 }
