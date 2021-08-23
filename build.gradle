@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
+        classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.6.0'
     }
 }
 
@@ -73,6 +73,8 @@ pitest {
     targetClasses = ['com.github.leeonky.dal.*']
     excludedClasses = ['com.github.leeonky.dal.spec.*']
     outputFormats = ['HTML2']
+    pitestVersion = '1.6.9'
+    threads = 4
     junit5PluginVersion = "0.12"
 }
 

@@ -2,72 +2,15 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.ast.ParenthesesNode;
-import com.github.leeonky.dal.ast.PropertyNode;
 import com.github.leeonky.dal.token.Token;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.compiler.NodeFactory.createPropertyNodeFactory;
-import static com.github.leeonky.dal.token.Token.*;
+import static com.github.leeonky.dal.token.Token.constValueToken;
+import static com.github.leeonky.dal.token.Token.openingParenthesisToken;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SingleNodeFactoryTest {
-
-    @Nested
-    class FetchPropertyNode extends NodeFactoryTestBase {
-
-        @Override
-        protected NodeFactory getDefaultNodeFactory() {
-            return createPropertyNodeFactory();
-        }
-
-        @Test
-        void matches_and_return_node() {
-            Node node = fetchNodeWhenGivenToken(propertyToken("name"), 10);
-
-            assertThat(node)
-                    .isInstanceOf(PropertyNode.class)
-                    .hasFieldOrPropertyWithValue("name", "name")
-                    .hasFieldOrPropertyWithValue("positionBegin", 10);
-            assertThat(node.inspect()).isEqualTo(".name");
-        }
-
-        @Test
-        void matches_bracket_property_and_return_node() {
-            Node node = givenCode("[0]").fetchNode();
-
-            assertThat(node)
-                    .isInstanceOf(PropertyNode.class)
-                    .hasFieldOrPropertyWithValue("name", 0);
-            assertThat(node.inspect()).isEqualTo("[0]");
-        }
-
-        @Test
-        void return_null_when_dost_not_match() {
-            assertThat(fetchNodeWhenGivenToken(operatorToken("+")))
-                    .isNull();
-        }
-
-        @Test
-        void support_ignore_start_dot_char() {
-            Node node = givenCode("name").fetchNode();
-
-            assertThat(node)
-                    .isInstanceOf(PropertyNode.class)
-                    .hasFieldOrPropertyWithValue("name", "name");
-            assertThat(node.inspect()).isEqualTo("name");
-        }
-
-        @Test
-        void support_ignore_start_dot_char_for_property_chain() {
-            Node node = givenCode("product.name").fetchNode();
-
-            assertThat(node)
-                    .isInstanceOf(PropertyNode.class)
-                    .hasFieldOrPropertyWithValue("name", "name");
-            assertThat(node.inspect()).isEqualTo("product.name");
-        }
-    }
 
     @Nested
     class FetchParenthesesNode extends NodeFactoryTestBase {

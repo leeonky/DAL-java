@@ -55,6 +55,10 @@ public class PropertyNode extends Node {
         return name;
     }
 
+    public Node getInstanceNode() {
+        return instanceNode;
+    }
+
     public enum Type {
         DOT("%s.%s"),
         IDENTIFIER("%s%s"),

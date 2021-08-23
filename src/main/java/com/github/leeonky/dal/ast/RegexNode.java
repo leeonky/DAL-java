@@ -34,8 +34,7 @@ public class RegexNode extends Node {
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
-        return matches(context.getConverter().convert(String.class, actualNode.evaluate(context))
-        );
+        return matches(context.getConverter().convert(String.class, actualNode.evaluate(context)));
     }
 
     @Override
