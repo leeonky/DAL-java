@@ -120,16 +120,16 @@ Feature: single evaluable node
   Scenario: support logic not
     Given the following dal code:
     """
-    !true
+    !false
     """
     Then got the following "single-evaluable" node:
     """
     : {
       class.simpleName: 'Expression'
-      inspect: '!true'
+      inspect: '!false'
     }
     """
     And evaluate result is:
     """
-    =false
+    =true
     """

@@ -16,7 +16,8 @@ class BracketPropertyNodeFactory implements NodeFactory {
             if (nodeParser.tokenStream.hasTokens())
                 return new PropertyNode(nodeParser.getThisNode(),
                         nodeParser.tokenStream.pop().getPropertyOrIndex(), BRACKET);
-            throw new SyntaxException(nodeParser.tokenStream.getPosition(), "should end with `]`");
+            throw new SyntaxException(nodeParser.tokenStream.getPosition(),
+                    "should given one property or array index in `[]`");
         });
     }
 }

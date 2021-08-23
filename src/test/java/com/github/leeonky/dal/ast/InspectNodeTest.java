@@ -8,11 +8,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class InspectNodeTest {
 
-    @Test
-    void input_node_is_empty_string() {
-        inspectAssert("", "");
-    }
-
     private void inspectAssert(String sourceCode, String expected) {
         assertThat(new DALCompiler().compile(new SourceCode(sourceCode)).inspect()).isEqualTo(expected);
     }
@@ -36,11 +31,6 @@ class InspectNodeTest {
         inspectAssert("1>2", "1 > 2");
         inspectAssert("!false", "!false");
         inspectAssert("(-1)", "(-1)");
-    }
-
-    @Test
-    void support_inspect_index_expression() {
-        inspectAssert(".lines[0]", ".lines[0]");
     }
 
     @Test
