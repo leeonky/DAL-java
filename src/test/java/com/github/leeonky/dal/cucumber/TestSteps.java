@@ -32,10 +32,14 @@ public class TestSteps {
 
     private final Map<String, NodeFactory> nodeFactoryMap = new HashMap<String, NodeFactory>() {{
         put("const", NodeFactory.createConstNodeFactory());
-        put("regex", NodeFactory.createRegexNodeFactory());
-        put("expression", NodeFactory.createExpressionNodeFactory());
-        put("property", NodeFactory.createPropertyNodeFactory());
         put("parentheses", NodeFactory.createParenthesesNodeFactory());
+        put("regex", NodeFactory.createRegexNodeFactory());
+        put("property", NodeFactory.createPropertyNodeFactory());
+        put("identifier-property", NodeFactory.createIdentifierPropertyNodeFactory());
+        put("explicit-property", NodeFactory.createExplicitPropertyNodeFactory());
+        put("bean-property", NodeFactory.createBeanPropertyNodeFactory());
+        put("bracket-property", NodeFactory.createBracketPropertyNodeFactory());
+        put("expression", NodeFactory.createExpressionNodeFactory());
     }};
 
     @Given("the following dal code:")

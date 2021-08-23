@@ -80,5 +80,4 @@ Feature: property node
     user.name = 'Tom'
     """
 
-
 #TODO    field alias
