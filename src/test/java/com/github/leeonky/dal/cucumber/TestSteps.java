@@ -39,6 +39,7 @@ public class TestSteps {
         put("explicit-property", NodeFactory.createExplicitPropertyNodeFactory());
         put("bean-property", NodeFactory.createBeanPropertyNodeFactory());
         put("bracket-property", NodeFactory.createBracketPropertyNodeFactory());
+        put("single-evaluable", NodeFactory.createSingleEvaluableNodeFactory());
         put("expression", NodeFactory.createExpressionNodeFactory());
     }};
 
@@ -85,12 +86,17 @@ public class TestSteps {
 
     @Then("got the following {string} node:")
     public void got_the_following_node(String nodeFactory, String assertion) {
-        TestContext.INSTANCE.compileNode(nodeFactoryMap.get(nodeFactory));
+        get_an_node(nodeFactory);
         TestContext.INSTANCE.assertNode(assertion);
     }
 
     @Then("evaluate result is:")
     public void evaluate_result_is(String assertion) {
         TestContext.INSTANCE.assertEvaluateNode(assertion);
+    }
+
+    @Given("get an {string} node")
+    public void get_an_node(String nodeFactory) {
+        TestContext.INSTANCE.compileNode(nodeFactoryMap.get(nodeFactory));
     }
 }

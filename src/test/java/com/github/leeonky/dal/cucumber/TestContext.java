@@ -11,7 +11,6 @@ import com.github.leeonky.dal.parser.TokenParser;
 import com.github.leeonky.dal.token.SourceCode;
 import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenFactory;
-import com.github.leeonky.dal.token.TokenStream;
 import lombok.SneakyThrows;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -43,6 +42,7 @@ class TestContext {
     private Node node = null;
     private TokenParser tokenParser = null;
     private SourceCode sourceCode;
+    private NodeParser nodeParser;
 
     public static void reset() {
         INSTANCE = new TestContext();
@@ -111,14 +111,14 @@ class TestContext {
     }
 
     public void failedCompileNode(NodeFactory factory, String message) {
-        TokenStream tokenStream = createDALTokenFactory().fetchToken(tokenParser).getTokenStream();
-        dalException = assertThrows(DalException.class, () -> factory.fetchNode(new NodeParser(tokenStream)));
+        dalException = assertThrows(DalException.class, () -> compileNode(factory));
         assertThat(dalException).hasMessage(message);
     }
 
     public void compileNode(NodeFactory nodeFactory) {
-        TokenStream tokenStream = createDALTokenFactory().fetchToken(tokenParser).getTokenStream();
-        node = nodeFactory.fetchNode(new NodeParser(tokenStream));
+        if (nodeParser == null)
+            nodeParser = new NodeParser(createDALTokenFactory().fetchToken(tokenParser).getTokenStream());
+        node = nodeFactory.fetchNode(nodeParser);
     }
 
     public void assertNode(String assertion) {
