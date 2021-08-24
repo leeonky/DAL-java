@@ -17,12 +17,16 @@ public class Expression extends Node {
     }
 
     //TODO to be removed
-    public PropertyNode getPropertyNode1() {
-        return (PropertyNode) node1;
+    public Node getLeftOperand() {
+        return node1;
     }
 
     public Node getRightOperand() {
         return node2;
+    }
+
+    public Operator getOperator() {
+        return operator;
     }
 
     public Expression adjustOperatorOrder() {

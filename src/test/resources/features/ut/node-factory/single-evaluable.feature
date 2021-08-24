@@ -13,22 +13,23 @@ Feature: single evaluable node
   Scenario Outline: supported single evaluable node
     Given the following dal code:
     """
-    <code>
+      <code>
     """
     Then got the following "single-evaluable" node:
     """
     : {
       class.simpleName: '<type>'
       inspect: '<inspect>'
+      positionBegin: <position>
     }
     """
     Examples:
-      | code     | type            | inspect    |
-      | 100      | ConstNode       | 100        |
-      | (1+1)    | ParenthesesNode | (1 + 1)    |
-      | .name    | PropertyNode    | .name      |
-      | [0]      | PropertyNode    | [0]        |
-      | "".empty | PropertyNode    | \'\'.empty |
+      | code     | type            | inspect    | position |
+      | 100      | ConstNode       | 100        | 2        |
+      | (1+1)    | ParenthesesNode | (1 + 1)    | 2        |
+      | .name    | PropertyNode    | .name      | 2        |
+      | [0]      | PropertyNode    | [0]        | 2        |
+      | "".empty | PropertyNode    | \'\'.empty | 4        |
 
   Scenario: recursive property node
     Given the following dal code:

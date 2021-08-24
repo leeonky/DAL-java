@@ -13,39 +13,42 @@ Feature: list node
   Scenario: support empty list
     Given the following dal code:
     """
-    []
+     []
     """
     Then got the following "list" node:
     """
     : {
       class.simpleName: 'ListNode'
       inspect: '[]'
+      positionBegin: 1
     }
     """
 
   Scenario: support one element list
     Given the following dal code:
     """
-    [1]
+     [1]
     """
     Then got the following "list" node:
     """
     : {
       class.simpleName: 'ListNode'
       inspect: '[1]'
+      positionBegin: 1
     }
     """
 
   Scenario: support two elements list
     Given the following dal code:
     """
-    [1 2]
+     [1 2]
     """
     Then got the following "list" node:
     """
     : {
       class.simpleName: 'ListNode'
       inspect: '[1 2]'
+      positionBegin: 1
     }
     """
 

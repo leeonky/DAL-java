@@ -12,26 +12,26 @@ class InspectNodeTest {
         assertThat(new DALCompiler().compile(new SourceCode(sourceCode)).inspect()).isEqualTo(expected);
     }
 
-    @Test
-    void support_inspect_expression() {
-        inspectAssert("1=1", "1 = 1");
-        inspectAssert("1+1", "1 + 1");
-        inspectAssert("1-1", "1 - 1");
-        inspectAssert("1*1", "1 * 1");
-        inspectAssert("1/1", "1 / 1");
-
-        inspectAssert("true&&true", "true && true");
-        inspectAssert("true||true", "true || true");
-
-        inspectAssert("1>=1", "1 >= 1");
-        inspectAssert("1<=1", "1 <= 1");
-        inspectAssert("1!=2", "1 != 2");
-
-        inspectAssert("2>1", "2 > 1");
-        inspectAssert("1>2", "1 > 2");
-        inspectAssert("!false", "!false");
-        inspectAssert("(-1)", "(-1)");
-    }
+//    @Test
+//    void support_inspect_expression() {
+//        inspectAssert("1=1", "1 = 1");
+//        inspectAssert("1+1", "1 + 1");
+//        inspectAssert("1-1", "1 - 1");
+//        inspectAssert("1*1", "1 * 1");
+//        inspectAssert("1/1", "1 / 1");
+//
+//        inspectAssert("true&&true", "true && true");
+//        inspectAssert("true||true", "true || true");
+//
+//        inspectAssert("1>=1", "1 >= 1");
+//        inspectAssert("1<=1", "1 <= 1");
+//        inspectAssert("1!=2", "1 != 2");
+//
+//        inspectAssert("2>1", "2 > 1");
+//        inspectAssert("1>2", "1 > 2");
+//        inspectAssert("!false", "!false");
+//        inspectAssert("(-1)", "(-1)");
+//    }
 
     @Test
     void support_inspect_type_assert() {

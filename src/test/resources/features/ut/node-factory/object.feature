@@ -13,13 +13,14 @@ Feature: object node
   Scenario: support empty object with no field
     Given the following dal code:
     """
-    {}
+      {}
     """
     Then got the following "object" node:
     """
     : {
       class.simpleName: 'ObjectNode'
       inspect: '{}'
+      positionBegin: 2
     }
     """
 
