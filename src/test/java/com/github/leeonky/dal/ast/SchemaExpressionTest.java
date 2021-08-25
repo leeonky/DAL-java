@@ -9,46 +9,47 @@ import java.time.Instant;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class TypeExpressionTest {
+class SchemaExpressionTest {
     RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
 
     @Test
     void unexpected_data_type_should_return_false() {
-        TypeExpression typeExpression = new TypeExpression(new ConstNode(1), new SchemaNode("String"));
+        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode(1), new SchemaNode("String"));
 
-        assertThat(typeExpression.evaluate(runtimeContextBuilder.build(null)))
+        assertThat(schemaExpression.evaluate(runtimeContextBuilder.build(null)))
                 .isEqualTo(false);
     }
 
     @Test
     void should_return_true_when_type_matches() {
-        TypeExpression typeExpression = new TypeExpression(new ConstNode(1), new SchemaNode("Integer"));
+        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode(1), new SchemaNode("Integer"));
 
-        assertThat(typeExpression.evaluate(runtimeContextBuilder.build(null)))
+        assertThat(schemaExpression.evaluate(runtimeContextBuilder.build(null)))
                 .isEqualTo(true);
     }
 
     @Test
     void support_return_value_as_schema_type() {
-        TypeExpression typeExpression = new TypeExpression(new ConstNode("2000-10-10T00:00:00Z"), new SchemaNode("Instant"));
+        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode("2000-10-10T00:00:00Z"), new SchemaNode("Instant"));
 
-        typeExpression.evaluate(runtimeContextBuilder.build(null));
+        schemaExpression.evaluate(runtimeContextBuilder.build(null));
 
-        assertThat(typeExpression.getTypeInstance())
+        assertThat(schemaExpression.getTypeInstance())
                 .isEqualTo(Instant.parse("2000-10-10T00:00:00Z"));
     }
 
     @Test
     void support_return_schema_name() {
-        TypeExpression typeExpression = new TypeExpression(new ConstNode(1), new SchemaNode("Integer"));
+        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode(1), new SchemaNode("Integer"));
 
-        assertThat(typeExpression.getSchemaName()).isEqualTo("Integer");
+        assertThat(schemaExpression.getSchemaName()).isEqualTo("Integer");
     }
 
     @Test
     void record_schema_position_in_parsing() {
         RuntimeException runtimeException = assertThrows(RuntimeException.class, () ->
-                new TypeExpression(new ConstNode(1), new SchemaNode("Unknown"))
+                new SchemaExpression(new ConstNode(1),
+                        (SchemaNode) new SchemaNode("Unknown").setPositionBegin(5))
                         .evaluate(new RuntimeContextBuilder().build(null)));
 
         assertThat(runtimeException)

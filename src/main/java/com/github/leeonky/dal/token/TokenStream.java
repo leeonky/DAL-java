@@ -2,7 +2,7 @@ package com.github.leeonky.dal.token;
 
 import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.TypeExpression.Operator;
+import com.github.leeonky.dal.ast.SchemaExpression.Operator;
 
 import java.util.*;
 import java.util.function.Supplier;

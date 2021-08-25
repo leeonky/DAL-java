@@ -11,13 +11,13 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
-public class TypeExpression extends Node {
+public class SchemaExpression extends Node {
     private final Node instance;
     private final List<SchemaNode> schemaNodes = new ArrayList<>();
     private final ObjectRef objectRef = new ObjectRef();
     private Operator operator = Operator.NONE;
 
-    public TypeExpression(Node instance, SchemaNode node) {
+    public SchemaExpression(Node instance, SchemaNode node) {
         this.instance = instance;
         schemaNodes.add(node);
     }
@@ -71,8 +71,8 @@ public class TypeExpression extends Node {
         schemaNodes.add(schemaNode);
     }
 
-    final public TypeWhichExpression which(Node whichClause) {
-        return new TypeWhichExpression(this, whichClause);
+    final public SchemaWhichExpression which(Node whichClause) {
+        return new SchemaWhichExpression(this, whichClause);
     }
 
     public enum Operator {

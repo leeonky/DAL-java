@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TypeWhichExpressionTest {
-    private static final TypeExpression NON_MATCH_TYPE_EXPRESSION = new TypeExpression(new ConstNode(1), new SchemaNode("String"));
-    private static final TypeExpression MATCHES_TYPE_EXPRESSION = new TypeExpression(new ConstNode(1), new SchemaNode("Integer"));
+class SchemaWhichExpressionTest {
+    private static final SchemaExpression NON_MATCH_TYPE_EXPRESSION = new SchemaExpression(new ConstNode(1), new SchemaNode("String"));
+    private static final SchemaExpression MATCHES_TYPE_EXPRESSION = new SchemaExpression(new ConstNode(1), new SchemaNode("Integer"));
     RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
 
     @Test
@@ -31,9 +31,9 @@ class TypeWhichExpressionTest {
     @Test
     void should_wrapper_object_as_target_type() {
 
-        TypeWhichExpression typeWhichExpression = new TypeExpression(new ConstNode("http://www.baidu.com"),
+        SchemaWhichExpression schemaWhichExpression = new SchemaExpression(new ConstNode("http://www.baidu.com"),
                 new SchemaNode("URL")).which(new PropertyNode(InputNode.INSTANCE, "protocol"));
 
-        assertThat(typeWhichExpression.evaluate(runtimeContextBuilder.build(null))).isEqualTo("http");
+        assertThat(schemaWhichExpression.evaluate(runtimeContextBuilder.build(null))).isEqualTo("http");
     }
 }

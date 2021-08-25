@@ -8,7 +8,7 @@ Feature: type expression
     Then got the following "expression" node:
     """
     : {
-      class.simpleName: 'TypeExpression'
+      class.simpleName: 'SchemaExpression'
       inspect: '1 is Integer'
       positionBegin: 2
     }
@@ -52,7 +52,7 @@ Feature: type expression
     Then got the following "expression" node:
     """
     : {
-      class.simpleName: 'TypeExpression'
+      class.simpleName: 'SchemaExpression'
       inspect: '1 is Integer | Number'
     }
     """

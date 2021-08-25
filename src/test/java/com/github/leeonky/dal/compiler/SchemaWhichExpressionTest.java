@@ -1,12 +1,12 @@
 package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.TypeWhichExpression;
+import com.github.leeonky.dal.ast.SchemaWhichExpression;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TypeWhichExpressionTest extends NodeFactoryTestBase {
+class SchemaWhichExpressionTest extends NodeFactoryTestBase {
 
     @Override
     protected NodeFactory getDefaultNodeFactory() {
@@ -17,7 +17,7 @@ class TypeWhichExpressionTest extends NodeFactoryTestBase {
     void support_type_which_expression() {
         Node node = givenCode("1 is Integer which true").fetchNode();
 
-        assertThat(node).isInstanceOf(TypeWhichExpression.class);
+        assertThat(node).isInstanceOf(SchemaWhichExpression.class);
         assertThat(node.inspect()).isEqualTo("1 is Integer which true");
     }
 
@@ -25,7 +25,7 @@ class TypeWhichExpressionTest extends NodeFactoryTestBase {
     void support_type_which_complex_expression() {
         Node node = givenCode("1 is Integer which true and true").fetchNode();
 
-        assertThat(node).isInstanceOf(TypeWhichExpression.class);
+        assertThat(node).isInstanceOf(SchemaWhichExpression.class);
         assertThat(node.inspect()).isEqualTo("1 is Integer which true and true");
     }
 

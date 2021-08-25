@@ -4,8 +4,8 @@ import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.Expression;
 import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.ast.SchemaExpression;
 import com.github.leeonky.dal.ast.SchemaNode;
-import com.github.leeonky.dal.ast.TypeExpression;
 import com.github.leeonky.dal.token.Token;
 
 import java.util.function.BiFunction;
@@ -65,12 +65,12 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
         @Override
         public Node apply(NodeParser nodeParser, Node node) {
             if (nodeParser.tokenStream.isCurrentKeywordAndTake(Constants.KeyWords.IS)) {
-                TypeExpression typeExpression = new TypeExpression(node, parseSchema(nodeParser));
+                SchemaExpression schemaExpression = new SchemaExpression(node, parseSchema(nodeParser));
                 nodeParser.tokenStream.getSchemaOperators().forEach(opt ->
-                        typeExpression.appendSchema(opt, parseSchema(nodeParser)));
+                        schemaExpression.appendSchema(opt, parseSchema(nodeParser)));
                 if (nodeParser.tokenStream.isCurrentKeywordAndTake(Constants.KeyWords.WHICH))
-                    return typeExpression.which(expressionNodeFactory.fetchNode(nodeParser));
-                return typeExpression;
+                    return schemaExpression.which(expressionNodeFactory.fetchNode(nodeParser));
+                return schemaExpression;
             }
             return null;
         }
