@@ -83,7 +83,7 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
                 } else
                     throw new SyntaxException(nodeParser.tokenStream.getPosition(), "operand of `is` must be schema type");
             }
-            throw new SyntaxException(nodeParser.tokenStream.getPosition(), "Schema expression not finished");
+            throw new SyntaxException(nodeParser.tokenStream.getPosition(), "schema expression not finished");
         }
     }
 }

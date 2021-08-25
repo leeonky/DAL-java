@@ -1,11 +1,13 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.RuntimeContextBuilder;
+import com.github.leeonky.dal.RuntimeException;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TypeExpressionTest {
     RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
@@ -41,5 +43,15 @@ class TypeExpressionTest {
         TypeExpression typeExpression = new TypeExpression(new ConstNode(1), new SchemaNode("Integer"));
 
         assertThat(typeExpression.getSchemaName()).isEqualTo("Integer");
+    }
+
+    @Test
+    void record_schema_position_in_parsing() {
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () ->
+                new TypeExpression(new ConstNode(1), new SchemaNode("Unknown"))
+                        .evaluate(new RuntimeContextBuilder().build(null)));
+
+        assertThat(runtimeException)
+                .hasFieldOrPropertyWithValue("position", 5);
     }
 }

@@ -66,7 +66,7 @@ public class TypeExpression extends Node {
 
     public void appendSchema(Operator operator, SchemaNode schemaNode) {
         if (this.operator != Operator.NONE && this.operator != operator)
-            throw new SyntaxException(schemaNode.getPositionBegin(), "Schema operator should be consistent");
+            throw new SyntaxException(schemaNode.getPositionBegin(), "schema operator was different");
         this.operator = operator;
         schemaNodes.add(schemaNode);
     }
@@ -76,6 +76,7 @@ public class TypeExpression extends Node {
     }
 
     public enum Operator {
+        //TODO replace | and /
         NONE(""), AND("|"), OR("/");
 
         private final String value;
