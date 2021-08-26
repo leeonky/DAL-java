@@ -1,4 +1,4 @@
-Feature: type expression
+Feature: schema expression
 
   Scenario: support schema checking expression
     Given the following dal code:
