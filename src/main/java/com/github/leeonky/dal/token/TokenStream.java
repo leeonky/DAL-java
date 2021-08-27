@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.token;
 
+import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.SchemaExpression.Operator;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -57,23 +57,12 @@ public class TokenStream {
         return false;
     }
 
-    public Iterable<Operator> getSchemaOperators() {
-        return () -> new Iterator<Operator>() {
-            @Override
-            public boolean hasNext() {
-                return hasTokens() && currentType() == Token.Type.OPERATOR
-                        && ("|".equals(currentToken().getValue())
-                        || "/".equals(currentToken().getValue()));
-            }
-
-            @Override
-            public Operator next() {
-                if ("|".equals(pop().getValue()))
-                    return Operator.AND;
-                else
-                    return Operator.OR;
-            }
-        };
+    public boolean isCurrentSchemaConnectorAndTake() {
+        if (hasTokens() && currentToken().getType() == Token.Type.OPERATOR && (Constants.SCHEMA_DELIMITER.equals(currentToken().getValue()))) {
+            index++;
+            return true;
+        }
+        return false;
     }
 
     public Optional<Token> lastToken() {

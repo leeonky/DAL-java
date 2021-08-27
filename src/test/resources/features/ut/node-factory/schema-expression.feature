@@ -47,35 +47,20 @@ Feature: schema expression
   Scenario: support multi schemas in expression
     Given the following dal code:
     """
-    1 is Integer | Number
+    1 is Integer / Number
     """
     Then got the following "expression" node:
     """
     : {
       class.simpleName: 'SchemaExpression'
-      inspect: '1 is Integer | Number'
+      inspect: '1 is Integer / Number'
     }
-    """
-
-  Scenario: raise error when schema operator is different
-    Given the following dal code:
-    """
-    1 is Integer | Number / Long
-    """
-    Then failed to get "expression" node with the following message:
-    """
-    schema operator was different
-    """
-    And got the following source code information:
-    """
-    1 is Integer | Number / Long
-                            ^
     """
 
   Scenario: raise error when schema list not finished
     Given the following dal code:
     """
-    1 is Integer |
+    1 is Integer /
     """
     Then failed to get "expression" node with the following message:
     """
@@ -83,6 +68,6 @@ Feature: schema expression
     """
     And got the following source code information:
     """
-    1 is Integer |
+    1 is Integer /
                   ^
     """

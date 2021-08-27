@@ -58,7 +58,7 @@ Feature: list: [...]
            ^
     """
 
-#  TODO null equal to []
+#  TODO null matches []
 #  TODO match
 #  TODO equal
 #  TODO skip element

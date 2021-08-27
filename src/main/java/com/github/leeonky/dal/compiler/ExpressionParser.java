@@ -66,8 +66,8 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
         public Node apply(NodeParser nodeParser, Node node) {
             if (nodeParser.tokenStream.isCurrentKeywordAndTake(Constants.KeyWords.IS)) {
                 SchemaExpression schemaExpression = new SchemaExpression(node, parseSchema(nodeParser));
-                nodeParser.tokenStream.getSchemaOperators().forEach(opt ->
-                        schemaExpression.appendSchema(opt, parseSchema(nodeParser)));
+                while (nodeParser.tokenStream.isCurrentSchemaConnectorAndTake())
+                    schemaExpression.appendSchema(parseSchema(nodeParser));
                 if (nodeParser.tokenStream.isCurrentKeywordAndTake(Constants.KeyWords.WHICH))
                     return schemaExpression.which(expressionNodeFactory.fetchNode(nodeParser));
                 return schemaExpression;
@@ -76,14 +76,12 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
         }
 
         private SchemaNode parseSchema(NodeParser nodeParser) {
-            if (nodeParser.tokenStream.hasTokens()) {
-                if (nodeParser.tokenStream.currentType() == Token.Type.IDENTIFIER) {
-                    Token token = nodeParser.tokenStream.pop();
-                    return (SchemaNode) new SchemaNode((String) token.getValue()).setPositionBegin(token.getPositionBegin());
-                } else
-                    throw new SyntaxException(nodeParser.tokenStream.getPosition(), "operand of `is` must be schema type");
-            }
-            throw new SyntaxException(nodeParser.tokenStream.getPosition(), "schema expression not finished");
+            if (!nodeParser.tokenStream.hasTokens())
+                throw new SyntaxException(nodeParser.tokenStream.getPosition(), "schema expression not finished");
+            if (nodeParser.tokenStream.currentType() != Token.Type.IDENTIFIER)
+                throw new SyntaxException(nodeParser.tokenStream.getPosition(), "operand of `is` must be schema type");
+            Token token = nodeParser.tokenStream.pop();
+            return (SchemaNode) new SchemaNode((String) token.getValue()).setPositionBegin(token.getPositionBegin());
         }
     }
 }

@@ -2,20 +2,19 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
-import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.token.IllegalTypeException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.Constants.SCHEMA_DELIMITER;
 import static java.lang.String.format;
 
 public class SchemaExpression extends Node {
     private final Node instance;
     private final List<SchemaNode> schemaNodes = new ArrayList<>();
     private final ObjectRef objectRef = new ObjectRef();
-    private Operator operator = Operator.NONE;
 
     public SchemaExpression(Node instance, SchemaNode node) {
         this.instance = instance;
@@ -36,6 +35,7 @@ public class SchemaExpression extends Node {
             boolean failed = isFailed(context, objectRef);
             if (failed)
                 System.err.println("Warning: Type assertion `" + inspect() + "` got false.");
+            //TODO throw error
             return !failed;
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), getPositionBegin());
@@ -43,9 +43,7 @@ public class SchemaExpression extends Node {
     }
 
     private boolean isFailed(RuntimeContext context, ObjectRef objectRef) {
-        return operator == Operator.AND ?
-                !schemaNodes.stream().allMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef))
-                : schemaNodes.stream().noneMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
+        return !schemaNodes.stream().allMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
     }
 
     private boolean verifyAndConvertAsSchemaType(RuntimeContext context, SchemaNode schemaNode, ObjectRef objectRef) {
@@ -61,29 +59,15 @@ public class SchemaExpression extends Node {
     @Override
     public String inspect() {
         return format("%s is %s", instance.inspect(), schemaNodes.stream().map(SchemaNode::inspect)
-                .collect(Collectors.joining(" " + operator.value + " ")));
+                .collect(Collectors.joining(String.format(" %s ", SCHEMA_DELIMITER))));
     }
 
-    public void appendSchema(Operator operator, SchemaNode schemaNode) {
-        if (this.operator != Operator.NONE && this.operator != operator)
-            throw new SyntaxException(schemaNode.getPositionBegin(), "schema operator was different");
-        this.operator = operator;
+    public void appendSchema(SchemaNode schemaNode) {
         schemaNodes.add(schemaNode);
     }
 
     final public SchemaWhichExpression which(Node whichClause) {
         return new SchemaWhichExpression(this, whichClause);
-    }
-
-    public enum Operator {
-        //TODO replace | and /
-        NONE(""), AND("|"), OR("/");
-
-        private final String value;
-
-        Operator(String value) {
-            this.value = value;
-        }
     }
 
     static class ObjectRef {
