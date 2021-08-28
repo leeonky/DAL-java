@@ -14,9 +14,6 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
     public static final ExpressionParser INSTANCE = new ExpressionParser();
     private final OperatorExpressionFactory operatorExpressionFactory = new OperatorExpressionFactory();
     private final SchemaExpressionFactory schemaExpressionFactory = new SchemaExpressionFactory();
-    private final NodeFactory rightOperandNodeFactory = NodeFactory.createRightOperandNodeFactory();
-    private final NodeFactory singleEvaluableNodeFactory = NodeFactory.createSingleEvaluableNodeFactory();
-    private final NodeFactory expressionNodeFactory = NodeFactory.createExpressionNodeFactory();
 
     @Override
     public Node apply(NodeParser nodeParser, Node first) {
@@ -36,7 +33,7 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
         return first;
     }
 
-    class OperatorExpressionFactory implements BiFunction<NodeParser, Node, Node> {
+    static class OperatorExpressionFactory implements BiFunction<NodeParser, Node, Node> {
 
         @Override
         public Node apply(NodeParser nodeParser, Node first) {
@@ -48,8 +45,8 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
                         return new Expression(first, operatorToken.toOperator(false),
                                 //TODO need UT
                                 operatorToken.judgement() ?
-                                        rightOperandNodeFactory.fetchNode(nodeParser) :
-                                        singleEvaluableNodeFactory.fetchNode(nodeParser)).adjustOperatorOrder();
+                                        NodeFactories.RIGHT_OPERAND.fetchNode(nodeParser) :
+                                        NodeFactories.SINGLE_EVALUABLE.fetchNode(nodeParser)).adjustOperatorOrder();
                     throw new SyntaxException(nodeParser.tokenStream.getPosition(), "expression is not finished");
                 } finally {
                     nodeParser.operators.pop();
@@ -60,7 +57,7 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
 
     }
 
-    class SchemaExpressionFactory implements BiFunction<NodeParser, Node, Node> {
+    static class SchemaExpressionFactory implements BiFunction<NodeParser, Node, Node> {
 
         @Override
         public Node apply(NodeParser nodeParser, Node node) {
@@ -69,7 +66,7 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
                 while (nodeParser.tokenStream.isCurrentSchemaConnectorAndTake())
                     schemaExpression.appendSchema(parseSchema(nodeParser));
                 if (nodeParser.tokenStream.isCurrentKeywordAndTake(Constants.KeyWords.WHICH))
-                    return schemaExpression.which(expressionNodeFactory.fetchNode(nodeParser));
+                    return schemaExpression.which(NodeFactories.EXPRESSION.fetchNode(nodeParser));
                 return schemaExpression;
             }
             return null;

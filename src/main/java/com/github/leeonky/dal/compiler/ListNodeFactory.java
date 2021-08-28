@@ -8,9 +8,8 @@ import static com.github.leeonky.dal.token.Token.Type.OPENING_BRACKET;
 
 //TODO set position
 public class ListNodeFactory implements NodeFactory {
-    //TODO should contains expression => a: 100+10
-    private static final NodeFactory rightOperandNodeFactory = NodeFactory.createRightOperandNodeFactory();
 
+    //TODO should contains expression => a: 100+10
     @Override
     public Node fetchNode(NodeParser nodeParser) {
         return nodeParser.tokenStream.parseBetween(OPENING_BRACKET, CLOSING_BRACKET, ']', () -> {
@@ -27,7 +26,7 @@ public class ListNodeFactory implements NodeFactory {
                             //TODO hardcode
                             operatorToken.toOperator(false),
                             //TODO expression not finished
-                            rightOperandNodeFactory.fetchNode(nodeParser)));
+                            NodeFactories.RIGHT_OPERAND.fetchNode(nodeParser)));
                 }
             }
             return listNode;

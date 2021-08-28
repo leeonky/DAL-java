@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.cucumber;
 
+import com.github.leeonky.dal.compiler.NodeFactories;
 import com.github.leeonky.dal.compiler.NodeFactory;
 import com.github.leeonky.dal.token.TokenFactory;
 import io.cucumber.java.en.Given;
@@ -31,19 +32,19 @@ public class TestSteps {
     }};
 
     private final Map<String, NodeFactory> nodeFactoryMap = new HashMap<String, NodeFactory>() {{
-        put("const", NodeFactory.createConstNodeFactory());
-        put("parentheses", NodeFactory.createParenthesesNodeFactory());
-        put("regex", NodeFactory.createRegexNodeFactory());
-        put("property", NodeFactory.createPropertyNodeFactory());
-        put("identifier-property", NodeFactory.createIdentifierPropertyNodeFactory());
-        put("explicit-property", NodeFactory.createExplicitPropertyNodeFactory());
-        put("bean-property", NodeFactory.createBeanPropertyNodeFactory());
-        put("bracket-property", NodeFactory.createBracketPropertyNodeFactory());
-        put("single-evaluable", NodeFactory.createSingleEvaluableNodeFactory());
-        put("right-operand", NodeFactory.createRightOperandNodeFactory());
-        put("expression", NodeFactory.createExpressionNodeFactory());
-        put("object", NodeFactory.createObjectNodeFactory());
-        put("list", NodeFactory.createListNodeFactory());
+        put("const", NodeFactories.CONST);
+        put("parentheses", NodeFactories.PARENTHESES);
+        put("regex", NodeFactories.REGEX);
+        put("property", NodeFactories.PROPERTY);
+        put("identifier-property", NodeFactories.IDENTIFIER);
+        put("explicit-property", NodeFactories.EXPLICIT_PROPERTY);
+        put("bean-property", NodeFactories.BEAN_PROPERTY);
+        put("bracket-property", NodeFactories.BRACKET_PROPERTY);
+        put("single-evaluable", NodeFactories.SINGLE_EVALUABLE);
+        put("right-operand", NodeFactories.RIGHT_OPERAND);
+        put("expression", NodeFactories.EXPRESSION);
+        put("object", NodeFactories.OBJECT);
+        put("list", NodeFactories.LIST);
     }};
 
     @Given("the following dal code:")

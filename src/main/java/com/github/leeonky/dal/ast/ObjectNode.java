@@ -28,7 +28,6 @@ public class ObjectNode extends Node {
         Object actual = actualNode.evaluate(context);
         DataObject data = context.wrap(actual);
         Set<String> dataFields = new LinkedHashSet<>(data.getPropertyReaderNames());
-        //TODO property chain
         //TODO property alias
         dataFields.removeAll(expressions.stream().map(expression -> ((PropertyNode) expression.getLeftOperand()).getRootName())
                 .collect(Collectors.toSet()));
