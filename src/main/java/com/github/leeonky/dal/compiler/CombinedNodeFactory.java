@@ -14,9 +14,7 @@ class CombinedNodeFactory implements NodeFactory {
     @Override
     public Node fetchNode(NodeParser nodeParser) {
         return nodeFactories.stream().map(factory -> factory.fetchNode(nodeParser))
-                .filter(Objects::nonNull)
-                .findFirst()
-                .orElse(null);
+                .filter(Objects::nonNull).findFirst().orElse(null);
     }
 
     public void combine(NodeFactory... factories) {

@@ -16,21 +16,21 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
     private final SchemaExpressionFactory schemaExpressionFactory = new SchemaExpressionFactory();
 
     @Override
-    public Node apply(NodeParser nodeParser, Node first) {
+    public Node apply(NodeParser nodeParser, Node previous) {
         if (nodeParser.tokenStream.hasTokens()) {
             //TODO refactor
-            Node expression = operatorExpressionFactory.apply(nodeParser, first);
+            Node expression = operatorExpressionFactory.apply(nodeParser, previous);
             if (expression == null)
-                expression = schemaExpressionFactory.apply(nodeParser, first);
+                expression = schemaExpressionFactory.apply(nodeParser, previous);
             if (expression != null)
-                return apply(nodeParser, expression.setPositionBegin(first.getPositionBegin()));
+                return apply(nodeParser, expression.setPositionBegin(previous.getPositionBegin()));
             if (nodeParser.tokenStream.currentType() == Token.Type.CLOSING_PARENTHESIS) {
                 if (nodeParser.isInParentheses())
                     throw new SyntaxException(nodeParser.tokenStream.getPosition(), "missed '('");
-                return first;
+                return previous;
             }
         }
-        return first;
+        return previous;
     }
 
     static class OperatorExpressionFactory implements BiFunction<NodeParser, Node, Node> {
