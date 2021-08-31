@@ -6,16 +6,19 @@ import com.github.leeonky.dal.ast.PropertyNode;
 import com.github.leeonky.dal.ast.RegexNode;
 import com.github.leeonky.dal.token.Token;
 
+import static com.github.leeonky.dal.compiler.ExpressionParser.EXPRESSION_PARSER;
+
 public class NodeFactories {
-    public static final CombinedNodeFactory EXPLICIT_PROPERTY = new CombinedNodeFactory();
-    public static final CombinedNodeFactory PROPERTY = new CombinedNodeFactory();
-    public static final NodeFactory BRACKET_PROPERTY = NodeParser::compileBracketPropertyNode;
     public static final SingleTokenNodeFactory BEAN_PROPERTY = new SingleTokenNodeFactory(Token.Type.PROPERTY) {
         @Override
         protected Node createNode(NodeParser nodeParser, Object value) {
             return new PropertyNode(nodeParser.getThisNode(), value);
         }
     };
+    public static final NodeFactory BRACKET_PROPERTY = NodeParser::compileBracketPropertyNode;
+    public static final NodeFactory EXPLICIT_PROPERTY = BEAN_PROPERTY.combine(BRACKET_PROPERTY);
+    public static final NodeFactory IDENTIFIER = NodeParser::compileIdentifierProperty;
+    public static final NodeFactory PROPERTY = IDENTIFIER.combine(EXPLICIT_PROPERTY);
     public static final SingleTokenNodeFactory REGEX = new SingleTokenNodeFactory(Token.Type.REGEX) {
         @Override
         protected Node createNode(NodeParser nodeParser, Object value) {
@@ -30,20 +33,10 @@ public class NodeFactories {
             return new ConstNode(value);
         }
     };
-    public static final NodeFactory IDENTIFIER = NodeParser::compileIdentifierProperty;
-    public static final SingleEvaluableNodeFactory SINGLE_EVALUABLE = new SingleEvaluableNodeFactory();
-    public static final CombinedNodeFactory RIGHT_OPERAND = new CombinedNodeFactory();
-    public static final NodeFactory EXPRESSION = nodeParser -> ExpressionParser.INSTANCE.apply(nodeParser,
-            SINGLE_EVALUABLE.fetchNode(nodeParser));
+    public static final OperandNodeFactory OPERAND = new OperandNodeFactory();
+    public static final NodeFactory RIGHT_OPERAND = REGEX.combine(OBJECT).combine(LIST).combine(OPERAND);
     public static final NodeFactory PARENTHESES = NodeParser::compileParenthesesNode;
-
-    static {
-        EXPLICIT_PROPERTY.combine(BEAN_PROPERTY, BRACKET_PROPERTY);
-
-        PROPERTY.combine(IDENTIFIER, EXPLICIT_PROPERTY);
-
-        SINGLE_EVALUABLE.combine(CONST, PARENTHESES, PROPERTY);
-
-        RIGHT_OPERAND.combine(REGEX, OBJECT, LIST, SINGLE_EVALUABLE);
-    }
+    public static final NodeFactory SINGLE_EVALUABLE = CONST.combine(PARENTHESES).combine(PROPERTY);
+    public static final NodeFactory EXPRESSION = nodeParser -> EXPRESSION_PARSER.apply(nodeParser,
+            OPERAND.fetchNode(nodeParser));
 }

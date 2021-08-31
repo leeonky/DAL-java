@@ -6,9 +6,9 @@ import com.github.leeonky.dal.ast.Expression;
 import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 
-import java.util.Optional;
+import static java.util.Optional.ofNullable;
 
-class SingleEvaluableNodeFactory extends CombinedNodeFactory {
+class OperandNodeFactory implements NodeFactory {
 
     @Override
     public Node fetchNode(NodeParser nodeParser) {
@@ -18,23 +18,20 @@ class SingleEvaluableNodeFactory extends CombinedNodeFactory {
         return nodeParser.tokenStream.tryFetchUnaryOperator()
                 .map(token -> (Node) new Expression(new ConstNode(null),
                         token.toOperator(true), fetchNode(nodeParser)))
-                .orElseGet(() -> parsePropertyChain(nodeParser, Optional.ofNullable(super.fetchNode(nodeParser))
-                        .orElseGet(() -> giveDefault(nodeParser))));
+                .orElseGet(() -> parsePropertyChain(nodeParser,
+                        ofNullable(NodeFactories.SINGLE_EVALUABLE.fetchNode(nodeParser))
+                                .orElseGet(() -> giveDefault(nodeParser))));
     }
 
     private Node giveDefault(NodeParser nodeParser) {
         if (nodeParser.tokenStream.isFromBeginning())
             return InputNode.INSTANCE;
-        throw noValueException(nodeParser);
-    }
-
-    private SyntaxException noValueException(NodeParser nodeParser) {
-        return new SyntaxException(nodeParser.tokenStream.getPosition(), "expect a value or expression");
+        throw new SyntaxException(nodeParser.tokenStream.getPosition(), "expect a value or expression");
     }
 
     private Node parsePropertyChain(NodeParser nodeParser, Node node) {
         if (nodeParser.setThis(node) != null && nodeParser.tokenStream.hasTokens()) {
-            Node next = ((NodeFactory) NodeFactories.EXPLICIT_PROPERTY).fetchNode(nodeParser);
+            Node next = NodeFactories.EXPLICIT_PROPERTY.fetchNode(nodeParser);
             if (next != null)
                 return parsePropertyChain(nodeParser, next);
         }

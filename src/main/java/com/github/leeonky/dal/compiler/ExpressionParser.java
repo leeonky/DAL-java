@@ -11,7 +11,7 @@ import com.github.leeonky.dal.token.Token;
 import java.util.function.BiFunction;
 
 public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
-    public static final ExpressionParser INSTANCE = new ExpressionParser();
+    public static final ExpressionParser EXPRESSION_PARSER = new ExpressionParser();
     private final OperatorExpressionFactory operatorExpressionFactory = new OperatorExpressionFactory();
     private final SchemaExpressionFactory schemaExpressionFactory = new SchemaExpressionFactory();
 
@@ -46,7 +46,8 @@ public class ExpressionParser implements BiFunction<NodeParser, Node, Node> {
                                 //TODO need UT
                                 operatorToken.judgement() ?
                                         NodeFactories.RIGHT_OPERAND.fetchNode(nodeParser) :
-                                        NodeFactories.SINGLE_EVALUABLE.fetchNode(nodeParser)).adjustOperatorOrder();
+                                        NodeFactories.OPERAND.fetchNode(nodeParser)
+                        ).adjustOperatorOrder();
                     throw new SyntaxException(nodeParser.tokenStream.getPosition(), "expression is not finished");
                 } finally {
                     nodeParser.operators.pop();

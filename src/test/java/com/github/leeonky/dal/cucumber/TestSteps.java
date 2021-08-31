@@ -40,7 +40,7 @@ public class TestSteps {
         put("explicit-property", NodeFactories.EXPLICIT_PROPERTY);
         put("bean-property", NodeFactories.BEAN_PROPERTY);
         put("bracket-property", NodeFactories.BRACKET_PROPERTY);
-        put("single-evaluable", NodeFactories.SINGLE_EVALUABLE);
+        put("single-evaluable", NodeFactories.OPERAND);
         put("right-operand", NodeFactories.RIGHT_OPERAND);
         put("expression", NodeFactories.EXPRESSION);
         put("object", NodeFactories.OBJECT);

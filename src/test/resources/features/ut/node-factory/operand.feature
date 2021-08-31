@@ -1,4 +1,4 @@
-Feature: single evaluable node
+Feature: operand node
 
   Scenario: reference 'this' object when code is empty
     Given the following dal code:
