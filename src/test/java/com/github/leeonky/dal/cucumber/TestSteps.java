@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.cucumber;
 
-import com.github.leeonky.dal.compiler.NodeFactories;
 import com.github.leeonky.dal.compiler.NodeFactory;
 import com.github.leeonky.dal.token.TokenFactory;
 import io.cucumber.java.en.Given;
@@ -32,19 +31,19 @@ public class TestSteps {
     }};
 
     private final Map<String, NodeFactory> nodeFactoryMap = new HashMap<String, NodeFactory>() {{
-        put("const", NodeFactories.CONST);
-        put("parentheses", NodeFactories.PARENTHESES);
-        put("regex", NodeFactories.REGEX);
-        put("property", NodeFactories.PROPERTY);
-        put("identifier-property", NodeFactories.IDENTIFIER);
-        put("explicit-property", NodeFactories.EXPLICIT_PROPERTY);
-        put("bean-property", NodeFactories.BEAN_PROPERTY);
-        put("bracket-property", NodeFactories.BRACKET_PROPERTY);
-        put("single-evaluable", NodeFactories.OPERAND);
-        put("right-operand", NodeFactories.RIGHT_OPERAND);
-        put("expression", NodeFactories.EXPRESSION);
-        put("object", NodeFactories.OBJECT);
-        put("list", NodeFactories.LIST);
+        put("const", NodeFactory.CONST);
+        put("parentheses", NodeFactory.PARENTHESES);
+        put("regex", NodeFactory.REGEX);
+        put("property", NodeFactory.PROPERTY);
+        put("identifier-property", NodeFactory.IDENTIFIER);
+        put("explicit-property", NodeFactory.EXPLICIT_PROPERTY);
+        put("bean-property", NodeFactory.BEAN_PROPERTY);
+        put("bracket-property", NodeFactory.BRACKET_PROPERTY);
+        put("single-evaluable", NodeFactory.OPERAND);
+        put("right-operand", NodeFactory.RIGHT_OPERAND);
+        put("expression", NodeFactory.EXPRESSION);
+        put("object", NodeFactory.OBJECT);
+        put("list", NodeFactory.LIST);
     }};
 
     @Given("the following dal code:")
