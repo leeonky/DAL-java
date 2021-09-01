@@ -1,9 +1,8 @@
-package com.github.leeonky.dal.compiler;
+package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.ast.ConstNode;
-import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.RegexNode;
 import com.github.leeonky.dal.token.Token;
+
+import static java.util.Optional.ofNullable;
 
 public interface NodeFactory {
 
@@ -26,10 +25,7 @@ public interface NodeFactory {
     Node fetchNode(NodeParser nodeParser);
 
     default NodeFactory combine(NodeFactory nodeFactory) {
-        return nodeParser -> {
-            Node node = fetchNode(nodeParser);
-            return node == null ? nodeFactory.fetchNode(nodeParser) : node;
-        };
+        return nodeParser -> ofNullable(fetchNode(nodeParser)).orElseGet(() -> nodeFactory.fetchNode(nodeParser));
     }
 }
 

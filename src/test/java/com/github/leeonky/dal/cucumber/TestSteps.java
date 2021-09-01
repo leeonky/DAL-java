@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.cucumber;
 
-import com.github.leeonky.dal.compiler.NodeFactory;
+import com.github.leeonky.dal.ast.NodeFactory;
 import com.github.leeonky.dal.token.TokenFactory;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;

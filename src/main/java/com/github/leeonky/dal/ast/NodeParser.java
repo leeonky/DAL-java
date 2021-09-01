@@ -1,8 +1,7 @@
-package com.github.leeonky.dal.compiler;
+package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
-import com.github.leeonky.dal.ast.*;
 import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenStream;
 
@@ -15,26 +14,17 @@ import static com.github.leeonky.dal.token.Token.Type.*;
 import static java.util.Optional.ofNullable;
 
 public class NodeParser {
-    //TODO to be private
-    public final LinkedList<Token> operators = new LinkedList<>();
-    //TODO to be private
-    final TokenStream tokenStream;
+    private final LinkedList<Token> operators = new LinkedList<>();
+    private final TokenStream tokenStream;
     private final ExpressionFactory expressionFactory = ((ExpressionFactory) NodeParser::compileOperatorExpression)
             .combine(NodeParser::compileSchemaExpression);
     private int parenthesisCount = 0;
+
+    // TODO to be removed
     private Node thisNode = InputNode.INSTANCE;
 
     public NodeParser(TokenStream tokenStream) {
         this.tokenStream = tokenStream;
-    }
-
-    //TODO logic for clear
-    public Node setThis(Node node) {
-        return thisNode = node;
-    }
-
-    public Node getThisNode() {
-        return thisNode;
     }
 
     public Node compileParenthesesNode() {
@@ -55,7 +45,7 @@ public class NodeParser {
     public Node compileBracketPropertyNode() {
         return tokenStream.parseBetween(OPENING_BRACKET, CLOSING_BRACKET, ']', () -> {
             if (tokenStream.hasTokens())
-                return new PropertyNode(getThisNode(), tokenStream.pop().getPropertyOrIndex(), BRACKET);
+                return new PropertyNode(thisNode, tokenStream.pop().getPropertyOrIndex(), BRACKET);
             throw new SyntaxException(tokenStream.getPosition(), "should given one property or array index in `[]`");
         });
     }
@@ -65,7 +55,7 @@ public class NodeParser {
         if (tokenStream.currentType() == IDENTIFIER) {
             Token token = tokenStream.pop();
             String[] names = ((String) token.getValue()).split("\\.");
-            Node node = new PropertyNode(getThisNode(), names[0], PropertyNode.Type.IDENTIFIER)
+            Node node = new PropertyNode(thisNode, names[0], PropertyNode.Type.IDENTIFIER)
                     .setPositionBegin(token.getPositionBegin());
             for (int i = 1; i < names.length; i++)
                 node = new PropertyNode(node, names[i], DOT)
@@ -138,12 +128,13 @@ public class NodeParser {
     }
 
     private Node parsePropertyChain(Node node) {
-        if (setThis(node) != null && tokenStream.hasTokens()) {
+        thisNode = node;
+        if (tokenStream.hasTokens()) {
             Node next = NodeFactory.EXPLICIT_PROPERTY.fetchNode(this);
             if (next != null)
                 return parsePropertyChain(next);
         }
-        setThis(InputNode.INSTANCE);
+        thisNode = InputNode.INSTANCE;
         return node;
     }
 
@@ -209,6 +200,6 @@ public class NodeParser {
     }
 
     public PropertyNode createProperty(Object value) {
-        return new PropertyNode(getThisNode(), value);
+        return new PropertyNode(thisNode, value);
     }
 }

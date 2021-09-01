@@ -1,8 +1,8 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.compiler.NodeFactory;
-import com.github.leeonky.dal.compiler.NodeParser;
+import com.github.leeonky.dal.ast.NodeFactory;
+import com.github.leeonky.dal.ast.NodeParser;
 import com.github.leeonky.dal.parser.TokenParser;
 import com.github.leeonky.dal.token.SourceCode;
 import com.github.leeonky.dal.token.TokenStream;
