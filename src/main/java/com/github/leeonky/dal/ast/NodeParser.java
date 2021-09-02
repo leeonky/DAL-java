@@ -19,8 +19,6 @@ public class NodeParser {
     private final ExpressionFactory expressionFactory = ((ExpressionFactory) NodeParser::compileOperatorExpression)
             .combine(NodeParser::compileSchemaExpression);
     private int parenthesisCount = 0;
-
-    // TODO to be removed
     private Node thisNode = InputNode.INSTANCE;
 
     public NodeParser(TokenStream tokenStream) {
@@ -55,7 +53,7 @@ public class NodeParser {
         if (tokenStream.currentType() == IDENTIFIER) {
             Token token = tokenStream.pop();
             String[] names = ((String) token.getValue()).split("\\.");
-            Node node = new PropertyNode(thisNode, names[0], PropertyNode.Type.IDENTIFIER)
+            Node node = new PropertyNode(InputNode.INSTANCE, names[0], PropertyNode.Type.IDENTIFIER)
                     .setPositionBegin(token.getPositionBegin());
             for (int i = 1; i < names.length; i++)
                 node = new PropertyNode(node, names[i], DOT)
@@ -89,7 +87,8 @@ public class NodeParser {
                     //TODO use JudgementExpression type
                     listNode.addJudgements(new Expression(
                             //TODO access element
-                            new PropertyNode(InputNode.INSTANCE, index++),
+                            //TODO not DOT mode
+                            new PropertyNode(InputNode.INSTANCE, index++, DOT),
                             //TODO hardcode
                             operatorToken.toOperator(false),
                             //TODO expression not finished
@@ -199,7 +198,7 @@ public class NodeParser {
         return null;
     }
 
-    public PropertyNode createProperty(Object value) {
-        return new PropertyNode(thisNode, value);
+    public PropertyNode createThisDotProperty(Object value) {
+        return new PropertyNode(thisNode, value, DOT);
     }
 }

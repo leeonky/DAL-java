@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 
+import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -35,12 +36,12 @@ class DALCompilerTest {
 
         @Test
         void access_property_of_root_value() {
-            assertCompileNode(".result", new PropertyNode(InputNode.INSTANCE, "result"));
+            assertCompileNode(".result", new PropertyNode(InputNode.INSTANCE, "result", DOT));
         }
 
         @Test
         void access_property_list_of_root_value() {
-            assertCompileNode(".sub .result", new PropertyNode(new PropertyNode(InputNode.INSTANCE, "sub"), "result"));
+            assertCompileNode(".sub .result", new PropertyNode(new PropertyNode(InputNode.INSTANCE, "sub", DOT), "result", DOT));
         }
 
         @Test
@@ -50,13 +51,13 @@ class DALCompilerTest {
 
         @Test
         void access_one_const_value_property_ignore_root_value() {
-            assertCompileNode("''.empty", new PropertyNode(new ConstNode(""), "empty"));
+            assertCompileNode("''.empty", new PropertyNode(new ConstNode(""), "empty", DOT));
         }
 
         @Test
         void access_property_after_parentheses() {
             ParenthesesNode parenthesesNode = new ParenthesesNode(new ConstNode(""));
-            assertCompileNode("('').empty", new PropertyNode(parenthesesNode, "empty"));
+            assertCompileNode("('').empty", new PropertyNode(parenthesesNode, "empty", DOT));
         }
     }
 
@@ -65,7 +66,7 @@ class DALCompilerTest {
 
         @Test
         void support_access_array_by_const_index() {
-            assertCompileNode("[0]", new PropertyNode(InputNode.INSTANCE, 0));
+            assertCompileNode("[0]", new PropertyNode(InputNode.INSTANCE, 0, DOT));
         }
     }
 

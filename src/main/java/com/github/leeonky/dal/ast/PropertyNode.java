@@ -5,17 +5,12 @@ import com.github.leeonky.dal.RuntimeException;
 
 import java.util.Objects;
 
-import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 import static java.lang.String.format;
 
 public class PropertyNode extends Node {
     private final Node instanceNode;
     private final Object name;
     private final Type type;
-
-    public PropertyNode(Node instanceNode, Object name) {
-        this(instanceNode, name, DOT);
-    }
 
     public PropertyNode(Node instanceNode, Object name, Type type) {
         this.instanceNode = instanceNode;

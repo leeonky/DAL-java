@@ -3,6 +3,7 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.RuntimeContextBuilder;
 import org.junit.jupiter.api.Test;
 
+import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SchemaWhichExpressionTest {
@@ -32,7 +33,7 @@ class SchemaWhichExpressionTest {
     void should_wrapper_object_as_target_type() {
 
         SchemaWhichExpression schemaWhichExpression = new SchemaExpression(new ConstNode("http://www.baidu.com"),
-                new SchemaNode("URL")).which(new PropertyNode(InputNode.INSTANCE, "protocol"));
+                new SchemaNode("URL")).which(new PropertyNode(InputNode.INSTANCE, "protocol", DOT));
 
         assertThat(schemaWhichExpression.evaluate(runtimeContextBuilder.build(null))).isEqualTo("http");
     }

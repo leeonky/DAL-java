@@ -8,10 +8,10 @@ public interface NodeFactory {
 
     NodeFactory
             BRACKET_PROPERTY = NodeParser::compileBracketPropertyNode,
-            BEAN_PROPERTY = nodeParser -> nodeParser.compileSingle(Token.Type.PROPERTY, nodeParser::createProperty),
+            BEAN_PROPERTY = nodeParser -> nodeParser.compileSingle(Token.Type.PROPERTY, nodeParser::createThisDotProperty),
             EXPLICIT_PROPERTY = BEAN_PROPERTY.combine(BRACKET_PROPERTY),
-            IDENTIFIER = NodeParser::compileIdentifierProperty,
-            PROPERTY = IDENTIFIER.combine(EXPLICIT_PROPERTY),
+            IDENTIFIER_PROPERTY = NodeParser::compileIdentifierProperty,
+            PROPERTY = IDENTIFIER_PROPERTY.combine(EXPLICIT_PROPERTY),
             REGEX = nodeParser -> nodeParser.compileSingle(Token.Type.REGEX, value -> new RegexNode((String) value)),
             CONST = nodeParser -> nodeParser.compileSingle(Token.Type.CONST_VALUE, ConstNode::new),
             OPERAND = NodeParser::compileOperand,

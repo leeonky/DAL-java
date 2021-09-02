@@ -35,7 +35,7 @@ public class TestSteps {
         put("parentheses", NodeFactory.PARENTHESES);
         put("regex", NodeFactory.REGEX);
         put("property", NodeFactory.PROPERTY);
-        put("identifier-property", NodeFactory.IDENTIFIER);
+        put("identifier-property", NodeFactory.IDENTIFIER_PROPERTY);
         put("explicit-property", NodeFactory.EXPLICIT_PROPERTY);
         put("bean-property", NodeFactory.BEAN_PROPERTY);
         put("bracket-property", NodeFactory.BRACKET_PROPERTY);
