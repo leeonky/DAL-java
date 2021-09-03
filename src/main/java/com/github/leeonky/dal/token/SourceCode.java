@@ -2,10 +2,11 @@ package com.github.leeonky.dal.token;
 
 import static com.github.leeonky.dal.util.IfThenFactory.when;
 
+//TODO clean method
 public class SourceCode {
+    private final char[] charBuffer;
+    private final String sourceCode;
     private int offset = 0;
-    private char[] charBuffer;
-    private String sourceCode;
 
     public SourceCode(String sourceCode) {
         this.sourceCode = sourceCode;
@@ -41,8 +42,7 @@ public class SourceCode {
     }
 
     public boolean hasContent() {
-        trimLeft();
-        return notEnd();
+        return trimLeft().notEnd();
     }
 
     public boolean notEnd() {

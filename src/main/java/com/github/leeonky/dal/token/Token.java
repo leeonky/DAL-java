@@ -2,10 +2,12 @@ package com.github.leeonky.dal.token;
 
 import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
-import com.github.leeonky.dal.ast.Operator;
+import com.github.leeonky.dal.ast.*;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+
+import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 
 public class Token {
     private final Type type;
@@ -192,6 +194,28 @@ public class Token {
 
     public TokenStream getTokenStream() {
         return (TokenStream) value;
+    }
+
+    public Node toIdentifierNode() {
+        String[] names = ((String) value).split("\\.");
+        Node node = new PropertyNode(InputNode.INSTANCE, names[0], PropertyNode.Type.IDENTIFIER)
+                .setPositionBegin(getPositionBegin());
+        for (int i = 1; i < names.length; i++)
+            node = new PropertyNode(node, names[i], DOT)
+                    .setPositionBegin(node.getPositionBegin() + names[i - 1].length() + 1);
+        return node;
+    }
+
+    public PropertyNode toDotPropertyNode(Node instanceNode) {
+        return new PropertyNode(instanceNode, value, DOT);
+    }
+
+    public RegexNode toRegexNode() {
+        return new RegexNode((String) value);
+    }
+
+    public ConstNode toConstNode() {
+        return new ConstNode(value);
     }
 
     public enum Type {

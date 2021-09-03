@@ -36,11 +36,9 @@ public interface TokenFactory {
     Function<String, Token> CLOSING_BRACKET_TOKEN = s -> Token.closingBracketToken();
     Function<String, Token> OPENING_BRACE_TOKEN = s -> Token.openingBraceToken();
     Function<String, Token> CLOSING_BRACE_TOKEN = s -> Token.closingBraceToken();
-    Function<TokenStream, Token> BRACKET_PROPERTY_TOKEN = tokenStream -> {
-        if (tokenStream.size() != 1)
-            throw new IllegalTokenContentException("should given one property or array index in `[]`");
-        return Token.propertyToken(tokenStream.pop().getPropertyOrIndex());
-    };
+    Function<TokenStream, Token> BRACKET_PROPERTY_TOKEN = tokenStream ->
+            Token.propertyToken(tokenStream.popOnlyOneTokenForPropertyOnIndex());
+
     Function<String, Token> IDENTIFIER_TOKEN = content -> {
         if (NULL.equals(content))
             return constValueToken(null);

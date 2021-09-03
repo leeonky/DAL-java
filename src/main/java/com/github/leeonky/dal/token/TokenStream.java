@@ -12,6 +12,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
 
+//TODO clean method
 public class TokenStream {
     private static final Set<String> UNARY_OPERATORS_WITHOUT_INTENTION = new HashSet<>(asList("!"));
     private static final Set<String> UNARY_OPERATORS = new HashSet<String>(asList("-")) {{
@@ -34,12 +35,7 @@ public class TokenStream {
         return token;
     }
 
-    public Token.Type currentType() {
-        return currentToken().getType();
-    }
-
-    //TODO to be private
-    public Token currentToken() {
+    private Token currentToken() {
         if (tokens.size() <= index)
             throw new NoMoreTokenException();
         return tokens.get(index);
@@ -86,22 +82,45 @@ public class TokenStream {
     }
 
     private boolean isCurrentUnaryOperator() {
-        return currentType() == Token.Type.OPERATOR &&
+        return isType(Token.Type.OPERATOR) &&
                 (isFromBeginning() ? UNARY_OPERATORS_WITHOUT_INTENTION : UNARY_OPERATORS)
                         .contains(currentToken().getValue());
     }
 
     public Node parseBetween(Token.Type opening, Token.Type closing, char closingChar, Supplier<Node> supplier) {
-        if (currentType() == opening) {
+        if (isType(opening)) {
             Token openingToken = pop();
             Node node = supplier.get();
             if (!hasTokens())
                 throw new SyntaxException(getPosition(), format("missed `%c`", closingChar));
-            if (currentType() != closing)
+            if (!isType(closing))
                 throw new SyntaxException(getPosition(), format("unexpected token, `%c` expected", closingChar));
             pop();
             return node.setPositionBegin(openingToken.getPositionBegin());
         }
         return null;
+    }
+
+    public Object popTokenForPropertyOrIndex() {
+        if (!hasTokens())
+            throw new SyntaxException(getPosition(), "should given one property or array index in `[]`");
+        return pop().getPropertyOrIndex();
+    }
+
+
+    public Object popOnlyOneTokenForPropertyOnIndex() {
+        if (size() != 1)
+            throw new IllegalTokenContentException("should given one property or array index in `[]`");
+        return pop().getPropertyOrIndex();
+    }
+
+    public Optional<Token> popByType(Token.Type type) {
+        if (isType(type))
+            return of(pop());
+        return Optional.empty();
+    }
+
+    public boolean isType(Token.Type type) {
+        return currentToken().getType() == type;
     }
 }

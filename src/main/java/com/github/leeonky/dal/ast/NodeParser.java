@@ -36,38 +36,28 @@ public class NodeParser {
     }
 
     public Node compileBracketProperty(Node instance) {
-        return tokenStream.parseBetween(OPENING_BRACKET, CLOSING_BRACKET, ']', () -> {
-            if (tokenStream.hasTokens())
-                return new PropertyNode(instance, tokenStream.pop().getPropertyOrIndex(), BRACKET);
-            throw new SyntaxException(tokenStream.getPosition(), "should given one property or array index in `[]`");
-        });
+        return tokenStream.parseBetween(OPENING_BRACKET, CLOSING_BRACKET, ']',
+                () -> new PropertyNode(instance, tokenStream.popTokenForPropertyOrIndex(), BRACKET));
     }
 
-    //TODO refactor
     public Node compileIdentifierProperty() {
-        if (tokenStream.currentType() == IDENTIFIER) {
-            Token token = tokenStream.pop();
-            String[] names = ((String) token.getValue()).split("\\.");
-            Node node = new PropertyNode(InputNode.INSTANCE, names[0], PropertyNode.Type.IDENTIFIER)
-                    .setPositionBegin(token.getPositionBegin());
-            for (int i = 1; i < names.length; i++)
-                node = new PropertyNode(node, names[i], DOT)
-                        .setPositionBegin(node.getPositionBegin() + names[i - 1].length() + 1);
-            return node;
-        }
-        return null;
+        return tokenStream.popByType(IDENTIFIER).map(Token::toIdentifierNode).orElse(null);
     }
 
     public Node compileExpression(Node previous) {
         if (tokenStream.hasTokens()) {
-            if (tokenStream.currentType() == CLOSING_PARENTHESIS)
-                if (!(parenthesisCount != 0))
-                    throw new SyntaxException(tokenStream.getPosition(), "missed '('");
+            processUnexpectedClosingParentheses();
             Node expression = expressionFactory.fetchExpression(this, previous);
             if (expression != null)
                 return compileExpression(expression.setPositionBegin(previous.getPositionBegin()));
         }
         return previous;
+    }
+
+    private void processUnexpectedClosingParentheses() {
+        if (tokenStream.isType(CLOSING_PARENTHESIS))
+            if (parenthesisCount == 0)
+                throw new SyntaxException(tokenStream.getPosition(), "missed '('");
     }
 
     public Node compileList() {
@@ -78,7 +68,7 @@ public class NodeParser {
             if (tokenStream.hasTokens()) {
                 int index = 0;
                 //TODO refactor
-                while (tokenStream.hasTokens() && tokenStream.currentType() != CLOSING_BRACKET) {
+                while (tokenStream.hasTokens() && !tokenStream.isType(CLOSING_BRACKET)) {
                     //TODO use JudgementExpression type
                     listNode.addJudgements(new Expression(
                             //TODO access element
@@ -98,18 +88,16 @@ public class NodeParser {
         //TODO should contains expression => a: 100+10
         return tokenStream.parseBetween(OPENING_BRACE, CLOSING_BRACE, '}', () -> {
             ObjectNode objectNode = new ObjectNode();
-            if (tokenStream.hasTokens()) {
-                //TODO refactor
-                while (tokenStream.hasTokens() && tokenStream.currentType() != CLOSING_BRACE) {
-                    Node node = NodeFactory.PROPERTY.fetchNode(this);
-                    if (node != null)
-                        //TODO use JudgementExpression type
-                        objectNode.addJudgements(new Expression(
-                                node,
-                                tokenStream.pop().toOperator(false),
-                                //TODO expression not finished
-                                NodeFactory.RIGHT_OPERAND.fetchNode(this)));
-                }
+            //TODO refactor
+            while (tokenStream.hasTokens() && !tokenStream.isType(CLOSING_BRACE)) {
+                Node node = NodeFactory.PROPERTY.fetchNode(this);
+                if (node != null)
+                    //TODO use JudgementExpression type
+                    objectNode.addJudgements(new Expression(
+                            node,
+                            tokenStream.pop().toOperator(false),
+                            //TODO expression not finished
+                            NodeFactory.RIGHT_OPERAND.fetchNode(this)));
             }
             return objectNode;
         });
@@ -143,7 +131,7 @@ public class NodeParser {
     }
 
     public Expression compileOperatorExpression(Node first) {
-        if (tokenStream.currentType() == OPERATOR) {
+        if (tokenStream.isType(OPERATOR)) {
             Token operatorToken = tokenStream.pop();
             operators.push(operatorToken);
             try {
@@ -165,7 +153,7 @@ public class NodeParser {
     private SchemaNode parseSchema() {
         if (!tokenStream.hasTokens())
             throw new SyntaxException(tokenStream.getPosition(), "schema expression not finished");
-        if (tokenStream.currentType() != IDENTIFIER)
+        if (!tokenStream.isType(IDENTIFIER))
             throw new SyntaxException(tokenStream.getPosition(), "operand of `is` must be schema type");
         Token token = tokenStream.pop();
         return (SchemaNode) new SchemaNode((String) token.getValue()).setPositionBegin(token.getPositionBegin());
@@ -183,15 +171,8 @@ public class NodeParser {
         return null;
     }
 
-    public Node compileSingle(Token.Type type, Function<Object, Node> nodeFactory) {
-        if (tokenStream.currentType() == type) {
-            Token token = tokenStream.pop();
-            return nodeFactory.apply(token.getValue()).setPositionBegin(token.getPositionBegin());
-        }
-        return null;
-    }
-
-    public Node compileDotProperty(Node instanceNode) {
-        return compileSingle(Token.Type.PROPERTY, value -> new PropertyNode(instanceNode, value, DOT));
+    public Node compileSingle(Token.Type type, Function<Token, Node> nodeFactory) {
+        return tokenStream.popByType(type).map(token ->
+                nodeFactory.apply(token).setPositionBegin(token.getPositionBegin())).orElse(null);
     }
 }
