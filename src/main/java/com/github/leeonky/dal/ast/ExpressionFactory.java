@@ -9,4 +9,8 @@ public interface ExpressionFactory {
         return (nodeParser, previous) -> ofNullable(fetchExpression(nodeParser, previous))
                 .orElseGet(() -> expressionFactory.fetchExpression(nodeParser, previous));
     }
+
+    default NodeFactory inThis() {
+        return nodeParser -> fetchExpression(nodeParser, InputNode.INSTANCE);
+    }
 }

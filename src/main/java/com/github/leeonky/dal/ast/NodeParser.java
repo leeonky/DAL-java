@@ -19,13 +19,12 @@ public class NodeParser {
     private final ExpressionFactory expressionFactory = ((ExpressionFactory) NodeParser::compileOperatorExpression)
             .combine(NodeParser::compileSchemaExpression);
     private int parenthesisCount = 0;
-    private Node thisNode = InputNode.INSTANCE;
 
     public NodeParser(TokenStream tokenStream) {
         this.tokenStream = tokenStream;
     }
 
-    public Node compileParenthesesNode() {
+    public Node compileParentheses() {
         return tokenStream.parseBetween(OPENING_PARENTHESIS, CLOSING_PARENTHESIS, ')', () -> {
             try {
                 parenthesisCount++;
@@ -36,14 +35,10 @@ public class NodeParser {
         });
     }
 
-    public boolean isInParentheses() {
-        return parenthesisCount != 0;
-    }
-
-    public Node compileBracketPropertyNode() {
+    public Node compileBracketProperty(Node instance) {
         return tokenStream.parseBetween(OPENING_BRACKET, CLOSING_BRACKET, ']', () -> {
             if (tokenStream.hasTokens())
-                return new PropertyNode(thisNode, tokenStream.pop().getPropertyOrIndex(), BRACKET);
+                return new PropertyNode(instance, tokenStream.pop().getPropertyOrIndex(), BRACKET);
             throw new SyntaxException(tokenStream.getPosition(), "should given one property or array index in `[]`");
         });
     }
@@ -66,7 +61,7 @@ public class NodeParser {
     public Node compileExpression(Node previous) {
         if (tokenStream.hasTokens()) {
             if (tokenStream.currentType() == CLOSING_PARENTHESIS)
-                if (!isInParentheses())
+                if (!(parenthesisCount != 0))
                     throw new SyntaxException(tokenStream.getPosition(), "missed '('");
             Node expression = expressionFactory.fetchExpression(this, previous);
             if (expression != null)
@@ -127,13 +122,11 @@ public class NodeParser {
     }
 
     private Node parsePropertyChain(Node node) {
-        thisNode = node;
         if (tokenStream.hasTokens()) {
-            Node next = NodeFactory.EXPLICIT_PROPERTY.fetchNode(this);
+            Node next = NodeFactory.EXPLICIT_PROPERTY.fetchExpression(this, node);
             if (next != null)
                 return parsePropertyChain(next);
         }
-        thisNode = InputNode.INSTANCE;
         return node;
     }
 
@@ -198,7 +191,7 @@ public class NodeParser {
         return null;
     }
 
-    public PropertyNode createThisDotProperty(Object value) {
-        return new PropertyNode(thisNode, value, DOT);
+    public Node compileDotProperty(Node instanceNode) {
+        return compileSingle(Token.Type.PROPERTY, value -> new PropertyNode(instanceNode, value, DOT));
     }
 }

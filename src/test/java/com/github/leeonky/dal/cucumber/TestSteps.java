@@ -36,9 +36,9 @@ public class TestSteps {
         put("regex", NodeFactory.REGEX);
         put("property", NodeFactory.PROPERTY);
         put("identifier-property", NodeFactory.IDENTIFIER_PROPERTY);
-        put("explicit-property", NodeFactory.EXPLICIT_PROPERTY);
-        put("bean-property", NodeFactory.BEAN_PROPERTY);
-        put("bracket-property", NodeFactory.BRACKET_PROPERTY);
+        put("explicit-property", NodeFactory.EXPLICIT_PROPERTY.inThis());
+        put("bean-property", NodeFactory.BEAN_PROPERTY.inThis());
+        put("bracket-property", NodeFactory.BRACKET_PROPERTY.inThis());
         put("single-evaluable", NodeFactory.OPERAND);
         put("right-operand", NodeFactory.RIGHT_OPERAND);
         put("expression", NodeFactory.EXPRESSION);
