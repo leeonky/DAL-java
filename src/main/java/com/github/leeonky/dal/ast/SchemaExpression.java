@@ -67,7 +67,8 @@ public class SchemaExpression extends Node {
     }
 
     final public SchemaWhichExpression which(Node whichClause) {
-        return new SchemaWhichExpression(this, whichClause);
+        return (SchemaWhichExpression) new SchemaWhichExpression(this, whichClause)
+                .setPositionBegin(getPositionBegin());
     }
 
     static class ObjectRef {

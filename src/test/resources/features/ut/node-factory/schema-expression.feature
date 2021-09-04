@@ -10,7 +10,7 @@ Feature: schema expression
     : {
       class.simpleName: 'SchemaExpression'
       inspect: '1 is Integer'
-      positionBegin: 2
+      positionBegin: 4
     }
     """
 

@@ -35,7 +35,7 @@ Feature: calculator expression
     : {
       class.simpleName: 'Expression'
       inspect: ' + 1'
-      positionBegin: 0
+      positionBegin: 2
     }
     """
 
@@ -79,7 +79,7 @@ Feature: calculator expression
     : {
       class.simpleName: 'Expression'
       inspect: 'a <operator> b'
-      positionBegin: 0
+      positionBegin: 2
       leftOperand.inspect: 'a'
       operator.class.simpleName: '<type>'
       rightOperand.inspect: 'b'
@@ -112,10 +112,11 @@ Feature: calculator expression
     : {
       class.simpleName: 'Expression'
       inspect: 'a + b * c'
-      positionBegin: 0
+      positionBegin: 2
       leftOperand.inspect: 'a'
       operator.class.simpleName: 'Plus'
       rightOperand.inspect: 'b * c'
+      rightOperand.positionBegin: 6
     }
     """
 

@@ -10,7 +10,7 @@ Feature: schema which expression
     : {
       class.simpleName: 'SchemaWhichExpression'
       inspect: '1 is Integer which true'
-      positionBegin: 2
+      positionBegin: 4
     }
     """
 

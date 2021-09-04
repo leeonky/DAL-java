@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 //TODO clean method
@@ -26,6 +27,7 @@ public class TokenStream {
         return tokens.get(index++);
     }
 
+    //TODO refactor
     public boolean hasTokens() {
         return index < tokens.size();
     }
@@ -45,12 +47,11 @@ public class TokenStream {
         return hasTokens() ? currentToken().getPositionBegin() : (index > 0 ? tokens.get(index - 1).getPositionEnd() : 0);
     }
 
-    public boolean isCurrentKeywordAndTake(String keyword) {
+    public Optional<Token> popKeyWord(String keyword) {
         if (hasTokens() && currentToken().getType() == Token.Type.KEY_WORD && keyword.equals(currentToken().getValue())) {
-            index++;
-            return true;
+            return of(pop());
         }
-        return false;
+        return empty();
     }
 
     public boolean isCurrentSchemaConnectorAndTake() {
@@ -122,5 +123,16 @@ public class TokenStream {
 
     public boolean isType(Token.Type type) {
         return currentToken().getType() == type;
+    }
+
+    public void shouldHasTokens(String message) {
+        if (!hasTokens())
+            throw new SyntaxException(getPosition(), message);
+    }
+
+    public <T> T shouldHasTokens(String message, Supplier<T> supplier) {
+        if (!hasTokens())
+            throw new SyntaxException(getPosition(), message);
+        return supplier.get();
     }
 }

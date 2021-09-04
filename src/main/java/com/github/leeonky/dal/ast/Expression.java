@@ -14,6 +14,7 @@ public class Expression extends Node {
         this.node1 = node1;
         this.node2 = node2;
         this.operator = operator;
+        setPositionBegin(operator.getPosition());
     }
 
     //TODO to be removed

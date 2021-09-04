@@ -106,74 +106,6 @@ public class Token {
         return this;
     }
 
-    public Operator toOperator(boolean isUnaryOperator) {
-        String operatorString = value.toString();
-        Operator operator;
-        if (isUnaryOperator) {
-            switch (operatorString) {
-                case "-":
-                    operator = new Operator.Minus();
-                    break;
-                case "!":
-                    operator = new Operator.Not();
-                    break;
-                default:
-                    throw new SyntaxException(getPositionBegin(), "not support operator " + operatorString + " yet");
-            }
-        } else {
-            switch (operatorString) {
-                case "=":
-                    operator = new Operator.Equal();
-                    break;
-                case ">":
-                    operator = new Operator.Greater();
-                    break;
-                case "<":
-                    operator = new Operator.Less();
-                    break;
-                case ">=":
-                    operator = new Operator.GreaterOrEqual();
-                    break;
-                case "<=":
-                    operator = new Operator.LessOrEqual();
-                    break;
-                case "!=":
-                    operator = new Operator.NotEqual();
-                    break;
-                case "+":
-                    operator = new Operator.Plus();
-                    break;
-                case "-":
-                    operator = new Operator.Subtraction();
-                    break;
-                case "*":
-                    operator = new Operator.Multiplication();
-                    break;
-                case "/":
-                    operator = new Operator.Division();
-                    break;
-                case "&&":
-                case Constants.KeyWords.AND:
-                    operator = new Operator.And(operatorString);
-                    break;
-                case "||":
-                case Constants.KeyWords.OR:
-                    operator = new Operator.Or(operatorString);
-                    break;
-                case Constants.Operators.MATCH:
-                    operator = new Operator.Matcher();
-                    break;
-//                    not work in [] {}
-                case ",":
-                    operator = new Operator.Comma();
-                    break;
-                default:
-                    throw new SyntaxException(getPositionBegin(), "not support operator `" + operatorString + "` yet");
-            }
-        }
-        return operator.setPosition(getPositionBegin());
-    }
-
     public boolean judgement() {
         return getType() == Type.OPERATOR
                 && (getValue().equals(Constants.Operators.MATCH) || getValue().equals(Constants.Operators.EQ));
@@ -196,6 +128,7 @@ public class Token {
         return (TokenStream) value;
     }
 
+    //TODO refactor
     public Node toIdentifierNode() {
         String[] names = ((String) value).split("\\.");
         Node node = new PropertyNode(InputNode.INSTANCE, names[0], PropertyNode.Type.IDENTIFIER)
@@ -207,15 +140,90 @@ public class Token {
     }
 
     public PropertyNode toDotPropertyNode(Node instanceNode) {
-        return new PropertyNode(instanceNode, value, DOT);
+        return (PropertyNode) new PropertyNode(instanceNode, value, DOT).setPositionBegin(getPositionBegin());
     }
 
     public RegexNode toRegexNode() {
-        return new RegexNode((String) value);
+        return (RegexNode) new RegexNode((String) value).setPositionBegin(getPositionBegin());
     }
 
     public ConstNode toConstNode() {
-        return new ConstNode(value);
+        return (ConstNode) new ConstNode(value).setPositionBegin(getPositionBegin());
+    }
+
+    public SchemaNode toSchemaNode() {
+        return (SchemaNode) new SchemaNode((String) getValue()).setPositionBegin(getPositionBegin());
+    }
+
+    public Operator toBinaryOperator() {
+        String operatorString = value.toString();
+        Operator operator;
+        switch (operatorString) {
+            case "=":
+                operator = new Operator.Equal();
+                break;
+            case ">":
+                operator = new Operator.Greater();
+                break;
+            case "<":
+                operator = new Operator.Less();
+                break;
+            case ">=":
+                operator = new Operator.GreaterOrEqual();
+                break;
+            case "<=":
+                operator = new Operator.LessOrEqual();
+                break;
+            case "!=":
+                operator = new Operator.NotEqual();
+                break;
+            case "+":
+                operator = new Operator.Plus();
+                break;
+            case "-":
+                operator = new Operator.Subtraction();
+                break;
+            case "*":
+                operator = new Operator.Multiplication();
+                break;
+            case "/":
+                operator = new Operator.Division();
+                break;
+            case "&&":
+            case Constants.KeyWords.AND:
+                operator = new Operator.And(operatorString);
+                break;
+            case "||":
+            case Constants.KeyWords.OR:
+                operator = new Operator.Or(operatorString);
+                break;
+            case Constants.Operators.MATCH:
+                operator = new Operator.Matcher();
+                break;
+//                    not work in [] {}
+            case ",":
+                operator = new Operator.Comma();
+                break;
+            default:
+                throw new SyntaxException(getPositionBegin(), "not support operator `" + operatorString + "` yet");
+        }
+        return operator.setPosition(getPositionBegin());
+    }
+
+    public Operator toUnaryOperator() {
+        String operatorString = value.toString();
+        Operator operator;
+        switch (operatorString) {
+            case "-":
+                operator = new Operator.Minus();
+                break;
+            case "!":
+                operator = new Operator.Not();
+                break;
+            default:
+                throw new SyntaxException(getPositionBegin(), "not support operator " + operatorString + " yet");
+        }
+        return operator.setPosition(getPositionBegin());
     }
 
     public enum Type {
