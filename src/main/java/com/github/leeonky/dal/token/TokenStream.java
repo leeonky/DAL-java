@@ -5,6 +5,7 @@ import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.Node;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -27,8 +28,7 @@ public class TokenStream {
         return tokens.get(index++);
     }
 
-    //TODO refactor
-    public boolean hasTokens() {
+    private boolean hasTokens() {
         return index < tokens.size();
     }
 
@@ -44,7 +44,8 @@ public class TokenStream {
     }
 
     public int getPosition() {
-        return hasTokens() ? currentToken().getPositionBegin() : (index > 0 ? tokens.get(index - 1).getPositionEnd() : 0);
+        return hasTokens() ? currentToken().getPositionBegin()
+                : (index > 0 ? tokens.get(index - 1).getPositionEnd() : 0);
     }
 
     public Optional<Token> popKeyWord(String keyword) {
@@ -125,14 +126,17 @@ public class TokenStream {
         return currentToken().getType() == type;
     }
 
-    public void shouldHasTokens(String message) {
-        if (!hasTokens())
-            throw new SyntaxException(getPosition(), message);
+    public <T extends Node> Optional<T> fetchNode(Supplier<T> supplier) {
+        if (hasTokens())
+            return of(supplier.get());
+        return empty();
     }
 
-    public <T> T shouldHasTokens(String message, Supplier<T> supplier) {
-        if (!hasTokens())
-            throw new SyntaxException(getPosition(), message);
-        return supplier.get();
+    public <T extends Node> List<T> fetchElements(Token.Type closingType, Function<Integer, T> function) {
+        List<T> result = new ArrayList<>();
+        int index = 0;
+        while (hasTokens() && !isType(closingType))
+            result.add(function.apply(index++));
+        return result;
     }
 }

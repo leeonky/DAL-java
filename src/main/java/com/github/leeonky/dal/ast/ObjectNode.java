@@ -4,10 +4,7 @@ import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.util.DataObject;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.AssertionFailure.assertUnexpectedFields;
@@ -17,6 +14,14 @@ import static java.util.stream.Collectors.joining;
 public class ObjectNode extends Node {
 
     private final List<Expression> expressions = new ArrayList<>();
+
+    public ObjectNode(List<Expression> expressions) {
+        this.expressions.addAll(expressions);
+    }
+
+    public ObjectNode() {
+        this(Collections.emptyList());
+    }
 
     @Override
     public String inspect() {

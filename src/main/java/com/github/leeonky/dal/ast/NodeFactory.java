@@ -2,6 +2,8 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.token.Token;
 
+import java.util.Optional;
+
 import static java.util.Optional.ofNullable;
 
 public interface NodeFactory {
@@ -28,7 +30,11 @@ public interface NodeFactory {
     Node fetchNode(NodeParser nodeParser);
 
     default NodeFactory combine(NodeFactory nodeFactory) {
-        return nodeParser -> ofNullable(fetchNode(nodeParser)).orElseGet(() -> nodeFactory.fetchNode(nodeParser));
+        return nodeParser -> fetchNodeOptional(nodeParser).orElseGet(() -> nodeFactory.fetchNode(nodeParser));
+    }
+
+    default Optional<Node> fetchNodeOptional(NodeParser nodeParser) {
+        return ofNullable(fetchNode(nodeParser));
     }
 }
 

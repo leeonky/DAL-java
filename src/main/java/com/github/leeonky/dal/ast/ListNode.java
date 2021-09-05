@@ -3,6 +3,7 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.RuntimeContext;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,14 @@ import static java.util.stream.StreamSupport.stream;
 
 public class ListNode extends Node {
     private final List<Expression> expressions = new ArrayList<>();
+
+    public ListNode(List<Expression> expressions) {
+        this.expressions.addAll(expressions);
+    }
+
+    public ListNode() {
+        this(Collections.emptyList());
+    }
 
     @Override
     public String inspect() {
@@ -45,9 +54,5 @@ public class ListNode extends Node {
                 context.wrappedValueStack.pop();
             }
         return false;
-    }
-
-    public void addJudgements(Expression expression) {
-        expressions.add(expression);
     }
 }
