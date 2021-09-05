@@ -1,7 +1,11 @@
 package com.github.leeonky.dal.util;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 public class IfThenFactory {
     public static IfTrue when(boolean bool) {
@@ -29,6 +33,12 @@ public class IfThenFactory {
             if (bool)
                 return supplier.get();
             return null;
+        }
+
+        public <T> Optional<T> optional(Supplier<T> supplier) {
+            if (bool)
+                return of(supplier.get());
+            return empty();
         }
     }
 

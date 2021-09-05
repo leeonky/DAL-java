@@ -58,6 +58,16 @@ Feature: list= [...]
            ^
     """
 
+  Scenario: support element judgement
+    Given the following input data:
+    """
+      [1, 2]
+    """
+    Then the following assertion should be passed:
+    """
+      = [1 :{}]
+    """
+
 #  TODO null equal to []
 #  TODO match
 #  TODO equal

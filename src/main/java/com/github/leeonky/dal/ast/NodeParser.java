@@ -6,7 +6,6 @@ import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenStream;
 
 import java.util.LinkedList;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -22,7 +21,6 @@ public class NodeParser {
     private final TokenStream tokenStream;
     private final ExpressionFactory expressionFactory = ((ExpressionFactory) NodeParser::compileOperatorExpression)
             .combine(NodeParser::compileSchemaWhichExpression);
-    private int parenthesisCount = 0;
 
     public NodeParser(TokenStream tokenStream) {
         this.tokenStream = tokenStream;
@@ -30,16 +28,7 @@ public class NodeParser {
 
     public Node compileParentheses() {
         return tokenStream.parseBetween(OPENING_PARENTHESIS, CLOSING_PARENTHESIS, ')',
-                this::compileParenthesesNode);
-    }
-
-    private ParenthesesNode compileParenthesesNode() {
-        try {
-            parenthesisCount++;
-            return new ParenthesesNode(NodeFactory.EXPRESSION.fetchNode(this));
-        } finally {
-            parenthesisCount--;
-        }
+                () -> new ParenthesesNode(NodeFactory.EXPRESSION.fetchNode(this)));
     }
 
     public Node compileBracketProperty(Node instance) {
@@ -57,14 +46,9 @@ public class NodeParser {
 
     private Node recursiveCompile(Node input, ExpressionFactory expressionFactory, Function<Node, Node> method) {
         return tokenStream.fetchNode(() -> {
-            processUnexpectedClosingParentheses();
+            tokenStream.checkingParenthesis();
             return expressionFactory.fetchExpressionOptional(this, input).map(method).orElse(input);
         }).orElse(input);
-    }
-
-    private void processUnexpectedClosingParentheses() {
-        if (tokenStream.isType(CLOSING_PARENTHESIS) && parenthesisCount == 0)
-            throw new SyntaxException(tokenStream.getPosition(), "missed '('");
     }
 
     public Node compileList() {
@@ -76,8 +60,7 @@ public class NodeParser {
     private Expression compileElementNode(Integer index) {
         return new Expression(
                 new PropertyNode(InputNode.INSTANCE, index, BRACKET),
-                //TODO support element judgement
-                defaultListOperator().toBinaryOperator(),
+                tokenStream.popJudgementOperator().orElseGet(this::defaultListOperator).toBinaryOperator(),
                 RIGHT_OPERAND.fetchNode(this));
     }
 
@@ -89,17 +72,13 @@ public class NodeParser {
         //TODO should contains expression => a: 100+10
         return tokenStream.parseBetween(OPENING_BRACE, CLOSING_BRACE, '}', () ->
                 new ObjectNode(tokenStream.fetchElements(CLOSING_BRACE, index ->
-                        new Expression(NodeFactory.PROPERTY.fetchNodeOptional(this)
-                                .orElseThrow(() ->
+                        new Expression(
+                                NodeFactory.PROPERTY.fetchNodeOptional(this).orElseThrow(() ->
                                         new SyntaxException(tokenStream.getPosition(), "expect a object property")),
-                                fetchJudgementOperator(), RIGHT_OPERAND.fetchNode(this)))));
-    }
-
-    private Operator fetchJudgementOperator() {
-        Optional<Token> operator = tokenStream.popByType(OPERATOR);
-        return operator.filter(Token::judgement).orElseThrow(() ->
-                new SyntaxException(operator.map(Token::getPositionBegin).orElseGet(tokenStream::getPosition),
-                        "expect operator `:` or `=`")).toBinaryOperator();
+                                tokenStream.popJudgementOperator().orElseThrow(() ->
+                                        new SyntaxException(tokenStream.getPosition(), "expect operator `:` or `=`"))
+                                        .toBinaryOperator(),
+                                RIGHT_OPERAND.fetchNode(this)))));
     }
 
     private Node giveDefault() {
@@ -170,7 +149,7 @@ public class NodeParser {
     }
 
     public Node compileSingle(Token.Type type, Function<Token, Node> nodeFactory) {
-        return tokenStream.popByType(type).map(t ->
-                nodeFactory.apply(t).setPositionBegin(t.getPositionBegin())).orElse(null);
+        return tokenStream.popByType(type).map(t -> nodeFactory.apply(t).setPositionBegin(t.getPositionBegin()))
+                .orElse(null);
     }
 }

@@ -5,23 +5,26 @@ import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.Node;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.token.Token.Type.CLOSING_PARENTHESIS;
+import static com.github.leeonky.dal.util.IfThenFactory.when;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static java.util.Optional.empty;
+import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 
 //TODO clean method
 public class TokenStream {
-    private static final Set<String> UNARY_OPERATORS_WITHOUT_INTENTION = new HashSet<>(asList("!"));
-    private static final Set<String> UNARY_OPERATORS = new HashSet<String>(asList("-")) {{
+    private static final AtomicInteger DEFAULT_VALUE = new AtomicInteger();
+    private static final Set<String> UNARY_OPERATORS_WITHOUT_INTENTION = new HashSet<>(singletonList("!"));
+    private static final Set<String> UNARY_OPERATORS = new HashSet<String>(singletonList("-")) {{
         addAll(UNARY_OPERATORS_WITHOUT_INTENTION);
     }};
-
     private final List<Token> tokens = new ArrayList<>();
+    private final Map<Token.Type, AtomicInteger> braceLevels = new HashMap<>();
     private int index = 0;
 
     public Token pop() {
@@ -49,14 +52,14 @@ public class TokenStream {
     }
 
     public Optional<Token> popKeyWord(String keyword) {
-        if (hasTokens() && currentToken().getType() == Token.Type.KEY_WORD && keyword.equals(currentToken().getValue())) {
-            return of(pop());
-        }
-        return empty();
+        return when(hasTokens()
+                && currentToken().getType() == Token.Type.KEY_WORD && keyword.equals(currentToken().getValue()))
+                .optional(this::pop);
     }
 
     public boolean isCurrentSchemaConnectorAndTake() {
-        if (hasTokens() && currentToken().getType() == Token.Type.OPERATOR && (Constants.SCHEMA_DELIMITER.equals(currentToken().getValue()))) {
+        if (hasTokens() && currentToken().getType() == Token.Type.OPERATOR
+                && (Constants.SCHEMA_DELIMITER.equals(currentToken().getValue()))) {
             index++;
             return true;
         }
@@ -84,23 +87,32 @@ public class TokenStream {
     }
 
     private boolean isCurrentUnaryOperator() {
-        return isType(Token.Type.OPERATOR) &&
+        return currentToken().getType() == Token.Type.OPERATOR &&
                 (isFromBeginning() ? UNARY_OPERATORS_WITHOUT_INTENTION : UNARY_OPERATORS)
-                        .contains(currentToken().getValue());
+                        .contains((String) currentToken().getValue());
     }
 
     public Node parseBetween(Token.Type opening, Token.Type closing, char closingChar, Supplier<Node> supplier) {
-        if (isType(opening)) {
-            Token openingToken = pop();
-            Node node = supplier.get();
-            if (!hasTokens())
-                throw new SyntaxException(getPosition(), format("missed `%c`", closingChar));
-            if (!isType(closing))
-                throw new SyntaxException(getPosition(), format("unexpected token, `%c` expected", closingChar));
-            pop();
-            return node.setPositionBegin(openingToken.getPositionBegin());
-        }
-        return null;
+        return when(currentToken().getType() == opening).thenReturn(() -> {
+            try {
+                Token openingToken = pop();
+                braceLevels.computeIfAbsent(closing, k -> new AtomicInteger(0)).incrementAndGet();
+                Node node = supplier.get();
+                if (!hasTokens())
+                    throw new SyntaxException(getPosition(), format("missed `%c`", closingChar));
+                if (!(currentToken().getType() == closing))
+                    throw new SyntaxException(getPosition(), format("unexpected token, `%c` expected", closingChar));
+                pop();
+                return node.setPositionBegin(openingToken.getPositionBegin());
+            } finally {
+                braceLevels.get(closing).decrementAndGet();
+            }
+        });
+    }
+
+    public void checkingParenthesis() {
+        if (currentToken().getType() == CLOSING_PARENTHESIS && braceLevels.getOrDefault(CLOSING_PARENTHESIS, DEFAULT_VALUE).get() == 0)
+            throw new SyntaxException(getPosition(), "missed '('");
     }
 
     public Object popTokenForPropertyOrIndex() {
@@ -117,26 +129,21 @@ public class TokenStream {
     }
 
     public Optional<Token> popByType(Token.Type type) {
-        if (isType(type))
-            return of(pop());
-        return Optional.empty();
+        return when(currentToken().getType() == type).optional(this::pop);
     }
 
-    //TODO to be private
-    public boolean isType(Token.Type type) {
-        return currentToken().getType() == type;
+    public Optional<Token> popJudgementOperator() {
+        return when(currentToken().judgement()).optional(this::pop);
     }
 
     public <T extends Node> Optional<T> fetchNode(Supplier<T> supplier) {
-        if (hasTokens())
-            return of(supplier.get());
-        return empty();
+        return when(hasTokens()).optional(supplier);
     }
 
     public <T extends Node> List<T> fetchElements(Token.Type closingType, Function<Integer, T> function) {
         List<T> result = new ArrayList<>();
         int index = 0;
-        while (hasTokens() && !isType(closingType))
+        while (hasTokens() && !(currentToken().getType() == closingType))
             result.add(function.apply(index++));
         return result;
     }
