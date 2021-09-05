@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 
+//TODO return optional
 public interface NodeFactory {
     ExpressionFactory
             BRACKET_PROPERTY = NodeParser::compileBracketProperty,

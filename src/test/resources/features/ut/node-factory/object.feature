@@ -68,6 +68,66 @@ Feature: object node
      ^
     """
 
+  Scenario: raise error when element is invalid
+    Given the following dal code:
+    """
+    { name: + }
+    """
+    Then failed to get "object" node with the following message:
+    """
+    expect a value or expression
+    """
+    And got the following source code information:
+    """
+    { name: + }
+            ^
+    """
+
+  Scenario: raise error when invalid judgement expression
+    Given the following dal code:
+    """
+    { 1: 1 }
+    """
+    Then failed to get "object" node with the following message:
+    """
+    expect a object property
+    """
+    And got the following source code information:
+    """
+    { 1: 1 }
+      ^
+    """
+
+  Scenario: raise error when not judgement expression
+    Given the following dal code:
+    """
+    { a + 1 }
+    """
+    Then failed to get "object" node with the following message:
+    """
+    expect operator `:` or `=`
+    """
+    And got the following source code information:
+    """
+    { a + 1 }
+        ^
+    """
+
+  Scenario: raise error when missing judgement operator
+    Given the following dal code:
+    """
+    { a 1 }
+    """
+    Then failed to get "object" node with the following message:
+    """
+    expect operator `:` or `=`
+    """
+    And got the following source code information:
+    """
+    { a 1 }
+        ^
+    """
+
 #  TODO support comma
 #  TODO nested list
 #  TODO nested object

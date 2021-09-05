@@ -122,6 +122,7 @@ public class TokenStream {
         return Optional.empty();
     }
 
+    //TODO to be private
     public boolean isType(Token.Type type) {
         return currentToken().getType() == type;
     }

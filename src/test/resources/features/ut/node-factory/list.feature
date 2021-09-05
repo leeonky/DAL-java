@@ -67,6 +67,21 @@ Feature: list node
      ^
     """
 
+  Scenario: raise error when element is invalid
+    Given the following dal code:
+    """
+    [ + ]
+    """
+    Then failed to get "list" node with the following message:
+    """
+    expect a value or expression
+    """
+    And got the following source code information:
+    """
+    [ + ]
+      ^
+    """
+
 #  TODO support comma
 #  TODO nested list
 #  TODO nested object

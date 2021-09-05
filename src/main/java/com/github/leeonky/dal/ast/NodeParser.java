@@ -6,14 +6,17 @@ import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenStream;
 
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.github.leeonky.dal.ast.NodeFactory.RIGHT_OPERAND;
 import static com.github.leeonky.dal.ast.NodeFactory.SINGLE_EVALUABLE;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.token.Token.Type.*;
 import static java.util.Optional.ofNullable;
 
+//TODO orElseThrow
 public class NodeParser {
     private final LinkedList<Token> operators = new LinkedList<>();
     private final TokenStream tokenStream;
@@ -67,15 +70,15 @@ public class NodeParser {
     public Node compileList() {
         //TODO should contains expression => a: 100+10
         return tokenStream.parseBetween(OPENING_BRACKET, CLOSING_BRACKET, ']', () ->
-                new ListNode(tokenStream.fetchElements(CLOSING_BRACKET, index -> {
-                    //TODO use JudgementExpression type
-                    return new Expression(
-                            new PropertyNode(InputNode.INSTANCE, index, BRACKET),
-                            //TODO support element judgement
-                            defaultListOperator().toBinaryOperator(),
-                            //TODO expression not finished
-                            NodeFactory.RIGHT_OPERAND.fetchNode(this));
-                })));
+                new ListNode(tokenStream.fetchElements(CLOSING_BRACKET, this::compileElementNode)));
+    }
+
+    private Expression compileElementNode(Integer index) {
+        return new Expression(
+                new PropertyNode(InputNode.INSTANCE, index, BRACKET),
+                //TODO support element judgement
+                defaultListOperator().toBinaryOperator(),
+                RIGHT_OPERAND.fetchNode(this));
     }
 
     private Token defaultListOperator() {
@@ -85,16 +88,18 @@ public class NodeParser {
     public Node compileObject() {
         //TODO should contains expression => a: 100+10
         return tokenStream.parseBetween(OPENING_BRACE, CLOSING_BRACE, '}', () ->
-                new ObjectNode(tokenStream.fetchElements(CLOSING_BRACE, index -> {
-                    Node node = NodeFactory.PROPERTY.fetchNode(this);
-                    //TODO null node / node is not start with property
-                    //TODO use JudgementExpression type
-                    return new Expression(
-                            node,
-                            tokenStream.pop().toBinaryOperator(),
-                            //TODO expression not finished
-                            NodeFactory.RIGHT_OPERAND.fetchNode(this));
-                })));
+                new ObjectNode(tokenStream.fetchElements(CLOSING_BRACE, index ->
+                        new Expression(NodeFactory.PROPERTY.fetchNodeOptional(this)
+                                .orElseThrow(() ->
+                                        new SyntaxException(tokenStream.getPosition(), "expect a object property")),
+                                fetchJudgementOperator(), RIGHT_OPERAND.fetchNode(this)))));
+    }
+
+    private Operator fetchJudgementOperator() {
+        Optional<Token> operator = tokenStream.popByType(OPERATOR);
+        return operator.filter(Token::judgement).orElseThrow(() ->
+                new SyntaxException(operator.map(Token::getPositionBegin).orElseGet(tokenStream::getPosition),
+                        "expect operator `:` or `=`")).toBinaryOperator();
     }
 
     private Node giveDefault() {
@@ -124,7 +129,7 @@ public class NodeParser {
     }
 
     private Node compileRight(Token operator) {
-        return operator.judgement() ? NodeFactory.RIGHT_OPERAND.fetchNode(this)
+        return operator.judgement() ? RIGHT_OPERAND.fetchNode(this)
                 : NodeFactory.OPERAND.fetchNode(this);
     }
 
