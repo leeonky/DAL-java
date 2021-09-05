@@ -140,9 +140,9 @@ class TestContext {
     }
 
     public void assertEvaluateNode(String assertion) {
+        Object evaluate = node.evaluate(runtimeContextBuilder.build(inputObject));
         try {
-            assertThat(dataAssert.assertData(node.evaluate(runtimeContextBuilder.build(inputObject)), assertion)
-                    .isPassed()).isTrue();
+            assertThat(dataAssert.assertData(evaluate, assertion).isPassed()).isTrue();
         } catch (DalException e) {
             System.err.println(e.getMessage());
             System.err.println(e.show(assertion));

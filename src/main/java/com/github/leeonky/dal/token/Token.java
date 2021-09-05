@@ -140,15 +140,15 @@ public class Token {
     }
 
     public PropertyNode toDotPropertyNode(Node instanceNode) {
-        return (PropertyNode) new PropertyNode(instanceNode, value, DOT).setPositionBegin(getPositionBegin());
+        return new PropertyNode(instanceNode, value, DOT);
     }
 
     public RegexNode toRegexNode() {
-        return (RegexNode) new RegexNode((String) value).setPositionBegin(getPositionBegin());
+        return new RegexNode((String) value);
     }
 
     public ConstNode toConstNode() {
-        return (ConstNode) new ConstNode(value).setPositionBegin(getPositionBegin());
+        return new ConstNode(value);
     }
 
     public SchemaNode toSchemaNode() {

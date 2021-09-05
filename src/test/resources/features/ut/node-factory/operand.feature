@@ -102,11 +102,7 @@ Feature: operand node
     """
 
   Scenario: should not parse as minus when start with minus
-    Given the following input data:
-    """
-    2
-    """
-    And the following dal code:
+    Given the following dal code:
     """
     -1
     """
@@ -134,3 +130,39 @@ Feature: operand node
     """
     =true
     """
+
+  Scenario Outline: dot operator has higher precedence over unary operator(property chain after unary operator)
+    Given the following dal code:
+    """
+    1 <operator>false.xxx
+    """
+    And get an "const" node
+    Then got the following "single-evaluable" node:
+    """
+    : {
+      class.simpleName: 'Expression'
+      rightOperand.class.simpleName: 'PropertyNode'
+    }
+    """
+    Examples:
+      | operator |
+      | !        |
+      | -        |
+
+  Scenario Outline: unary operator has higher precedence over other operators
+    Given the following dal code:
+    """
+    1 <operator>false + 1
+    """
+    And get an "const" node
+    Then got the following "expression" node:
+    """
+    : {
+      leftOperand.inspect: '<operator>false'
+      rightOperand.class.simpleName: 'ConstNode'
+    }
+    """
+    Examples:
+      | operator |
+      | !        |
+      | -        |

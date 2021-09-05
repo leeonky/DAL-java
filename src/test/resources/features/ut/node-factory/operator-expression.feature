@@ -140,3 +140,17 @@ Feature: calculator expression
       | :        | {}        |
       | :        | []        |
       | :        | /pattern/ |
+
+  Scenario: compile right operand as element accessing when operator is not judgement
+    Given the following dal code:
+    """
+      + [0]
+    """
+    Then got the following "expression" node:
+    """
+    : {
+      class.simpleName: 'Expression'
+      inspect: ' + [0]'
+      rightOperand.class.simpleName: 'PropertyNode'
+    }
+    """

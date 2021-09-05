@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.ast.NodeFactory.SINGLE_EVALUABLE;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
-import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 import static com.github.leeonky.dal.token.Token.Type.*;
 import static java.util.Optional.ofNullable;
 
@@ -67,20 +66,16 @@ public class NodeParser {
 
     public Node compileList() {
         //TODO should contains expression => a: 100+10
-        return tokenStream.parseBetween(OPENING_BRACKET, CLOSING_BRACKET, ']', () -> {
-            //TODO position
-            return new ListNode(tokenStream.fetchElements(CLOSING_BRACKET, index -> {
-                //TODO use JudgementExpression type
-                return new Expression(
-                        //TODO access element
-                        //TODO not DOT mode
-                        new PropertyNode(InputNode.INSTANCE, index, DOT),
-                        //TODO hardcode
-                        defaultListOperator().toBinaryOperator(),
-                        //TODO expression not finished
-                        NodeFactory.RIGHT_OPERAND.fetchNode(this));
-            }));
-        });
+        return tokenStream.parseBetween(OPENING_BRACKET, CLOSING_BRACKET, ']', () ->
+                new ListNode(tokenStream.fetchElements(CLOSING_BRACKET, index -> {
+                    //TODO use JudgementExpression type
+                    return new Expression(
+                            new PropertyNode(InputNode.INSTANCE, index, BRACKET),
+                            //TODO support element judgement
+                            defaultListOperator().toBinaryOperator(),
+                            //TODO expression not finished
+                            NodeFactory.RIGHT_OPERAND.fetchNode(this));
+                })));
     }
 
     private Token defaultListOperator() {
@@ -90,7 +85,6 @@ public class NodeParser {
     public Node compileObject() {
         //TODO should contains expression => a: 100+10
         return tokenStream.parseBetween(OPENING_BRACE, CLOSING_BRACE, '}', () ->
-                //TODO position
                 new ObjectNode(tokenStream.fetchElements(CLOSING_BRACE, index -> {
                     Node node = NodeFactory.PROPERTY.fetchNode(this);
                     //TODO null node / node is not start with property
@@ -109,18 +103,16 @@ public class NodeParser {
         throw new SyntaxException(tokenStream.getPosition(), "expect a value or expression");
     }
 
-    private Node parsePropertyChain(Node instanceNode) {
-        return recursiveCompile(instanceNode, NodeFactory.EXPLICIT_PROPERTY, this::parsePropertyChain);
-    }
-
     public Node compileOperand() {
         return tokenStream.fetchNode(() -> tokenStream.tryFetchUnaryOperator()
-                //TODO unary opt adjustOperatorOrder
-                //TODO property chain for expression?
                 .map(token -> (Node) new Expression(new ConstNode(null), token.toUnaryOperator(), compileOperand()))
                 .orElseGet(() -> parsePropertyChain(ofNullable(SINGLE_EVALUABLE.fetchNode(this))
                         .orElseGet(this::giveDefault))))
                 .orElseGet(this::giveDefault);
+    }
+
+    private Node parsePropertyChain(Node instanceNode) {
+        return recursiveCompile(instanceNode, NodeFactory.EXPLICIT_PROPERTY, this::parsePropertyChain);
     }
 
     public Expression compileOperatorExpression(Node left) {
@@ -132,9 +124,8 @@ public class NodeParser {
     }
 
     private Node compileRight(Token operator) {
-        //TODO need UT
-        return operator.judgement() ? NodeFactory.RIGHT_OPERAND.fetchNode(this) :
-                NodeFactory.OPERAND.fetchNode(this);
+        return operator.judgement() ? NodeFactory.RIGHT_OPERAND.fetchNode(this)
+                : NodeFactory.OPERAND.fetchNode(this);
     }
 
 
@@ -174,6 +165,7 @@ public class NodeParser {
     }
 
     public Node compileSingle(Token.Type type, Function<Token, Node> nodeFactory) {
-        return tokenStream.popByType(type).map(nodeFactory).orElse(null);
+        return tokenStream.popByType(type).map(t ->
+                nodeFactory.apply(t).setPositionBegin(t.getPositionBegin())).orElse(null);
     }
 }
