@@ -6,6 +6,7 @@ import com.github.leeonky.dal.token.Token;
 import com.github.leeonky.dal.token.TokenStream;
 
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -19,8 +20,9 @@ import static java.util.Optional.ofNullable;
 public class NodeParser {
     private final LinkedList<Token> operators = new LinkedList<>();
     private final TokenStream tokenStream;
-    private final ExpressionFactory expressionFactory = ((ExpressionFactory) NodeParser::compileOperatorExpression)
-            .combine(NodeParser::compileSchemaWhichExpression);
+    private final OptionalExpressionFactory expressionFactory =
+            ((OptionalExpressionFactory) NodeParser::compileOperatorExpression)
+                    .combine(NodeParser::compileSchemaWhichExpression);
 
     public NodeParser(TokenStream tokenStream) {
         this.tokenStream = tokenStream;
@@ -31,8 +33,8 @@ public class NodeParser {
                 () -> new ParenthesesNode(NodeFactory.EXPRESSION.fetchNode(this)));
     }
 
-    public Node compileBracketProperty(Node instance) {
-        return tokenStream.parseBetween(OPENING_BRACKET, CLOSING_BRACKET, ']',
+    public Optional<Node> compileBracketProperty(Node instance) {
+        return tokenStream.parseBetween2(OPENING_BRACKET, CLOSING_BRACKET, ']',
                 () -> new PropertyNode(instance, tokenStream.popTokenForPropertyOrIndex(), BRACKET));
     }
 
@@ -44,10 +46,10 @@ public class NodeParser {
         return recursiveCompile(previous, expressionFactory, this::compileExpression);
     }
 
-    private Node recursiveCompile(Node input, ExpressionFactory expressionFactory, Function<Node, Node> method) {
+    private Node recursiveCompile(Node input, OptionalExpressionFactory expressionFactory, Function<Node, Node> method) {
         return tokenStream.fetchNode(() -> {
             tokenStream.checkingParenthesis();
-            return expressionFactory.fetchExpressionOptional(this, input).map(method).orElse(input);
+            return expressionFactory.fetch(this, input).map(method).orElse(input);
         }).orElse(input);
     }
 
@@ -96,15 +98,16 @@ public class NodeParser {
     }
 
     private Node parsePropertyChain(Node instanceNode) {
-        return recursiveCompile(instanceNode, NodeFactory.EXPLICIT_PROPERTY, this::parsePropertyChain);
+        return recursiveCompile(instanceNode, OptionalExpressionFactory.EXPLICIT_PROPERTY,
+                this::parsePropertyChain);
     }
 
-    public Expression compileOperatorExpression(Node left) {
+    public Optional<Node> compileOperatorExpression(Node left) {
         return tokenStream.popByType(OPERATOR).map(operator -> withDefaultListJudgementOperator(operator, () ->
                 tokenStream.fetchNode(() ->
                         new Expression(left, operator.toBinaryOperator(), compileRight(operator)).adjustOperatorOrder())
                         .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression is not finished"))
-        )).orElse(null);
+        ));
     }
 
     private Node compileRight(Token operator) {
@@ -129,9 +132,9 @@ public class NodeParser {
                 .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "schema expression not finished"));
     }
 
-    public Node compileSchemaWhichExpression(Node node) {
+    public Optional<Node> compileSchemaWhichExpression(Node node) {
         return tokenStream.popKeyWord(Constants.KeyWords.IS)
-                .map(is -> appendWhichClause(compileSchema(node, is))).orElse(null);
+                .map(is -> appendWhichClause(compileSchema(node, is)));
     }
 
     private Node appendWhichClause(SchemaExpression schemaExpression) {
@@ -148,8 +151,14 @@ public class NodeParser {
         return schemaExpression;
     }
 
+    @Deprecated
     public Node compileSingle(Token.Type type, Function<Token, Node> nodeFactory) {
         return tokenStream.popByType(type).map(t -> nodeFactory.apply(t).setPositionBegin(t.getPositionBegin()))
                 .orElse(null);
+    }
+
+    //TODO rename
+    public Optional<Node> compileSingle2(Token.Type type, Function<Token, Node> nodeFactory) {
+        return tokenStream.popByType(type).map(t -> nodeFactory.apply(t).setPositionBegin(t.getPositionBegin()));
     }
 }

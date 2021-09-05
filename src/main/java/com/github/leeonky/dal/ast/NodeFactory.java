@@ -8,15 +8,10 @@ import static java.util.Optional.ofNullable;
 
 //TODO return optional
 public interface NodeFactory {
-    ExpressionFactory
-            BRACKET_PROPERTY = NodeParser::compileBracketProperty,
-            BEAN_PROPERTY = (nodeParser, instanceNode) ->
-                    nodeParser.compileSingle(Token.Type.PROPERTY, value -> value.toDotPropertyNode(instanceNode)),
-            EXPLICIT_PROPERTY = BEAN_PROPERTY.combine(BRACKET_PROPERTY);
 
     NodeFactory
             IDENTIFIER_PROPERTY = NodeParser::compileIdentifierProperty,
-            PROPERTY = IDENTIFIER_PROPERTY.combine(EXPLICIT_PROPERTY.inThis()),
+            PROPERTY = IDENTIFIER_PROPERTY.combine(OptionalExpressionFactory.EXPLICIT_PROPERTY.returnInstance().inThis()),
             REGEX = nodeParser -> nodeParser.compileSingle(Token.Type.REGEX, Token::toRegexNode),
             CONST = nodeParser -> nodeParser.compileSingle(Token.Type.CONST_VALUE, Token::toConstNode),
             OPERAND = NodeParser::compileOperand,
@@ -34,8 +29,8 @@ public interface NodeFactory {
         return nodeParser -> fetchNodeOptional(nodeParser).orElseGet(() -> nodeFactory.fetchNode(nodeParser));
     }
 
+    @Deprecated
     default Optional<Node> fetchNodeOptional(NodeParser nodeParser) {
         return ofNullable(fetchNode(nodeParser));
     }
 }
-

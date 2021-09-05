@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.ast.NodeFactory;
+import com.github.leeonky.dal.ast.OptionalExpressionFactory;
 import com.github.leeonky.dal.token.TokenFactory;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -36,9 +37,9 @@ public class TestSteps {
         put("regex", NodeFactory.REGEX);
         put("property", NodeFactory.PROPERTY);
         put("identifier-property", NodeFactory.IDENTIFIER_PROPERTY);
-        put("explicit-property", NodeFactory.EXPLICIT_PROPERTY.inThis());
-        put("bean-property", NodeFactory.BEAN_PROPERTY.inThis());
-        put("bracket-property", NodeFactory.BRACKET_PROPERTY.inThis());
+        put("explicit-property", OptionalExpressionFactory.EXPLICIT_PROPERTY.returnInstance().inThis());
+        put("bean-property", OptionalExpressionFactory.BEAN_PROPERTY.returnInstance().inThis());
+        put("bracket-property", OptionalExpressionFactory.BRACKET_PROPERTY.returnInstance().inThis());
         put("single-evaluable", NodeFactory.OPERAND);
         put("right-operand", NodeFactory.RIGHT_OPERAND);
         put("expression", NodeFactory.EXPRESSION);
