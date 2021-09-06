@@ -12,6 +12,6 @@ import static com.github.leeonky.dal.token.TokenFactory.createDALTokenFactory;
 public class DALCompiler {
     public Node compile(SourceCode sourceCode) {
         TokenStream tokenStream = createDALTokenFactory().fetchToken(new TokenParser(sourceCode)).getTokenStream();
-        return NodeFactory.EXPRESSION.fetchNode(new NodeParser(tokenStream));
+        return NodeFactory.EXPRESSION.fetch(new NodeParser(tokenStream));
     }
 }

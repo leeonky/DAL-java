@@ -33,19 +33,19 @@ public class TestSteps {
     }};
 
     private final Map<String, MandatoryNodeFactory> nodeFactoryMap = new HashMap<String, MandatoryNodeFactory>() {{
-        put("const", nodeParser -> CONST.fetch(nodeParser).orElse(null));
-        put("parentheses", nodeParser -> PARENTHESES.fetch(nodeParser).orElse(null));
-        put("regex", nodeParser -> REGEX.fetch(nodeParser).orElse(null));
-        put("property", nodeParser -> PROPERTY.fetch(nodeParser).orElse(null));
-        put("identifier-property", nodeParser -> IDENTIFIER_PROPERTY.fetch(nodeParser).orElse(null));
-        put("explicit-property", nodeParser -> EXPLICIT_PROPERTY.withThis().fetch(nodeParser).orElse(null));
-        put("bean-property", nodeParser -> BEAN_PROPERTY.withThis().fetch(nodeParser).orElse(null));
-        put("bracket-property", nodeParser -> BRACKET_PROPERTY.withThis().fetch(nodeParser).orElse(null));
+        put("const", nodeParser -> CONST.tryFetch(nodeParser).orElse(null));
+        put("parentheses", nodeParser -> PARENTHESES.tryFetch(nodeParser).orElse(null));
+        put("regex", nodeParser -> REGEX.tryFetch(nodeParser).orElse(null));
+        put("property", nodeParser -> PROPERTY.tryFetch(nodeParser).orElse(null));
+        put("identifier-property", nodeParser -> IDENTIFIER_PROPERTY.tryFetch(nodeParser).orElse(null));
+        put("explicit-property", nodeParser -> EXPLICIT_PROPERTY.withThis().tryFetch(nodeParser).orElse(null));
+        put("bean-property", nodeParser -> BEAN_PROPERTY.withThis().tryFetch(nodeParser).orElse(null));
+        put("bracket-property", nodeParser -> BRACKET_PROPERTY.withThis().tryFetch(nodeParser).orElse(null));
         put("single-evaluable", OPERAND);
         put("right-operand", RIGHT_OPERAND);
         put("expression", EXPRESSION);
-        put("object", nodeParser -> OBJECT.fetch(nodeParser).orElse(null));
-        put("list", nodeParser -> LIST.fetch(nodeParser).orElse(null));
+        put("object", nodeParser -> OBJECT.tryFetch(nodeParser).orElse(null));
+        put("list", nodeParser -> LIST.tryFetch(nodeParser).orElse(null));
     }};
 
     @Given("the following dal code:")

@@ -118,7 +118,7 @@ class TestContext {
     }
 
     public void compileNode(MandatoryNodeFactory mandatoryNodeFactory) {
-        node = mandatoryNodeFactory.fetchNode(getNodeParser());
+        node = mandatoryNodeFactory.fetch(getNodeParser());
     }
 
     private NodeParser getNodeParser() {

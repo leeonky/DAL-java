@@ -14,13 +14,11 @@ import static com.github.leeonky.dal.ast.NodeFactory.RIGHT_OPERAND;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.token.Token.Type.*;
 
-//TODO orElseThrow
 public class NodeParser {
     private final LinkedList<Token> operators = new LinkedList<>();
     private final TokenStream tokenStream;
-    private final ExpressionFactory expressionFactory =
-            ((ExpressionFactory) NodeParser::compileOperatorExpression)
-                    .combine(NodeParser::compileSchemaWhichExpression);
+    private final ExpressionFactory expressionFactory = ((ExpressionFactory) NodeParser::compileOperatorExpression)
+            .combine(NodeParser::compileSchemaWhichExpression);
 
     public NodeParser(TokenStream tokenStream) {
         this.tokenStream = tokenStream;
@@ -28,7 +26,7 @@ public class NodeParser {
 
     public Optional<Node> compileParentheses() {
         return tokenStream.parseBetween(OPENING_PARENTHESIS, CLOSING_PARENTHESIS, ')',
-                () -> new ParenthesesNode(NodeFactory.EXPRESSION.fetchNode(this)));
+                () -> new ParenthesesNode(NodeFactory.EXPRESSION.fetch(this)));
     }
 
     public Optional<Node> compileBracketProperty(Node instance) {
@@ -47,7 +45,7 @@ public class NodeParser {
     private Node recursiveCompile(Node input, ExpressionFactory expressionFactory, Function<Node, Node> method) {
         return tokenStream.fetchNode(() -> {
             tokenStream.checkingParenthesis();
-            return expressionFactory.fetch(this, input).map(method).orElse(input);
+            return expressionFactory.tryFetch(this, input).map(method).orElse(input);
         }).orElse(input);
     }
 
@@ -61,7 +59,7 @@ public class NodeParser {
         return new Expression(
                 new PropertyNode(InputNode.INSTANCE, index, BRACKET),
                 tokenStream.popJudgementOperator().orElseGet(this::defaultListOperator).toBinaryOperator(),
-                RIGHT_OPERAND.fetchNode(this));
+                RIGHT_OPERAND.fetch(this));
     }
 
     private Token defaultListOperator() {
@@ -71,14 +69,17 @@ public class NodeParser {
     public Optional<Node> compileObject() {
         //TODO should contains expression => a: 100+10
         return tokenStream.parseBetween(OPENING_BRACE, CLOSING_BRACE, '}', () ->
-                new ObjectNode(tokenStream.fetchElements(CLOSING_BRACE, index ->
-                        new Expression(
-                                NodeFactory.PROPERTY.fetch(this).orElseThrow(() ->
-                                        new SyntaxException(tokenStream.getPosition(), "expect a object property")),
-                                tokenStream.popJudgementOperator().orElseThrow(() ->
-                                        new SyntaxException(tokenStream.getPosition(), "expect operator `:` or `=`"))
-                                        .toBinaryOperator(),
-                                RIGHT_OPERAND.fetchNode(this)))));
+                new ObjectNode(tokenStream.fetchElements(CLOSING_BRACE, index -> compilePropertyJudgementExpression())));
+    }
+
+    private Expression compilePropertyJudgementExpression() {
+        return new Expression(fetch(NodeFactory.PROPERTY.tryFetch(this), "expect a object property"),
+                fetch(tokenStream.popJudgementOperator(), "expect operator `:` or `=`").toBinaryOperator(),
+                RIGHT_OPERAND.fetch(this));
+    }
+
+    private <T> T fetch(Optional<T> node, String errorMessage) {
+        return node.orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), errorMessage));
     }
 
     private Node giveDefault() {
@@ -90,7 +91,7 @@ public class NodeParser {
     public Node compileOperand() {
         return tokenStream.fetchNode(() -> tokenStream.tryFetchUnaryOperator()
                 .map(token -> (Node) new Expression(new ConstNode(null), token.toUnaryOperator(), compileOperand()))
-                .orElseGet(() -> parsePropertyChain(NodeFactory.SINGLE_EVALUABLE.fetch(this)
+                .orElseGet(() -> parsePropertyChain(NodeFactory.SINGLE_EVALUABLE.tryFetch(this)
                         .orElseGet(this::giveDefault))))
                 .orElseGet(this::giveDefault);
     }
@@ -102,15 +103,13 @@ public class NodeParser {
 
     public Optional<Node> compileOperatorExpression(Node left) {
         return tokenStream.popByType(OPERATOR).map(operator -> withDefaultListJudgementOperator(operator, () ->
-                tokenStream.fetchNode(() ->
-                        new Expression(left, operator.toBinaryOperator(), compileRight(operator)).adjustOperatorOrder())
-                        .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "expression is not finished"))
-        ));
+                fetch(tokenStream.fetchNode(() -> new Expression(left, operator.toBinaryOperator(),
+                        compileRight(operator)).adjustOperatorOrder()), "expression is not finished")));
     }
 
     private Node compileRight(Token operator) {
-        return operator.judgement() ? RIGHT_OPERAND.fetchNode(this)
-                : NodeFactory.OPERAND.fetchNode(this);
+        return operator.judgement() ? RIGHT_OPERAND.fetch(this)
+                : NodeFactory.OPERAND.fetch(this);
     }
 
 
@@ -124,10 +123,8 @@ public class NodeParser {
     }
 
     private SchemaNode parseSchema() {
-        return tokenStream.fetchNode(() ->
-                tokenStream.popByType(IDENTIFIER).map(Token::toSchemaNode).orElseThrow(() ->
-                        new SyntaxException(tokenStream.getPosition(), "operand of `is` must be schema type")))
-                .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "schema expression not finished"));
+        return fetch(tokenStream.fetchNode(() -> fetch(tokenStream.popByType(IDENTIFIER).map(Token::toSchemaNode),
+                "operand of `is` must be schema type")), "schema expression not finished");
     }
 
     public Optional<Node> compileSchemaWhichExpression(Node node) {
@@ -137,7 +134,7 @@ public class NodeParser {
 
     private Node appendWhichClause(SchemaExpression schemaExpression) {
         if (tokenStream.popKeyWord(Constants.KeyWords.WHICH).isPresent())
-            return schemaExpression.which(NodeFactory.EXPRESSION.fetchNode(this));
+            return schemaExpression.which(NodeFactory.EXPRESSION.fetch(this));
         return schemaExpression;
     }
 

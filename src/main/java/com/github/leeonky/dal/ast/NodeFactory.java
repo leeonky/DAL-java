@@ -20,25 +20,25 @@ public interface NodeFactory {
 
     MandatoryNodeFactory
             OPERAND = NodeParser::compileOperand,
-            EXPRESSION = nodeParser -> nodeParser.compileExpression(OPERAND.fetchNode(nodeParser)),
+            EXPRESSION = nodeParser -> nodeParser.compileExpression(OPERAND.fetch(nodeParser)),
             RIGHT_OPERAND = REGEX.
                     combine(OBJECT).
                     combine(LIST).
                     combine(OPERAND);
 
 
-    Optional<Node> fetch(NodeParser nodeParser);
+    Optional<Node> tryFetch(NodeParser nodeParser);
 
     default NodeFactory combine(NodeFactory another) {
         return nodeParser -> {
-            Optional<Node> optionalNode = fetch(nodeParser);
+            Optional<Node> optionalNode = tryFetch(nodeParser);
             if (optionalNode.isPresent())
                 return optionalNode;
-            return another.fetch(nodeParser);
+            return another.tryFetch(nodeParser);
         };
     }
 
     default MandatoryNodeFactory combine(MandatoryNodeFactory another) {
-        return nodeParser -> fetch(nodeParser).orElseGet(() -> another.fetchNode(nodeParser));
+        return nodeParser -> tryFetch(nodeParser).orElseGet(() -> another.fetch(nodeParser));
     }
 }

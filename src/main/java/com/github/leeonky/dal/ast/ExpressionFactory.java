@@ -11,18 +11,18 @@ public interface ExpressionFactory {
                     nodeParser.compileSingle(Token.Type.PROPERTY, value -> value.toDotPropertyNode(instance)),
             EXPLICIT_PROPERTY = BEAN_PROPERTY.combine(BRACKET_PROPERTY);
 
-    Optional<Node> fetch(NodeParser nodeParser, Node previous);
+    Optional<Node> tryFetch(NodeParser nodeParser, Node previous);
 
     default ExpressionFactory combine(ExpressionFactory another) {
         return (nodeParser, previous) -> {
-            Optional<Node> optionalNode = fetch(nodeParser, previous);
+            Optional<Node> optionalNode = tryFetch(nodeParser, previous);
             if (optionalNode.isPresent())
                 return optionalNode;
-            return another.fetch(nodeParser, previous);
+            return another.tryFetch(nodeParser, previous);
         };
     }
 
     default NodeFactory withThis() {
-        return nodeParser -> fetch(nodeParser, InputNode.INSTANCE);
+        return nodeParser -> tryFetch(nodeParser, InputNode.INSTANCE);
     }
 }
