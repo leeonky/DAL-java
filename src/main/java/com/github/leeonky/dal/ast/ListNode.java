@@ -22,6 +22,10 @@ public class ListNode extends Node {
         this(Collections.emptyList());
     }
 
+    public List<Expression> getExpressions() {
+        return expressions;
+    }
+
     @Override
     public String inspect() {
         return format("[%s]", expressions.stream().map(Expression::getRightOperand)

@@ -35,6 +35,7 @@ Feature: list node
       class.simpleName: 'ListNode'
       inspect: '[1]'
       positionBegin: 1
+      expressions.inspect: ['[0] : 1']
     }
     """
 
@@ -49,6 +50,10 @@ Feature: list node
       class.simpleName: 'ListNode'
       inspect: '[1 2]'
       positionBegin: 1
+      expressions.inspect: [
+        '[0] : 1'
+        '[1] : 2'
+      ]
     }
     """
 
@@ -82,7 +87,44 @@ Feature: list node
       ^
     """
 
+  Scenario Outline: support different judgement operator in element
+    Given the following dal code:
+    """
+     [<operator>1]
+    """
+    Then got the following "list" node:
+    """
+    expressions.inspect: [
+      '[0] <result> 1'
+    ]
+    """
+    Examples:
+      | operator | result |
+      |          | :      |
+      | =        | =      |
+      | :        | :      |
+
+  Scenario Outline: support expression in element judgement
+    Given the following dal code:
+    """
+     [<operator>2+1]
+    """
+    Then got the following "list" node:
+    """
+    expressions[0]: {
+      leftOperand.inspect: '[0]'
+      operator.class.simpleName: '<result>'
+      rightOperand.inspect: '2 + 1'
+    }
+    """
+    Examples:
+      | operator | result  |
+      |          | Matcher |
+      | =        | Equal   |
+      | :        | Matcher |
+
 #  TODO support comma
 #  TODO nested list
 #  TODO nested object
-#  TODO support comma
+#  TODO regex
+#  TODO is schema

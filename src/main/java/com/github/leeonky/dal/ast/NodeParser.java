@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.github.leeonky.dal.ast.NodeFactory.RIGHT_OPERAND;
+import static com.github.leeonky.dal.ast.NodeFactory.*;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.token.Token.Type.*;
 
@@ -42,6 +42,11 @@ public class NodeParser {
         return recursiveCompile(previous, expressionFactory, this::compileExpression);
     }
 
+    public Node compileCalculateExpression(Node previous) {
+        return recursiveCompile(previous, NodeParser::compileCalculateOperatorExpression,
+                this::compileCalculateExpression);
+    }
+
     private Node recursiveCompile(Node input, ExpressionFactory expressionFactory, Function<Node, Node> method) {
         return tokenStream.fetchNode(() -> {
             tokenStream.checkingParenthesis();
@@ -56,10 +61,9 @@ public class NodeParser {
     }
 
     private Expression compileElementNode(Integer index) {
-        return new Expression(
-                new PropertyNode(InputNode.INSTANCE, index, BRACKET),
+        return new Expression(new PropertyNode(InputNode.INSTANCE, index, BRACKET),
                 tokenStream.popJudgementOperator().orElseGet(this::defaultListOperator).toBinaryOperator(),
-                RIGHT_OPERAND.fetch(this));
+                JUDGEMENT_OPERAND.fetch(this));
     }
 
     private Token defaultListOperator() {
@@ -101,10 +105,16 @@ public class NodeParser {
                 this::parsePropertyChain);
     }
 
-    public Optional<Node> compileOperatorExpression(Node left) {
+    private Optional<Node> compileOperatorExpression(Node left) {
         return tokenStream.popByType(OPERATOR).map(operator -> withDefaultListJudgementOperator(operator, () ->
                 fetch(tokenStream.fetchNode(() -> new Expression(left, operator.toBinaryOperator(),
                         compileRight(operator)).adjustOperatorOrder()), "expression is not finished")));
+    }
+
+    public Optional<Node> compileCalculateOperatorExpression(Node left) {
+        return tokenStream.popCalculatorOperator()
+                .map(operator -> fetch(tokenStream.fetchNode(() -> new Expression(left, operator.toBinaryOperator(),
+                        OPERAND.fetch(this)).adjustOperatorOrder()), "expression is not finished"));
     }
 
     private Node compileRight(Token operator) {

@@ -21,17 +21,13 @@ public class DalException extends java.lang.RuntimeException {
     }
 
     public String show(String code) {
-        try {
-            List<String> codeLines = new BufferedReader(new StringReader(code)).lines()
-                    .collect(toCollection(ArrayList::new));
-            int position = this.position;
-            int lineIndex = 0;
-            for (; lineIndex < codeLines.size() && position > codeLines.get(lineIndex).length(); lineIndex++)
-                position -= codeLines.get(lineIndex).length() + 1;
-            codeLines.add(lineIndex + 1, String.join("", Collections.nCopies(position, " ")) + "^");
-            return String.join("\n", codeLines);
-        } catch (Exception exception) {
-            throw new IllegalStateException(exception);
-        }
+        List<String> codeLines = new BufferedReader(new StringReader(code)).lines()
+                .collect(toCollection(ArrayList::new));
+        int position = this.position;
+        int lineIndex = 0;
+        for (; lineIndex < codeLines.size() && position > codeLines.get(lineIndex).length(); lineIndex++)
+            position -= codeLines.get(lineIndex).length() + 1;
+        codeLines.add(lineIndex + 1, String.join("", Collections.nCopies(position, " ")) + "^");
+        return String.join("\n", codeLines);
     }
 }

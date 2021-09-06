@@ -55,8 +55,4 @@ public class ObjectNode extends Node {
             context.wrappedValueStack.pop();
         }
     }
-
-    public void addJudgements(Expression expression) {
-        expressions.add(expression);
-    }
 }

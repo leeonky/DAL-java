@@ -1,10 +1,10 @@
-Feature: expression
+Feature: calculator expression
 
   Scenario: return 'this' object when no code
     Given the following dal code:
     """
     """
-    Then got the following "expression" node:
+    Then got the following "calculator-expression" node:
     """
     : {
       class.simpleName: 'InputNode'
@@ -17,7 +17,7 @@ Feature: expression
     """
       1
     """
-    Then got the following "expression" node:
+    Then got the following "calculator-expression" node:
     """
     : {
       class.simpleName: 'ConstNode'
@@ -30,7 +30,7 @@ Feature: expression
     """
       + 1
     """
-    Then got the following "expression" node:
+    Then got the following "calculator-expression" node:
     """
     : {
       class.simpleName: 'Expression'
@@ -44,7 +44,7 @@ Feature: expression
     """
       1)
     """
-    Then failed to get "expression" node with the following message:
+    Then failed to get "calculator-expression" node with the following message:
     """
     missed '('
     """
@@ -59,7 +59,7 @@ Feature: expression
     """
       1+
     """
-    Then failed to get "expression" node with the following message:
+    Then failed to get "calculator-expression" node with the following message:
     """
     expression is not finished
     """
@@ -74,7 +74,7 @@ Feature: expression
     """
     a <operator> b
     """
-    Then got the following "expression" node:
+    Then got the following "calculator-expression" node:
     """
     : {
       class.simpleName: 'Expression'
@@ -99,15 +99,30 @@ Feature: expression
       | <        | Less           |
       | >=       | GreaterOrEqual |
       | <=       | LessOrEqual    |
-      | =        | Equal          |
-      | :        | Matcher        |
+
+  Scenario Outline: should finish expression when got judgement operator
+    Given the following dal code:
+    """
+      1<operator>
+    """
+    Then got the following "calculator-expression" node:
+    """
+    : {
+      class.simpleName: 'ConstNode'
+      inspect: '1'
+    }
+    """
+    Examples:
+      | operator |
+      | =        |
+      | :        |
 
   Scenario: support expression chain and process the operator precedence
     Given the following dal code:
     """
     a + b * c
     """
-    Then got the following "expression" node:
+    Then got the following "calculator-expression" node:
     """
     : {
       class.simpleName: 'Expression'
@@ -120,33 +135,12 @@ Feature: expression
     }
     """
 
-  Scenario Outline: judge by object list or regex
-    Given the following dal code:
-    """
-    <operator> <operand>
-    """
-    Then got the following "expression" node:
-    """
-    : {
-      class.simpleName: 'Expression'
-      inspect: ' <operator> <operand>'
-    }
-    """
-    Examples:
-      | operator | operand   |
-      | =        | {}        |
-      | =        | []        |
-      | =        | /pattern/ |
-      | :        | {}        |
-      | :        | []        |
-      | :        | /pattern/ |
-
   Scenario: compile right operand as element accessing when operator is not judgement
     Given the following dal code:
     """
       + [0]
     """
-    Then got the following "expression" node:
+    Then got the following "calculator-expression" node:
     """
     : {
       class.simpleName: 'Expression'

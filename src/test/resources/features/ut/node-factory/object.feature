@@ -131,4 +131,5 @@ Feature: object node
 #  TODO support comma
 #  TODO nested list
 #  TODO nested object
-#  TODO support comma
+#  TODO regex
+#  TODO is schema

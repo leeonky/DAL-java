@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.token.Token.Type.CLOSING_PARENTHESIS;
+import static com.github.leeonky.dal.token.Token.Type.OPERATOR;
 import static com.github.leeonky.dal.util.IfThenFactory.when;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
@@ -134,6 +135,10 @@ public class TokenStream {
 
     public Optional<Token> popJudgementOperator() {
         return when(currentToken().judgement()).optional(this::pop);
+    }
+
+    public Optional<Token> popCalculatorOperator() {
+        return when(currentToken().getType() == OPERATOR && !currentToken().judgement()).optional(this::pop);
     }
 
     public <T extends Node> Optional<T> fetchNode(Supplier<T> supplier) {

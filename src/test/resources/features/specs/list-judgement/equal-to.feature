@@ -68,6 +68,16 @@ Feature: list= [...]
       = [1 :{}]
     """
 
+  Scenario: support expression in element judgement
+    Given the following input data:
+    """
+      [2, 3, 4]
+    """
+    Then the following assertion should be passed:
+    """
+      = [1+1 =1+2 :2+2]
+    """
+
 #  TODO null equal to []
 #  TODO match
 #  TODO equal
@@ -76,5 +86,6 @@ Feature: list= [...]
 #  TODO element match
 #  TODO element equal
 #  TODO nested object
+#  TODO regex
 #  TODO sub alias
 #  TODO support comma

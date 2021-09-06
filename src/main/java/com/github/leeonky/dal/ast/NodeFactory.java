@@ -24,7 +24,12 @@ public interface NodeFactory {
             RIGHT_OPERAND = REGEX.
                     combine(OBJECT).
                     combine(LIST).
-                    combine(OPERAND);
+                    combine(OPERAND),
+            CALCULATOR_EXPRESSION = nodeParser -> nodeParser.compileCalculateExpression(OPERAND.fetch(nodeParser)),
+            JUDGEMENT_OPERAND = REGEX.
+                    combine(OBJECT).
+                    combine(LIST).
+                    combine(CALCULATOR_EXPRESSION);
 
 
     Optional<Node> tryFetch(NodeParser nodeParser);
