@@ -11,49 +11,47 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.ast.NodeFactory.RIGHT_OPERAND;
-import static com.github.leeonky.dal.ast.NodeFactory.SINGLE_EVALUABLE;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.token.Token.Type.*;
-import static java.util.Optional.ofNullable;
 
 //TODO orElseThrow
 public class NodeParser {
     private final LinkedList<Token> operators = new LinkedList<>();
     private final TokenStream tokenStream;
-    private final OptionalExpressionFactory expressionFactory =
-            ((OptionalExpressionFactory) NodeParser::compileOperatorExpression)
+    private final ExpressionFactory expressionFactory =
+            ((ExpressionFactory) NodeParser::compileOperatorExpression)
                     .combine(NodeParser::compileSchemaWhichExpression);
 
     public NodeParser(TokenStream tokenStream) {
         this.tokenStream = tokenStream;
     }
 
-    public Node compileParentheses() {
+    public Optional<Node> compileParentheses() {
         return tokenStream.parseBetween(OPENING_PARENTHESIS, CLOSING_PARENTHESIS, ')',
                 () -> new ParenthesesNode(NodeFactory.EXPRESSION.fetchNode(this)));
     }
 
     public Optional<Node> compileBracketProperty(Node instance) {
-        return tokenStream.parseBetween2(OPENING_BRACKET, CLOSING_BRACKET, ']',
+        return tokenStream.parseBetween(OPENING_BRACKET, CLOSING_BRACKET, ']',
                 () -> new PropertyNode(instance, tokenStream.popTokenForPropertyOrIndex(), BRACKET));
     }
 
-    public Node compileIdentifierProperty() {
-        return tokenStream.popByType(IDENTIFIER).map(Token::toIdentifierNode).orElse(null);
+    public Optional<Node> compileIdentifierProperty() {
+        return tokenStream.popByType(IDENTIFIER).map(Token::toIdentifierNode);
     }
 
     public Node compileExpression(Node previous) {
         return recursiveCompile(previous, expressionFactory, this::compileExpression);
     }
 
-    private Node recursiveCompile(Node input, OptionalExpressionFactory expressionFactory, Function<Node, Node> method) {
+    private Node recursiveCompile(Node input, ExpressionFactory expressionFactory, Function<Node, Node> method) {
         return tokenStream.fetchNode(() -> {
             tokenStream.checkingParenthesis();
             return expressionFactory.fetch(this, input).map(method).orElse(input);
         }).orElse(input);
     }
 
-    public Node compileList() {
+    public Optional<Node> compileList() {
         //TODO should contains expression => a: 100+10
         return tokenStream.parseBetween(OPENING_BRACKET, CLOSING_BRACKET, ']', () ->
                 new ListNode(tokenStream.fetchElements(CLOSING_BRACKET, this::compileElementNode)));
@@ -70,12 +68,12 @@ public class NodeParser {
         return operators.isEmpty() ? Token.operatorToken(":") : operators.getFirst();
     }
 
-    public Node compileObject() {
+    public Optional<Node> compileObject() {
         //TODO should contains expression => a: 100+10
         return tokenStream.parseBetween(OPENING_BRACE, CLOSING_BRACE, '}', () ->
                 new ObjectNode(tokenStream.fetchElements(CLOSING_BRACE, index ->
                         new Expression(
-                                NodeFactory.PROPERTY.fetchNodeOptional(this).orElseThrow(() ->
+                                NodeFactory.PROPERTY.fetch(this).orElseThrow(() ->
                                         new SyntaxException(tokenStream.getPosition(), "expect a object property")),
                                 tokenStream.popJudgementOperator().orElseThrow(() ->
                                         new SyntaxException(tokenStream.getPosition(), "expect operator `:` or `=`"))
@@ -92,13 +90,13 @@ public class NodeParser {
     public Node compileOperand() {
         return tokenStream.fetchNode(() -> tokenStream.tryFetchUnaryOperator()
                 .map(token -> (Node) new Expression(new ConstNode(null), token.toUnaryOperator(), compileOperand()))
-                .orElseGet(() -> parsePropertyChain(ofNullable(SINGLE_EVALUABLE.fetchNode(this))
+                .orElseGet(() -> parsePropertyChain(NodeFactory.SINGLE_EVALUABLE.fetch(this)
                         .orElseGet(this::giveDefault))))
                 .orElseGet(this::giveDefault);
     }
 
     private Node parsePropertyChain(Node instanceNode) {
-        return recursiveCompile(instanceNode, OptionalExpressionFactory.EXPLICIT_PROPERTY,
+        return recursiveCompile(instanceNode, ExpressionFactory.EXPLICIT_PROPERTY,
                 this::parsePropertyChain);
     }
 
@@ -151,14 +149,7 @@ public class NodeParser {
         return schemaExpression;
     }
 
-    @Deprecated
-    public Node compileSingle(Token.Type type, Function<Token, Node> nodeFactory) {
-        return tokenStream.popByType(type).map(t -> nodeFactory.apply(t).setPositionBegin(t.getPositionBegin()))
-                .orElse(null);
-    }
-
-    //TODO rename
-    public Optional<Node> compileSingle2(Token.Type type, Function<Token, Node> nodeFactory) {
+    public Optional<Node> compileSingle(Token.Type type, Function<Token, Node> nodeFactory) {
         return tokenStream.popByType(type).map(t -> nodeFactory.apply(t).setPositionBegin(t.getPositionBegin()));
     }
 }

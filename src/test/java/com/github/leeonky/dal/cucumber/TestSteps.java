@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.cucumber;
 
-import com.github.leeonky.dal.ast.NodeFactory;
-import com.github.leeonky.dal.ast.OptionalExpressionFactory;
+import com.github.leeonky.dal.ast.MandatoryNodeFactory;
 import com.github.leeonky.dal.token.TokenFactory;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -9,6 +8,8 @@ import io.cucumber.java.en.Then;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.github.leeonky.dal.ast.ExpressionFactory.*;
+import static com.github.leeonky.dal.ast.NodeFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TestSteps {
@@ -31,20 +32,20 @@ public class TestSteps {
         put("bracket-property", TokenFactory.createBracketPropertyTokenFactory());
     }};
 
-    private final Map<String, NodeFactory> nodeFactoryMap = new HashMap<String, NodeFactory>() {{
-        put("const", NodeFactory.CONST);
-        put("parentheses", NodeFactory.PARENTHESES);
-        put("regex", NodeFactory.REGEX);
-        put("property", NodeFactory.PROPERTY);
-        put("identifier-property", NodeFactory.IDENTIFIER_PROPERTY);
-        put("explicit-property", OptionalExpressionFactory.EXPLICIT_PROPERTY.returnInstance().inThis());
-        put("bean-property", OptionalExpressionFactory.BEAN_PROPERTY.returnInstance().inThis());
-        put("bracket-property", OptionalExpressionFactory.BRACKET_PROPERTY.returnInstance().inThis());
-        put("single-evaluable", NodeFactory.OPERAND);
-        put("right-operand", NodeFactory.RIGHT_OPERAND);
-        put("expression", NodeFactory.EXPRESSION);
-        put("object", NodeFactory.OBJECT);
-        put("list", NodeFactory.LIST);
+    private final Map<String, MandatoryNodeFactory> nodeFactoryMap = new HashMap<String, MandatoryNodeFactory>() {{
+        put("const", nodeParser -> CONST.fetch(nodeParser).orElse(null));
+        put("parentheses", nodeParser -> PARENTHESES.fetch(nodeParser).orElse(null));
+        put("regex", nodeParser -> REGEX.fetch(nodeParser).orElse(null));
+        put("property", nodeParser -> PROPERTY.fetch(nodeParser).orElse(null));
+        put("identifier-property", nodeParser -> IDENTIFIER_PROPERTY.fetch(nodeParser).orElse(null));
+        put("explicit-property", nodeParser -> EXPLICIT_PROPERTY.withThis().fetch(nodeParser).orElse(null));
+        put("bean-property", nodeParser -> BEAN_PROPERTY.withThis().fetch(nodeParser).orElse(null));
+        put("bracket-property", nodeParser -> BRACKET_PROPERTY.withThis().fetch(nodeParser).orElse(null));
+        put("single-evaluable", OPERAND);
+        put("right-operand", RIGHT_OPERAND);
+        put("expression", EXPRESSION);
+        put("object", nodeParser -> OBJECT.fetch(nodeParser).orElse(null));
+        put("list", nodeParser -> LIST.fetch(nodeParser).orElse(null));
     }};
 
     @Given("the following dal code:")

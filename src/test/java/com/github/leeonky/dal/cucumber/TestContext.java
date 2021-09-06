@@ -4,8 +4,8 @@ import com.github.leeonky.dal.AssertResult;
 import com.github.leeonky.dal.DalException;
 import com.github.leeonky.dal.DataAssert;
 import com.github.leeonky.dal.RuntimeContextBuilder;
+import com.github.leeonky.dal.ast.MandatoryNodeFactory;
 import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.NodeFactory;
 import com.github.leeonky.dal.ast.NodeParser;
 import com.github.leeonky.dal.parser.TokenParser;
 import com.github.leeonky.dal.token.SourceCode;
@@ -112,13 +112,13 @@ class TestContext {
         assertThat(dalException).hasMessage(message);
     }
 
-    public void failedCompileNode(NodeFactory factory, String message) {
+    public void failedCompileNode(MandatoryNodeFactory factory, String message) {
         dalException = assertThrows(DalException.class, () -> compileNode(factory));
         assertThat(dalException).hasMessage(message);
     }
 
-    public void compileNode(NodeFactory nodeFactory) {
-        node = nodeFactory.fetchNode(getNodeParser());
+    public void compileNode(MandatoryNodeFactory mandatoryNodeFactory) {
+        node = mandatoryNodeFactory.fetchNode(getNodeParser());
     }
 
     private NodeParser getNodeParser() {

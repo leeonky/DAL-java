@@ -92,9 +92,8 @@ public class TokenStream {
                         .contains((String) currentToken().getValue());
     }
 
-    @Deprecated
-    public Node parseBetween(Token.Type opening, Token.Type closing, char closingChar, Supplier<Node> supplier) {
-        return when(currentToken().getType() == opening).thenReturn(() -> {
+    public Optional<Node> parseBetween(Token.Type opening, Token.Type closing, char closingChar, Supplier<Node> supplier) {
+        return when(currentToken().getType() == opening).optional(() -> {
             try {
                 Token openingToken = pop();
                 braceLevels.computeIfAbsent(closing, k -> new AtomicInteger(0)).incrementAndGet();
@@ -109,11 +108,6 @@ public class TokenStream {
                 braceLevels.get(closing).decrementAndGet();
             }
         });
-    }
-
-    //TODO rename
-    public Optional<Node> parseBetween2(Token.Type opening, Token.Type closing, char closingChar, Supplier<Node> supplier) {
-        return Optional.ofNullable(parseBetween(opening, closing, closingChar, supplier));
     }
 
     public void checkingParenthesis() {
