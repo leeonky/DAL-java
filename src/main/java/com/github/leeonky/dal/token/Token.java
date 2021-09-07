@@ -106,7 +106,7 @@ public class Token {
         return this;
     }
 
-    public boolean judgement() {
+    public boolean isJudgement() {
         return getType() == Type.OPERATOR
                 && (getValue().equals(Constants.Operators.MATCH) || getValue().equals(Constants.Operators.EQ));
     }
@@ -202,7 +202,7 @@ public class Token {
                 break;
 //                    not work in [] {}
             case ",":
-                operator = new Operator.Comma();
+                operator = new Operator.CommaAnd();
                 break;
             default:
                 throw new SyntaxException(getPositionBegin(), "not support operator `" + operatorString + "` yet");
@@ -224,6 +224,10 @@ public class Token {
                 throw new SyntaxException(getPositionBegin(), "not support operator " + operatorString + " yet");
         }
         return operator.setPosition(getPositionBegin());
+    }
+
+    public boolean isComma() {
+        return value.equals(",");
     }
 
     public enum Type {

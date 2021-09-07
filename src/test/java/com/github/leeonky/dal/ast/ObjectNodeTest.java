@@ -55,6 +55,4 @@ class ObjectNodeTest {
             );
         }
     }
-
-    //TODO missing judge UT
 }

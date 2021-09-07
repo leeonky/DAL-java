@@ -129,7 +129,7 @@ Feature: object node
     """
 
 #  TODO support comma
-#  TODO nested list
-#  TODO nested object
-#  TODO regex
+#  TODO nested list schema alias
+#  TODO nested object schema alias
+#  TODO property chain sub alias
 #  TODO is schema

@@ -60,7 +60,7 @@ Feature: list node
   Scenario: raise error when no closing bracket
     Given the following dal code:
     """
-    [
+    [1
     """
     Then failed to get "list" node with the following message:
     """
@@ -68,8 +68,8 @@ Feature: list node
     """
     And got the following source code information:
     """
-    [
-     ^
+    [1
+      ^
     """
 
   Scenario: raise error when element is invalid
@@ -123,8 +123,17 @@ Feature: list node
       | =        | Equal   |
       | :        | Matcher |
 
-#  TODO support comma
-#  TODO nested list
-#  TODO nested object
-#  TODO regex
+
+  Scenario: support optional comma between elements
+    Given the following dal code:
+    """
+     [true, false]
+    """
+    Then got the following "list" node:
+    """
+    inspect: '[true false]'
+    """
+
+#  TODO nested list schema alias
+#  TODO nested object schema alias
 #  TODO is schema

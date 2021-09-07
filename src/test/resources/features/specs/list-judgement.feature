@@ -152,11 +152,20 @@ Feature: judge list
             ^
     """
 
+  Scenario: use comma to avoid ambiguous element
+    Given the following input data:
+    """
+      [1, [2, 3]]
+    """
+    Then the following assertion should pass:
+    """
+      = [1, [2 3]]
+    """
+
 #  TODO skip element
 #  TODO ignore tails
 #  TODO nested object
 #  TODO nested list
 #  TODO sub alias
-#  TODO support comma
 #  TODO regex
 #  TODO = [1, [2 3]] support comma

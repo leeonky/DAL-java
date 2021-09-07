@@ -70,7 +70,7 @@ public interface TokenFactory {
     }
 
     static TokenFactory createOperatorTokenFactory() {
-        return startWith(included(OPERATOR.except(CHARACTER('/').when(after(Token::judgement)))))
+        return startWith(included(OPERATOR.except(CHARACTER('/').when(after(Token::isJudgement)))))
                 .endWith(END_OF_CODE.or(before(not(OPERATOR))).or(before(CHARACTER('/').when(after(Operators.MATCH).or(after(Operators.EQ))))))
                 .createAs(OPERATOR_TOKEN);
     }
@@ -96,7 +96,7 @@ public interface TokenFactory {
     }
 
     static TokenFactory createRegexTokenFactory() {
-        return startWith(excluded(CHARACTER('/').when(after(Token::judgement))))
+        return startWith(excluded(CHARACTER('/').when(after(Token::isJudgement))))
                 .take(ALL_CHARACTERS
                         .escape("\\\\", '\\')
                         .escape("\\/", '/'))
@@ -113,7 +113,7 @@ public interface TokenFactory {
     }
 
     static TokenFactory createBracketPropertyTokenFactory() {
-        return startWith(excluded(CHARACTER('[').except(after(Token::judgement))))
+        return startWith(excluded(CHARACTER('[').except(after(Token::isJudgement))))
                 .take(byFactory(createNumberTokenFactory())
                         .or(createSingleQuotedStringTokenFactory())
                         .or(createDoubleQuotedStringTokenFactory()))

@@ -224,10 +224,24 @@ Feature: judge object
       }
     """
 
+  Scenario: use comma to avoid ambiguous field
+    Given the following input data:
+    """
+      {
+        "key1": "1",
+        "key2": "2"
+      }
+    """
+    Then the following assertion should pass:
+    """
+      = {
+        .key1: '1',
+        .key2= '2'
+      }
+    """
+
 #  TODO nested object sub alias
 #  TODO property chain sub alias
 #  TODO process getClass property for java bean and size property of
 #  TODO property is alias
 #  TODO sub alias
-#  TODO support comma
-#  TODO .key: 1

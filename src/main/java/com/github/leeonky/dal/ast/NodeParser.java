@@ -71,7 +71,6 @@ public class NodeParser {
     }
 
     public Optional<Node> compileObject() {
-        //TODO should contains expression => a: 100+10
         return tokenStream.parseBetween(OPENING_BRACE, CLOSING_BRACE, '}', () ->
                 new ObjectNode(tokenStream.fetchElements(CLOSING_BRACE, index -> compilePropertyJudgementExpression())));
     }
@@ -112,13 +111,13 @@ public class NodeParser {
     }
 
     public Optional<Node> compileCalculationOperatorExpression(Node left) {
-        return tokenStream.popCalculatorOperator()
+        return tokenStream.popCalculationOperator()
                 .map(operator -> fetch(tokenStream.fetchNode(() -> new Expression(left, operator.toBinaryOperator(),
                         OPERAND.fetch(this)).adjustOperatorOrder()), "expression is not finished"));
     }
 
     private Node compileRight(Token operator) {
-        return operator.judgement() ? RIGHT_OPERAND.fetch(this)
+        return operator.isJudgement() ? RIGHT_OPERAND.fetch(this)
                 : NodeFactory.OPERAND.fetch(this);
     }
 

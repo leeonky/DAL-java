@@ -20,6 +20,4 @@ class ListNodeTest {
         assertThat(listNode.judge(new ConstNode(Collections.emptyList()), EQUAL, runtimeContext)).isTrue();
         assertThat(listNode.judge(new ConstNode(Collections.emptyList()), MATCHER, runtimeContext)).isTrue();
     }
-
-    //TODO missing judge UT
 }
