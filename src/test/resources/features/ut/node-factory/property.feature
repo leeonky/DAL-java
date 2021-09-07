@@ -75,7 +75,7 @@ Feature: property node
         }
       }
     """
-    Then the following assertion should be passed:
+    Then the following assertion should pass:
     """
     user.name = 'Tom'
     """

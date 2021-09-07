@@ -34,17 +34,17 @@ public class ListNode extends Node {
 
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
-        return judgeAll(actualNode, context, operator);
+        return judgeAll(actualNode, context);
     }
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
-        return judgeAll(actualNode, context, operator);
+        return judgeAll(actualNode, context);
     }
 
-    private boolean judgeAll(Node actualNode, RuntimeContext context, Operator operator) {
+    private boolean judgeAll(Node actualNode, RuntimeContext context) {
         Object[] list = stream(context.wrap(actualNode.evaluate(context)).getList().spliterator(), false).toArray();
-        assertListSize(expressions.size(), list.length, operator.getPosition());
+        assertListSize(expressions.size(), list.length, getPositionBegin());
         return judgeAll(list, context);
     }
 

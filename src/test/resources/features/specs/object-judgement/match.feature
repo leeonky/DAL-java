@@ -5,7 +5,7 @@ Feature: object: {...}
     """
       <data>
     """
-    Then the following assertion should be passed:
+    Then the following assertion should pass:
     """
       : {}
     """
@@ -38,7 +38,7 @@ Feature: object: {...}
         "key2": 2
       }
     """
-    Then the following assertion should be passed:
+    Then the following assertion should pass:
     """
       : {
         key1: 1
@@ -94,7 +94,7 @@ Feature: object: {...}
 
 #TODO move to basic judgement
   Scenario: null matches null
-    Then the following assertion should be passed:
+    Then the following assertion should pass:
     """
       null: null
     """

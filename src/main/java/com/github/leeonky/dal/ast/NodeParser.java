@@ -42,9 +42,9 @@ public class NodeParser {
         return recursiveCompile(previous, expressionFactory, this::compileExpression);
     }
 
-    public Node compileCalculateExpression(Node previous) {
-        return recursiveCompile(previous, NodeParser::compileCalculateOperatorExpression,
-                this::compileCalculateExpression);
+    public Node compileCalculationExpression(Node previous) {
+        return recursiveCompile(previous, NodeParser::compileCalculationOperatorExpression,
+                this::compileCalculationExpression);
     }
 
     private Node recursiveCompile(Node input, ExpressionFactory expressionFactory, Function<Node, Node> method) {
@@ -55,7 +55,6 @@ public class NodeParser {
     }
 
     public Optional<Node> compileList() {
-        //TODO should contains expression => a: 100+10
         return tokenStream.parseBetween(OPENING_BRACKET, CLOSING_BRACKET, ']', () ->
                 new ListNode(tokenStream.fetchElements(CLOSING_BRACKET, this::compileElementNode)));
     }
@@ -111,7 +110,7 @@ public class NodeParser {
                         compileRight(operator)).adjustOperatorOrder()), "expression is not finished")));
     }
 
-    public Optional<Node> compileCalculateOperatorExpression(Node left) {
+    public Optional<Node> compileCalculationOperatorExpression(Node left) {
         return tokenStream.popCalculatorOperator()
                 .map(operator -> fetch(tokenStream.fetchNode(() -> new Expression(left, operator.toBinaryOperator(),
                         OPERAND.fetch(this)).adjustOperatorOrder()), "expression is not finished"));

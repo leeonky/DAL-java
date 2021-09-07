@@ -46,7 +46,7 @@ public class TestSteps {
         put("expression", EXPRESSION);
         put("object", nodeParser -> OBJECT.tryFetch(nodeParser).orElse(null));
         put("list", nodeParser -> LIST.tryFetch(nodeParser).orElse(null));
-        put("calculator-expression", CALCULATOR_EXPRESSION);
+        put("calculator-expression", CALCULATION_EXPRESSION);
     }};
 
     @Given("the following dal code:")

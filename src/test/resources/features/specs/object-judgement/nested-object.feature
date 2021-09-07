@@ -11,7 +11,7 @@ Feature: {nested: {...}}
         }
       }
     """
-    Then the following assertion should be passed:
+    Then the following assertion should pass:
     """
       : {
         key1: 1

@@ -17,8 +17,8 @@ public class SpecSteps {
         TestContext.INSTANCE.givenInputByJson(json);
     }
 
-    @Then("the following assertion should be passed:")
-    public void the_follow_assertion_should_be_passed(String dalCode) {
+    @Then("the following assertion should pass:")
+    public void the_follow_assertion_should_be_pass(String dalCode) {
         TestContext.INSTANCE.executeDal(dalCode);
         TestContext.INSTANCE.shouldPass();
     }

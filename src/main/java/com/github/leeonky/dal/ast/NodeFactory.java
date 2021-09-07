@@ -25,11 +25,11 @@ public interface NodeFactory {
                     combine(OBJECT).
                     combine(LIST).
                     combine(OPERAND),
-            CALCULATOR_EXPRESSION = nodeParser -> nodeParser.compileCalculateExpression(OPERAND.fetch(nodeParser)),
+            CALCULATION_EXPRESSION = nodeParser -> nodeParser.compileCalculationExpression(OPERAND.fetch(nodeParser)),
             JUDGEMENT_OPERAND = REGEX.
                     combine(OBJECT).
                     combine(LIST).
-                    combine(CALCULATOR_EXPRESSION);
+                    combine(CALCULATION_EXPRESSION);
 
 
     Optional<Node> tryFetch(NodeParser nodeParser);

@@ -14,7 +14,7 @@ Feature: {property.chain: ...}
         }
       }
     """
-    Then the following assertion should be passed:
+    Then the following assertion should pass:
     """
       : {
         key1.s1: 3

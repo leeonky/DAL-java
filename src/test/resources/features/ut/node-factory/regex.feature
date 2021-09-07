@@ -59,7 +59,7 @@ Feature: regex node
     """
 
   Scenario: convert input value to string when 'match to regex'
-    Then the following assertion should be passed:
+    Then the following assertion should pass:
     """
     100: /100/
     """

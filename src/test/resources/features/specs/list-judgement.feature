@@ -1,0 +1,164 @@
+Feature: judge list
+
+  Scenario: support = [...] and : [...]; compare list size and each element with the same index
+    Given the following input data:
+    """
+      [1, 2]
+    """
+    Then the following assertion should pass:
+    """
+      = [1 2]
+    """
+    And the following assertion should pass:
+    """
+      : [1 2]
+    """
+
+  Scenario: empty list
+    Given the following input data:
+    """
+      []
+    """
+    Then the following assertion should pass:
+    """
+      : []
+    """
+    And the following assertion should pass:
+    """
+      = []
+    """
+
+  Scenario: should not pass when list size is not equal or any false judgement of list element
+    Given the following input data:
+    """
+      [1, 2]
+    """
+    When assert by the following code:
+    """
+      : [1]
+    """
+    Then failed with the following message:
+    """
+    expected list size [1] but was [2]
+    """
+    And got the following source code information:
+    """
+      : [1]
+        ^
+    """
+    When assert by the following code:
+    """
+      = [1]
+    """
+    Then failed with the following message:
+    """
+    expected list size [1] but was [2]
+    """
+    And got the following source code information:
+    """
+      = [1]
+        ^
+    """
+    When assert by the following code:
+    """
+      : [1 3]
+    """
+    Then failed with the following message:
+    """
+    expected [2] matches [3] but was not
+    """
+    And got the following source code information:
+    """
+      : [1 3]
+           ^
+    """
+    When assert by the following code:
+    """
+      = [1 3]
+    """
+    Then failed with the following message:
+    """
+    expected [2] equal to [3] but was not
+    """
+    And got the following source code information:
+    """
+      = [1 3]
+           ^
+    """
+
+  Scenario: explicit judgement before element
+    Given the following input data:
+    """
+      [1, 2]
+    """
+    Then the following assertion should pass:
+    """
+      = [1 :{}]
+    """
+    And the following assertion should pass:
+    """
+      : [=1 {}]
+    """
+
+  Scenario: element can be calculation expression
+    Given the following input data:
+    """
+      [2, 3, 4]
+    """
+    Then the following assertion should pass:
+    """
+      = [1+1 =1+2 :2+2]
+    """
+
+  Scenario: multidimensional list
+    Given the following input data:
+    """
+      [[2, 3]]
+    """
+    Then the following assertion should pass:
+    """
+      = [[2 3]]
+    """
+
+  Scenario: should not pass when any list or sub list size or element assertion failure
+    Given the following input data:
+    """
+      [[2, 3]]
+    """
+    When assert by the following code:
+    """
+      = [[2]]
+    """
+    Then failed with the following message:
+    """
+    expected list size [1] but was [2]
+    """
+    And got the following source code information:
+    """
+      = [[2]]
+         ^
+    """
+    When assert by the following code:
+    """
+      = [[2 4]]
+    """
+    Then failed with the following message:
+    """
+    expected [3] equal to [4] but was not
+    """
+    And got the following source code information:
+    """
+      = [[2 4]]
+            ^
+    """
+
+#  TODO null matches []
+#  TODO null equal to []
+#  TODO skip element
+#  TODO ignore tails
+#  TODO nested object
+#  TODO nested list
+#  TODO sub alias
+#  TODO support comma
+#  TODO regex
+#  TODO = [1, [2 3]] support comma

@@ -74,7 +74,7 @@ class TestContext {
     }
 
     public void sourceCodePositionMessage(String sourceCodePosition) {
-        assertThat(dalException.show(dalSourceCode)).isEqualTo(sourceCodePosition);
+        assertThat("\n" + dalException.show(dalSourceCode)).isEqualTo("\n" + sourceCodePosition);
     }
 
     public void givenDalSourceCode(String dalSourceCode) {
