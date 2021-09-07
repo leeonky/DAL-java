@@ -14,6 +14,7 @@ import static com.github.leeonky.dal.ast.NodeFactory.*;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.token.Token.Type.*;
 
+//TODO all factory extends from node parser, fetch args should be token stream
 public class NodeParser {
     private final LinkedList<Token> operators = new LinkedList<>();
     private final TokenStream tokenStream;
@@ -78,7 +79,7 @@ public class NodeParser {
     private Expression compilePropertyJudgementExpression() {
         return new Expression(fetch(NodeFactory.PROPERTY.tryFetch(this), "expect a object property"),
                 fetch(tokenStream.popJudgementOperator(), "expect operator `:` or `=`").toBinaryOperator(),
-                RIGHT_OPERAND.fetch(this));
+                JUDGEMENT_OPERAND.fetch(this));
     }
 
     private <T> T fetch(Optional<T> node, String errorMessage) {
@@ -120,7 +121,6 @@ public class NodeParser {
         return operator.judgement() ? RIGHT_OPERAND.fetch(this)
                 : NodeFactory.OPERAND.fetch(this);
     }
-
 
     private Expression withDefaultListJudgementOperator(Token operatorToken, Supplier<Expression> expressionSupplier) {
         operators.push(operatorToken);

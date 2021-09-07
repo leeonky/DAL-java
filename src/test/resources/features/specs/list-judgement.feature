@@ -100,14 +100,14 @@ Feature: judge list
       : [=1 {}]
     """
 
-  Scenario: element can be calculation expression
+  Scenario: element can be calculation expression or regex
     Given the following input data:
     """
-      [2, 3, 4]
+      [2, 3, 4, 5]
     """
     Then the following assertion should pass:
     """
-      = [1+1 =1+2 :2+2]
+      = [1+1 =1+2 :2+2 :/5/]
     """
 
   Scenario: multidimensional list

@@ -12,7 +12,7 @@ Feature: judge object
     """
       = {
         key1: '1'
-        key2: '2'
+        key2= '2'
       }
     """
     When assert by the following code:
@@ -59,7 +59,7 @@ Feature: judge object
     Then the following assertion should pass:
     """
       : {
-        key1: "1"
+        key1= "1"
       }
     """
     When assert by the following code:
@@ -147,6 +147,22 @@ Feature: judge object
           s1: 100
               ^
         }
+      }
+    """
+
+  Scenario: judgement value can be calculation expression or regex
+    Given the following input data:
+    """
+      {
+        "key1": 2,
+        "key2": 3
+      }
+    """
+    Then the following assertion should pass:
+    """
+      = {
+        key1= 1+1
+        key2: /3/
       }
     """
 
