@@ -1,6 +1,6 @@
 Feature: judge list
 
-  Scenario: support = [...] and : [...]; compare list size and each element with the same index
+  Scenario: '= []' means both list size and element at the same index should be equal
     Given the following input data:
     """
       [1, 2]
@@ -9,33 +9,9 @@ Feature: judge list
     """
       = [1 2]
     """
-    And the following assertion should pass:
-    """
-      : [1 2]
-    """
-
-  Scenario: empty list
-    Given the following input data:
-    """
-      []
-    """
-    Then the following assertion should pass:
-    """
-      : []
-    """
-    And the following assertion should pass:
-    """
-      = []
-    """
-
-  Scenario: should not pass when list size is not equal or any false judgement of list element
-    Given the following input data:
-    """
-      [1, 2]
-    """
     When assert by the following code:
     """
-      : [1]
+      = [1]
     """
     Then failed with the following message:
     """
@@ -43,12 +19,35 @@ Feature: judge list
     """
     And got the following source code information:
     """
-      : [1]
+      = [1]
         ^
     """
     When assert by the following code:
     """
-      = [1]
+      = [1 3]
+    """
+    Then failed with the following message:
+    """
+    expected [2] equal to [3] but was not
+    """
+    And got the following source code information:
+    """
+      = [1 3]
+           ^
+    """
+
+  Scenario: ': []' means the same list size and element at the same index should match
+    Given the following input data:
+    """
+      [1, 2]
+    """
+    And the following assertion should pass:
+    """
+      : [1 2]
+    """
+    When assert by the following code:
+    """
+      : [1]
     """
     Then failed with the following message:
     """
@@ -56,7 +55,7 @@ Feature: judge list
     """
     And got the following source code information:
     """
-      = [1]
+      : [1]
         ^
     """
     When assert by the following code:
@@ -72,18 +71,19 @@ Feature: judge list
       : [1 3]
            ^
     """
-    When assert by the following code:
+
+  Scenario: empty list
+    Given the following input data:
     """
-      = [1 3]
+      []
     """
-    Then failed with the following message:
+    Then the following assertion should pass:
     """
-    expected [2] equal to [3] but was not
+      : []
     """
-    And got the following source code information:
+    And the following assertion should pass:
     """
-      = [1 3]
-           ^
+      = []
     """
 
   Scenario: explicit judgement before element
@@ -152,8 +152,6 @@ Feature: judge list
             ^
     """
 
-#  TODO null matches []
-#  TODO null equal to []
 #  TODO skip element
 #  TODO ignore tails
 #  TODO nested object

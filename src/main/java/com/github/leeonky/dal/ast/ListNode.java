@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.RuntimeContext;
 
 import java.util.ArrayList;
@@ -34,16 +35,24 @@ public class ListNode extends Node {
 
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
-        return judgeAll(actualNode, context);
+        Object actual = actualNode.evaluate(context);
+        if (actual == null)
+            throw new AssertionFailure(String.format("expected [null] equal to [%s] but was not", inspect()),
+                    getPositionBegin());
+        return judgeAll(context, actual);
     }
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
-        return judgeAll(actualNode, context);
+        Object actual = actualNode.evaluate(context);
+        if (actual == null)
+            throw new AssertionFailure(String.format("expected [null] matches [%s] but was not", inspect()),
+                    getPositionBegin());
+        return judgeAll(context, actual);
     }
 
-    private boolean judgeAll(Node actualNode, RuntimeContext context) {
-        Object[] list = stream(context.wrap(actualNode.evaluate(context)).getList().spliterator(), false).toArray();
+    private boolean judgeAll(RuntimeContext context, Object actual) {
+        Object[] list = stream(context.wrap(actual).getList().spliterator(), false).toArray();
         assertListSize(expressions.size(), list.length, getPositionBegin());
         return judgeAll(list, context);
     }

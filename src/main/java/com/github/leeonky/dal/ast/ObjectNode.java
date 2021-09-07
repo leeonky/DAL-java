@@ -28,9 +28,13 @@ public class ObjectNode extends Node {
         return format("{%s}", expressions.stream().map(Expression::inspect).collect(joining(" ")));
     }
 
+    //TODO refactor
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
         Object actual = actualNode.evaluate(context);
+        if (actual == null)
+            throw new AssertionFailure(String.format("expected [null] equal to [%s] but was not", inspect()),
+                    getPositionBegin());
         DataObject data = context.wrap(actual);
         Set<String> dataFields = new LinkedHashSet<>(data.getPropertyReaderNames());
         //TODO property alias
@@ -42,7 +46,11 @@ public class ObjectNode extends Node {
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
-        return judgeAll(actualNode.evaluate(context), context, actualNode);
+        Object actual = actualNode.evaluate(context);
+        if (actual == null)
+            throw new AssertionFailure(String.format("expected [null] matches [%s] but was not", inspect()),
+                    getPositionBegin());
+        return judgeAll(actual, context, actualNode);
     }
 
     private boolean judgeAll(Object actual, RuntimeContext context, Node actualNode) {
