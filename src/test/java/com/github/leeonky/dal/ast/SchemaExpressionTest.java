@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.RuntimeContextBuilder;
 import com.github.leeonky.dal.RuntimeException;
 import org.junit.jupiter.api.Test;
@@ -13,11 +14,15 @@ class SchemaExpressionTest {
     RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
 
     @Test
-    void unexpected_data_type_should_return_false() {
-        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode(1), new SchemaNode("String"));
+    void unexpected_data_type_should_raise_error() {
+        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode(1),
+                (SchemaNode) new SchemaNode("String").setPositionBegin(100));
 
-        assertThat(schemaExpression.evaluate(runtimeContextBuilder.build(null)))
-                .isEqualTo(false);
+        assertThat(assertThrows(AssertionFailure.class, () ->
+                schemaExpression.evaluate(runtimeContextBuilder.build(null))))
+                .hasMessage("expect matches schema type `String` but was not")
+                .hasFieldOrPropertyWithValue("position", 100)
+        ;
     }
 
     @Test

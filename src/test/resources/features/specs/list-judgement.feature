@@ -164,8 +164,6 @@ Feature: judge list
 
 #  TODO skip element
 #  TODO ignore tails
-#  TODO nested object
-#  TODO nested list
+#  TODO nested object sub alias
+#  TODO nested list sub alias
 #  TODO sub alias
-#  TODO regex
-#  TODO = [1, [2 3]] support comma

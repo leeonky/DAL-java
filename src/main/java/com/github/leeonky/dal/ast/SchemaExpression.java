@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
 import com.github.leeonky.dal.token.IllegalTypeException;
@@ -32,18 +33,14 @@ public class SchemaExpression extends Node {
     @Override
     public Object evaluate(RuntimeContext context) {
         try {
-            boolean failed = isFailed(context, objectRef);
-            if (failed)
-                System.err.println("Warning: Type assertion `" + inspect() + "` got false.");
-            //TODO throw error
-            return !failed;
+            return matches(context, objectRef);
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), getPositionBegin());
         }
     }
 
-    private boolean isFailed(RuntimeContext context, ObjectRef objectRef) {
-        return !schemaNodes.stream().allMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
+    private boolean matches(RuntimeContext context, ObjectRef objectRef) {
+        return schemaNodes.stream().allMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
     }
 
     private boolean verifyAndConvertAsSchemaType(RuntimeContext context, SchemaNode schemaNode, ObjectRef objectRef) {
@@ -51,15 +48,15 @@ public class SchemaExpression extends Node {
             objectRef.instance = schemaNode.getConstructorViaSchema(context).apply(instance.evaluate(context), context);
             return true;
         } catch (IllegalTypeException ignore) {
-            System.err.println("Warning: Type assertion `" + schemaNode.inspect() + "` got false.");
-            return false;
+            throw new AssertionFailure(format("expect matches schema type `%s` but was not", schemaNode.getSchema()),
+                    schemaNode.getPositionBegin());
         }
     }
 
     @Override
     public String inspect() {
         return format("%s is %s", instance.inspect(), schemaNodes.stream().map(SchemaNode::inspect)
-                .collect(Collectors.joining(String.format(" %s ", SCHEMA_DELIMITER))));
+                .collect(Collectors.joining(format(" %s ", SCHEMA_DELIMITER))));
     }
 
     public void appendSchema(SchemaNode schemaNode) {
