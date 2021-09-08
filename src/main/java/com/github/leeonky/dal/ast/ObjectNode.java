@@ -41,7 +41,7 @@ public class ObjectNode extends Node {
         dataFields.removeAll(expressions.stream().map(expression -> ((PropertyNode) expression.getLeftOperand()).getRootName())
                 .collect(Collectors.toSet()));
         assertUnexpectedFields(dataFields, operator.getPosition());
-        return judgeAll(actual, context, actualNode);
+        return judgeAll(actual, context);
     }
 
     @Override
@@ -50,11 +50,10 @@ public class ObjectNode extends Node {
         if (actual == null)
             throw new AssertionFailure(String.format("expected [null] matches [%s] but was not", inspect()),
                     getPositionBegin());
-        return judgeAll(actual, context, actualNode);
+        return judgeAll(actual, context);
     }
 
-    private boolean judgeAll(Object actual, RuntimeContext context, Node actualNode) {
-        AssertionFailure.assertNullMatch(actual, actualNode.getPositionBegin());
+    private boolean judgeAll(Object actual, RuntimeContext context) {
         try {
             //TODO process sub schema
             context.wrappedValueStack.push(actual);

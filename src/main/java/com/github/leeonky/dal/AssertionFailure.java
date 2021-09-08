@@ -28,11 +28,6 @@ public class AssertionFailure extends DalException {
         return true;
     }
 
-    public static void assertNullMatch(Object actual, int position) {
-        if (actual == null)
-            throw new AssertionFailure("[null] does not match non-null object", position);
-    }
-
     public static boolean assertMatch(Object expect, Object actual, int position, Converter converter) {
         if (!Calculator.equals(converter.convert(expect.getClass(), actual), expect))
             throw new AssertionFailure(format("expected [%s] matches [%s] but was not",

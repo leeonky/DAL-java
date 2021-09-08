@@ -58,14 +58,12 @@ public class ListNode extends Node {
     }
 
     private boolean judgeAll(Object input, RuntimeContext context) {
-        if (input != null)
-            try {
-                //TODO process sub schema
-                context.wrappedValueStack.push(input);
-                return expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context));
-            } finally {
-                context.wrappedValueStack.pop();
-            }
-        return false;
+        try {
+            //TODO process sub schema
+            context.wrappedValueStack.push(input);
+            return expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context));
+        } finally {
+            context.wrappedValueStack.pop();
+        }
     }
 }

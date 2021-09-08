@@ -42,8 +42,7 @@ public class TokenStream {
     }
 
     private Token currentToken() {
-        if (tokens.size() <= index)
-            throw new NoMoreTokenException();
+        assert (tokens.size() > index);
         return tokens.get(index);
     }
 

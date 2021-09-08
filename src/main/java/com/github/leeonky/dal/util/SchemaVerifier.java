@@ -92,6 +92,8 @@ public class SchemaVerifier {
                 polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
+    //TODO should raise error
+    //TODO try to print source code position of schema class
     private boolean errorLog(String format, Object... params) {
         System.err.printf(format + "%n", params);
         return false;

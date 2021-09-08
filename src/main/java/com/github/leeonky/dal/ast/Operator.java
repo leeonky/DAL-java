@@ -232,7 +232,6 @@ public abstract class Operator {
         }
     }
 
-    //TODO comma in {} []
     public static class CommaAnd extends And {
         public CommaAnd() {
             super("&&");

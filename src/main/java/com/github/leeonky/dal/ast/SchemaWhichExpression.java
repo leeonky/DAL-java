@@ -20,9 +20,8 @@ public class SchemaWhichExpression extends Node {
     @Override
     public Object evaluate(RuntimeContext context) {
         try {
-            if ((Boolean) schemaExpression.evaluate(context))
-                return context.wrapInputValueAndEvaluate(schemaExpression.getTypeInstance(), clause, schemaExpression.getSchemaName());
-            return false;
+            schemaExpression.evaluate(context);
+            return context.wrapInputValueAndEvaluate(schemaExpression.getTypeInstance(), clause, schemaExpression.getSchemaName());
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), getPositionBegin());
         }

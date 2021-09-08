@@ -128,7 +128,19 @@ Feature: object node
         ^
     """
 
-#  TODO support comma
+  Scenario: support optional comma between after sub expression
+    Given the following dal code:
+    """
+     {
+       key1: 1,
+       key2: 2
+     }
+    """
+    Then got the following "object" node:
+    """
+    inspect: '{key1 : 1 key2 : 2}'
+    """
+
 #  TODO nested list schema alias
 #  TODO nested object schema alias
 #  TODO property chain sub alias
