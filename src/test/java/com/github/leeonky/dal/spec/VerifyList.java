@@ -78,5 +78,4 @@ class VerifyList extends Base {
     }
 
     //TODO lines .@size .@[0]
-    //TODO mapping element sub schema processing
 }

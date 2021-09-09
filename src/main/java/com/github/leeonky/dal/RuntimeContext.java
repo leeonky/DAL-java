@@ -46,8 +46,8 @@ public class RuntimeContext {
             schemaTypesStack.push(SchemaType.create(schemaMap.get(schema)));
             return node.evaluate(this);
         } finally {
-            wrappedValueStack.pop();
             schemaTypesStack.pop();
+            wrappedValueStack.pop();
         }
     }
 

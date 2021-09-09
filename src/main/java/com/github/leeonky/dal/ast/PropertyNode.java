@@ -43,7 +43,6 @@ public class PropertyNode extends Node {
         return type.format(instanceNode.inspect(), name);
     }
 
-    //TODO to be removed
     public Object getRootName() {
         if (instanceNode instanceof PropertyNode)
             return ((PropertyNode) instanceNode).getRootName();

@@ -59,7 +59,8 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerSchema(String name, Class<?> schema) {
         schemas.put(name, BeanClass.create(schema));
-        return registerSchema(name, (bw) -> bw.createSchemaVerifier().verify(schema, null, ""));
+        return registerSchema(name, dataObject -> dataObject.createSchemaVerifier()
+                .verify(schema, null, ""));
     }
 
     public RuntimeContextBuilder registerSchema(String name, Function<DataObject, Boolean> predicate) {

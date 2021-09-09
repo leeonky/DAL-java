@@ -26,15 +26,6 @@ class TestContext {
     private static DataAssert dataAssert = new DataAssert();
     private static RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
 
-    static {
-        dataAssert.getRuntimeContextBuilder()
-                .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                .registerListAccessor(JSONArray.class, new JSONArrayListAccessor());
-        runtimeContextBuilder
-                .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                .registerListAccessor(JSONArray.class, new JSONArrayListAccessor());
-    }
-
     private Object inputObject = null;
     private String dalSourceCode = "";
     private AssertResult assertResult;
@@ -48,6 +39,15 @@ class TestContext {
 
     public static void reset() {
         INSTANCE = new TestContext();
+    }
+
+    public void initDataAssert() {
+        dataAssert.getRuntimeContextBuilder()
+                .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
+                .registerListAccessor(JSONArray.class, new JSONArrayListAccessor());
+        runtimeContextBuilder
+                .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
+                .registerListAccessor(JSONArray.class, new JSONArrayListAccessor());
     }
 
     @SneakyThrows
@@ -154,5 +154,9 @@ class TestContext {
         getNodeParser();
         while (skip-- > 0)
             tokenStream.pop();
+    }
+
+    public void registerSchema(String schemaCode) {
+        dataAssert.getRuntimeContextBuilder().registerSchema(new Compiler().compileToClass(schemaCode));
     }
 }

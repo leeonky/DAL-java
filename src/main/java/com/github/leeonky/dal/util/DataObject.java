@@ -29,7 +29,6 @@ public class DataObject {
     }
 
     public boolean isList() {
-        //TODO refactor
         return instance != null && (runtimeContext.isRegisteredList(instance) || instance instanceof Iterable
                 || instance.getClass().isArray() || instance instanceof Stream);
     }

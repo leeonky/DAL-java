@@ -2,6 +2,7 @@ package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.ast.MandatoryNodeFactory;
 import com.github.leeonky.dal.token.TokenFactory;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 
@@ -48,6 +49,11 @@ public class TestSteps {
         put("list", nodeParser -> LIST.tryFetch(nodeParser).orElse(null));
         put("calculator-expression", CALCULATION_EXPRESSION);
     }};
+
+    @Before
+    public void initDataAssert() {
+        TestContext.INSTANCE.initDataAssert();
+    }
 
     @Given("the following dal code:")
     public void the_follow_dal_code(String dalSourceCode) {
@@ -111,5 +117,10 @@ public class TestSteps {
     public void the_following_dal_code_and_skip_tokens(int skip, String dalSourceCode) {
         TestContext.INSTANCE.givenDalSourceCode(dalSourceCode);
         TestContext.INSTANCE.skipTokens(skip);
+    }
+
+    @Given("the following schema:")
+    public void the_following_schema(String schemaCode) {
+        TestContext.INSTANCE.registerSchema(schemaCode);
     }
 }

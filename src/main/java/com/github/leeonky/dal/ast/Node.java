@@ -7,7 +7,6 @@ import static com.github.leeonky.dal.AssertionFailure.*;
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
 
-//TODO should raise error when got false
 public abstract class Node {
     private int positionBegin;
 

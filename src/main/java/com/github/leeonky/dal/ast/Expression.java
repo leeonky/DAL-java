@@ -17,7 +17,6 @@ public class Expression extends Node {
         setPositionBegin(operator.getPosition());
     }
 
-    //TODO to be removed
     public Node getLeftOperand() {
         return node1;
     }

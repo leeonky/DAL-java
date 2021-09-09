@@ -128,7 +128,6 @@ public class Token {
         return (TokenStream) value;
     }
 
-    //TODO refactor
     public Node toIdentifierNode() {
         String[] names = ((String) value).split("\\.");
         Node node = new PropertyNode(InputNode.INSTANCE, names[0], PropertyNode.Type.IDENTIFIER)

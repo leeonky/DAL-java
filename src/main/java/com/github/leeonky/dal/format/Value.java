@@ -6,6 +6,7 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.Objects;
 
+//TODO formatter/ type / value refactor
 public abstract class Value<T> {
 
     public static <T> Value<T> equalTo(T value) {
