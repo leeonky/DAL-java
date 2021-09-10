@@ -5,6 +5,7 @@ import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
+import com.github.leeonky.dal.token.IllegalTypeException;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.dal.type.SubType;
@@ -83,20 +84,19 @@ public class SchemaVerifier {
 
     private <T> boolean shouldNotContainsUnexpectedField(BeanClass<T> polymorphicBeanClass, Set<String> expectedFields, String f) {
         return expectedFields.contains(f)
-                || errorLog("Unexpected field `%s` for type %s[%s]", f, polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
+                || errorLog("unexpected field `%s` for schema %s[%s]", f, polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
     private <T> boolean shouldContainsField(Set<String> actualFields, BeanClass<T> polymorphicBeanClass, PropertyReader<T> propertyReader) {
         return actualFields.contains(propertyReader.getName())
-                || errorLog("Expected field `%s` for type %s[%s], but does not exist", propertyReader.getName(),
+                || errorLog("expected field `%s` for type %s[%s], but does not exist", propertyReader.getName(),
                 polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
-    //TODO should raise error
+    //TODO should raise error *******
     //TODO try to print source code position of schema class
     private boolean errorLog(String format, Object... params) {
-        System.err.printf(format + "%n", params);
-        return false;
+        throw new IllegalTypeException(String.format(format, params));
     }
 
     @SuppressWarnings("unchecked")
@@ -167,7 +167,7 @@ public class SchemaVerifier {
     private boolean verifyType(String subPrefix, Object schemaProperty, Class<?> fieldType) {
         if (schemaProperty != null)
             return Objects.equals(schemaProperty, object.getInstance())
-                    || errorLog("Expected field `%s` equal to %s[%s], but was %s[%s]", subPrefix,
+                    || errorLog("expected field `%s` equal to %s[%s], but was %s[%s]", subPrefix,
                     getClassName(schemaProperty), schemaProperty, getClassName(object.getInstance()), object.getInstance());
         return fieldType.isInstance(object.getInstance())
                 || errorLog("Expected field `%s` is type [%s], but was [%s]", subPrefix,

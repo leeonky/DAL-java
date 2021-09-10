@@ -17,7 +17,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.github.leeonky.dal.NameStrategy.SIMPLE_NAME_WITH_PARENT;
 import static java.util.Arrays.asList;
@@ -180,31 +183,6 @@ class VerifySchema extends Base {
                     .registerSchema(NestedAbstract.class)
                     .registerSchema(NestedSubType.class)
             ;
-        }
-
-        @Test
-        void should_verify_fields_and_type() throws JSONException {
-            assertPass(new JSONObject("{\"id\": 1}"), "is RightFieldAndType");
-            assertPass(new HashMap<String, Object>() {{
-                put("id", 1);
-            }}, "is RightFieldAndType");
-
-            assertPass(new ClassObject().setId(1), "is RightFieldAndType");
-        }
-
-        @Test
-        void has_an_unexpected_field() throws JSONException {
-            assertFailed(new JSONObject("{\"id\": 1, \"unexpected field\":2}"), "is RightFieldAndType");
-        }
-
-        @Test
-        void missing_field() throws JSONException {
-            assertFailed(new JSONObject("{}"), "is RightFieldAndType");
-        }
-
-        @Test
-        void field_has_incorrect_type() throws JSONException {
-            assertFailed(new JSONObject("{\"id\": 0}"), "is RightFieldAndType");
         }
 
         @Test

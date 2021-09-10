@@ -2,6 +2,7 @@ package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.AssertResult;
 import com.github.leeonky.dal.AssertionFailure;
+import com.github.leeonky.dal.DalException;
 import com.github.leeonky.dal.DataAssert;
 
 import java.io.ByteArrayOutputStream;
@@ -39,7 +40,8 @@ public class Base {
                 .hasMessage(message);
     }
 
-    protected void assertErrorContains(Runnable codeBlock, String errorMessage) {
+    private void assertErrorContains(Runnable codeBlock, String errorMessage) {
+//        assertThat(assertThrows(DalException.class, codeBlock::run))
         PrintStream systemErr = System.err;
         ByteArrayOutputStream os = new ByteArrayOutputStream();
         PrintStream err = new PrintStream(os);
@@ -50,5 +52,11 @@ public class Base {
         } finally {
             System.setErr(systemErr);
         }
+    }
+
+    protected void assertErrorContains(Object input, String expression, String errorMessage) {
+        assertThat(assertThrows(DalException.class, () -> {
+            dataAssert.assertData(input, expression);
+        })).hasMessage(errorMessage);
     }
 }

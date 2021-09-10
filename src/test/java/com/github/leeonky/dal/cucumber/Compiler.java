@@ -41,9 +41,10 @@ public class Compiler {
             if (i < codeMarks.length && !codeMarks[i].trim().isEmpty())
                 result.add(codeMarks[i]);
         }
-        System.out.println(String.join("\n", result));
-        if (!success)
+        if (!success) {
+            System.out.println(String.join("\n", result));
             throw new IllegalStateException("Failed to compile java code: \n" + schemaCode);
+        }
         return Class.forName(className, true,
                 URLClassLoader.newInstance(new URL[]{new File("").toURI().toURL()}));
     }
