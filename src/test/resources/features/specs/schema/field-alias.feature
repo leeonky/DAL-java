@@ -147,3 +147,44 @@ Feature: define field alias in schema
         aliasOfId: 1
       }
     """
+
+  Scenario: alias in nested object judgement
+    Given the following schema:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfAge", field = "age"),
+    })
+    public class User {
+    }
+    """
+    And the following schema:
+    """
+    public class Order {
+        public User user;
+    }
+    """
+    When the following input data:
+    """
+      {
+        "user": {
+          "age": 10
+        }
+      }
+    """
+    Then the following assertion should pass:
+    """
+      is Order which :{
+        user: {
+          aliasOfAge: 10
+        }
+      }
+    """
+    And the following assertion should pass:
+    """
+      is Order which :{
+        user= {
+          aliasOfAge: 10
+        }
+      }
+    """

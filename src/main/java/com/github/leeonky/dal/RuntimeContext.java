@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class RuntimeContext {
     //TODO private, merge wrappedValueStack and schemaTypesStack
     public final LinkedList<Object> wrappedValueStack = new LinkedList<>();
-    private final LinkedList<SchemaType> schemaTypesStack = new LinkedList<>();
+    public final LinkedList<SchemaType> schemaTypesStack = new LinkedList<>();
     private final TypeData<PropertyAccessor> propertyAccessors;
     private final TypeData<ListAccessor> listAccessors;
     private final Map<String, ConstructorViaSchema> constructors;

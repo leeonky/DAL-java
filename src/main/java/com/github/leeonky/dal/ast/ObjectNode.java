@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.RuntimeContext;
+import com.github.leeonky.dal.SchemaType;
 import com.github.leeonky.dal.util.DataObject;
 
 import java.util.*;
@@ -31,34 +32,34 @@ public class ObjectNode extends Node {
     //TODO refactor
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
-        Object actual = actualNode.evaluate(context);
-        if (actual == null)
-            throw new AssertionFailure(String.format("expected [null] equal to [%s] but was not", inspect()),
-                    getPositionBegin());
-        DataObject data = context.wrap(actual);
-        Set<String> dataFields = new LinkedHashSet<>(data.getFieldNames());
+        DataObject dataObject = actualNode.evaluateDataObject(context);
+        if (dataObject.isNull())
+            throw new AssertionFailure(format("expected [null] equal to [%s] but was not", inspect()), getPositionBegin());
+        Set<String> dataFields = new LinkedHashSet<>(dataObject.getFieldNames());
         dataFields.removeAll(expressions.stream().map(expression ->
-                data.guessField(((PropertyNode) expression.getLeftOperand()).getRootName()))
+                dataObject.guessField(((PropertyNode) expression.getLeftOperand()).getRootName()))
                 .collect(Collectors.toSet()));
         assertUnexpectedFields(dataFields, operator.getPosition());
-        return judgeAll(actual, context);
+        return judgeAll(dataObject.getInstance(), context, dataObject.schemaType);
     }
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
-        Object actual = actualNode.evaluate(context);
-        if (actual == null)
-            throw new AssertionFailure(String.format("expected [null] matches [%s] but was not", inspect()),
+        DataObject dataObject = actualNode.evaluateDataObject(context);
+        if (dataObject.isNull())
+            throw new AssertionFailure(format("expected [null] matches [%s] but was not", inspect()),
                     getPositionBegin());
-        return judgeAll(actual, context);
+        return judgeAll(dataObject.getInstance(), context, dataObject.schemaType);
     }
 
-    private boolean judgeAll(Object actual, RuntimeContext context) {
+    private boolean judgeAll(Object actual, RuntimeContext context, SchemaType schemaType) {
         try {
             //TODO process sub schema
             context.wrappedValueStack.push(actual);
+            context.schemaTypesStack.push(schemaType);
             return expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context));
         } finally {
+            context.schemaTypesStack.pop();
             context.wrappedValueStack.pop();
         }
     }
