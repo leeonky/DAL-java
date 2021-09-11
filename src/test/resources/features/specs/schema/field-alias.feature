@@ -137,7 +137,13 @@ Feature: define field alias in schema
     """
     Then the following assertion should pass:
     """
+      is Order which :{
+        aliasOfId: 1
+      }
+    """
+    And the following assertion should pass:
+    """
       is Order which ={
-        id: 1
+        aliasOfId: 1
       }
     """

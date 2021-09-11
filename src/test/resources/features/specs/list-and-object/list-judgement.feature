@@ -166,4 +166,4 @@ Feature: judge list
 #  TODO ignore tails
 #  TODO nested object sub alias
 #  TODO nested list sub alias
-#  TODO sub alias
+#  TODO sub mapping alias

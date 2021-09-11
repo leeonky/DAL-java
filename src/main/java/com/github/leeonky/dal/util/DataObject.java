@@ -12,10 +12,11 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class DataObject {
+    //TODO private
+    public final SchemaType schemaType;
     private final RuntimeContext runtimeContext;
     private final Object instance;
     private final BeanClass<Object> beanClass;
-    private final SchemaType schemaType;
 
     @SuppressWarnings("unchecked")
     public DataObject(Object instance, RuntimeContext context, SchemaType schemaType) {
@@ -139,5 +140,9 @@ public class DataObject {
                 throw new IllegalStateException(e);
             }
         }
+    }
+
+    public Object guessField(Object rootName) {
+        return schemaType.access(rootName).getPropertyChainBefore(schemaType).get(0);
     }
 }

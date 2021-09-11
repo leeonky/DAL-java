@@ -37,8 +37,8 @@ public class ObjectNode extends Node {
                     getPositionBegin());
         DataObject data = context.wrap(actual);
         Set<String> dataFields = new LinkedHashSet<>(data.getFieldNames());
-        //TODO property alias
-        dataFields.removeAll(expressions.stream().map(expression -> ((PropertyNode) expression.getLeftOperand()).getRootName())
+        dataFields.removeAll(expressions.stream().map(expression ->
+                data.guessField(((PropertyNode) expression.getLeftOperand()).getRootName()))
                 .collect(Collectors.toSet()));
         assertUnexpectedFields(dataFields, operator.getPosition());
         return judgeAll(actual, context);
