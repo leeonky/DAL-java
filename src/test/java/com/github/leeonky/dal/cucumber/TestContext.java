@@ -16,6 +16,10 @@ import lombok.SneakyThrows;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static com.github.leeonky.dal.token.TokenFactory.createDALTokenFactory;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,6 +40,7 @@ class TestContext {
     private SourceCode sourceCode;
     private NodeParser nodeParser;
     private TokenStream tokenStream;
+    private List<String> schemas = new ArrayList<>();
 
     public static void reset() {
         INSTANCE = new TestContext();
@@ -62,6 +67,9 @@ class TestContext {
 
     public void executeDal(String dalSourceCode) {
         try {
+            new Compiler().compileToClasses(schemas.stream().map(s -> "import com.github.leeonky.dal.type.*;\n" + s)
+                    .collect(Collectors.toList()))
+                    .forEach(dataAssert.getRuntimeContextBuilder()::registerSchema);
             assertResult = dataAssert.assertData(inputObject, this.dalSourceCode = dalSourceCode);
         } catch (DalException dalException) {
             this.dalException = dalException;
@@ -157,6 +165,6 @@ class TestContext {
     }
 
     public void registerSchema(String schemaCode) {
-        dataAssert.getRuntimeContextBuilder().registerSchema(new Compiler().compileToClass(schemaCode));
+        schemas.add(schemaCode);
     }
 }
