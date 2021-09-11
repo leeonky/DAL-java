@@ -36,7 +36,7 @@ public class SchemaVerifier {
         Class<?> type = superSchemaType;
         SubType subType = superSchemaType.getAnnotation(SubType.class);
         if (subType != null) {
-            Object value = object.getValue(CodeHelper.INSTANCE.toChainNodes(subType.property()).toArray());
+            Object value = object.getValue(CodeHelper.INSTANCE.toChainNodes(subType.property()).toArray()).getInstance();
             type = Stream.of(subType.types())
                     .filter(t -> t.value().equals(value))
                     .map(SubType.Type::type)
@@ -70,7 +70,7 @@ public class SchemaVerifier {
     private <T> boolean allPropertyValueShouldBeValid(String subPrefix, BeanClass<T> polymorphicBeanClass, T schemaInstance) {
         return polymorphicBeanClass.getPropertyReaders().values().stream()
                 .allMatch(propertyReader -> {
-                    DataObject wrappedPropertyValue = object.getWrappedPropertyValue(propertyReader.getName());
+                    DataObject wrappedPropertyValue = object.getValue(propertyReader.getName());
                     return allowNullAndIsNull(propertyReader, wrappedPropertyValue)
                             || wrappedPropertyValue.createSchemaVerifier()
                             .verifySchemaInGenericType(subPrefix + "." + propertyReader.getName(),
@@ -93,7 +93,6 @@ public class SchemaVerifier {
                 polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
-    //TODO should raise error *******
     //TODO try to print source code position of schema class
     private boolean errorLog(String format, Object... params) {
         throw new IllegalTypeException(String.format(format, params));
@@ -205,11 +204,11 @@ public class SchemaVerifier {
                 new IllegalArgumentException(format("`%s` should be generic type", subPrefix)));
         if (schemaProperty == null)
             return object.getPropertyReaderNames().stream()
-                    .allMatch(key -> object.getWrappedPropertyValue(key).createSchemaVerifier()
+                    .allMatch(key -> object.getValue(key).createSchemaVerifier()
                             .verifySchemaInGenericType(subPrefix + "." + key, subGenericType, null));
         return shouldBeSameSize(subPrefix, object.getPropertyReaderNames(), schemaProperty.values())
                 && object.getPropertyReaderNames().stream()
-                .allMatch(key -> object.getWrappedPropertyValue(key).createSchemaVerifier()
+                .allMatch(key -> object.getValue(key).createSchemaVerifier()
                         .verifySchemaInGenericType(subPrefix + "." + key, subGenericType, schemaProperty.get(key)));
     }
 

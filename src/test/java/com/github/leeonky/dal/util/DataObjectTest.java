@@ -1,8 +1,13 @@
 package com.github.leeonky.dal.util;
 
 import com.github.leeonky.dal.RuntimeContextBuilder;
+import com.github.leeonky.dal.SchemaType;
 import com.github.leeonky.dal.cucumber.JSONArrayListAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
+import com.github.leeonky.dal.type.FieldAlias;
+import com.github.leeonky.dal.type.FieldAliases;
+import com.github.leeonky.dal.type.Partial;
+import com.github.leeonky.util.BeanClass;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -55,6 +60,13 @@ class DataObjectTest {
     @Accessors(chain = true)
     public static class Bean {
         private int intValue;
+    }
+
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfAge", field = "age"),
+    })
+    public static class User {
     }
 
     @Nested
@@ -124,8 +136,16 @@ class DataObjectTest {
             assertDataAccess(Stream.of(1, 2), 2, "size");
         }
 
+        @Test
+        void support_get_value_via_field_alias() {
+            assertThat(new DataObject(new HashMap<String, Object>() {{
+                put("age", 100);
+            }}, runtimeContextBuilder.build(null), SchemaType.create(BeanClass.create(User.class)))
+                    .getValue("aliasOfAge").getInstance()).isEqualTo(100);
+        }
+
         private void assertDataAccess(Object object, Object expected, Object... properties) {
-            assertThat(runtimeContextBuilder.build(null).wrap(object).getValue(properties))
+            assertThat(runtimeContextBuilder.build(null).wrap(object).getValue(properties).getInstance())
                     .isEqualTo(expected);
         }
     }

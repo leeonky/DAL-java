@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.util;
 
 import com.github.leeonky.dal.RuntimeContext;
+import com.github.leeonky.dal.SchemaType;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.NoSuchAccessorException;
 
@@ -12,16 +13,19 @@ import java.util.stream.StreamSupport;
 
 import static java.util.Arrays.asList;
 
+//TODO clean methods *****
 public class DataObject {
     private final RuntimeContext runtimeContext;
     private final Object instance;
     private final BeanClass<Object> beanClass;
+    private final SchemaType schemaType;
 
     @SuppressWarnings("unchecked")
-    public DataObject(Object instance, RuntimeContext context) {
+    public DataObject(Object instance, RuntimeContext context, SchemaType schemaType) {
         this.instance = instance;
         beanClass = instance == null ? null : (BeanClass<Object>) BeanClass.create(instance.getClass());
         runtimeContext = context;
+        this.schemaType = schemaType;
     }
 
     public Object getInstance() {
@@ -43,10 +47,6 @@ public class DataObject {
                 });
     }
 
-    public DataObject getWrappedPropertyValue(String name) {
-        return runtimeContext.wrap(getValue(name));
-    }
-
     public int getListSize() {
         int size = 0;
         for (Object ignore : getList())
@@ -55,6 +55,7 @@ public class DataObject {
     }
 
     @SuppressWarnings("unchecked")
+    //TODO return data object ****
     public Iterable<Object> getList() {
         return runtimeContext.gitList(instance)
                 .orElseGet(() -> {
@@ -79,11 +80,58 @@ public class DataObject {
                 });
     }
 
+    //TODO process schema ***********
     public Iterable<DataObject> getWrappedList() {
         List<DataObject> result = new ArrayList<>();
         for (Object object : getList())
             result.add(runtimeContext.wrap(object));
         return result;
+    }
+
+    public boolean isNull() {
+        return runtimeContext.isNull(instance);
+    }
+
+    public SchemaVerifier createSchemaVerifier() {
+        return new SchemaVerifier(runtimeContext, this);
+    }
+
+    public DataObject getValue(Object... properties) {
+        return getValue(new LinkedList<>(asList(properties)));
+    }
+
+    private DataObject getValue(LinkedList<Object> properties) {
+        if (properties.isEmpty())
+            return this;
+        return getValue(properties.removeFirst()).getValue(properties);
+    }
+
+    public DataObject getValue(Object property) {
+        List<Object> propertyChainBefore = schemaType.access(property).getPropertyChainBefore(schemaType);
+        if (propertyChainBefore.size() == 1 && propertyChainBefore.get(0).equals(property))
+            return new DataObject(getElementOrPropertyValue(propertyChainBefore.get(0)), runtimeContext, schemaType.access(property));
+        return getValue(new LinkedList<>(propertyChainBefore));
+    }
+
+    private Object getElementOrPropertyValue(Object property) {
+        if (isList()) {
+            if ("size".equals(property))
+                return getListSize();
+            if (property instanceof String) {
+                //TODO process schema and data object
+                return StreamSupport.stream(getList().spliterator(), false)
+                        .map(runtimeContext::wrap)
+                        .map(e -> e.getElementOrPropertyValue(property))
+                        .collect(Collectors.toList());
+            }
+            return getElement((int) property);
+        }
+        return getPropertyValue((String) property);
+    }
+
+    private Object getElement(int index) {
+        return StreamSupport.stream(getList().spliterator(), false).skip(index).findFirst()
+                .orElseThrow(() -> new IndexOutOfBoundsException("Index out of range: " + index));
     }
 
     private Object getPropertyValue(String name) {
@@ -103,42 +151,5 @@ public class DataObject {
                 throw new IllegalStateException(e);
             }
         }
-    }
-
-    public boolean isNull() {
-        return runtimeContext.isNull(instance);
-    }
-
-    public SchemaVerifier createSchemaVerifier() {
-        return new SchemaVerifier(runtimeContext, this);
-    }
-
-    public Object getValue(Object... properties) {
-        return getValue(new LinkedList<>(asList(properties)));
-    }
-
-    private Object getValue(LinkedList<Object> properties) {
-        return properties.isEmpty() ? instance :
-                runtimeContext.wrap(getValue(properties.removeFirst())).getValue(properties);
-    }
-
-    private Object getValue(Object property) {
-        if (isList()) {
-            if ("size".equals(property))
-                return getListSize();
-            if (property instanceof String) {
-                return StreamSupport.stream(getList().spliterator(), false)
-                        .map(runtimeContext::wrap)
-                        .map(e -> e.getValue(property))
-                        .collect(Collectors.toList());
-            }
-            return getElement((int) property);
-        }
-        return getPropertyValue((String) property);
-    }
-
-    private Object getElement(int index) {
-        return StreamSupport.stream(getList().spliterator(), false).skip(index).findFirst()
-                .orElseThrow(() -> new IndexOutOfBoundsException("Index out of range: " + index));
     }
 }

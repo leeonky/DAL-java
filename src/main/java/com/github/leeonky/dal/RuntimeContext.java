@@ -9,7 +9,6 @@ import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
 
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class RuntimeContext {
@@ -22,7 +21,6 @@ public class RuntimeContext {
     private final Set<Class<?>> schemas;
     private final Map<String, BeanClass<?>> schemaMap;
     private final Converter converter = Converter.createDefault();
-    private int schemaTypeRecursivePushDepth = 0, schemaTypeRecursivePopDepth = 0;
 
     public RuntimeContext(Object inputValue, TypeData<PropertyAccessor> propertyAccessors,
                           Map<String, ConstructorViaSchema> constructors, TypeData<ListAccessor> listAccessors,
@@ -40,6 +38,7 @@ public class RuntimeContext {
         return wrappedValueStack.getFirst();
     }
 
+    //TODO return data object remove schemaTypesStack *****
     public Object wrapInputValueAndEvaluate(Object value, Node node, String schema) {
         try {
             wrappedValueStack.push(value);
@@ -55,8 +54,9 @@ public class RuntimeContext {
         return Optional.ofNullable(constructors.get(type));
     }
 
+    //TODO should not use any where ****************
     public DataObject wrap(Object instance) {
-        return new DataObject(instance, this);
+        return new DataObject(instance, this, schemaTypesStack.getFirst());
     }
 
     public boolean isRegistered(Class<?> fieldType) {
@@ -90,27 +90,5 @@ public class RuntimeContext {
 
     public Converter getConverter() {
         return converter;
-    }
-
-    public Object getAliasValue(Supplier<Object> input, Object alias) {
-        schemaTypeRecursivePushDepth++;
-        DataObject dataObject = wrap(input.get());
-        try {
-            return dataObject.getValue(evaluateAliasToPropertyChain(alias));
-        } finally {
-            if (schemaTypeRecursivePushDepth == ++schemaTypeRecursivePopDepth)
-                popSchemaTypeAndResetDepthVar();
-        }
-    }
-
-    private Object[] evaluateAliasToPropertyChain(Object alias) {
-        SchemaType currentSchema = schemaTypesStack.getFirst();
-        schemaTypesStack.push(currentSchema.access(alias));
-        return schemaTypesStack.getFirst().getPropertyChainBefore(currentSchema).toArray();
-    }
-
-    private void popSchemaTypeAndResetDepthVar() {
-        for (schemaTypeRecursivePopDepth = 0; schemaTypeRecursivePushDepth > 0; schemaTypeRecursivePushDepth--)
-            schemaTypesStack.pop();
     }
 }

@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
+import com.github.leeonky.dal.util.DataObject;
 
 import static com.github.leeonky.dal.AssertionFailure.*;
 import static com.github.leeonky.util.BeanClass.getClassName;
@@ -12,6 +13,10 @@ public abstract class Node {
 
     public Object evaluate(RuntimeContext context) {
         throw new IllegalStateException();
+    }
+
+    public DataObject evaluateDataObject(RuntimeContext context) {
+        return context.wrap(evaluate(context));
     }
 
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
