@@ -49,7 +49,7 @@ public class RuntimeContextBuilder {
 
     @SuppressWarnings("unchecked")
     public RuntimeContextBuilder registerValueFormat(String name, Formatter formatter) {
-        constructors.put(name, (o, context) -> formatter.transform(o));
+        constructors.put(name, o -> formatter.transform(o.getInstance()));
         return this;
     }
 
@@ -64,9 +64,9 @@ public class RuntimeContextBuilder {
     }
 
     public RuntimeContextBuilder registerSchema(String name, Function<DataObject, Boolean> predicate) {
-        constructors.put(name, (o, context) -> {
-            if (o != null && predicate.apply(context.wrap(o)))
-                return o;
+        constructors.put(name, (o) -> {
+            if (predicate.apply(o))
+                return o.getInstance();
             throw new IllegalTypeException();
         });
         return this;

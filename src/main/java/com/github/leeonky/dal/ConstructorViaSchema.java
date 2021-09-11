@@ -1,7 +1,9 @@
 package com.github.leeonky.dal;
 
-import java.util.function.BiFunction;
+import com.github.leeonky.dal.util.DataObject;
+
+import java.util.function.Function;
 
 @FunctionalInterface
-public interface ConstructorViaSchema extends BiFunction<Object, RuntimeContext, Object> {
+public interface ConstructorViaSchema extends Function<DataObject, Object> {
 }

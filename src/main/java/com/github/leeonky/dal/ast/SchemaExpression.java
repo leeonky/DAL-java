@@ -45,8 +45,7 @@ public class SchemaExpression extends Node {
 
     private boolean verifyAndConvertAsSchemaType(RuntimeContext context, SchemaNode schemaNode, ObjectRef objectRef) {
         try {
-            //TODO use instance.evaluateDataObject
-            objectRef.instance = schemaNode.getConstructorViaSchema(context).apply(instance.evaluate(context), context);
+            objectRef.instance = schemaNode.getConstructorViaSchema(context).apply(instance.evaluateDataObject(context));
             return true;
         } catch (IllegalTypeException exception) {
             //TODO refactor

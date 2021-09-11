@@ -47,7 +47,7 @@ public class SchemaVerifier {
     }
 
     public boolean verify(Class<?> clazz, Object schemaInstance, String subPrefix) {
-        Set<String> propertyReaderNames = object.getPropertyReaderNames();
+        Set<String> propertyReaderNames = object.getFieldNames();
         BeanClass<Object> schema = getPolymorphicSchemaType(clazz);
         return (clazz.getAnnotation(Partial.class) != null ||
                 noMoreUnexpectedField(schema, schema.getPropertyReaders().keySet(), propertyReaderNames))
@@ -174,7 +174,7 @@ public class SchemaVerifier {
     }
 
     private boolean verifyCollection(String subPrefix, BeanClass<?> elementType, Object schemaProperties) {
-        List<DataObject> dataObjectList = stream(object.getWrappedList().spliterator(), false)
+        List<DataObject> dataObjectList = stream(object.asList().spliterator(), false)
                 .collect(toList());
         if (schemaProperties == null)
             return range(0, dataObjectList.size())
@@ -203,11 +203,11 @@ public class SchemaVerifier {
         BeanClass<?> subGenericType = genericType.getTypeArguments(1).orElseThrow(() ->
                 new IllegalArgumentException(format("`%s` should be generic type", subPrefix)));
         if (schemaProperty == null)
-            return object.getPropertyReaderNames().stream()
+            return object.getFieldNames().stream()
                     .allMatch(key -> object.getValue(key).createSchemaVerifier()
                             .verifySchemaInGenericType(subPrefix + "." + key, subGenericType, null));
-        return shouldBeSameSize(subPrefix, object.getPropertyReaderNames(), schemaProperty.values())
-                && object.getPropertyReaderNames().stream()
+        return shouldBeSameSize(subPrefix, object.getFieldNames(), schemaProperty.values())
+                && object.getFieldNames().stream()
                 .allMatch(key -> object.getValue(key).createSchemaVerifier()
                         .verifySchemaInGenericType(subPrefix + "." + key, subGenericType, schemaProperty.get(key)));
     }

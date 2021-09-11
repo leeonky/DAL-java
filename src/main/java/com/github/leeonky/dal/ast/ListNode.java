@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.RuntimeContext;
+import com.github.leeonky.dal.util.DataObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,7 +53,8 @@ public class ListNode extends Node {
     }
 
     private boolean judgeAll(RuntimeContext context, Object actual) {
-        Object[] list = stream(context.wrap(actual).getList().spliterator(), false).toArray();
+        Object[] list = stream(context.wrap(actual).asList().spliterator(), false)
+                .map(DataObject::getInstance).toArray();
         assertListSize(expressions.size(), list.length, getPositionBegin());
         return judgeAll(list, context);
     }

@@ -36,7 +36,7 @@ public class ObjectNode extends Node {
             throw new AssertionFailure(String.format("expected [null] equal to [%s] but was not", inspect()),
                     getPositionBegin());
         DataObject data = context.wrap(actual);
-        Set<String> dataFields = new LinkedHashSet<>(data.getPropertyReaderNames());
+        Set<String> dataFields = new LinkedHashSet<>(data.getFieldNames());
         //TODO property alias
         dataFields.removeAll(expressions.stream().map(expression -> ((PropertyNode) expression.getLeftOperand()).getRootName())
                 .collect(Collectors.toSet()));

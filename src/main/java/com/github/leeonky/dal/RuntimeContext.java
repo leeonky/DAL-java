@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class RuntimeContext {
-    //TODO private
+    //TODO private, merge wrappedValueStack and schemaTypesStack
     public final LinkedList<Object> wrappedValueStack = new LinkedList<>();
     private final LinkedList<SchemaType> schemaTypesStack = new LinkedList<>();
     private final TypeData<PropertyAccessor> propertyAccessors;
@@ -38,7 +38,6 @@ public class RuntimeContext {
         return wrappedValueStack.getFirst();
     }
 
-    //TODO return data object remove schemaTypesStack *****
     public Object wrapInputValueAndEvaluate(Object value, Node node, String schema) {
         try {
             wrappedValueStack.push(value);

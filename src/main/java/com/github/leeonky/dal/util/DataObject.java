@@ -11,9 +11,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.util.Arrays.asList;
-
-//TODO clean methods *****
 public class DataObject {
     private final RuntimeContext runtimeContext;
     private final Object instance;
@@ -38,25 +35,18 @@ public class DataObject {
     }
 
     @SuppressWarnings("unchecked")
-    public Set<String> getPropertyReaderNames() {
+    public Set<String> getFieldNames() {
         return runtimeContext.findPropertyReaderNames(instance)
-                .orElseGet(() -> {
-                    if (instance instanceof Map)
-                        return ((Map) instance).keySet();
-                    return beanClass.getPropertyReaders().keySet();
-                });
+                .orElseGet(() -> instance instanceof Map ? ((Map) instance).keySet()
+                        : beanClass.getPropertyReaders().keySet());
     }
 
-    public int getListSize() {
-        int size = 0;
-        for (Object ignore : getList())
-            size++;
-        return size;
+    public long getListSize() {
+        return StreamSupport.stream(getListValues().spliterator(), false).count();
     }
 
     @SuppressWarnings("unchecked")
-    //TODO return data object ****
-    public Iterable<Object> getList() {
+    private Iterable<Object> getListValues() {
         return runtimeContext.gitList(instance)
                 .orElseGet(() -> {
                     if (instance instanceof Iterable)
@@ -80,11 +70,11 @@ public class DataObject {
                 });
     }
 
-    //TODO process schema ***********
-    public Iterable<DataObject> getWrappedList() {
+    public Iterable<DataObject> asList() {
         List<DataObject> result = new ArrayList<>();
-        for (Object object : getList())
-            result.add(runtimeContext.wrap(object));
+        int i = 0;
+        for (Object object : getListValues())
+            result.add(new DataObject(object, runtimeContext, schemaType.access(i++)));
         return result;
     }
 
@@ -97,7 +87,7 @@ public class DataObject {
     }
 
     public DataObject getValue(Object... properties) {
-        return getValue(new LinkedList<>(asList(properties)));
+        return getValue(new LinkedList<>(Arrays.asList(properties)));
     }
 
     private DataObject getValue(LinkedList<Object> properties) {
@@ -107,30 +97,28 @@ public class DataObject {
     }
 
     public DataObject getValue(Object property) {
-        List<Object> propertyChainBefore = schemaType.access(property).getPropertyChainBefore(schemaType);
-        if (propertyChainBefore.size() == 1 && propertyChainBefore.get(0).equals(property))
-            return new DataObject(getElementOrPropertyValue(propertyChainBefore.get(0)), runtimeContext, schemaType.access(property));
-        return getValue(new LinkedList<>(propertyChainBefore));
+        List<Object> propertyChain = schemaType.access(property).getPropertyChainBefore(schemaType);
+        if (propertyChain.size() == 1 && propertyChain.get(0).equals(property))
+            return new DataObject(getElementOrPropertyValue(property), runtimeContext, schemaType.access(property));
+        return getValue(new LinkedList<>(propertyChain));
     }
 
     private Object getElementOrPropertyValue(Object property) {
         if (isList()) {
             if ("size".equals(property))
                 return getListSize();
-            if (property instanceof String) {
-                //TODO process schema and data object
-                return StreamSupport.stream(getList().spliterator(), false)
-                        .map(runtimeContext::wrap)
+            //TODO process schema and data object
+            if (property instanceof String)
+                return StreamSupport.stream(asList().spliterator(), false)
                         .map(e -> e.getElementOrPropertyValue(property))
                         .collect(Collectors.toList());
-            }
             return getElement((int) property);
         }
         return getPropertyValue((String) property);
     }
 
     private Object getElement(int index) {
-        return StreamSupport.stream(getList().spliterator(), false).skip(index).findFirst()
+        return StreamSupport.stream(getListValues().spliterator(), false).skip(index).findFirst()
                 .orElseThrow(() -> new IndexOutOfBoundsException("Index out of range: " + index));
     }
 
