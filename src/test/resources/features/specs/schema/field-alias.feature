@@ -118,3 +118,26 @@ Feature: define field alias in schema
     """
       is Order which .user.aliasOfAge = 18
     """
+
+  Scenario: alias in object judgement
+    Given the following schema:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfId", field = "id")
+    })
+    public class Order {
+    }
+    """
+    When the following input data:
+    """
+      {
+        "id": 1
+      }
+    """
+    Then the following assertion should pass:
+    """
+      is Order which ={
+        id: 1
+      }
+    """

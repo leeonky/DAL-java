@@ -86,7 +86,7 @@ public class NodeParser {
     }
 
     private Node giveDefault() {
-        if (tokenStream.isFromBeginning())
+        if (tokenStream.isFromBeginning() || tokenStream.isAfterKeyWordWhich())
             return InputNode.INSTANCE;
         throw new SyntaxException(tokenStream.getPosition(), "expect a value or expression");
     }
@@ -141,8 +141,12 @@ public class NodeParser {
     }
 
     private Node appendWhichClause(SchemaExpression schemaExpression) {
-        if (tokenStream.popKeyWord(Constants.KeyWords.WHICH).isPresent())
-            return schemaExpression.which(NodeFactory.EXPRESSION.fetch(this));
+        if (tokenStream.popKeyWord(Constants.KeyWords.WHICH).isPresent()) {
+            Node whichClause = EXPRESSION.fetch(this);
+            if (whichClause instanceof InputNode)
+                throw new SyntaxException(tokenStream.getPosition(), "expect a value or expression");
+            return schemaExpression.which(whichClause);
+        }
         return schemaExpression;
     }
 

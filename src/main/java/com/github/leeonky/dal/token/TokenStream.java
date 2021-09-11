@@ -10,8 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.dal.token.Token.Type.CLOSING_PARENTHESIS;
-import static com.github.leeonky.dal.token.Token.Type.OPERATOR;
+import static com.github.leeonky.dal.token.Token.Type.*;
 import static com.github.leeonky.dal.util.IfThenFactory.when;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
@@ -158,5 +157,11 @@ public class TokenStream {
     private void popOptionalComma() {
         if (hasTokens() && currentToken().isComma())
             pop();
+    }
+
+    public boolean isAfterKeyWordWhich() {
+        assert (index > 0);
+        Token token = tokens.get(index - 1);
+        return token.getType() == KEY_WORD && Constants.KeyWords.WHICH.equals(token.getValue());
     }
 }

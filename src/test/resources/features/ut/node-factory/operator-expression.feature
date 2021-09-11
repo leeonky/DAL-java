@@ -129,7 +129,7 @@ Feature: expression
     """
     : {
       class.simpleName: 'Expression'
-      inspect: ' <operator> <operand>'
+      inspect: '<operator> <operand>'
     }
     """
     Examples:

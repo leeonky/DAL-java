@@ -47,6 +47,8 @@ public abstract class Operator {
     }
 
     public String inspect(Node node1, Node node2) {
+        if (node1 instanceof InputNode)
+            return String.format("%s %s", inspect, node2.inspect());
         return String.format("%s %s %s", node1.inspect(), inspect, node2.inspect());
     }
 

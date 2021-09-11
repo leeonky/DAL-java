@@ -93,7 +93,6 @@ public class SchemaVerifier {
                 polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
-    //TODO try to print source code position of schema class
     private boolean errorLog(String format, Object... params) {
         throw new IllegalTypeException(String.format(format, params));
     }

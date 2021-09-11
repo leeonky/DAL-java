@@ -61,3 +61,27 @@ Feature: schema verification
     expect matches schema `IdZero` but was not
         expected field `.id` equal to java.lang.Integer[0], but was java.lang.String[0]
     """
+
+  Scenario: verify data matches schema and which clause
+    Given the following schema:
+    """
+    public class IdZero {
+        public int id = 0;
+    }
+    """
+    When the following input data:
+    """
+      {
+        "id": 0
+      }
+    """
+    Then the following assertion should pass:
+    """
+      is IdZero which .id=0
+    """
+    And the following assertion should pass:
+    """
+      is IdZero which ={
+        id: 0
+      }
+    """

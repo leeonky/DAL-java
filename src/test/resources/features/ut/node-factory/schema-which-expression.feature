@@ -41,3 +41,16 @@ Feature: schema which expression
       1 is Integer which
                         ^
     """
+
+  Scenario: use input value after key word which
+    Given the following dal code:
+    """
+      1 is Integer which = 1
+    """
+    Then got the following "expression" node:
+    """
+    : {
+      class.simpleName: 'SchemaWhichExpression'
+      inspect: '1 is Integer which = 1'
+    }
+    """
