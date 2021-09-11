@@ -35,7 +35,7 @@ public class ListNode extends Node {
 
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
-        DataObject dataObject = actualNode.evaluateDataObject(context).toList();
+        DataObject dataObject = actualNode.evaluateDataObject(context);
         if (dataObject.isNull())
             throw new AssertionFailure(String.format("expected [null] equal to [%s] but was not", inspect()),
                     getPositionBegin());
@@ -44,7 +44,7 @@ public class ListNode extends Node {
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
-        DataObject dataObject = actualNode.evaluateDataObject(context).toList();
+        DataObject dataObject = actualNode.evaluateDataObject(context);
         if (dataObject.isNull())
             throw new AssertionFailure(String.format("expected [null] matches [%s] but was not", inspect()),
                     getPositionBegin());

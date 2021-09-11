@@ -2,7 +2,7 @@ package com.github.leeonky.dal.util;
 
 import com.github.leeonky.dal.RuntimeContextBuilder;
 import com.github.leeonky.dal.SchemaType;
-import com.github.leeonky.dal.cucumber.JSONArrayListAccessor;
+import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.type.FieldAlias;
 import com.github.leeonky.dal.type.FieldAliases;
@@ -73,7 +73,7 @@ class DataObjectTest {
     class GetPropertyOrIndexValue {
         RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder()
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                .registerListAccessor(JSONArray.class, new JSONArrayListAccessor());
+                .registerListAccessor(JSONArray.class, new JSONArrayAccessor());
 
         @Test
         void access_java_class_property() {

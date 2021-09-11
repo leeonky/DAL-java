@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class RuntimeContextBuilder {
-    private final TypeData<PropertyAccessor> propertyAccessors = new TypeData<>();
-    private final TypeData<ListAccessor> listAccessors = new TypeData<>();
+    private final TypeData<PropertyAccessor<?>> propertyAccessors = new TypeData<>();
+    private final TypeData<ListAccessor<?>> listAccessors = new TypeData<>();
     private final Map<String, ConstructorViaSchema> constructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
 
@@ -42,13 +42,13 @@ public class RuntimeContextBuilder {
         return new RuntimeContext(inputValue, propertyAccessors, constructors, listAccessors, schemas);
     }
 
-    public RuntimeContextBuilder registerValueFormat(Formatter formatter) {
+    public RuntimeContextBuilder registerValueFormat(Formatter<?, ?> formatter) {
         return registerValueFormat(formatter.getFormatterName(), formatter);
     }
 
     @SuppressWarnings("unchecked")
-    public RuntimeContextBuilder registerValueFormat(String name, Formatter formatter) {
-        constructors.put(name, o -> formatter.transform(o.getInstance()));
+    public RuntimeContextBuilder registerValueFormat(String name, Formatter<?, ?> formatter) {
+        constructors.put(name, o -> ((Formatter<Object, ?>) formatter).transform(o.getInstance()));
         return this;
     }
 

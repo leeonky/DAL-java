@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.spec;
 
-import com.github.leeonky.dal.cucumber.JSONArrayListAccessor;
+import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.format.Formatters;
 import org.json.JSONArray;
@@ -21,7 +21,7 @@ class VerifySchemaFormatterField extends Base {
     void registerJsonType() {
         dataAssert.getRuntimeContextBuilder()
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                .registerListAccessor(JSONArray.class, new JSONArrayListAccessor());
+                .registerListAccessor(JSONArray.class, new JSONArrayAccessor());
     }
 
     public enum E {

@@ -18,6 +18,7 @@ public class DataObject {
     private final RuntimeContext runtimeContext;
     private final Object instance;
     private final BeanClass<Object> beanClass;
+    private List<Object> listValue;
 
     @SuppressWarnings("unchecked")
     public DataObject(Object instance, RuntimeContext context, SchemaType schemaType) {
@@ -31,48 +32,53 @@ public class DataObject {
         return instance;
     }
 
-    public boolean isList() {
-        return instance != null && (runtimeContext.isRegisteredList(instance) || instance instanceof Iterable
-                || instance.getClass().isArray() || instance instanceof Stream);
-    }
-
     @SuppressWarnings("unchecked")
     public Set<String> getFieldNames() {
-        //TODO all use PropertyAccessor
+        //TODO all use PropertyAccessor ****
         return runtimeContext.findPropertyReaderNames(instance)
                 .orElseGet(() -> instance instanceof Map ? ((Map) instance).keySet()
                         : beanClass.getPropertyReaders().keySet());
     }
 
+    public boolean isList() {
+        return instance != null && (runtimeContext.isRegisteredList(instance) || instance instanceof Iterable
+                || instance.getClass().isArray() || instance instanceof Stream);
+    }
+
     public long getListSize() {
-        return StreamSupport.stream(getListValues().spliterator(), false).count();
+        return getListValues().size();
     }
 
     @SuppressWarnings("unchecked")
-    //TODO refactor ********** use List
-    private Iterable<Object> getListValues() {
-        //TODO all use listAccessor
-        return runtimeContext.getList(instance)
-                .orElseGet(() -> {
-                    if (instance instanceof Iterable)
-                        return (Iterable<Object>) instance;
-                    if (instance instanceof Stream)
-                        return ((Stream<Object>) instance)::iterator;
-                    return () -> new Iterator<Object>() {
-                        private final int length = Array.getLength(instance);
-                        private int index = 0;
+    private List<Object> getListValues() {
+        if (listValue == null) {
 
-                        @Override
-                        public boolean hasNext() {
-                            return index < length;
-                        }
+            //TODO all use listAccessor *****
+            Iterable<Object> objects = runtimeContext.getList(instance)
+                    .orElseGet(() -> {
+                        if (instance instanceof Iterable)
+                            return (Iterable<Object>) instance;
+                        if (instance instanceof Stream)
+                            return ((Stream<Object>) instance)::iterator;
+                        return () -> new Iterator<Object>() {
+                            private final int length = Array.getLength(instance);
+                            private int index = 0;
 
-                        @Override
-                        public Object next() {
-                            return Array.get(instance, index++);
-                        }
-                    };
-                });
+                            @Override
+                            public boolean hasNext() {
+                                return index < length;
+                            }
+
+                            @Override
+                            public Object next() {
+                                return Array.get(instance, index++);
+                            }
+                        };
+                    });
+            listValue = stream(objects.spliterator(), false)
+                    .collect(Collectors.toList());
+        }
+        return listValue;
     }
 
     public Iterable<DataObject> asList() {
@@ -148,13 +154,5 @@ public class DataObject {
 
     public Object filedNameFromAlias(Object rootName) {
         return schemaType.access(rootName).getPropertyChainBefore(schemaType).get(0);
-    }
-
-    //TODO cache list
-    public DataObject toList() {
-        if (instance == null)
-            return this;
-        return new DataObject(stream(getListValues().spliterator(), false).collect(Collectors.toList()),
-                runtimeContext, schemaType);
     }
 }

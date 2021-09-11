@@ -14,22 +14,23 @@ import java.util.stream.Collectors;
 
 public class RuntimeContext {
     private final LinkedList<DataObject> thisStack = new LinkedList<>();
-    private final TypeData<PropertyAccessor> propertyAccessors;
-    private final TypeData<ListAccessor> listAccessors;
+    private final TypeData<PropertyAccessor<Object>> propertyAccessors;
+    private final TypeData<ListAccessor<Object>> listAccessors;
     private final Map<String, ConstructorViaSchema> constructors;
     private final Set<Class<?>> schemas;
     private final Map<String, BeanClass<?>> schemaMap;
     private final Converter converter = Converter.createDefault();
 
-    public RuntimeContext(Object inputValue, TypeData<PropertyAccessor> propertyAccessors,
-                          Map<String, ConstructorViaSchema> constructors, TypeData<ListAccessor> listAccessors,
+    @SuppressWarnings("unchecked")
+    public RuntimeContext(Object inputValue, TypeData<PropertyAccessor<?>> propertyAccessors,
+                          Map<String, ConstructorViaSchema> constructors, TypeData<ListAccessor<?>> listAccessors,
                           Map<String, BeanClass<?>> schemas) {
         this.schemas = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
         schemaMap = schemas;
         thisStack.push(wrap(inputValue));
         this.constructors = constructors;
-        this.propertyAccessors = propertyAccessors;
-        this.listAccessors = listAccessors;
+        this.propertyAccessors = (TypeData) propertyAccessors;
+        this.listAccessors = (TypeData) listAccessors;
     }
 
     public DataObject getInputValue() {
@@ -58,23 +59,19 @@ public class RuntimeContext {
         return schemas.contains(fieldType);
     }
 
-    @SuppressWarnings("unchecked")
     public Optional<Set<String>> findPropertyReaderNames(Object instance) {
         return propertyAccessors.getData(instance).map(f -> f.getPropertyNames(instance));
     }
 
-    @SuppressWarnings("unchecked")
     public Boolean isNull(Object instance) {
-        return propertyAccessors.getData(instance).map(p -> p.isNull(instance))
+        return propertyAccessors.getData(instance).map(f -> f.isNull(instance))
                 .orElseGet(() -> Objects.equals(instance, null));
     }
 
-    @SuppressWarnings("unchecked")
     public Optional<Object> getPropertyValue(Object instance, String name) {
-        return propertyAccessors.getData(instance).map(p -> p.getValue(instance, name));
+        return propertyAccessors.getData(instance).map(f -> f.getValue(instance, name));
     }
 
-    @SuppressWarnings("unchecked")
     public Optional<Iterable<Object>> getList(Object instance) {
         return listAccessors.getData(instance).map(l -> l.toIterable(instance));
     }

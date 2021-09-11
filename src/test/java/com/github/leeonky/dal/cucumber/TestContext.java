@@ -49,10 +49,10 @@ class TestContext {
     public void initDataAssert() {
         dataAssert.getRuntimeContextBuilder()
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                .registerListAccessor(JSONArray.class, new JSONArrayListAccessor());
+                .registerListAccessor(JSONArray.class, new JSONArrayAccessor());
         runtimeContextBuilder
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                .registerListAccessor(JSONArray.class, new JSONArrayListAccessor());
+                .registerListAccessor(JSONArray.class, new JSONArrayAccessor());
     }
 
     @SneakyThrows

@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.spec;
 
-import com.github.leeonky.dal.util.ListAccessor;
+import com.github.leeonky.dal.util.ArrayAccessor;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ class VerifyList extends Base {
 
     @Test
     void should_support_customer_array_type() throws JSONException {
-        dataAssert.getRuntimeContextBuilder().registerListAccessor(JSONArray.class, new ListAccessor<JSONArray>() {
+        dataAssert.getRuntimeContextBuilder().registerListAccessor(JSONArray.class, new ArrayAccessor<JSONArray>() {
             @Override
             public Object get(JSONArray jsonArray, int index) {
                 try {

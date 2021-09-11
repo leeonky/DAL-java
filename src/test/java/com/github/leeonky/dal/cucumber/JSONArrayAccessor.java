@@ -1,10 +1,10 @@
 package com.github.leeonky.dal.cucumber;
 
-import com.github.leeonky.dal.util.ListAccessor;
+import com.github.leeonky.dal.util.ArrayAccessor;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-public class JSONArrayListAccessor implements ListAccessor<JSONArray> {
+public class JSONArrayAccessor implements ArrayAccessor<JSONArray> {
     @Override
     public Object get(JSONArray jsonArray, int index) {
         try {
