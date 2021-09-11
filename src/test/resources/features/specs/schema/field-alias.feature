@@ -188,3 +188,74 @@ Feature: define field alias in schema
         }
       }
     """
+
+  Scenario: alias in list judgement
+    Given the following schema:
+    """
+    public class Order {
+      public List<Product> products;
+    }
+    """
+    And the following schema:
+    """
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfName", field = "name"),
+    })
+    public class Product {
+        public String name;
+    }
+    """
+    When the following input data:
+    """
+      {
+        "products": [{
+          "name": "ipad"
+        }, {
+          "name": "iphone"
+        }]
+      }
+    """
+    Then the following assertion should pass:
+    """
+      is Order which :{
+        products: [
+          {aliasOfName: 'ipad'}
+          {aliasOfName: 'iphone'}
+        ]
+      }
+    """
+
+  Scenario: alias in nested list judgement
+    Given the following schema:
+    """
+    public class Image {
+      public List<List<Pixel>> pixels;
+    }
+    """
+    And the following schema:
+    """
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfColor", field = "color"),
+    })
+    public class Pixel {
+      public String color;
+    }
+    """
+    When the following input data:
+    """
+      {
+        "pixels": [
+          [{"color": "red"}],
+          [{"color": "black"}]
+        ]
+      }
+    """
+    Then the following assertion should pass:
+    """
+      is Image which :{
+        pixels: [
+          [{aliasOfColor: 'red'}],
+          [{aliasOfColor: 'black'}]
+        ]
+      }
+    """

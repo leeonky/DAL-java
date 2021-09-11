@@ -67,7 +67,9 @@ class TestContext {
 
     public void executeDal(String dalSourceCode) {
         try {
-            new Compiler().compileToClasses(schemas.stream().map(s -> "import com.github.leeonky.dal.type.*;\n" + s)
+            new Compiler().compileToClasses(schemas.stream().map(s ->
+                    "import com.github.leeonky.dal.type.*;\n" +
+                            "import java.util.*;\n" + s)
                     .collect(Collectors.toList()))
                     .forEach(dataAssert.getRuntimeContextBuilder()::registerSchema);
             assertResult = dataAssert.assertData(inputObject, this.dalSourceCode = dalSourceCode);

@@ -240,6 +240,5 @@ Feature: judge object
       }
     """
 
-#  TODO nested list sub alias
 #  TODO property chain sub alias
 #  TODO process size property of list

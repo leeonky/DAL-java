@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.RuntimeContext;
+import com.github.leeonky.dal.SchemaType;
 import com.github.leeonky.dal.util.DataObject;
 
 import java.util.ArrayList;
@@ -36,35 +37,39 @@ public class ListNode extends Node {
 
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
-        Object actual = actualNode.evaluate(context);
+        DataObject dataObject = actualNode.evaluateDataObject(context);
+        Object actual = dataObject.getInstance();
         if (actual == null)
             throw new AssertionFailure(String.format("expected [null] equal to [%s] but was not", inspect()),
                     getPositionBegin());
-        return judgeAll(context, actual);
+        return judgeAll(context, actual, dataObject.schemaType);
     }
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
-        Object actual = actualNode.evaluate(context);
+        DataObject dataObject = actualNode.evaluateDataObject(context);
+        Object actual = dataObject.getInstance();
         if (actual == null)
             throw new AssertionFailure(String.format("expected [null] matches [%s] but was not", inspect()),
                     getPositionBegin());
-        return judgeAll(context, actual);
+        return judgeAll(context, actual, dataObject.schemaType);
     }
 
-    private boolean judgeAll(RuntimeContext context, Object actual) {
+    private boolean judgeAll(RuntimeContext context, Object actual, SchemaType schemaType) {
         Object[] list = stream(context.wrap(actual).asList().spliterator(), false)
                 .map(DataObject::getInstance).toArray();
         assertListSize(expressions.size(), list.length, getPositionBegin());
-        return judgeAll(list, context);
+        return judgeAll(list, context, schemaType);
     }
 
-    private boolean judgeAll(Object input, RuntimeContext context) {
+    private boolean judgeAll(Object input, RuntimeContext context, SchemaType schemaType) {
         try {
             //TODO process sub schema
             context.wrappedValueStack.push(input);
+            context.schemaTypesStack.push(schemaType);
             return expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context));
         } finally {
+            context.schemaTypesStack.pop();
             context.wrappedValueStack.pop();
         }
     }
