@@ -21,20 +21,19 @@ public class RuntimeContextBuilder {
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
 
     public RuntimeContextBuilder() {
-        registerValueFormat(new Formatters.String());
-        registerValueFormat(new Formatters.URL());
-        registerValueFormat(new Formatters.Instant());
-        registerValueFormat(new Formatters.LocalDate());
-        registerValueFormat(new Formatters.LocalDateTime());
-        registerValueFormat(new Formatters.Enum<>());
+        registerValueFormat(new Formatters.String()).
+                registerValueFormat(new Formatters.URL()).
+                registerValueFormat(new Formatters.Instant()).
+                registerValueFormat(new Formatters.LocalDate()).
+                registerValueFormat(new Formatters.LocalDateTime()).
+                registerValueFormat(new Formatters.Enum<>()).
 
-        registerValueFormat(new Formatters.Number());
-        registerValueFormat(new Formatters.PositiveInteger());
-        registerValueFormat(new Formatters.Integer());
-        registerValueFormat(new Formatters.PositiveNumber());
-        registerValueFormat(new Formatters.ZeroNumber());
-
-        registerValueFormat(new Formatters.Boolean());
+                registerValueFormat(new Formatters.Number()).
+                registerValueFormat(new Formatters.PositiveInteger()).
+                registerValueFormat(new Formatters.Integer()).
+                registerValueFormat(new Formatters.PositiveNumber()).
+                registerValueFormat(new Formatters.ZeroNumber()).
+                registerValueFormat(new Formatters.Boolean());
 
         registerSchema("List", DataObject::isList);
     }

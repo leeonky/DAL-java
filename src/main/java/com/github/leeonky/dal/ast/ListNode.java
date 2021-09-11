@@ -2,7 +2,6 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.RuntimeContext;
-import com.github.leeonky.dal.SchemaType;
 import com.github.leeonky.dal.util.DataObject;
 
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.AssertionFailure.assertListSize;
 import static java.lang.String.format;
-import static java.util.stream.StreamSupport.stream;
 
 public class ListNode extends Node {
     private final List<Expression> expressions = new ArrayList<>();
@@ -37,40 +35,25 @@ public class ListNode extends Node {
 
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
-        DataObject dataObject = actualNode.evaluateDataObject(context);
-        Object actual = dataObject.getInstance();
-        if (actual == null)
+        DataObject dataObject = actualNode.evaluateDataObject(context).toList();
+        if (dataObject.isNull())
             throw new AssertionFailure(String.format("expected [null] equal to [%s] but was not", inspect()),
                     getPositionBegin());
-        return judgeAll(context, actual, dataObject.schemaType);
+        return judgeAll(context, dataObject);
     }
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
-        DataObject dataObject = actualNode.evaluateDataObject(context);
-        Object actual = dataObject.getInstance();
-        if (actual == null)
+        DataObject dataObject = actualNode.evaluateDataObject(context).toList();
+        if (dataObject.isNull())
             throw new AssertionFailure(String.format("expected [null] matches [%s] but was not", inspect()),
                     getPositionBegin());
-        return judgeAll(context, actual, dataObject.schemaType);
+        return judgeAll(context, dataObject);
     }
 
-    private boolean judgeAll(RuntimeContext context, Object actual, SchemaType schemaType) {
-        Object[] list = stream(context.wrap(actual).asList().spliterator(), false)
-                .map(DataObject::getInstance).toArray();
-        assertListSize(expressions.size(), list.length, getPositionBegin());
-        return judgeAll(list, context, schemaType);
-    }
-
-    private boolean judgeAll(Object input, RuntimeContext context, SchemaType schemaType) {
-        try {
-            //TODO process sub schema
-            context.wrappedValueStack.push(input);
-            context.schemaTypesStack.push(schemaType);
-            return expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context));
-        } finally {
-            context.schemaTypesStack.pop();
-            context.wrappedValueStack.pop();
-        }
+    private boolean judgeAll(RuntimeContext context, DataObject dataObject) {
+        assertListSize(expressions.size(), dataObject.getListSize(), getPositionBegin());
+        return context.newThisScope(dataObject,
+                () -> expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context)));
     }
 }

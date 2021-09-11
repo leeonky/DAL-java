@@ -9,12 +9,11 @@ import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class RuntimeContext {
-    //TODO private, merge wrappedValueStack and schemaTypesStack
-    public final LinkedList<Object> wrappedValueStack = new LinkedList<>();
-    public final LinkedList<SchemaType> schemaTypesStack = new LinkedList<>();
+    private final LinkedList<DataObject> thisStack = new LinkedList<>();
     private final TypeData<PropertyAccessor> propertyAccessors;
     private final TypeData<ListAccessor> listAccessors;
     private final Map<String, ConstructorViaSchema> constructors;
@@ -27,35 +26,32 @@ public class RuntimeContext {
                           Map<String, BeanClass<?>> schemas) {
         this.schemas = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
         schemaMap = schemas;
-        wrappedValueStack.push(inputValue);
-        schemaTypesStack.push(SchemaType.createRoot());
+        thisStack.push(wrap(inputValue));
         this.constructors = constructors;
         this.propertyAccessors = propertyAccessors;
         this.listAccessors = listAccessors;
     }
 
-    public Object getInputValue() {
-        return wrappedValueStack.getFirst();
+    public DataObject getInputValue() {
+        return thisStack.getFirst();
     }
 
     public Object wrapInputValueAndEvaluate(Object value, Node node, String schema) {
+        return newThisScope(new DataObject(value, this, SchemaType.create(schemaMap.get(schema))),
+                () -> node.evaluate(this));
+    }
+
+    public <T> T newThisScope(DataObject dataObject, Supplier<T> supplier) {
         try {
-            wrappedValueStack.push(value);
-            schemaTypesStack.push(SchemaType.create(schemaMap.get(schema)));
-            return node.evaluate(this);
+            thisStack.push(dataObject);
+            return supplier.get();
         } finally {
-            schemaTypesStack.pop();
-            wrappedValueStack.pop();
+            thisStack.pop();
         }
     }
 
     public Optional<ConstructorViaSchema> searchConstructor(String type) {
         return Optional.ofNullable(constructors.get(type));
-    }
-
-    //TODO should not use any where ****************
-    public DataObject wrap(Object instance) {
-        return new DataObject(instance, this, schemaTypesStack.getFirst());
     }
 
     public boolean isRegistered(Class<?> fieldType) {
@@ -79,7 +75,7 @@ public class RuntimeContext {
     }
 
     @SuppressWarnings("unchecked")
-    public Optional<Iterable<Object>> gitList(Object instance) {
+    public Optional<Iterable<Object>> getList(Object instance) {
         return listAccessors.getData(instance).map(l -> l.toIterable(instance));
     }
 
@@ -89,5 +85,9 @@ public class RuntimeContext {
 
     public Converter getConverter() {
         return converter;
+    }
+
+    public DataObject wrap(Object instance) {
+        return new DataObject(instance, this, SchemaType.createRoot());
     }
 }

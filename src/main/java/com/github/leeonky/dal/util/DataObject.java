@@ -11,9 +11,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static java.util.stream.StreamSupport.stream;
+
 public class DataObject {
-    //TODO private
-    public final SchemaType schemaType;
+    private final SchemaType schemaType;
     private final RuntimeContext runtimeContext;
     private final Object instance;
     private final BeanClass<Object> beanClass;
@@ -37,6 +38,7 @@ public class DataObject {
 
     @SuppressWarnings("unchecked")
     public Set<String> getFieldNames() {
+        //TODO all use PropertyAccessor
         return runtimeContext.findPropertyReaderNames(instance)
                 .orElseGet(() -> instance instanceof Map ? ((Map) instance).keySet()
                         : beanClass.getPropertyReaders().keySet());
@@ -47,8 +49,10 @@ public class DataObject {
     }
 
     @SuppressWarnings("unchecked")
+    //TODO refactor ********** use List
     private Iterable<Object> getListValues() {
-        return runtimeContext.gitList(instance)
+        //TODO all use listAccessor
+        return runtimeContext.getList(instance)
                 .orElseGet(() -> {
                     if (instance instanceof Iterable)
                         return (Iterable<Object>) instance;
@@ -142,7 +146,15 @@ public class DataObject {
         }
     }
 
-    public Object guessField(Object rootName) {
+    public Object filedNameFromAlias(Object rootName) {
         return schemaType.access(rootName).getPropertyChainBefore(schemaType).get(0);
+    }
+
+    //TODO cache list
+    public DataObject toList() {
+        if (instance == null)
+            return this;
+        return new DataObject(stream(getListValues().spliterator(), false).collect(Collectors.toList()),
+                runtimeContext, schemaType);
     }
 }
