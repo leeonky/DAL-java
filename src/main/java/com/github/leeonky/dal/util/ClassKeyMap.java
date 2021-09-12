@@ -6,17 +6,21 @@ import java.util.Optional;
 
 public class ClassKeyMap<T> extends LinkedHashMap<Class<?>, T> {
 
-    //TODO equal class first
     public Optional<T> tryGetData(Object object) {
-        return entrySet().stream()
-                .filter(e -> e.getKey().isInstance(object))
-                .findFirst()
-                .map(Map.Entry::getValue);
+        if (object == null)
+            return Optional.empty();
+        T data = get(object.getClass());
+        if (data != null)
+            return Optional.of(data);
+        return entrySet().stream().filter(e -> e.getKey().isInstance(object))
+                .findFirst().map(Map.Entry::getValue);
     }
 
-    //TODO equal class first
     public boolean containsType(Object object) {
-        return entrySet().stream()
-                .anyMatch(e -> e.getKey().isInstance(object));
+        return tryGetData(object).isPresent();
+    }
+
+    public T getData(Object instance) {
+        return tryGetData(instance).orElseThrow(IllegalArgumentException::new);
     }
 }

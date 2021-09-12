@@ -61,9 +61,8 @@ public class RuntimeContext {
         return schemas.contains(fieldType);
     }
 
-    //TODO remove optional
     public Set<String> findPropertyReaderNames(Object instance) {
-        return propertyAccessors.tryGetData(instance).map(f -> f.getPropertyNames(instance)).orElse(null);
+        return propertyAccessors.getData(instance).getPropertyNames(instance);
     }
 
     public Boolean isNull(Object instance) {
@@ -71,9 +70,8 @@ public class RuntimeContext {
                 .orElseGet(() -> Objects.equals(instance, null));
     }
 
-    //TODO remove optional
     public Object getPropertyValue(Object instance, String name) {
-        return propertyAccessors.tryGetData(instance).map(f -> f.getValue(instance, name)).orElse(null);
+        return propertyAccessors.getData(instance).getValue(instance, name);
     }
 
     @SuppressWarnings("unchecked")
@@ -136,7 +134,7 @@ public class RuntimeContext {
 
                 @Override
                 public boolean isNull(Object instance1) {
-                    return instance1 == null;
+                    return Objects.equals(instance1, null);
                 }
             });
         }
