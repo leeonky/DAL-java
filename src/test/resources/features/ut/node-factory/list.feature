@@ -133,7 +133,3 @@ Feature: list node
     """
     inspect: '[true false]'
     """
-
-#  TODO nested list schema alias
-#  TODO nested object schema alias
-#  TODO is schema

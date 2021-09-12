@@ -5,12 +5,11 @@ import com.github.leeonky.dal.SchemaType;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.NoSuchAccessorException;
 
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
 public class DataObject {
@@ -49,35 +48,9 @@ public class DataObject {
         return getListValues().size();
     }
 
-    @SuppressWarnings("unchecked")
     private List<Object> getListValues() {
-        if (listValue == null) {
-
-            //TODO all use listAccessor *****
-            Iterable<Object> objects = runtimeContext.getList(instance)
-                    .orElseGet(() -> {
-                        if (instance instanceof Iterable)
-                            return (Iterable<Object>) instance;
-                        if (instance instanceof Stream)
-                            return ((Stream<Object>) instance)::iterator;
-                        return () -> new Iterator<Object>() {
-                            private final int length = Array.getLength(instance);
-                            private int index = 0;
-
-                            @Override
-                            public boolean hasNext() {
-                                return index < length;
-                            }
-
-                            @Override
-                            public Object next() {
-                                return Array.get(instance, index++);
-                            }
-                        };
-                    });
-            listValue = stream(objects.spliterator(), false)
-                    .collect(Collectors.toList());
-        }
+        if (listValue == null)
+            listValue = stream(runtimeContext.getList(instance).spliterator(), false).collect(toList());
         return listValue;
     }
 
@@ -122,7 +95,7 @@ public class DataObject {
             if (property instanceof String)
                 return StreamSupport.stream(asList().spliterator(), false)
                         .map(e -> e.getElementOrPropertyValue(property))
-                        .collect(Collectors.toList());
+                        .collect(toList());
             return getElement((int) property);
         }
         return getPropertyValue((String) property);

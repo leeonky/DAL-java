@@ -8,6 +8,7 @@ import com.github.leeonky.dal.util.TypeData;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -72,8 +73,23 @@ public class RuntimeContext {
         return propertyAccessors.getData(instance).map(f -> f.getValue(instance, name));
     }
 
-    public Optional<Iterable<Object>> getList(Object instance) {
-        return listAccessors.getData(instance).map(l -> l.toIterable(instance));
+    @SuppressWarnings("unchecked")
+    public Iterable<Object> getList(Object instance) {
+        return listAccessors.getData(instance).map(l -> (Iterable<Object>) l.toIterable(instance))
+                .orElseGet(() -> () -> new Iterator<Object>() {
+                    private final int length = Array.getLength(instance);
+                    private int index = 0;
+
+                    @Override
+                    public boolean hasNext() {
+                        return index < length;
+                    }
+
+                    @Override
+                    public Object next() {
+                        return Array.get(instance, index++);
+                    }
+                });
     }
 
     public boolean isRegisteredList(Object instance) {

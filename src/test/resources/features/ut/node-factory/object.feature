@@ -140,8 +140,3 @@ Feature: object node
     """
     inspect: '{key1 : 1 key2 : 2}'
     """
-
-#  TODO nested list schema alias
-#  TODO nested object schema alias
-#  TODO property chain sub alias
-#  TODO is schema

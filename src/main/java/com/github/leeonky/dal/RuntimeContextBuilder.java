@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class RuntimeContextBuilder {
     private final TypeData<PropertyAccessor<?>> propertyAccessors = new TypeData<>();
@@ -33,9 +34,12 @@ public class RuntimeContextBuilder {
                 registerValueFormat(new Formatters.Integer()).
                 registerValueFormat(new Formatters.PositiveNumber()).
                 registerValueFormat(new Formatters.ZeroNumber()).
-                registerValueFormat(new Formatters.Boolean());
+                registerValueFormat(new Formatters.Boolean()).
 
-        registerSchema("List", DataObject::isList);
+                registerSchema("List", DataObject::isList).
+
+                registerListAccessor(Iterable.class, iterable -> iterable).
+                registerListAccessor(Stream.class, stream -> stream::iterator);
     }
 
     public RuntimeContext build(Object inputValue) {
