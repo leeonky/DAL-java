@@ -1,12 +1,13 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.util.ClassKeyMap;
 import com.github.leeonky.dal.util.DataObject;
 import com.github.leeonky.dal.util.ListAccessor;
 import com.github.leeonky.dal.util.PropertyAccessor;
-import com.github.leeonky.dal.util.TypeData;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.NoSuchAccessorException;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -15,23 +16,23 @@ import java.util.stream.Collectors;
 
 public class RuntimeContext {
     private final LinkedList<DataObject> thisStack = new LinkedList<>();
-    private final TypeData<PropertyAccessor<Object>> propertyAccessors;
-    private final TypeData<ListAccessor<Object>> listAccessors;
+    private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors;
+    private final ClassKeyMap<ListAccessor<Object>> listAccessors;
     private final Map<String, ConstructorViaSchema> constructors;
     private final Set<Class<?>> schemas;
     private final Map<String, BeanClass<?>> schemaMap;
     private final Converter converter = Converter.createDefault();
 
     @SuppressWarnings("unchecked")
-    public RuntimeContext(Object inputValue, TypeData<PropertyAccessor<?>> propertyAccessors,
-                          Map<String, ConstructorViaSchema> constructors, TypeData<ListAccessor<?>> listAccessors,
+    public RuntimeContext(Object inputValue, ClassKeyMap<PropertyAccessor<?>> propertyAccessors,
+                          Map<String, ConstructorViaSchema> constructors, ClassKeyMap<ListAccessor<?>> listAccessors,
                           Map<String, BeanClass<?>> schemas) {
         this.schemas = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
         schemaMap = schemas;
-        thisStack.push(wrap(inputValue));
         this.constructors = constructors;
-        this.propertyAccessors = (TypeData) propertyAccessors;
-        this.listAccessors = (TypeData) listAccessors;
+        this.propertyAccessors = (ClassKeyMap) propertyAccessors;
+        this.listAccessors = (ClassKeyMap) listAccessors;
+        thisStack.push(wrap(inputValue));
     }
 
     public DataObject getInputValue() {
@@ -56,40 +57,46 @@ public class RuntimeContext {
         return Optional.ofNullable(constructors.get(type));
     }
 
-    public boolean isRegistered(Class<?> fieldType) {
+    public boolean isSchemaRegistered(Class<?> fieldType) {
         return schemas.contains(fieldType);
     }
 
-    public Optional<Set<String>> findPropertyReaderNames(Object instance) {
-        return propertyAccessors.getData(instance).map(f -> f.getPropertyNames(instance));
+    //TODO remove optional
+    public Set<String> findPropertyReaderNames(Object instance) {
+        return propertyAccessors.tryGetData(instance).map(f -> f.getPropertyNames(instance)).orElse(null);
     }
 
     public Boolean isNull(Object instance) {
-        return propertyAccessors.getData(instance).map(f -> f.isNull(instance))
+        return propertyAccessors.tryGetData(instance).map(f -> f.isNull(instance))
                 .orElseGet(() -> Objects.equals(instance, null));
     }
 
-    public Optional<Object> getPropertyValue(Object instance, String name) {
-        return propertyAccessors.getData(instance).map(f -> f.getValue(instance, name));
+    //TODO remove optional
+    public Object getPropertyValue(Object instance, String name) {
+        return propertyAccessors.tryGetData(instance).map(f -> f.getValue(instance, name)).orElse(null);
     }
 
     @SuppressWarnings("unchecked")
     public Iterable<Object> getList(Object instance) {
-        return listAccessors.getData(instance).map(l -> (Iterable<Object>) l.toIterable(instance))
-                .orElseGet(() -> () -> new Iterator<Object>() {
-                    private final int length = Array.getLength(instance);
-                    private int index = 0;
+        return listAccessors.tryGetData(instance).map(l -> (Iterable<Object>) l.toIterable(instance))
+                .orElseGet(() -> arrayIterable(instance));
+    }
 
-                    @Override
-                    public boolean hasNext() {
-                        return index < length;
-                    }
+    private Iterable<Object> arrayIterable(Object instance) {
+        return () -> new Iterator<Object>() {
+            private final int length = Array.getLength(instance);
+            private int index = 0;
 
-                    @Override
-                    public Object next() {
-                        return Array.get(instance, index++);
-                    }
-                });
+            @Override
+            public boolean hasNext() {
+                return index < length;
+            }
+
+            @Override
+            public Object next() {
+                return Array.get(instance, index++);
+            }
+        };
     }
 
     public boolean isRegisteredList(Object instance) {
@@ -102,5 +109,37 @@ public class RuntimeContext {
 
     public DataObject wrap(Object instance) {
         return new DataObject(instance, this, SchemaType.createRoot());
+    }
+
+    public RuntimeContext registerPropertyAccessor(Object instance) {
+        if (!Objects.equals(instance, null) && !propertyAccessors.containsType(instance)) {
+            propertyAccessors.put(BeanClass.getClass(instance), new PropertyAccessor<Object>() {
+                private final BeanClass<Object> beanClass = BeanClass.createFrom(instance);
+
+                @Override
+                public Object getValue(Object instance1, String name) {
+                    try {
+                        return beanClass.getPropertyValue(instance1, name);
+                    } catch (NoSuchAccessorException ignore) {
+                        try {
+                            return beanClass.getType().getMethod(name).invoke(instance1);
+                        } catch (Exception e) {
+                            throw new IllegalStateException(e);
+                        }
+                    }
+                }
+
+                @Override
+                public Set<String> getPropertyNames(Object instance1) {
+                    return beanClass.getPropertyReaders().keySet();
+                }
+
+                @Override
+                public boolean isNull(Object instance1) {
+                    return instance1 == null;
+                }
+            });
+        }
+        return this;
     }
 }

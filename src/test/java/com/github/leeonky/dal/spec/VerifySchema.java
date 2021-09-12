@@ -51,7 +51,7 @@ class VerifySchema extends Base {
         });
 
         dataAssert.getRuntimeContextBuilder().registerSchema("Bean",
-                wrappedObject -> wrappedObject.getFieldNames() == PROPERTY_NAMES);
+                dataObject -> dataObject.getFieldNames() == PROPERTY_NAMES);
 
         assertPass(new JSONObject("{\"f1\": 1, \"f2\": 1}"), "is Bean which .f1='mocked return value of f1'");
         assertPass(null, "= null");

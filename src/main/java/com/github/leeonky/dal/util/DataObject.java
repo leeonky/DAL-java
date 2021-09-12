@@ -2,11 +2,8 @@ package com.github.leeonky.dal.util;
 
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.SchemaType;
-import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.NoSuchAccessorException;
 
 import java.util.*;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
@@ -16,32 +13,24 @@ public class DataObject {
     private final SchemaType schemaType;
     private final RuntimeContext runtimeContext;
     private final Object instance;
-    private final BeanClass<Object> beanClass;
     private List<Object> listValue;
 
-    @SuppressWarnings("unchecked")
     public DataObject(Object instance, RuntimeContext context, SchemaType schemaType) {
         this.instance = instance;
-        beanClass = instance == null ? null : (BeanClass<Object>) BeanClass.create(instance.getClass());
-        runtimeContext = context;
         this.schemaType = schemaType;
+        runtimeContext = context.registerPropertyAccessor(instance);
     }
 
     public Object getInstance() {
         return instance;
     }
 
-    @SuppressWarnings("unchecked")
     public Set<String> getFieldNames() {
-        //TODO all use PropertyAccessor ****
-        return runtimeContext.findPropertyReaderNames(instance)
-                .orElseGet(() -> instance instanceof Map ? ((Map) instance).keySet()
-                        : beanClass.getPropertyReaders().keySet());
+        return runtimeContext.findPropertyReaderNames(instance);
     }
 
     public boolean isList() {
-        return instance != null && (runtimeContext.isRegisteredList(instance) || instance instanceof Iterable
-                || instance.getClass().isArray() || instance instanceof Stream);
+        return runtimeContext.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
     public long getListSize() {
@@ -96,33 +85,9 @@ public class DataObject {
                 return StreamSupport.stream(asList().spliterator(), false)
                         .map(e -> e.getElementOrPropertyValue(property))
                         .collect(toList());
-            return getElement((int) property);
+            return getListValues().get((int) property);
         }
-        return getPropertyValue((String) property);
-    }
-
-    private Object getElement(int index) {
-        return StreamSupport.stream(getListValues().spliterator(), false).skip(index).findFirst()
-                .orElseThrow(() -> new IndexOutOfBoundsException("Index out of range: " + index));
-    }
-
-    private Object getPropertyValue(String name) {
-        if (instance instanceof Map)
-            return ((Map<?, ?>) instance).get(name);
-        return runtimeContext.getPropertyValue(instance, name)
-                .orElseGet(() -> getBeanPropertyValue(name));
-    }
-
-    private Object getBeanPropertyValue(String name) {
-        try {
-            return beanClass.getPropertyValue(instance, name);
-        } catch (NoSuchAccessorException ignore) {
-            try {
-                return beanClass.getType().getMethod(name).invoke(instance);
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-        }
+        return runtimeContext.getPropertyValue(instance, (String) property);
     }
 
     public Object filedNameFromAlias(Object rootName) {

@@ -38,7 +38,7 @@ class VerifyList extends Base {
 
     @Test
     void should_raise_error_when_invalid_index() {
-        assertRuntimeException(asList("hello"), "[1] = 'hello'", 0, "Index out of range: 1");
+        assertRuntimeException(asList("hello"), "[1] = 'hello'", 0, "Index 1 out of bounds for length 1");
     }
 
     @Test

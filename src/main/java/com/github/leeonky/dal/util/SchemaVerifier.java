@@ -102,7 +102,7 @@ public class SchemaVerifier {
         Class<?> fieldType = type.getType();
         if (Formatter.class.isAssignableFrom(fieldType)) {
             return verifyFormatterValue(subPrefix, getOrCreateFormatter(schemaProperty, type));
-        } else if (runtimeContext.isRegistered(fieldType))
+        } else if (runtimeContext.isSchemaRegistered(fieldType))
             return object.createSchemaVerifier().verify(fieldType, schemaProperty, subPrefix);
         else if (type.isCollection())
             return verifyCollection(subPrefix, type.getElementType(), schemaProperty);
