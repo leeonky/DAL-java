@@ -15,11 +15,11 @@ public class TokenContentInString {
     }
 
     public static TokenContentInString leftTrim(TokenContentInString getter) {
-        return getter.copy().setPreprocessor(SourceCode::trimLeft);
+        return getter.copy().setPreprocessor(SourceCode::skipBlank);
     }
 
     public TokenContentInString escape(String replace, char c) {
-        return copy().setCharGetter(sourceCode -> sourceCode.startsWithThenSeek(replace) ? c : getChar(sourceCode));
+        return copy().setCharGetter(sourceCode -> sourceCode.skip(replace) ? c : getChar(sourceCode));
     }
 
     void preprocess(SourceCode sourceCode) {

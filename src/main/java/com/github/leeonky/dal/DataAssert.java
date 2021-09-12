@@ -6,8 +6,8 @@ import static com.github.leeonky.util.BeanClass.getClassName;
 
 //TODO rename
 public class DataAssert {
-    private DALCompiler dalCompiler = new DALCompiler();
-    private RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
+    private final DALCompiler dalCompiler = new DALCompiler();
+    private final RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
 
     public RuntimeContextBuilder getRuntimeContextBuilder() {
         return runtimeContextBuilder;

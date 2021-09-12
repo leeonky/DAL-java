@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
+import static com.github.leeonky.dal.token.Token.Type.KEY_WORD;
 
 public class Token {
     private final Type type;
@@ -227,6 +228,10 @@ public class Token {
 
     public boolean isComma() {
         return value.equals(",");
+    }
+
+    public boolean isKeyWord(String keyWord) {
+        return getType() == KEY_WORD && keyWord.equals(getValue());
     }
 
     public enum Type {

@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.ast.MandatoryNodeFactory;
+import com.github.leeonky.dal.token.SourceCode;
 import com.github.leeonky.dal.token.TokenFactory;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
@@ -11,6 +12,9 @@ import java.util.Map;
 
 import static com.github.leeonky.dal.ast.ExpressionFactory.*;
 import static com.github.leeonky.dal.ast.NodeFactory.*;
+import static java.lang.String.valueOf;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.IntStream.range;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TestSteps {
@@ -61,8 +65,11 @@ public class TestSteps {
     }
 
     @Then("current offset char of source code is {string}")
-    public void current_offset_char_of_source_code_is(String character) {
-        assertThat(TestContext.INSTANCE.getSourceCode().startsWith(parseTabAndSpace(character))).isTrue();
+    public void current_offset_char_of_source_code_is(String code) {
+        code = parseTabAndSpace(code);
+        SourceCode sourceCode = TestContext.INSTANCE.getSourceCode();
+        assertThat(range(0, code.length()).mapToObj(i -> valueOf(sourceCode.currentChar()))
+                .collect(joining())).isEqualTo(code);
     }
 
     private String parseTabAndSpace(String code) {
@@ -110,13 +117,6 @@ public class TestSteps {
     @Given("get an {string} node")
     public void get_an_node(String nodeFactory) {
         TestContext.INSTANCE.compileNode(nodeFactoryMap.get(nodeFactory));
-    }
-
-
-    @Given("the following dal code and skip {int} tokens:")
-    public void the_following_dal_code_and_skip_tokens(int skip, String dalSourceCode) {
-        TestContext.INSTANCE.givenDalSourceCode(dalSourceCode);
-        TestContext.INSTANCE.skipTokens(skip);
     }
 
     @Given("the following schema:")

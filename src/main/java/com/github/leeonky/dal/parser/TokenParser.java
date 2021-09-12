@@ -83,10 +83,10 @@ public class TokenParser {
 
     private void parseTokenStreamContent(TokenContentInToken content, TokenStartEnd end, TokenParser subContext) {
         while (!end.matches(subContext)) {
-            if (sourceCode.hasContent()) {
+            if (sourceCode.skipBlank().notEnd()) {
                 if (content.getToken(subContext) == null)
                     throw new SyntaxException(sourceCode.getPosition(), "Unexpected token");
-                sourceCode.trimLeft();
+                sourceCode.skipBlank();
             }
         }
     }
@@ -106,11 +106,10 @@ public class TokenParser {
     private Token parseTokenWithSourceCodePosition(TokenStartEnd start, Supplier<Token> supplier) {
         int position = sourceCode.getPosition();
         return when(start.matches(this)).thenReturn(() -> (Token)
-                whenNonNull(getToken(supplier))
-                        .canReturn(token -> tokenStream.appendToken(token)
-                                .setPositionBegin(position)
-                                .setPositionEnd(sourceCode.getPosition())
-                        ).orElse(() -> sourceCode.seek(position - sourceCode.getPosition())));
+                whenNonNull(getToken(supplier)).canReturn(token -> tokenStream.appendToken(token)
+                        .setPositionBegin(position)
+                        .setPositionEnd(sourceCode.getPosition())
+                ).orElse(() -> sourceCode.seek(position - sourceCode.getPosition())));
     }
 
     private Token getToken(Supplier<Token> supplier) {

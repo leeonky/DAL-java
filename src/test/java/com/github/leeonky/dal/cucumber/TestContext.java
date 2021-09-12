@@ -160,12 +160,6 @@ class TestContext {
         }
     }
 
-    public void skipTokens(int skip) {
-        getNodeParser();
-        while (skip-- > 0)
-            tokenStream.pop();
-    }
-
     public void registerSchema(String schemaCode) {
         schemas.add(schemaCode);
     }

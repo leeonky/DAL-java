@@ -16,7 +16,6 @@ import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 
-//TODO clean method
 public class TokenStream {
     private static final AtomicInteger DEFAULT_VALUE = new AtomicInteger();
     private static final Set<String> UNARY_OPERATORS_WITHOUT_INTENTION = new HashSet<>(singletonList("!"));
@@ -27,7 +26,7 @@ public class TokenStream {
     private final Map<Token.Type, AtomicInteger> braceLevels = new HashMap<>();
     private int index = 0;
 
-    public Token pop() {
+    private Token pop() {
         return tokens.get(index++);
     }
 
@@ -52,7 +51,7 @@ public class TokenStream {
 
     public Optional<Token> popKeyWord(String keyword) {
         return when(hasTokens()
-                && currentToken().getType() == Token.Type.KEY_WORD && keyword.equals(currentToken().getValue()))
+                && currentToken().getType() == KEY_WORD && keyword.equals(currentToken().getValue()))
                 .optional(this::pop);
     }
 
@@ -67,10 +66,6 @@ public class TokenStream {
 
     public Optional<Token> lastToken() {
         return tokens.isEmpty() ? Optional.empty() : of(tokens.get(tokens.size() - 1));
-    }
-
-    public int size() {
-        return tokens.size();
     }
 
     public Stream<Token> tokens() {
@@ -122,7 +117,7 @@ public class TokenStream {
 
 
     public Object popOnlyOneTokenForPropertyOnIndex() {
-        if (size() != 1)
+        if (tokens.size() != 1)
             throw new IllegalTokenContentException("should given one property or array index in `[]`");
         return pop().getPropertyOrIndex();
     }
@@ -161,7 +156,7 @@ public class TokenStream {
 
     public boolean isAfterKeyWordWhich() {
         assert (index > 0);
-        Token token = tokens.get(index - 1);
-        return token.getType() == KEY_WORD && Constants.KeyWords.WHICH.equals(token.getValue());
+        return tokens.get(index - 1).isKeyWord(Constants.KeyWords.WHICH);
     }
+
 }

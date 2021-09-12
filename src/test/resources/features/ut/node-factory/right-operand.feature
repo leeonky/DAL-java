@@ -1,43 +1,43 @@
 Feature: right operand node
 
   Scenario: must take a right operand node
-    Given the following dal code and skip 1 tokens:
+    Given the following dal code:
     """
-    is which
+    is Object which
     """
-    Then failed to get "right-operand" node with the following message:
+    Then failed to get "expression" node with the following message:
     """
     expect a value or expression
     """
 
   Scenario: regex node
-    Given the following dal code and skip 1 tokens:
+    Given the following dal code:
     """
     : /hello/
     """
-    Then got the following "right-operand" node:
+    Then got the following "expression" node:
     """
-    class.simpleName: 'RegexNode'
+    rightOperand.class.simpleName: 'RegexNode'
     """
 
   Scenario: object node
-    Given the following dal code and skip 1 tokens:
+    Given the following dal code:
     """
     : {}
     """
-    Then got the following "right-operand" node:
+    Then got the following "expression" node:
     """
-    class.simpleName: 'ObjectNode'
+    rightOperand.class.simpleName: 'ObjectNode'
     """
 
   Scenario: list node
-    Given the following dal code and skip 1 tokens:
+    Given the following dal code:
     """
     : []
     """
-    Then got the following "right-operand" node:
+    Then got the following "expression" node:
     """
-    class.simpleName: 'ListNode'
+    rightOperand.class.simpleName: 'ListNode'
     """
 
   Scenario Outline: supported single evaluable node

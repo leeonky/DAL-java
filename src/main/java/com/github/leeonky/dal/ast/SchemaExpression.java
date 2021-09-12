@@ -48,12 +48,7 @@ public class SchemaExpression extends Node {
             objectRef.instance = schemaNode.getConstructorViaSchema(context).apply(instance.evaluateDataObject(context));
             return true;
         } catch (IllegalTypeException exception) {
-            //TODO refactor
-            if (exception.getMessage() == null)
-                throw new AssertionFailure(String.format("expect matches schema `%s` but was not",
-                        schemaNode.getSchema()), schemaNode.getPositionBegin());
-            throw new AssertionFailure(format("expect matches schema `%s` but was not\n    %s",
-                    schemaNode.getSchema(), exception.getMessage()), schemaNode.getPositionBegin());
+            throw new AssertionFailure(exception.assertionFailureMessage(schemaNode), schemaNode.getPositionBegin());
         }
     }
 

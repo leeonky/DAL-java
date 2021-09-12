@@ -2,7 +2,6 @@ package com.github.leeonky.dal.token;
 
 import static com.github.leeonky.dal.util.IfThenFactory.when;
 
-//TODO clean method
 public class SourceCode {
     private final char[] charBuffer;
     private final String sourceCode;
@@ -17,11 +16,7 @@ public class SourceCode {
         return offset;
     }
 
-    public boolean startsWith(String prefix) {
-        return sourceCode.startsWith(prefix, offset);
-    }
-
-    public SourceCode trimLeft() {
+    public SourceCode skipBlank() {
         while (offset < charBuffer.length && Character.isWhitespace(currentChar()))
             offset++;
         return this;
@@ -41,10 +36,6 @@ public class SourceCode {
         return getChar(offset++);
     }
 
-    public boolean hasContent() {
-        return trimLeft().notEnd();
-    }
-
     public boolean notEnd() {
         return offset < charBuffer.length;
     }
@@ -53,7 +44,7 @@ public class SourceCode {
         offset += p;
     }
 
-    public boolean startsWithThenSeek(String prefix) {
-        return when(startsWith(prefix)).then(() -> seek(prefix.length()));
+    public boolean skip(String prefix) {
+        return when(sourceCode.startsWith(prefix, offset)).then(() -> seek(prefix.length()));
     }
 }
