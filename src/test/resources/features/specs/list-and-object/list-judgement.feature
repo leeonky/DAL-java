@@ -164,4 +164,3 @@ Feature: judge list
 
 #  TODO skip element
 #  TODO ignore tails
-#  TODO sub mapping alias

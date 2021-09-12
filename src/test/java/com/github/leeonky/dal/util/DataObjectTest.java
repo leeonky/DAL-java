@@ -145,7 +145,7 @@ class DataObjectTest {
         }
 
         private void assertDataAccess(Object object, Object expected, Object... properties) {
-            assertThat(runtimeContextBuilder.build(null).wrap(object).getValue(properties).getInstance())
+            assertThat(runtimeContextBuilder.build(null).wrap(object).getValue(asList(properties)).getInstance())
                     .isEqualTo(expected);
         }
     }

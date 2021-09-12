@@ -259,3 +259,49 @@ Feature: define field alias in schema
         ]
       }
     """
+
+  Scenario: alias in list mapping
+    Given the following schema:
+    """
+    public class Order {
+      public List<Product> products;
+    }
+    """
+    And the following schema:
+    """
+    public class Product {
+        public Catalog catalog;
+    }
+    """
+    And the following schema:
+    """
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfName", field = "name"),
+    })
+    public class Catalog {
+        public String name;
+    }
+    """
+    When the following input data:
+    """
+      {
+        "products": [{
+          "catalog": {
+            "name": "c1"
+          }
+        }, {
+          "catalog": {
+            "name": "c2"
+          }
+        }]
+      }
+    """
+    Then the following assertion should pass:
+    """
+      is Order which :{
+        products.catalog: [
+          {aliasOfName: 'c1'}
+          {aliasOfName: 'c2'}
+        ]
+      }
+    """

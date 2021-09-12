@@ -79,4 +79,17 @@ public class SchemaType {
         chain.add(fromProperty);
         return chain;
     }
+
+    public SchemaType mappingAccess(Object property) {
+        return new SchemaType(null) {
+            @Override
+            public SchemaType access(Object alias) {
+                return new SchemaType(SchemaType.this.access(alias).access(property).schema, alias, this);
+            }
+        };
+    }
+
+    public Object firstFieldFromAlias(Object alias) {
+        return access(alias).getPropertyChainBefore(this).get(0);
+    }
 }

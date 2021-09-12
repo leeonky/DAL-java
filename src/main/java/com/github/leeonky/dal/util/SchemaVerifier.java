@@ -20,7 +20,6 @@ import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
-import static java.util.stream.StreamSupport.stream;
 
 public class SchemaVerifier {
     private final DataObject object;
@@ -36,7 +35,7 @@ public class SchemaVerifier {
         Class<?> type = superSchemaType;
         SubType subType = superSchemaType.getAnnotation(SubType.class);
         if (subType != null) {
-            Object value = object.getValue(CodeHelper.INSTANCE.toChainNodes(subType.property()).toArray()).getInstance();
+            Object value = object.getValue(CodeHelper.INSTANCE.toChainNodes(subType.property())).getInstance();
             type = Stream.of(subType.types())
                     .filter(t -> t.value().equals(value))
                     .map(SubType.Type::type)
@@ -173,8 +172,7 @@ public class SchemaVerifier {
     }
 
     private boolean verifyCollection(String subPrefix, BeanClass<?> elementType, Object schemaProperties) {
-        List<DataObject> dataObjectList = stream(object.asList().spliterator(), false)
-                .collect(toList());
+        List<DataObject> dataObjectList = object.getListObjects();
         if (schemaProperties == null)
             return range(0, dataObjectList.size())
                     .allMatch(i -> dataObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(

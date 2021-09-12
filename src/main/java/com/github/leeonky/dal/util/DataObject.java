@@ -3,8 +3,9 @@ package com.github.leeonky.dal.util;
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.SchemaType;
 
-import java.util.*;
-import java.util.stream.StreamSupport;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
@@ -43,12 +44,10 @@ public class DataObject {
         return listValue;
     }
 
-    public Iterable<DataObject> asList() {
-        List<DataObject> result = new ArrayList<>();
-        int i = 0;
-        for (Object object : getListValues())
-            result.add(new DataObject(object, runtimeContext, schemaType.access(i++)));
-        return result;
+    public List<DataObject> getListObjects() {
+        AtomicInteger index = new AtomicInteger(0);
+        return getListValues().stream().map(object ->
+                new DataObject(object, runtimeContext, schemaType.access(index.incrementAndGet()))).collect(toList());
     }
 
     public boolean isNull() {
@@ -59,38 +58,37 @@ public class DataObject {
         return new SchemaVerifier(runtimeContext, this);
     }
 
-    public DataObject getValue(Object... properties) {
-        return getValue(new LinkedList<>(Arrays.asList(properties)));
-    }
-
-    private DataObject getValue(LinkedList<Object> properties) {
+    public DataObject getValue(List<Object> properties) {
         if (properties.isEmpty())
             return this;
-        return getValue(properties.removeFirst()).getValue(properties);
+        return getValue(properties.get(0)).getValue(properties.subList(1, properties.size()));
     }
 
     public DataObject getValue(Object property) {
         List<Object> propertyChain = schemaType.access(property).getPropertyChainBefore(schemaType);
         if (propertyChain.size() == 1 && propertyChain.get(0).equals(property))
-            return new DataObject(getElementOrPropertyValue(property), runtimeContext, schemaType.access(property));
-        return getValue(new LinkedList<>(propertyChain));
+            return new DataObject(getPropertyValue(property), runtimeContext, propertySchema(property));
+        return getValue(propertyChain);
     }
 
-    private Object getElementOrPropertyValue(Object property) {
-        if (isList()) {
-            if ("size".equals(property))
-                return getListSize();
-            //TODO process schema and data object
-            if (property instanceof String)
-                return StreamSupport.stream(asList().spliterator(), false)
-                        .map(e -> e.getElementOrPropertyValue(property))
-                        .collect(toList());
-            return getListValues().get((int) property);
-        }
-        return runtimeContext.getPropertyValue(instance, (String) property);
+    private Object getPropertyValue(Object property) {
+        return isList() ? getValueFromList(property) : runtimeContext.getPropertyValue(instance, (String) property);
     }
 
-    public Object filedNameFromAlias(Object rootName) {
-        return schemaType.access(rootName).getPropertyChainBefore(schemaType).get(0);
+    private Object getValueFromList(Object property) {
+        if ("size".equals(property))
+            return getListSize();
+        if (property instanceof String)
+            return getListObjects().stream().map(e -> e.getPropertyValue(property)).collect(toList());
+        return getListValues().get((int) property);
+    }
+
+    private SchemaType propertySchema(Object property) {
+        return isList() && property instanceof String && !"size".equals(property) ?
+                schemaType.mappingAccess(property) : schemaType.access(property);
+    }
+
+    public Object firstFieldFromAlias(Object alias) {
+        return schemaType.firstFieldFromAlias(alias);
     }
 }

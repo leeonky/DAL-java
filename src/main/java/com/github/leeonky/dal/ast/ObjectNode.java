@@ -40,7 +40,7 @@ public class ObjectNode extends Node {
     private Set<String> collectUnexpectedFields(DataObject dataObject) {
         Set<String> dataFields = new LinkedHashSet<>(dataObject.getFieldNames());
         dataFields.removeAll(expressions.stream().map(expression ->
-                dataObject.filedNameFromAlias(((PropertyNode) expression.getLeftOperand()).getRootName()))
+                dataObject.firstFieldFromAlias(((PropertyNode) expression.getLeftOperand()).getRootName()))
                 .collect(Collectors.toSet()));
         return dataFields;
     }
