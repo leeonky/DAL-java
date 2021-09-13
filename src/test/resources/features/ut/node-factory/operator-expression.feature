@@ -154,3 +154,20 @@ Feature: expression
       rightOperand.class.simpleName: 'PropertyNode'
     }
     """
+
+  Scenario Outline: force positive judgement
+    Given the following dal code:
+    """
+    <operator> *
+    """
+    Then got the following "expression" node:
+    """
+    : {
+      class.simpleName: 'Expression'
+      inspect: '<operator> *'
+    }
+    """
+    Examples:
+      | operator |
+      | =        |
+      | :        |

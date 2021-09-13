@@ -162,5 +162,19 @@ Feature: judge list
       = [1, [2 3]]
     """
 
-#  TODO skip element
+#    TODO move to base feature
+  Scenario: use * to force positive judgment
+    Given the following input data:
+    """
+      [1, null]
+    """
+    Then the following assertion should pass:
+    """
+      = [* *]
+    """
+    And the following assertion should pass:
+    """
+      : [* *]
+    """
+
 #  TODO ignore tails

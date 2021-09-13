@@ -36,7 +36,7 @@ public class NodeParser {
     }
 
     public Optional<Node> compileIdentifierProperty() {
-        return tokenStream.popByType(IDENTIFIER).map(Token::toIdentifierNode);
+        return tokenStream.popBy(IDENTIFIER).map(Token::toIdentifierNode);
     }
 
     public Node compileExpression(Node previous) {
@@ -63,7 +63,7 @@ public class NodeParser {
     private Expression compileElementNode(Integer index) {
         return new Expression(new PropertyNode(InputNode.INSTANCE, index, BRACKET),
                 tokenStream.popJudgementOperator().orElseGet(this::defaultListOperator).toBinaryOperator(),
-                JUDGEMENT_OPERAND.fetch(this));
+                JUDGEMENT_AND_CALCULATION_EXPRESSION.fetch(this));
     }
 
     private Token defaultListOperator() {
@@ -78,7 +78,7 @@ public class NodeParser {
     private Expression compilePropertyJudgementExpression() {
         return new Expression(fetch(NodeFactory.PROPERTY.tryFetch(this), "expect a object property"),
                 fetch(tokenStream.popJudgementOperator(), "expect operator `:` or `=`").toBinaryOperator(),
-                JUDGEMENT_OPERAND.fetch(this));
+                JUDGEMENT_AND_CALCULATION_EXPRESSION.fetch(this));
     }
 
     private <T> T fetch(Optional<T> node, String errorMessage) {
@@ -105,7 +105,7 @@ public class NodeParser {
     }
 
     private Optional<Node> compileOperatorExpression(Node left) {
-        return tokenStream.popByType(OPERATOR).map(operator -> withDefaultListJudgementOperator(operator, () ->
+        return tokenStream.popBy(OPERATOR).map(operator -> withDefaultListJudgementOperator(operator, () ->
                 fetch(tokenStream.fetchNode(() -> new Expression(left, operator.toBinaryOperator(),
                         compileRight(operator)).adjustOperatorOrder()), "expression is not finished")));
     }
@@ -117,7 +117,7 @@ public class NodeParser {
     }
 
     private Node compileRight(Token operator) {
-        return operator.isJudgement() ? RIGHT_OPERAND.fetch(this)
+        return operator.isJudgement() ? JUDGEMENT_AND_OPERAND.fetch(this)
                 : NodeFactory.OPERAND.fetch(this);
     }
 
@@ -131,7 +131,7 @@ public class NodeParser {
     }
 
     private SchemaNode parseSchema() {
-        return fetch(tokenStream.fetchNode(() -> fetch(tokenStream.popByType(IDENTIFIER).map(Token::toSchemaNode),
+        return fetch(tokenStream.fetchNode(() -> fetch(tokenStream.popBy(IDENTIFIER).map(Token::toSchemaNode),
                 "operand of `is` must be schema type")), "schema expression not finished");
     }
 
@@ -159,6 +159,10 @@ public class NodeParser {
     }
 
     public Optional<Node> compileSingle(Token.Type type, Function<Token, Node> nodeFactory) {
-        return tokenStream.popByType(type).map(t -> nodeFactory.apply(t).setPositionBegin(t.getPositionBegin()));
+        return tokenStream.popBy(type).map(t -> nodeFactory.apply(t).setPositionBegin(t.getPositionBegin()));
+    }
+
+    public Optional<Node> matchAll() {
+        return tokenStream.popBy(OPERATOR, "*").map(Token::toWildCardNode);
     }
 }

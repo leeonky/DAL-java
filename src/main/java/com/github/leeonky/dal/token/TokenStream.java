@@ -122,8 +122,13 @@ public class TokenStream {
         return pop().getPropertyOrIndex();
     }
 
-    public Optional<Token> popByType(Token.Type type) {
+    public Optional<Token> popBy(Token.Type type) {
         return when(currentToken().getType() == type).optional(this::pop);
+    }
+
+    public Optional<Token> popBy(Token.Type type, Object value) {
+        Token token = currentToken();
+        return when(token.getType() == type && Objects.equals(token.getValue(), value)).optional(this::pop);
     }
 
     public Optional<Token> popJudgementOperator() {
@@ -158,5 +163,4 @@ public class TokenStream {
         assert (index > 0);
         return tokens.get(index - 1).isKeyWord(Constants.KeyWords.WHICH);
     }
-
 }
