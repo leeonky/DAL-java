@@ -42,7 +42,7 @@ class SourceCodeMatcherTest {
 
         @Test
         void operator() {
-            assertThat(allCharMatchesBy(TokenParser.OPERATOR))
+            assertThat(allCharMatchesBy(TokenParser.OPERATOR_CHAR))
                     .isEqualTo(Constants.OPERATOR_CHAR);
         }
 

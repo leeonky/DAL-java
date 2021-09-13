@@ -57,6 +57,23 @@ Feature: list node
     }
     """
 
+  Scenario: support incomplete List
+    Given the following dal code:
+    """
+     [1 ...]
+    """
+    Then got the following "list" node:
+    """
+    : {
+      class.simpleName: 'ListNode'
+      inspect: '[1 ...]'
+      positionBegin: 1
+      expressions.inspect: [
+        '[0] : 1'
+      ]
+    }
+    """
+
   Scenario: raise error when no closing bracket
     Given the following dal code:
     """

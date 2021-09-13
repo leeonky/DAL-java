@@ -185,7 +185,7 @@ class TokenStartEndTest {
             TokenParser parser = givenParseContextBySourceCode("");
 
             assertThat(assertThrows(SyntaxException.class, () ->
-                    excluded(OPERATOR).orThrow("error").matches(parser)))
+                    excluded(OPERATOR_CHAR).orThrow("error").matches(parser)))
                     .hasMessage("error")
                     .hasFieldOrPropertyWithValue("position", 0);
         }

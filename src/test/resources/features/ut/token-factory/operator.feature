@@ -54,6 +54,7 @@ Feature: operator token
       | &&       |
       | \|\|     |
       | ,        |
+      | ...      |
 
   Scenario Outline: all supported operators at the end of code
     Given the following dal code:

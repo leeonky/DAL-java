@@ -70,8 +70,9 @@ public interface TokenFactory {
     }
 
     static TokenFactory createOperatorTokenFactory() {
-        return startWith(included(OPERATOR.except(CHARACTER('/').when(after(Token::isJudgement)))))
-                .endWith(END_OF_CODE.or(before(not(OPERATOR))).or(before(CHARACTER('/').when(after(Operators.MATCH).or(after(Operators.EQ))))))
+        return startWith(included(OPERATOR_CHAR.except(CHARACTER('/').when(after(Token::isJudgement)))))
+                .endWith(END_OF_CODE.or(before(not(OPERATOR)))
+                        .or(before(CHARACTER('/').when(after(Operators.MATCH).or(after(Operators.EQ))))))
                 .createAs(OPERATOR_TOKEN);
     }
 

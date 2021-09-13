@@ -162,7 +162,6 @@ Feature: judge list
       = [1, [2 3]]
     """
 
-#    TODO move to base feature
   Scenario: use * to force positive judgment
     Given the following input data:
     """
@@ -177,4 +176,16 @@ Feature: judge list
       : [* *]
     """
 
-#  TODO ignore tails
+  Scenario: use ... at the end of list to ignore list size
+    Given the following input data:
+    """
+      [1, 2, 3]
+    """
+    Then the following assertion should pass:
+    """
+      = [1 2 ...]
+    """
+    And the following assertion should pass:
+    """
+      : [1 2 ...]
+    """

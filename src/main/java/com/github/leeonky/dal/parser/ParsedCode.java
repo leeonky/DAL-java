@@ -10,7 +10,7 @@ public class ParsedCode {
     private final List<Character> content = new ArrayList<>();
 
     public String takeContent() {
-        String collect = content.stream().map(Objects::toString).collect(joining());
+        String collect = content();
         content.clear();
         return collect;
     }
@@ -25,6 +25,10 @@ public class ParsedCode {
     }
 
     public boolean isSourceCode(String code) {
-        return content.stream().map(Objects::toString).collect(joining()).equals(code);
+        return content().equals(code);
+    }
+
+    public String content() {
+        return content.stream().map(Objects::toString).collect(joining());
     }
 }

@@ -19,7 +19,9 @@ import static com.github.leeonky.dal.util.IfThenFactory.whenNonNull;
 public class TokenParser {
     public static final SourceCodeMatcher DIGITAL = oneCharMatcher(Constants.DIGITAL_CHAR::contains);
     public static final SourceCodeMatcher DELIMITER = oneCharMatcher(Constants.TOKEN_DELIMITER::contains);
-    public static final SourceCodeMatcher OPERATOR = oneCharMatcher(Constants.OPERATOR_CHAR::contains);
+    public static final SourceCodeMatcher OPERATOR_CHAR = oneCharMatcher(Constants.OPERATOR_CHAR::contains);
+    public static final SourceCodeMatcher OPERATOR = createSourceCodeMatcher(parser ->
+            Constants.OPERATOR.contains(parser.parsedCode.content() + parser.sourceCode.currentChar()));
     public static final SourceCodeMatcher ANY_CHARACTERS = createSourceCodeMatcher(parser ->
             parser.sourceCode.notEnd());
     public static final TokenStartEnd END_OF_CODE = TokenStartEnd.createTokenStartEnd(parser ->
