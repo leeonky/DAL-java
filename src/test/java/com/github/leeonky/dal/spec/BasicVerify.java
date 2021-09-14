@@ -160,7 +160,8 @@ class BasicVerify extends Base {
 
         @Test
         void should_raise_error_when_access_invalid_property() {
-            assertRuntimeException("", " = .fun", 3, "Get property via `.fun` failed, property can be public field, getter or customer type getter");
+            assertRuntimeException("", " = .fun", 3, "Get property via `.fun` failed, property can be public field, getter or customer type getter:\n\t"
+                    + "java.lang.NoSuchMethodException: java.lang.String.fun()");
         }
     }
 

@@ -189,3 +189,11 @@ Feature: judge list
     """
       : [1 2 ...]
     """
+    And the following assertion should pass:
+    """
+      = [...]
+    """
+    And the following assertion should pass:
+    """
+      : [...]
+    """

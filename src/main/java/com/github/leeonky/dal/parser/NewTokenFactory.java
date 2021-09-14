@@ -19,12 +19,12 @@ public class NewTokenFactory {
         this.start = start;
     }
 
-    public static NewTokenFactory startWith(TokenStartEnd startEnd) {
+    public static NewTokenFactory startsWith(TokenStartEnd startEnd) {
         return new NewTokenFactory(startEnd);
     }
 
     public static StringContent.EndWith equalToCharacter(char c) {
-        return startWith(TokenParser.included(CHARACTER(c)))
+        return startsWith(TokenParser.included(CHARACTER(c)))
                 .take(ALL_CHARACTERS)
                 .endWith(TokenParser.END_OF_CODE.or(before(ANY_CHARACTERS)));
     }

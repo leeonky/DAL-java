@@ -86,15 +86,15 @@ Feature: basic assertion
       | operator |
       | =        |
       | :        |
-# TODO
-#  Scenario Outline: always pass
-#    Then the following assertion should pass:
-#    """
-#      <operand> : *,
-#      <operand> = *
-#    """
-#    Examples:
-#      | operand |
-#      | 1       |
-#      | ''      |
-#      | null    |
+
+  Scenario Outline: always pass
+    Then the following assertion should pass:
+    """
+      <operand> : *,
+      <operand> = *
+    """
+    Examples:
+      | operand |
+      | 1       |
+      | ''      |
+      | null    |

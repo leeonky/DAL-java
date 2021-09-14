@@ -4,19 +4,23 @@ import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.util.DataObject;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.AssertionFailure.assertListSize;
 import static java.lang.String.format;
 
 public class ListNode extends Node {
-    private final List<Expression> expressions = new ArrayList<>();
+    private final List<Expression> expressions;
+    private final boolean incomplete;
 
     public ListNode(List<Expression> expressions) {
-        this.expressions.addAll(expressions);
+        long count = expressions.stream().filter(Objects::isNull).count();
+        incomplete = count == 1;
+        this.expressions = expressions.stream().filter(Objects::nonNull).collect(Collectors.toList());
+
     }
 
     public ListNode() {
@@ -29,8 +33,8 @@ public class ListNode extends Node {
 
     @Override
     public String inspect() {
-        return format("[%s]", expressions.stream().map(Expression::getRightOperand)
-                .map(Node::inspect).collect(Collectors.joining(" ")));
+        return format("[%s%s]", expressions.stream().map(Expression::getRightOperand)
+                .map(Node::inspect).collect(Collectors.joining(" ")), incomplete ? " ..." : "");
     }
 
     @Override
@@ -52,7 +56,8 @@ public class ListNode extends Node {
     }
 
     private boolean judgeAll(RuntimeContext context, DataObject dataObject) {
-        assertListSize(expressions.size(), dataObject.getListSize(), getPositionBegin());
+        if (!incomplete)
+            assertListSize(expressions.size(), dataObject.getListSize(), getPositionBegin());
         return context.newThisScope(dataObject,
                 () -> expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context)));
     }

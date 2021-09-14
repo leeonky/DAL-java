@@ -16,7 +16,7 @@ class TokenParserTest {
     void should_clean_parsed_code_when_create_sub_parser() {
         TokenParser tokenParser = new TokenParser(new SourceCode("100 |hello"));
 
-        NewTokenFactory.startWith(included(ANY_CHARACTERS))
+        NewTokenFactory.startsWith(included(ANY_CHARACTERS))
                 .take(byFactory(TokenFactory.createNumberTokenFactory()))
                 .endWith(excluded(CHARACTER('|'))).createAs(TOKEN_TREE).fetchToken(tokenParser);
 

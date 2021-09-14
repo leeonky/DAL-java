@@ -61,9 +61,11 @@ public class NodeParser {
     }
 
     private Expression compileElementNode(Integer index) {
+        if (LIST_TAIL.tryFetch(this).isPresent())
+            return null;
         return new Expression(new PropertyNode(InputNode.INSTANCE, index, BRACKET),
                 tokenStream.popJudgementOperator().orElseGet(this::defaultListOperator).toBinaryOperator(),
-                JUDGEMENT_AND_CALCULATION_EXPRESSION.fetch(this));
+                JUDGEMENT_OR_CALCULATION_EXPRESSION.fetch(this));
     }
 
     private Token defaultListOperator() {
@@ -78,7 +80,7 @@ public class NodeParser {
     private Expression compilePropertyJudgementExpression() {
         return new Expression(fetch(NodeFactory.PROPERTY.tryFetch(this), "expect a object property"),
                 fetch(tokenStream.popJudgementOperator(), "expect operator `:` or `=`").toBinaryOperator(),
-                JUDGEMENT_AND_CALCULATION_EXPRESSION.fetch(this));
+                JUDGEMENT_OR_CALCULATION_EXPRESSION.fetch(this));
     }
 
     private <T> T fetch(Optional<T> node, String errorMessage) {
@@ -117,7 +119,7 @@ public class NodeParser {
     }
 
     private Node compileRight(Token operator) {
-        return operator.isJudgement() ? JUDGEMENT_AND_OPERAND.fetch(this)
+        return operator.isJudgement() ? JUDGEMENT_OR_OPERAND.fetch(this)
                 : NodeFactory.OPERAND.fetch(this);
     }
 
@@ -164,5 +166,9 @@ public class NodeParser {
 
     public Optional<Node> matchAll() {
         return tokenStream.popBy(OPERATOR, "*").map(Token::toWildCardNode);
+    }
+
+    public Optional<Node> listTail() {
+        return tokenStream.popBy(SPECIAL_SYMBOL, "...").map(Token::toListTailNode);
     }
 }

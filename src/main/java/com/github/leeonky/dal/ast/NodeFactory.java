@@ -16,14 +16,17 @@ public interface NodeFactory {
             OBJECT = NodeParser::compileObject,
             LIST = NodeParser::compileList,
             MATCH_ALL = NodeParser::matchAll,
-            JUDGEMENT = REGEX.combines(OBJECT, LIST, MATCH_ALL);
+            JUDGEMENT = REGEX.combines(OBJECT, LIST, MATCH_ALL),
+            LIST_TAIL = NodeParser::listTail;
 
+
+    //TODO rename
     MandatoryNodeFactory
             OPERAND = NodeParser::compileOperand,
             EXPRESSION = nodeParser -> nodeParser.compileExpression(OPERAND.fetch(nodeParser)),
-            JUDGEMENT_AND_OPERAND = JUDGEMENT.combine(OPERAND),
+            JUDGEMENT_OR_OPERAND = JUDGEMENT.combine(OPERAND),
             CALCULATION_EXPRESSION = nodeParser -> nodeParser.compileCalculationExpression(OPERAND.fetch(nodeParser)),
-            JUDGEMENT_AND_CALCULATION_EXPRESSION = JUDGEMENT.combine(CALCULATION_EXPRESSION);
+            JUDGEMENT_OR_CALCULATION_EXPRESSION = JUDGEMENT.combine(CALCULATION_EXPRESSION);
 
 
     Optional<Node> tryFetch(NodeParser nodeParser);

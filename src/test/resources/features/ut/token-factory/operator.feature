@@ -54,7 +54,23 @@ Feature: operator token
       | &&       |
       | \|\|     |
       | ,        |
-      | ...      |
+
+  Scenario Outline: all supported special symbols, end seek to next char after fetching
+    Given the following dal code:
+    """
+    <symbol>1
+    """
+    Then got the following "operator" token:
+    """
+    : {
+      type: 'SPECIAL_SYMBOL'
+      value: '<symbol>'
+    }
+    """
+    And current offset char of source code is "1"
+    Examples:
+      | symbol |
+      | ...    |
 
   Scenario Outline: all supported operators at the end of code
     Given the following dal code:

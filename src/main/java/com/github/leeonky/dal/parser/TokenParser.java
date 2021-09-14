@@ -48,6 +48,10 @@ public class TokenParser {
         return createSourceCodeMatcher(parser -> parser.parsedCode.isSourceCode(code));
     }
 
+    public static SourceCodeMatcher startsWith(String code) {
+        return createSourceCodeMatcher(parser -> parser.sourceCode.startsWith(code));
+    }
+
     private static SourceCodeMatcher oneCharMatcher(Predicate<Character> predicate) {
         return createSourceCodeMatcher(parser -> predicate.test(parser.sourceCode.currentChar()));
     }

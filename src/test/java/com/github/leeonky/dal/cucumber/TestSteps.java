@@ -47,7 +47,7 @@ public class TestSteps {
         put("bean-property", nodeParser -> BEAN_PROPERTY.withThis().tryFetch(nodeParser).orElse(null));
         put("bracket-property", nodeParser -> BRACKET_PROPERTY.withThis().tryFetch(nodeParser).orElse(null));
         put("single-evaluable", OPERAND);
-        put("right-operand", JUDGEMENT_AND_OPERAND);
+        put("right-operand", JUDGEMENT_OR_OPERAND);
         put("expression", EXPRESSION);
         put("object", nodeParser -> OBJECT.tryFetch(nodeParser).orElse(null));
         put("list", nodeParser -> LIST.tryFetch(nodeParser).orElse(null));

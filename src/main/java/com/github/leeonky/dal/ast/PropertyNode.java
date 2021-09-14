@@ -27,8 +27,8 @@ public class PropertyNode extends Node {
             throw new RuntimeException(ex.getMessage(), getPositionBegin());
         } catch (Exception e) {
             throw new RuntimeException(format(
-                    "Get property via `%s` failed, property can be public field, getter or customer type getter",
-                    inspect()), getPositionBegin());
+                    "Get property via `%s` failed, property can be public field, getter or customer type getter:\n\t"
+                            + e.getMessage(), inspect()), getPositionBegin());
         }
     }
 

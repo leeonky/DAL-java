@@ -1,9 +1,9 @@
 Feature: dal token
 
-  Scenario: parse all dal tokens:  [ ] .id 100 'str1'"str2" : /abc/ ( ) which { }
+  Scenario: parse all dal tokens:  [ ] .id 100 'str1'"str2" : /abc/ ( ) which { } ...
     Given the following dal code:
     """
-    [ ] .id 100 'str1' "str2" : /abc/ ( ) which { }
+    [ ] .id 100 'str1' "str2" : /abc/ ( ) which { } ...
     """
     Then got the following "dal" token:
     """
@@ -86,6 +86,12 @@ Feature: dal token
         value: '}'
         positionBegin: 46
         positionEnd: 47
+      }
+      {
+        type: 'SPECIAL_SYMBOL'
+        value: '...'
+        positionBegin: 48
+        positionEnd: 51
       }]
     }
     """
@@ -120,15 +126,21 @@ Feature: dal token
   Scenario: list tail and property
     Given the following dal code:
     """
-    1 ...
+    .a ...
     """
     Then got the following "dal" token:
     """
     : {
       type: 'TREE'
-      tokenStream.tokens.inspect: [
-        '1'
-        '...'
+      tokenStream.tokens: [
+        {
+          type: 'PROPERTY'
+          value: 'a'
+        }
+        {
+          type: 'SPECIAL_SYMBOL'
+          value: '...'
+        }
       ]
     }
     """

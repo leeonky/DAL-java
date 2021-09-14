@@ -29,7 +29,7 @@ public class Token {
     }
 
     public static Token operatorToken(String value) {
-        return new Token(Type.OPERATOR, value);
+        return new Token(("...".equals(value) ? Type.SPECIAL_SYMBOL : Type.OPERATOR), value);
     }
 
     public static Token constValueToken(Object value) {
@@ -207,7 +207,6 @@ public class Token {
             case Constants.Operators.MATCH:
                 operator = new Operator.Matcher();
                 break;
-//                    not work in [] {}
             case ",":
                 operator = new Operator.CommaAnd();
                 break;
@@ -243,6 +242,6 @@ public class Token {
 
     public enum Type {
         IDENTIFIER, PROPERTY, OPERATOR, OPENING_PARENTHESIS, CLOSING_PARENTHESIS, KEY_WORD, CONST_VALUE, REGEX, TREE,
-        OPENING_BRACKET, CLOSING_BRACKET, OPENING_BRACE, CLOSING_BRACE
+        OPENING_BRACKET, CLOSING_BRACKET, OPENING_BRACE, CLOSING_BRACE, SPECIAL_SYMBOL
     }
 }
