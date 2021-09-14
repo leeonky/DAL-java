@@ -45,6 +45,10 @@ public class SourceCode {
     }
 
     public boolean skip(String prefix) {
-        return when(sourceCode.startsWith(prefix, offset)).then(() -> seek(prefix.length()));
+        return when(startsWith(prefix)).then(() -> seek(prefix.length()));
+    }
+
+    public boolean startsWith(String prefix) {
+        return sourceCode.startsWith(prefix, offset);
     }
 }

@@ -10,12 +10,23 @@ import java.util.function.Function;
 import static com.github.leeonky.dal.Constants.KeyWords.*;
 import static com.github.leeonky.dal.Constants.Operators;
 import static com.github.leeonky.dal.parser.NewTokenFactory.equalToCharacter;
-import static com.github.leeonky.dal.parser.NewTokenFactory.startWith;
+import static com.github.leeonky.dal.parser.NewTokenFactory.startsWith;
 import static com.github.leeonky.dal.parser.SourceCodeMatcher.not;
 import static com.github.leeonky.dal.parser.TokenContentInString.ALL_CHARACTERS;
 import static com.github.leeonky.dal.parser.TokenContentInString.leftTrim;
 import static com.github.leeonky.dal.parser.TokenContentInToken.byFactory;
-import static com.github.leeonky.dal.parser.TokenParser.*;
+import static com.github.leeonky.dal.parser.TokenParser.ANY_CHARACTERS;
+import static com.github.leeonky.dal.parser.TokenParser.BEGIN_OF_CODE;
+import static com.github.leeonky.dal.parser.TokenParser.CHARACTER;
+import static com.github.leeonky.dal.parser.TokenParser.DELIMITER;
+import static com.github.leeonky.dal.parser.TokenParser.DIGITAL;
+import static com.github.leeonky.dal.parser.TokenParser.END_OF_CODE;
+import static com.github.leeonky.dal.parser.TokenParser.OPERATOR;
+import static com.github.leeonky.dal.parser.TokenParser.OPERATOR_CHAR;
+import static com.github.leeonky.dal.parser.TokenParser.after;
+import static com.github.leeonky.dal.parser.TokenParser.excluded;
+import static com.github.leeonky.dal.parser.TokenParser.included;
+import static com.github.leeonky.dal.parser.TokenParser.startsWith;
 import static com.github.leeonky.dal.parser.TokenStartEnd.before;
 import static com.github.leeonky.dal.token.Token.*;
 
@@ -57,27 +68,30 @@ public interface TokenFactory {
     Function<TokenStream, Token> TOKEN_TREE = Token::treeToken;
 
     static TokenFactory createNumberTokenFactory() {
-        return startWith(included(DIGITAL))
+        return startsWith(included(DIGITAL))
                 .endWith(END_OF_CODE.or(before(DELIMITER)))
                 .createAs(CONST_NUMBER_TOKEN);
     }
 
     static TokenFactory createBeanPropertyTokenFactory() {
-        return startWith(excluded(CHARACTER('.')))
+        return startsWith(excluded(CHARACTER('.')))
                 .take(leftTrim(ALL_CHARACTERS))
                 .endWith(END_OF_CODE.or(before(DELIMITER)).or(before(CHARACTER('.'))))
                 .createAs(PROPERTY_TOKEN);
     }
 
     static TokenFactory createOperatorTokenFactory() {
-        return startWith(included(OPERATOR_CHAR.except(CHARACTER('/').when(after(Token::isJudgement)))))
+        return startsWith(included(OPERATOR_CHAR
+                .or(CHARACTER('.').when(startsWith("...")))
+                .except(CHARACTER('/').when(after(Token::isJudgement))))
+        )
                 .endWith(END_OF_CODE.or(before(not(OPERATOR)))
                         .or(before(CHARACTER('/').when(after(Operators.MATCH).or(after(Operators.EQ))))))
                 .createAs(OPERATOR_TOKEN);
     }
 
     static TokenFactory createSingleQuotedStringTokenFactory() {
-        return startWith(excluded(CHARACTER('\'')))
+        return startsWith(excluded(CHARACTER('\'')))
                 .take(ALL_CHARACTERS
                         .escape("\\'", '\'')
                         .escape("\\\\", '\\'))
@@ -86,7 +100,7 @@ public interface TokenFactory {
     }
 
     static TokenFactory createDoubleQuotedStringTokenFactory() {
-        return startWith(excluded(CHARACTER('"')))
+        return startsWith(excluded(CHARACTER('"')))
                 .take(ALL_CHARACTERS
                         .escape("\\\"", '"')
                         .escape("\\t", '\t')
@@ -97,7 +111,7 @@ public interface TokenFactory {
     }
 
     static TokenFactory createRegexTokenFactory() {
-        return startWith(excluded(CHARACTER('/').when(after(Token::isJudgement))))
+        return startsWith(excluded(CHARACTER('/').when(after(Token::isJudgement))))
                 .take(ALL_CHARACTERS
                         .escape("\\\\", '\\')
                         .escape("\\/", '/'))
@@ -114,7 +128,7 @@ public interface TokenFactory {
     }
 
     static TokenFactory createBracketPropertyTokenFactory() {
-        return startWith(excluded(CHARACTER('[').except(after(Token::isJudgement))))
+        return startsWith(excluded(CHARACTER('[').except(after(Token::isJudgement))))
                 .take(byFactory(createNumberTokenFactory())
                         .or(createSingleQuotedStringTokenFactory())
                         .or(createDoubleQuotedStringTokenFactory()))
@@ -123,7 +137,7 @@ public interface TokenFactory {
     }
 
     static TokenFactory createIdentifierTokenFactory() {
-        return startWith(included(ANY_CHARACTERS))
+        return startsWith(included(ANY_CHARACTERS))
                 .take(ALL_CHARACTERS)
                 .endWith(END_OF_CODE.or(before(DELIMITER)))
                 .createAs(IDENTIFIER_TOKEN);
@@ -142,13 +156,13 @@ public interface TokenFactory {
     }
 
     static TokenFactory createDALTokenFactory() {
-        return startWith(BEGIN_OF_CODE)
-                .take(byFactory(createBeanPropertyTokenFactory())
+        return startsWith(BEGIN_OF_CODE)
+                .take(byFactory(createOperatorTokenFactory())
                         .or(createNumberTokenFactory())
                         .or(createSingleQuotedStringTokenFactory())
                         .or(createDoubleQuotedStringTokenFactory())
                         .or(createRegexTokenFactory())
-                        .or(createOperatorTokenFactory())
+                        .or(createBeanPropertyTokenFactory())
                         .or(createOpeningParenthesisTokenFactory())
                         .or(createClosingParenthesisTokenFactory())
                         .or(createOpeningBraceTokenFactory())
@@ -161,7 +175,7 @@ public interface TokenFactory {
     }
 
     static TokenFactory createPropertyChainFactory() {
-        return startWith(BEGIN_OF_CODE)
+        return startsWith(BEGIN_OF_CODE)
                 .take(byFactory(createBeanPropertyTokenFactory())
                         .or(createBracketPropertyTokenFactory()))
                 .endWith(END_OF_CODE).createAs(TOKEN_TREE);

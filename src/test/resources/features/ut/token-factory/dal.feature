@@ -116,3 +116,19 @@ Feature: dal token
       tokenStream.tokens: []
     }
     """
+
+  Scenario: list tail and property
+    Given the following dal code:
+    """
+    1 ...
+    """
+    Then got the following "dal" token:
+    """
+    : {
+      type: 'TREE'
+      tokenStream.tokens.inspect: [
+        '1'
+        '...'
+      ]
+    }
+    """

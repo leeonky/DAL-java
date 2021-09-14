@@ -76,6 +76,10 @@ public class Token {
         return (WildCardNode) new WildCardNode().setPositionBegin(token.getPositionBegin());
     }
 
+    public static ListTailNode toListTailNode(Token token) {
+        return (ListTailNode) new ListTailNode().setPositionBegin(token.getPositionBegin());
+    }
+
     //TODO to be removed
     @Override
     public boolean equals(Object obj) {
