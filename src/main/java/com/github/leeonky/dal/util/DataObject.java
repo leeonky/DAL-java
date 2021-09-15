@@ -79,8 +79,12 @@ public class DataObject {
         if ("size".equals(property))
             return getListSize();
         if (property instanceof String)
-            return getListObjects().stream().map(e -> e.getPropertyValue(property)).collect(toList());
+            return getListObjects().stream().map(e -> e.getPropertyValue(subProperty((String) property))).collect(toList());
         return getListValues().get((int) property);
+    }
+
+    private Object subProperty(String property) {
+        return property.replace("@size", "size");
     }
 
     private SchemaType propertySchema(Object property) {

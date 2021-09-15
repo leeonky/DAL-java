@@ -86,7 +86,7 @@ Feature: judge list
       = []
     """
 
-  Scenario: explicit judgement before element
+  Scenario: explicit element judgement
     Given the following input data:
     """
       [1, 2]
@@ -197,3 +197,25 @@ Feature: judge list
     """
       : [...]
     """
+
+  Scenario: support mapping list element property to new list
+    Given the following input data:
+    """
+      {"list": [{"id": 1}, {"id": 2}]}
+    """
+    Then the following assertion should pass:
+    """
+      list.id = [1 2]
+    """
+
+  Scenario: use @size to mapping sub list size ot new list
+    Given the following input data:
+    """
+      {"list": [[1,2], [1,2,3]]}
+    """
+    Then the following assertion should pass:
+    """
+      list.@size = [2 3]
+    """
+
+#  TODO .@size .@[0]

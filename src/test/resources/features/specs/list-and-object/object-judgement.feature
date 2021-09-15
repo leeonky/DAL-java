@@ -239,5 +239,3 @@ Feature: judge object
         .key2= '2'
       }
     """
-
-#  TODO process size property of list
