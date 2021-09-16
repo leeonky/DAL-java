@@ -76,10 +76,20 @@ public class DataObject {
     }
 
     private Object getValueFromList(Object property) {
+        if (runtimeContext.isListMapping()) {
+            runtimeContext.endListMapping();
+            return getListObjects().stream().map(e -> e.getPropertyValue(property)).collect(toList());
+        }
         if ("size".equals(property))
             return getListSize();
-        if (property instanceof String)
-            return getListObjects().stream().map(e -> e.getPropertyValue(subProperty((String) property))).collect(toList());
+        if ("@".equals(property)) {
+            runtimeContext.beginListMapping();
+            return instance;
+        }
+        if (property instanceof String) {
+            runtimeContext.beginListMapping();
+            return getValueFromList(subProperty((String) property));
+        }
         return getListValues().get((int) property);
     }
 
@@ -88,8 +98,13 @@ public class DataObject {
     }
 
     private SchemaType propertySchema(Object property) {
-        return isList() && property instanceof String && !"size".equals(property) ?
-                schemaType.mappingAccess(property) : schemaType.access(property);
+        if (isList() && property instanceof String) {
+            if ("@".equals(property))
+                return schemaType;
+            if (!"size".equals(property))
+                return schemaType.mappingAccess(property);
+        }
+        return schemaType.access(property);
     }
 
     public Object firstFieldFromAlias(Object alias) {

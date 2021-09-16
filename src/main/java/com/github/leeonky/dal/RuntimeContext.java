@@ -22,6 +22,7 @@ public class RuntimeContext {
     private final Set<Class<?>> schemas;
     private final Map<String, BeanClass<?>> schemaMap;
     private final Converter converter = Converter.createDefault();
+    private boolean listMapping = false;
 
     @SuppressWarnings("unchecked")
     public RuntimeContext(Object inputValue, ClassKeyMap<PropertyAccessor<?>> propertyAccessors,
@@ -139,5 +140,17 @@ public class RuntimeContext {
             });
         }
         return this;
+    }
+
+    public void beginListMapping() {
+        listMapping = true;
+    }
+
+    public boolean isListMapping() {
+        return listMapping;
+    }
+
+    public void endListMapping() {
+        listMapping = false;
     }
 }

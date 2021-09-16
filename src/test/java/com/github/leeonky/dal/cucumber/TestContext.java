@@ -60,7 +60,9 @@ class TestContext {
         inputObject = new JSONArray(String.format("[%s]", json)).get(0);
     }
 
-    public void shouldPass() {
+    public void shouldPass(String dalCode) {
+        if (dalException != null)
+            System.err.println(dalException.show(dalCode));
         assertThat(dalException).isNull();
         assertTrue(assertResult.isPassed());
     }

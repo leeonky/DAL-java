@@ -277,9 +277,10 @@ Feature: define field alias in schema
     """
     @FieldAliases({
             @FieldAlias(alias = "aliasOfName", field = "name"),
+            @FieldAlias(alias = "aliasOfDescription", field = "description"),
     })
+    @Partial
     public class Catalog {
-        public String name;
     }
     """
     When the following input data:
@@ -287,11 +288,13 @@ Feature: define field alias in schema
       {
         "products": [{
           "catalog": {
-            "name": "c1"
+            "name": "c1",
+            "description": "catalog c1"
           }
         }, {
           "catalog": {
-            "name": "c2"
+            "name": "c2",
+            "description": "catalog c1"
           }
         }]
       }
@@ -302,6 +305,10 @@ Feature: define field alias in schema
         products.catalog: [
           {aliasOfName: 'c1'}
           {aliasOfName: 'c2'}
+        ]
+        products.@.catalog: [
+          {aliasOfDescription: 'catalog c1'}
+          {aliasOfDescription: 'catalog c1'}
         ]
       }
     """

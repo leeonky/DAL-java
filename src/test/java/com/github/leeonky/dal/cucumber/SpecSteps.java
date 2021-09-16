@@ -20,7 +20,7 @@ public class SpecSteps {
     @Then("the following assertion should pass:")
     public void the_follow_assertion_should_be_pass(String dalCode) {
         TestContext.INSTANCE.executeDal(dalCode);
-        TestContext.INSTANCE.shouldPass();
+        TestContext.INSTANCE.shouldPass(dalCode);
     }
 
     @When("assert by the following code:")

@@ -198,14 +198,23 @@ Feature: judge list
       : [...]
     """
 
-  Scenario: support mapping list element property to new list
+  Scenario: support mapping list element property to new list by optional `.@`
     Given the following input data:
     """
-      {"list": [{"id": 1}, {"id": 2}]}
+      {"list": [{
+        "data": {
+          "value": "v1"
+        }
+      }, {
+        "data": {
+          "value": "v2"
+        }
+      }]}
     """
     Then the following assertion should pass:
     """
-      list.id = [1 2]
+      list.@.data.value = ['v1', 'v2']
+      list.data.value = ['v1', 'v2']
     """
 
   Scenario: use @size to mapping sub list size ot new list
@@ -218,4 +227,14 @@ Feature: judge list
       list.@size = [2 3]
     """
 
-#  TODO .@size .@[0]
+  Scenario: use mandatory .@ before [xx] to mapping sub list element ot new list
+    Given the following input data:
+    """
+      {"list": [[1,2], [1,2,3]]}
+    """
+    Then the following assertion should pass:
+    """
+      list.@[0] = [1 1]
+    """
+
+#    TODO list.@ is invalid
