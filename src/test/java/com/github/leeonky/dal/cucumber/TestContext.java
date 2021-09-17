@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.AssertResult;
+import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.DalException;
-import com.github.leeonky.dal.DataAssert;
 import com.github.leeonky.dal.RuntimeContextBuilder;
 import com.github.leeonky.dal.ast.MandatoryNodeFactory;
 import com.github.leeonky.dal.ast.Node;
@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestContext {
     public static TestContext INSTANCE = new TestContext();
-    private static DataAssert dataAssert = new DataAssert();
+    private static DAL dal = new DAL();
     private static RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
 
     private Object inputObject = null;
@@ -47,7 +47,7 @@ class TestContext {
     }
 
     public void initDataAssert() {
-        dataAssert.getRuntimeContextBuilder()
+        dal.getRuntimeContextBuilder()
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
                 .registerListAccessor(JSONArray.class, new JSONArrayAccessor());
         runtimeContextBuilder
@@ -73,8 +73,8 @@ class TestContext {
                     "import com.github.leeonky.dal.type.*;\n" +
                             "import java.util.*;\n" + s)
                     .collect(Collectors.toList()))
-                    .forEach(dataAssert.getRuntimeContextBuilder()::registerSchema);
-            assertResult = dataAssert.assertData(inputObject, this.dalSourceCode = dalSourceCode);
+                    .forEach(dal.getRuntimeContextBuilder()::registerSchema);
+            assertResult = dal.assertData(inputObject, this.dalSourceCode = dalSourceCode);
         } catch (DalException dalException) {
             this.dalException = dalException;
         }
@@ -107,7 +107,7 @@ class TestContext {
 
     public void assertToken(String assertion) {
         try {
-            assertThat(dataAssert.assertData(token, assertion).isPassed()).isTrue();
+            assertThat(dal.assertData(token, assertion).isPassed()).isTrue();
         } catch (DalException e) {
             System.err.println(e.getMessage());
             System.err.println(e.show(assertion));
@@ -143,7 +143,7 @@ class TestContext {
 
     public void assertNode(String assertion) {
         try {
-            assertThat(dataAssert.assertData(node, assertion).isPassed()).isTrue();
+            assertThat(dal.assertData(node, assertion).isPassed()).isTrue();
         } catch (DalException e) {
             System.err.println(e.getMessage());
             System.err.println(e.show(assertion));
@@ -154,7 +154,7 @@ class TestContext {
     public void assertEvaluateNode(String assertion) {
         Object evaluate = node.evaluate(runtimeContextBuilder.build(inputObject));
         try {
-            assertThat(dataAssert.assertData(evaluate, assertion).isPassed()).isTrue();
+            assertThat(dal.assertData(evaluate, assertion).isPassed()).isTrue();
         } catch (DalException e) {
             System.err.println(e.getMessage());
             System.err.println(e.show(assertion));

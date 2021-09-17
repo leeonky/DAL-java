@@ -33,7 +33,7 @@ class VerifySchema extends Base {
 
     @Test
     void should_support_register_customer_object_type() throws JSONException {
-        dataAssert.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
+        dal.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
             @Override
             public Object getValue(JSONObject instance, String name) {
                 return "mocked return value of " + name;
@@ -50,7 +50,7 @@ class VerifySchema extends Base {
             }
         });
 
-        dataAssert.getRuntimeContextBuilder().registerSchema("Bean",
+        dal.getRuntimeContextBuilder().registerSchema("Bean",
                 dataObject -> dataObject.getFieldNames() == PROPERTY_NAMES);
 
         assertPass(new JSONObject("{\"f1\": 1, \"f2\": 1}"), "is Bean which .f1='mocked return value of f1'");
@@ -166,7 +166,7 @@ class VerifySchema extends Base {
     class RegisterSchemaType {
         @BeforeEach
         void registerJson() {
-            dataAssert.getRuntimeContextBuilder()
+            dal.getRuntimeContextBuilder()
                     .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
                     .registerListAccessor(JSONArray.class, new JSONArrayAccessor())
                     .registerSchema(RightFieldAndType.class)
@@ -251,34 +251,34 @@ class VerifySchema extends Base {
         @Test
         void should_error_when_no_type_property() {
             RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                    () -> dataAssert.assertData(new JSONObject("{\"v\": {\"id\": 1}}"), "is V"));
+                    () -> dal.assertData(new JSONObject("{\"v\": {\"id\": 1}}"), "is V"));
             assertThat(runtimeException).hasMessage("Cannot guess sub type through property type value[null]");
         }
 
         @Test
         void should_error_when_no_matched_subtype() {
             RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                    () -> dataAssert.assertData(new JSONObject("{\"v\": {\"id\": 1, \"type\": V3}}"), "is V"));
+                    () -> dal.assertData(new JSONObject("{\"v\": {\"id\": 1, \"type\": V3}}"), "is V"));
             assertThat(runtimeException).hasMessage("Cannot guess sub type through property type value[V3]");
         }
 
         @Test
         void should_support_with_parent_type_name() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
+            dal.getRuntimeContextBuilder().registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
 
             assertPass(new JSONObject("{\"id\": 1}"), "is VerifySchema.RightFieldAndType");
         }
 
         @Test
         void should_support_partially_field_assertion() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class);
+            dal.getRuntimeContextBuilder().registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class);
 
             assertPass(new JSONObject("{\"id\": 1, \"unexpected\": 2}"), "is VerifySchema.IgnoreUnexpectedField");
         }
 
         @Test
         void should_support_assertion_schema_list_opt_and_result_true() throws JSONException {
-            dataAssert.getRuntimeContextBuilder()
+            dal.getRuntimeContextBuilder()
                     .registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class)
                     .registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
 
@@ -288,7 +288,7 @@ class VerifySchema extends Base {
 
         @Test
         void should_support_assertion_schema_list_opt_and_result_false() throws JSONException {
-            dataAssert.getRuntimeContextBuilder()
+            dal.getRuntimeContextBuilder()
                     .registerSchema(SIMPLE_NAME_WITH_PARENT, IgnoreUnexpectedField.class)
                     .registerSchema(SIMPLE_NAME_WITH_PARENT, RightFieldAndType.class);
 
@@ -302,7 +302,7 @@ class VerifySchema extends Base {
 
         @BeforeEach
         void registerJson() {
-            dataAssert.getRuntimeContextBuilder()
+            dal.getRuntimeContextBuilder()
                     .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
                     .registerListAccessor(JSONArray.class, new JSONArrayAccessor())
                     .registerSchema(FieldValue.class)

@@ -9,7 +9,7 @@ class VerifyValueTypeInSchema extends Base {
 
     @Test
     void verify_string_type() {
-        dataAssert.getRuntimeContextBuilder().registerSchema(JavaTypeInSchema.class);
+        dal.getRuntimeContextBuilder().registerSchema(JavaTypeInSchema.class);
 
         assertPass(new JavaTypeInSchema() {{
             stringValue = "hello";
@@ -22,7 +22,7 @@ class VerifyValueTypeInSchema extends Base {
 
     @Test
     void verify_type_with_value() {
-        dataAssert.getRuntimeContextBuilder().registerSchema(JavaTypeWithValueInSchema.class);
+        dal.getRuntimeContextBuilder().registerSchema(JavaTypeWithValueInSchema.class);
 
         assertPass(new JavaTypeInSchema() {{
             stringValue = "world";
@@ -35,7 +35,7 @@ class VerifyValueTypeInSchema extends Base {
 
     @Test
     void verify_wrapped_type() {
-        dataAssert.getRuntimeContextBuilder().registerSchema(WrappedJavaTypeInSchema.class);
+        dal.getRuntimeContextBuilder().registerSchema(WrappedJavaTypeInSchema.class);
 
         assertPass(new JavaTypeInSchema() {{
             stringValue = "hello";
@@ -48,7 +48,7 @@ class VerifyValueTypeInSchema extends Base {
 
     @Test
     void verify_wrapped_type_with_value() {
-        dataAssert.getRuntimeContextBuilder().registerSchema(WrappedJavaTypeWithValueInSchema.class);
+        dal.getRuntimeContextBuilder().registerSchema(WrappedJavaTypeWithValueInSchema.class);
 
         assertPass(new JavaTypeInSchema() {{
             stringValue = "hello";
@@ -61,7 +61,7 @@ class VerifyValueTypeInSchema extends Base {
 
     @Test
     void verify_wrapped_type_with_null() {
-        dataAssert.getRuntimeContextBuilder().registerSchema(WrappedJavaTypeNullReferenceInSchema.class);
+        dal.getRuntimeContextBuilder().registerSchema(WrappedJavaTypeNullReferenceInSchema.class);
 
         assertPass(new JavaTypeInSchema() {{
             stringValue = null;
@@ -74,14 +74,14 @@ class VerifyValueTypeInSchema extends Base {
 
     @Test
     void customized_error_log() {
-        dataAssert.getRuntimeContextBuilder().registerSchema(WrappedJavaTypeWithValueInSchema.class);
+        dal.getRuntimeContextBuilder().registerSchema(WrappedJavaTypeWithValueInSchema.class);
         assertErrorContains(new JavaTypeInSchema() {{
                                 stringValue = "world";
                             }}, "is WrappedJavaTypeWithValueInSchema",
                 "expect matches schema `WrappedJavaTypeWithValueInSchema` but was not\n" +
                         "    Expect field `.stringValue` [world] to be equal to [hello], but was not.");
 
-        dataAssert.getRuntimeContextBuilder().registerSchema(WrappedJavaTypeNullReferenceInSchema.class);
+        dal.getRuntimeContextBuilder().registerSchema(WrappedJavaTypeNullReferenceInSchema.class);
         assertErrorContains(new JavaTypeInSchema() {{
                                 stringValue = "world";
                             }}, "is WrappedJavaTypeNullReferenceInSchema",
@@ -91,7 +91,7 @@ class VerifyValueTypeInSchema extends Base {
 
     @Test
     void verify_number_comparison() {
-        dataAssert.getRuntimeContextBuilder()
+        dal.getRuntimeContextBuilder()
                 .registerSchema(VerifyValueTypeInSchema.LessThan2.class)
                 .registerSchema(VerifyValueTypeInSchema.GreaterThan3.class)
                 .registerSchema(VerifyValueTypeInSchema.LessOrEqualTo3.class)
@@ -147,7 +147,7 @@ class VerifyValueTypeInSchema extends Base {
 
     @Test
     void customized_message() {
-        dataAssert.getRuntimeContextBuilder()
+        dal.getRuntimeContextBuilder()
                 .registerSchema(VerifyValueTypeInSchema.LessThan2.class)
                 .registerSchema(VerifyValueTypeInSchema.GreaterThan3.class)
                 .registerSchema(VerifyValueTypeInSchema.LessOrEqualTo3.class)

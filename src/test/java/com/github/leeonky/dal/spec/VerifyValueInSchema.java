@@ -16,7 +16,7 @@ public class VerifyValueInSchema extends Base {
 
     @Test
     void verify_without_type_convert() {
-        dataAssert.getRuntimeContextBuilder().registerSchema(MatchString1.class);
+        dal.getRuntimeContextBuilder().registerSchema(MatchString1.class);
 
         assertPass(new HashMap<String, Object>() {{
             put("value", "1");
@@ -29,7 +29,7 @@ public class VerifyValueInSchema extends Base {
 
     @Test
     void should_convert_to_target_type_in_verification() {
-        dataAssert.getRuntimeContextBuilder().registerSchema(MatchString1.class);
+        dal.getRuntimeContextBuilder().registerSchema(MatchString1.class);
 
         assertPass(new HashMap<String, Object>() {{
             put("value", 1);
@@ -42,7 +42,7 @@ public class VerifyValueInSchema extends Base {
 
     @Test
     void verify_null_value() {
-        dataAssert.getRuntimeContextBuilder().registerSchema(MatchNullValue.class);
+        dal.getRuntimeContextBuilder().registerSchema(MatchNullValue.class);
 
         assertPass(new HashMap<String, Object>() {{
             put("value", null);
@@ -55,7 +55,7 @@ public class VerifyValueInSchema extends Base {
 
     @Test
     void verify_number_comparison() {
-        dataAssert.getRuntimeContextBuilder()
+        dal.getRuntimeContextBuilder()
                 .registerSchema(MatchLessThan2.class)
                 .registerSchema(MatchGreaterThan3.class)
                 .registerSchema(MatchLessOrEqualTo3.class)
@@ -111,7 +111,7 @@ public class VerifyValueInSchema extends Base {
 
     @Test
     void verify_type() {
-        dataAssert.getRuntimeContextBuilder()
+        dal.getRuntimeContextBuilder()
                 .registerSchema(MatchType.class)
                 .registerSchema(MatchTypeWithNullableValue.class);
 
@@ -132,22 +132,22 @@ public class VerifyValueInSchema extends Base {
 
     @Test
     void missing_type_arg() {
-        dataAssert.getRuntimeContextBuilder()
+        dal.getRuntimeContextBuilder()
                 .registerSchema(MissingTypeArg.class)
                 .registerSchema(MissingTypeArgButGivenValue.class);
 
-        assertThrows(RuntimeException.class, () -> dataAssert.assertData(new HashMap<String, Object>() {{
+        assertThrows(RuntimeException.class, () -> dal.assertData(new HashMap<String, Object>() {{
             put("value", 1);
         }}, "is MissingTypeArg"));
 
-        assertThrows(RuntimeException.class, () -> dataAssert.assertData(new HashMap<String, Object>() {{
+        assertThrows(RuntimeException.class, () -> dal.assertData(new HashMap<String, Object>() {{
             put("value", 1);
         }}, "is MissingTypeArgButGivenValue"));
     }
 
     @Test
     void customized_message() {
-        dataAssert.getRuntimeContextBuilder()
+        dal.getRuntimeContextBuilder()
                 .registerSchema(MatchString1.class)
                 .registerSchema(MatchNullValue.class)
                 .registerSchema(MatchLessThan2.class)
@@ -254,7 +254,7 @@ public class VerifyValueInSchema extends Base {
 
         @Test
         void customized_converter() {
-            dataAssert.getRuntimeContextBuilder()
+            dal.getRuntimeContextBuilder()
                     .registerSchema(CustomizedConverter.class);
 
             assertPass(new HashMap<String, Object>() {{

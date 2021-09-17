@@ -19,7 +19,7 @@ import static java.util.Arrays.asList;
 class VerifySchemaFormatterField extends Base {
     @BeforeEach
     void registerJsonType() {
-        dataAssert.getRuntimeContextBuilder()
+        dal.getRuntimeContextBuilder()
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
                 .registerListAccessor(JSONArray.class, new JSONArrayAccessor());
     }
@@ -77,7 +77,7 @@ class VerifySchemaFormatterField extends Base {
 
         @Test
         void support_verify_integer() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(IntegerValue.class);
+            dal.getRuntimeContextBuilder().registerSchema(IntegerValue.class);
             assertPass(new JSONObject("{" +
                     "\"integer1\": 1," +
                     " \"integer2\": 2" +
@@ -91,7 +91,7 @@ class VerifySchemaFormatterField extends Base {
 
         @Test
         void support_verify_integer_list() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(IntegerListValue.class);
+            dal.getRuntimeContextBuilder().registerSchema(IntegerListValue.class);
             assertPass(new JSONObject("{" +
                     "\"integerList\": [1, 2]" +
                     "}"), "is IntegerListValue");
@@ -107,7 +107,7 @@ class VerifySchemaFormatterField extends Base {
 
         @Test
         void support_verify_integer_array() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(IntegerArrayValue.class);
+            dal.getRuntimeContextBuilder().registerSchema(IntegerArrayValue.class);
             assertPass(new JSONObject("{" +
                     "\"integerArray\": [1, 2]" +
                     "}"), "is IntegerArrayValue");
@@ -123,7 +123,7 @@ class VerifySchemaFormatterField extends Base {
 
         @Test
         void support_verify_integer_map() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(IntegerMapValue.class);
+            dal.getRuntimeContextBuilder().registerSchema(IntegerMapValue.class);
             assertPass(new JSONObject("{" +
                     "\"integerMap\": {\"a\": 1, \"b\": 2}" +
                     "}"), "is IntegerMapValue");
@@ -139,7 +139,7 @@ class VerifySchemaFormatterField extends Base {
 
         @Test
         void support_positive_integer() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(PositiveIntegerValue.class);
+            dal.getRuntimeContextBuilder().registerSchema(PositiveIntegerValue.class);
 
             assertPass(new JSONObject("{" +
                     "\"integer\": 1" +
@@ -156,7 +156,7 @@ class VerifySchemaFormatterField extends Base {
 
         @Test
         void support_negative_integer() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(NegativeIntegerValue.class);
+            dal.getRuntimeContextBuilder().registerSchema(NegativeIntegerValue.class);
 
             assertFailed(new JSONObject("{" +
                     "\"integer\": 1" +
@@ -177,7 +177,7 @@ class VerifySchemaFormatterField extends Base {
 
         @Test
         void support_verify_instant_now_value() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(InstantNowValue.class);
+            dal.getRuntimeContextBuilder().registerSchema(InstantNowValue.class);
             assertPass(new JSONObject("{\"instant\": \"" + java.time.Instant.now().toString() + "\"}"), "is InstantNowValue");
             assertFailed(new JSONObject("{\"instant\": \"" + java.time.Instant.now().plusSeconds(100).toString() + "\"}"), "is InstantNowValue");
         }
@@ -188,7 +188,7 @@ class VerifySchemaFormatterField extends Base {
 
         @Test
         void support_equal_to() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(NumberValue.class);
+            dal.getRuntimeContextBuilder().registerSchema(NumberValue.class);
             assertPass(new JSONObject("{\"number\": 1}"), "is NumberValue");
             assertPass(new JSONObject("{\"number\": 1.0}"), "is NumberValue");
             assertFailed(new JSONObject("{\"number\": 1.1}"), "is NumberValue");
@@ -197,7 +197,7 @@ class VerifySchemaFormatterField extends Base {
 
         @Test
         void support_positive_number() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(PositiveNumberValue.class);
+            dal.getRuntimeContextBuilder().registerSchema(PositiveNumberValue.class);
             assertPass(new JSONObject("{\"number\": 1}"), "is PositiveNumberValue");
             assertPass(new JSONObject("{\"number\": 1.0}"), "is PositiveNumberValue");
             assertFailed(new JSONObject("{\"number\": 0.0}"), "is PositiveNumberValue");
@@ -207,7 +207,7 @@ class VerifySchemaFormatterField extends Base {
 
         @Test
         void support_negative_number() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerSchema(NegativeNumberValue.class);
+            dal.getRuntimeContextBuilder().registerSchema(NegativeNumberValue.class);
             assertPass(new JSONObject("{\"number\": -1}"), "is NegativeNumberValue");
             assertPass(new JSONObject("{\"number\": -1.0}"), "is NegativeNumberValue");
             assertFailed(new JSONObject("{\"number\": 0.0}"), "is NegativeNumberValue");

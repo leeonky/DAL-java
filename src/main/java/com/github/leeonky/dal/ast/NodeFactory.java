@@ -19,8 +19,6 @@ public interface NodeFactory {
             JUDGEMENT = REGEX.combines(OBJECT, LIST, MATCH_ALL),
             LIST_TAIL = NodeParser::listTail;
 
-
-    //TODO rename
     MandatoryNodeFactory
             OPERAND = NodeParser::compileOperand,
             EXPRESSION = nodeParser -> nodeParser.compileExpression(OPERAND.fetch(nodeParser)),

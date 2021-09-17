@@ -4,9 +4,8 @@ import com.github.leeonky.dal.token.SourceCode;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 
-//TODO rename
-public class DataAssert {
-    private final DALCompiler dalCompiler = new DALCompiler();
+public class DAL {
+    private final Compiler compiler = new Compiler();
     private final RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
 
     public RuntimeContextBuilder getRuntimeContextBuilder() {
@@ -23,10 +22,10 @@ public class DataAssert {
 
     @SuppressWarnings("unchecked")
     public <T> T evaluate(Object root, String expression) {
-        return (T) dalCompiler.compile(new SourceCode(expression)).evaluate(runtimeContextBuilder.build(root));
+        return (T) compiler.compile(new SourceCode(expression)).evaluate(runtimeContextBuilder.build(root));
     }
 
-    public DALCompiler getDalCompiler() {
-        return dalCompiler;
+    public Compiler getCompiler() {
+        return compiler;
     }
 }

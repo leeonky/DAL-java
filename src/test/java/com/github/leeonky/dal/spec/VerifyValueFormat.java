@@ -75,7 +75,7 @@ class VerifyValueFormat extends Base {
     class VerifyEnumInSchema {
         @BeforeEach
         void registerSchema() {
-            dataAssert.getRuntimeContextBuilder().registerSchema(EnumSchema.class);
+            dal.getRuntimeContextBuilder().registerSchema(EnumSchema.class);
         }
 
         @Test

@@ -9,7 +9,7 @@ import com.github.leeonky.dal.token.TokenStream;
 
 import static com.github.leeonky.dal.token.TokenFactory.createDALTokenFactory;
 
-public class DALCompiler {
+public class Compiler {
     public Node compile(SourceCode sourceCode) {
         TokenStream tokenStream = createDALTokenFactory().fetchToken(new TokenParser(sourceCode)).getTokenStream();
         return NodeFactory.EXPRESSION.fetch(new NodeParser(tokenStream));

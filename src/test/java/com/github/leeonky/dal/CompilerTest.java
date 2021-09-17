@@ -11,19 +11,19 @@ import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class DALCompilerTest {
+class CompilerTest {
 
-    private DALCompiler dalCompiler = new DALCompiler();
+    private Compiler compiler = new Compiler();
 
     private void assertSyntaxException(String sourceCode, int position, String message) {
-        SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> dalCompiler.compile(new SourceCode(sourceCode)));
+        SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> compiler.compile(new SourceCode(sourceCode)));
         assertThat(syntaxException)
                 .hasFieldOrPropertyWithValue("position", position)
                 .hasMessage(message);
     }
 
     private void assertCompileNode(String sourceCode, Node expected) {
-        assertThat(dalCompiler.compile(new SourceCode(sourceCode))).isEqualTo(expected);
+        assertThat(compiler.compile(new SourceCode(sourceCode))).isEqualTo(expected);
     }
 
     @Nested

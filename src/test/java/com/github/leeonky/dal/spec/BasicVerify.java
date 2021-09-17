@@ -46,7 +46,7 @@ class BasicVerify extends Base {
         void should_use_root_value_as_assertion_expression_when_source_code_is_empty() {
             assertPass(true, "");
 
-            AssertResult assertResult = dataAssert.assertData(false, "");
+            AssertResult assertResult = dal.assertData(false, "");
             assertFalse(assertResult.isPassed());
             assertThat(assertResult.getMessage()).contains("Expected root value to be [true] but was <false>");
         }
@@ -55,7 +55,7 @@ class BasicVerify extends Base {
         @Test
         void verify_expression_return_type_should_be_boolean() {
             IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
-                    () -> dataAssert.assertData(1, ""));
+                    () -> dal.assertData(1, ""));
             assertThat(illegalStateException).hasMessage("Verification result should be boolean but 'java.lang.Integer'");
         }
 
@@ -128,7 +128,7 @@ class BasicVerify extends Base {
 
         @Test
         void should_support_register_customer_getter() throws JSONException {
-            dataAssert.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
+            dal.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
                 @Override
                 public Object getValue(JSONObject instance, String name) {
                     try {
