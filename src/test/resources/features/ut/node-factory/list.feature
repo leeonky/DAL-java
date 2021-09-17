@@ -150,3 +150,5 @@ Feature: list node
     """
     inspect: '[true false]'
     """
+
+#    TODO array [-1] last alias

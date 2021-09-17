@@ -50,14 +50,11 @@ public class TokenStream {
     }
 
     public Optional<Token> popKeyWord(String keyword) {
-        return when(hasTokens()
-                && currentToken().getType() == KEY_WORD && keyword.equals(currentToken().getValue()))
-                .optional(this::pop);
+        return when(isType(KEY_WORD) && keyword.equals(currentToken().getValue())).optional(this::pop);
     }
 
     public boolean isCurrentSchemaConnectorAndTake() {
-        if (hasTokens() && currentToken().getType() == Token.Type.OPERATOR
-                && (Constants.SCHEMA_DELIMITER.equals(currentToken().getValue()))) {
+        if (isType(OPERATOR) && (Constants.SCHEMA_DELIMITER.equals(currentToken().getValue()))) {
             index++;
             return true;
         }
@@ -81,20 +78,19 @@ public class TokenStream {
     }
 
     private boolean isCurrentUnaryOperator() {
-        return currentToken().getType() == Token.Type.OPERATOR &&
-                (isFromBeginning() ? UNARY_OPERATORS_WITHOUT_INTENTION : UNARY_OPERATORS)
-                        .contains((String) currentToken().getValue());
+        return isType(OPERATOR) && (isFromBeginning() ? UNARY_OPERATORS_WITHOUT_INTENTION : UNARY_OPERATORS)
+                .contains((String) currentToken().getValue());
     }
 
     public Optional<Node> parseBetween(Token.Type opening, Token.Type closing, char closingChar, Supplier<Node> supplier) {
-        return when(currentToken().getType() == opening).optional(() -> {
+        return when(isType(opening)).optional(() -> {
             try {
                 Token openingToken = pop();
                 braceLevels.computeIfAbsent(closing, k -> new AtomicInteger(0)).incrementAndGet();
                 Node node = supplier.get();
                 if (!hasTokens())
                     throw new SyntaxException(getPosition(), format("missed `%c`", closingChar));
-                if (!(currentToken().getType() == closing))
+                if (!(isType(closing)))
                     throw new SyntaxException(getPosition(), format("unexpected token, `%c` expected", closingChar));
                 pop();
                 return node.setPositionBegin(openingToken.getPositionBegin());
@@ -105,7 +101,7 @@ public class TokenStream {
     }
 
     public void checkingParenthesis() {
-        if (currentToken().getType() == CLOSING_PARENTHESIS && braceLevels.getOrDefault(CLOSING_PARENTHESIS, DEFAULT_VALUE).get() == 0)
+        if (isType(CLOSING_PARENTHESIS) && braceLevels.getOrDefault(CLOSING_PARENTHESIS, DEFAULT_VALUE).get() == 0)
             throw new SyntaxException(getPosition(), "missed '('");
     }
 
@@ -123,12 +119,15 @@ public class TokenStream {
     }
 
     public Optional<Token> popBy(Token.Type type) {
-        return when(currentToken().getType() == type).optional(this::pop);
+        return when(isType(type)).optional(this::pop);
+    }
+
+    private boolean isType(Token.Type type) {
+        return hasTokens() && currentToken().getType() == type;
     }
 
     public Optional<Token> popBy(Token.Type type, Object value) {
-        Token token = currentToken();
-        return when(token.getType() == type && Objects.equals(token.getValue(), value)).optional(this::pop);
+        return when(isType(type) && Objects.equals(currentToken().getValue(), value)).optional(this::pop);
     }
 
     public Optional<Token> popJudgementOperator() {
@@ -136,7 +135,7 @@ public class TokenStream {
     }
 
     public Optional<Token> popCalculationOperator() {
-        return when(currentToken().getType() == OPERATOR
+        return when(isType(OPERATOR)
                 && !currentToken().isJudgement() && !currentToken().isComma()).optional(this::pop);
     }
 
@@ -147,7 +146,7 @@ public class TokenStream {
     public <T extends Node> List<T> fetchElements(Token.Type closingType, Function<Integer, T> function) {
         List<T> result = new ArrayList<>();
         int index = 0;
-        while (hasTokens() && !(currentToken().getType() == closingType)) {
+        while (hasTokens() && !isType(closingType)) {
             result.add(function.apply(index++));
             popOptionalComma();
         }

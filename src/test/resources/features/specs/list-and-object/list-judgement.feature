@@ -236,5 +236,3 @@ Feature: judge list
     """
       list.@[0] = [1 1]
     """
-
-#    TODO list.@ is invalid

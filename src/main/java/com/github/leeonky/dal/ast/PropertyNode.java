@@ -55,6 +55,10 @@ public class PropertyNode extends Node {
         return name;
     }
 
+    public boolean isListMapping() {
+        return "@".equals(name);
+    }
+
     public enum Type {
         DOT("%s.%s"),
         IDENTIFIER("%s%s"),

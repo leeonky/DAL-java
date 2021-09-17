@@ -1,14 +1,11 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.token.Token;
-
 import java.util.Optional;
 
 public interface ExpressionFactory {
     ExpressionFactory
             BRACKET_PROPERTY = NodeParser::compileBracketProperty,
-            BEAN_PROPERTY = (nodeParser, instance) ->
-                    nodeParser.compileSingle(Token.Type.PROPERTY, value -> value.toDotPropertyNode(instance)),
+            BEAN_PROPERTY = NodeParser::compileBeanProperty,
             EXPLICIT_PROPERTY = BEAN_PROPERTY.combine(BRACKET_PROPERTY);
 
     Optional<Node> tryFetch(NodeParser nodeParser, Node previous);

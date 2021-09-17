@@ -171,4 +171,16 @@ public class NodeParser {
     public Optional<Node> listTail() {
         return tokenStream.popBy(SPECIAL_SYMBOL, "...").map(Token::toListTailNode);
     }
+
+    public Optional<Node> compileBeanProperty(Node instance) {
+        return compileSingle(Token.Type.PROPERTY, value -> value.toDotPropertyNode(instance))
+                .map(this::processListMappingProperty);
+    }
+
+    private Node processListMappingProperty(Node n) {
+        if (((PropertyNode) n).isListMapping())
+            return ExpressionFactory.EXPLICIT_PROPERTY.tryFetch(this, n)
+                    .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "element property needed"));
+        return n;
+    }
 }
