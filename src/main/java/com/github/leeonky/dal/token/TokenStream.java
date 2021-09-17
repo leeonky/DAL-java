@@ -108,7 +108,11 @@ public class TokenStream {
     public Object popTokenForPropertyOrIndex() {
         if (!hasTokens())
             throw new SyntaxException(getPosition(), "should given one property or array index in `[]`");
-        return pop().getPropertyOrIndex();
+        int sign = popBy(OPERATOR, "-").map(o -> -1).orElse(1);
+        Object propertyOrIndex = pop().getPropertyOrIndex();
+        if (propertyOrIndex instanceof Integer)
+            return sign * (int) propertyOrIndex;
+        return propertyOrIndex;
     }
 
 

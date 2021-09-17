@@ -29,6 +29,11 @@ class VerifyList extends Base {
     }
 
     @Test
+    void should_support_access_item_by_negative_index() {
+        assertPass(new Object[]{1, 2}, "[-1] = 2");
+    }
+
+    @Test
     void should_support_get_size() {
         assertPass(new Object[]{1}, ".size = 1");
         assertPass(asList("hello"), ".size = 1");

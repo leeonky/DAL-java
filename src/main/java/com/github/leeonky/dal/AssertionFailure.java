@@ -16,7 +16,7 @@ public class AssertionFailure extends DalException {
         super(message, position);
     }
 
-    public static void assertListSize(long expected, long actual, int position) {
+    public static void assertListSize(int expected, int actual, int position) {
         if (expected != actual)
             throw new AssertionFailure(format("expected list size [%d] but was [%d]", expected, actual), position);
     }

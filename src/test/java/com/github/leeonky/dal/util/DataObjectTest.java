@@ -95,9 +95,9 @@ class DataObjectTest {
 
         @Test
         void get_list_size() {
-            assertDataAccess(emptyList(), 0L, "size");
-            assertDataAccess(new String[]{"a"}, 1L, "size");
-            assertDataAccess(new JSONArray().put(100).put(200), 2L, "size");
+            assertDataAccess(emptyList(), 0, "size");
+            assertDataAccess(new String[]{"a"}, 1, "size");
+            assertDataAccess(new JSONArray().put(100).put(200), 2, "size");
         }
 
         @Test
@@ -133,7 +133,7 @@ class DataObjectTest {
 
         @Test
         void support_stream_size_as_list() {
-            assertDataAccess(Stream.of(1, 2), 2L, "size");
+            assertDataAccess(Stream.of(1, 2), 2, "size");
         }
 
         @Test

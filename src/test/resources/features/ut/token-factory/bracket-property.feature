@@ -53,6 +53,20 @@ Feature: bracket property token
     """
     And current offset char of source code is "="
 
+  Scenario: access from the end of list
+    Given the following dal code:
+    """
+    [-1]=
+    """
+    Then got the following "bracket-property" token:
+    """
+    : {
+      type: 'PROPERTY'
+      value: -1
+    }
+    """
+    And current offset char of source code is "="
+
   Scenario: raise error when list index is not integer
     Given the following dal code:
     """

@@ -34,7 +34,7 @@ public class DataObject {
         return runtimeContext.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
-    public long getListSize() {
+    public int getListSize() {
         return getListValues().size();
     }
 
@@ -90,6 +90,8 @@ public class DataObject {
             runtimeContext.beginListMapping();
             return getValueFromList(subProperty((String) property));
         }
+        if ((int) property < 0)
+            return getListValues().get(getListSize() + (int) property);
         return getListValues().get((int) property);
     }
 

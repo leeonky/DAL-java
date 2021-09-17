@@ -73,6 +73,12 @@ public interface TokenFactory {
                 .createAs(CONST_NUMBER_TOKEN);
     }
 
+    static TokenFactory createIntegerTokenFactory() {
+        return startsWith(included(DIGITAL.or(CHARACTER('-'))))
+                .endWith(END_OF_CODE.or(before(DELIMITER)))
+                .createAs(CONST_NUMBER_TOKEN);
+    }
+
     static TokenFactory createBeanPropertyTokenFactory() {
         return startsWith(excluded(CHARACTER('.')))
                 .take(leftTrim(ALL_CHARACTERS))
@@ -129,7 +135,7 @@ public interface TokenFactory {
 
     static TokenFactory createBracketPropertyTokenFactory() {
         return startsWith(excluded(CHARACTER('[').except(after(Token::isJudgement))))
-                .take(byFactory(createNumberTokenFactory())
+                .take(byFactory(createIntegerTokenFactory())
                         .or(createSingleQuotedStringTokenFactory())
                         .or(createDoubleQuotedStringTokenFactory()))
                 .endWith(excluded(CHARACTER(']')).orThrow("should end with `]`"))

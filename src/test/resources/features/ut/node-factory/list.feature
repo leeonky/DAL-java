@@ -140,7 +140,6 @@ Feature: list node
       | =        | Equal   |
       | :        | Matcher |
 
-
   Scenario: support optional comma between elements
     Given the following dal code:
     """
@@ -150,5 +149,3 @@ Feature: list node
     """
     inspect: '[true false]'
     """
-
-#    TODO array [-1] last alias
