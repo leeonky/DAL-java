@@ -59,7 +59,6 @@ Feature: basic assertion
       | 0     | 0       |
       | ""    | ''      |
       | {}    | {}      |
-      | []    | []      |
 
   Scenario Outline: null matches non null
     When assert by the following code:
@@ -75,7 +74,6 @@ Feature: basic assertion
       | 0     | 0       |
       | ""    | ''      |
       | {}    | {}      |
-      | []    | []      |
 
   Scenario Outline: compare null and null
     Then the following assertion should pass:

@@ -176,7 +176,7 @@ Feature: judge list
       : [* *]
     """
 
-  Scenario: use ... at the end of list to ignore list size
+  Scenario: use ... at the end of list to ignore list size and [...] to check list type
     Given the following input data:
     """
       [1, 2, 3]
@@ -196,6 +196,32 @@ Feature: judge list
     And the following assertion should pass:
     """
       : [...]
+    """
+    When assert by the following code:
+    """
+    1 = [...]
+    """
+    Then failed with the following message:
+    """
+    1 is not a list
+    """
+    And got the following source code information:
+    """
+    1 = [...]
+        ^
+    """
+    When assert by the following code:
+    """
+    1 : [...]
+    """
+    Then failed with the following message:
+    """
+    1 is not a list
+    """
+    And got the following source code information:
+    """
+    1 : [...]
+        ^
     """
 
   Scenario: support mapping list element property to new list by optional `.@`

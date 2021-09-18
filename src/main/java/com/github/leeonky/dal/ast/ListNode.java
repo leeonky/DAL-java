@@ -13,6 +13,7 @@ import static com.github.leeonky.dal.AssertionFailure.assertListSize;
 import static java.lang.String.format;
 
 public class ListNode extends Node {
+    // TODO New type JudgementExpression
     private final List<Expression> expressions;
     private final boolean incomplete;
 
@@ -40,18 +41,16 @@ public class ListNode extends Node {
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
         DataObject dataObject = actualNode.evaluateDataObject(context);
-        if (dataObject.isNull())
-            throw new AssertionFailure(String.format("expected [null] equal to [%s] but was not", inspect()),
-                    getPositionBegin());
+        if (!dataObject.isList())
+            throw new AssertionFailure(String.format("%s is not a list", actualNode.inspect()), getPositionBegin());
         return judgeAll(context, dataObject);
     }
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
         DataObject dataObject = actualNode.evaluateDataObject(context);
-        if (dataObject.isNull())
-            throw new AssertionFailure(String.format("expected [null] matches [%s] but was not", inspect()),
-                    getPositionBegin());
+        if (!dataObject.isList())
+            throw new AssertionFailure(String.format("%s is not a list", actualNode.inspect()), getPositionBegin());
         return judgeAll(context, dataObject);
     }
 

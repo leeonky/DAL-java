@@ -14,6 +14,7 @@ import static java.util.stream.Collectors.joining;
 
 public class ObjectNode extends Node {
 
+    // TODO New type JudgementExpression
     private final List<Expression> expressions = new ArrayList<>();
 
     public ObjectNode(List<Expression> expressions) {
