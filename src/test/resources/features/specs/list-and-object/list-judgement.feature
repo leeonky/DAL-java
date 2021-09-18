@@ -216,6 +216,33 @@ Feature: judge list
       list.@.data.value = ['v1', 'v2']
       list.data.value = ['v1', 'v2']
     """
+    And the following assertion should pass:
+    """
+      list: { data.value: ['v1', 'v2'] }
+    """
+
+  Scenario: should check each element fields when use list = {} mapping
+    Given the following input data:
+    """
+      {"list": [{
+        "data": {
+          "value": "v1"
+        }
+      }, {
+        "data": {
+          "value": "v2"
+        },
+        "unexpected": "any str"
+      }]}
+    """
+    And assert by the following code:
+    """
+      list= { data.value: ['v1', 'v2'] }
+    """
+    Then failed with the following message:
+    """
+    unexpected fields `unexpected` in list[1]
+    """
 
   Scenario: use @size to mapping sub list size ot new list
     Given the following input data:

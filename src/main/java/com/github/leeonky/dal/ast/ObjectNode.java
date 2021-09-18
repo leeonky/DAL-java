@@ -5,6 +5,7 @@ import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.util.DataObject;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.AssertionFailure.assertUnexpectedFields;
@@ -33,7 +34,13 @@ public class ObjectNode extends Node {
         DataObject dataObject = actualNode.evaluateDataObject(context);
         if (dataObject.isNull())
             throw new AssertionFailure(format("expected [null] equal to [%s] but was not", inspect()), getPositionBegin());
-        assertUnexpectedFields(collectUnexpectedFields(dataObject), operator.getPosition());
+        if (dataObject.isList()) {
+            AtomicInteger integer = new AtomicInteger(0);
+            dataObject.getListObjects().forEach(element ->
+                    assertUnexpectedFields(collectUnexpectedFields(element),
+                            actualNode.inspect() + format("[%d]", integer.getAndIncrement()), operator.getPosition()));
+        } else
+            assertUnexpectedFields(collectUnexpectedFields(dataObject), operator.getPosition());
         return judgeAll(context, dataObject);
     }
 

@@ -41,6 +41,12 @@ public class AssertionFailure extends DalException {
                     dataFields.stream().map(s -> format("`%s`", s)).collect(joining(", ")), position);
     }
 
+    public static void assertUnexpectedFields(Set<String> dataFields, String element, int position) {
+        if (!dataFields.isEmpty())
+            throw new AssertionFailure(format("unexpected fields %s in %s",
+                    dataFields.stream().map(s -> format("`%s`", s)).collect(joining(", ")), element), position);
+    }
+
     public static boolean assertEquals(Object actual, Object expected, int position) {
         if (!Calculator.equals(actual, expected))
             throw new AssertionFailure(format("expected [%s] equal to [%s] but was not",
