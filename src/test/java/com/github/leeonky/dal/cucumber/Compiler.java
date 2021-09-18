@@ -31,7 +31,19 @@ public class Compiler {
     }
 
     private String guessClassName(String schemaCode) {
-        Matcher matcher = Pattern.compile(".* class\\s(.*)\\s\\{.*", Pattern.DOTALL).matcher(schemaCode);
+        Matcher matcher = Pattern.compile(".* class\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(schemaCode);
+        if (matcher.matches())
+            return matcher.group(1).trim();
+        matcher = Pattern.compile(".* class\\s(.*)\\simplements.*", Pattern.DOTALL).matcher(schemaCode);
+        if (matcher.matches())
+            return matcher.group(1).trim();
+        matcher = Pattern.compile(".* class\\s(.*)\\s\\{.*", Pattern.DOTALL).matcher(schemaCode);
+        if (matcher.matches())
+            return matcher.group(1).trim();
+        matcher = Pattern.compile(".* interface\\s(.*)\\s\\{.*", Pattern.DOTALL).matcher(schemaCode);
+        if (matcher.matches())
+            return matcher.group(1).trim();
+        matcher = Pattern.compile(".* interface\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(schemaCode);
         if (matcher.matches())
             return matcher.group(1).trim();
         throw new IllegalStateException("Can not guess class name");

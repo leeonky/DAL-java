@@ -312,3 +312,39 @@ Feature: define field alias in schema
         ]
       }
     """
+
+  Scenario: alias in super class and interface
+    Given the following schema:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "nameInSuper", field = "name")
+    })
+    public class Super {
+    }
+    """
+    And the following schema:
+    """
+    @FieldAliases({
+            @FieldAlias(alias = "nameInInterface", field = "name")
+    })
+    public interface Interface {
+    }
+    """
+    And the following schema:
+    """
+    @Partial
+    public class Schema extends Super implements Interface {
+    }
+    """
+    When the following input data:
+    """
+      { "name": "hello" }
+    """
+    Then the following assertion should pass:
+    """
+      is Schema which :{
+        nameInInterface: 'hello'
+        nameInSuper: 'hello'
+      }
+    """

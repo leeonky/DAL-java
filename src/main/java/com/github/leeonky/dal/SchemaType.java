@@ -40,11 +40,18 @@ public class SchemaType {
     }
 
     private List<FieldAlias> allAliases() {
+        return collectAlias(schema == null ? null : schema.getType());
+    }
+
+    private List<FieldAlias> collectAlias(Class<?> type) {
         List<FieldAlias> aliases = new ArrayList<>();
-        if (schema != null) {
-            FieldAliases fieldAliases = schema.getType().getAnnotation(FieldAliases.class);
+        if (type != null) {
+            FieldAliases fieldAliases = type.getAnnotation(FieldAliases.class);
             if (fieldAliases != null)
                 aliases.addAll(asList(fieldAliases.value()));
+            aliases.addAll(collectAlias(type.getSuperclass()));
+            for (Class<?> interfaceType : type.getInterfaces())
+                aliases.addAll(collectAlias(interfaceType));
         }
         return aliases;
     }

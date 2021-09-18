@@ -74,7 +74,7 @@ pitest {
     excludedClasses = ['com.github.leeonky.dal.spec.*']
     outputFormats = ['HTML2']
     pitestVersion = '1.6.9'
-    threads = 4
+    threads = 8
     junit5PluginVersion = "0.12"
 }
 

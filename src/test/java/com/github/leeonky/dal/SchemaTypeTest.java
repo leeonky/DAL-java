@@ -13,6 +13,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SchemaTypeTest {
 
     @FieldAliases({
+            @FieldAlias(alias = "aliasOfName", field = "name"),
+    })
+    public interface Interface {
+    }
+
+    @FieldAliases({
             @FieldAlias(alias = "aliasOfId", field = "id"),
             @FieldAlias(alias = "aliasOfAliasId", field = "aliasOfId"),
             @FieldAlias(alias = "aliasOfUserName", field = "user.name"),
@@ -36,9 +42,20 @@ class SchemaTypeTest {
     public static class OrderLine {
     }
 
+    public static class ExtendedOrder extends Order {
+    }
+
+    public static class ExtendedExtendedOrder extends ExtendedOrder {
+    }
+
+    public static class ImplementInterface implements Interface {
+    }
+
     @Nested
     class AccessProperty {
         SchemaType schemaOrder = SchemaType.create(BeanClass.create(Order.class));
+        SchemaType schemaExtendedExtendedOrder = SchemaType.create(BeanClass.create(ExtendedExtendedOrder.class));
+        SchemaType schemaImplementInterface = SchemaType.create(BeanClass.create(ImplementInterface.class));
 
         @Test
         void access_property_directly() {
@@ -102,6 +119,20 @@ class SchemaTypeTest {
             SchemaType subSchema = schemaOrder.access("containsWhiteSpace");
 
             assertThat(subSchema.getPropertyChainBefore(schemaOrder)).containsExactly("sub", " a ");
+        }
+
+        @Test
+        void should_search_alias_from_all_super_class() {
+            SchemaType subSchema = schemaExtendedExtendedOrder.access("aliasOfId");
+
+            assertThat(subSchema.getPropertyChainBefore(schemaExtendedExtendedOrder)).containsExactly("id");
+        }
+
+        @Test
+        void should_search_alias_from_all_interfaces() {
+            SchemaType subSchema = schemaImplementInterface.access("aliasOfName");
+
+            assertThat(subSchema.getPropertyChainBefore(schemaImplementInterface)).containsExactly("name");
         }
     }
 }

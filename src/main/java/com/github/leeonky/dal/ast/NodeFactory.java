@@ -26,7 +26,6 @@ public interface NodeFactory {
             CALCULATION_EXPRESSION = nodeParser -> nodeParser.compileCalculationExpression(OPERAND.fetch(nodeParser)),
             JUDGEMENT_OR_CALCULATION_EXPRESSION = JUDGEMENT.combine(CALCULATION_EXPRESSION);
 
-
     Optional<Node> tryFetch(NodeParser nodeParser);
 
     default NodeFactory combine(NodeFactory another) {
