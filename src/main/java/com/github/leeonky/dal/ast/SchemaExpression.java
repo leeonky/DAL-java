@@ -62,8 +62,8 @@ public class SchemaExpression extends Node {
         schemaNodes.add(schemaNode);
     }
 
-    final public SchemaWhichExpression which(Node whichClause) {
-        return (SchemaWhichExpression) new SchemaWhichExpression(this, whichClause)
+    public SchemaWhichExpression which(Node whichClause, boolean omitWhich) {
+        return (SchemaWhichExpression) new SchemaWhichExpression(this, whichClause, omitWhich)
                 .setPositionBegin(getPositionBegin());
     }
 

@@ -147,8 +147,11 @@ public class NodeParser {
             Node whichClause = EXPRESSION.fetch(this);
             if (whichClause instanceof InputNode)
                 throw new SyntaxException(tokenStream.getPosition(), "expect a value or expression");
-            return schemaExpression.which(whichClause);
+            return schemaExpression.which(whichClause, false);
         }
+        if (tokenStream.isCurrentJudgement())
+            return schemaExpression.which(
+                    MandatoryExpressionFactory.EXPRESSION.fetch(this, InputNode.INSTANCE), true);
         return schemaExpression;
     }
 

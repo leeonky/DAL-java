@@ -5,6 +5,7 @@ import com.github.leeonky.dal.token.Token;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+//TODO rename const
 public interface NodeFactory {
     NodeFactory
             IDENTIFIER_PROPERTY = NodeParser::compileIdentifierProperty,
@@ -21,7 +22,7 @@ public interface NodeFactory {
 
     MandatoryNodeFactory
             OPERAND = NodeParser::compileOperand,
-            EXPRESSION = nodeParser -> nodeParser.compileExpression(OPERAND.fetch(nodeParser)),
+            EXPRESSION = nodeParser -> MandatoryExpressionFactory.EXPRESSION.fetch(nodeParser, OPERAND.fetch(nodeParser)),
             JUDGEMENT_OR_OPERAND = JUDGEMENT.combine(OPERAND),
             CALCULATION_EXPRESSION = nodeParser -> nodeParser.compileCalculationExpression(OPERAND.fetch(nodeParser)),
             JUDGEMENT_OR_CALCULATION_EXPRESSION = JUDGEMENT.combine(CALCULATION_EXPRESSION);

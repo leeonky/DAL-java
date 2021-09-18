@@ -81,7 +81,13 @@ Feature: schema verification
     """
     And the following assertion should pass:
     """
-      is IdZero which ={
+      is IdZero which = {
+        id: 0
+      }
+    """
+    And the following assertion should pass:
+    """
+      is IdZero = {
         id: 0
       }
     """

@@ -54,3 +54,20 @@ Feature: schema which expression
       inspect: '1 is Integer which = 1'
     }
     """
+
+  Scenario Outline: can omit which when clause start with = or :
+    Given the following dal code:
+    """
+      1 is Integer <operator> 1
+    """
+    Then got the following "expression" node:
+    """
+    : {
+      class.simpleName: 'SchemaWhichExpression'
+      inspect: '1 is Integer <operator> 1'
+    }
+    """
+    Examples:
+      | operator |
+      | :        |
+      | =        |

@@ -166,4 +166,8 @@ public class TokenStream {
         assert (index > 0);
         return tokens.get(index - 1).isKeyWord(Constants.KeyWords.WHICH);
     }
+
+    public boolean isCurrentJudgement() {
+        return hasTokens() && currentToken().isJudgement();
+    }
 }
