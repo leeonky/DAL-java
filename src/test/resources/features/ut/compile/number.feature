@@ -40,12 +40,9 @@ Feature: const number node
     """
      1<delimiter>
     """
-    Then got the following "const" node xx:
+    Then evaluate as "const" result is:
     """
-    : {
-      inspect: '1'
-      positionBegin: 1
-    }
+    : 1
     """
     Examples:
       | delimiter |

@@ -3,17 +3,50 @@ package com.github.leeonky.dal.cucumber;
 import com.github.leeonky.dal.ast.Node;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public interface Parser {
-    Parser CONST = new ConstParser();
+    Parser NUMBER = new NumberParser(),
+            SINGLE_QUOTED_STRING = new SingleQuotedStringParser(),
+            DOUBLE_QUOTED_STRING = new DoubleQuotedStringParser(),
+            CONST = NUMBER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
     Optional<Node> fetch(SourceCode sourceCode);
 
-    class ConstParser implements Parser {
+    default Parser combine(Parser another) {
+        return sourceCode -> {
+            Optional<Node> optionalNode = fetch(sourceCode);
+            if (optionalNode.isPresent())
+                return optionalNode;
+            return another.fetch(sourceCode);
+        };
+    }
+
+    default Parser combines(Parser... others) {
+        return Stream.of(others).reduce(this, Parser::combine);
+    }
+
+    class NumberParser implements Parser {
 
         @Override
         public Optional<Node> fetch(SourceCode sourceCode) {
             return sourceCode.fetch().map(Token::toConstNumber);
+        }
+    }
+
+    class SingleQuotedStringParser implements Parser {
+
+        @Override
+        public Optional<Node> fetch(SourceCode sourceCode) {
+            return sourceCode.fetchSingleQuotedString().map(Token::toConstString);
+        }
+    }
+
+    class DoubleQuotedStringParser implements Parser {
+
+        @Override
+        public Optional<Node> fetch(SourceCode sourceCode) {
+            return sourceCode.fetchDoubleQuotedString().map(Token::toConstString);
         }
     }
 }

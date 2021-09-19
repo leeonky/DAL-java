@@ -6,12 +6,17 @@ import com.github.leeonky.dal.ast.Node;
 import java.math.BigDecimal;
 
 public class Token {
-    private final String content;
+    private final StringBuilder contentBuilder;
     private final int position;
 
-    public Token(String content, int position) {
-        this.content = content;
+    public Token(int position) {
         this.position = position;
+        contentBuilder = new StringBuilder();
+    }
+
+    public Token(String content, int position) {
+        this.position = position;
+        contentBuilder = new StringBuilder(content);
     }
 
     private static Number getNumber(String content) {
@@ -23,6 +28,18 @@ public class Token {
     }
 
     public Node toConstNumber() {
-        return new ConstNode(getNumber(content)).setPositionBegin(position);
+        return new ConstNode(getNumber(getContent())).setPositionBegin(position);
+    }
+
+    private String getContent() {
+        return contentBuilder.toString();
+    }
+
+    public Node toConstString() {
+        return new ConstNode(getContent()).setPositionBegin(position);
+    }
+
+    public void appendChar(char c) {
+        contentBuilder.append(c);
     }
 }
