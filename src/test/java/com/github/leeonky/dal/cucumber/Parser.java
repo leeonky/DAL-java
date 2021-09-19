@@ -2,6 +2,7 @@ package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.ast.Node;
 
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -38,7 +39,10 @@ public interface Parser {
 
         @Override
         public Optional<Node> fetch(SourceCode sourceCode) {
-            return sourceCode.fetchSingleQuotedString().map(Token::toConstString);
+            return sourceCode.fetchBetween('\'', new HashMap<String, Character>() {{
+                put("\\\\", '\\');
+                put("\\'", '\'');
+            }}).map(Token::toConstString);
         }
     }
 
@@ -46,7 +50,12 @@ public interface Parser {
 
         @Override
         public Optional<Node> fetch(SourceCode sourceCode) {
-            return sourceCode.fetchDoubleQuotedString().map(Token::toConstString);
+            return sourceCode.fetchBetween('"', new HashMap<String, Character>() {{
+                put("\\\\", '\\');
+                put("\\n", '\n');
+                put("\\t", '\t');
+                put("\\\"", '"');
+            }}).map(Token::toConstString);
         }
     }
 }

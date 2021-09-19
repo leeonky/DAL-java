@@ -3,6 +3,7 @@ package com.github.leeonky.dal.cucumber;
 import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class SourceCode {
@@ -35,55 +36,30 @@ public class SourceCode {
         return this;
     }
 
-    public Optional<Token> fetchSingleQuotedString() {
-        if ('\'' == currentChar()) {
-            Token token = new Token(position);
-            position++;
-            while ('\'' != currentChar()) {
-                if (currentChar() == '\\') {
-                    if (code.startsWith("\\\\", position)) {
-                        token.appendChar('\\');
-                        position += 2;
-                    } else if (code.startsWith("\\'", position)) {
-                        token.appendChar('\'');
-                        position += 2;
-                    } else token.appendChar(popChar());
-                } else
+    public Optional<Token> fetchBetween(char c, Map<String, Character> escapes) {
+        if (c == currentChar()) {
+            Token token = new Token(position++);
+            while (!(c == currentChar())) {
+                if (!isAppendEscapeContent(escapes, token))
                     token.appendChar(popChar());
                 if (position >= chars.length)
-                    throw new SyntaxException(position, "should end with `'`");
+                    throw new SyntaxException(position, String.format("should end with `%c`", c));
             }
             position++;
             return Optional.of(token);
         }
         return Optional.empty();
+    }
+
+    private boolean isAppendEscapeContent(Map<String, Character> escapes, Token token) {
+        return escapes.entrySet().stream().filter(e -> code.startsWith(e.getKey(), position))
+                .peek(e -> {
+                    token.appendChar(e.getValue());
+                    position += e.getKey().length();
+                }).count() != 0;
     }
 
     private char popChar() {
         return chars[position++];
-    }
-
-    public Optional<Token> fetchDoubleQuotedString() {
-        if ('"' == currentChar()) {
-            Token token = new Token(position);
-            position++;
-            while ('"' != currentChar()) {
-                if (currentChar() == '\\') {
-                    if (code.startsWith("\\\\", position)) {
-                        token.appendChar('\\');
-                        position += 2;
-                    } else if (code.startsWith("\\'", position)) {
-                        token.appendChar('\'');
-                        position += 2;
-                    } else token.appendChar(popChar());
-                } else
-                    token.appendChar(popChar());
-                if (position >= chars.length)
-                    throw new SyntaxException(position, "should end with `'`");
-            }
-            position++;
-            return Optional.of(token);
-        }
-        return Optional.empty();
     }
 }
