@@ -2,6 +2,7 @@ package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.ast.ConstNode;
 import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.ast.RegexNode;
 
 import java.math.BigDecimal;
 
@@ -41,5 +42,9 @@ public class Token {
 
     public void appendChar(char c) {
         contentBuilder.append(c);
+    }
+
+    public Node toRegex() {
+        return new RegexNode(getContent()).setPositionBegin(position);
     }
 }

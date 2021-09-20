@@ -10,12 +10,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.leeonky.dal.cucumber.Parser.CONST;
+import static com.github.leeonky.dal.cucumber.Parser.REGEX;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TestSteps2 {
     private final Map<String, Parser> parserMap = new HashMap<String, Parser>() {{
         put("const", CONST);
+        put("regex", REGEX);
     }};
     private final DAL dal = new DAL();
     private SourceCode sourceCode;

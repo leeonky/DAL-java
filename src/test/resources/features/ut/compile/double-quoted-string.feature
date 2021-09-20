@@ -13,14 +13,14 @@ Feature: "string"
   Scenario Outline: double quoted string
     Given the following dal code xx:
     """
-    "<str>"
+     "<str>"
     """
     Then got the following "const" node xx:
     """
     : {
       class.simpleName: 'ConstNode'
       inspect: '<inspect>'
-      positionBegin: 0
+      positionBegin: 1
     }
     """
     Examples:

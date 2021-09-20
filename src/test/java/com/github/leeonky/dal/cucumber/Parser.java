@@ -10,7 +10,8 @@ public interface Parser {
     Parser NUMBER = new NumberParser(),
             SINGLE_QUOTED_STRING = new SingleQuotedStringParser(),
             DOUBLE_QUOTED_STRING = new DoubleQuotedStringParser(),
-            CONST = NUMBER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
+            CONST = NUMBER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
+            REGEX = new RegexParser();
 
     Optional<Node> fetch(SourceCode sourceCode);
 
@@ -56,6 +57,16 @@ public interface Parser {
                 put("\\t", '\t');
                 put("\\\"", '"');
             }}).map(Token::toConstString);
+        }
+    }
+
+    class RegexParser implements Parser {
+
+        @Override
+        public Optional<Node> fetch(SourceCode sourceCode) {
+            return sourceCode.fetchBetween('/', new HashMap<String, Character>() {{
+                put("\\/", '/');
+            }}).map(Token::toRegex);
         }
     }
 }
