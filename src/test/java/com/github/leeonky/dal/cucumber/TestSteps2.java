@@ -9,8 +9,7 @@ import io.cucumber.java.en.Then;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.leeonky.dal.cucumber.Parser.CONST;
-import static com.github.leeonky.dal.cucumber.Parser.REGEX;
+import static com.github.leeonky.dal.cucumber.Parser.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -18,6 +17,7 @@ public class TestSteps2 {
     private final Map<String, Parser> parserMap = new HashMap<String, Parser>() {{
         put("const", CONST);
         put("regex", REGEX);
+        put("dot-property", DOT_PROPERTY);
     }};
     private final DAL dal = new DAL();
     private SourceCode sourceCode;
@@ -32,7 +32,7 @@ public class TestSteps2 {
 
     @Then("got the following {string} node xx:")
     public void got_the_following_node_xx(String factory, String assertion) {
-        dal.assertData(node = parserMap.get(factory).fetch(sourceCode.leftTrim()).orElse(null), assertion);
+        dal.assertData(node = parserMap.get(factory).fetch(sourceCode).orElse(null), assertion);
     }
 
     @Then("evaluate result is xx:")
@@ -42,14 +42,14 @@ public class TestSteps2 {
 
     @Then("evaluate as {string} result is:")
     public void evaluate_as_result_is(String factory, String assertion) {
-        dal.assertData(parserMap.get(factory).fetch(new SourceCode(code).leftTrim()).orElse(null)
+        dal.assertData(parserMap.get(factory).fetch(new SourceCode(code)).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
     }
 
-    @Then("failed to get the following {string} node with the following message xx:")
+    @Then("failed to get {string} node with the following message xx:")
     public void failed_to_get_the_following_node_with_the_following_message_xx(String factory, String message) {
         dalException = assertThrows(DalException.class, () ->
-                parserMap.get(factory).fetch(new SourceCode(code).leftTrim()));
+                parserMap.get(factory).fetch(new SourceCode(code)));
         assertThat(dalException).hasMessage(message);
     }
 

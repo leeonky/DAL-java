@@ -39,7 +39,7 @@ Feature: regex node
     """
     <code>
     """
-    Then failed to get the following "regex" node with the following message xx:
+    Then failed to get "regex" node with the following message xx:
     """
     should end with `/`
     """
@@ -52,3 +52,39 @@ Feature: regex node
       | code |
       | /str |
       | /st\ |
+
+  Scenario: regex does not match
+    When assert by the following code:
+    """
+    'hello'= /unmatched/
+    """
+    Then failed with the following message:
+    """
+    expected ['hello'] matches /unmatched/ but was not
+    """
+    And got the following source code information:
+    """
+    'hello'= /unmatched/
+             ^
+    """
+
+  Scenario: input value of 'equal to regex' must string type
+    When assert by the following code:
+    """
+    100= /100/
+    """
+    Then failed with the following message:
+    """
+    Operator = before regex need a string input value
+    """
+    And got the following source code information:
+    """
+    100= /100/
+       ^
+    """
+
+  Scenario: convert input value to string when 'match to regex'
+    Then the following assertion should pass:
+    """
+    100: /100/
+    """

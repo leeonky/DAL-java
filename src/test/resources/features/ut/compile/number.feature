@@ -12,7 +12,7 @@ Feature: const number node
     : null
     """
 
-  Scenario Outline: number
+  Scenario Outline: supported format for number parsing
     Given the following dal code xx:
     """
      <code>

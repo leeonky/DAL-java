@@ -13,14 +13,14 @@ Feature: 'string'
   Scenario Outline: single quoted string
     Given the following dal code xx:
     """
-    '<str>'
+     '<str>'
     """
     Then got the following "const" node xx:
     """
     : {
       class.simpleName: 'ConstNode'
       inspect: '<inspect>'
-      positionBegin: 0
+      positionBegin: 1
     }
     """
     Examples:
@@ -53,7 +53,7 @@ Feature: 'string'
     """
     <code>
     """
-    Then failed to get the following "const" node with the following message xx:
+    Then failed to get "const" node with the following message xx:
     """
     should end with `'`
     """

@@ -54,7 +54,7 @@ Feature: "string"
     """
     <code>
     """
-    Then failed to get the following "const" node with the following message xx:
+    Then failed to get "const" node with the following message xx:
     """
     should end with `"`
     """

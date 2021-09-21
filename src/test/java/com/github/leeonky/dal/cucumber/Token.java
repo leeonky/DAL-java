@@ -1,8 +1,6 @@
 package com.github.leeonky.dal.cucumber;
 
-import com.github.leeonky.dal.ast.ConstNode;
-import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.RegexNode;
+import com.github.leeonky.dal.ast.*;
 
 import java.math.BigDecimal;
 
@@ -46,5 +44,13 @@ public class Token {
 
     public Node toRegex() {
         return new RegexNode(getContent()).setPositionBegin(position);
+    }
+
+    public Node toDotProperty() {
+        return new PropertyNode(InputNode.INSTANCE, getContent(), PropertyNode.Type.DOT).setPositionBegin(position);
+    }
+
+    public boolean contentEmpty() {
+        return contentBuilder.length() == 0;
     }
 }

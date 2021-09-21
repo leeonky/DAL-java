@@ -11,7 +11,8 @@ public interface Parser {
             SINGLE_QUOTED_STRING = new SingleQuotedStringParser(),
             DOUBLE_QUOTED_STRING = new DoubleQuotedStringParser(),
             CONST = NUMBER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
-            REGEX = new RegexParser();
+            REGEX = new RegexParser(),
+            DOT_PROPERTY = new DotPropertyParser();
 
     Optional<Node> fetch(SourceCode sourceCode);
 
@@ -67,6 +68,14 @@ public interface Parser {
             return sourceCode.fetchBetween('/', new HashMap<String, Character>() {{
                 put("\\/", '/');
             }}).map(Token::toRegex);
+        }
+    }
+
+    class DotPropertyParser implements Parser {
+
+        @Override
+        public Optional<Node> fetch(SourceCode sourceCode) {
+            return sourceCode.fetchProperty().map(Token::toDotProperty);
         }
     }
 }

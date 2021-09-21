@@ -17,7 +17,7 @@ public class SourceCode {
     }
 
     Optional<Token> fetch() {
-        if (Character.isDigit(currentChar())) {
+        if (Character.isDigit(firstChar())) {
             Token token = new Token(position);
             while (position < chars.length && !Constants.TOKEN_DELIMITER.contains(currentChar()))
                 token.appendChar(popChar());
@@ -26,18 +26,22 @@ public class SourceCode {
         return Optional.empty();
     }
 
+    private char firstChar() {
+        return leftTrim().currentChar();
+    }
+
     private char currentChar() {
         return chars[position];
     }
 
-    public SourceCode leftTrim() {
-        while (Character.isWhitespace(currentChar()))
+    private SourceCode leftTrim() {
+        while (position < chars.length && Character.isWhitespace(currentChar()))
             position++;
         return this;
     }
 
     public Optional<Token> fetchBetween(char c, Map<String, Character> escapes) {
-        if (c == currentChar()) {
+        if (c == firstChar()) {
             Token token = new Token(position++);
             while (!(c == currentChar())) {
                 if (!isAppendEscapeContent(escapes, token))
@@ -61,5 +65,18 @@ public class SourceCode {
 
     private char popChar() {
         return chars[position++];
+    }
+
+    public Optional<Token> fetchProperty() {
+        if ('.' == firstChar()) {
+            Token token = new Token(position++);
+            leftTrim();
+            while (position < chars.length && !Constants.TOKEN_DELIMITER.contains(currentChar()))
+                token.appendChar(popChar());
+            if (token.contentEmpty())
+                throw new SyntaxException(position, "property is not finished");
+            return Optional.of(token);
+        }
+        return Optional.empty();
     }
 }
