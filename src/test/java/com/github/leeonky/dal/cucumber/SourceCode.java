@@ -6,8 +6,7 @@ import com.github.leeonky.dal.SyntaxException;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
+import static java.util.Optional.*;
 
 public class SourceCode {
     private final String code;
@@ -23,10 +22,10 @@ public class SourceCode {
         if (Character.isDigit(firstChar())) {
             Token token = new Token(position);
             while (position < chars.length && !Constants.TOKEN_DELIMITER.contains(currentChar()))
-                token.appendChar(popChar());
+                token.append(popChar());
             return of(token);
         }
-        return Optional.empty();
+        return empty();
     }
 
     private char firstChar() {
@@ -48,7 +47,7 @@ public class SourceCode {
             Token token = new Token(position++);
             while (!(c == currentChar())) {
                 if (!isAppendEscapeContent(escapes, token))
-                    token.appendChar(popChar());
+                    token.append(popChar());
                 if (position >= chars.length)
                     throw new SyntaxException(position, String.format("should end with `%c`", c));
             }
@@ -61,7 +60,7 @@ public class SourceCode {
     private boolean isAppendEscapeContent(Map<String, Character> escapes, Token token) {
         return escapes.entrySet().stream().filter(e -> code.startsWith(e.getKey(), position))
                 .peek(e -> {
-                    token.appendChar(e.getValue());
+                    token.append(e.getValue());
                     position += e.getKey().length();
                 }).count() != 0;
     }
@@ -75,7 +74,7 @@ public class SourceCode {
             Token token = new Token(position++);
             leftTrim();
             while (position < chars.length && !Constants.TOKEN_DELIMITER.contains(currentChar()))
-                token.appendChar(popChar());
+                token.append(popChar());
             if (token.contentEmpty())
                 throw new SyntaxException(position, "property is not finished");
             return of(token);
@@ -83,14 +82,17 @@ public class SourceCode {
         return Optional.empty();
     }
 
-    public Optional<Token> fetchKeyWord(String keyWord) {
+    public Optional<Token> fetchWord(String word) {
+        return ofNullable(firstStartsWith(word) ? new Token(position).append(popWord(word)) : null);
+    }
+
+    private boolean firstStartsWith(String word) {
         leftTrim();
-        if (code.startsWith(keyWord, position)) {
-            Token token = new Token(position);
-            for (int i = keyWord.length(); i > 0; i--)
-                token.appendChar(popChar());
-            return of(token);
-        }
-        return empty();
+        return (code.startsWith(word, position));
+    }
+
+    private String popWord(String word) {
+        position += word.length();
+        return word;
     }
 }

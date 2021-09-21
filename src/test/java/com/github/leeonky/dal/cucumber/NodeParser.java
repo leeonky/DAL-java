@@ -1,20 +1,27 @@
 package com.github.leeonky.dal.cucumber;
 
+import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.ast.Node;
 
-import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.Constants.DOUBLE_QUOTED_STRING_ESCAPES;
+import static com.github.leeonky.dal.Constants.SINGLE_QUOTED_STRING_ESCAPES;
+
 public interface NodeParser {
-    NodeParser NUMBER = new NumberNodeParser();
-    NodeParser SINGLE_QUOTED_STRING = new SingleQuotedStringNodeParser();
-    NodeParser DOUBLE_QUOTED_STRING = new DoubleQuotedStringNodeParser();
-    NodeParser CONST_TRUE = sourceCode -> sourceCode.fetchKeyWord("true").map(Token::toConstTrue);
-    NodeParser CONST_FALSE = sourceCode -> sourceCode.fetchKeyWord("false").map(Token::toConstFalse);
-    NodeParser CONST_NULL = sourceCode -> sourceCode.fetchKeyWord("null").map(Token::toConstNull);
-    NodeParser CONST = NUMBER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL);
-    NodeParser REGEX = new RegexNodeParser();
+
+    NodeParser NUMBER = sourceCode -> sourceCode.fetch().map(Token::toConstNumber),
+            SINGLE_QUOTED_STRING = sourceCode -> sourceCode.fetchBetween('\'',
+                    SINGLE_QUOTED_STRING_ESCAPES).map(Token::toConstString),
+            DOUBLE_QUOTED_STRING = sourceCode -> sourceCode.fetchBetween('"',
+                    DOUBLE_QUOTED_STRING_ESCAPES).map(Token::toConstString),
+            CONST_TRUE = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.TRUE).map(Token::toConstTrue),
+            CONST_FALSE = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.FALSE).map(Token::toConstFalse),
+            CONST_NULL = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.NULL).map(Token::toConstNull),
+            CONST = NUMBER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL),
+            REGEX = sourceCode -> sourceCode.fetchBetween('/', Constants.REGEX_ESCAPES).map(Token::toRegex);
+
     NodeParser DOT_PROPERTY = new DotPropertyNodeParser();
 
     Optional<Node> fetch(SourceCode sourceCode);
@@ -30,48 +37,6 @@ public interface NodeParser {
 
     default NodeParser combines(NodeParser... others) {
         return Stream.of(others).reduce(this, NodeParser::combine);
-    }
-
-    class NumberNodeParser implements NodeParser {
-
-        @Override
-        public Optional<Node> fetch(SourceCode sourceCode) {
-            return sourceCode.fetch().map(Token::toConstNumber);
-        }
-    }
-
-    class SingleQuotedStringNodeParser implements NodeParser {
-
-        @Override
-        public Optional<Node> fetch(SourceCode sourceCode) {
-            return sourceCode.fetchBetween('\'', new HashMap<String, Character>() {{
-                put("\\\\", '\\');
-                put("\\'", '\'');
-            }}).map(Token::toConstString);
-        }
-    }
-
-    class DoubleQuotedStringNodeParser implements NodeParser {
-
-        @Override
-        public Optional<Node> fetch(SourceCode sourceCode) {
-            return sourceCode.fetchBetween('"', new HashMap<String, Character>() {{
-                put("\\\\", '\\');
-                put("\\n", '\n');
-                put("\\t", '\t');
-                put("\\\"", '"');
-            }}).map(Token::toConstString);
-        }
-    }
-
-    class RegexNodeParser implements NodeParser {
-
-        @Override
-        public Optional<Node> fetch(SourceCode sourceCode) {
-            return sourceCode.fetchBetween('/', new HashMap<String, Character>() {{
-                put("\\/", '/');
-            }}).map(Token::toRegex);
-        }
     }
 
     class DotPropertyNodeParser implements NodeParser {

@@ -38,8 +38,13 @@ public class Token {
         return new ConstNode(getContent()).setPositionBegin(position);
     }
 
-    public void appendChar(char c) {
+    public void append(char c) {
         contentBuilder.append(c);
+    }
+
+    public Token append(String str) {
+        contentBuilder.append(str);
+        return this;
     }
 
     public Node toRegex() {

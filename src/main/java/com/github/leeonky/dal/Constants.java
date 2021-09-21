@@ -1,5 +1,6 @@
 package com.github.leeonky.dal;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,6 +18,19 @@ public class Constants {
     public static final String SCHEMA_DELIMITER = "/";
     public static final Set<String> OPERATOR = new HashSet<>(asList("-", "!", "=", ">", "<", "+", "*", "/", ":", ">=",
             "<=", "!=", "&&", "||", ",", "...", ".."));
+    public static final HashMap<String, Character> SINGLE_QUOTED_STRING_ESCAPES = new HashMap<String, Character>() {{
+        put("\\\\", '\\');
+        put("\\'", '\'');
+    }};
+    public static final HashMap<String, Character> DOUBLE_QUOTED_STRING_ESCAPES = new HashMap<String, Character>() {{
+        put("\\\\", '\\');
+        put("\\n", '\n');
+        put("\\t", '\t');
+        put("\\\"", '"');
+    }};
+    public static final HashMap<String, Character> REGEX_ESCAPES = new HashMap<String, Character>() {{
+        put("\\/", '/');
+    }};
 
     public static class KeyWords {
         public static final String WHICH = "which";
