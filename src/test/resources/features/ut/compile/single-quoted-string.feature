@@ -5,7 +5,7 @@ Feature: 'string'
     """
     not starts with quote
     """
-    Then got the following "const" node xx:
+    Then got the following "single-quoted-string" node xx:
     """
     : null
     """
@@ -15,7 +15,7 @@ Feature: 'string'
     """
      '<str>'
     """
-    Then got the following "const" node xx:
+    Then got the following "single-quoted-string" node xx:
     """
     : {
       class.simpleName: 'ConstNode'
@@ -33,7 +33,7 @@ Feature: 'string'
     """
     '\\\''
     """
-    And evaluate as "const" result is:
+    And evaluate as "single-quoted-string" result is:
     """
     : "\\'"
     """
@@ -43,7 +43,7 @@ Feature: 'string'
     """
     '\h'
     """
-    And evaluate as "const" result is:
+    And evaluate as "single-quoted-string" result is:
     """
     : "\\h"
     """
@@ -53,7 +53,7 @@ Feature: 'string'
     """
     <code>
     """
-    Then failed to get "const" node with the following message xx:
+    Then failed to get "single-quoted-string" node with the following message xx:
     """
     should end with `'`
     """

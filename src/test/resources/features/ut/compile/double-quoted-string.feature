@@ -5,7 +5,7 @@ Feature: "string"
     """
     not starts with "
     """
-    Then got the following "const" node xx:
+    Then got the following "double-quoted-string" node xx:
     """
     : null
     """
@@ -15,7 +15,7 @@ Feature: "string"
     """
      "<str>"
     """
-    Then got the following "const" node xx:
+    Then got the following "double-quoted-string" node xx:
     """
     : {
       class.simpleName: 'ConstNode'
@@ -33,7 +33,7 @@ Feature: "string"
     """
     "\\\n\t\""
     """
-    And evaluate as "const" result is:
+    And evaluate as "double-quoted-string" result is:
     """
     : '\\
     	"'
@@ -44,7 +44,7 @@ Feature: "string"
     """
     "\h"
     """
-    And evaluate as "const" result is:
+    And evaluate as "double-quoted-string" result is:
     """
     : "\\h"
     """
@@ -54,7 +54,7 @@ Feature: "string"
     """
     <code>
     """
-    Then failed to get "const" node with the following message xx:
+    Then failed to get "double-quoted-string" node with the following message xx:
     """
     should end with `"`
     """

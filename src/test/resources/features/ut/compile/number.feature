@@ -7,7 +7,7 @@ Feature: const number node
     """
     not starts with digital
     """
-    Then got the following "const" node xx:
+    Then got the following "number" node xx:
     """
     : null
     """
@@ -17,7 +17,7 @@ Feature: const number node
     """
      <code>
     """
-    Then got the following "const" node xx:
+    Then got the following "number" node xx:
     """
     : {
       class.simpleName: 'ConstNode'
@@ -40,7 +40,7 @@ Feature: const number node
     """
      1<delimiter>
     """
-    Then evaluate as "const" result is:
+    Then evaluate as "number" result is:
     """
     : 1
     """

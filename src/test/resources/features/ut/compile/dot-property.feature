@@ -23,6 +23,14 @@ Feature: compile property starts with dot
       inspect: '.name'
     }
     """
+    Given the following input data xx:
+    """
+      {"name": "Tom"}
+    """
+    Then the following assertion should pass xx:
+    """
+      .name = 'Tom'
+    """
 
   Scenario Outline: trim white space after dot
     Given the following dal code xx:

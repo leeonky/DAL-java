@@ -54,37 +54,37 @@ Feature: regex node
       | /st\ |
 
   Scenario: regex does not match
-    When assert by the following code:
+    When assert by the following code xx:
     """
     'hello'= /unmatched/
     """
-    Then failed with the following message:
+    Then failed with the following message xx:
     """
     expected ['hello'] matches /unmatched/ but was not
     """
-    And got the following source code information:
+    And got the following source code information xx:
     """
     'hello'= /unmatched/
              ^
     """
 
   Scenario: input value of 'equal to regex' must string type
-    When assert by the following code:
+    When assert by the following code xx:
     """
     100= /100/
     """
-    Then failed with the following message:
+    Then failed with the following message xx:
     """
     Operator = before regex need a string input value
     """
-    And got the following source code information:
+    And got the following source code information xx:
     """
     100= /100/
        ^
     """
 
   Scenario: convert input value to string when 'match to regex'
-    Then the following assertion should pass:
+    Then the following assertion should pass xx:
     """
     100: /100/
     """
