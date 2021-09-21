@@ -45,8 +45,8 @@ public class TestContext2 {
         dal.assertData(node.evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
     }
 
-    public void assertNodeValue(String assertion, Parser parser) {
-        dal.assertData(parser.fetch(new SourceCode(sourceCodeString)).orElse(null)
+    public void assertNodeValue(String assertion, NodeParser nodeParser) {
+        dal.assertData(nodeParser.fetch(new SourceCode(sourceCodeString)).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
     }
 
@@ -54,9 +54,9 @@ public class TestContext2 {
         assertThat(dalException.show(sourceCodeString)).isEqualTo(sourceCodePosition);
     }
 
-    public void failedToGetNodeWithMessage(Parser parser, String message) {
+    public void failedToGetNodeWithMessage(NodeParser nodeParser, String message) {
         dalException = assertThrows(DalException.class, () ->
-                parser.fetch(new SourceCode(sourceCodeString)));
+                nodeParser.fetch(new SourceCode(sourceCodeString)));
         shouldHasDalMessage(message);
     }
 
@@ -64,8 +64,8 @@ public class TestContext2 {
         assertThat(dalException).hasMessage(message);
     }
 
-    public void compileAndAssertNode(Parser parser, String assertion) {
-        node = parser.fetch(sourceCode).orElse(null);
+    public void compileAndAssertNode(NodeParser nodeParser, String assertion) {
+        node = nodeParser.fetch(sourceCode).orElse(null);
         dal.assertData(INSTANCE.node, assertion);
     }
 

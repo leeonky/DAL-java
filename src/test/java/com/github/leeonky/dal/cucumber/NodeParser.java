@@ -6,17 +6,17 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public interface Parser {
-    Parser NUMBER = new NumberParser(),
-            SINGLE_QUOTED_STRING = new SingleQuotedStringParser(),
-            DOUBLE_QUOTED_STRING = new DoubleQuotedStringParser(),
+public interface NodeParser {
+    NodeParser NUMBER = new NumberNodeParser(),
+            SINGLE_QUOTED_STRING = new SingleQuotedStringNodeParser(),
+            DOUBLE_QUOTED_STRING = new DoubleQuotedStringNodeParser(),
             CONST = NUMBER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
-            REGEX = new RegexParser(),
-            DOT_PROPERTY = new DotPropertyParser();
+            REGEX = new RegexNodeParser(),
+            DOT_PROPERTY = new DotPropertyNodeParser();
 
     Optional<Node> fetch(SourceCode sourceCode);
 
-    default Parser combine(Parser another) {
+    default NodeParser combine(NodeParser another) {
         return sourceCode -> {
             Optional<Node> optionalNode = fetch(sourceCode);
             if (optionalNode.isPresent())
@@ -25,11 +25,11 @@ public interface Parser {
         };
     }
 
-    default Parser combines(Parser... others) {
-        return Stream.of(others).reduce(this, Parser::combine);
+    default NodeParser combines(NodeParser... others) {
+        return Stream.of(others).reduce(this, NodeParser::combine);
     }
 
-    class NumberParser implements Parser {
+    class NumberNodeParser implements NodeParser {
 
         @Override
         public Optional<Node> fetch(SourceCode sourceCode) {
@@ -37,7 +37,7 @@ public interface Parser {
         }
     }
 
-    class SingleQuotedStringParser implements Parser {
+    class SingleQuotedStringNodeParser implements NodeParser {
 
         @Override
         public Optional<Node> fetch(SourceCode sourceCode) {
@@ -48,7 +48,7 @@ public interface Parser {
         }
     }
 
-    class DoubleQuotedStringParser implements Parser {
+    class DoubleQuotedStringNodeParser implements NodeParser {
 
         @Override
         public Optional<Node> fetch(SourceCode sourceCode) {
@@ -61,7 +61,7 @@ public interface Parser {
         }
     }
 
-    class RegexParser implements Parser {
+    class RegexNodeParser implements NodeParser {
 
         @Override
         public Optional<Node> fetch(SourceCode sourceCode) {
@@ -71,7 +71,7 @@ public interface Parser {
         }
     }
 
-    class DotPropertyParser implements Parser {
+    class DotPropertyNodeParser implements NodeParser {
 
         @Override
         public Optional<Node> fetch(SourceCode sourceCode) {

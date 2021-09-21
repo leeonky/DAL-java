@@ -8,13 +8,14 @@ import io.cucumber.java.en.When;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.leeonky.dal.cucumber.Parser.*;
+import static com.github.leeonky.dal.cucumber.NodeParser.*;
 
 public class TestSteps2 {
-    private final Map<String, Parser> parserMap = new HashMap<String, Parser>() {{
+    private final Map<String, NodeParser> parserMap = new HashMap<String, NodeParser>() {{
         put("number", NUMBER);
         put("single-quoted-string", SINGLE_QUOTED_STRING);
         put("double-quoted-string", DOUBLE_QUOTED_STRING);
+        put("const", CONST);
         put("regex", REGEX);
         put("dot-property", DOT_PROPERTY);
     }};
