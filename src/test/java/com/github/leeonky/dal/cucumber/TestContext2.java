@@ -66,7 +66,12 @@ public class TestContext2 {
 
     public void compileAndAssertNode(NodeParser nodeParser, String assertion) {
         node = nodeParser.fetch(sourceCode).orElse(null);
-        dal.assertData(INSTANCE.node, assertion);
+        try {
+            dal.assertData(INSTANCE.node, assertion);
+        } catch (DalException e) {
+            System.err.println(e.show(assertion));
+            throw e;
+        }
     }
 
     public void assertInputData(String assertion) {

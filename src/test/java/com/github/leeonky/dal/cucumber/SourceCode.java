@@ -6,6 +6,9 @@ import com.github.leeonky.dal.SyntaxException;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+
 public class SourceCode {
     private final String code;
     private final char[] chars;
@@ -21,7 +24,7 @@ public class SourceCode {
             Token token = new Token(position);
             while (position < chars.length && !Constants.TOKEN_DELIMITER.contains(currentChar()))
                 token.appendChar(popChar());
-            return Optional.of(token);
+            return of(token);
         }
         return Optional.empty();
     }
@@ -50,7 +53,7 @@ public class SourceCode {
                     throw new SyntaxException(position, String.format("should end with `%c`", c));
             }
             position++;
-            return Optional.of(token);
+            return of(token);
         }
         return Optional.empty();
     }
@@ -75,8 +78,19 @@ public class SourceCode {
                 token.appendChar(popChar());
             if (token.contentEmpty())
                 throw new SyntaxException(position, "property is not finished");
-            return Optional.of(token);
+            return of(token);
         }
         return Optional.empty();
+    }
+
+    public Optional<Token> fetchKeyWord(String keyWord) {
+        leftTrim();
+        if (code.startsWith(keyWord, position)) {
+            Token token = new Token(position);
+            for (int i = keyWord.length(); i > 0; i--)
+                token.appendChar(popChar());
+            return of(token);
+        }
+        return empty();
     }
 }

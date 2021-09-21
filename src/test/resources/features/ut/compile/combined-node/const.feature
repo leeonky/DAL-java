@@ -14,7 +14,10 @@ Feature: compile all const value node
     }
     """
     Examples:
-      | code | inspect |
-      | 100  | '100'   |
-      | 'a'  | "'a'"   |
-      | "a"  | "'a'"   |
+      | code  | inspect |
+      | 100   | '100'   |
+      | 'a'   | "'a'"   |
+      | "a"   | "'a'"   |
+      | true  | 'true'  |
+      | false | 'false' |
+      | null  | 'null'  |

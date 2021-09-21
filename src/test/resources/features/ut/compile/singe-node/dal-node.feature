@@ -3,7 +3,7 @@ Feature: compile all nodes with delimiter
   Scenario: compile all nodes with delimiter
     Given the following dal code xx:
     """
-    1 'hello' "world" /regex/ 2
+    1 'hello' "world" /regex/ true false null 2
     """
     Then got the following "number" node xx:
     """
@@ -31,6 +31,27 @@ Feature: compile all nodes with delimiter
     : {
       class.simpleName: 'RegexNode'
       inspect: '/regex/'
+    }
+    """
+    And got the following "const-true" node xx:
+    """
+    : {
+      class.simpleName: 'ConstNode'
+      inspect: 'true'
+    }
+    """
+    And got the following "const-false" node xx:
+    """
+    : {
+      class.simpleName: 'ConstNode'
+      inspect: 'false'
+    }
+    """
+    And got the following "const-null" node xx:
+    """
+    : {
+      class.simpleName: 'ConstNode'
+      inspect: 'null'
     }
     """
     And got the following "number" node xx:

@@ -7,12 +7,15 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface NodeParser {
-    NodeParser NUMBER = new NumberNodeParser(),
-            SINGLE_QUOTED_STRING = new SingleQuotedStringNodeParser(),
-            DOUBLE_QUOTED_STRING = new DoubleQuotedStringNodeParser(),
-            CONST = NUMBER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
-            REGEX = new RegexNodeParser(),
-            DOT_PROPERTY = new DotPropertyNodeParser();
+    NodeParser NUMBER = new NumberNodeParser();
+    NodeParser SINGLE_QUOTED_STRING = new SingleQuotedStringNodeParser();
+    NodeParser DOUBLE_QUOTED_STRING = new DoubleQuotedStringNodeParser();
+    NodeParser CONST_TRUE = sourceCode -> sourceCode.fetchKeyWord("true").map(Token::toConstTrue);
+    NodeParser CONST_FALSE = sourceCode -> sourceCode.fetchKeyWord("false").map(Token::toConstFalse);
+    NodeParser CONST_NULL = sourceCode -> sourceCode.fetchKeyWord("null").map(Token::toConstNull);
+    NodeParser CONST = NUMBER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL);
+    NodeParser REGEX = new RegexNodeParser();
+    NodeParser DOT_PROPERTY = new DotPropertyNodeParser();
 
     Optional<Node> fetch(SourceCode sourceCode);
 

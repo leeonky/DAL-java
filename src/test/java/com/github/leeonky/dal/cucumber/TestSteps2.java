@@ -15,6 +15,9 @@ public class TestSteps2 {
         put("number", NUMBER);
         put("single-quoted-string", SINGLE_QUOTED_STRING);
         put("double-quoted-string", DOUBLE_QUOTED_STRING);
+        put("const-true", CONST_TRUE);
+        put("const-false", CONST_FALSE);
+        put("const-null", CONST_NULL);
         put("const", CONST);
         put("regex", REGEX);
         put("dot-property", DOT_PROPERTY);

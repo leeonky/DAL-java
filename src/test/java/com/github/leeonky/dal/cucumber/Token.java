@@ -53,4 +53,16 @@ public class Token {
     public boolean contentEmpty() {
         return contentBuilder.length() == 0;
     }
+
+    public Node toConstTrue() {
+        return new ConstNode(true).setPositionBegin(position);
+    }
+
+    public Node toConstFalse() {
+        return new ConstNode(false).setPositionBegin(position);
+    }
+
+    public Node toConstNull() {
+        return new ConstNode(null).setPositionBegin(position);
+    }
 }
