@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.cucumber;
 
-import com.github.leeonky.dal.AssertResult;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.DalException;
 import com.github.leeonky.dal.ast.Node;
@@ -18,7 +17,6 @@ public class TestContext2 {
     Object inputObject = null;
     SourceCode sourceCode = null;
     String sourceCodeString = null;
-    AssertResult assertResult;
     DalException dalException;
     Node node = null;
 

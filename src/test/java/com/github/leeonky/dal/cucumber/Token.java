@@ -4,6 +4,9 @@ import com.github.leeonky.dal.ast.*;
 
 import java.math.BigDecimal;
 
+import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
+import static com.github.leeonky.dal.ast.PropertyNode.Type.IDENTIFIER;
+
 public class Token {
     private final StringBuilder contentBuilder;
     private final int position;
@@ -11,11 +14,6 @@ public class Token {
     public Token(int position) {
         this.position = position;
         contentBuilder = new StringBuilder();
-    }
-
-    public Token(String content, int position) {
-        this.position = position;
-        contentBuilder = new StringBuilder(content);
     }
 
     private static Number getNumber(String content) {
@@ -26,16 +24,8 @@ public class Token {
         }
     }
 
-    public Node toConstNumber() {
-        return new ConstNode(getNumber(getContent())).setPositionBegin(position);
-    }
-
     private String getContent() {
         return contentBuilder.toString();
-    }
-
-    public Node toConstString() {
-        return new ConstNode(getContent()).setPositionBegin(position);
     }
 
     public void append(char c) {
@@ -47,16 +37,24 @@ public class Token {
         return this;
     }
 
+    public boolean contentEmpty() {
+        return contentBuilder.length() == 0;
+    }
+
+    public Node toConstNumber() {
+        return new ConstNode(getNumber(getContent())).setPositionBegin(position);
+    }
+
+    public Node toConstString() {
+        return new ConstNode(getContent()).setPositionBegin(position);
+    }
+
     public Node toRegex() {
         return new RegexNode(getContent()).setPositionBegin(position);
     }
 
-    public Node toDotProperty() {
-        return new PropertyNode(InputNode.INSTANCE, getContent(), PropertyNode.Type.DOT).setPositionBegin(position);
-    }
-
-    public boolean contentEmpty() {
-        return contentBuilder.length() == 0;
+    public Node toDotProperty(Node instanceNode) {
+        return new PropertyNode(instanceNode, getContent(), DOT).setPositionBegin(position);
     }
 
     public Node toConstTrue() {
@@ -69,5 +67,9 @@ public class Token {
 
     public Node toConstNull() {
         return new ConstNode(null).setPositionBegin(position);
+    }
+
+    public Node toIdentityProperty() {
+        return new PropertyNode(InputNode.INSTANCE, getContent(), IDENTIFIER).setPositionBegin(position);
     }
 }

@@ -10,7 +10,6 @@ import static com.github.leeonky.dal.Constants.DOUBLE_QUOTED_STRING_ESCAPES;
 import static com.github.leeonky.dal.Constants.SINGLE_QUOTED_STRING_ESCAPES;
 
 public interface NodeParser {
-
     NodeParser NUMBER = sourceCode -> sourceCode.fetch().map(Token::toConstNumber),
             SINGLE_QUOTED_STRING = sourceCode -> sourceCode.fetchBetween('\'',
                     SINGLE_QUOTED_STRING_ESCAPES).map(Token::toConstString),
@@ -21,8 +20,7 @@ public interface NodeParser {
             CONST_NULL = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.NULL).map(Token::toConstNull),
             CONST = NUMBER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL),
             REGEX = sourceCode -> sourceCode.fetchBetween('/', Constants.REGEX_ESCAPES).map(Token::toRegex);
-
-    NodeParser DOT_PROPERTY = new DotPropertyNodeParser();
+    NodeParser IDENTITY_PROPERTY = sourceCode -> sourceCode.fetchIdentity().map(Token::toIdentityProperty);
 
     Optional<Node> fetch(SourceCode sourceCode);
 
@@ -37,13 +35,5 @@ public interface NodeParser {
 
     default NodeParser combines(NodeParser... others) {
         return Stream.of(others).reduce(this, NodeParser::combine);
-    }
-
-    class DotPropertyNodeParser implements NodeParser {
-
-        @Override
-        public Optional<Node> fetch(SourceCode sourceCode) {
-            return sourceCode.fetchProperty().map(Token::toDotProperty);
-        }
     }
 }

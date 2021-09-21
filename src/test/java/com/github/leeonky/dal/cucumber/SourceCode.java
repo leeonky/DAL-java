@@ -5,6 +5,7 @@ import com.github.leeonky.dal.SyntaxException;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static java.util.Optional.*;
 
@@ -18,32 +19,36 @@ public class SourceCode {
         chars = code.toCharArray();
     }
 
-    Optional<Token> fetch() {
-        if (Character.isDigit(firstChar())) {
+    private char currentChar() {
+        return chars[position];
+    }
+
+    private SourceCode leftTrim() {
+        while (hasCode() && Character.isWhitespace(currentChar()))
+            position++;
+        return this;
+    }
+
+    private boolean hasCode() {
+        return position < chars.length;
+    }
+
+    private boolean isFirstChar(Predicate<Character> predicate) {
+        return leftTrim().hasCode() && predicate.test(currentChar());
+    }
+
+    public Optional<Token> fetch() {
+        if (isFirstChar(Constants.DIGITAL_CHAR::contains)) {
             Token token = new Token(position);
-            while (position < chars.length && !Constants.TOKEN_DELIMITER.contains(currentChar()))
+            while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()))
                 token.append(popChar());
             return of(token);
         }
         return empty();
     }
 
-    private char firstChar() {
-        return leftTrim().currentChar();
-    }
-
-    private char currentChar() {
-        return chars[position];
-    }
-
-    private SourceCode leftTrim() {
-        while (position < chars.length && Character.isWhitespace(currentChar()))
-            position++;
-        return this;
-    }
-
-    public Optional<Token> fetchBetween(char c, Map<String, Character> escapes) {
-        if (c == firstChar()) {
+    public Optional<Token> fetchBetween(Character c, Map<String, Character> escapes) {
+        if (isFirstChar(c::equals)) {
             Token token = new Token(position++);
             while (!(c == currentChar())) {
                 if (!isAppendEscapeContent(escapes, token))
@@ -70,10 +75,10 @@ public class SourceCode {
     }
 
     public Optional<Token> fetchProperty() {
-        if ('.' == firstChar()) {
+        if (isFirstChar(c -> '.' == c)) {
             Token token = new Token(position++);
             leftTrim();
-            while (position < chars.length && !Constants.TOKEN_DELIMITER.contains(currentChar()))
+            while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()) && currentChar() != '.')
                 token.append(popChar());
             if (token.contentEmpty())
                 throw new SyntaxException(position, "property is not finished");
@@ -83,10 +88,10 @@ public class SourceCode {
     }
 
     public Optional<Token> fetchWord(String word) {
-        return ofNullable(firstStartsWith(word) ? new Token(position).append(popWord(word)) : null);
+        return ofNullable(startsWith(word) ? new Token(position).append(popWord(word)) : null);
     }
 
-    private boolean firstStartsWith(String word) {
+    private boolean startsWith(String word) {
         leftTrim();
         return (code.startsWith(word, position));
     }
@@ -94,5 +99,22 @@ public class SourceCode {
     private String popWord(String word) {
         position += word.length();
         return word;
+    }
+
+    public Optional<Token> fetchIdentity() {
+        if (!isFirstChar(Constants.TOKEN_DELIMITER::contains) && hasCode()
+                && !startsWith(Constants.KeyWords.IS)
+                && !startsWith(Constants.KeyWords.WHICH)
+                && !startsWith(Constants.KeyWords.TRUE)
+                && !startsWith(Constants.KeyWords.FALSE)
+                && !startsWith(Constants.KeyWords.NULL)
+                && !startsWith(Constants.KeyWords.AND)
+                && !startsWith(Constants.KeyWords.OR)) {
+            Token token = new Token(position);
+            while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()) && currentChar() != '.')
+                token.append(popChar());
+            return of(token);
+        }
+        return Optional.empty();
     }
 }

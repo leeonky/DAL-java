@@ -50,10 +50,10 @@ Feature: compile property starts with dot
       | `TAB        |
       | `SPACE      |
 
-  Scenario Outline: property before delimiter
+  Scenario Outline: property before delimiter and dot
     Given the following dal code xx:
     """
-    .a<delimiter>
+    .a<delimiter>b
     """
     Then got the following "dot-property" node xx:
     """
@@ -83,6 +83,7 @@ Feature: compile property starts with dot
       | \n        |
       | `TAB      |
       | `SPACE    |
+      | .         |
 
   Scenario: do not allow empty property
     Given the following dal code xx:

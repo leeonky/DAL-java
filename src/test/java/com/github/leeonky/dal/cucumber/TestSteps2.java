@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.cucumber;
 
+import com.github.leeonky.dal.ast.InputNode;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -8,6 +9,7 @@ import io.cucumber.java.en.When;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.github.leeonky.dal.cucumber.ExpressionParser.DOT_PROPERTY;
 import static com.github.leeonky.dal.cucumber.NodeParser.*;
 
 public class TestSteps2 {
@@ -20,7 +22,8 @@ public class TestSteps2 {
         put("const-null", CONST_NULL);
         put("const", CONST);
         put("regex", REGEX);
-        put("dot-property", DOT_PROPERTY);
+        put("dot-property", sourceCode -> DOT_PROPERTY.fetch(sourceCode, InputNode.INSTANCE));
+        put("identity-property", IDENTITY_PROPERTY);
     }};
 
     @Before
