@@ -40,7 +40,7 @@ public class TestContext2 {
     }
 
     public void assertLastNodeValue(String assertion) {
-        dal.assertData(node.evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
+        dal.assertData(node.evaluate(dal.getRuntimeContextBuilder().build(inputObject)), assertion);
     }
 
     public void assertNodeValue(String assertion, NodeParser nodeParser) {

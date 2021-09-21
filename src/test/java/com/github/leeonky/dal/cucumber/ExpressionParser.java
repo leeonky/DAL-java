@@ -7,7 +7,10 @@ import java.util.Optional;
 public interface ExpressionParser {
 
     ExpressionParser DOT_PROPERTY = (sourceCode, previous) ->
-            sourceCode.fetchProperty().map(token -> token.toDotProperty(previous));
+            sourceCode.fetchProperty().map(token -> token.toDotProperty(previous)),
+            BRACKET_PROPERTY = (sourceCode, previous) -> {
+                return sourceCode.fetchProperty().map(token -> token.toDotProperty(previous));
+            };
 
     Optional<Node> fetch(SourceCode sourceCode, Node previous);
 }

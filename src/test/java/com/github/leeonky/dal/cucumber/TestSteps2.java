@@ -9,6 +9,7 @@ import io.cucumber.java.en.When;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.github.leeonky.dal.cucumber.ExpressionParser.BRACKET_PROPERTY;
 import static com.github.leeonky.dal.cucumber.ExpressionParser.DOT_PROPERTY;
 import static com.github.leeonky.dal.cucumber.NodeParser.*;
 
@@ -24,6 +25,7 @@ public class TestSteps2 {
         put("regex", REGEX);
         put("dot-property", sourceCode -> DOT_PROPERTY.fetch(sourceCode, InputNode.INSTANCE));
         put("identity-property", IDENTITY_PROPERTY);
+        put("bracket-property", sourceCode -> BRACKET_PROPERTY.fetch(sourceCode, InputNode.INSTANCE));
     }};
 
     @Before

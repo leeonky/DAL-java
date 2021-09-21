@@ -2,10 +2,14 @@ package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
+import com.github.leeonky.dal.ast.Node;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static java.util.Optional.*;
 
@@ -33,12 +37,12 @@ public class SourceCode {
         return position < chars.length;
     }
 
-    private boolean isFirstChar(Predicate<Character> predicate) {
+    private boolean whenFirstChar(Predicate<Character> predicate) {
         return leftTrim().hasCode() && predicate.test(currentChar());
     }
 
     public Optional<Token> fetch() {
-        if (isFirstChar(Constants.DIGITAL_CHAR::contains)) {
+        if (whenFirstChar(Constants.DIGITAL_CHAR::contains)) {
             Token token = new Token(position);
             while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()))
                 token.append(popChar());
@@ -47,27 +51,19 @@ public class SourceCode {
         return empty();
     }
 
-    public Optional<Token> fetchBetween(Character c, Map<String, Character> escapes) {
-        if (isFirstChar(c::equals)) {
-            Token token = new Token(position++);
-            while (!(c == currentChar())) {
-                if (!isAppendEscapeContent(escapes, token))
-                    token.append(popChar());
-                if (position >= chars.length)
-                    throw new SyntaxException(position, String.format("should end with `%c`", c));
-            }
+    public <T> Optional<Node> fetchBetween(char opening, char closing,
+                                           Function<List<T>, Node> nodeFactory, Supplier<T> element) {
+        if (whenFirstChar(c -> c == opening)) {
+            List<T> elements = new ArrayList<>();
+            int startPosition = position++;
+            while (hasCode() && closing != currentChar())
+                elements.add(element.get());
+            if (position >= chars.length)
+                throw new SyntaxException(position, String.format("should end with `%c`", closing));
             position++;
-            return of(token);
+            return of(nodeFactory.apply(elements).setPositionBegin(startPosition));
         }
         return Optional.empty();
-    }
-
-    private boolean isAppendEscapeContent(Map<String, Character> escapes, Token token) {
-        return escapes.entrySet().stream().filter(e -> code.startsWith(e.getKey(), position))
-                .peek(e -> {
-                    token.append(e.getValue());
-                    position += e.getKey().length();
-                }).count() != 0;
     }
 
     private char popChar() {
@@ -75,7 +71,7 @@ public class SourceCode {
     }
 
     public Optional<Token> fetchProperty() {
-        if (isFirstChar(c -> '.' == c)) {
+        if (whenFirstChar(c -> '.' == c)) {
             Token token = new Token(position++);
             leftTrim();
             while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()) && currentChar() != '.')
@@ -102,7 +98,7 @@ public class SourceCode {
     }
 
     public Optional<Token> fetchIdentity() {
-        if (!isFirstChar(Constants.TOKEN_DELIMITER::contains) && hasCode()
+        if (!whenFirstChar(Constants.TOKEN_DELIMITER::contains) && hasCode()
                 && !startsWith(Constants.KeyWords.IS)
                 && !startsWith(Constants.KeyWords.WHICH)
                 && !startsWith(Constants.KeyWords.TRUE)
@@ -116,5 +112,9 @@ public class SourceCode {
             return of(token);
         }
         return Optional.empty();
+    }
+
+    public char escapedPop(EscapeChars escapeChars) {
+        return escapeChars.escapeAt(code, position, length -> position += length).orElseGet(this::popChar);
     }
 }

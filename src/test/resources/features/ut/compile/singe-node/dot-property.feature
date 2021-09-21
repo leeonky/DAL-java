@@ -23,13 +23,13 @@ Feature: compile property starts with dot
       inspect: '.name'
     }
     """
-    Given the following input data xx:
+    When the following input data xx:
     """
       {"name": "Tom"}
     """
-    Then the following assertion should pass xx:
+    Then evaluate result is xx:
     """
-      .name = 'Tom'
+      : 'Tom'
     """
 
   Scenario Outline: trim white space after dot
