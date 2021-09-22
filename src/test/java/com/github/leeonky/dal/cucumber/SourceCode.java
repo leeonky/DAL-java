@@ -41,9 +41,9 @@ public class SourceCode {
         return leftTrim().hasCode() && predicate.test(currentChar());
     }
 
-    public Optional<Token> fetch() {
-        if (whenFirstChar(Constants.DIGITAL_CHAR::contains)) {
-            Token token = new Token(position);
+    public Optional<Token> fetchNumber() {
+        if (whenFirstChar(o -> Constants.DIGITAL_CHAR.contains(o) || o == '-')) {
+            Token token = new Token(position).append(popChar());
             while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()))
                 token.append(popChar());
             return of(token);

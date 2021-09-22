@@ -57,7 +57,7 @@ public class SchemaType {
     }
 
     public SchemaType access(Object alias) {
-        if (alias instanceof Integer)
+        if (isIntegerForListIndex(alias))
             return subSchema(alias);
         String property = fetchFieldChain((String) alias);
         if (Objects.equals(property, alias))
@@ -70,13 +70,17 @@ public class SchemaType {
 
     private SchemaType subSchema(Object property) {
         try {
-            if (property instanceof Integer)
+            if (isIntegerForListIndex(property))
                 return new SchemaType(schema.getElementType(), property, this);
             else
                 return new SchemaType(schema.getPropertyChainReader((String) property).getType(), property, this);
         } catch (Exception e) {
             return new SchemaType(null, property, this);
         }
+    }
+
+    private boolean isIntegerForListIndex(Object property) {
+        return property instanceof Integer || property instanceof Long;
     }
 
     public List<Object> getPropertyChainBefore(SchemaType schemaOrder) {

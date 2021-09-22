@@ -1,7 +1,6 @@
 Feature: const number node
 
 #TODO support different type of number
-#TODO null
   Scenario: null when does not match
     Given the following dal code xx:
     """
@@ -34,6 +33,7 @@ Feature: const number node
       | 100   | 100     | 100      |
       | 0x100 | 256     | 256      |
       | 1.1   | 1.1     | 1.1      |
+      | -10   | -10     | -10      |
 
   Scenario Outline: delimiter between numbers
     Given the following dal code xx:

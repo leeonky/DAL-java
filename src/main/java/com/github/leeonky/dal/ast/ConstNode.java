@@ -12,6 +12,12 @@ public class ConstNode extends Node {
         this.value = value;
     }
 
+    public Object toPropertyOrListIndex() {
+        if (value instanceof Number)
+            return ((Number) value).intValue();
+        return value;
+    }
+
     public static String inspectValue(Object value) {
         if (value == null)
             return "null";

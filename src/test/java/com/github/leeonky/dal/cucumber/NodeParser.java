@@ -23,7 +23,7 @@ public interface NodeParser {
     EscapeChars REGEX_ESCAPES = new EscapeChars()
             .escape("\\/", '/');
 
-    NodeParser NUMBER = sourceCode -> sourceCode.fetch().map(Token::toConstNumber),
+    NodeParser NUMBER = sourceCode -> sourceCode.fetchNumber().map(Token::toConstNumber),
             SINGLE_QUOTED_STRING = sourceCode -> sourceCode.fetchBetween('\'', '\'',
                     create(ConstNode::new), () -> sourceCode.escapedPop(SINGLE_QUOTED_ESCAPES)),
             DOUBLE_QUOTED_STRING = sourceCode -> sourceCode.fetchBetween('"', '"',
