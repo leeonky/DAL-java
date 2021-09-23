@@ -51,19 +51,25 @@ public class SourceCode {
         return empty();
     }
 
-    public <T> Optional<Node> fetchBetween(char opening, char closing,
-                                           Function<List<T>, Node> nodeFactory, Supplier<T> element) {
+    public <T> Optional<Node> fetchElements(FetchBy fetchBy, char opening, char closing,
+                                            Function<List<T>, Node> nodeFactory, Supplier<T> element) {
         if (whenFirstChar(c -> c == opening)) {
-            List<T> elements = new ArrayList<>();
             int startPosition = position++;
-            while (hasCode() && closing != currentChar())
-                elements.add(element.get());
-            if (position >= chars.length)
-                throw new SyntaxException(position, String.format("should end with `%c`", closing));
-            position++;
-            return of(nodeFactory.apply(elements).setPositionBegin(startPosition));
+            return of(nodeFactory.apply(fetchElements(fetchBy, closing, element)).setPositionBegin(startPosition));
         }
         return Optional.empty();
+    }
+
+    private <T> List<T> fetchElements(FetchBy fetchBy, char closing, Supplier<T> element) {
+        List<T> elements = new ArrayList<>();
+        while (hasCode() && closing != currentChar()) {
+            elements.add(element.get());
+            fetchBy.afterFetchElement(this);
+        }
+        if (position >= chars.length)
+            throw new SyntaxException(String.format("should end with `%c`", closing), position);
+        position++;
+        return elements;
     }
 
     private char popChar() {
@@ -77,7 +83,7 @@ public class SourceCode {
             while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()) && currentChar() != '.')
                 token.append(popChar());
             if (token.contentEmpty())
-                throw new SyntaxException(position, "property is not finished");
+                throw new SyntaxException("property is not finished", position);
             return of(token);
         }
         return Optional.empty();
@@ -116,5 +122,22 @@ public class SourceCode {
 
     public char escapedPop(EscapeChars escapeChars) {
         return escapeChars.escapeAt(code, position, length -> position += length).orElseGet(this::popChar);
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public enum FetchBy {
+        BY_CHAR,
+        BY_NODE {
+            @Override
+            protected void afterFetchElement(SourceCode sourceCode) {
+                sourceCode.leftTrim();
+            }
+        };
+
+        protected void afterFetchElement(SourceCode sourceCode) {
+        }
     }
 }

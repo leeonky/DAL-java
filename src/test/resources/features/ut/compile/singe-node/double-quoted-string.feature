@@ -24,9 +24,9 @@ Feature: "string"
     }
     """
     Examples:
-      | str   | inspect   |
-      |       | \'\'      |
-      | hello | \'hello\' |
+      | str         | inspect         |
+      |             | \'\'            |
+      | hello world | \'hello world\' |
 
   Scenario: escape char
     Given the following dal code xx:

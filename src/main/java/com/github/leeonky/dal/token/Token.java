@@ -121,12 +121,12 @@ public class Token {
 
     public Object getPropertyOrIndex() {
         if (type != Type.CONST_VALUE)
-            throw new SyntaxException(getPositionBegin(), "should given one property or array index in `[]`");
+            throw new SyntaxException("should given one property or array index in `[]`", getPositionBegin());
         if (value instanceof BigDecimal) {
             try {
                 return Integer.valueOf(value.toString());
             } catch (NumberFormatException ignore) {
-                throw new SyntaxException(getPositionBegin(), "must be integer");
+                throw new SyntaxException("must be integer", getPositionBegin());
             }
         }
         return getValue();
@@ -211,7 +211,7 @@ public class Token {
                 operator = new Operator.CommaAnd();
                 break;
             default:
-                throw new SyntaxException(getPositionBegin(), "not support operator `" + operatorString + "` yet");
+                throw new SyntaxException("not support operator `" + operatorString + "` yet", getPositionBegin());
         }
         return operator.setPosition(getPositionBegin());
     }
@@ -227,7 +227,7 @@ public class Token {
                 operator = new Operator.Not();
                 break;
             default:
-                throw new SyntaxException(getPositionBegin(), "not support operator " + operatorString + " yet");
+                throw new SyntaxException("not support operator " + operatorString + " yet", getPositionBegin());
         }
         return operator.setPosition(getPositionBegin());
     }

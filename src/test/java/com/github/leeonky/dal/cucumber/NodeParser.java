@@ -11,6 +11,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.cucumber.SourceCode.FetchBy.BY_CHAR;
+
 public interface NodeParser {
     EscapeChars SINGLE_QUOTED_ESCAPES = new EscapeChars()
             .escape("\\\\", '\\')
@@ -24,15 +26,15 @@ public interface NodeParser {
             .escape("\\/", '/');
 
     NodeParser NUMBER = sourceCode -> sourceCode.fetchNumber().map(Token::toConstNumber),
-            SINGLE_QUOTED_STRING = sourceCode -> sourceCode.fetchBetween('\'', '\'',
+            SINGLE_QUOTED_STRING = sourceCode -> sourceCode.fetchElements(BY_CHAR, '\'', '\'',
                     create(ConstNode::new), () -> sourceCode.escapedPop(SINGLE_QUOTED_ESCAPES)),
-            DOUBLE_QUOTED_STRING = sourceCode -> sourceCode.fetchBetween('"', '"',
+            DOUBLE_QUOTED_STRING = sourceCode -> sourceCode.fetchElements(BY_CHAR, '"', '"',
                     create(ConstNode::new), () -> sourceCode.escapedPop(DOUBLE_QUOTED_ESCAPES)),
             CONST_TRUE = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.TRUE).map(Token::toConstTrue),
             CONST_FALSE = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.FALSE).map(Token::toConstFalse),
             CONST_NULL = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.NULL).map(Token::toConstNull),
             CONST = NUMBER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL),
-            REGEX = sourceCode -> sourceCode.fetchBetween('/', '/',
+            REGEX = sourceCode -> sourceCode.fetchElements(BY_CHAR, '/', '/',
                     create(RegexNode::new), () -> sourceCode.escapedPop(REGEX_ESCAPES));
 
     NodeParser IDENTITY_PROPERTY = sourceCode -> sourceCode.fetchIdentity().map(Token::toIdentityProperty);

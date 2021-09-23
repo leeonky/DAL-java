@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.RuntimeContext;
+import com.github.leeonky.dal.SyntaxException;
 
 import java.util.Objects;
 
@@ -14,7 +15,10 @@ public class ConstNode extends Node {
 
     public Object toPropertyOrListIndex() {
         if (value instanceof Number)
-            return ((Number) value).intValue();
+            if (value instanceof Long || value instanceof Integer)
+                return value;
+            else
+                throw new SyntaxException("index must be integer", getPositionBegin());
         return value;
     }
 

@@ -84,13 +84,13 @@ public class NodeParser {
     }
 
     private <T> T fetch(Optional<T> node, String errorMessage) {
-        return node.orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), errorMessage));
+        return node.orElseThrow(() -> new SyntaxException(errorMessage, tokenStream.getPosition()));
     }
 
     private Node giveDefault() {
         if (tokenStream.isFromBeginning() || tokenStream.isAfterKeyWordWhich())
             return InputNode.INSTANCE;
-        throw new SyntaxException(tokenStream.getPosition(), "expect a value or expression");
+        throw new SyntaxException("expect a value or expression", tokenStream.getPosition());
     }
 
     public Node compileOperand() {
@@ -146,7 +146,7 @@ public class NodeParser {
         if (tokenStream.popKeyWord(Constants.KeyWords.WHICH).isPresent()) {
             Node whichClause = EXPRESSION.fetch(this);
             if (whichClause instanceof InputNode)
-                throw new SyntaxException(tokenStream.getPosition(), "expect a value or expression");
+                throw new SyntaxException("expect a value or expression", tokenStream.getPosition());
             return schemaExpression.which(whichClause, false);
         }
         if (tokenStream.isCurrentJudgement())
@@ -183,7 +183,7 @@ public class NodeParser {
     private Node processListMappingProperty(Node n) {
         if (((PropertyNode) n).isListMapping())
             return ExpressionFactory.EXPLICIT_PROPERTY.tryFetch(this, n)
-                    .orElseThrow(() -> new SyntaxException(tokenStream.getPosition(), "element property needed"));
+                    .orElseThrow(() -> new SyntaxException("element property needed", tokenStream.getPosition()));
         return n;
     }
 }

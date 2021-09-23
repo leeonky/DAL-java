@@ -30,7 +30,7 @@ public abstract class TokenStartEnd {
             try {
                 return matches(parser);
             } catch (NoMoreSourceCodeException exception) {
-                throw new SyntaxException(exception.getPosition(), message);
+                throw new SyntaxException(message, exception.getPosition());
             }
         });
     }

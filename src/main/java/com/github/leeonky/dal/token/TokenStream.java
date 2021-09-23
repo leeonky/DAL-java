@@ -89,9 +89,9 @@ public class TokenStream {
                 braceLevels.computeIfAbsent(closing, k -> new AtomicInteger(0)).incrementAndGet();
                 Node node = supplier.get();
                 if (!hasTokens())
-                    throw new SyntaxException(getPosition(), format("missed `%c`", closingChar));
+                    throw new SyntaxException(format("missed `%c`", closingChar), getPosition());
                 if (!(isType(closing)))
-                    throw new SyntaxException(getPosition(), format("unexpected token, `%c` expected", closingChar));
+                    throw new SyntaxException(format("unexpected token, `%c` expected", closingChar), getPosition());
                 pop();
                 return node.setPositionBegin(openingToken.getPositionBegin());
             } finally {
@@ -102,12 +102,12 @@ public class TokenStream {
 
     public void checkingParenthesis() {
         if (isType(CLOSING_PARENTHESIS) && braceLevels.getOrDefault(CLOSING_PARENTHESIS, DEFAULT_VALUE).get() == 0)
-            throw new SyntaxException(getPosition(), "missed '('");
+            throw new SyntaxException("missed '('", getPosition());
     }
 
     public Object popTokenForPropertyOrIndex() {
         if (!hasTokens())
-            throw new SyntaxException(getPosition(), "should given one property or array index in `[]`");
+            throw new SyntaxException("should given one property or array index in `[]`", getPosition());
         int sign = popBy(OPERATOR, "-").map(o -> -1).orElse(1);
         Object propertyOrIndex = pop().getPropertyOrIndex();
         if (propertyOrIndex instanceof Integer)

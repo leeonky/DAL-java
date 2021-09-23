@@ -21,9 +21,13 @@ public class Token {
 
     private static Number getNumber(String content) {
         try {
-            return BigDecimal.valueOf(Long.decode(content));
-        } catch (NumberFormatException e) {
-            return new BigDecimal(content);
+            return Integer.decode(content);
+        } catch (NumberFormatException ignore) {
+            try {
+                return Long.decode(content);
+            } catch (NumberFormatException ignore2) {
+                return new BigDecimal(content);
+            }
         }
     }
 

@@ -91,7 +91,7 @@ public class TokenParser {
         while (!end.matches(subContext)) {
             if (sourceCode.skipBlank().notEnd()) {
                 if (content.getToken(subContext) == null)
-                    throw new SyntaxException(sourceCode.getPosition(), "Unexpected token");
+                    throw new SyntaxException("Unexpected token", sourceCode.getPosition());
                 sourceCode.skipBlank();
             }
         }
@@ -122,7 +122,7 @@ public class TokenParser {
         try {
             return supplier.get();
         } catch (IllegalTokenContentException e) {
-            throw new SyntaxException(sourceCode.getPosition() - 1, e.getMessage());
+            throw new SyntaxException(e.getMessage(), sourceCode.getPosition() - 1);
         }
     }
 }

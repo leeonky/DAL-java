@@ -1,6 +1,5 @@
 Feature: const number node
 
-#TODO support different type of number
   Scenario: null when does not match
     Given the following dal code xx:
     """
@@ -29,11 +28,12 @@ Feature: const number node
     : <evaluate>
     """
     Examples:
-      | code  | inspect | evaluate |
-      | 100   | 100     | 100      |
-      | 0x100 | 256     | 256      |
-      | 1.1   | 1.1     | 1.1      |
-      | -10   | -10     | -10      |
+      | code           | inspect        | evaluate       |
+      | 100            | 100            | 100            |
+      | 99999999999999 | 99999999999999 | 99999999999999 |
+      | 0x100          | 256            | 256            |
+      | 1.1            | 1.1            | 1.1            |
+      | -10            | -10            | -10            |
 
   Scenario Outline: delimiter between numbers
     Given the following dal code xx:
