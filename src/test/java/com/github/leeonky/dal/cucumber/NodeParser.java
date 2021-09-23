@@ -11,6 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.cucumber.ExpressionParser.EXPLICIT_PROPERTY;
 import static com.github.leeonky.dal.cucumber.SourceCode.FetchBy.BY_CHAR;
 
 public interface NodeParser {
@@ -37,7 +38,8 @@ public interface NodeParser {
             REGEX = sourceCode -> sourceCode.fetchElements(BY_CHAR, '/', '/',
                     create(RegexNode::new), () -> sourceCode.escapedPop(REGEX_ESCAPES));
 
-    NodeParser IDENTITY_PROPERTY = sourceCode -> sourceCode.fetchIdentity().map(Token::toIdentityProperty);
+    NodeParser IDENTITY_PROPERTY = sourceCode -> sourceCode.fetchIdentity().map(Token::toIdentityProperty),
+            PROPERTY = EXPLICIT_PROPERTY.defaultInputNode().combine(IDENTITY_PROPERTY);
 
     Optional<Node> fetch(SourceCode sourceCode);
 

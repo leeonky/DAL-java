@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.cucumber;
 
-import com.github.leeonky.dal.ast.InputNode;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -8,9 +7,10 @@ import io.cucumber.java.en.When;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-import static com.github.leeonky.dal.cucumber.ExpressionParser.BRACKET_PROPERTY;
-import static com.github.leeonky.dal.cucumber.ExpressionParser.DOT_PROPERTY;
+import static com.github.leeonky.dal.cucumber.ExpressionParser.*;
+import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.LEFT_OPERAND;
 import static com.github.leeonky.dal.cucumber.NodeParser.*;
 
 public class TestSteps2 {
@@ -23,10 +23,17 @@ public class TestSteps2 {
         put("const-null", CONST_NULL);
         put("const", CONST);
         put("regex", REGEX);
-        put("dot-property", sourceCode -> DOT_PROPERTY.fetch(sourceCode, InputNode.INSTANCE));
+        put("dot-property", DOT_PROPERTY.defaultInputNode());
         put("identity-property", IDENTITY_PROPERTY);
-        put("bracket-property", sourceCode -> BRACKET_PROPERTY.fetch(sourceCode, InputNode.INSTANCE));
+        put("bracket-property", BRACKET_PROPERTY.defaultInputNode());
+        put("explicit-property", EXPLICIT_PROPERTY.defaultInputNode());
+        put("property", PROPERTY);
+        put("left-operand", optional(LEFT_OPERAND));
     }};
+
+    private NodeParser optional(MandatoryNodeParser mandatoryNodeParser) {
+        return sourceCode -> Optional.ofNullable(mandatoryNodeParser.fetch(sourceCode));
+    }
 
     @Before
     public void clearEnv() {
