@@ -111,21 +111,6 @@ Feature: bracket property node
       | +    |
       |      |
 
-  Scenario: raise error when list index is not integer
-    Given the following dal code xx:
-    """
-    [1.1]
-    """
-    Then failed to get "bracket-property" node with the following message xx:
-    """
-    index must be integer
-    """
-    And got the following source code information xx:
-    """
-    [1.1]
-     ^
-    """
-
   Scenario: raise error when more than one token in brackets
     Given the following dal code xx:
     """

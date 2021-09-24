@@ -3,14 +3,19 @@ package com.github.leeonky.dal.cucumber;
 import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.ast.Operator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
+import static com.github.leeonky.dal.util.IfThenFactory.when;
+import static java.util.Arrays.asList;
 import static java.util.Optional.*;
 
 public class SourceCode {
@@ -42,6 +47,16 @@ public class SourceCode {
     }
 
     public Optional<Token> fetchNumber() {
+        if (whenFirstChar(Constants.DIGITAL_CHAR::contains)) {
+            Token token = new Token(position).append(popChar());
+            while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()))
+                token.append(popChar());
+            return of(token);
+        }
+        return empty();
+    }
+
+    public Optional<Token> fetchInteger() {
         if (whenFirstChar(o -> Constants.DIGITAL_CHAR.contains(o) || o == '-')) {
             Token token = new Token(position).append(popChar());
             while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()))
@@ -103,6 +118,7 @@ public class SourceCode {
         return word;
     }
 
+    //TODO refactor
     public Optional<Token> fetchIdentity() {
         if (!whenFirstChar(Constants.TOKEN_DELIMITER::contains) && hasCode()
                 && !startsWith(Constants.KeyWords.IS)
@@ -128,6 +144,10 @@ public class SourceCode {
         return position;
     }
 
+    public Optional<Operator> popUnaryOperator() {
+        return unaryOperatorFactories.stream().map(UnaryOperatorFactory::popOperator).filter(Objects::nonNull).findFirst();
+    }
+
     public enum FetchBy {
         BY_CHAR,
         BY_NODE {
@@ -138,6 +158,47 @@ public class SourceCode {
         };
 
         protected void afterFetchElement(SourceCode sourceCode) {
+        }
+    }
+
+    public boolean isBeginning() {
+        return IntStream.range(0, position).mapToObj(i -> chars[i]).allMatch(Character::isWhitespace);
+    }
+
+    private final List<UnaryOperatorFactory> unaryOperatorFactories = asList(
+            new UnaryOperatorFactory("-") {
+                @Override
+                protected Operator toUnaryOperator() {
+                    return new Operator.Minus();
+                }
+
+                @Override
+                protected boolean matches() {
+                    return super.matches() && !isBeginning();
+                }
+            }, new UnaryOperatorFactory("!") {
+                @Override
+                protected Operator toUnaryOperator() {
+                    return new Operator.Not();
+                }
+            });
+
+    public abstract class UnaryOperatorFactory {
+        private final String symbol;
+
+        public UnaryOperatorFactory(String symbol) {
+            this.symbol = symbol;
+        }
+
+        protected abstract Operator toUnaryOperator();
+
+        public Operator popOperator() {
+            return when(matches())
+                    .thenReturn(() -> toUnaryOperator().setPosition(position++));
+        }
+
+        protected boolean matches() {
+            return startsWith(symbol);
         }
     }
 }

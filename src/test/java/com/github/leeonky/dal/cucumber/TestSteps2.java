@@ -10,12 +10,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.github.leeonky.dal.cucumber.ExpressionParser.*;
-import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.LEFT_OPERAND;
+import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.OPERAND;
 import static com.github.leeonky.dal.cucumber.NodeParser.*;
 
 public class TestSteps2 {
     private final Map<String, NodeParser> parserMap = new HashMap<String, NodeParser>() {{
         put("number", NUMBER);
+        put("integer", INTEGER);
         put("single-quoted-string", SINGLE_QUOTED_STRING);
         put("double-quoted-string", DOUBLE_QUOTED_STRING);
         put("const-true", CONST_TRUE);
@@ -28,7 +29,7 @@ public class TestSteps2 {
         put("bracket-property", BRACKET_PROPERTY.defaultInputNode());
         put("explicit-property", EXPLICIT_PROPERTY.defaultInputNode());
         put("property", PROPERTY);
-        put("left-operand", optional(LEFT_OPERAND));
+        put("operand", optional(OPERAND));
     }};
 
     private NodeParser optional(MandatoryNodeParser mandatoryNodeParser) {
@@ -43,6 +44,11 @@ public class TestSteps2 {
     @Given("the following dal code xx:")
     public void the_following_dal_code_xx(String code) {
         TestContext2.INSTANCE.giveDalSourceCode(code);
+    }
+
+    @Given("ignore an {string} node xx")
+    public void ignore_an_node_xx(String factory) {
+        TestContext2.INSTANCE.ignoreNodeBy(parserMap.get(factory));
     }
 
     @Then("got the following {string} node xx:")

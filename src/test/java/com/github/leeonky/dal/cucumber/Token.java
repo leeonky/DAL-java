@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.cucumber;
 
+import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.ConstNode;
 import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
@@ -17,6 +18,18 @@ public class Token {
     public Token(int position) {
         this.position = position;
         contentBuilder = new StringBuilder();
+    }
+
+    private Object getInteger(String content) {
+        try {
+            return Integer.decode(content);
+        } catch (NumberFormatException ignore) {
+            try {
+                return Long.decode(content);
+            } catch (NumberFormatException ignore2) {
+                throw new SyntaxException("expect an integer", position);
+            }
+        }
     }
 
     private static Number getNumber(String content) {
@@ -71,5 +84,9 @@ public class Token {
 
     public Node toIdentityProperty() {
         return new PropertyNode(InputNode.INSTANCE, getContent(), IDENTIFIER).setPositionBegin(position);
+    }
+
+    public Node toConstInteger() {
+        return new ConstNode(getInteger(getContent())).setPositionBegin(position);
     }
 }

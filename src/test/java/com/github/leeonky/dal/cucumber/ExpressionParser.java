@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
+import static com.github.leeonky.dal.cucumber.NodeParser.INTEGER_OR_STRING_INDEX;
 import static com.github.leeonky.dal.cucumber.SourceCode.FetchBy.BY_NODE;
 
 public interface ExpressionParser {
@@ -34,6 +35,7 @@ public interface ExpressionParser {
     }
 
     class BracketPropertyExpressionParser implements ExpressionParser {
+
         @Override
         public Optional<Node> fetch(SourceCode sourceCode, Node previous) {
             return sourceCode.fetchElements(BY_NODE, '[', ']', args -> createNode(previous, args, sourceCode),
@@ -47,7 +49,7 @@ public interface ExpressionParser {
         }
 
         private Node indexOrKey(SourceCode sourceCode) {
-            return NodeParser.CONST.fetch(sourceCode).orElseThrow(() ->
+            return INTEGER_OR_STRING_INDEX.fetch(sourceCode).orElseThrow(() ->
                     new SyntaxException("should given one property or array index in `[]`", sourceCode.getPosition()));
         }
     }

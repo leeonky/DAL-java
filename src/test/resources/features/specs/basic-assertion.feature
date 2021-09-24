@@ -96,3 +96,6 @@ Feature: basic assertion
       | 1       |
       | ''      |
       | null    |
+
+
+#TODO bug：should raise error when multi line expression. current implementation is: only first expression is compiled

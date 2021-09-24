@@ -27,6 +27,7 @@ public interface NodeParser {
             .escape("\\/", '/');
 
     NodeParser NUMBER = sourceCode -> sourceCode.fetchNumber().map(Token::toConstNumber),
+            INTEGER = sourceCode -> sourceCode.fetchInteger().map(Token::toConstInteger),
             SINGLE_QUOTED_STRING = sourceCode -> sourceCode.fetchElements(BY_CHAR, '\'', '\'',
                     create(ConstNode::new), () -> sourceCode.escapedPop(SINGLE_QUOTED_ESCAPES)),
             DOUBLE_QUOTED_STRING = sourceCode -> sourceCode.fetchElements(BY_CHAR, '"', '"',
@@ -36,7 +37,8 @@ public interface NodeParser {
             CONST_NULL = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.NULL).map(Token::toConstNull),
             CONST = NUMBER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL),
             REGEX = sourceCode -> sourceCode.fetchElements(BY_CHAR, '/', '/',
-                    create(RegexNode::new), () -> sourceCode.escapedPop(REGEX_ESCAPES));
+                    create(RegexNode::new), () -> sourceCode.escapedPop(REGEX_ESCAPES)),
+            INTEGER_OR_STRING_INDEX = INTEGER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
     NodeParser IDENTITY_PROPERTY = sourceCode -> sourceCode.fetchIdentity().map(Token::toIdentityProperty),
             PROPERTY = EXPLICIT_PROPERTY.defaultInputNode().combine(IDENTITY_PROPERTY);

@@ -53,8 +53,7 @@ public class TestContext2 {
     }
 
     public void failedToGetNodeWithMessage(NodeParser nodeParser, String message) {
-        dalException = assertThrows(DalException.class, () ->
-                nodeParser.fetch(new SourceCode(sourceCodeString)));
+        dalException = assertThrows(DalException.class, () -> nodeParser.fetch(sourceCode));
         shouldHasDalMessage(message);
     }
 
@@ -93,5 +92,9 @@ public class TestContext2 {
     @SneakyThrows
     public void givenInputByJson(String json) {
         inputObject = new JSONArray(String.format("[%s]", json)).get(0);
+    }
+
+    public void ignoreNodeBy(NodeParser nodeParser) {
+        nodeParser.fetch(sourceCode);
     }
 }
