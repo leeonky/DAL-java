@@ -36,6 +36,28 @@ Feature: operand node
       | .name | PropertyNode | .name   |
       | [0]   | PropertyNode | [0]     |
 
+  Scenario: recursive property node
+    Given the following dal code xx:
+    """
+    .order.lines[0].name
+    """
+    Then got the following "operand" node xx:
+    """
+    : {
+      class.simpleName: 'PropertyNode'
+      inspect: '.order.lines[0].name'
+      positionBegin: 15
+    }
+    """
+    When the following input data xx:
+    """
+      { "order": { "lines": [{ "name": "book" }] } }
+    """
+    Then evaluate result is xx:
+    """
+    : 'book'
+    """
+
   Scenario: support minus before node
     Given the following dal code xx:
     """

@@ -8,6 +8,7 @@ import com.github.leeonky.dal.ast.PropertyNode;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.cucumber.NodeParser.INTEGER_OR_STRING_INDEX;
@@ -32,6 +33,11 @@ public interface ExpressionParser {
 
     default NodeParser defaultInputNode() {
         return sourceCode -> fetch(sourceCode, InputNode.INSTANCE);
+    }
+
+    default Node recursiveCompile(SourceCode sourceCode, Node input,
+                                  BiFunction<SourceCode, Node, Node> method) {
+        return fetch(sourceCode, input).map(node -> method.apply(sourceCode, node)).orElse(input);
     }
 
     class BracketPropertyExpressionParser implements ExpressionParser {
