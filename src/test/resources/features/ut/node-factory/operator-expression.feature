@@ -34,7 +34,7 @@ Feature: expression
     """
     : {
       class.simpleName: 'Expression'
-      inspect: ' + 1'
+      inspect: '+ 1'
       positionBegin: 2
     }
     """
@@ -150,7 +150,7 @@ Feature: expression
     """
     : {
       class.simpleName: 'Expression'
-      inspect: ' + [0]'
+      inspect: '+ [0]'
       rightOperand.class.simpleName: 'PropertyNode'
     }
     """

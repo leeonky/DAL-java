@@ -30,6 +30,7 @@ public class TestSteps2 {
         put("explicit-property", EXPLICIT_PROPERTY.defaultInputNode());
         put("property", PROPERTY);
         put("operand", optional(OPERAND));
+        put("binary-operator-expression", BINARY_OPERATOR_EXPRESSION.defaultInputNode());
     }};
 
     private NodeParser optional(MandatoryNodeParser mandatoryNodeParser) {

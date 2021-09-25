@@ -10,7 +10,6 @@ import static com.github.leeonky.dal.cucumber.NodeParser.CONST;
 import static com.github.leeonky.dal.cucumber.NodeParser.PROPERTY;
 
 public interface MandatoryNodeParser {
-
     MandatoryNodeParser OPERAND = new OperandNodeParser();
 
     Node fetch(SourceCode sourceCode);
@@ -33,6 +32,5 @@ public interface MandatoryNodeParser {
         private Node parsePropertyChain(SourceCode sourceCode, Node instanceNode) {
             return EXPLICIT_PROPERTY.recursiveCompile(sourceCode, instanceNode, this::parsePropertyChain);
         }
-
     }
 }

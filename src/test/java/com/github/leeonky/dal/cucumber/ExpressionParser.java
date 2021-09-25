@@ -1,16 +1,14 @@
 package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.SyntaxException;
-import com.github.leeonky.dal.ast.ConstNode;
-import com.github.leeonky.dal.ast.InputNode;
-import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.PropertyNode;
+import com.github.leeonky.dal.ast.*;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
+import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.OPERAND;
 import static com.github.leeonky.dal.cucumber.NodeParser.INTEGER_OR_STRING_INDEX;
 import static com.github.leeonky.dal.cucumber.SourceCode.FetchBy.BY_NODE;
 
@@ -18,7 +16,9 @@ public interface ExpressionParser {
     ExpressionParser
             DOT_PROPERTY = (sourceCode, previous) -> sourceCode.fetchProperty().map(token -> token.toDotProperty(previous)),
             BRACKET_PROPERTY = new BracketPropertyExpressionParser(),
-            EXPLICIT_PROPERTY = DOT_PROPERTY.combine(BRACKET_PROPERTY);
+            EXPLICIT_PROPERTY = DOT_PROPERTY.combine(BRACKET_PROPERTY),
+            BINARY_OPERATOR_EXPRESSION = (sourceCode, previous) -> sourceCode.popBinaryOperator().map(operator ->
+                    new Expression(previous, operator, OPERAND.fetch(sourceCode)));
 
     Optional<Node> fetch(SourceCode sourceCode, Node previous);
 

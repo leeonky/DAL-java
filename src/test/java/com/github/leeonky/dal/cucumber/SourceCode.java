@@ -13,10 +13,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.util.IfThenFactory.when;
 import static java.util.Arrays.asList;
 import static java.util.Optional.*;
+import static java.util.stream.Collectors.toList;
 
 public class SourceCode {
     private final String code;
@@ -46,6 +48,7 @@ public class SourceCode {
         return leftTrim().hasCode() && predicate.test(currentChar());
     }
 
+    //TODO use ifWhen
     public Optional<Token> fetchNumber() {
         if (whenFirstChar(Constants.DIGITAL_CHAR::contains)) {
             Token token = new Token(position).append(popChar());
@@ -145,7 +148,19 @@ public class SourceCode {
     }
 
     public Optional<Operator> popUnaryOperator() {
-        return unaryOperatorFactories.stream().map(UnaryOperatorFactory::popOperator).filter(Objects::nonNull).findFirst();
+        return popOperator(unaryOperatorFactories);
+    }
+
+    private Optional<Operator> popOperator(List<OperatorFactory> factories) {
+        return factories.stream().map(OperatorFactory::popOperator).filter(Objects::nonNull).findFirst();
+    }
+
+    public Optional<Operator> popBinaryArithmeticOperator() {
+        return popOperator(binaryArithmeticOperatorFactories);
+    }
+
+    public Optional<Operator> popBinaryOperator() {
+        return popOperator(binaryOperatorFactories);
     }
 
     public enum FetchBy {
@@ -165,36 +180,52 @@ public class SourceCode {
         return IntStream.range(0, position).mapToObj(i -> chars[i]).allMatch(Character::isWhitespace);
     }
 
-    private final List<UnaryOperatorFactory> unaryOperatorFactories = asList(
-            new UnaryOperatorFactory("-") {
-                @Override
-                protected Operator toUnaryOperator() {
-                    return new Operator.Minus();
-                }
-
+    private final List<OperatorFactory> unaryOperatorFactories = asList(
+            new OperatorFactory("-", Operator.Minus::new) {
                 @Override
                 protected boolean matches() {
                     return super.matches() && !isBeginning();
                 }
-            }, new UnaryOperatorFactory("!") {
-                @Override
-                protected Operator toUnaryOperator() {
-                    return new Operator.Not();
-                }
-            });
+            },
+            new OperatorFactory("!", Operator.Not::new));
 
-    public abstract class UnaryOperatorFactory {
+    private final List<OperatorFactory> binaryArithmeticOperatorFactories = asList(
+            new OperatorFactory("&&", () -> new Operator.And("&&")),
+            new OperatorFactory("||", () -> new Operator.Or("||")),
+            new OperatorFactory("and", () -> new Operator.And("and")),
+            new OperatorFactory("or", () -> new Operator.Or("or")),
+            new OperatorFactory(">=", Operator.GreaterOrEqual::new),
+            new OperatorFactory("<=", Operator.LessOrEqual::new),
+            new OperatorFactory(">", Operator.Greater::new),
+            new OperatorFactory("<", Operator.Less::new),
+            new OperatorFactory("+", Operator.Plus::new),
+            new OperatorFactory("-", Operator.Subtraction::new),
+            new OperatorFactory("*", Operator.Multiplication::new),
+            new OperatorFactory("/", Operator.Division::new)
+    );
+    private final List<OperatorFactory> judgementOperatorFactories = asList(
+            new OperatorFactory(":", Operator.Matcher::new),
+            new OperatorFactory("=", Operator.Equal::new));
+
+    private final List<OperatorFactory> binaryOperatorFactories = Stream.of(
+            binaryArithmeticOperatorFactories, judgementOperatorFactories).flatMap(List::stream).collect(toList());
+
+
+    public class OperatorFactory {
         private final String symbol;
+        private final Supplier<Operator> factory;
 
-        public UnaryOperatorFactory(String symbol) {
+        public OperatorFactory(String symbol, Supplier<Operator> factory) {
             this.symbol = symbol;
+            this.factory = factory;
         }
 
-        protected abstract Operator toUnaryOperator();
-
         public Operator popOperator() {
-            return when(matches())
-                    .thenReturn(() -> toUnaryOperator().setPosition(position++));
+            return when(matches()).thenReturn(() -> {
+                int p = position;
+                position += symbol.length();
+                return factory.get().setPosition(p);
+            });
         }
 
         protected boolean matches() {

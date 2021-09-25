@@ -116,11 +116,6 @@ public abstract class Operator {
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
             return Calculator.plus(node1.evaluate(context), node2.evaluate(context));
         }
-
-        @Override
-        public String inspect(Node node1, Node node2) {
-            return String.format("%s + %s", node1.inspect(), node2.inspect());
-        }
     }
 
     public static class Greater extends Operator {
