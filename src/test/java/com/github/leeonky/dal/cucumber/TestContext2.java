@@ -49,7 +49,7 @@ public class TestContext2 {
     }
 
     public void shouldShowSourceCodePosition(String sourceCodePosition) {
-        assertThat(dalException.show(sourceCodeString)).isEqualTo(sourceCodePosition);
+        assertThat("\n" + dalException.show(sourceCodeString)).isEqualTo("\n" + sourceCodePosition);
     }
 
     public void failedToGetNodeWithMessage(NodeParser nodeParser, String message) {

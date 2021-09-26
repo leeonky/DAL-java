@@ -23,6 +23,14 @@ Feature: schema expression
       positionBegin: 2
     }
     """
+    When the following input data xx:
+    """
+    1
+    """
+    Then evaluate result is xx:
+    """
+    = true
+    """
 
   Scenario: raise error when right operand is not schema
     Given the following dal code xx:
@@ -52,4 +60,32 @@ Feature: schema expression
     """
     is
       ^
+    """
+
+  Scenario: support multi schemas in expression
+    Given the following dal code xx:
+    """
+    is Integer / Number
+    """
+    Then got the following "schema-expression" node xx:
+    """
+    : {
+      class.simpleName: 'SchemaExpression'
+      inspect: 'is Integer / Number'
+    }
+    """
+
+  Scenario: raise error when schema list not finished
+    Given the following dal code xx:
+    """
+    is Integer /
+    """
+    Then failed to get "schema-expression" node with the following message xx:
+    """
+    schema expression not finished
+    """
+    And got the following source code information xx:
+    """
+    is Integer /
+                ^
     """

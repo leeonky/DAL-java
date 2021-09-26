@@ -221,7 +221,6 @@ public class SourceCode {
     private final List<OperatorFactory> binaryOperatorFactories = Stream.of(
             binaryArithmeticOperatorFactories, judgementOperatorFactories).flatMap(List::stream).collect(toList());
 
-
     public class OperatorFactory {
         private final String symbol;
         private final Supplier<Operator> factory;

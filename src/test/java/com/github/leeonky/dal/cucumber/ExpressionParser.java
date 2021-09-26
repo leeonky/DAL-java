@@ -80,8 +80,14 @@ public interface ExpressionParser {
         @Override
         public Optional<Node> fetch(SourceCode sourceCode, Node previous) {
             return sourceCode.fetchWord(Constants.KeyWords.IS)
-                    .map(is -> new SchemaExpression(previous, sourceCode.fetchIdentityToken().toSchemaNode())
-                            .setPositionBegin(is.getPosition()));
+                    .map(is -> compile(sourceCode, previous).setPositionBegin(is.getPosition()));
+        }
+
+        private SchemaExpression compile(SourceCode sourceCode, Node previous) {
+            SchemaExpression expression = new SchemaExpression(previous, sourceCode.fetchIdentityToken().toSchemaNode());
+            while (sourceCode.fetchWord("/").isPresent())
+                expression.appendSchema(sourceCode.fetchIdentityToken().toSchemaNode());
+            return expression;
         }
     }
 }
