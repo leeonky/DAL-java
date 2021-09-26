@@ -17,8 +17,7 @@ public interface ExpressionParser {
             DOT_PROPERTY = (sourceCode, previous) -> sourceCode.fetchProperty().map(token -> token.toDotProperty(previous)),
             BRACKET_PROPERTY = new BracketPropertyExpressionParser(),
             EXPLICIT_PROPERTY = DOT_PROPERTY.combine(BRACKET_PROPERTY),
-            BINARY_OPERATOR_EXPRESSION = (sourceCode, previous) -> sourceCode.popBinaryOperator().map(operator ->
-                    new Expression(previous, operator, OPERAND.fetch(sourceCode)));
+            BINARY_OPERATOR_EXPRESSION = new BinaryOperatorExpressionParser();
 
     Optional<Node> fetch(SourceCode sourceCode, Node previous);
 
@@ -57,6 +56,20 @@ public interface ExpressionParser {
         private Node indexOrKey(SourceCode sourceCode) {
             return INTEGER_OR_STRING_INDEX.fetch(sourceCode).orElseThrow(() ->
                     new SyntaxException("should given one property or array index in `[]`", sourceCode.getPosition()));
+        }
+    }
+
+    class BinaryOperatorExpressionParser implements ExpressionParser {
+
+        @Override
+        public Optional<Node> fetch(SourceCode sourceCode, Node previous) {
+            return sourceCode.popBinaryOperator().map(operator -> recursiveCompile(sourceCode,
+                    new Expression(previous, operator, OPERAND.fetch(sourceCode)).adjustOperatorOrder(),
+
+//                   TODO chain is operator or is which
+                    (sourceCode1, node) -> fetch(sourceCode1, node).orElse(node)));
+           
+//            TODO test for mix opt expression and schema expression chain
         }
     }
 }
