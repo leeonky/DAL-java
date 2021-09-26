@@ -1,10 +1,7 @@
 package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.SyntaxException;
-import com.github.leeonky.dal.ast.ConstNode;
-import com.github.leeonky.dal.ast.InputNode;
-import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.PropertyNode;
+import com.github.leeonky.dal.ast.*;
 
 import java.math.BigDecimal;
 
@@ -14,6 +11,10 @@ import static com.github.leeonky.dal.ast.PropertyNode.Type.IDENTIFIER;
 public class Token {
     private final StringBuilder contentBuilder;
     private final int position;
+
+    public int getPosition() {
+        return position;
+    }
 
     public Token(int position) {
         this.position = position;
@@ -88,5 +89,9 @@ public class Token {
 
     public Node toConstInteger() {
         return new ConstNode(getInteger(getContent())).setPositionBegin(position);
+    }
+
+    public SchemaNode toSchemaNode() {
+        return (SchemaNode) new SchemaNode(getContent()).setPositionBegin(position);
     }
 }

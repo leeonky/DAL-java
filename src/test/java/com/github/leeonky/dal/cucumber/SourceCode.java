@@ -122,7 +122,7 @@ public class SourceCode {
     }
 
     //TODO refactor
-    public Optional<Token> fetchIdentity() {
+    public Optional<Token> fetchIdentityProperty() {
         if (!whenFirstChar(Constants.TOKEN_DELIMITER::contains) && hasCode()
                 && !startsWith(Constants.KeyWords.IS)
                 && !startsWith(Constants.KeyWords.WHICH)
@@ -137,6 +137,17 @@ public class SourceCode {
             return of(token);
         }
         return Optional.empty();
+    }
+
+    public Token fetchIdentityToken() {
+        if (!whenFirstChar(Constants.TOKEN_DELIMITER::contains) && hasCode()) {
+            Token token = new Token(position);
+            while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()))
+                token.append(popChar());
+            return token;
+        }
+        throw new SyntaxException(hasCode() ? "operand of `is` must be schema type"
+                : "schema expression not finished", position);
     }
 
     public char escapedPop(EscapeChars escapeChars) {

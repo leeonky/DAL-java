@@ -40,7 +40,7 @@ public interface NodeParser {
                     create(RegexNode::new), () -> sourceCode.escapedPop(REGEX_ESCAPES)),
             INTEGER_OR_STRING_INDEX = INTEGER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
-    NodeParser IDENTITY_PROPERTY = sourceCode -> sourceCode.fetchIdentity().map(Token::toIdentityProperty),
+    NodeParser IDENTITY_PROPERTY = sourceCode -> sourceCode.fetchIdentityProperty().map(Token::toIdentityProperty),
             PROPERTY = EXPLICIT_PROPERTY.defaultInputNode().combine(IDENTITY_PROPERTY);
 
     Optional<Node> fetch(SourceCode sourceCode);

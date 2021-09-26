@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.cucumber;
 
+import com.github.leeonky.dal.ast.InputNode;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.github.leeonky.dal.cucumber.ExpressionParser.*;
+import static com.github.leeonky.dal.cucumber.MandatoryExpressionParser.EXPRESSION;
 import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.OPERAND;
 import static com.github.leeonky.dal.cucumber.NodeParser.*;
 
@@ -31,6 +33,8 @@ public class TestSteps2 {
         put("property", PROPERTY);
         put("operand", optional(OPERAND));
         put("binary-operator-expression", BINARY_OPERATOR_EXPRESSION.defaultInputNode());
+        put("schema-expression", SCHEMA_EXPRESSION.defaultInputNode());
+        put("expression", optional(sourceCode -> EXPRESSION.fetch(sourceCode, InputNode.INSTANCE)));
     }};
 
     private NodeParser optional(MandatoryNodeParser mandatoryNodeParser) {

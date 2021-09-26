@@ -54,7 +54,8 @@ public class SchemaExpression extends Node {
 
     @Override
     public String inspect() {
-        return format("%s is %s", instance.inspect(), schemaNodes.stream().map(SchemaNode::inspect)
+        String instanceInspect = instance instanceof InputNode ? "" : instance.inspect() + " ";
+        return format("%sis %s", instanceInspect, schemaNodes.stream().map(SchemaNode::inspect)
                 .collect(Collectors.joining(format(" %s ", SCHEMA_DELIMITER))));
     }
 

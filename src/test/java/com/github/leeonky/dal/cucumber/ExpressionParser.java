@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.cucumber;
 
+import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.*;
 
@@ -17,7 +18,8 @@ public interface ExpressionParser {
             DOT_PROPERTY = (sourceCode, previous) -> sourceCode.fetchProperty().map(token -> token.toDotProperty(previous)),
             BRACKET_PROPERTY = new BracketPropertyExpressionParser(),
             EXPLICIT_PROPERTY = DOT_PROPERTY.combine(BRACKET_PROPERTY),
-            BINARY_OPERATOR_EXPRESSION = new BinaryOperatorExpressionParser();
+            BINARY_OPERATOR_EXPRESSION = new BinaryOperatorExpressionParser(),
+            SCHEMA_EXPRESSION = new SchemaExpressionParser();
 
     Optional<Node> fetch(SourceCode sourceCode, Node previous);
 
@@ -68,8 +70,18 @@ public interface ExpressionParser {
 
 //                   TODO chain is operator or is which
                     (sourceCode1, node) -> fetch(sourceCode1, node).orElse(node)));
-           
+
 //            TODO test for mix opt expression and schema expression chain
+        }
+    }
+
+    class SchemaExpressionParser implements ExpressionParser {
+
+        @Override
+        public Optional<Node> fetch(SourceCode sourceCode, Node previous) {
+            return sourceCode.fetchWord(Constants.KeyWords.IS)
+                    .map(is -> new SchemaExpression(previous, sourceCode.fetchIdentityToken().toSchemaNode())
+                            .setPositionBegin(is.getPosition()));
         }
     }
 }
