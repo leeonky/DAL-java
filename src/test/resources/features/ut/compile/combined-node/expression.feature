@@ -1,15 +1,54 @@
 Feature: expression
 
+  Scenario: return 'this' object when no code
+    Given the following dal code xx:
+    """
+    """
+    Then got the following "expression" node xx:
+    """
+    : {
+      class.simpleName: 'InputNode'
+      inspect: ''
+    }
+    """
+
+  Scenario: return left operand when no right operand
+    Given the following dal code xx:
+    """
+      1
+    """
+    Then got the following "expression" node xx:
+    """
+    : {
+      class.simpleName: 'ConstNode'
+      inspect: '1'
+    }
+    """
+
+  Scenario: default use 'this' object as left operand
+    Given the following dal code:
+    """
+      + 1
+    """
+    Then got the following "expression" node:
+    """
+    : {
+      class.simpleName: 'Expression'
+      inspect: '+ 1'
+      positionBegin: 2
+    }
+    """
+
   Scenario: binary operator expression
     Given the following dal code xx:
     """
-     + b
+    a + b
     """
     Then got the following "expression" node xx:
     """
     : {
       class.simpleName: 'Expression'
-      inspect: '+ b'
+      inspect: 'a + b'
     }
     """
 

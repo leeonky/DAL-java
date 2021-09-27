@@ -5,12 +5,15 @@ import com.github.leeonky.dal.ast.Expression;
 import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 
-import static com.github.leeonky.dal.cucumber.ExpressionParser.EXPLICIT_PROPERTY;
+import static com.github.leeonky.dal.cucumber.ExpressionParser.*;
 import static com.github.leeonky.dal.cucumber.NodeParser.CONST;
 import static com.github.leeonky.dal.cucumber.NodeParser.PROPERTY;
 
 public interface MandatoryNodeParser {
-    MandatoryNodeParser OPERAND = new OperandNodeParser();
+    MandatoryNodeParser
+            OPERAND = new OperandNodeParser(),
+            EXPRESSION = sourceCode -> BINARY_OPERATOR_EXPRESSION.combine(SCHEMA_EXPRESSION)
+                    .defaultPrevious().recursive().fetch(sourceCode, OPERAND.fetch(sourceCode));
 
     Node fetch(SourceCode sourceCode);
 
