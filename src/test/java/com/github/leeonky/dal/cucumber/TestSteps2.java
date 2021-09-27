@@ -34,6 +34,7 @@ public class TestSteps2 {
         put("binary-operator-expression", BINARY_OPERATOR_EXPRESSION.defaultInputNode());
         put("schema-expression", SCHEMA_EXPRESSION.defaultInputNode());
         put("expression", optional(EXPRESSION));
+        put("parentheses", PARENTHESES);
     }};
 
     private NodeParser optional(MandatoryNodeParser mandatoryNodeParser) {

@@ -69,7 +69,17 @@ public class SourceCode {
         return empty();
     }
 
+    public Optional<Node> fetchNode(char opening, char closing,
+                                    Function<Node, Node> nodeFactory, MandatoryNodeParser nodeParser, String message) {
+        return fetchElements(FetchBy.BY_NODE, opening, closing, args -> {
+            if (args.size() != 1)
+                throw new SyntaxException(message, getPosition() - 1);
+            return nodeFactory.apply(args.get(0));
+        }, () -> nodeParser.fetch(this));
+    }
+
     public <T> Optional<Node> fetchElements(FetchBy fetchBy, char opening, char closing,
+                                            //TODO Supplier<T> => Function<SourceCode, T>
                                             Function<List<T>, Node> nodeFactory, Supplier<T> element) {
         if (whenFirstChar(c -> c == opening)) {
             int startPosition = position++;
