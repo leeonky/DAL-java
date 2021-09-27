@@ -36,6 +36,10 @@ public interface ExpressionParser {
         return sourceCode -> fetch(sourceCode, InputNode.INSTANCE);
     }
 
+    default MandatoryExpressionParser defaultPrevious() {
+        return (sourceCode, previous) -> fetch(sourceCode, previous).orElse(previous);
+    }
+
     default Node recursiveCompile(SourceCode sourceCode, Node input,
                                   BiFunction<SourceCode, Node, Node> method) {
         return fetch(sourceCode, input).map(node -> method.apply(sourceCode, node)).orElse(input);
@@ -65,13 +69,8 @@ public interface ExpressionParser {
 
         @Override
         public Optional<Node> fetch(SourceCode sourceCode, Node previous) {
-            return sourceCode.popBinaryOperator().map(operator -> recursiveCompile(sourceCode,
-                    new Expression(previous, operator, OPERAND.fetch(sourceCode)).adjustOperatorOrder(),
-
-//                   TODO chain is operator or is which
-                    (sourceCode1, node) -> fetch(sourceCode1, node).orElse(node)));
-
-//            TODO test for mix opt expression and schema expression chain
+            return sourceCode.popBinaryOperator().map(operator ->
+                    new Expression(previous, operator, OPERAND.fetch(sourceCode)).adjustOperatorOrder());
         }
     }
 
