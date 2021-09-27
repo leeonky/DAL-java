@@ -35,6 +35,7 @@ public class TestSteps2 {
         put("schema-expression", SCHEMA_EXPRESSION.defaultInputNode());
         put("expression", optional(EXPRESSION));
         put("parentheses", PARENTHESES);
+        put("object", OBJECT);
     }};
 
     private NodeParser optional(MandatoryNodeParser mandatoryNodeParser) {

@@ -2,10 +2,7 @@ package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
-import com.github.leeonky.dal.ast.ConstNode;
-import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.ParenthesesNode;
-import com.github.leeonky.dal.ast.RegexNode;
+import com.github.leeonky.dal.ast.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +13,7 @@ import java.util.stream.Stream;
 import static com.github.leeonky.dal.cucumber.ExpressionParser.EXPLICIT_PROPERTY;
 import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.EXPRESSION;
 import static com.github.leeonky.dal.cucumber.SourceCode.FetchBy.BY_CHAR;
+import static com.github.leeonky.dal.cucumber.SourceCode.FetchBy.BY_NODE;
 
 //TODO use generic
 public interface NodeParser {
@@ -47,7 +45,9 @@ public interface NodeParser {
                     ParenthesesNode::new, EXPRESSION, "expect a value or expression"),
             IDENTITY_PROPERTY = sourceCode -> sourceCode.fetchIdentityProperty().map(Token::toIdentityProperty),
             PROPERTY = EXPLICIT_PROPERTY.defaultInputNode().combine(IDENTITY_PROPERTY),
-            SINGLE_EVALUABLE = CONST.combines(PROPERTY, PARENTHESES);
+            SINGLE_EVALUABLE = CONST.combines(PROPERTY, PARENTHESES),
+            OBJECT = sourceCode -> sourceCode.fetchElements(BY_NODE, '{', '}',
+                    args -> new ObjectNode((List) args), () -> EXPRESSION.fetch(sourceCode));
 
     Optional<Node> fetch(SourceCode sourceCode);
 
