@@ -31,10 +31,11 @@ Feature: operand node
     }
     """
     Examples:
-      | code  | type         | inspect |
-      | 100   | ConstNode    | 100     |
-      | .name | PropertyNode | .name   |
-      | [0]   | PropertyNode | [0]     |
+      | code  | type            | inspect |
+      | 100   | ConstNode       | 100     |
+      | .name | PropertyNode    | .name   |
+      | [0]   | PropertyNode    | [0]     |
+      | (1+1) | ParenthesesNode | (1 + 1) |
 
   Scenario: recursive property node
     Given the following dal code xx:

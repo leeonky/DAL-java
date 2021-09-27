@@ -6,8 +6,7 @@ import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 
 import static com.github.leeonky.dal.cucumber.ExpressionParser.*;
-import static com.github.leeonky.dal.cucumber.NodeParser.CONST;
-import static com.github.leeonky.dal.cucumber.NodeParser.PROPERTY;
+import static com.github.leeonky.dal.cucumber.NodeParser.SINGLE_EVALUABLE;
 
 //TODO use generic
 public interface MandatoryNodeParser {
@@ -26,7 +25,7 @@ public interface MandatoryNodeParser {
         }
 
         private Node singleEvaluableNode(SourceCode sourceCode) {
-            return CONST.combine(PROPERTY).fetch(sourceCode).orElseGet(() -> {
+            return SINGLE_EVALUABLE.fetch(sourceCode).orElseGet(() -> {
                 if (sourceCode.isBeginning())
                     return InputNode.INSTANCE;
                 throw new SyntaxException("expect a value or expression", sourceCode.getPosition());
