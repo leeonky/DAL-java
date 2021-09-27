@@ -36,6 +36,7 @@ public class TestSteps2 {
         put("expression", optional(EXPRESSION));
         put("parentheses", PARENTHESES);
         put("object", OBJECT);
+        put("list", LIST);
     }};
 
     private NodeParser optional(MandatoryNodeParser mandatoryNodeParser) {

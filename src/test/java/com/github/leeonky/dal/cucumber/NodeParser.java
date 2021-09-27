@@ -47,7 +47,9 @@ public interface NodeParser {
             PROPERTY = EXPLICIT_PROPERTY.defaultInputNode().combine(IDENTITY_PROPERTY),
             SINGLE_EVALUABLE = CONST.combines(PROPERTY, PARENTHESES),
             OBJECT = sourceCode -> sourceCode.fetchElements(BY_NODE, '{', '}',
-                    args -> new ObjectNode((List) args), () -> EXPRESSION.fetch(sourceCode));
+                    args -> new ObjectNode((List) args), () -> EXPRESSION.fetch(sourceCode)),
+            LIST = sourceCode -> sourceCode.fetchElements(BY_NODE, '[', ']',
+                    args -> new ListNode((List) args), () -> EXPRESSION.fetch(sourceCode));
 
     Optional<Node> fetch(SourceCode sourceCode);
 
