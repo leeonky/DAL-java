@@ -36,7 +36,7 @@ public class TestSteps2 {
         put("parentheses", PARENTHESES);
         put("object", OBJECT);
         put("list", LIST);
-        put("arithmetic-expression", optional(ARITHMETIC_EXPRESSION));
+        put("judgement-expression-operand", optional(JUDGEMENT_EXPRESSION_OPERAND));
     }};
 
     private NodeParser optional(MandatoryNodeParser mandatoryNodeParser) {

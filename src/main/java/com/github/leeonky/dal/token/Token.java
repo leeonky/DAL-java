@@ -72,8 +72,8 @@ public class Token {
         return new Token(Type.CLOSING_BRACE, "}");
     }
 
-    public static WildCardNode toWildCardNode(Token token) {
-        return (WildCardNode) new WildCardNode().setPositionBegin(token.getPositionBegin());
+    public static WildcardNode toWildCardNode(Token token) {
+        return (WildcardNode) new WildcardNode().setPositionBegin(token.getPositionBegin());
     }
 
     public static ListTailNode toListTailNode(Token token) {

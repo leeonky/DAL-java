@@ -1,10 +1,10 @@
-Feature: compile arithmetic expression
+Feature: compile judgement expression operand
 
   Scenario: return 'this' object when no code
     Given the following dal code xx:
     """
     """
-    Then got the following "arithmetic-expression" node xx:
+    Then got the following "judgement-expression-operand" node xx:
     """
     : {
       class.simpleName: 'InputNode'
@@ -17,7 +17,7 @@ Feature: compile arithmetic expression
     """
       1
     """
-    Then got the following "arithmetic-expression" node xx:
+    Then got the following "judgement-expression-operand" node xx:
     """
     : {
       class.simpleName: 'ConstNode'
@@ -30,7 +30,7 @@ Feature: compile arithmetic expression
     """
       + 1
     """
-    Then got the following "arithmetic-expression" node xx:
+    Then got the following "judgement-expression-operand" node xx:
     """
     : {
       class.simpleName: 'Expression'
@@ -44,7 +44,7 @@ Feature: compile arithmetic expression
     """
       1+
     """
-    Then failed to get "arithmetic-expression" node with the following message xx:
+    Then failed to get "judgement-expression-operand" node with the following message xx:
     """
     expect a value or expression
     """
@@ -59,7 +59,7 @@ Feature: compile arithmetic expression
     """
     a <operator> b
     """
-    Then got the following "arithmetic-expression" node xx:
+    Then got the following "judgement-expression-operand" node xx:
     """
     : {
       class.simpleName: 'Expression'
@@ -90,7 +90,7 @@ Feature: compile arithmetic expression
     """
       1<operator>
     """
-    Then got the following "arithmetic-expression" node xx:
+    Then got the following "judgement-expression-operand" node xx:
     """
     : {
       class.simpleName: 'ConstNode'
@@ -107,7 +107,7 @@ Feature: compile arithmetic expression
     """
     a + b * c
     """
-    Then got the following "arithmetic-expression" node xx:
+    Then got the following "judgement-expression-operand" node xx:
     """
     : {
       class.simpleName: 'Expression'
@@ -125,11 +125,51 @@ Feature: compile arithmetic expression
     """
       + [0]
     """
-    Then got the following "arithmetic-expression" node xx:
+    Then got the following "judgement-expression-operand" node xx:
     """
     : {
       class.simpleName: 'Expression'
       inspect: '+ [0]'
       rightOperand.class.simpleName: 'PropertyNode'
     }
+    """
+
+  Scenario: regex node
+    Given the following dal code xx:
+    """
+    /hello/
+    """
+    Then got the following "judgement-expression-operand" node xx:
+    """
+    class.simpleName: 'RegexNode'
+    """
+
+  Scenario: object node
+    Given the following dal code xx:
+    """
+    {}
+    """
+    Then got the following "judgement-expression-operand" node xx:
+    """
+    class.simpleName: 'ObjectNode'
+    """
+
+  Scenario: list node
+    Given the following dal code xx:
+    """
+    []
+    """
+    Then got the following "judgement-expression-operand" node xx:
+    """
+    class.simpleName: 'ListNode'
+    """
+
+  Scenario: wildcard
+    Given the following dal code xx:
+    """
+    *
+    """
+    Then got the following "judgement-expression-operand" node xx:
+    """
+    class.simpleName: 'WildcardNode'
     """
