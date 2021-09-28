@@ -139,3 +139,26 @@ Feature: operand node
     1
      ^
     """
+
+  Scenario Outline:
+  dot operator has higher precedence over unary operator(property chain after unary operator)
+  unary operator has higher precedence over other operators
+    Given the following dal code xx:
+    """
+    1 + <operator>false.xxx
+    """
+    Then got the following "expression" node xx:
+    """
+    rightOperand: {
+      inspect: '<operator>false.xxx'
+      class.simpleName: 'Expression'
+      rightOperand: {
+        class.simpleName: 'PropertyNode'
+        inspect: 'false.xxx'
+      }
+    }
+    """
+    Examples:
+      | operator |
+      | !        |
+      | -        |

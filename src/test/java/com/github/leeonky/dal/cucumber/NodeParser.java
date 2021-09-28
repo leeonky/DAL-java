@@ -49,7 +49,8 @@ public interface NodeParser {
             OBJECT = sourceCode -> sourceCode.fetchElements(BY_NODE, '{', '}',
                     args -> new ObjectNode((List) args), () -> EXPRESSION.fetch(sourceCode)),
             LIST = sourceCode -> sourceCode.fetchElements(BY_NODE, '[', ']',
-                    args -> new ListNode((List) args), () -> EXPRESSION.fetch(sourceCode));
+                    args -> new ListNode((List) args), () -> EXPRESSION.fetch(sourceCode)),
+            JUDGEMENT = REGEX.combines(OBJECT, LIST);
 
     Optional<Node> fetch(SourceCode sourceCode);
 
@@ -60,6 +61,10 @@ public interface NodeParser {
                 return optionalNode;
             return another.fetch(sourceCode);
         };
+    }
+
+    default MandatoryNodeParser combine(MandatoryNodeParser mandatoryNodeParser) {
+        return sourceCode -> fetch(sourceCode).orElseGet(() -> mandatoryNodeParser.fetch(sourceCode));
     }
 
     default NodeParser combines(NodeParser... others) {

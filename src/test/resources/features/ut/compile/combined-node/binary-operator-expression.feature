@@ -41,3 +41,39 @@ Feature: binary operator expression
       | <=       | LessOrEqual    |
       | =        | Equal          |
       | :        | Matcher        |
+
+  Scenario Outline: judge by object list or regex
+    Given the following dal code xx:
+    """
+    <operator> <operand>
+    """
+    Then got the following "binary-operator-expression" node xx:
+    """
+    : {
+      class.simpleName: 'Expression'
+      inspect: '<operator> <operand>'
+    }
+    """
+    Examples:
+      | operator | operand   |
+      | =        | {}        |
+      | =        | []        |
+      | =        | /pattern/ |
+      | :        | {}        |
+      | :        | []        |
+      | :        | /pattern/ |
+
+  Scenario: raise error when expression is not finished
+    Given the following dal code xx:
+    """
+      +
+    """
+    Then failed to get "binary-operator-expression" node with the following message xx:
+    """
+    expect a value or expression
+    """
+    And got the following source code information xx:
+    """
+      +
+       ^
+    """

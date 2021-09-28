@@ -6,12 +6,14 @@ import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 
 import static com.github.leeonky.dal.cucumber.ExpressionParser.*;
+import static com.github.leeonky.dal.cucumber.NodeParser.JUDGEMENT;
 import static com.github.leeonky.dal.cucumber.NodeParser.SINGLE_EVALUABLE;
 
 //TODO use generic
 public interface MandatoryNodeParser {
     MandatoryNodeParser
             OPERAND = new OperandNodeParser(),
+            JUDGEMENT_OR_OPERAND = JUDGEMENT.combine(OPERAND),
             EXPRESSION = sourceCode -> BINARY_OPERATOR_EXPRESSION.combine(SCHEMA_EXPRESSION)
                     .defaultPrevious().recursive().fetch(sourceCode, OPERAND.fetch(sourceCode));
 

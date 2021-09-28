@@ -69,8 +69,8 @@ public class SourceCode {
         return empty();
     }
 
-    public Optional<Node> fetchNode(char opening, char closing,
-                                    Function<Node, Node> nodeFactory, MandatoryNodeParser nodeParser, String message) {
+    public Optional<Node> fetchNode(char opening, char closing, Function<Node, Node> nodeFactory,
+                                    MandatoryNodeParser nodeParser, String message) {
         return fetchElements(FetchBy.BY_NODE, opening, closing, args -> {
             if (args.size() != 1)
                 throw new SyntaxException(message, getPosition() - 1);
@@ -178,6 +178,10 @@ public class SourceCode {
 
     public Optional<Operator> popBinaryArithmeticOperator() {
         return popOperator(binaryArithmeticOperatorFactories);
+    }
+
+    public Optional<Operator> popJudgementOperator() {
+        return popOperator(judgementOperatorFactories);
     }
 
     public Optional<Operator> popBinaryOperator() {
