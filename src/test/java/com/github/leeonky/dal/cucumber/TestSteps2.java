@@ -10,8 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.github.leeonky.dal.cucumber.ExpressionParser.*;
-import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.EXPRESSION;
-import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.OPERAND;
+import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.*;
 import static com.github.leeonky.dal.cucumber.NodeParser.*;
 
 public class TestSteps2 {
@@ -37,6 +36,7 @@ public class TestSteps2 {
         put("parentheses", PARENTHESES);
         put("object", OBJECT);
         put("list", LIST);
+        put("arithmetic-expression", optional(ARITHMETIC_EXPRESSION));
     }};
 
     private NodeParser optional(MandatoryNodeParser mandatoryNodeParser) {

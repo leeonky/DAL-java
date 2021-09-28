@@ -77,3 +77,17 @@ Feature: binary operator expression
       +
        ^
     """
+
+  Scenario: compile right operand as element accessing when operator is not judgement
+    Given the following dal code xx:
+    """
+      + [0]
+    """
+    Then got the following "binary-operator-expression" node xx:
+    """
+    : {
+      class.simpleName: 'Expression'
+      inspect: '+ [0]'
+      rightOperand.class.simpleName: 'PropertyNode'
+    }
+    """
