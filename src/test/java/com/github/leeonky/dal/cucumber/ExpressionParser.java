@@ -11,7 +11,6 @@ import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.JUDGEMENT_OR_O
 import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.OPERAND;
 import static com.github.leeonky.dal.cucumber.NodeParser.INTEGER_OR_STRING_INDEX;
 
-//TODO use generic
 public interface ExpressionParser {
     ExpressionParser
             DOT_PROPERTY = (sourceCode, previous) -> sourceCode.fetchProperty().map(token -> token.toDotProperty(previous)),

@@ -9,7 +9,6 @@ import static com.github.leeonky.dal.cucumber.ExpressionParser.*;
 import static com.github.leeonky.dal.cucumber.NodeParser.JUDGEMENT;
 import static com.github.leeonky.dal.cucumber.NodeParser.SINGLE_EVALUABLE;
 
-//TODO use generic
 public interface MandatoryNodeParser {
     MandatoryNodeParser
             OPERAND = new OperandNodeParser(),

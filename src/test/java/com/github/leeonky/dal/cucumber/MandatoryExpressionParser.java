@@ -2,7 +2,6 @@ package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.ast.Node;
 
-//TODO use generic
 public interface MandatoryExpressionParser {
     Node fetch(SourceCode sourceCode, Node previous);
 

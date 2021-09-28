@@ -15,7 +15,6 @@ import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.EXPRESSION;
 import static com.github.leeonky.dal.cucumber.SourceCode.FetchBy.BY_CHAR;
 import static com.github.leeonky.dal.cucumber.SourceCode.FetchBy.BY_NODE;
 
-//TODO use generic
 public interface NodeParser {
     EscapeChars SINGLE_QUOTED_ESCAPES = new EscapeChars()
             .escape("\\\\", '\\')
@@ -47,9 +46,9 @@ public interface NodeParser {
             PROPERTY = EXPLICIT_PROPERTY.defaultInputNode().combine(IDENTITY_PROPERTY),
             SINGLE_EVALUABLE = CONST.combines(PROPERTY, PARENTHESES),
             OBJECT = sourceCode -> sourceCode.fetchElements(BY_NODE, '{', '}',
-                    args -> new ObjectNode((List) args), () -> EXPRESSION.fetch(sourceCode)),
+                    ObjectNode::new, () -> (Expression) EXPRESSION.fetch(sourceCode)),
             LIST = sourceCode -> sourceCode.fetchElements(BY_NODE, '[', ']',
-                    args -> new ListNode((List) args), () -> EXPRESSION.fetch(sourceCode)),
+                    ListNode::new, () -> (Expression) EXPRESSION.fetch(sourceCode)),
             JUDGEMENT = REGEX.combines(OBJECT, LIST);
 
     Optional<Node> fetch(SourceCode sourceCode);
