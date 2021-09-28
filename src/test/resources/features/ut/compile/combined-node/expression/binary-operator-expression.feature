@@ -91,3 +91,24 @@ Feature: binary operator expression
       rightOperand.class.simpleName: 'PropertyNode'
     }
     """
+
+  Scenario Outline: force positive judgement
+    Given the following dal code xx:
+    """
+    <operator> *
+    """
+    Then got the following "expression" node xx:
+    """
+    : {
+      class.simpleName: 'Expression'
+      inspect: '<operator> *'
+    }
+    """
+    And evaluate result is xx:
+    """
+    :true
+    """
+    Examples:
+      | operator |
+      | =        |
+      | :        |

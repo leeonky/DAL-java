@@ -94,4 +94,8 @@ public class Token {
     public SchemaNode toSchemaNode() {
         return (SchemaNode) new SchemaNode(getContent()).setPositionBegin(position);
     }
+
+    public WildCardNode toWildcardNode() {
+        return (WildCardNode) new WildCardNode().setPositionBegin(position);
+    }
 }

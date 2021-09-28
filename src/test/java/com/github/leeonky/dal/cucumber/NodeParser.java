@@ -49,7 +49,8 @@ public interface NodeParser {
                     ObjectNode::new, () -> (Expression) EXPRESSION.fetch(sourceCode)),
             LIST = sourceCode -> sourceCode.fetchElements(BY_NODE, '[', ']',
                     ListNode::new, () -> (Expression) EXPRESSION.fetch(sourceCode)),
-            JUDGEMENT = REGEX.combines(OBJECT, LIST);
+            WILDCARD = sourceCode -> sourceCode.fetchWord("*").map(Token::toWildcardNode),
+            JUDGEMENT = REGEX.combines(OBJECT, LIST, WILDCARD);
 
     Optional<Node> fetch(SourceCode sourceCode);
 
