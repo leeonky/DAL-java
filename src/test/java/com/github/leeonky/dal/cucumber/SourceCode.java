@@ -94,6 +94,8 @@ public class SourceCode {
         while (hasCode() && closing != currentChar()) {
             elements.add(element.apply(index++));
             fetchBy.afterFetchElement(this);
+            if (fetchBy == FetchBy.BY_NODE)
+                fetchWord(",");
         }
         if (position >= chars.length)
             throw new SyntaxException(String.format("should end with `%c`", closing), position);

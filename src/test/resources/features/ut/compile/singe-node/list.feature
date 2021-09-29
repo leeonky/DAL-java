@@ -103,3 +103,49 @@ Feature: list node
       ]
     }
     """
+
+  Scenario Outline: support different judgement operator in element
+    Given the following dal code xx:
+    """
+     [<operator>1]
+    """
+    Then got the following "list" node xx:
+    """
+    expressions.inspect: [
+      '[0] <result> 1'
+    ]
+    """
+    Examples:
+      | operator | result |
+      |          | :      |
+      | =        | =      |
+      | :        | :      |
+
+  Scenario Outline: support expression in element judgement
+    Given the following dal code xx:
+    """
+     [<operator>2+1]
+    """
+    Then got the following "list" node xx:
+    """
+    expressions[0]: {
+      leftOperand.inspect: '[0]'
+      operator.class.simpleName: '<result>'
+      rightOperand.inspect: '2 + 1'
+    }
+    """
+    Examples:
+      | operator | result  |
+      |          | Matcher |
+      | =        | Equal   |
+      | :        | Matcher |
+
+  Scenario: support optional comma between elements
+    Given the following dal code xx:
+    """
+     [true, false]
+    """
+    Then got the following "list" node xx:
+    """
+    inspect: '[true false]'
+    """
