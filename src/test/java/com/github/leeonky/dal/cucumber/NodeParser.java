@@ -50,7 +50,7 @@ public interface NodeParser {
             OBJECT = sourceCode -> sourceCode.fetchElements(BY_NODE, '{', '}',
                     ObjectNode::new, i -> new Expression(
                             PROPERTY.toMandatoryNodeParser("expect a object property").fetch(sourceCode),
-                            sourceCode.popJudgementOperator().get(),
+                            sourceCode.popJudgementOperator().orElseThrow(() -> new SyntaxException("expect operator `:` or `=`", sourceCode.getPosition())),
                             JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode)
                     )),
             LIST_TAIL = sourceCode -> sourceCode.fetchWord("...").map(Token::toListTail),

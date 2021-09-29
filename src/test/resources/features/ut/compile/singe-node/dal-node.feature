@@ -3,7 +3,7 @@ Feature: compile all nodes with delimiter
   Scenario: compile all nodes with delimiter
     Given the following dal code xx:
     """
-    1 'hello' "world" /regex/ true false null identityProperty [1] 2
+    1 'hello' "world" /regex/ true false null identityProperty [1] 1a  [1] {a: 1} 2
     """
     Then got the following "number" node xx:
     """
@@ -66,6 +66,27 @@ Feature: compile all nodes with delimiter
     : {
       class.simpleName: 'PropertyNode'
       inspect: '[1]'
+    }
+    """
+    And got the following "identity-property" node xx:
+    """
+    : {
+      class.simpleName: 'PropertyNode'
+      inspect: '1a'
+    }
+    """
+    And got the following "list" node xx:
+    """
+    : {
+      class.simpleName: 'ListNode'
+      inspect: '[1]'
+    }
+    """
+    And got the following "object" node xx:
+    """
+    : {
+      class.simpleName: 'ObjectNode'
+      inspect: '{a : 1}'
     }
     """
     And got the following "number" node xx:

@@ -97,3 +97,46 @@ Feature: object node
     { 1: 1 }
       ^
     """
+
+  Scenario: raise error when not judgement expression
+    Given the following dal code xx:
+    """
+    { a + 1 }
+    """
+    Then failed to get "object" node with the following message xx:
+    """
+    expect operator `:` or `=`
+    """
+    And got the following source code information xx:
+    """
+    { a + 1 }
+        ^
+    """
+
+  Scenario: raise error when missing judgement operator
+    Given the following dal code:
+    """
+    { a 1 }
+    """
+    Then failed to get "object" node with the following message:
+    """
+    expect operator `:` or `=`
+    """
+    And got the following source code information:
+    """
+    { a 1 }
+        ^
+    """
+
+  Scenario: support optional comma between after sub expression
+    Given the following dal code:
+    """
+     {
+       key1: 1,
+       key2: 2
+     }
+    """
+    Then got the following "object" node:
+    """
+    inspect: '{key1 : 1 key2 : 2}'
+    """
