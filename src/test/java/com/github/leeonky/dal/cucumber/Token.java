@@ -98,4 +98,8 @@ public class Token {
     public WildcardNode toWildcardNode() {
         return (WildcardNode) new WildcardNode().setPositionBegin(position);
     }
+
+    public ListTailNode toListTail() {
+        return (ListTailNode) new ListTailNode().setPositionBegin(position);
+    }
 }

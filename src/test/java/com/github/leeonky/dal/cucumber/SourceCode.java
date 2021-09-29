@@ -75,12 +75,12 @@ public class SourceCode {
             if (args.size() != 1)
                 throw new SyntaxException(message, getPosition() - 1);
             return nodeFactory.apply(args.get(0));
-        }, () -> nodeParser.fetch(this));
+        }, i -> nodeParser.fetch(this));
     }
 
     public <T> Optional<Node> fetchElements(FetchBy fetchBy, char opening, char closing,
                                             //TODO Supplier<T> => Function<SourceCode, T>
-                                            Function<List<T>, Node> nodeFactory, Supplier<T> element) {
+                                            Function<List<T>, Node> nodeFactory, Function<Integer, T> element) {
         if (whenFirstChar(c -> c == opening)) {
             int startPosition = position++;
             return of(nodeFactory.apply(fetchElements(fetchBy, closing, element)).setPositionBegin(startPosition));
@@ -88,10 +88,11 @@ public class SourceCode {
         return Optional.empty();
     }
 
-    private <T> List<T> fetchElements(FetchBy fetchBy, char closing, Supplier<T> element) {
+    private <T> List<T> fetchElements(FetchBy fetchBy, char closing, Function<Integer, T> element) {
         List<T> elements = new ArrayList<>();
+        int index = 0;
         while (hasCode() && closing != currentChar()) {
-            elements.add(element.get());
+            elements.add(element.apply(index++));
             fetchBy.afterFetchElement(this);
         }
         if (position >= chars.length)
@@ -105,7 +106,7 @@ public class SourceCode {
     }
 
     public Optional<Token> fetchProperty() {
-        if (whenFirstChar(c -> '.' == c)) {
+        if (whenFirstChar(c -> '.' == c) && !startsWith(Constants.LIST_TAIL)) {
             Token token = new Token(position++);
             leftTrim();
             while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()) && currentChar() != '.')

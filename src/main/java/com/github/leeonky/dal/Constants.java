@@ -17,6 +17,7 @@ public class Constants {
     public static final String SCHEMA_DELIMITER = "/";
     public static final Set<String> OPERATOR = new HashSet<>(asList("-", "!", "=", ">", "<", "+", "*", "/", ":", ">=",
             "<=", "!=", "&&", "||", ",", "...", ".."));
+    public static final String LIST_TAIL = "...";
 
     public static class KeyWords {
         public static final String WHICH = "which";
