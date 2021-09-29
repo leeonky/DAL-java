@@ -64,3 +64,19 @@ Feature: const number node
       | \n        |
       | `TAB      |
       | `SPACE    |
+
+  Scenario: return empty when invalid number, and source code offset should rollback to beginning
+    Given the following dal code xx:
+    """
+    12Invalid
+    """
+    Then got the following "number" node xx:
+    """
+    : null
+    """
+    Then got the following "identity-property" node xx:
+    """
+    : {
+      inspect: '12Invalid'
+    }
+    """

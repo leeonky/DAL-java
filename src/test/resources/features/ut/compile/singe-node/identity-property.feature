@@ -37,6 +37,7 @@ Feature: compile identity property
       | false  |
       | or     |
       | and    |
+      | 100    |
 
   Scenario Outline: valid identity property(may not possible)
     Given the following dal code xx:
@@ -55,7 +56,6 @@ Feature: compile identity property
       | code |
       | a    |
       | 1a   |
-      | 100  |
 
   Scenario Outline: identity property should end with delimiter and dot
     Given the following dal code xx:

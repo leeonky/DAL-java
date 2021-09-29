@@ -102,4 +102,13 @@ public class Token {
     public ListTailNode toListTail() {
         return (ListTailNode) new ListTailNode().setPositionBegin(position);
     }
+
+    public boolean isNumber() {
+        try {
+            getNumber(getContent());
+            return true;
+        } catch (Exception ignore) {
+            return false;
+        }
+    }
 }

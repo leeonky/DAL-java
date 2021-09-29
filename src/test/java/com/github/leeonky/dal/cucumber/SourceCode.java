@@ -50,10 +50,16 @@ public class SourceCode {
 
     //TODO use ifWhen
     public Optional<Token> fetchNumber() {
+        //TODO refactor
+        int savePosition = position;
         if (whenFirstChar(Constants.DIGITAL_CHAR::contains)) {
             Token token = new Token(position).append(popChar());
             while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()))
                 token.append(popChar());
+            if (!token.isNumber()) {
+                position = savePosition;
+                return empty();
+            }
             return of(token);
         }
         return empty();
@@ -136,6 +142,7 @@ public class SourceCode {
 
     //TODO refactor
     public Optional<Token> fetchIdentityProperty() {
+        int savePosition = position;
         if (!whenFirstChar(Constants.TOKEN_DELIMITER::contains) && hasCode()
                 && !startsWith(Constants.KeyWords.IS)
                 && !startsWith(Constants.KeyWords.WHICH)
@@ -144,6 +151,10 @@ public class SourceCode {
                 && !startsWith(Constants.KeyWords.NULL)
                 && !startsWith(Constants.KeyWords.AND)
                 && !startsWith(Constants.KeyWords.OR)) {
+            if (fetchNumber().isPresent()) {
+                position = savePosition;
+                return empty();
+            }
             Token token = new Token(position);
             while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()) && currentChar() != '.')
                 token.append(popChar());
