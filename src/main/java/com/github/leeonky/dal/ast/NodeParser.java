@@ -181,7 +181,7 @@ public class NodeParser {
     }
 
     private Node processListMappingProperty(Node n) {
-        if (((PropertyNode) n).isListMapping())
+        if (n.isListMapping())
             return ExpressionFactory.EXPLICIT_PROPERTY.tryFetch(this, n)
                     .orElseThrow(() -> new SyntaxException("element property needed", tokenStream.getPosition()));
         return n;

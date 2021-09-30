@@ -19,6 +19,10 @@ public class PropertyNode extends Node {
         this.type = type;
     }
 
+    public Object getName() {
+        return name;
+    }
+
     @Override
     public DataObject evaluateDataObject(RuntimeContext context) {
         try {
@@ -55,6 +59,7 @@ public class PropertyNode extends Node {
         return name;
     }
 
+    @Override
     public boolean isListMapping() {
         return "@".equals(name);
     }

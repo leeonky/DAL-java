@@ -33,6 +33,7 @@ Feature: operand node
     Examples:
       | code  | type            | inspect |
       | 100   | ConstNode       | 100     |
+      | name  | PropertyNode    | name    |
       | .name | PropertyNode    | .name   |
       | [0]   | PropertyNode    | [0]     |
       | (1+1) | ParenthesesNode | (1 + 1) |
@@ -162,3 +163,18 @@ Feature: operand node
       | operator |
       | !        |
       | -        |
+
+  Scenario: end with .@ is invalid
+    Given the following dal code xx:
+    """
+      .@
+    """
+    Then failed to get "operand" node with the following message xx:
+    """
+    element property needed
+    """
+    And got the following source code information xx:
+    """
+      .@
+        ^
+    """

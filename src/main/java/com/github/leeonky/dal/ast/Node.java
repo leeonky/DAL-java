@@ -46,6 +46,10 @@ public abstract class Node {
 
     public abstract String inspect();
 
+    public boolean isListMapping() {
+        return false;
+    }
+
     private void invalidTypeToMatchStringValue(Class<?> type, Object value1, Object value2, Operator.Matcher operator) {
         if (type.isInstance(value1) && value2 instanceof String)
             throw new RuntimeException(format("Cannot matches between type '%s' and 'java.lang.String'",

@@ -25,8 +25,11 @@ public interface MandatoryNodeParser {
     class OperandNodeParser implements MandatoryNodeParser {
         @Override
         public Node fetch(SourceCode sourceCode) {
-            return sourceCode.popUnaryOperator().map(operator -> (Node) new Expression(operator, fetch(sourceCode)))
+            Node node = sourceCode.popUnaryOperator().map(operator -> (Node) new Expression(operator, fetch(sourceCode)))
                     .orElseGet(() -> parsePropertyChain(sourceCode, singleEvaluableNode(sourceCode)));
+            if (node.isListMapping())
+                throw new SyntaxException("element property needed", sourceCode.getPosition());
+            return node;
         }
 
         private Node singleEvaluableNode(SourceCode sourceCode) {

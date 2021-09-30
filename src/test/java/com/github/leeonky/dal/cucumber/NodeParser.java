@@ -51,8 +51,7 @@ public interface NodeParser {
                     ObjectNode::new, i -> new Expression(
                             PROPERTY.toMandatoryNodeParser("expect a object property").fetch(sourceCode),
                             sourceCode.popJudgementOperator().orElseThrow(() -> new SyntaxException("expect operator `:` or `=`", sourceCode.getPosition())),
-                            JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode)
-                    )),
+                            JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode))),
             LIST_TAIL = sourceCode -> sourceCode.fetchWord("...").map(Token::toListTail),
             LIST = sourceCode -> sourceCode.fetchElements(BY_NODE, '[', ']',
                     ListNode::new, i -> LIST_TAIL.fetch(sourceCode).isPresent() ? null :
