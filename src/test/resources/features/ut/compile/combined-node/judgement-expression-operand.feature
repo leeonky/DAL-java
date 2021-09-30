@@ -1,18 +1,6 @@
 Feature: compile judgement expression operand
 
-  Scenario: return 'this' object when no code
-    Given the following dal code xx:
-    """
-    """
-    Then got the following "judgement-expression-operand" node xx:
-    """
-    : {
-      class.simpleName: 'InputNode'
-      inspect: ''
-    }
-    """
-
-  Scenario: return left operand when no right operand
+  Scenario: single const node
     Given the following dal code xx:
     """
       1
@@ -25,36 +13,26 @@ Feature: compile judgement expression operand
     }
     """
 
-  Scenario: default use 'this' object as left operand
+
+  Scenario Outline: property node
     Given the following dal code xx:
     """
-      + 1
+      <code>
     """
     Then got the following "judgement-expression-operand" node xx:
     """
     : {
-      class.simpleName: 'Expression'
-      inspect: '+ 1'
-      positionBegin: 2
+      class.simpleName: 'PropertyNode'
+      inspect: '<code>'
     }
     """
+    Examples:
+      | code |
+      | a    |
+      | .a   |
+      | .a.b |
 
-  Scenario: raise error when expression is not finished
-    Given the following dal code xx:
-    """
-      1+
-    """
-    Then failed to get "judgement-expression-operand" node with the following message xx:
-    """
-    expect a value or expression
-    """
-    And got the following source code information xx:
-    """
-      1+
-        ^
-    """
-
-  Scenario Outline: supported operator expressions
+  Scenario Outline: operator expressions
     Given the following dal code xx:
     """
     a <operator> b
@@ -120,18 +98,14 @@ Feature: compile judgement expression operand
     }
     """
 
-  Scenario: compile right operand as element accessing when operator is not judgement
+  Scenario: compile as element accessing when operator is not judgement
     Given the following dal code xx:
     """
-      + [0]
+    a + [0]
     """
     Then got the following "judgement-expression-operand" node xx:
     """
-    : {
-      class.simpleName: 'Expression'
-      inspect: '+ [0]'
-      rightOperand.class.simpleName: 'PropertyNode'
-    }
+    rightOperand.class.simpleName: 'PropertyNode'
     """
 
   Scenario: regex node
@@ -164,6 +138,19 @@ Feature: compile judgement expression operand
     class.simpleName: 'ListNode'
     """
 
+  Scenario: parentheses
+    Given the following dal code xx:
+    """
+    (1)
+    """
+    Then got the following "judgement-expression-operand" node xx:
+    """
+    : {
+      class.simpleName: 'ParenthesesNode'
+      inspect: '(1)'
+    }
+    """
+
   Scenario: wildcard
     Given the following dal code xx:
     """
@@ -172,4 +159,35 @@ Feature: compile judgement expression operand
     Then got the following "judgement-expression-operand" node xx:
     """
     class.simpleName: 'WildcardNode'
+    """
+
+  Scenario: raise error when expression is not finished
+    Given the following dal code xx:
+    """
+      1+
+    """
+    Then failed to get "judgement-expression-operand" node with the following message xx:
+    """
+    expect a value or expression
+    """
+    And got the following source code information xx:
+    """
+      1+
+        ^
+    """
+
+  Scenario: raise error when no code
+    Given the following dal code xx:
+    """
+    a
+    """
+    And ignore an "property" node xx
+    Then failed to get "judgement-expression-operand" node with the following message xx:
+    """
+    expect a value or expression
+    """
+    And got the following source code information xx:
+    """
+    a
+     ^
     """

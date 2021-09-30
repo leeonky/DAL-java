@@ -12,7 +12,7 @@ Feature: expression
     }
     """
 
-  Scenario: return left operand when no right operand
+  Scenario: single const node
     Given the following dal code xx:
     """
       1
@@ -24,6 +24,24 @@ Feature: expression
       inspect: '1'
     }
     """
+
+  Scenario Outline: property node
+    Given the following dal code xx:
+    """
+      <code>
+    """
+    Then got the following "expression" node xx:
+    """
+    : {
+      class.simpleName: 'PropertyNode'
+      inspect: '<code>'
+    }
+    """
+    Examples:
+      | code |
+      | a    |
+      | .a   |
+      | .a.b |
 
   Scenario: default use 'this' object as left operand
     Given the following dal code:

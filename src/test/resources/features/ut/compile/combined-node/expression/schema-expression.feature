@@ -54,7 +54,7 @@ Feature: schema expression
     """
     Then failed to get "schema-expression" node with the following message xx:
     """
-    schema expression not finished
+    schema expression is not finished
     """
     And got the following source code information xx:
     """
@@ -82,7 +82,7 @@ Feature: schema expression
     """
     Then failed to get "schema-expression" node with the following message xx:
     """
-    schema expression not finished
+    schema expression is not finished
     """
     And got the following source code information xx:
     """

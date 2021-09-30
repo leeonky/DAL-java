@@ -17,7 +17,8 @@ public interface MandatoryNodeParser {
                     .defaultPrevious().recursive().fetch(sourceCode, OPERAND.fetch(sourceCode)),
             ARITHMETIC_EXPRESSION = sourceCode -> BINARY_ARITHMETIC_EXPRESSION
                     .defaultPrevious().recursive().fetch(sourceCode, OPERAND.fetch(sourceCode)),
-            JUDGEMENT_EXPRESSION_OPERAND = JUDGEMENT.combine(ARITHMETIC_EXPRESSION);
+            JUDGEMENT_EXPRESSION_OPERAND = JUDGEMENT.combine(ARITHMETIC_EXPRESSION),
+            SCHEMA = sourceCode -> sourceCode.fetchSchemaToken().toSchemaNode();
 
     Node fetch(SourceCode sourceCode);
 

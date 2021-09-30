@@ -39,7 +39,7 @@ Feature: compile identity property
       | and    |
       | 100    |
 
-  Scenario Outline: valid identity property(may not possible)
+  Scenario Outline: valid identity property
     Given the following dal code xx:
     """
       <code>
@@ -56,6 +56,7 @@ Feature: compile identity property
       | code |
       | a    |
       | 1a   |
+      | _1a  |
 
   Scenario Outline: identity property should end with delimiter and dot
     Given the following dal code xx:

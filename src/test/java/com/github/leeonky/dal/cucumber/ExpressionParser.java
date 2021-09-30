@@ -7,8 +7,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
-import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.JUDGEMENT_OR_OPERAND;
-import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.OPERAND;
+import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.*;
 import static com.github.leeonky.dal.cucumber.NodeParser.INTEGER_OR_STRING_INDEX;
 
 public interface ExpressionParser {
@@ -61,9 +60,10 @@ public interface ExpressionParser {
         }
 
         private SchemaExpression compile(SourceCode sourceCode, Node previous) {
-            SchemaExpression expression = new SchemaExpression(previous, sourceCode.fetchIdentityToken().toSchemaNode());
+//            TODO return generic
+            SchemaExpression expression = new SchemaExpression(previous, (SchemaNode) SCHEMA.fetch(sourceCode));
             while (sourceCode.fetchWord("/").isPresent())
-                expression.appendSchema(sourceCode.fetchIdentityToken().toSchemaNode());
+                expression.appendSchema((SchemaNode) SCHEMA.fetch(sourceCode));
             return expression;
         }
     }

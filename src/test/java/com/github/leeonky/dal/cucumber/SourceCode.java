@@ -13,12 +13,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.util.IfThenFactory.when;
 import static java.util.Arrays.asList;
 import static java.util.Optional.*;
-import static java.util.stream.Collectors.toList;
 
 public class SourceCode {
     private final String code;
@@ -163,15 +161,26 @@ public class SourceCode {
         return Optional.empty();
     }
 
-    public Token fetchIdentityToken() {
-        if (!whenFirstChar(Constants.TOKEN_DELIMITER::contains) && hasCode()) {
-            Token token = new Token(position);
-            while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()))
-                token.append(popChar());
-            return token;
+    public Token fetchSchemaToken() {
+        int savePosition = position;
+        if (!whenFirstChar(Constants.TOKEN_DELIMITER::contains) && hasCode()
+                && !startsWith(Constants.KeyWords.IS)
+                && !startsWith(Constants.KeyWords.WHICH)
+                && !startsWith(Constants.KeyWords.TRUE)
+                && !startsWith(Constants.KeyWords.FALSE)
+                && !startsWith(Constants.KeyWords.NULL)
+                && !startsWith(Constants.KeyWords.AND)
+                && !startsWith(Constants.KeyWords.OR)) {
+            if (!fetchNumber().isPresent()) {
+                Token token = new Token(position);
+                while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()))
+                    token.append(popChar());
+                return token;
+            }
+            position = savePosition;
         }
         throw new SyntaxException(hasCode() ? "operand of `is` must be schema type"
-                : "schema expression not finished", position);
+                : "schema expression is not finished", position);
     }
 
     public char escapedPop(EscapeChars escapeChars) {
@@ -196,10 +205,6 @@ public class SourceCode {
 
     public Optional<Operator> popJudgementOperator() {
         return popOperator(judgementOperatorFactories);
-    }
-
-    public Optional<Operator> popBinaryOperator() {
-        return popOperator(binaryOperatorFactories);
     }
 
     public enum FetchBy {
@@ -245,9 +250,6 @@ public class SourceCode {
     private final List<OperatorFactory> judgementOperatorFactories = asList(
             new OperatorFactory(":", Operator.Matcher::new),
             new OperatorFactory("=", Operator.Equal::new));
-
-    private final List<OperatorFactory> binaryOperatorFactories = Stream.of(
-            binaryArithmeticOperatorFactories, judgementOperatorFactories).flatMap(List::stream).collect(toList());
 
     public class OperatorFactory {
         private final String symbol;
