@@ -59,11 +59,13 @@ public interface ExpressionParser {
                     .map(is -> compile(sourceCode, previous).setPositionBegin(is.getPosition()));
         }
 
-        private SchemaExpression compile(SourceCode sourceCode, Node previous) {
+        private Node compile(SourceCode sourceCode, Node previous) {
 //            TODO return generic
             SchemaExpression expression = new SchemaExpression(previous, (SchemaNode) SCHEMA.fetch(sourceCode));
             while (sourceCode.fetchWord("/").isPresent())
                 expression.appendSchema((SchemaNode) SCHEMA.fetch(sourceCode));
+            if (sourceCode.fetchWord(Constants.KeyWords.WHICH).isPresent())
+                return expression.which(EXPRESSION.fetch(sourceCode), false);
             return expression;
         }
     }
