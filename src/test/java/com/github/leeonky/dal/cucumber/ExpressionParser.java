@@ -9,6 +9,7 @@ import java.util.function.BiFunction;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.cucumber.MandatoryNodeParser.*;
 import static com.github.leeonky.dal.cucumber.NodeParser.INTEGER_OR_STRING_INDEX;
+import static com.github.leeonky.dal.util.IfThenFactory.anyOf;
 
 public interface ExpressionParser {
     ExpressionParser
@@ -64,9 +65,19 @@ public interface ExpressionParser {
             SchemaExpression expression = new SchemaExpression(previous, (SchemaNode) SCHEMA.fetch(sourceCode));
             while (sourceCode.fetchWord("/").isPresent())
                 expression.appendSchema((SchemaNode) SCHEMA.fetch(sourceCode));
-            if (sourceCode.fetchWord(Constants.KeyWords.WHICH).isPresent())
-                return expression.which(EXPRESSION.fetch(sourceCode), false);
-            return expression;
+            return anyOf(judgementClause(sourceCode, expression), whichClause(sourceCode, expression)).orElse(expression);
+        }
+
+        private Optional<Node> whichClause(SourceCode sourceCode, SchemaExpression expression) {
+            return sourceCode.fetchWord(Constants.KeyWords.WHICH).map(_ignore -> expression.which(
+                    sourceCode.popJudgementOperator().<Node>map(operator -> new Expression(InputNode.INSTANCE,
+                            operator, JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode)))
+                            .orElseGet(() -> EXPRESSION.fetch(sourceCode)), false));
+        }
+
+        private Optional<Node> judgementClause(SourceCode sourceCode, SchemaExpression expression) {
+            return sourceCode.popJudgementOperator().map(o -> expression.which(new Expression(
+                    InputNode.INSTANCE, o, JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode)), true));
         }
     }
 }
