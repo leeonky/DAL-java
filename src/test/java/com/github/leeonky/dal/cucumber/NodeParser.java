@@ -56,8 +56,7 @@ public interface NodeParser {
             LIST = sourceCode -> sourceCode.fetchElements(BY_NODE, '[', ']',
                     ListNode::new, i -> LIST_TAIL.fetch(sourceCode).isPresent() ? null :
                             new Expression(new PropertyNode(InputNode.INSTANCE, i, BRACKET),
-                                    //TODO default operator incorrect
-                                    sourceCode.popJudgementOperator().orElse(new Operator.Matcher()),
+                                    sourceCode.popJudgementOperatorOrDefault(),
                                     JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode))),
             WILDCARD = sourceCode -> sourceCode.fetchWord("*").map(Token::toWildcardNode),
             JUDGEMENT = REGEX.combines(OBJECT, LIST, WILDCARD);

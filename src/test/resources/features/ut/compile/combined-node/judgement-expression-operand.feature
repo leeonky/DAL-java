@@ -191,3 +191,22 @@ Feature: compile judgement expression operand
     a
      ^
     """
+
+  Scenario Outline: operator of judgement list
+    Given the following dal code xx:
+    """
+    {
+      a<operator> [1, 2]
+    }
+    """
+    Then got the following "object" node xx:
+    """
+    expressions[0].rightOperand.expressions.inspect: [
+      '[0] <operator> 1',
+      '[1] <operator> 2',
+    ]
+    """
+    Examples:
+      | operator |
+      | =        |
+      | :        |

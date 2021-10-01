@@ -22,6 +22,7 @@ public class SourceCode {
     private final String code;
     private final char[] chars;
     private int position = 0;
+    Operator operator;
 
     public SourceCode(String code) {
         this.code = code;
@@ -204,7 +205,11 @@ public class SourceCode {
     }
 
     public Optional<Operator> popJudgementOperator() {
-        return popOperator(judgementOperatorFactories);
+        return popOperator(judgementOperatorFactories).map(operator -> this.operator = operator);
+    }
+
+    Operator popJudgementOperatorOrDefault() {
+        return popJudgementOperator().orElse(operator == null ? new Operator.Matcher() : operator);
     }
 
     public enum FetchBy {

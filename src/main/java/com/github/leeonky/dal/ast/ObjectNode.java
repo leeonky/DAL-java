@@ -21,6 +21,10 @@ public class ObjectNode extends Node {
         this.expressions.addAll(expressions);
     }
 
+    public List<Expression> getExpressions() {
+        return expressions;
+    }
+
     public ObjectNode() {
         this(Collections.emptyList());
     }

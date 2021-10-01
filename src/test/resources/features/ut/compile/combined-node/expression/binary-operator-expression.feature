@@ -97,7 +97,7 @@ Feature: binary operator expression
     """
     <operator> *
     """
-    Then got the following "expression" node xx:
+    Then got the following "binary-operator-expression" node xx:
     """
     : {
       class.simpleName: 'Expression'
@@ -107,6 +107,23 @@ Feature: binary operator expression
     And evaluate result is xx:
     """
     :true
+    """
+    Examples:
+      | operator |
+      | =        |
+      | :        |
+
+  Scenario Outline: operator of judgement list
+    Given the following dal code xx:
+    """
+    <operator> [1, 2]
+    """
+    Then got the following "binary-operator-expression" node xx:
+    """
+    rightOperand.expressions.inspect: [
+      '[0] <operator> 1',
+      '[1] <operator> 2',
+    ]
     """
     Examples:
       | operator |
