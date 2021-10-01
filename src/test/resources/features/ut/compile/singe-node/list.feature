@@ -1,21 +1,21 @@
 Feature: list node
 
   Scenario: return null when does not match
-    Given the following dal code xx:
+    Given the following dal code:
     """
     +
     """
-    Then got the following "list" node xx:
+    Then got the following "list" node:
     """
     : null
     """
 
   Scenario: support empty list
-    Given the following dal code xx:
+    Given the following dal code:
     """
      []
     """
-    Then got the following "list" node xx:
+    Then got the following "list" node:
     """
     : {
       class.simpleName: 'ListNode'
@@ -25,11 +25,11 @@ Feature: list node
     """
 
   Scenario: support one element list
-    Given the following dal code xx:
+    Given the following dal code:
     """
      [1]
     """
-    Then got the following "list" node xx:
+    Then got the following "list" node:
     """
     : {
       class.simpleName: 'ListNode'
@@ -40,11 +40,11 @@ Feature: list node
     """
 
   Scenario: support two elements list
-    Given the following dal code xx:
+    Given the following dal code:
     """
      [1 2]
     """
-    Then got the following "list" node xx:
+    Then got the following "list" node:
     """
     : {
       class.simpleName: 'ListNode'
@@ -58,41 +58,41 @@ Feature: list node
     """
 
   Scenario: raise error when no closing bracket
-    Given the following dal code xx:
+    Given the following dal code:
     """
     [1
     """
-    Then failed to get "list" node with the following message xx:
+    Then failed to get "list" node with the following message:
     """
     should end with `]`
     """
-    And got the following source code information xx:
+    And got the following source code information:
     """
     [1
       ^
     """
 
   Scenario: raise error when element is invalid
-    Given the following dal code xx:
+    Given the following dal code:
     """
     [ + ]
     """
-    Then failed to get "list" node with the following message xx:
+    Then failed to get "list" node with the following message:
     """
     expect a value or expression
     """
-    And got the following source code information xx:
+    And got the following source code information:
     """
     [ + ]
       ^
     """
 
   Scenario: support incomplete List
-    Given the following dal code xx:
+    Given the following dal code:
     """
      [1 ...]
     """
-    Then got the following "list" node xx:
+    Then got the following "list" node:
     """
     : {
       class.simpleName: 'ListNode'
@@ -105,11 +105,11 @@ Feature: list node
     """
 
   Scenario Outline: support different judgement operator in element
-    Given the following dal code xx:
+    Given the following dal code:
     """
      [<operator>1]
     """
-    Then got the following "list" node xx:
+    Then got the following "list" node:
     """
     expressions.inspect: [
       '[0] <result> 1'
@@ -122,11 +122,11 @@ Feature: list node
       | :        | :      |
 
   Scenario Outline: support expression in element judgement
-    Given the following dal code xx:
+    Given the following dal code:
     """
      [<operator>2+1]
     """
-    Then got the following "list" node xx:
+    Then got the following "list" node:
     """
     expressions[0]: {
       leftOperand.inspect: '[0]'
@@ -141,11 +141,11 @@ Feature: list node
       | :        | Matcher |
 
   Scenario: support optional comma between elements
-    Given the following dal code xx:
+    Given the following dal code:
     """
      [true, false]
     """
-    Then got the following "list" node xx:
+    Then got the following "list" node:
     """
     inspect: '[true false]'
     """

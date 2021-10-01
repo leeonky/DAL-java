@@ -1,29 +1,29 @@
 Feature: operand node
 
   Scenario: reference 'this' object when code is empty
-    Given the following dal code xx:
+    Given the following dal code:
     """
       
     """
-    Then got the following "operand" node xx:
+    Then got the following "operand" node:
     """
     class.simpleName: 'InputNode'
     """
-    When the following input data xx:
+    When the following input data:
     """
       1
     """
-    Then evaluate result is xx:
+    Then evaluate result is:
     """
     : 1
     """
 
   Scenario Outline: supported single evaluable node
-    Given the following dal code xx:
+    Given the following dal code:
     """
       <code>
     """
-    Then got the following "operand" node xx:
+    Then got the following "operand" node:
     """
     : {
       class.simpleName: '<type>'
@@ -39,11 +39,11 @@ Feature: operand node
       | (1+1) | ParenthesesNode | (1 + 1) |
 
   Scenario: recursive property node
-    Given the following dal code xx:
+    Given the following dal code:
     """
     .order.lines[0].name
     """
-    Then got the following "operand" node xx:
+    Then got the following "operand" node:
     """
     : {
       class.simpleName: 'PropertyNode'
@@ -51,22 +51,22 @@ Feature: operand node
       positionBegin: 15
     }
     """
-    When the following input data xx:
+    When the following input data:
     """
       { "order": { "lines": [{ "name": "book" }] } }
     """
-    Then evaluate result is xx:
+    Then evaluate result is:
     """
     : 'book'
     """
 
   Scenario: support minus before node
-    Given the following dal code xx:
+    Given the following dal code:
     """
     1 -1
     """
-    And ignore an "const" node xx
-    Then got the following "operand" node xx:
+    And ignore an "const" node
+    Then got the following "operand" node:
     """
     : {
       class.simpleName: 'Expression'
@@ -74,17 +74,17 @@ Feature: operand node
       positionBegin: 2
     }
     """
-    Then evaluate result is xx:
+    Then evaluate result is:
     """
     : -1
     """
 
   Scenario: should not parse as minus when start with minus
-    Given the following dal code xx:
+    Given the following dal code:
     """
     -1
     """
-    Then got the following "operand" node xx:
+    Then got the following "operand" node:
     """
     : {
       class.simpleName: 'InputNode'
@@ -93,49 +93,49 @@ Feature: operand node
     """
 
   Scenario: support logic not
-    Given the following dal code xx:
+    Given the following dal code:
     """
     !false
     """
-    Then got the following "operand" node xx:
+    Then got the following "operand" node:
     """
     : {
       class.simpleName: 'Expression'
       inspect: '!false'
     }
     """
-    And evaluate result is xx:
+    And evaluate result is:
     """
     =true
     """
 
   Scenario: should raise error when not a evaluable node
-    Given the following dal code xx:
+    Given the following dal code:
     """
     1 +
     """
-    And ignore an "const" node xx
-    Then failed to get "operand" node with the following message xx:
+    And ignore an "const" node
+    Then failed to get "operand" node with the following message:
     """
     expect a value or expression
     """
-    And got the following source code information xx:
+    And got the following source code information:
     """
     1 +
       ^
     """
 
   Scenario: should raise error when at the end of token
-    Given the following dal code xx:
+    Given the following dal code:
     """
     1
     """
-    And ignore an "const" node xx
-    Then failed to get "operand" node with the following message xx:
+    And ignore an "const" node
+    Then failed to get "operand" node with the following message:
     """
     expect a value or expression
     """
-    And got the following source code information xx:
+    And got the following source code information:
     """
     1
      ^
@@ -144,11 +144,11 @@ Feature: operand node
   Scenario Outline:
   dot operator has higher precedence over unary operator(property chain after unary operator)
   unary operator has higher precedence over other operators
-    Given the following dal code xx:
+    Given the following dal code:
     """
     1 + <operator>false.xxx
     """
-    Then got the following "expression" node xx:
+    Then got the following "expression" node:
     """
     rightOperand: {
       inspect: '<operator>false.xxx'
@@ -165,15 +165,15 @@ Feature: operand node
       | -        |
 
   Scenario: end with .@ is invalid
-    Given the following dal code xx:
+    Given the following dal code:
     """
       .@
     """
-    Then failed to get "operand" node with the following message xx:
+    Then failed to get "operand" node with the following message:
     """
     element property needed
     """
-    And got the following source code information xx:
+    And got the following source code information:
     """
       .@
         ^

@@ -1,11 +1,11 @@
 Feature: compile all const value node
 
   Scenario Outline: compile const node
-    Given the following dal code xx:
+    Given the following dal code:
     """
      <code>
     """
-    Then got the following "const" node xx:
+    Then got the following "const" node:
     """
     : {
       class.simpleName: 'ConstNode'

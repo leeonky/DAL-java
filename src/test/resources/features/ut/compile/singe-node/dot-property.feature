@@ -1,21 +1,21 @@
 Feature: compile property starts with dot
 
   Scenario: return null when not start with dot
-    Given the following dal code xx:
+    Given the following dal code:
     """
     not start with .
     """
-    Then got the following "dot-property" node xx:
+    Then got the following "dot-property" node:
     """
     : null
     """
 
   Scenario: compile property starts with dot
-    Given the following dal code xx:
+    Given the following dal code:
     """
       .name
     """
-    Then got the following "dot-property" node xx:
+    Then got the following "dot-property" node:
     """
     : {
       class.simpleName: 'PropertyNode'
@@ -23,21 +23,21 @@ Feature: compile property starts with dot
       inspect: '.name'
     }
     """
-    When the following input data xx:
+    When the following input data:
     """
       {"name": "Tom"}
     """
-    Then evaluate result is xx:
+    Then evaluate result is:
     """
       : 'Tom'
     """
 
   Scenario Outline: trim white space after dot
-    Given the following dal code xx:
+    Given the following dal code:
     """
     .<white-space>a
     """
-    Then got the following "dot-property" node xx:
+    Then got the following "dot-property" node:
     """
     : {
       class.simpleName: 'PropertyNode'
@@ -51,11 +51,11 @@ Feature: compile property starts with dot
       | `SPACE      |
 
   Scenario Outline: property before delimiter and dot
-    Given the following dal code xx:
+    Given the following dal code:
     """
     .a<delimiter>b
     """
-    Then got the following "dot-property" node xx:
+    Then got the following "dot-property" node:
     """
     : {
       class.simpleName: 'PropertyNode'
@@ -86,41 +86,41 @@ Feature: compile property starts with dot
       | .         |
 
   Scenario: do not allow empty property
-    Given the following dal code xx:
+    Given the following dal code:
     """
     .
     """
-    Then failed to get "dot-property" node with the following message xx:
+    Then failed to get "dot-property" node with the following message:
     """
     property is not finished
     """
-    And got the following source code information xx:
+    And got the following source code information:
     """
     .
      ^
     """
 
   Scenario: do not allow empty property(has white space)
-    Given the following dal code xx:
+    Given the following dal code:
     """
     . 
     """
-    Then failed to get "dot-property" node with the following message xx:
+    Then failed to get "dot-property" node with the following message:
     """
     property is not finished
     """
-    And got the following source code information xx:
+    And got the following source code information:
     """
     . 
       ^
     """
 
   Scenario: return null when code is ...
-    Given the following dal code xx:
+    Given the following dal code:
     """
     ...
     """
-    Then got the following "dot-property" node xx:
+    Then got the following "dot-property" node:
     """
     : null
     """

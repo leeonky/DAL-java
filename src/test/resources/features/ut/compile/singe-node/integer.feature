@@ -1,21 +1,21 @@
 Feature: integer node
 
   Scenario: null when does not match
-    Given the following dal code xx:
+    Given the following dal code:
     """
     not starts with digital
     """
-    Then got the following "integer" node xx:
+    Then got the following "integer" node:
     """
     : null
     """
 
   Scenario Outline: supported format for integer parsing
-    Given the following dal code xx:
+    Given the following dal code:
     """
      <code>
     """
-    Then got the following "integer" node xx:
+    Then got the following "integer" node:
     """
     : {
       class.simpleName: 'ConstNode'
@@ -23,7 +23,7 @@ Feature: integer node
       positionBegin: 1
     }
     """
-    And evaluate result is xx:
+    And evaluate result is:
     """
     : <evaluate>
     """
@@ -35,7 +35,7 @@ Feature: integer node
       | -10            | -10            | -10            |
 
   Scenario Outline: delimiter between numbers
-    Given the following dal code xx:
+    Given the following dal code:
     """
      1<delimiter>
     """
@@ -66,11 +66,11 @@ Feature: integer node
       | `SPACE    |
 
   Scenario: raise error when number is not a integer
-    Given the following dal code xx:
+    Given the following dal code:
     """
     1.1
     """
-    Then failed to get "integer" node with the following message xx:
+    Then failed to get "integer" node with the following message:
     """
     expect an integer
     """

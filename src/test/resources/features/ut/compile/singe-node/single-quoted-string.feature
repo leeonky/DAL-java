@@ -1,21 +1,21 @@
 Feature: 'string'
 
   Scenario: null when does not match
-    Given the following dal code xx:
+    Given the following dal code:
     """
     not starts with quote
     """
-    Then got the following "single-quoted-string" node xx:
+    Then got the following "single-quoted-string" node:
     """
     : null
     """
 
   Scenario Outline: single quoted string
-    Given the following dal code xx:
+    Given the following dal code:
     """
      '<str>'
     """
-    Then got the following "single-quoted-string" node xx:
+    Then got the following "single-quoted-string" node:
     """
     : {
       class.simpleName: 'ConstNode'
@@ -29,7 +29,7 @@ Feature: 'string'
       | hello world | \'hello world\' |
 
   Scenario: escape char
-    Given the following dal code xx:
+    Given the following dal code:
     """
     '\\\''
     """
@@ -39,7 +39,7 @@ Feature: 'string'
     """
 
   Scenario: keep original char when not valid escape char
-    Given the following dal code xx:
+    Given the following dal code:
     """
     '\h'
     """
@@ -49,15 +49,15 @@ Feature: 'string'
     """
 
   Scenario Outline: syntax error: incomplete string
-    Given the following dal code xx:
+    Given the following dal code:
     """
     <code>
     """
-    Then failed to get "single-quoted-string" node with the following message xx:
+    Then failed to get "single-quoted-string" node with the following message:
     """
     should end with `'`
     """
-    And got the following source code information xx:
+    And got the following source code information:
     """
     <code>
         ^

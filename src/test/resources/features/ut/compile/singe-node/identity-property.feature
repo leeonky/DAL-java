@@ -1,11 +1,11 @@
 Feature: compile identity property
 
   Scenario Outline: return null when not valid identity
-    Given the following dal code xx:
+    Given the following dal code:
     """
     <code>
     """
-    Then got the following "identity-property" node xx:
+    Then got the following "identity-property" node:
     """
     : null
     """
@@ -40,11 +40,11 @@ Feature: compile identity property
       | 100    |
 
   Scenario Outline: valid identity property
-    Given the following dal code xx:
+    Given the following dal code:
     """
       <code>
     """
-    Then got the following "identity-property" node xx:
+    Then got the following "identity-property" node:
     """
     : {
       class.simpleName: 'PropertyNode'
@@ -59,11 +59,11 @@ Feature: compile identity property
       | _1a  |
 
   Scenario Outline: identity property should end with delimiter and dot
-    Given the following dal code xx:
+    Given the following dal code:
     """
     name<delimiter>xxx
     """
-    Then got the following "identity-property" node xx:
+    Then got the following "identity-property" node:
     """
     : {
       class.simpleName: 'PropertyNode'

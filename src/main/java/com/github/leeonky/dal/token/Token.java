@@ -10,6 +10,7 @@ import java.util.Objects;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 import static com.github.leeonky.dal.token.Token.Type.KEY_WORD;
 
+@Deprecated
 public class Token {
     private final Type type;
     private final Object value;

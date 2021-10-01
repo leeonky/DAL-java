@@ -1,10 +1,10 @@
 Feature: expression
 
   Scenario: return 'this' object when no code
-    Given the following dal code xx:
+    Given the following dal code:
     """
     """
-    Then got the following "expression" node xx:
+    Then got the following "expression" node:
     """
     : {
       class.simpleName: 'InputNode'
@@ -13,11 +13,11 @@ Feature: expression
     """
 
   Scenario: single const node
-    Given the following dal code xx:
+    Given the following dal code:
     """
       1
     """
-    Then got the following "expression" node xx:
+    Then got the following "expression" node:
     """
     : {
       class.simpleName: 'ConstNode'
@@ -26,11 +26,11 @@ Feature: expression
     """
 
   Scenario Outline: property node
-    Given the following dal code xx:
+    Given the following dal code:
     """
       <code>
     """
-    Then got the following "expression" node xx:
+    Then got the following "expression" node:
     """
     : {
       class.simpleName: 'PropertyNode'
@@ -58,11 +58,11 @@ Feature: expression
     """
 
   Scenario: binary operator expression
-    Given the following dal code xx:
+    Given the following dal code:
     """
     a + b
     """
-    Then got the following "expression" node xx:
+    Then got the following "expression" node:
     """
     : {
       class.simpleName: 'Expression'
@@ -71,11 +71,11 @@ Feature: expression
     """
 
   Scenario: schema expression
-    Given the following dal code xx:
+    Given the following dal code:
     """
      is Number
     """
-    Then got the following "expression" node xx:
+    Then got the following "expression" node:
     """
     : {
       class.simpleName: 'SchemaExpression'
@@ -84,11 +84,11 @@ Feature: expression
     """
 
   Scenario: operator expression after schema expression
-    Given the following dal code xx:
+    Given the following dal code:
     """
     is Integer || true
     """
-    Then got the following "expression" node xx:
+    Then got the following "expression" node:
     """
     : {
       class.simpleName: 'Expression'
@@ -97,11 +97,11 @@ Feature: expression
     """
 
   Scenario: schema expression after operator expression
-    Given the following dal code xx:
+    Given the following dal code:
     """
     + 1 is Number
     """
-    Then got the following "expression" node xx:
+    Then got the following "expression" node:
     """
     : {
       class.simpleName: 'SchemaExpression'
@@ -110,11 +110,11 @@ Feature: expression
     """
 
   Scenario: support expression chain and process the operator precedence
-    Given the following dal code xx:
+    Given the following dal code:
     """
     + 2 * 3 * 4
     """
-    Then got the following "expression" node xx:
+    Then got the following "expression" node:
     """
     : {
       class.simpleName: 'Expression'

@@ -1,21 +1,21 @@
 Feature: schema expression
 
   Scenario: return null when not start with key word is
-    Given the following dal code xx:
+    Given the following dal code:
     """
     +1
     """
-    Then got the following "schema-expression" node xx:
+    Then got the following "schema-expression" node:
     """
     : null
     """
 
   Scenario: support schema checking expression
-    Given the following dal code xx:
+    Given the following dal code:
     """
       is Integer
     """
-    Then got the following "schema-expression" node xx:
+    Then got the following "schema-expression" node:
     """
     : {
       class.simpleName: 'SchemaExpression'
@@ -23,51 +23,51 @@ Feature: schema expression
       positionBegin: 2
     }
     """
-    When the following input data xx:
+    When the following input data:
     """
     1
     """
-    Then evaluate result is xx:
+    Then evaluate result is:
     """
     = true
     """
 
   Scenario: raise error when right operand is not schema
-    Given the following dal code xx:
+    Given the following dal code:
     """
     is +
     """
-    Then failed to get "schema-expression" node with the following message xx:
+    Then failed to get "schema-expression" node with the following message:
     """
     operand of `is` must be schema type
     """
-    And got the following source code information xx:
+    And got the following source code information:
     """
     is +
        ^
     """
 
   Scenario: raise error when missing schema at the end of code
-    Given the following dal code xx:
+    Given the following dal code:
     """
     is
     """
-    Then failed to get "schema-expression" node with the following message xx:
+    Then failed to get "schema-expression" node with the following message:
     """
     schema expression is not finished
     """
-    And got the following source code information xx:
+    And got the following source code information:
     """
     is
       ^
     """
 
   Scenario: support multi schemas in expression
-    Given the following dal code xx:
+    Given the following dal code:
     """
     is Integer / Number
     """
-    Then got the following "schema-expression" node xx:
+    Then got the following "schema-expression" node:
     """
     : {
       class.simpleName: 'SchemaExpression'
@@ -76,15 +76,15 @@ Feature: schema expression
     """
 
   Scenario: raise error when schema list not finished
-    Given the following dal code xx:
+    Given the following dal code:
     """
     is Integer /
     """
-    Then failed to get "schema-expression" node with the following message xx:
+    Then failed to get "schema-expression" node with the following message:
     """
     schema expression is not finished
     """
-    And got the following source code information xx:
+    And got the following source code information:
     """
     is Integer /
                 ^

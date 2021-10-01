@@ -1,21 +1,21 @@
 Feature: const number node
 
   Scenario: null when does not match
-    Given the following dal code xx:
+    Given the following dal code:
     """
     not starts with digital
     """
-    Then got the following "number" node xx:
+    Then got the following "number" node:
     """
     : null
     """
 
   Scenario Outline: supported format for number parsing
-    Given the following dal code xx:
+    Given the following dal code:
     """
      <code>
     """
-    Then got the following "number" node xx:
+    Then got the following "number" node:
     """
     : {
       class.simpleName: 'ConstNode'
@@ -23,7 +23,7 @@ Feature: const number node
       positionBegin: 1
     }
     """
-    And evaluate result is xx:
+    And evaluate result is:
     """
     : <evaluate>
     """
@@ -35,7 +35,7 @@ Feature: const number node
       | 1.1            | 1.1            | 1.1            |
 
   Scenario Outline: delimiter between numbers
-    Given the following dal code xx:
+    Given the following dal code:
     """
      1<delimiter>
     """
@@ -66,15 +66,15 @@ Feature: const number node
       | `SPACE    |
 
   Scenario: return empty when invalid number, and source code offset should rollback to beginning
-    Given the following dal code xx:
+    Given the following dal code:
     """
     12Invalid
     """
-    Then got the following "number" node xx:
+    Then got the following "number" node:
     """
     : null
     """
-    Then got the following "identity-property" node xx:
+    Then got the following "identity-property" node:
     """
     : {
       inspect: '12Invalid'

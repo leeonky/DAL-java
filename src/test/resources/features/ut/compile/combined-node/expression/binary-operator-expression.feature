@@ -1,21 +1,21 @@
 Feature: binary operator expression
 
   Scenario: return null when not start with arithmetic operator
-    Given the following dal code xx:
+    Given the following dal code:
     """
     1
     """
-    Then got the following "binary-operator-expression" node xx:
+    Then got the following "binary-operator-expression" node:
     """
     : null
     """
 
   Scenario Outline: supported arithmetic operators
-    Given the following dal code xx:
+    Given the following dal code:
     """
      <operator> b
     """
-    Then got the following "binary-operator-expression" node xx:
+    Then got the following "binary-operator-expression" node:
     """
     : {
       class.simpleName: 'Expression'
@@ -44,11 +44,11 @@ Feature: binary operator expression
       | :        | Matcher        |
 
   Scenario Outline: judge by object list or regex
-    Given the following dal code xx:
+    Given the following dal code:
     """
     <operator> <operand>
     """
-    Then got the following "binary-operator-expression" node xx:
+    Then got the following "binary-operator-expression" node:
     """
     : {
       class.simpleName: 'Expression'
@@ -65,26 +65,26 @@ Feature: binary operator expression
       | :        | /pattern/ |
 
   Scenario: raise error when expression is not finished
-    Given the following dal code xx:
+    Given the following dal code:
     """
       +
     """
-    Then failed to get "binary-operator-expression" node with the following message xx:
+    Then failed to get "binary-operator-expression" node with the following message:
     """
     expect a value or expression
     """
-    And got the following source code information xx:
+    And got the following source code information:
     """
       +
        ^
     """
 
   Scenario: compile right operand as element accessing when operator is not judgement
-    Given the following dal code xx:
+    Given the following dal code:
     """
       + [0]
     """
-    Then got the following "binary-operator-expression" node xx:
+    Then got the following "binary-operator-expression" node:
     """
     : {
       class.simpleName: 'Expression'
@@ -94,18 +94,18 @@ Feature: binary operator expression
     """
 
   Scenario Outline: force positive judgement
-    Given the following dal code xx:
+    Given the following dal code:
     """
     <operator> *
     """
-    Then got the following "binary-operator-expression" node xx:
+    Then got the following "binary-operator-expression" node:
     """
     : {
       class.simpleName: 'Expression'
       inspect: '<operator> *'
     }
     """
-    And evaluate result is xx:
+    And evaluate result is:
     """
     :true
     """
@@ -115,11 +115,11 @@ Feature: binary operator expression
       | :        |
 
   Scenario Outline: operator of judgement list
-    Given the following dal code xx:
+    Given the following dal code:
     """
     <operator> [1, 2]
     """
-    Then got the following "binary-operator-expression" node xx:
+    Then got the following "binary-operator-expression" node:
     """
     rightOperand.expressions.inspect: [
       '[0] <operator> 1',
