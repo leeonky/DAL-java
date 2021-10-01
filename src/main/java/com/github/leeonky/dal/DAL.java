@@ -1,6 +1,6 @@
 package com.github.leeonky.dal;
 
-import com.github.leeonky.dal.token.SourceCode;
+import com.github.leeonky.dal.compiler.SourceCode;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 

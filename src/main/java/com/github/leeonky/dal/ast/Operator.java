@@ -228,10 +228,4 @@ public abstract class Operator {
             return node2.judge(node1, this, context);
         }
     }
-
-    public static class CommaAnd extends And {
-        public CommaAnd() {
-            super("&&");
-        }
-    }
 }

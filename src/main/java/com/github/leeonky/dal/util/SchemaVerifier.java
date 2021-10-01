@@ -35,7 +35,7 @@ public class SchemaVerifier {
         Class<?> type = superSchemaType;
         SubType subType = superSchemaType.getAnnotation(SubType.class);
         if (subType != null) {
-            Object value = object.getValue(CodeHelper.INSTANCE.toChainNodes(subType.property())).getInstance();
+            Object value = object.getValue(CodeHelper.toChainNodes(subType.property())).getInstance();
             type = Stream.of(subType.types())
                     .filter(t -> t.value().equals(value))
                     .map(SubType.Type::type)

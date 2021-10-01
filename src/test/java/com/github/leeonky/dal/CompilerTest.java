@@ -1,7 +1,7 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.ast.*;
-import com.github.leeonky.dal.token.SourceCode;
+import com.github.leeonky.dal.compiler.SourceCode;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +14,8 @@ class CompilerTest {
     private final Compiler compiler = new Compiler();
 
     private void assertSyntaxException(String sourceCode, int position, String message) {
-        SyntaxException syntaxException = assertThrows(SyntaxException.class, () -> compiler.compile(new SourceCode(sourceCode)));
+        SyntaxException syntaxException = assertThrows(SyntaxException.class,
+                () -> compiler.compile(new SourceCode(sourceCode)));
         assertThat(syntaxException)
                 .hasFieldOrPropertyWithValue("position", position)
                 .hasMessage(message);

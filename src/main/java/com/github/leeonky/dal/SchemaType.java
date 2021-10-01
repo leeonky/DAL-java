@@ -62,7 +62,7 @@ public class SchemaType {
         String property = fetchFieldChain((String) alias);
         if (Objects.equals(property, alias))
             return subSchema(property);
-        List<Object> chain = CodeHelper.INSTANCE.toChainNodes(property);
+        List<Object> chain = CodeHelper.toChainNodes(property);
         return chain.stream().skip(1).reduce(access(chain.get(0)), SchemaType::access, (o1, o2) -> {
             throw new IllegalStateException("Not allow parallel here!");
         });
