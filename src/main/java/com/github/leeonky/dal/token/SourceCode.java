@@ -2,6 +2,7 @@ package com.github.leeonky.dal.token;
 
 import static com.github.leeonky.dal.util.IfThenFactory.when;
 
+@Deprecated
 public class SourceCode {
     private final char[] charBuffer;
     private final String sourceCode;
@@ -10,6 +11,10 @@ public class SourceCode {
     public SourceCode(String sourceCode) {
         this.sourceCode = sourceCode;
         charBuffer = sourceCode.toCharArray();
+    }
+
+    public String getSourceCode() {
+        return sourceCode;
     }
 
     public int getPosition() {

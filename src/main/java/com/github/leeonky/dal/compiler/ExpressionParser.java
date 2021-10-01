@@ -23,7 +23,7 @@ public interface ExpressionParser {
             EXPLICIT_PROPERTY = DOT_PROPERTY.combine(BRACKET_PROPERTY),
             BINARY_ARITHMETIC_EXPRESSION = (sourceCode, previous) -> sourceCode.popBinaryArithmeticOperator().map(operator ->
                     new Expression(previous, operator, OPERAND.fetch(sourceCode)).adjustOperatorOrder()),
-            BINARY_JUDGEMENT_EXPRESSION = (sourceCode, previous) -> sourceCode.popJudgementOperator().map(operator ->
+            BINARY_JUDGEMENT_EXPRESSION = (sourceCode, previous) -> sourceCode.popJudgementOperatorAndCompile(operator ->
                     new Expression(previous, operator, JUDGEMENT_OR_OPERAND.fetch(sourceCode)).adjustOperatorOrder()),
             BINARY_OPERATOR_EXPRESSION = BINARY_ARITHMETIC_EXPRESSION.combine(BINARY_JUDGEMENT_EXPRESSION),
             SCHEMA_EXPRESSION = new SchemaExpressionParser();
@@ -43,8 +43,9 @@ public interface ExpressionParser {
         return sourceCode -> fetch(sourceCode, InputNode.INSTANCE);
     }
 
-    default MandatoryExpressionParser defaultPrevious() {
-        return (sourceCode, previous) -> fetch(sourceCode, previous).orElse(previous);
+    default MandatoryExpressionParser defaultPreviousRecursive() {
+        return (sourceCode, previous) -> fetch(sourceCode, previous).map(p ->
+                defaultPreviousRecursive().fetch(sourceCode, p)).orElse(previous);
     }
 
     default Node recursiveCompile(SourceCode sourceCode, Node input,
@@ -70,14 +71,14 @@ public interface ExpressionParser {
 
         private Optional<Node> whichClause(SourceCode sourceCode, SchemaExpression expression) {
             return sourceCode.fetchWord(Constants.KeyWords.WHICH).map(_ignore -> expression.which(
-                    sourceCode.popJudgementOperator().<Node>map(operator -> new Expression(InputNode.INSTANCE,
+                    sourceCode.<Node>popJudgementOperatorAndCompile(operator -> new Expression(InputNode.INSTANCE,
                             operator, JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode)))
                             .orElseGet(() -> EXPRESSION.fetch(sourceCode)), false));
         }
 
         private Optional<Node> judgementClause(SourceCode sourceCode, SchemaExpression expression) {
-            return sourceCode.popJudgementOperator().map(o -> expression.which(new Expression(
-                    InputNode.INSTANCE, o, JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode)), true));
+            return sourceCode.popJudgementOperatorAndCompile(operator -> expression.which(new Expression(
+                    InputNode.INSTANCE, operator, JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode)), true));
         }
     }
 }

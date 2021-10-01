@@ -48,10 +48,12 @@ public interface NodeParser {
             PROPERTY = EXPLICIT_PROPERTY.defaultInputNode().combine(IDENTITY_PROPERTY),
             SINGLE_EVALUABLE = CONST.combines(PROPERTY, PARENTHESES),
             OBJECT = sourceCode -> sourceCode.fetchElements(BY_NODE, '{', '}',
-                    ObjectNode::new, i -> new Expression(
-                            PROPERTY.toMandatoryNodeParser("expect a object property").fetch(sourceCode),
-                            sourceCode.popJudgementOperator().orElseThrow(() -> new SyntaxException("expect operator `:` or `=`", sourceCode.getPosition())),
-                            JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode))),
+                    ObjectNode::new, i -> {
+                        Node property = PROPERTY.toMandatoryNodeParser("expect a object property").recursive(EXPLICIT_PROPERTY).fetch(sourceCode);
+                        return sourceCode.popJudgementOperatorAndCompile(operator ->
+                                new Expression(property, operator, JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode)))
+                                .orElseThrow(() -> new SyntaxException("expect operator `:` or `=`", sourceCode.getPosition()));
+                    }),
             LIST_TAIL = sourceCode -> sourceCode.fetchWord("...").map(Token::toListTail),
             LIST = sourceCode -> sourceCode.fetchElements(BY_NODE, '[', ']',
                     ListNode::new, i -> LIST_TAIL.fetch(sourceCode).isPresent() ? null :

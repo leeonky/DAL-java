@@ -112,17 +112,17 @@ Feature: expression
   Scenario: support expression chain and process the operator precedence
     Given the following dal code xx:
     """
-    + 2 * 3
+    + 2 * 3 * 4
     """
     Then got the following "expression" node xx:
     """
     : {
       class.simpleName: 'Expression'
-      inspect: '+ 2 * 3'
+      inspect: '+ 2 * 3 * 4'
       positionBegin: 0
       leftOperand.class.simpleName: 'InputNode'
       operator.class.simpleName: 'Plus'
-      rightOperand.inspect: '2 * 3'
-      rightOperand.positionBegin: 4
+      rightOperand.inspect: '2 * 3 * 4'
+      rightOperand.positionBegin: 8
     }
     """

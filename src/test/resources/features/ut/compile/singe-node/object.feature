@@ -37,6 +37,16 @@ Feature: object node
     }
     """
 
+  Scenario: support property chain key
+    Given the following dal code xx:
+    """
+    { user.name.first = 'Tom' }
+    """
+    Then got the following "object" node xx:
+    """
+    inspect: "{user.name.first = 'Tom'}"
+    """
+
   Scenario: support two judgement expressions
     Given the following dal code xx:
     """

@@ -39,6 +39,7 @@ Feature: binary operator expression
       | <        | Less           |
       | >=       | GreaterOrEqual |
       | <=       | LessOrEqual    |
+      | !=       | NotEqual       |
       | =        | Equal          |
       | :        | Matcher        |
 

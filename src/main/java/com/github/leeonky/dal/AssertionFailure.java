@@ -3,6 +3,7 @@ package com.github.leeonky.dal;
 import com.github.leeonky.dal.util.Calculator;
 import com.github.leeonky.util.Converter;
 
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -28,7 +29,10 @@ public class AssertionFailure extends DalException {
         return true;
     }
 
+    //TODO process different type of number
     public static boolean assertMatch(Object expect, Object actual, int position, Converter converter) {
+        if (expect instanceof Number && actual instanceof Number && !expect.getClass().equals(actual.getClass()))
+            return assertMatch(new BigDecimal(expect.toString()), new BigDecimal(actual.toString()), position, converter);
         if (!Calculator.equals(converter.convert(expect.getClass(), actual), expect))
             throw new AssertionFailure(format("expected [%s] matches [%s] but was not",
                     inspectValue(actual), inspectValue(expect)), position);

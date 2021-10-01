@@ -5,10 +5,7 @@ import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.ast.Operator;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -22,7 +19,9 @@ public class SourceCode {
     private final String code;
     private final char[] chars;
     private int position = 0;
+    @Deprecated
     Operator operator;
+    private LinkedList<Operator> operators = new LinkedList<>();
 
     public SourceCode(String code) {
         this.code = code;
@@ -99,8 +98,11 @@ public class SourceCode {
         while (hasCode() && closing != currentChar()) {
             elements.add(element.apply(index++));
             fetchBy.afterFetchElement(this);
-            if (fetchBy == FetchBy.BY_NODE)
+            if (fetchBy == FetchBy.BY_NODE) {
                 fetchWord(",");
+                //TODO test: white space after last comma [1,2, ]
+                leftTrim();
+            }
         }
         if (position >= chars.length)
             throw new SyntaxException(String.format("should end with `%c`", closing), position);
@@ -163,7 +165,6 @@ public class SourceCode {
     }
 
     public Token fetchSchemaToken() {
-        int savePosition = position;
         if (!whenFirstChar(Constants.TOKEN_DELIMITER::contains) && hasCode()
                 && !startsWith(Constants.KeyWords.IS)
                 && !startsWith(Constants.KeyWords.WHICH)
@@ -172,6 +173,7 @@ public class SourceCode {
                 && !startsWith(Constants.KeyWords.NULL)
                 && !startsWith(Constants.KeyWords.AND)
                 && !startsWith(Constants.KeyWords.OR)) {
+            int savePosition = position;
             if (!fetchNumber().isPresent()) {
                 Token token = new Token(position);
                 while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()))
@@ -204,12 +206,23 @@ public class SourceCode {
         return popOperator(binaryArithmeticOperatorFactories);
     }
 
-    public Optional<Operator> popJudgementOperator() {
-        return popOperator(judgementOperatorFactories).map(operator -> this.operator = operator);
+    private Optional<Operator> popJudgementOperator() {
+        return popOperator(judgementOperatorFactories);
     }
 
-    Operator popJudgementOperatorOrDefault() {
-        return popJudgementOperator().orElse(operator == null ? new Operator.Matcher() : operator);
+    public <T extends Node> Optional<T> popJudgementOperatorAndCompile(Function<Operator, T> compiler) {
+        return popJudgementOperator().map(operator -> {
+            operators.push(operator);
+            try {
+                return compiler.apply(operator);
+            } finally {
+                operators.pop();
+            }
+        });
+    }
+
+    public Operator popJudgementOperatorOrDefault() {
+        return popJudgementOperator().orElse(operators.isEmpty() ? new Operator.Matcher() : operators.getFirst());
     }
 
     public enum FetchBy {
@@ -229,6 +242,7 @@ public class SourceCode {
         return IntStream.range(0, position).mapToObj(i -> chars[i]).allMatch(Character::isWhitespace);
     }
 
+    //    TODO complex test
     private final List<OperatorFactory> unaryOperatorFactories = asList(
             new OperatorFactory("-", Operator.Minus::new) {
                 @Override
@@ -236,7 +250,12 @@ public class SourceCode {
                     return super.matches() && !isBeginning();
                 }
             },
-            new OperatorFactory("!", Operator.Not::new));
+            new OperatorFactory("!", Operator.Not::new) {
+                @Override
+                protected boolean matches() {
+                    return super.matches() && !startsWith("!=");
+                }
+            });
 
     private final List<OperatorFactory> binaryArithmeticOperatorFactories = asList(
             new OperatorFactory("&&", () -> new Operator.And("&&")),
@@ -250,7 +269,8 @@ public class SourceCode {
             new OperatorFactory("+", Operator.Plus::new),
             new OperatorFactory("-", Operator.Subtraction::new),
             new OperatorFactory("*", Operator.Multiplication::new),
-            new OperatorFactory("/", Operator.Division::new)
+            new OperatorFactory("/", Operator.Division::new),
+            new OperatorFactory("!=", Operator.NotEqual::new)
     );
     private final List<OperatorFactory> judgementOperatorFactories = asList(
             new OperatorFactory(":", Operator.Matcher::new),

@@ -5,6 +5,8 @@ import com.github.leeonky.dal.ast.Expression;
 import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 
+import java.util.Optional;
+
 import static com.github.leeonky.dal.compiler.ExpressionParser.*;
 import static com.github.leeonky.dal.compiler.NodeParser.JUDGEMENT;
 import static com.github.leeonky.dal.compiler.NodeParser.SINGLE_EVALUABLE;
@@ -14,19 +16,33 @@ public interface MandatoryNodeParser {
             OPERAND = new OperandNodeParser(),
             JUDGEMENT_OR_OPERAND = JUDGEMENT.combine(OPERAND),
             EXPRESSION = sourceCode -> BINARY_OPERATOR_EXPRESSION.combine(SCHEMA_EXPRESSION)
-                    .defaultPrevious().recursive().fetch(sourceCode, OPERAND.fetch(sourceCode)),
+                    .defaultPreviousRecursive().fetch(sourceCode, OPERAND.fetch(sourceCode)),
             ARITHMETIC_EXPRESSION = sourceCode -> BINARY_ARITHMETIC_EXPRESSION
-                    .defaultPrevious().recursive().fetch(sourceCode, OPERAND.fetch(sourceCode)),
+                    .defaultPreviousRecursive().fetch(sourceCode, OPERAND.fetch(sourceCode)),
             JUDGEMENT_EXPRESSION_OPERAND = JUDGEMENT.combine(ARITHMETIC_EXPRESSION),
             SCHEMA = sourceCode -> sourceCode.fetchSchemaToken().toSchemaNode();
 
     Node fetch(SourceCode sourceCode);
+
+    default MandatoryNodeParser recursive(ExpressionParser expressionParser) {
+        return sourceCode -> {
+            Node node = fetch(sourceCode);
+            Optional<Node> optionalNode = expressionParser.fetch(sourceCode, node);
+            while (optionalNode.isPresent()) {
+                node = optionalNode.get();
+                optionalNode = expressionParser.fetch(sourceCode, node);
+            }
+            return node;
+        };
+
+    }
 
     class OperandNodeParser implements MandatoryNodeParser {
         @Override
         public Node fetch(SourceCode sourceCode) {
             Node node = sourceCode.popUnaryOperator().map(operator -> (Node) new Expression(operator, fetch(sourceCode)))
                     .orElseGet(() -> parsePropertyChain(sourceCode, singleEvaluableNode(sourceCode)));
+
             if (node.isListMapping())
                 throw new SyntaxException("element property needed", sourceCode.getPosition());
             return node;
@@ -40,6 +56,7 @@ public interface MandatoryNodeParser {
             });
         }
 
+        //TODO refactor inline
         private Node parsePropertyChain(SourceCode sourceCode, Node instanceNode) {
             return EXPLICIT_PROPERTY.recursiveCompile(sourceCode, instanceNode, this::parsePropertyChain);
         }
