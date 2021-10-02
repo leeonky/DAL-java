@@ -196,14 +196,14 @@ Feature: compile judgement expression operand
     Given the following dal code:
     """
     {
-      a<operator> [1, 2]
+      a<operator> [1 2]
     }
     """
     Then got the following "object" node:
     """
     expressions[0].rightOperand.expressions.inspect: [
-      '[0] <operator> 1',
-      '[1] <operator> 2',
+      '[0] <operator> 1'
+      '[1] <operator> 2'
     ]
     """
     Examples:

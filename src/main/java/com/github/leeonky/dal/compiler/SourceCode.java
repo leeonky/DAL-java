@@ -11,17 +11,18 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
+import static com.github.leeonky.dal.util.IfThenFactory.anyOf;
 import static com.github.leeonky.dal.util.IfThenFactory.when;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static java.util.Optional.*;
 
 public class SourceCode {
     private final String code;
     private final char[] chars;
     private int position = 0;
-    @Deprecated
-    Operator operator;
-    private LinkedList<Operator> operators = new LinkedList<>();
+    private final LinkedList<Operator> operators = new LinkedList<>();
+    private final LinkedList<Boolean> enableAndComma = new LinkedList<>(singleton(true));
 
     public SourceCode(String code) {
         this.code = code;
@@ -203,7 +204,7 @@ public class SourceCode {
     }
 
     public Optional<Operator> popBinaryArithmeticOperator() {
-        return popOperator(binaryArithmeticOperatorFactories);
+        return anyOf(popOperator(binaryArithmeticOperatorFactories), ofNullable(commaAndFactory.popOperator()));
     }
 
     private Optional<Operator> popJudgementOperator() {
@@ -223,6 +224,23 @@ public class SourceCode {
 
     public Operator popJudgementOperatorOrDefault() {
         return popJudgementOperator().orElse(operators.isEmpty() ? new Operator.Matcher() : operators.getFirst());
+    }
+
+    public Optional<Node> disableCommaAnd(Supplier<Optional<Node>> nodeFactory) {
+        return commaAnd(false, nodeFactory);
+    }
+
+    private Optional<Node> commaAnd(boolean b, Supplier<Optional<Node>> nodeFactory) {
+        enableAndComma.push(b);
+        try {
+            return nodeFactory.get();
+        } finally {
+            enableAndComma.pop();
+        }
+    }
+
+    public Optional<Node> enableCommaAnd(Supplier<Optional<Node>> nodeFactory) {
+        return commaAnd(true, nodeFactory);
     }
 
     public enum FetchBy {
@@ -257,6 +275,14 @@ public class SourceCode {
                 }
             });
 
+    private final OperatorFactory commaAndFactory = new OperatorFactory(",", () -> new Operator.And(",")) {
+
+        @Override
+        protected boolean matches() {
+            return super.matches() && enableAndComma.getFirst();
+        }
+    };
+
     private final List<OperatorFactory> binaryArithmeticOperatorFactories = asList(
             new OperatorFactory("&&", () -> new Operator.And("&&")),
             new OperatorFactory("||", () -> new Operator.Or("||")),
@@ -285,6 +311,7 @@ public class SourceCode {
             this.factory = factory;
         }
 
+        //TODO return optional
         public Operator popOperator() {
             return when(matches()).thenReturn(() -> {
                 int p = position;

@@ -117,13 +117,13 @@ Feature: binary operator expression
   Scenario Outline: operator of judgement list
     Given the following dal code:
     """
-    <operator> [1, 2]
+    <operator> [1 2]
     """
     Then got the following "binary-operator-expression" node:
     """
     rightOperand.expressions.inspect: [
-      '[0] <operator> 1',
-      '[1] <operator> 2',
+      '[0] <operator> 1'
+      '[1] <operator> 2'
     ]
     """
     Examples:

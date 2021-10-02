@@ -88,8 +88,7 @@ class BasicVerify extends Base {
             assertPass(null, "true or false");
         }
 
-        //        @Test
-//       TODO , => and
+        @Test
         void alias_of_operator_and() {
             assertPass(null, "true , true");
             assertFailed(null, "true , false");

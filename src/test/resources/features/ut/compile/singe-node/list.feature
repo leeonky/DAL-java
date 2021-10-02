@@ -149,3 +149,13 @@ Feature: list node
     """
     inspect: '[true false]'
     """
+
+  Scenario: comma as and in parentheses
+    Given the following dal code:
+    """
+     [(a,b), c]
+    """
+    Then got the following "list" node:
+    """
+    inspect: '[(a , b) c]'
+    """

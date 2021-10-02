@@ -42,24 +42,24 @@ public interface NodeParser {
             REGEX = sourceCode -> sourceCode.fetchElements(BY_CHAR, '/', '/',
                     create(RegexNode::new), i -> sourceCode.escapedPop(REGEX_ESCAPES)),
             INTEGER_OR_STRING_INDEX = INTEGER.combines(SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
-            PARENTHESES = sourceCode -> sourceCode.fetchNode('(', ')',
-                    ParenthesesNode::new, EXPRESSION, "expect a value or expression"),
+            PARENTHESES = sourceCode -> sourceCode.enableCommaAnd(() -> sourceCode.fetchNode('(', ')',
+                    ParenthesesNode::new, EXPRESSION, "expect a value or expression")),
             IDENTITY_PROPERTY = sourceCode -> sourceCode.fetchIdentityProperty().map(Token::toIdentityProperty),
             PROPERTY = EXPLICIT_PROPERTY.defaultInputNode().combine(IDENTITY_PROPERTY),
             SINGLE_EVALUABLE = CONST.combines(PROPERTY, PARENTHESES),
-            OBJECT = sourceCode -> sourceCode.fetchElements(BY_NODE, '{', '}',
+            OBJECT = sourceCode -> sourceCode.disableCommaAnd(() -> sourceCode.fetchElements(BY_NODE, '{', '}',
                     ObjectNode::new, i -> {
                         Node property = PROPERTY.toMandatoryNodeParser("expect a object property").recursive(EXPLICIT_PROPERTY).fetch(sourceCode);
                         return sourceCode.popJudgementOperatorAndCompile(operator ->
                                 new Expression(property, operator, JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode)))
                                 .orElseThrow(() -> new SyntaxException("expect operator `:` or `=`", sourceCode.getPosition()));
-                    }),
+                    })),
             LIST_TAIL = sourceCode -> sourceCode.fetchWord("...").map(Token::toListTail),
-            LIST = sourceCode -> sourceCode.fetchElements(BY_NODE, '[', ']',
+            LIST = sourceCode -> sourceCode.disableCommaAnd(() -> sourceCode.fetchElements(BY_NODE, '[', ']',
                     ListNode::new, i -> LIST_TAIL.fetch(sourceCode).isPresent() ? null :
                             new Expression(new PropertyNode(InputNode.INSTANCE, i, BRACKET),
                                     sourceCode.popJudgementOperatorOrDefault(),
-                                    JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode))),
+                                    JUDGEMENT_EXPRESSION_OPERAND.fetch(sourceCode)))),
             WILDCARD = sourceCode -> sourceCode.fetchWord("*").map(Token::toWildcardNode),
             JUDGEMENT = REGEX.combines(OBJECT, LIST, WILDCARD);
 

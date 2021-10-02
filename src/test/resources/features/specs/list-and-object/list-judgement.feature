@@ -107,7 +107,7 @@ Feature: judge list
     """
     Then the following assertion should pass:
     """
-      = [1+1 =1+2 :2+2 :/5/]
+      : [1+1 =1+2 :2+2, /5/]
     """
 
   Scenario: multidimensional list
@@ -239,12 +239,12 @@ Feature: judge list
     """
     Then the following assertion should pass:
     """
-      list.@.data.value = ['v1', 'v2'] and
-      list.data.value = ['v1', 'v2']
+      list.@.data.value = ['v1' 'v2'] and
+      list.data.value = ['v1' 'v2']
     """
     And the following assertion should pass:
     """
-      list: { data.value: ['v1', 'v2'] }
+      list: { data.value: ['v1' 'v2'] }
     """
 
   Scenario: should check each element fields when use list = {} mapping
@@ -263,7 +263,7 @@ Feature: judge list
     """
     And assert by the following code:
     """
-      list= { data.value: ['v1', 'v2'] }
+      list= { data.value: ['v1' 'v2'] }
     """
     Then failed with the following message:
     """
