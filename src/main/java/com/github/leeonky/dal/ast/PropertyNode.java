@@ -28,7 +28,7 @@ public class PropertyNode extends Node {
         try {
             return instanceNode.evaluateDataObject(context).getValue(name);
         } catch (IndexOutOfBoundsException ex) {
-            throw new RuntimeException(ex.getMessage(), getPositionBegin());
+            throw new RuntimeException("Index out of bounds (" + ex.getMessage() + ")", getPositionBegin());
         } catch (Exception e) {
             throw new RuntimeException(format(
                     "Get property via `%s` failed, property can be public field, getter or customer type getter:\n\t"
