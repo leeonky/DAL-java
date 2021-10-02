@@ -6,6 +6,9 @@ import com.github.leeonky.dal.compiler.SourceCode;
 
 public class Compiler {
     public Node compile(SourceCode sourceCode) {
-        return MandatoryNodeParser.EXPRESSION.fetch(sourceCode);
+        Node node = MandatoryNodeParser.EXPRESSION.fetch(sourceCode);
+        if (sourceCode.hasCode())
+            throw new SyntaxException("unexpected token", sourceCode.getPosition());
+        return node;
     }
 }

@@ -239,7 +239,7 @@ Feature: judge list
     """
     Then the following assertion should pass:
     """
-      list.@.data.value = ['v1', 'v2']
+      list.@.data.value = ['v1', 'v2'] and
       list.data.value = ['v1', 'v2']
     """
     And the following assertion should pass:

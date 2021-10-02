@@ -67,6 +67,11 @@ class CompilerTest {
         void support_access_array_by_const_index() {
             assertCompileNode("[0]", new PropertyNode(InputNode.INSTANCE, 0, DOT));
         }
+
+        @Test
+        void miss_opening_bracket() {
+            assertSyntaxException("1]", 1, "unexpected token");
+        }
     }
 
     @Nested
@@ -91,10 +96,9 @@ class CompilerTest {
             assertCompileOperator("/", new Operator.Division());
         }
 
-        //        @Test
-//        TODO
+        @Test
         void not_supported_operator() {
-            assertSyntaxException("&1", 0, "not support operator `&` yet");
+            assertSyntaxException("&1", 0, "unexpected token");
         }
 
         @Test
@@ -177,10 +181,9 @@ class CompilerTest {
             assertSyntaxException("(1", 2, "should end with `)`");
         }
 
-        //        @Test
-//        TODO
+        @Test
         void miss_opening_parenthesis_should_raise_error() {
-            assertSyntaxException("1)", 1, "missed '('");
+            assertSyntaxException("1)", 1, "unexpected token");
         }
     }
 
@@ -237,5 +240,10 @@ class CompilerTest {
                     new ConstNode(false)
             ));
         }
+    }
+
+    @Test
+    void miss_opening_brace() {
+        assertSyntaxException("1}", 1, "unexpected token");
     }
 }

@@ -88,8 +88,7 @@ Feature: basic assertion
   Scenario Outline: always pass
     Then the following assertion should pass:
     """
-      <operand> : *,
-      <operand> = *
+      <operand> : * and <operand> = *
     """
     Examples:
       | operand |

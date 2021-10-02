@@ -38,7 +38,7 @@ public class SourceCode {
         return this;
     }
 
-    private boolean hasCode() {
+    public boolean hasCode() {
         return position < chars.length;
     }
 
@@ -131,7 +131,7 @@ public class SourceCode {
         return ofNullable(startsWith(word) ? new Token(position).append(popWord(word)) : null);
     }
 
-    private boolean startsWith(String word) {
+    public boolean startsWith(String word) {
         leftTrim();
         return (code.startsWith(word, position));
     }
@@ -242,7 +242,7 @@ public class SourceCode {
         return IntStream.range(0, position).mapToObj(i -> chars[i]).allMatch(Character::isWhitespace);
     }
 
-    //    TODO complex test
+    //    TODO complex expression test
     private final List<OperatorFactory> unaryOperatorFactories = asList(
             new OperatorFactory("-", Operator.Minus::new) {
                 @Override
