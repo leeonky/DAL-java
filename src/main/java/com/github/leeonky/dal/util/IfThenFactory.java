@@ -72,7 +72,6 @@ public class IfThenFactory {
 
     public static <T> Optional<T> anyOf(Optional<T> optional, Optional<T>... optionals) {
         return Stream.concat(Stream.of(optional), Stream.of(optionals))
-                .filter(Optional::isPresent).findFirst()
-                .orElse(empty());
+                .filter(Optional::isPresent).findFirst().orElse(empty());
     }
 }

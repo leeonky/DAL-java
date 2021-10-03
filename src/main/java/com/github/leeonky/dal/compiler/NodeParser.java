@@ -46,7 +46,6 @@ public interface NodeParser {
                     ParenthesesNode::new, EXPRESSION, "expect a value or expression")),
             IDENTITY_PROPERTY = sourceCode -> sourceCode.fetchIdentityProperty().map(Token::toIdentityProperty),
             PROPERTY = EXPLICIT_PROPERTY.defaultInputNode().combine(IDENTITY_PROPERTY),
-            SINGLE_EVALUABLE = CONST.combines(PROPERTY, PARENTHESES),
             OBJECT = sourceCode -> sourceCode.disableCommaAnd(() -> sourceCode.fetchElements(BY_NODE, '{', '}',
                     ObjectNode::new, i -> {
                         Node property = PROPERTY.toMandatoryNodeParser("expect a object property").recursive(EXPLICIT_PROPERTY).fetch(sourceCode);

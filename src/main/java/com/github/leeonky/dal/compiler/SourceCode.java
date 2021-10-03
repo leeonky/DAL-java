@@ -11,12 +11,12 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-import static com.github.leeonky.dal.util.IfThenFactory.anyOf;
 import static com.github.leeonky.dal.util.IfThenFactory.when;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Optional.*;
 
+//TODO refactor methods
 public class SourceCode {
     private final String code;
     private final char[] chars;
@@ -204,7 +204,7 @@ public class SourceCode {
     }
 
     public Optional<Operator> popBinaryArithmeticOperator() {
-        return anyOf(popOperator(binaryArithmeticOperatorFactories), ofNullable(commaAndFactory.popOperator()));
+        return popOperator(binaryArithmeticOperatorFactories);
     }
 
     private Optional<Operator> popJudgementOperator() {
@@ -275,18 +275,16 @@ public class SourceCode {
                 }
             });
 
-    private final OperatorFactory commaAndFactory = new OperatorFactory(",", () -> new Operator.And(",")) {
-
-        @Override
-        protected boolean matches() {
-            return super.matches() && enableAndComma.getFirst();
-        }
-    };
-
     private final List<OperatorFactory> binaryArithmeticOperatorFactories = asList(
             new OperatorFactory("&&", () -> new Operator.And("&&")),
             new OperatorFactory("||", () -> new Operator.Or("||")),
             new OperatorFactory("and", () -> new Operator.And("and")),
+            new OperatorFactory(",", () -> new Operator.And(",")) {
+                @Override
+                protected boolean matches() {
+                    return super.matches() && enableAndComma.getFirst();
+                }
+            },
             new OperatorFactory("or", () -> new Operator.Or("or")),
             new OperatorFactory(">=", Operator.GreaterOrEqual::new),
             new OperatorFactory("<=", Operator.LessOrEqual::new),
@@ -311,7 +309,6 @@ public class SourceCode {
             this.factory = factory;
         }
 
-        //TODO return optional
         public Operator popOperator() {
             return when(matches()).thenReturn(() -> {
                 int p = position;

@@ -4,7 +4,6 @@ import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.ast.*;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.compiler.MandatoryNodeParser.*;
@@ -43,14 +42,10 @@ public interface ExpressionParser {
         return sourceCode -> fetch(sourceCode, InputNode.INSTANCE);
     }
 
+    //    TODO use MandatoryNodeParser::recursive ?
     default MandatoryExpressionParser defaultPreviousRecursive() {
         return (sourceCode, previous) -> fetch(sourceCode, previous).map(p ->
                 defaultPreviousRecursive().fetch(sourceCode, p)).orElse(previous);
-    }
-
-    default Node recursiveCompile(SourceCode sourceCode, Node input,
-                                  BiFunction<SourceCode, Node, Node> method) {
-        return fetch(sourceCode, input).map(node -> method.apply(sourceCode, node)).orElse(input);
     }
 
     class SchemaExpressionParser implements ExpressionParser {

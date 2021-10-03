@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.RuntimeException;
+import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.util.DataObject;
 
 import java.util.Objects;
@@ -60,8 +61,10 @@ public class PropertyNode extends Node {
     }
 
     @Override
-    public boolean isListMapping() {
-        return "@".equals(name);
+    public Node avoidListMapping() {
+        if ("@".equals(name))
+            throw new SyntaxException("element property needed", getPositionBegin());
+        return this;
     }
 
     public enum Type {

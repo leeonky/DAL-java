@@ -8,12 +8,23 @@ import com.github.leeonky.dal.ast.Node;
 import java.util.Optional;
 
 import static com.github.leeonky.dal.compiler.ExpressionParser.*;
-import static com.github.leeonky.dal.compiler.NodeParser.JUDGEMENT;
-import static com.github.leeonky.dal.compiler.NodeParser.SINGLE_EVALUABLE;
+import static com.github.leeonky.dal.compiler.NodeParser.*;
 
 public interface MandatoryNodeParser {
     MandatoryNodeParser
-            OPERAND = new OperandNodeParser(),
+            SINGLE_EVALUABLE = sourceCode -> CONST.combines(PROPERTY, PARENTHESES).fetch(sourceCode)
+            .orElseGet(() -> {
+                if (sourceCode.isBeginning())
+                    return InputNode.INSTANCE;
+                throw new SyntaxException("expect a value or expression", sourceCode.getPosition());
+            }),
+            OPERAND = new MandatoryNodeParser() {
+                @Override
+                public Node fetch(SourceCode sourceCode) {
+                    return sourceCode.popUnaryOperator().map(operator -> (Node) new Expression(operator, fetch(sourceCode)))
+                            .orElseGet(() -> SINGLE_EVALUABLE.recursive(EXPLICIT_PROPERTY).fetch(sourceCode)).avoidListMapping();
+                }
+            },
             JUDGEMENT_OR_OPERAND = JUDGEMENT.combine(OPERAND),
             EXPRESSION = sourceCode -> BINARY_OPERATOR_EXPRESSION.combine(SCHEMA_EXPRESSION)
                     .defaultPreviousRecursive().fetch(sourceCode, OPERAND.fetch(sourceCode)),
@@ -34,31 +45,5 @@ public interface MandatoryNodeParser {
             }
             return node;
         };
-
-    }
-
-    class OperandNodeParser implements MandatoryNodeParser {
-        @Override
-        public Node fetch(SourceCode sourceCode) {
-            Node node = sourceCode.popUnaryOperator().map(operator -> (Node) new Expression(operator, fetch(sourceCode)))
-                    .orElseGet(() -> parsePropertyChain(sourceCode, singleEvaluableNode(sourceCode)));
-
-            if (node.isListMapping())
-                throw new SyntaxException("element property needed", sourceCode.getPosition());
-            return node;
-        }
-
-        private Node singleEvaluableNode(SourceCode sourceCode) {
-            return SINGLE_EVALUABLE.fetch(sourceCode).orElseGet(() -> {
-                if (sourceCode.isBeginning())
-                    return InputNode.INSTANCE;
-                throw new SyntaxException("expect a value or expression", sourceCode.getPosition());
-            });
-        }
-
-        //TODO refactor inline
-        private Node parsePropertyChain(SourceCode sourceCode, Node instanceNode) {
-            return EXPLICIT_PROPERTY.recursiveCompile(sourceCode, instanceNode, this::parsePropertyChain);
-        }
     }
 }

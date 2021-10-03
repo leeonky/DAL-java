@@ -176,5 +176,5 @@ Feature: operand node
     And got the following source code information:
     """
       .@
-        ^
+      ^
     """
