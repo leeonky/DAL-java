@@ -12,13 +12,13 @@ class SchemaWhichExpressionTest {
 
     @Test
     void return_false_when_clause_is_false() {
-        assertThat(MATCHES_TYPE_EXPRESSION.which(new ConstNode(false), false).evaluate(runtimeContextBuilder.build(null)))
+        assertThat(MATCHES_TYPE_EXPRESSION.which(new ConstNode(false)).evaluate(runtimeContextBuilder.build(null)))
                 .isEqualTo(false);
     }
 
     @Test
     void should_return_true_when_both_type_matches_and_clause_is_true() {
-        assertThat(MATCHES_TYPE_EXPRESSION.which(new ConstNode(true), false).evaluate(runtimeContextBuilder.build(null)))
+        assertThat(MATCHES_TYPE_EXPRESSION.which(new ConstNode(true)).evaluate(runtimeContextBuilder.build(null)))
                 .isEqualTo(true);
     }
 

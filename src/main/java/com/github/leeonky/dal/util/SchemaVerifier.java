@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.util;
 
+import com.github.leeonky.dal.Compiler;
 import com.github.leeonky.dal.IllegalFieldException;
 import com.github.leeonky.dal.RuntimeContext;
 import com.github.leeonky.dal.format.Formatter;
@@ -24,6 +25,7 @@ import static java.util.stream.IntStream.range;
 public class SchemaVerifier {
     private final DataObject object;
     private final RuntimeContext runtimeContext;
+    private static final Compiler compiler = new Compiler();
 
     public SchemaVerifier(RuntimeContext runtimeContext, DataObject object) {
         this.runtimeContext = runtimeContext;
@@ -35,7 +37,7 @@ public class SchemaVerifier {
         Class<?> type = superSchemaType;
         SubType subType = superSchemaType.getAnnotation(SubType.class);
         if (subType != null) {
-            Object value = object.getValue(CodeHelper.toChainNodes(subType.property())).getInstance();
+            Object value = object.getValue(compiler.toChainNodes(subType.property())).getInstance();
             type = Stream.of(subType.types())
                     .filter(t -> t.value().equals(value))
                     .map(SubType.Type::type)

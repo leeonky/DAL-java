@@ -2,7 +2,6 @@ package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.type.FieldAlias;
 import com.github.leeonky.dal.type.FieldAliases;
-import com.github.leeonky.dal.util.CodeHelper;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.ArrayList;
@@ -12,9 +11,10 @@ import java.util.Objects;
 import static java.util.Arrays.asList;
 
 public class SchemaType {
-    public final BeanClass<?> schema;
+    private final BeanClass<?> schema;
     private final Object fromProperty;
     private final SchemaType parent;
+    private static final Compiler compiler = new Compiler();
 
     private SchemaType(BeanClass<?> schema) {
         this(schema, null, null);
@@ -62,7 +62,7 @@ public class SchemaType {
         String property = fetchFieldChain((String) alias);
         if (Objects.equals(property, alias))
             return subSchema(property);
-        List<Object> chain = CodeHelper.toChainNodes(property);
+        List<Object> chain = compiler.toChainNodes(property);
         return chain.stream().skip(1).reduce(access(chain.get(0)), SchemaType::access, (o1, o2) -> {
             throw new IllegalStateException("Not allow parallel here!");
         });

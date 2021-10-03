@@ -68,6 +68,14 @@ public class SchemaExpression extends Node {
                 .setPositionBegin(getPositionBegin());
     }
 
+    public SchemaWhichExpression omitWhich(Node n) {
+        return which(n, true);
+    }
+
+    public SchemaWhichExpression which(Node n) {
+        return which(n, false);
+    }
+
     static class ObjectRef {
         public Object instance;
     }

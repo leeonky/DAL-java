@@ -2,6 +2,7 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
+import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.ast.Operator;
 
@@ -132,7 +133,7 @@ public class SourceCode {
         return ofNullable(startsWith(word) ? new Token(position).append(popWord(word)) : null);
     }
 
-    public boolean startsWith(String word) {
+    private boolean startsWith(String word) {
         leftTrim();
         return (code.startsWith(word, position));
     }
@@ -211,7 +212,8 @@ public class SourceCode {
         return popOperator(judgementOperatorFactories);
     }
 
-    public <T extends Node> Optional<T> popJudgementOperatorAndCompile(Function<Operator, T> compiler) {
+    //    TODO private inline
+    public <T extends Node> Optional<T> compileJudgement(Function<Operator, T> compiler) {
         return popJudgementOperator().map(operator -> {
             operators.push(operator);
             try {
@@ -243,6 +245,10 @@ public class SourceCode {
         return commaAnd(true, nodeFactory);
     }
 
+    public Optional<Node> fetchInput() {
+        return when(isBeginning()).optional(() -> InputNode.INSTANCE);
+    }
+
     public enum FetchBy {
         BY_CHAR,
         BY_NODE {
@@ -256,7 +262,7 @@ public class SourceCode {
         }
     }
 
-    public boolean isBeginning() {
+    private boolean isBeginning() {
         return IntStream.range(0, position).mapToObj(i -> chars[i]).allMatch(Character::isWhitespace);
     }
 
