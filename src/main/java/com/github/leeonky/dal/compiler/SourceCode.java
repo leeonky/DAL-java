@@ -2,6 +2,7 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
+import com.github.leeonky.dal.ast.Expression;
 import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.ast.Operator;
@@ -214,7 +215,8 @@ public class SourceCode {
         return popOperator(judgementOperatorFactories);
     }
 
-    //    TODO private inline
+    //TODO use    public Optional<Node> fetchJudgement(Node left, NodeCompiler rightParser)
+    @Deprecated
     public <T extends Node> Optional<T> compileJudgement(Function<Operator, T> compiler) {
         return popJudgementOperator().map(operator -> {
             operators.push(operator);
@@ -226,6 +228,7 @@ public class SourceCode {
         });
     }
 
+    //TODO missing [=[1,2]]
     public Operator popJudgementOperatorOrDefault() {
         return popJudgementOperator().orElse(operators.isEmpty() ? new Operator.Matcher() : operators.getFirst());
     }
@@ -254,6 +257,30 @@ public class SourceCode {
     public Optional<Node> fetchString(char opening, char closing, Function<String, Node> factory, EscapeChars escapeChars) {
         return fetchElements(BY_CHAR, opening, closing, characters -> factory.apply(characters.stream()
                 .map(String::valueOf).collect(joining(""))), i -> escapedPop(escapeChars));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Node> List<T> fetchNodes(String delimiter, NodeCompiler factory) {
+        List<T> schemaNodes = new ArrayList<>();
+        schemaNodes.add((T) factory.fetch(this));
+        while (fetchWord(delimiter).isPresent())
+            schemaNodes.add((T) factory.fetch(this));
+        return schemaNodes;
+    }
+
+    public Optional<Node> expressionAfter(String token, NodeCompiler nodeCompiler) {
+        return fetchWord(token).map(t -> nodeCompiler.fetch(this).setPositionBegin(t.getPosition()));
+    }
+
+    public Optional<Node> fetchJudgement(Node left, NodeCompiler rightParser) {
+        return popJudgementOperator().map(operator -> {
+            operators.push(operator);
+            try {
+                return new Expression(left, operator, rightParser.fetch(this)).adjustOperatorOrder();
+            } finally {
+                operators.pop();
+            }
+        });
     }
 
     //    TODO refactor

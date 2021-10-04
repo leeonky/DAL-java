@@ -17,9 +17,9 @@ public class SchemaExpression extends Node {
     private final List<SchemaNode> schemaNodes = new ArrayList<>();
     private final ObjectRef objectRef = new ObjectRef();
 
-    public SchemaExpression(Node instance, SchemaNode node) {
-        this.instance = instance;
-        schemaNodes.add(node);
+    public SchemaExpression(Node previous, List<SchemaNode> schemaNodes) {
+        instance = previous;
+        this.schemaNodes.addAll(schemaNodes);
     }
 
     public Object getTypeInstance() {

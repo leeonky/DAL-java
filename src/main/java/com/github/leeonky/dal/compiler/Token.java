@@ -99,10 +99,6 @@ public class Token {
         return (WildcardNode) new WildcardNode().setPositionBegin(position);
     }
 
-    public ListTailNode toListTail() {
-        return (ListTailNode) new ListTailNode().setPositionBegin(position);
-    }
-
     public boolean isNumber() {
         try {
             getNumber(getContent());

@@ -6,8 +6,11 @@ import com.github.leeonky.dal.compiler.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.Constants.KeyWords.IS;
 import static com.github.leeonky.dal.Constants.KeyWords.WHICH;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_NODE;
@@ -32,8 +35,6 @@ public class Compiler {
 
     ExpressionParser DOT_PROPERTY, BRACKET_PROPERTY, EXPLICIT_PROPERTY, BINARY_ARITHMETIC_EXPRESSION,
             BINARY_JUDGEMENT_EXPRESSION, BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION;
-
-    ExpressionCompiler SCHEMA_AND_CLAUSE;
 
     public Compiler() {
         INPUT = SourceCode::fetchInput;
@@ -82,37 +83,34 @@ public class Compiler {
 
         BINARY_ARITHMETIC_EXPRESSION = (sourceCode, previous) -> sourceCode.popBinaryArithmeticOperator().map(operator ->
                 new Expression(previous, operator, OPERAND.fetch(sourceCode)).adjustOperatorOrder());
-        BINARY_JUDGEMENT_EXPRESSION = (sourceCode, previous) -> sourceCode.compileJudgement(operator ->
-                new Expression(previous, operator, JUDGEMENT_OR_OPERAND.fetch(sourceCode)).adjustOperatorOrder());
+        BINARY_JUDGEMENT_EXPRESSION = (sourceCode, previous) -> sourceCode.fetchJudgement(previous, JUDGEMENT_OR_OPERAND);
         BINARY_OPERATOR_EXPRESSION = oneOf(BINARY_ARITHMETIC_EXPRESSION, BINARY_JUDGEMENT_EXPRESSION);
-
         ARITHMETIC_EXPRESSION = OPERAND.recursive(BINARY_ARITHMETIC_EXPRESSION);
         JUDGEMENT_EXPRESSION_OPERAND = JUDGEMENT.or(ARITHMETIC_EXPRESSION);
-        SCHEMA_AND_CLAUSE = schemaAndClause();
-        SCHEMA_EXPRESSION = expressionAfterToken(Constants.KeyWords.IS, SCHEMA_AND_CLAUSE);
-        SCHEMA_JUDGEMENT_CLAUSE = judgementClause(InputNode.INSTANCE, JUDGEMENT_EXPRESSION_OPERAND);
+        SCHEMA_JUDGEMENT_CLAUSE = sourceCode -> sourceCode.fetchJudgement(InputNode.INSTANCE, JUDGEMENT_EXPRESSION_OPERAND);
+        SCHEMA_WHICH_CLAUSE = sourceCode -> sourceCode.expressionAfter(WHICH, SCHEMA_JUDGEMENT_CLAUSE.or(EXPRESSION));
+        SCHEMA_EXPRESSION = (sourceCode, previous) -> sourceCode.expressionAfter(IS, compileSchemaExpression(
+                whichClause(SCHEMA_JUDGEMENT_CLAUSE, SchemaExpression::omitWhich),
+                whichClause(SCHEMA_WHICH_CLAUSE, SchemaExpression::which)).toNode(previous));
         EXPRESSION = OPERAND.recursive(oneOf(BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION));
-        SCHEMA_WHICH_CLAUSE = expressionAfterToken(WHICH, SCHEMA_JUDGEMENT_CLAUSE.or(EXPRESSION));
     }
 
-    private ExpressionCompiler schemaAndClause() {
-        return (sourceCode, previous) -> {
-            SchemaExpression expression = new SchemaExpression(previous, (SchemaNode) SCHEMA.fetch(sourceCode));
-            while (sourceCode.fetchWord("/").isPresent())
-                expression.appendSchema((SchemaNode) SCHEMA.fetch(sourceCode));
-            return oneOf(SCHEMA_JUDGEMENT_CLAUSE.map(expression::omitWhich),
-                    SCHEMA_WHICH_CLAUSE.map(expression::which)).fetch(sourceCode).orElse(expression);
-        };
+    private ExpressionCompiler compileSchemaExpression(Function<SchemaExpression, NodeParser> whichClause1,
+                                                       Function<SchemaExpression, NodeParser> whichClause2) {
+        return (sourceCode, previous) -> schemaAndClause(sourceCode,
+                new SchemaExpression(previous, sourceCode.fetchNodes("/", SCHEMA)), whichClause1, whichClause2);
     }
 
-    private NodeParser expressionAfterToken(String token, NodeCompiler nodeCompiler) {
-        return sourceCode -> sourceCode.fetchWord(token).map(t -> nodeCompiler.fetch(sourceCode)
-                .setPositionBegin(t.getPosition()));
+    private Node schemaAndClause(SourceCode sourceCode1, SchemaExpression schemaExpression,
+                                 Function<SchemaExpression, NodeParser> whichClause1,
+                                 Function<SchemaExpression, NodeParser> whichClause2) {
+        return oneOf(whichClause1.apply(schemaExpression), whichClause2.apply(schemaExpression))
+                .fetch(sourceCode1).orElse(schemaExpression);
     }
 
-    private ExpressionParser expressionAfterToken(String token, ExpressionCompiler expressionCompiler) {
-        return (sourceCode, previous) -> sourceCode.fetchWord(token).map(t ->
-                expressionCompiler.fetch(sourceCode, previous).setPositionBegin(t.getPosition()));
+    private Function<SchemaExpression, NodeParser> whichClause(NodeParser clauseNodeParser, BiFunction<SchemaExpression,
+            Node, SchemaWhichExpression> appendWay) {
+        return schemaExpression -> clauseNodeParser.map(node -> appendWay.apply(schemaExpression, node));
     }
 
     public Node compile(SourceCode sourceCode) {
@@ -131,11 +129,6 @@ public class Compiler {
             fetch = PROPERTY.fetch(sourceCode);
         }
         return result;
-    }
-
-    private NodeParser judgementClause(Node left, NodeCompiler rightParser) {
-        return sourceCode -> sourceCode.compileJudgement(operator ->
-                new Expression(left, operator, rightParser.fetch(sourceCode)));
     }
 
     private static NodeParser oneOf(NodeParser parser, NodeParser... parsers) {
