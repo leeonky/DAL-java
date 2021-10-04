@@ -59,10 +59,6 @@ public class SchemaExpression extends Node {
                 .collect(Collectors.joining(format(" %s ", SCHEMA_DELIMITER))));
     }
 
-    public void appendSchema(SchemaNode schemaNode) {
-        schemaNodes.add(schemaNode);
-    }
-
     public SchemaWhichExpression which(Node whichClause, boolean omitWhich) {
         return (SchemaWhichExpression) new SchemaWhichExpression(this, whichClause, omitWhich)
                 .setPositionBegin(getPositionBegin());

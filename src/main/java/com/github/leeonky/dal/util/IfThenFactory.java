@@ -3,7 +3,6 @@ package com.github.leeonky.dal.util;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -68,11 +67,5 @@ public class IfThenFactory {
                 return null;
             }
         }
-    }
-
-    @SafeVarargs
-    public static <T> Optional<T> oneOf(Optional<T> optional, Optional<T>... optionals) {
-        return Stream.concat(Stream.of(optional), Stream.of(optionals))
-                .filter(Optional::isPresent).findFirst().orElse(empty());
     }
 }

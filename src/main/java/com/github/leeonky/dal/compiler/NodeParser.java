@@ -18,7 +18,7 @@ public interface NodeParser {
         return sourceCode -> fetch(sourceCode).orElseGet(() -> nodeCompiler.fetch(sourceCode));
     }
 
-    default NodeCompiler toMandatory(String message) {
+    default NodeCompiler or(String message) {
         return sourceCode -> fetch(sourceCode).orElseThrow(() -> new SyntaxException(message, sourceCode.getPosition()));
     }
 }

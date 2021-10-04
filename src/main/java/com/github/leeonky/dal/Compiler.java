@@ -12,72 +12,101 @@ import java.util.stream.Stream;
 import static com.github.leeonky.dal.Constants.KeyWords.IS;
 import static com.github.leeonky.dal.Constants.KeyWords.WHICH;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
-import static com.github.leeonky.dal.compiler.SourceCode.*;
-import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_NODE;
+import static com.github.leeonky.dal.compiler.SourceCode.DEFAULT_JUDGEMENT_OPERATOR;
+import static com.github.leeonky.dal.compiler.SourceCode.OperatorFactory;
 import static java.util.Optional.empty;
 
 public class Compiler {
-    EscapeChars SINGLE_QUOTED_ESCAPES = new EscapeChars()
-            .escape("\\\\", '\\')
-            .escape("\\'", '\'');
-    EscapeChars DOUBLE_QUOTED_ESCAPES = new EscapeChars()
-            .escape("\\\\", '\\')
-            .escape("\\n", '\n')
-            .escape("\\t", '\t')
-            .escape("\\\"", '"');
-    EscapeChars REGEX_ESCAPES = new EscapeChars()
-            .escape("\\/", '/');
+    //    TODO complex expression test
+    public static final OperatorParser BINARY_ARITHMETIC_OPERATORS = oneOf(
+            new OperatorFactory("&&", () -> new Operator.And("&&")),
+            new OperatorFactory("||", () -> new Operator.Or("||")),
+            new OperatorFactory("and", () -> new Operator.And("and")),
+            new OperatorFactory(",", () -> new Operator.And(",")) {
+                @Override
+                protected boolean matches(SourceCode sourceCode) {
+                    return super.matches(sourceCode) && isEnableAndComma(sourceCode);
+                }
+            },
+            new OperatorFactory("or", () -> new Operator.Or("or")),
+            new OperatorFactory(">=", Operator.GreaterOrEqual::new),
+            new OperatorFactory("<=", Operator.LessOrEqual::new),
+            new OperatorFactory(">", Operator.Greater::new),
+            new OperatorFactory("<", Operator.Less::new),
+            new OperatorFactory("+", Operator.Plus::new),
+            new OperatorFactory("-", Operator.Subtraction::new),
+            new OperatorFactory("*", Operator.Multiplication::new),
+            new OperatorFactory("/", Operator.Division::new),
+            new OperatorFactory("!=", Operator.NotEqual::new)),
+            UNARY_OPERATORS = oneOf(
+                    new OperatorFactory("-", Operator.Minus::new) {
+                        @Override
+                        protected boolean matches(SourceCode sourceCode) {
+                            return super.matches(sourceCode) && !sourceCode.isBeginning();
+                        }
+                    }, new OperatorFactory("!", Operator.Not::new) {
+                        @Override
+                        protected boolean matches(SourceCode sourceCode) {
+                            return super.matches(sourceCode) && !sourceCode.startsWith("!=");
+                        }
+                    }),
+            JUDGEMENT_OPERATORS = oneOf(
+                    new OperatorFactory(":", Operator.Matcher::new),
+                    new OperatorFactory("=", Operator.Equal::new));
 
-    NodeParser INPUT, NUMBER, INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
-            CONST, REGEX, LIST_INDEX_OR_MAP_KEY, PARENTHESES, IDENTITY_PROPERTY, PROPERTY, OBJECT, LIST,
+    private static final EscapeChars SINGLE_QUOTED_ESCAPES = new EscapeChars().escape("\\\\", '\\').escape("\\'", '\''),
+            DOUBLE_QUOTED_ESCAPES = new EscapeChars().escape("\\\\", '\\').escape("\\n", '\n').escape("\\t", '\t')
+                    .escape("\\\"", '"'),
+            REGEX_ESCAPES = new EscapeChars().escape("\\/", '/');
+
+    NodeParser INPUT = SourceCode::fetchInput,
+            NUMBER = sourceCode -> sourceCode.fetchNumber().map(Token::toConstNumber),
+            INTEGER = sourceCode -> sourceCode.fetchInteger().map(Token::toConstInteger),
+            SINGLE_QUOTED_STRING = sourceCode -> sourceCode.fetchString('\'', '\'', ConstNode::new, SINGLE_QUOTED_ESCAPES),
+            DOUBLE_QUOTED_STRING = sourceCode -> sourceCode.fetchString('"', '"', ConstNode::new, DOUBLE_QUOTED_ESCAPES),
+            CONST_TRUE = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.TRUE).map(Token::toConstTrue),
+            CONST_FALSE = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.FALSE).map(Token::toConstFalse),
+            CONST_NULL = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.NULL).map(Token::toConstNull),
+            REGEX = sourceCode -> sourceCode.fetchString('/', '/', RegexNode::new, REGEX_ESCAPES),
+            IDENTITY_PROPERTY = sourceCode -> sourceCode.fetchIdentityProperty().map(Token::toIdentityProperty),
             WILDCARD = sourceCode -> sourceCode.fetchWord("*").map(Token::toWildcardNode),
-            JUDGEMENT, SCHEMA_WHICH_CLAUSE, SCHEMA_JUDGEMENT_CLAUSE, UNARY_OPERATOR_EXPRESSION;
+            PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_WHICH_CLAUSE, SCHEMA_JUDGEMENT_CLAUSE,
+            UNARY_OPERATOR_EXPRESSION;
 
-    NodeCompiler OPERAND, EXPRESSION, ARITHMETIC_EXPRESSION, JUDGEMENT_EXPRESSION_OPERAND,
-            SCHEMA = sourceCode -> sourceCode.fetchSchemaToken().toSchemaNode(), PROPERTY_CHAIN;
+    NodeCompiler SCHEMA = sourceCode -> sourceCode.fetchSchemaToken().toSchemaNode(),
+            PROPERTY_CHAIN, OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION,
+            JUDGEMENT_EXPRESSION_OPERAND;
 
-    ExpressionParser DOT_PROPERTY, BRACKET_PROPERTY, EXPLICIT_PROPERTY, BINARY_ARITHMETIC_EXPRESSION,
-            BINARY_JUDGEMENT_EXPRESSION, BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION;
+    ExpressionParser DOT_PROPERTY = (sourceCode, previous) -> sourceCode.fetchProperty()
+            .map(token -> token.toDotProperty(previous)),
+            BRACKET_PROPERTY, EXPLICIT_PROPERTY, BINARY_ARITHMETIC_EXPRESSION, BINARY_JUDGEMENT_EXPRESSION,
+            BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION;
 
     public Compiler() {
-        INPUT = SourceCode::fetchInput;
-        NUMBER = sourceCode -> sourceCode.fetchNumber().map(Token::toConstNumber);
-        INTEGER = sourceCode -> sourceCode.fetchInteger().map(Token::toConstInteger);
-        SINGLE_QUOTED_STRING = sourceCode -> sourceCode.fetchString('\'', '\'', ConstNode::new, SINGLE_QUOTED_ESCAPES);
-        DOUBLE_QUOTED_STRING = sourceCode -> sourceCode.fetchString('"', '"', ConstNode::new, DOUBLE_QUOTED_ESCAPES);
-        CONST_TRUE = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.TRUE).map(Token::toConstTrue);
-        CONST_FALSE = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.FALSE).map(Token::toConstFalse);
-        CONST_NULL = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.NULL).map(Token::toConstNull);
         CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL);
-        REGEX = sourceCode -> sourceCode.fetchString('/', '/', RegexNode::new, REGEX_ESCAPES);
-        LIST_INDEX_OR_MAP_KEY = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
+        LIST_INDEX_OR_MAP_KEY = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING)
+                .or("should given one property or array index in `[]`");
         PARENTHESES = sourceCode -> sourceCode.enableCommaAnd(() -> sourceCode.fetchNode('(', ')',
                 ParenthesesNode::new, EXPRESSION, "expect a value or expression"));
-        IDENTITY_PROPERTY = sourceCode -> sourceCode.fetchIdentityProperty().map(Token::toIdentityProperty);
-        DOT_PROPERTY = (sourceCode, previous) -> sourceCode.fetchProperty().map(token -> token.toDotProperty(previous));
-        BRACKET_PROPERTY = (sourceCode, previous) -> {
-            String message = "should given one property or array index in `[]`";
-            return sourceCode.fetchNode('[', ']', node ->
-                            new PropertyNode(previous, ((ConstNode) node).toPropertyOrListIndex(), BRACKET),
-                    LIST_INDEX_OR_MAP_KEY.toMandatory(message), message);
-        };
+        BRACKET_PROPERTY = (sourceCode, previous) -> sourceCode.fetchNode('[', ']', node ->
+                        new PropertyNode(previous, ((ConstNode) node).toPropertyOrListIndex(), BRACKET),
+                LIST_INDEX_OR_MAP_KEY, "should given one property or array index in `[]`");
         EXPLICIT_PROPERTY = oneOf(DOT_PROPERTY, BRACKET_PROPERTY);
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(), IDENTITY_PROPERTY);
-        PROPERTY_CHAIN = sourceCode -> PROPERTY.toMandatory("expect a object property").recursive(EXPLICIT_PROPERTY).fetch(sourceCode);
-        OBJECT = sourceCode -> sourceCode.disableCommaAnd(() -> sourceCode.fetchElements(BY_NODE, '{', '}',
-                ObjectNode::new, i -> (Expression) sourceCode.fetchExpression(
-                        PROPERTY_CHAIN.fetch(sourceCode), JUDGEMENT_OPERATORS, JUDGEMENT_EXPRESSION_OPERAND)
-                        .orElseThrow(() -> new SyntaxException("expect operator `:` or `=`", sourceCode.getPosition()))));
-        LIST = sourceCode -> sourceCode.disableCommaAnd(() -> sourceCode.fetchElements(BY_NODE, '[', ']',
-                ListNode::new, i -> sourceCode.fetchWord(Constants.LIST_TAIL).isPresent() ? null
-                        : sourceCode.fetchExpression(new PropertyNode(InputNode.INSTANCE, i, BRACKET),
-                        sourceCode.popJudgementOperatorOrDefault(),
+        PROPERTY_CHAIN = sourceCode -> PROPERTY.or("expect a object property").recursive(EXPLICIT_PROPERTY).fetch(sourceCode);
+        OBJECT = sourceCode -> sourceCode.disableCommaAnd(() -> sourceCode.fetchNodes('{', '}', ObjectNode::new,
+                i -> sourceCode.fetchExpression(PROPERTY_CHAIN.fetch(sourceCode),
+                        JUDGEMENT_OPERATORS.or("expect operator `:` or `=`"),
                         JUDGEMENT_EXPRESSION_OPERAND)));
+        LIST = sourceCode -> sourceCode.disableCommaAnd(() -> sourceCode.fetchNodes('[', ']', ListNode::new,
+                i -> sourceCode.fetchWord(Constants.LIST_TAIL).isPresent() ? null
+                        : sourceCode.fetchExpression(new PropertyNode(InputNode.INSTANCE, i, BRACKET),
+                        JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR), JUDGEMENT_EXPRESSION_OPERAND)));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD);
-        UNARY_OPERATOR_EXPRESSION = sourceCode -> sourceCode.fetchExpression(
-                new ConstNode(null), UNARY_OPERATORS, OPERAND);
-        OPERAND = UNARY_OPERATOR_EXPRESSION.or(oneOf(CONST, PROPERTY, PARENTHESES, INPUT)
-                .toMandatory("expect a value or expression").recursive(EXPLICIT_PROPERTY).map(Node::avoidListMapping));
+        UNARY_OPERATOR_EXPRESSION = sourceCode -> sourceCode.fetchExpression(new ConstNode(null), UNARY_OPERATORS, OPERAND);
+        OPERAND = UNARY_OPERATOR_EXPRESSION.or(
+                oneOf(CONST, PROPERTY, PARENTHESES, INPUT).or("expect a value or expression")
+                        .recursive(EXPLICIT_PROPERTY).map(Node::avoidListMapping));
         BINARY_ARITHMETIC_EXPRESSION = (sourceCode, previous) -> sourceCode.fetchExpression(
                 previous, BINARY_ARITHMETIC_OPERATORS, OPERAND);
         BINARY_JUDGEMENT_EXPRESSION = (sourceCode, previous) -> sourceCode.fetchExpression(
@@ -87,8 +116,8 @@ public class Compiler {
         JUDGEMENT_EXPRESSION_OPERAND = JUDGEMENT.or(ARITHMETIC_EXPRESSION);
         SCHEMA_JUDGEMENT_CLAUSE = sourceCode -> sourceCode.fetchExpression(
                 InputNode.INSTANCE, JUDGEMENT_OPERATORS, JUDGEMENT_EXPRESSION_OPERAND);
-        SCHEMA_WHICH_CLAUSE = sourceCode -> sourceCode.expressionAfter(WHICH, SCHEMA_JUDGEMENT_CLAUSE.or(EXPRESSION));
-        SCHEMA_EXPRESSION = (sourceCode, previous) -> sourceCode.expressionAfter(IS, compileSchemaExpression(
+        SCHEMA_WHICH_CLAUSE = sourceCode -> sourceCode.fetchNodeAfter(WHICH, SCHEMA_JUDGEMENT_CLAUSE.or(EXPRESSION));
+        SCHEMA_EXPRESSION = (sourceCode, previous) -> sourceCode.fetchNodeAfter(IS, compileSchemaExpression(
                 whichClause(SCHEMA_WHICH_CLAUSE, SchemaExpression::which),
                 whichClause(SCHEMA_JUDGEMENT_CLAUSE, SchemaExpression::omitWhich)).toNode(previous));
         EXPRESSION = OPERAND.recursive(oneOf(BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION));
@@ -128,5 +157,10 @@ public class Compiler {
     private static ExpressionParser oneOf(ExpressionParser parser, ExpressionParser... parsers) {
         return (sourceCode, previous) -> Stream.concat(Stream.of(parser), Stream.of(parsers))
                 .map(p -> p.fetch(sourceCode, previous)).filter(Optional::isPresent).findFirst().orElse(empty());
+    }
+
+    private static OperatorParser oneOf(OperatorParser parser, OperatorParser... parsers) {
+        return sourceCode -> Stream.concat(Stream.of(parser), Stream.of(parsers))
+                .map(p -> p.fetch(sourceCode)).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 }

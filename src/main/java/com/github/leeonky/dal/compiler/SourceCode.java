@@ -7,15 +7,18 @@ import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.ast.Operator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_CHAR;
+import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_NODE;
 import static com.github.leeonky.dal.util.IfThenFactory.when;
-import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Optional.*;
 import static java.util.stream.Collectors.joining;
@@ -80,21 +83,19 @@ public class SourceCode {
 
     public Optional<Node> fetchNode(char opening, char closing, Function<Node, Node> nodeFactory,
                                     NodeCompiler nodeParser, String message) {
-        return fetchElements(FetchBy.BY_NODE, opening, closing, args -> {
+        return fetchNodes(opening, closing, args -> {
             if (args.size() != 1)
                 throw new SyntaxException(message, getPosition() - 1);
             return nodeFactory.apply(args.get(0));
         }, i -> nodeParser.fetch(this));
     }
 
-    public <T> Optional<Node> fetchElements(FetchBy fetchBy, char opening, char closing,
-                                            //TODO Supplier<T> => Function<SourceCode, T>
-                                            Function<List<T>, Node> nodeFactory, Function<Integer, T> element) {
-        if (whenFirstChar(c -> c == opening)) {
+    public <T extends Node> Optional<Node> fetchNodes(char opening, char closing,
+                                                      Function<List<T>, Node> nodeFactory, Function<Integer, T> element) {
+        return when(whenFirstChar(c -> c == opening)).optional(() -> {
             int startPosition = position++;
-            return of(nodeFactory.apply(fetchElements(fetchBy, closing, element)).setPositionBegin(startPosition));
-        }
-        return Optional.empty();
+            return nodeFactory.apply(fetchElements(BY_NODE, closing, element)).setPositionBegin(startPosition);
+        });
     }
 
     private <T> List<T> fetchElements(FetchBy fetchBy, char closing, Function<Integer, T> element) {
@@ -103,11 +104,6 @@ public class SourceCode {
         while (hasCode() && closing != currentChar()) {
             elements.add(element.apply(index++));
             fetchBy.afterFetchElement(this);
-            if (fetchBy == FetchBy.BY_NODE) {
-                fetchWord(",");
-                //TODO test: white space after last comma [1,2, ]
-                leftTrim();
-            }
         }
         if (position >= chars.length)
             throw new SyntaxException(String.format("should end with `%c`", closing), position);
@@ -136,7 +132,7 @@ public class SourceCode {
         return ofNullable(startsWith(word) ? new Token(position).append(popWord(word)) : null);
     }
 
-    private boolean startsWith(String word) {
+    public boolean startsWith(String word) {
         leftTrim();
         return (code.startsWith(word, position));
     }
@@ -199,19 +195,6 @@ public class SourceCode {
         return position;
     }
 
-    private Optional<Operator> popOperator(List<OperatorFactory> factories) {
-        return factories.stream().map(operatorFactory -> operatorFactory.popOperator(this)).filter(Objects::nonNull).findFirst();
-    }
-
-    private Optional<Operator> popJudgementOperator() {
-        return popOperator(JUDGEMENT_OPERATORS);
-    }
-
-    //TODO missing [=[1,2]]
-    public Operator popJudgementOperatorOrDefault() {
-        return popJudgementOperator().orElse(operators.isEmpty() ? new Operator.Matcher() : operators.getFirst());
-    }
-
     public Optional<Node> disableCommaAnd(Supplier<Optional<Node>> nodeFactory) {
         return commaAnd(false, nodeFactory);
     }
@@ -233,30 +216,35 @@ public class SourceCode {
         return when(isBeginning()).optional(() -> InputNode.INSTANCE);
     }
 
-    public Optional<Node> fetchString(char opening, char closing, Function<String, Node> factory, EscapeChars escapeChars) {
-        return fetchElements(BY_CHAR, opening, closing, characters -> factory.apply(characters.stream()
-                .map(String::valueOf).collect(joining(""))), i -> escapedPop(escapeChars));
+    public Optional<Node> fetchString(char opening, char closing,
+                                      Function<String, Node> nodeFactory, EscapeChars escapeChars) {
+        return when(whenFirstChar(c -> c == opening)).optional(() -> {
+            int startPosition = position++;
+            return nodeFactory.apply(fetchElements(BY_CHAR, closing, i -> escapedPop(escapeChars))
+                    .stream().map(String::valueOf).collect(joining(""))).setPositionBegin(startPosition);
+        });
     }
 
     @SuppressWarnings("unchecked")
     public <T extends Node> List<T> fetchNodes(String delimiter, NodeCompiler factory) {
-        List<T> schemaNodes = new ArrayList<>();
-        schemaNodes.add((T) factory.fetch(this));
-        while (fetchWord(delimiter).isPresent())
-            schemaNodes.add((T) factory.fetch(this));
-        return schemaNodes;
+        return new ArrayList<T>() {{
+            add((T) factory.fetch(SourceCode.this));
+            while (fetchWord(delimiter).isPresent())
+                add((T) factory.fetch(SourceCode.this));
+        }};
     }
 
-    public Optional<Node> expressionAfter(String token, NodeCompiler nodeCompiler) {
+    public Optional<Node> fetchNodeAfter(String token, NodeCompiler nodeCompiler) {
         return fetchWord(token).map(t -> nodeCompiler.fetch(this).setPositionBegin(t.getPosition()));
     }
 
-
-    public Optional<Node> fetchExpression(Node left, List<OperatorFactory> operatorFactories, NodeCompiler rightParser) {
-        return popOperator(operatorFactories).map(operator -> fetchExpression(left, operator, rightParser));
+    public Optional<Node> fetchExpression(Node left, OperatorParser operatorParser, NodeCompiler rightParser) {
+        return operatorParser.fetch(this).map(opt -> (OperatorCompiler) _ignore -> opt)
+                .map(operatorCompiler -> fetchExpression(left, operatorCompiler, rightParser));
     }
 
-    public Expression fetchExpression(Node left, Operator operator, NodeCompiler rightParser) {
+    public Expression fetchExpression(Node left, OperatorCompiler operatorCompiler, NodeCompiler rightParser) {
+        Operator operator = operatorCompiler.fetch(this);
         operators.push(operator);
         try {
             return new Expression(left, operator, rightParser.fetch(this)).adjustOperatorOrder();
@@ -272,6 +260,8 @@ public class SourceCode {
             @Override
             protected void afterFetchElement(SourceCode sourceCode) {
                 sourceCode.leftTrim();
+                //TODO test: white space after last comma [1,2, ]
+                sourceCode.fetchWord(",");
             }
         };
 
@@ -279,51 +269,14 @@ public class SourceCode {
         }
     }
 
-    private boolean isBeginning() {
+    public boolean isBeginning() {
         return IntStream.range(0, position).mapToObj(i -> chars[i]).allMatch(Character::isWhitespace);
     }
 
-    //    TODO complex expression test
-    public static final List<OperatorFactory> UNARY_OPERATORS = asList(
-            new OperatorFactory("-", Operator.Minus::new) {
-                @Override
-                protected boolean matches(SourceCode sourceCode) {
-                    return super.matches(sourceCode) && !sourceCode.isBeginning();
-                }
-            },
-            new OperatorFactory("!", Operator.Not::new) {
-                @Override
-                protected boolean matches(SourceCode sourceCode) {
-                    return super.matches(sourceCode) && !sourceCode.startsWith("!=");
-                }
-            });
+    public static final OperatorCompiler DEFAULT_JUDGEMENT_OPERATOR = sourceCode -> sourceCode.operators.isEmpty() ?
+            new Operator.Matcher() : sourceCode.operators.getFirst();
 
-    public static final List<OperatorFactory> BINARY_ARITHMETIC_OPERATORS = asList(
-            new OperatorFactory("&&", () -> new Operator.And("&&")),
-            new OperatorFactory("||", () -> new Operator.Or("||")),
-            new OperatorFactory("and", () -> new Operator.And("and")),
-            new OperatorFactory(",", () -> new Operator.And(",")) {
-                @Override
-                protected boolean matches(SourceCode sourceCode) {
-                    return super.matches(sourceCode) && sourceCode.enableAndComma.getFirst();
-                }
-            },
-            new OperatorFactory("or", () -> new Operator.Or("or")),
-            new OperatorFactory(">=", Operator.GreaterOrEqual::new),
-            new OperatorFactory("<=", Operator.LessOrEqual::new),
-            new OperatorFactory(">", Operator.Greater::new),
-            new OperatorFactory("<", Operator.Less::new),
-            new OperatorFactory("+", Operator.Plus::new),
-            new OperatorFactory("-", Operator.Subtraction::new),
-            new OperatorFactory("*", Operator.Multiplication::new),
-            new OperatorFactory("/", Operator.Division::new),
-            new OperatorFactory("!=", Operator.NotEqual::new)
-    );
-    public static final List<OperatorFactory> JUDGEMENT_OPERATORS = asList(
-            new OperatorFactory(":", Operator.Matcher::new),
-            new OperatorFactory("=", Operator.Equal::new));
-
-    public static class OperatorFactory {
+    public static class OperatorFactory implements OperatorParser {
         private final String symbol;
         private final Supplier<Operator> factory;
 
@@ -332,8 +285,9 @@ public class SourceCode {
             this.factory = factory;
         }
 
-        public Operator popOperator(SourceCode sourceCode) {
-            return when(matches(sourceCode)).thenReturn(() -> {
+        @Override
+        public Optional<Operator> fetch(SourceCode sourceCode) {
+            return when(matches(sourceCode)).optional(() -> {
                 int p = sourceCode.position;
                 sourceCode.position += symbol.length();
                 return factory.get().setPosition(p);
@@ -342,6 +296,10 @@ public class SourceCode {
 
         protected boolean matches(SourceCode sourceCode) {
             return sourceCode.startsWith(symbol);
+        }
+
+        public boolean isEnableAndComma(SourceCode sourceCode) {
+            return sourceCode.enableAndComma.getFirst();
         }
     }
 }
