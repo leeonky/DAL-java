@@ -199,33 +199,12 @@ public class SourceCode {
         return position;
     }
 
-    public Optional<Operator> popUnaryOperator() {
-        return popOperator(unaryOperatorFactories);
-    }
-
     private Optional<Operator> popOperator(List<OperatorFactory> factories) {
-        return factories.stream().map(OperatorFactory::popOperator).filter(Objects::nonNull).findFirst();
-    }
-
-    public Optional<Operator> popBinaryArithmeticOperator() {
-        return popOperator(binaryArithmeticOperatorFactories);
+        return factories.stream().map(operatorFactory -> operatorFactory.popOperator(this)).filter(Objects::nonNull).findFirst();
     }
 
     private Optional<Operator> popJudgementOperator() {
-        return popOperator(judgementOperatorFactories);
-    }
-
-    //TODO use    public Optional<Node> fetchJudgement(Node left, NodeCompiler rightParser)
-    @Deprecated
-    public <T extends Node> Optional<T> compileJudgement(Function<Operator, T> compiler) {
-        return popJudgementOperator().map(operator -> {
-            operators.push(operator);
-            try {
-                return compiler.apply(operator);
-            } finally {
-                operators.pop();
-            }
-        });
+        return popOperator(JUDGEMENT_OPERATORS);
     }
 
     //TODO missing [=[1,2]]
@@ -272,15 +251,18 @@ public class SourceCode {
         return fetchWord(token).map(t -> nodeCompiler.fetch(this).setPositionBegin(t.getPosition()));
     }
 
-    public Optional<Node> fetchJudgement(Node left, NodeCompiler rightParser) {
-        return popJudgementOperator().map(operator -> {
-            operators.push(operator);
-            try {
-                return new Expression(left, operator, rightParser.fetch(this)).adjustOperatorOrder();
-            } finally {
-                operators.pop();
-            }
-        });
+
+    public Optional<Node> fetchExpression(Node left, List<OperatorFactory> operatorFactories, NodeCompiler rightParser) {
+        return popOperator(operatorFactories).map(operator -> fetchExpression(left, operator, rightParser));
+    }
+
+    public Expression fetchExpression(Node left, Operator operator, NodeCompiler rightParser) {
+        operators.push(operator);
+        try {
+            return new Expression(left, operator, rightParser.fetch(this)).adjustOperatorOrder();
+        } finally {
+            operators.pop();
+        }
     }
 
     //    TODO refactor
@@ -302,28 +284,28 @@ public class SourceCode {
     }
 
     //    TODO complex expression test
-    private final List<OperatorFactory> unaryOperatorFactories = asList(
+    public static final List<OperatorFactory> UNARY_OPERATORS = asList(
             new OperatorFactory("-", Operator.Minus::new) {
                 @Override
-                protected boolean matches() {
-                    return super.matches() && !isBeginning();
+                protected boolean matches(SourceCode sourceCode) {
+                    return super.matches(sourceCode) && !sourceCode.isBeginning();
                 }
             },
             new OperatorFactory("!", Operator.Not::new) {
                 @Override
-                protected boolean matches() {
-                    return super.matches() && !startsWith("!=");
+                protected boolean matches(SourceCode sourceCode) {
+                    return super.matches(sourceCode) && !sourceCode.startsWith("!=");
                 }
             });
 
-    private final List<OperatorFactory> binaryArithmeticOperatorFactories = asList(
+    public static final List<OperatorFactory> BINARY_ARITHMETIC_OPERATORS = asList(
             new OperatorFactory("&&", () -> new Operator.And("&&")),
             new OperatorFactory("||", () -> new Operator.Or("||")),
             new OperatorFactory("and", () -> new Operator.And("and")),
             new OperatorFactory(",", () -> new Operator.And(",")) {
                 @Override
-                protected boolean matches() {
-                    return super.matches() && enableAndComma.getFirst();
+                protected boolean matches(SourceCode sourceCode) {
+                    return super.matches(sourceCode) && sourceCode.enableAndComma.getFirst();
                 }
             },
             new OperatorFactory("or", () -> new Operator.Or("or")),
@@ -337,11 +319,11 @@ public class SourceCode {
             new OperatorFactory("/", Operator.Division::new),
             new OperatorFactory("!=", Operator.NotEqual::new)
     );
-    private final List<OperatorFactory> judgementOperatorFactories = asList(
+    public static final List<OperatorFactory> JUDGEMENT_OPERATORS = asList(
             new OperatorFactory(":", Operator.Matcher::new),
             new OperatorFactory("=", Operator.Equal::new));
 
-    public class OperatorFactory {
+    public static class OperatorFactory {
         private final String symbol;
         private final Supplier<Operator> factory;
 
@@ -350,16 +332,16 @@ public class SourceCode {
             this.factory = factory;
         }
 
-        public Operator popOperator() {
-            return when(matches()).thenReturn(() -> {
-                int p = position;
-                position += symbol.length();
+        public Operator popOperator(SourceCode sourceCode) {
+            return when(matches(sourceCode)).thenReturn(() -> {
+                int p = sourceCode.position;
+                sourceCode.position += symbol.length();
                 return factory.get().setPosition(p);
             });
         }
 
-        protected boolean matches() {
-            return startsWith(symbol);
+        protected boolean matches(SourceCode sourceCode) {
+            return sourceCode.startsWith(symbol);
         }
     }
 }

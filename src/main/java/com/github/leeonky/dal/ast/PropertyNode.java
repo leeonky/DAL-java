@@ -5,6 +5,8 @@ import com.github.leeonky.dal.RuntimeException;
 import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.util.DataObject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static java.lang.String.format;
@@ -47,6 +49,14 @@ public class PropertyNode extends Node {
         return obj instanceof PropertyNode
                 && Objects.equals(instanceNode, ((PropertyNode) obj).instanceNode)
                 && Objects.equals(name, ((PropertyNode) obj).name);
+    }
+
+    public List<Object> getChain() {
+        return new ArrayList<Object>() {{
+            if (instanceNode instanceof PropertyNode)
+                addAll(((PropertyNode) instanceNode).getChain());
+            add(name);
+        }};
     }
 
     @Override

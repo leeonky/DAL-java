@@ -121,6 +121,23 @@ Feature: list node
       | =        | =      |
       | :        | :      |
 
+  Scenario Outline: support different judgement operator in sub element
+    Given the following dal code:
+    """
+     [<operator>[1]]
+    """
+    Then got the following "list" node:
+    """
+    expressions[0].rightOperand.expressions.inspect: [
+      '[0] <result> 1'
+    ]
+    """
+    Examples:
+      | operator | result |
+      |          | :      |
+      | =        | =      |
+      | :        | :      |
+
   Scenario Outline: support expression in element judgement
     Given the following dal code:
     """

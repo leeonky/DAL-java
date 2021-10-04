@@ -17,10 +17,6 @@ public class Expression extends Node {
         setPositionBegin(operator.getPosition());
     }
 
-    public Expression(Operator operator, Node node2) {
-        this(new ConstNode(null), operator, node2);
-    }
-
     public Node getLeftOperand() {
         return node1;
     }

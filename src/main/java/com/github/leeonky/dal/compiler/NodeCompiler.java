@@ -3,6 +3,7 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.ast.Node;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface NodeCompiler {
 
@@ -16,5 +17,9 @@ public interface NodeCompiler {
                 optionalNode = expressionParser.fetch(sourceCode, node = optionalNode.get());
             return node;
         };
+    }
+
+    default NodeCompiler map(Function<Node, Node> mapping) {
+        return sourceCode -> mapping.apply(fetch(sourceCode));
     }
 }
