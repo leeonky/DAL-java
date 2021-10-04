@@ -12,10 +12,12 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
+import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_CHAR;
 import static com.github.leeonky.dal.util.IfThenFactory.when;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Optional.*;
+import static java.util.stream.Collectors.joining;
 
 //TODO refactor methods
 public class SourceCode {
@@ -76,7 +78,7 @@ public class SourceCode {
     }
 
     public Optional<Node> fetchNode(char opening, char closing, Function<Node, Node> nodeFactory,
-                                    MandatoryNodeParser nodeParser, String message) {
+                                    NodeCompiler nodeParser, String message) {
         return fetchElements(FetchBy.BY_NODE, opening, closing, args -> {
             if (args.size() != 1)
                 throw new SyntaxException(message, getPosition() - 1);
@@ -249,6 +251,12 @@ public class SourceCode {
         return when(isBeginning()).optional(() -> InputNode.INSTANCE);
     }
 
+    public Optional<Node> fetchString(char opening, char closing, Function<String, Node> factory, EscapeChars escapeChars) {
+        return fetchElements(BY_CHAR, opening, closing, characters -> factory.apply(characters.stream()
+                .map(String::valueOf).collect(joining(""))), i -> escapedPop(escapeChars));
+    }
+
+    //    TODO refactor
     public enum FetchBy {
         BY_CHAR,
         BY_NODE {

@@ -4,11 +4,11 @@ import com.github.leeonky.dal.ast.Node;
 
 import java.util.Optional;
 
-public interface MandatoryNodeParser {
+public interface NodeCompiler {
 
     Node fetch(SourceCode sourceCode);
 
-    default MandatoryNodeParser recursive(ExpressionParser expressionParser) {
+    default NodeCompiler recursive(ExpressionParser expressionParser) {
         return sourceCode -> {
             Node node = fetch(sourceCode);
             Optional<Node> optionalNode = expressionParser.fetch(sourceCode, node);

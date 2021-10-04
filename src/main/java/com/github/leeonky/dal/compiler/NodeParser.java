@@ -14,11 +14,11 @@ public interface NodeParser {
         return sourceCode -> fetch(sourceCode).map(mapping);
     }
 
-    default MandatoryNodeParser or(MandatoryNodeParser mandatoryNodeParser) {
-        return sourceCode -> fetch(sourceCode).orElseGet(() -> mandatoryNodeParser.fetch(sourceCode));
+    default NodeCompiler or(NodeCompiler nodeCompiler) {
+        return sourceCode -> fetch(sourceCode).orElseGet(() -> nodeCompiler.fetch(sourceCode));
     }
 
-    default MandatoryNodeParser toMandatory(String message) {
+    default NodeCompiler toMandatory(String message) {
         return sourceCode -> fetch(sourceCode).orElseThrow(() -> new SyntaxException(message, sourceCode.getPosition()));
     }
 }

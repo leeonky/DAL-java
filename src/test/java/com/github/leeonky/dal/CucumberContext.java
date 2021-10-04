@@ -1,7 +1,7 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.compiler.MandatoryNodeParser;
+import com.github.leeonky.dal.compiler.NodeCompiler;
 import com.github.leeonky.dal.compiler.NodeParser;
 import com.github.leeonky.dal.compiler.SourceCode;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
@@ -44,8 +44,8 @@ public class CucumberContext {
         put("schema", optional(compiler.SCHEMA));
     }};
 
-    private static NodeParser optional(MandatoryNodeParser mandatoryNodeParser) {
-        return sourceCode -> Optional.ofNullable(mandatoryNodeParser.fetch(sourceCode));
+    private static NodeParser optional(NodeCompiler nodeCompiler) {
+        return sourceCode -> Optional.ofNullable(nodeCompiler.fetch(sourceCode));
     }
 
     public static CucumberContext INSTANCE = new CucumberContext();
