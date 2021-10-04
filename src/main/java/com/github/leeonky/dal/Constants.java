@@ -3,20 +3,17 @@ package com.github.leeonky.dal;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.github.leeonky.dal.Constants.KeyWords.IS;
-import static com.github.leeonky.dal.Constants.KeyWords.WHICH;
 import static java.util.Arrays.asList;
 
 public class Constants {
-    public static final Set<Character> TOKEN_DELIMITER = new HashSet<>(asList('=', '>', '<', '+', '-', '*', '/', ':',
+    public static final Character DOT = '.';
+    public static final Set<Character> DELIMITER = new HashSet<>(asList('=', '>', '<', '+', '-', '*', '/', ':',
             '&', '|', '!', ',', '(', ')', '[', ']', '{', '}', ' ', '\t', '\n'));
-    public static final Set<Character> OPERATOR_CHAR = new HashSet<>(asList('=', '>', '<', '+', '-', '*', '/', ':',
-            '&', '|', '!', ','));
-    public static final Set<Character> DIGITAL_CHAR = new HashSet<>(asList('1', '2', '3', '4', '5', '6', '7', '8', '9', '0'));
-    public static final Set<String> KEYWORD_SETS = new HashSet<>(asList(IS, WHICH));
+    public static final Set<Character> DELIMITER_OR_DOT = new HashSet<Character>(DELIMITER) {{
+        add(DOT);
+    }};
+    public static final Set<Character> DIGITAL = new HashSet<>(asList('1', '2', '3', '4', '5', '6', '7', '8', '9', '0'));
     public static final String SCHEMA_DELIMITER = "/";
-    public static final Set<String> OPERATOR = new HashSet<>(asList("-", "!", "=", ">", "<", "+", "*", "/", ":", ">=",
-            "<=", "!=", "&&", "||", ",", "...", ".."));
     public static final String LIST_TAIL = "...";
 
     public static class KeyWords {

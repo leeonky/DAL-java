@@ -140,7 +140,6 @@ public class Compiler {
     public Node compile(SourceCode sourceCode) {
         Node node = EXPRESSION.fetch(sourceCode);
         if (sourceCode.hasCode())
-//TODO should trim blank
             throw new SyntaxException("unexpected token", sourceCode.getPosition());
         return node;
     }

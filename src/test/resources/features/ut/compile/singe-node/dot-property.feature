@@ -97,7 +97,7 @@ Feature: compile property starts with dot
     And got the following source code information:
     """
     .
-     ^
+    ^
     """
 
   Scenario: do not allow empty property(has white space)
@@ -112,7 +112,7 @@ Feature: compile property starts with dot
     And got the following source code information:
     """
     . 
-      ^
+    ^
     """
 
   Scenario: return null when code is ...

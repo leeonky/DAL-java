@@ -7,15 +7,13 @@ import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.ast.Operator;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
+import static com.github.leeonky.dal.Constants.*;
 import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_CHAR;
 import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_NODE;
 import static com.github.leeonky.dal.util.IfThenFactory.when;
@@ -54,31 +52,28 @@ public class SourceCode {
         return leftTrim().hasCode() && predicate.test(currentChar());
     }
 
-    //TODO use ifWhen
     public Optional<Token> fetchNumber() {
-        //TODO refactor
         int savePosition = position;
-        if (whenFirstChar(Constants.DIGITAL_CHAR::contains)) {
-            Token token = new Token(position).append(popChar());
-            while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()))
-                token.append(popChar());
-            if (!token.isNumber()) {
-                position = savePosition;
-                return empty();
-            }
-            return of(token);
+        Optional<Token> token = when(whenFirstChar(DIGITAL::contains))
+                .optional(() -> fetchToken(false, DELIMITER)).filter(Token::isNumber);
+        if (!token.isPresent())
+            position = savePosition;
+        return token;
+    }
+
+    private Token fetchToken(boolean trim, Set<Character> delimiters) {
+        Token token = new Token(position);
+        if (trim) {
+            position++;
+            leftTrim();
         }
-        return empty();
+        if (hasCode())
+            do token.append(popChar()); while (hasCode() && !delimiters.contains(currentChar()));
+        return token;
     }
 
     public Optional<Token> fetchInteger() {
-        if (whenFirstChar(o -> Constants.DIGITAL_CHAR.contains(o) || o == '-')) {
-            Token token = new Token(position).append(popChar());
-            while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()))
-                token.append(popChar());
-            return of(token);
-        }
-        return empty();
+        return when(whenFirstChar(o -> DIGITAL.contains(o) || o == '-')).optional(() -> fetchToken(false, DELIMITER));
     }
 
     public Optional<Node> fetchNode(char opening, char closing, Function<Node, Node> nodeFactory,
@@ -90,8 +85,8 @@ public class SourceCode {
         }, i -> nodeParser.fetch(this));
     }
 
-    public <T extends Node> Optional<Node> fetchNodes(char opening, char closing,
-                                                      Function<List<T>, Node> nodeFactory, Function<Integer, T> element) {
+    public <T extends Node> Optional<Node> fetchNodes(char opening, char closing, Function<List<T>, Node> nodeFactory,
+                                                      Function<Integer, T> element) {
         return when(whenFirstChar(c -> c == opening)).optional(() -> {
             int startPosition = position++;
             return nodeFactory.apply(fetchElements(BY_NODE, closing, element)).setPositionBegin(startPosition);
@@ -116,16 +111,8 @@ public class SourceCode {
     }
 
     public Optional<Token> fetchProperty() {
-        if (whenFirstChar(c -> '.' == c) && !startsWith(Constants.LIST_TAIL)) {
-            Token token = new Token(position++);
-            leftTrim();
-            while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()) && currentChar() != '.')
-                token.append(popChar());
-            if (token.contentEmpty())
-                throw new SyntaxException("property is not finished", position);
-            return of(token);
-        }
-        return Optional.empty();
+        return when(whenFirstChar(DOT::equals) && !startsWith(Constants.LIST_TAIL))
+                .optional(() -> fetchToken(true, DELIMITER_OR_DOT));
     }
 
     public Optional<Token> fetchWord(String word) {
@@ -145,7 +132,7 @@ public class SourceCode {
     //TODO refactor
     public Optional<Token> fetchIdentityProperty() {
         int savePosition = position;
-        if (!whenFirstChar(Constants.TOKEN_DELIMITER::contains) && hasCode()
+        if (!whenFirstChar(DELIMITER::contains) && hasCode()
                 && !startsWith(Constants.KeyWords.IS)
                 && !startsWith(Constants.KeyWords.WHICH)
                 && !startsWith(Constants.KeyWords.TRUE)
@@ -157,16 +144,13 @@ public class SourceCode {
                 position = savePosition;
                 return empty();
             }
-            Token token = new Token(position);
-            while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()) && currentChar() != '.')
-                token.append(popChar());
-            return of(token);
+            return of(fetchToken(false, DELIMITER_OR_DOT));
         }
         return Optional.empty();
     }
 
     public Token fetchSchemaToken() {
-        if (!whenFirstChar(Constants.TOKEN_DELIMITER::contains) && hasCode()
+        if (!whenFirstChar(DELIMITER::contains) && hasCode()
                 && !startsWith(Constants.KeyWords.IS)
                 && !startsWith(Constants.KeyWords.WHICH)
                 && !startsWith(Constants.KeyWords.TRUE)
@@ -175,19 +159,15 @@ public class SourceCode {
                 && !startsWith(Constants.KeyWords.AND)
                 && !startsWith(Constants.KeyWords.OR)) {
             int savePosition = position;
-            if (!fetchNumber().isPresent()) {
-                Token token = new Token(position);
-                while (hasCode() && !Constants.TOKEN_DELIMITER.contains(currentChar()))
-                    token.append(popChar());
-                return token;
-            }
+            if (!fetchNumber().isPresent())
+                return fetchToken(false, DELIMITER);
             position = savePosition;
         }
         throw new SyntaxException(hasCode() ? "operand of `is` must be schema type"
                 : "schema expression is not finished", position);
     }
 
-    public char escapedPop(EscapeChars escapeChars) {
+    private char escapedPop(EscapeChars escapeChars) {
         return escapeChars.escapeAt(code, position, length -> position += length).orElseGet(this::popChar);
     }
 
@@ -216,8 +196,8 @@ public class SourceCode {
         return when(isBeginning()).optional(() -> InputNode.INSTANCE);
     }
 
-    public Optional<Node> fetchString(char opening, char closing,
-                                      Function<String, Node> nodeFactory, EscapeChars escapeChars) {
+    public Optional<Node> fetchString(char opening, char closing, Function<String, Node> nodeFactory,
+                                      EscapeChars escapeChars) {
         return when(whenFirstChar(c -> c == opening)).optional(() -> {
             int startPosition = position++;
             return nodeFactory.apply(fetchElements(BY_CHAR, closing, i -> escapedPop(escapeChars))
@@ -253,15 +233,13 @@ public class SourceCode {
         }
     }
 
-    //    TODO refactor
     public enum FetchBy {
         BY_CHAR,
         BY_NODE {
             @Override
             protected void afterFetchElement(SourceCode sourceCode) {
-                sourceCode.leftTrim();
-                //TODO test: white space after last comma [1,2, ]
                 sourceCode.fetchWord(",");
+                sourceCode.leftTrim();
             }
         };
 

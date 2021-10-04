@@ -176,3 +176,23 @@ Feature: list node
     """
     inspect: '[(a , b) c]'
     """
+
+  Scenario: support optional comma before bracket
+    Given the following dal code:
+    """
+     [true,]
+    """
+    Then got the following "list" node:
+    """
+    inspect: '[true]'
+    """
+
+  Scenario: blank before bracket
+    Given the following dal code:
+    """
+     [true, ]
+    """
+    Then got the following "list" node:
+    """
+    inspect: '[true]'
+    """

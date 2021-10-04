@@ -59,15 +59,13 @@ public class Token {
         return this;
     }
 
-    public boolean contentEmpty() {
-        return contentBuilder.length() == 0;
-    }
-
     public Node toConstNumber() {
         return new ConstNode(getNumber(getContent())).setPositionBegin(position);
     }
 
     public Node toDotProperty(Node instanceNode) {
+        if (contentBuilder.length() == 0)
+            throw new SyntaxException("property is not finished", position);
         return new PropertyNode(instanceNode, getContent(), DOT).setPositionBegin(position);
     }
 
