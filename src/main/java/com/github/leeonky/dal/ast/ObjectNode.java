@@ -41,9 +41,8 @@ public class ObjectNode extends Node {
             throw new AssertionFailure(format("expected [null] equal to [%s] but was not", inspect()), getPositionBegin());
         if (dataObject.isList()) {
             AtomicInteger integer = new AtomicInteger(0);
-            dataObject.getListObjects().forEach(element ->
-                    assertUnexpectedFields(collectUnexpectedFields(element),
-                            actualNode.inspect() + format("[%d]", integer.getAndIncrement()), operator.getPosition()));
+            dataObject.getListObjects().forEach(element -> assertUnexpectedFields(collectUnexpectedFields(element),
+                    actualNode.inspect() + format("[%d]", integer.getAndIncrement()), operator.getPosition()));
         } else
             assertUnexpectedFields(collectUnexpectedFields(dataObject), operator.getPosition());
         return judgeAll(context, dataObject);

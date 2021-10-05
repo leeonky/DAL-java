@@ -60,24 +60,24 @@ public class Compiler {
             REGEX_ESCAPES = new EscapeChars().escape("\\/", '/');
 
     NodeParser INPUT = SourceCode::fetchInput,
-            NUMBER = sourceCode -> sourceCode.fetchNumber().map(Token::toConstNumber),
-            INTEGER = sourceCode -> sourceCode.fetchInteger().map(Token::toConstInteger),
+            NUMBER = SourceCode.NUMBER.map(Token::toConstNumber),
+            INTEGER = SourceCode.INTEGER.map(Token::toConstInteger),
             SINGLE_QUOTED_STRING = sourceCode -> sourceCode.fetchString('\'', '\'', ConstNode::new, SINGLE_QUOTED_ESCAPES),
             DOUBLE_QUOTED_STRING = sourceCode -> sourceCode.fetchString('"', '"', ConstNode::new, DOUBLE_QUOTED_ESCAPES),
             CONST_TRUE = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.TRUE).map(Token::toConstTrue),
             CONST_FALSE = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.FALSE).map(Token::toConstFalse),
             CONST_NULL = sourceCode -> sourceCode.fetchWord(Constants.KeyWords.NULL).map(Token::toConstNull),
             REGEX = sourceCode -> sourceCode.fetchString('/', '/', RegexNode::new, REGEX_ESCAPES),
-            IDENTITY_PROPERTY = sourceCode -> sourceCode.fetchIdentityProperty().map(Token::toIdentityProperty),
+            IDENTITY_PROPERTY = SourceCode.IDENTITY_PROPERTY.map(Token::toIdentityProperty),
             WILDCARD = sourceCode -> sourceCode.fetchWord("*").map(Token::toWildcardNode),
             PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_WHICH_CLAUSE, SCHEMA_JUDGEMENT_CLAUSE,
             UNARY_OPERATOR_EXPRESSION;
 
-    NodeCompiler SCHEMA = sourceCode -> sourceCode.fetchSchemaToken().toSchemaNode(),
+    NodeCompiler SCHEMA = SourceCode.SCHEMA.map(Token::toSchemaNode),
             PROPERTY_CHAIN, OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION,
             JUDGEMENT_EXPRESSION_OPERAND;
 
-    ExpressionParser DOT_PROPERTY = (sourceCode, previous) -> sourceCode.fetchProperty()
+    ExpressionParser DOT_PROPERTY = (sourceCode, previous) -> SourceCode.DOT_PROPERTY.fetch(sourceCode)
             .map(token -> token.toDotProperty(previous)),
             BRACKET_PROPERTY, EXPLICIT_PROPERTY, BINARY_ARITHMETIC_EXPRESSION, BINARY_JUDGEMENT_EXPRESSION,
             BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION;
@@ -89,7 +89,7 @@ public class Compiler {
         PARENTHESES = sourceCode -> sourceCode.enableCommaAnd(() -> sourceCode.fetchNode('(', ')',
                 ParenthesesNode::new, EXPRESSION, "expect a value or expression"));
         BRACKET_PROPERTY = (sourceCode, previous) -> sourceCode.fetchNode('[', ']', node ->
-                        new PropertyNode(previous, ((ConstNode) node).toPropertyOrListIndex(), BRACKET),
+                        new PropertyNode(previous, ((ConstNode) node).getValue(), BRACKET),
                 LIST_INDEX_OR_MAP_KEY, "should given one property or array index in `[]`");
         EXPLICIT_PROPERTY = oneOf(DOT_PROPERTY, BRACKET_PROPERTY);
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(), IDENTITY_PROPERTY);

@@ -22,10 +22,6 @@ public class PropertyNode extends Node {
         this.type = type;
     }
 
-    public Object getName() {
-        return name;
-    }
-
     @Override
     public DataObject evaluateDataObject(RuntimeContext context) {
         try {

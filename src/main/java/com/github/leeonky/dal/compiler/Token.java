@@ -105,4 +105,8 @@ public class Token {
             return false;
         }
     }
+
+    public boolean all() {
+        return true;
+    }
 }

@@ -39,7 +39,7 @@ Feature: schema expression
     """
     Then failed to get "schema-expression" node with the following message:
     """
-    operand of `is` must be schema type
+    expect a schema
     """
     And got the following source code information:
     """
@@ -54,7 +54,7 @@ Feature: schema expression
     """
     Then failed to get "schema-expression" node with the following message:
     """
-    schema expression is not finished
+    expect a schema
     """
     And got the following source code information:
     """
@@ -82,7 +82,7 @@ Feature: schema expression
     """
     Then failed to get "schema-expression" node with the following message:
     """
-    schema expression is not finished
+    expect a schema
     """
     And got the following source code information:
     """

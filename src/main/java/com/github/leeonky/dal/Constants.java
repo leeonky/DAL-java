@@ -3,18 +3,25 @@ package com.github.leeonky.dal;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.github.leeonky.dal.Constants.KeyWords.*;
 import static java.util.Arrays.asList;
 
 public class Constants {
     public static final Character DOT = '.';
+    public static final Character MINUS = '-';
+
     public static final Set<Character> DELIMITER = new HashSet<>(asList('=', '>', '<', '+', '-', '*', '/', ':',
             '&', '|', '!', ',', '(', ')', '[', ']', '{', '}', ' ', '\t', '\n'));
     public static final Set<Character> DELIMITER_OR_DOT = new HashSet<Character>(DELIMITER) {{
         add(DOT);
     }};
     public static final Set<Character> DIGITAL = new HashSet<>(asList('1', '2', '3', '4', '5', '6', '7', '8', '9', '0'));
+    public static final Set<Character> DIGITAL_OR_MINUS = new HashSet<Character>(DIGITAL) {{
+        add(MINUS);
+    }};
     public static final String SCHEMA_DELIMITER = "/";
     public static final String LIST_TAIL = "...";
+    public static final Set<String> ALL_KEY_WORDS = new HashSet<>(asList(IS, WHICH, TRUE, FALSE, NULL, AND, OR));
 
     public static class KeyWords {
         public static final String WHICH = "which";

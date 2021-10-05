@@ -13,6 +13,6 @@ class ErrorHandler extends Base {
 
     @Test
     void operand_of_operator_is_must_be_type() {
-        assertRuntimeException(1, "is 1", 3, "operand of `is` must be schema type");
+        assertRuntimeException(1, "is 1", 3, "expect a schema");
     }
 }

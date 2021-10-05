@@ -7,7 +7,7 @@ Feature: compile schema node
     """
     Then failed to get "schema" node with the following message:
     """
-    schema expression is not finished
+    expect a schema
     """
     Examples:
       | code   |
@@ -22,7 +22,7 @@ Feature: compile schema node
     """
     Then failed to get "schema" node with the following message:
     """
-    operand of `is` must be schema type
+    expect a schema
     """
     Examples:
       | code  |

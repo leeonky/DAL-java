@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.compiler;
 
-import com.github.leeonky.dal.Constants;
 import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.Expression;
 import com.github.leeonky.dal.ast.InputNode;
@@ -16,13 +15,24 @@ import java.util.stream.IntStream;
 import static com.github.leeonky.dal.Constants.*;
 import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_CHAR;
 import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_NODE;
+import static com.github.leeonky.dal.util.Function.not;
 import static com.github.leeonky.dal.util.IfThenFactory.when;
-import static java.util.Collections.singleton;
+import static java.util.Collections.*;
 import static java.util.Optional.*;
 import static java.util.stream.Collectors.joining;
 
 //TODO refactor methods
 public class SourceCode {
+    public static final TokenParser
+            NUMBER = createTokenParser(DIGITAL::contains, emptyList(), false, DELIMITER, Token::isNumber),
+            INTEGER = createTokenParser(DIGITAL_OR_MINUS::contains, emptyList(), false, DELIMITER, Token::isNumber),
+            IDENTITY_PROPERTY = createTokenParser(not(DELIMITER::contains), ALL_KEY_WORDS, false, DELIMITER_OR_DOT,
+                    not(Token::isNumber)),
+            DOT_PROPERTY = createTokenParser(DOT::equals, singletonList(LIST_TAIL), true, DELIMITER_OR_DOT, Token::all);
+
+    public static final TokenFactory SCHEMA = createTokenParser(not(DELIMITER::contains), ALL_KEY_WORDS,
+            false, DELIMITER, not(Token::isNumber)).or("expect a schema");
+
     private final String code;
     private final char[] chars;
     private int position = 0;
@@ -32,6 +42,27 @@ public class SourceCode {
     public SourceCode(String code) {
         this.code = code;
         chars = code.toCharArray();
+    }
+
+    public static TokenParser createTokenParser(Predicate<Character> startsWith, Collection<String> excluded,
+                                                boolean trim, Set<Character> delimiters, Predicate<Token> validator) {
+        return sourceCode -> {
+            if (sourceCode.whenFirstChar(startsWith) && sourceCode.hasCode()
+                    && excluded.stream().noneMatch(sourceCode::startsWith)) {
+                Token token = new Token(sourceCode.position);
+                if (trim) {
+                    sourceCode.position++;
+                    sourceCode.leftTrim();
+                }
+                if (sourceCode.hasCode())
+                    do token.append(sourceCode.popChar());
+                    while (sourceCode.hasCode() && !delimiters.contains(sourceCode.currentChar()));
+                if (validator.test(token))
+                    return of(token);
+                sourceCode.position = token.getPosition();
+            }
+            return empty();
+        };
     }
 
     private char currentChar() {
@@ -50,30 +81,6 @@ public class SourceCode {
 
     private boolean whenFirstChar(Predicate<Character> predicate) {
         return leftTrim().hasCode() && predicate.test(currentChar());
-    }
-
-    public Optional<Token> fetchNumber() {
-        int savePosition = position;
-        Optional<Token> token = when(whenFirstChar(DIGITAL::contains))
-                .optional(() -> fetchToken(false, DELIMITER)).filter(Token::isNumber);
-        if (!token.isPresent())
-            position = savePosition;
-        return token;
-    }
-
-    private Token fetchToken(boolean trim, Set<Character> delimiters) {
-        Token token = new Token(position);
-        if (trim) {
-            position++;
-            leftTrim();
-        }
-        if (hasCode())
-            do token.append(popChar()); while (hasCode() && !delimiters.contains(currentChar()));
-        return token;
-    }
-
-    public Optional<Token> fetchInteger() {
-        return when(whenFirstChar(o -> DIGITAL.contains(o) || o == '-')).optional(() -> fetchToken(false, DELIMITER));
     }
 
     public Optional<Node> fetchNode(char opening, char closing, Function<Node, Node> nodeFactory,
@@ -110,11 +117,6 @@ public class SourceCode {
         return chars[position++];
     }
 
-    public Optional<Token> fetchProperty() {
-        return when(whenFirstChar(DOT::equals) && !startsWith(Constants.LIST_TAIL))
-                .optional(() -> fetchToken(true, DELIMITER_OR_DOT));
-    }
-
     public Optional<Token> fetchWord(String word) {
         return ofNullable(startsWith(word) ? new Token(position).append(popWord(word)) : null);
     }
@@ -127,44 +129,6 @@ public class SourceCode {
     private String popWord(String word) {
         position += word.length();
         return word;
-    }
-
-    //TODO refactor
-    public Optional<Token> fetchIdentityProperty() {
-        int savePosition = position;
-        if (!whenFirstChar(DELIMITER::contains) && hasCode()
-                && !startsWith(Constants.KeyWords.IS)
-                && !startsWith(Constants.KeyWords.WHICH)
-                && !startsWith(Constants.KeyWords.TRUE)
-                && !startsWith(Constants.KeyWords.FALSE)
-                && !startsWith(Constants.KeyWords.NULL)
-                && !startsWith(Constants.KeyWords.AND)
-                && !startsWith(Constants.KeyWords.OR)) {
-            if (fetchNumber().isPresent()) {
-                position = savePosition;
-                return empty();
-            }
-            return of(fetchToken(false, DELIMITER_OR_DOT));
-        }
-        return Optional.empty();
-    }
-
-    public Token fetchSchemaToken() {
-        if (!whenFirstChar(DELIMITER::contains) && hasCode()
-                && !startsWith(Constants.KeyWords.IS)
-                && !startsWith(Constants.KeyWords.WHICH)
-                && !startsWith(Constants.KeyWords.TRUE)
-                && !startsWith(Constants.KeyWords.FALSE)
-                && !startsWith(Constants.KeyWords.NULL)
-                && !startsWith(Constants.KeyWords.AND)
-                && !startsWith(Constants.KeyWords.OR)) {
-            int savePosition = position;
-            if (!fetchNumber().isPresent())
-                return fetchToken(false, DELIMITER);
-            position = savePosition;
-        }
-        throw new SyntaxException(hasCode() ? "operand of `is` must be schema type"
-                : "schema expression is not finished", position);
     }
 
     private char escapedPop(EscapeChars escapeChars) {
