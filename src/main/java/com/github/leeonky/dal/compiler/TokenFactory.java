@@ -5,9 +5,9 @@ import com.github.leeonky.dal.ast.Node;
 import java.util.function.Function;
 
 public interface TokenFactory {
-    Token fetch(SourceCode sourceCode);
+    Token fetch(TokenParser tokenParser);
 
     default NodeFactory map(Function<Token, Node> mapper) {
-        return sourceCode -> mapper.apply(fetch(sourceCode));
+        return parser -> mapper.apply(fetch(parser));
     }
 }

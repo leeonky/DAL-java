@@ -12,8 +12,8 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static com.github.leeonky.dal.compiler.Constants.*;
-import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_CHAR;
-import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_NODE;
+import static com.github.leeonky.dal.compiler.TokenParser.FetchBy.BY_CHAR;
+import static com.github.leeonky.dal.compiler.TokenParser.FetchBy.BY_NODE;
 import static com.github.leeonky.dal.runtime.Function.not;
 import static com.github.leeonky.dal.runtime.IfThenFactory.when;
 import static java.util.Collections.*;
@@ -21,7 +21,7 @@ import static java.util.Optional.*;
 import static java.util.stream.Collectors.joining;
 
 //TODO refactor methods
-public class SourceCode {
+public class TokenParser {
     public static final TokenMatcher
             NUMBER = tokenMatcher(DIGITAL::contains, emptyList(), false, DELIMITER, Token::isNumber),
             INTEGER = tokenMatcher(DIGITAL_OR_MINUS::contains, emptyList(), false, DELIMITER, Token::isNumber),
@@ -38,27 +38,27 @@ public class SourceCode {
     private final LinkedList<Operator> operators = new LinkedList<>();
     private final LinkedList<Boolean> enableAndComma = new LinkedList<>(singleton(true));
 
-    public SourceCode(String code) {
+    public TokenParser(String code) {
         this.code = code;
         chars = code.toCharArray();
     }
 
     public static TokenMatcher tokenMatcher(Predicate<Character> startsWith, Collection<String> excluded,
                                             boolean trim, Set<Character> delimiters, Predicate<Token> validator) {
-        return sourceCode -> {
-            if (sourceCode.whenFirstChar(startsWith) && sourceCode.hasCode()
-                    && excluded.stream().noneMatch(sourceCode::startsWith)) {
-                Token token = new Token(sourceCode.position);
+        return parser -> {
+            if (parser.whenFirstChar(startsWith) && parser.hasCode()
+                    && excluded.stream().noneMatch(parser::startsWith)) {
+                Token token = new Token(parser.position);
                 if (trim) {
-                    sourceCode.position++;
-                    sourceCode.leftTrim();
+                    parser.position++;
+                    parser.leftTrim();
                 }
-                if (sourceCode.hasCode())
-                    do token.append(sourceCode.popChar());
-                    while (sourceCode.hasCode() && !delimiters.contains(sourceCode.currentChar()));
+                if (parser.hasCode())
+                    do token.append(parser.popChar());
+                    while (parser.hasCode() && !delimiters.contains(parser.currentChar()));
                 if (validator.test(token))
                     return of(token);
-                sourceCode.position = token.getPosition();
+                parser.position = token.getPosition();
             }
             return empty();
         };
@@ -68,7 +68,7 @@ public class SourceCode {
         return chars[position];
     }
 
-    private SourceCode leftTrim() {
+    private TokenParser leftTrim() {
         while (hasCode() && Character.isWhitespace(currentChar()))
             position++;
         return this;
@@ -171,9 +171,9 @@ public class SourceCode {
     @SuppressWarnings("unchecked")
     public <T extends Node> List<T> fetchNodes(String delimiter, NodeFactory factory) {
         return new ArrayList<T>() {{
-            add((T) factory.fetch(SourceCode.this));
+            add((T) factory.fetch(TokenParser.this));
             while (fetchWord(delimiter).isPresent())
-                add((T) factory.fetch(SourceCode.this));
+                add((T) factory.fetch(TokenParser.this));
         }};
     }
 
@@ -204,13 +204,13 @@ public class SourceCode {
         BY_CHAR,
         BY_NODE {
             @Override
-            protected void afterFetchElement(SourceCode sourceCode) {
-                sourceCode.fetchWord(",");
-                sourceCode.leftTrim();
+            protected void afterFetchElement(TokenParser tokenParser) {
+                tokenParser.fetchWord(",");
+                tokenParser.leftTrim();
             }
         };
 
-        protected void afterFetchElement(SourceCode sourceCode) {
+        protected void afterFetchElement(TokenParser tokenParser) {
         }
     }
 
@@ -218,14 +218,14 @@ public class SourceCode {
         return IntStream.range(0, position).mapToObj(i -> chars[i]).allMatch(Character::isWhitespace);
     }
 
-    public static final OperatorFactory DEFAULT_JUDGEMENT_OPERATOR = sourceCode -> sourceCode.operators.isEmpty() ?
-            new Operator.Matcher() : sourceCode.operators.getFirst();
+    public static final OperatorFactory DEFAULT_JUDGEMENT_OPERATOR = parser -> parser.operators.isEmpty() ?
+            new Operator.Matcher() : parser.operators.getFirst();
 
     public static OperatorMatcher operatorMatcher(String symbol, Supplier<Operator> factory,
-                                                  Predicate<SourceCode> matcher) {
-        return sourceCode -> when(sourceCode.startsWith(symbol) && matcher.test(sourceCode)).optional(() -> {
-            int p = sourceCode.position;
-            sourceCode.position += symbol.length();
+                                                  Predicate<TokenParser> matcher) {
+        return parser -> when(parser.startsWith(symbol) && matcher.test(parser)).optional(() -> {
+            int p = parser.position;
+            parser.position += symbol.length();
             return factory.get().setPosition(p);
         });
     }

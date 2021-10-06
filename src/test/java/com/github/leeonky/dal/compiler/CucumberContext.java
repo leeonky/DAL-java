@@ -44,14 +44,14 @@ public class CucumberContext {
     }};
 
     private static NodeMatcher optional(NodeFactory nodeFactory) {
-        return sourceCode -> Optional.ofNullable(nodeFactory.fetch(sourceCode));
+        return parser -> Optional.ofNullable(nodeFactory.fetch(parser));
     }
 
     public static CucumberContext INSTANCE = new CucumberContext();
     DAL dal = new DAL();
 
     Object inputObject = null;
-    SourceCode sourceCode = null;
+    TokenParser tokenParser = null;
     String sourceCodeString = null;
     DalException dalException;
     Node node = null;
@@ -69,7 +69,7 @@ public class CucumberContext {
     }
 
     public void giveDalSourceCode(String code) {
-        sourceCode = new SourceCode(sourceCodeString = parseTabAndSpace(code));
+        tokenParser = new TokenParser(sourceCodeString = parseTabAndSpace(code));
     }
 
     private String parseTabAndSpace(String code) {
@@ -81,7 +81,7 @@ public class CucumberContext {
     }
 
     public void assertNodeValue(String assertion, String factory) {
-        dal.assertData(matcherMap.get(factory).fetch(new SourceCode(sourceCodeString)).orElse(null)
+        dal.assertData(matcherMap.get(factory).fetch(new TokenParser(sourceCodeString)).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
     }
 
@@ -90,7 +90,7 @@ public class CucumberContext {
     }
 
     public void failedToGetNodeWithMessage(String factory, String message) {
-        dalException = assertThrows(DalException.class, () -> matcherMap.get(factory).fetch(sourceCode));
+        dalException = assertThrows(DalException.class, () -> matcherMap.get(factory).fetch(tokenParser));
         shouldHasDalMessage(message);
     }
 
@@ -100,7 +100,7 @@ public class CucumberContext {
 
     public void compileAndAssertNode(String factory, String assertion) {
         try {
-            node = matcherMap.get(factory).fetch(sourceCode).orElse(null);
+            node = matcherMap.get(factory).fetch(tokenParser).orElse(null);
         } catch (DalException e) {
             System.err.println(e.show(sourceCodeString));
             throw e;
@@ -137,7 +137,7 @@ public class CucumberContext {
     }
 
     public void ignoreNodeBy(String factory) {
-        matcherMap.get(factory).fetch(sourceCode);
+        matcherMap.get(factory).fetch(tokenParser);
     }
 
     public void registerSchema(String schemaCode) {

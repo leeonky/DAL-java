@@ -6,9 +6,9 @@ import com.github.leeonky.dal.ast.Node;
 import java.util.Optional;
 
 public interface ExpressionMatcher {
-    Optional<Node> fetch(SourceCode sourceCode, Node previous);
+    Optional<Node> fetch(TokenParser tokenParser, Node previous);
 
     default NodeMatcher defaultInputNode() {
-        return sourceCode -> fetch(sourceCode, InputNode.INSTANCE);
+        return parser -> fetch(parser, InputNode.INSTANCE);
     }
 }

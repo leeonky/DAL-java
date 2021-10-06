@@ -43,8 +43,8 @@ public class TestSteps {
     }
 
     @Then("got the following source code information:")
-    public void got_the_following_source_code_information(String sourceCodePosition) {
-        CucumberContext.INSTANCE.shouldShowSourceCodePosition(sourceCodePosition);
+    public void got_the_following_source_code_information(String parserPosition) {
+        CucumberContext.INSTANCE.shouldShowSourceCodePosition(parserPosition);
     }
 
     @When("assert by the following code:")

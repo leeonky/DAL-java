@@ -5,13 +5,13 @@ import com.github.leeonky.dal.ast.Operator;
 import java.util.Optional;
 
 public interface OperatorMatcher {
-    Optional<Operator> fetch(SourceCode sourceCode);
+    Optional<Operator> fetch(TokenParser tokenParser);
 
     default OperatorFactory or(OperatorFactory compiler) {
-        return sourceCode -> fetch(sourceCode).orElseGet(() -> compiler.fetch(sourceCode));
+        return parser -> fetch(parser).orElseGet(() -> compiler.fetch(parser));
     }
 
     default OperatorFactory or(String message) {
-        return sourceCode -> fetch(sourceCode).orElseThrow(() -> new SyntaxException(message, sourceCode.getPosition()));
+        return parser -> fetch(parser).orElseThrow(() -> new SyntaxException(message, parser.getPosition()));
     }
 }

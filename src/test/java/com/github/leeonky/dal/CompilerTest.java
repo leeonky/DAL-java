@@ -2,8 +2,8 @@ package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.ast.*;
 import com.github.leeonky.dal.compiler.Compiler;
-import com.github.leeonky.dal.compiler.SourceCode;
 import com.github.leeonky.dal.compiler.SyntaxException;
+import com.github.leeonky.dal.compiler.TokenParser;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -17,14 +17,14 @@ class CompilerTest {
 
     private void assertSyntaxException(String sourceCode, int position, String message) {
         SyntaxException syntaxException = assertThrows(SyntaxException.class,
-                () -> compiler.compile(new SourceCode(sourceCode)));
+                () -> compiler.compile(new TokenParser(sourceCode)));
         assertThat(syntaxException)
                 .hasFieldOrPropertyWithValue("position", position)
                 .hasMessage(message);
     }
 
     private void assertCompileNode(String sourceCode, Node expected) {
-        assertThat(compiler.compile(new SourceCode(sourceCode))).isEqualTo(expected);
+        assertThat(compiler.compile(new TokenParser(sourceCode))).isEqualTo(expected);
     }
 
     @Nested

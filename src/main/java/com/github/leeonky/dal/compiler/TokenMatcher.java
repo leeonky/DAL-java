@@ -6,13 +6,13 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public interface TokenMatcher {
-    Optional<Token> fetch(SourceCode sourceCode);
+    Optional<Token> fetch(TokenParser tokenParser);
 
     default TokenFactory or(String message) {
-        return sourceCode -> fetch(sourceCode).orElseThrow(() -> new SyntaxException(message, sourceCode.getPosition()));
+        return parser -> fetch(parser).orElseThrow(() -> new SyntaxException(message, parser.getPosition()));
     }
 
     default NodeMatcher map(Function<Token, Node> mapper) {
-        return sourceCode -> fetch(sourceCode).map(mapper);
+        return parser -> fetch(parser).map(mapper);
     }
 }

@@ -7,17 +7,17 @@ import java.util.function.Function;
 
 public interface NodeMatcher {
 
-    Optional<Node> fetch(SourceCode sourceCode);
+    Optional<Node> fetch(TokenParser parser);
 
     default NodeMatcher map(Function<Node, Node> mapping) {
-        return sourceCode -> fetch(sourceCode).map(mapping);
+        return parser -> fetch(parser).map(mapping);
     }
 
     default NodeFactory or(NodeFactory nodeFactory) {
-        return sourceCode -> fetch(sourceCode).orElseGet(() -> nodeFactory.fetch(sourceCode));
+        return parser -> fetch(parser).orElseGet(() -> nodeFactory.fetch(parser));
     }
 
     default NodeFactory or(String message) {
-        return sourceCode -> fetch(sourceCode).orElseThrow(() -> new SyntaxException(message, sourceCode.getPosition()));
+        return parser -> fetch(parser).orElseThrow(() -> new SyntaxException(message, parser.getPosition()));
     }
 }
