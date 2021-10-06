@@ -1,9 +1,9 @@
-package com.github.leeonky.dal;
+package com.github.leeonky.dal.compiler;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.github.leeonky.dal.Constants.KeyWords.*;
+import static com.github.leeonky.dal.compiler.Constants.KeyWords.*;
 import static java.util.Arrays.asList;
 
 public class Constants {

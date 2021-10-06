@@ -1,6 +1,4 @@
-package com.github.leeonky.dal;
-
-import com.github.leeonky.dal.util.DataObject;
+package com.github.leeonky.dal.runtime;
 
 import java.util.function.Function;
 

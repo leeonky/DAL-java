@@ -1,10 +1,10 @@
-package com.github.leeonky.dal.token;
+package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.SchemaNode;
 
 import static java.lang.String.format;
 
-public class IllegalTypeException extends RuntimeException {
+public class IllegalTypeException extends java.lang.RuntimeException {
     public IllegalTypeException() {
     }
 

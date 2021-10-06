@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.format;
 
-import com.github.leeonky.dal.IllegalFieldException;
-import com.github.leeonky.dal.RuntimeContext;
+import com.github.leeonky.dal.runtime.IllegalFieldException;
+import com.github.leeonky.dal.runtime.RuntimeContext;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.Objects;

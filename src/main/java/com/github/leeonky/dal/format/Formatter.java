@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.format;
 
-import com.github.leeonky.dal.token.IllegalTypeException;
+import com.github.leeonky.dal.runtime.IllegalTypeException;
 
 public interface Formatter<T, R> {
 

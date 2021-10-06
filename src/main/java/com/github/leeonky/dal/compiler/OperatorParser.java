@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.compiler;
 
-import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.Operator;
 
 import java.util.Optional;

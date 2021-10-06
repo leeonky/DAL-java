@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.util;
 
+import com.github.leeonky.dal.runtime.ClassKeyMap;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

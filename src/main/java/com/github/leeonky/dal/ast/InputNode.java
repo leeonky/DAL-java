@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.RuntimeContext;
-import com.github.leeonky.dal.util.DataObject;
+import com.github.leeonky.dal.runtime.DataObject;
+import com.github.leeonky.dal.runtime.RuntimeContext;
 
 public class InputNode extends Node {
     public static final InputNode INSTANCE = new InputNode();

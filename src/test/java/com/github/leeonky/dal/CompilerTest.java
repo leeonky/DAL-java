@@ -1,7 +1,9 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.compiler.Compiler;
 import com.github.leeonky.dal.compiler.SourceCode;
+import com.github.leeonky.dal.compiler.SyntaxException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

@@ -1,7 +1,6 @@
-package com.github.leeonky.dal;
+package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.*;
-import com.github.leeonky.dal.compiler.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,9 +8,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.dal.Constants.KeyWords.IS;
-import static com.github.leeonky.dal.Constants.KeyWords.WHICH;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
+import static com.github.leeonky.dal.compiler.Constants.KeyWords.IS;
+import static com.github.leeonky.dal.compiler.Constants.KeyWords.WHICH;
 import static com.github.leeonky.dal.compiler.SourceCode.DEFAULT_JUDGEMENT_OPERATOR;
 import static com.github.leeonky.dal.compiler.SourceCode.OperatorFactory;
 import static java.util.Optional.empty;

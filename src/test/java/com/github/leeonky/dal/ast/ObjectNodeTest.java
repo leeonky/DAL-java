@@ -1,9 +1,8 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.AssertionFailure;
-import com.github.leeonky.dal.RuntimeContext;
-import com.github.leeonky.dal.RuntimeContextBuilder;
 import com.github.leeonky.dal.ast.Operator.Equal;
+import com.github.leeonky.dal.runtime.RuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 

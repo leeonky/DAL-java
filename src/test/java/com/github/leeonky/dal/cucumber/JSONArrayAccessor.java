@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.cucumber;
 
-import com.github.leeonky.dal.util.ArrayAccessor;
+import com.github.leeonky.dal.runtime.ArrayAccessor;
 import org.json.JSONArray;
 import org.json.JSONException;
 

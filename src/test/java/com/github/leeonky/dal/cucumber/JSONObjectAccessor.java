@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.cucumber;
 
-import com.github.leeonky.dal.util.PropertyAccessor;
+import com.github.leeonky.dal.runtime.PropertyAccessor;
 import org.json.JSONException;
 import org.json.JSONObject;
 

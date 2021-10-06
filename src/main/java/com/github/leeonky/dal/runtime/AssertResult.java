@@ -1,4 +1,4 @@
-package com.github.leeonky.dal;
+package com.github.leeonky.dal.runtime;
 
 public class AssertResult {
     private final boolean passed;

@@ -1,8 +1,7 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.ConstructorViaSchema;
-import com.github.leeonky.dal.RuntimeContext;
-import com.github.leeonky.dal.RuntimeException;
+import com.github.leeonky.dal.runtime.ConstructorViaSchema;
+import com.github.leeonky.dal.runtime.RuntimeContext;
 
 public class SchemaNode extends Node {
     private final String schema;

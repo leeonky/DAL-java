@@ -1,9 +1,11 @@
 package com.github.leeonky.dal.util;
 
-import com.github.leeonky.dal.RuntimeContextBuilder;
-import com.github.leeonky.dal.SchemaType;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
+import com.github.leeonky.dal.runtime.DataObject;
+import com.github.leeonky.dal.runtime.PropertyAccessor;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.SchemaType;
 import com.github.leeonky.dal.type.FieldAlias;
 import com.github.leeonky.dal.type.FieldAliases;
 import com.github.leeonky.dal.type.Partial;

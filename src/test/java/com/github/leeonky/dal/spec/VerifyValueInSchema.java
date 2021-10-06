@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.spec;
 
-import com.github.leeonky.dal.RuntimeContext;
-import com.github.leeonky.dal.RuntimeException;
+import com.github.leeonky.dal.ast.RuntimeException;
 import com.github.leeonky.dal.format.Value;
+import com.github.leeonky.dal.runtime.RuntimeContext;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.util.BeanClass;
 import org.junit.jupiter.api.Nested;

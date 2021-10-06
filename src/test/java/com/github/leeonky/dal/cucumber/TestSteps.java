@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.cucumber;
 
-import com.github.leeonky.dal.CucumberContext;
+import com.github.leeonky.dal.compiler.CucumberContext;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;

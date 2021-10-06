@@ -1,5 +1,6 @@
 package com.github.leeonky.dal;
 
+import com.github.leeonky.dal.runtime.SchemaType;
 import com.github.leeonky.dal.type.FieldAlias;
 import com.github.leeonky.dal.type.FieldAliases;
 import com.github.leeonky.util.BeanClass;

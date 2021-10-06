@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.spec;
 
-import com.github.leeonky.dal.AssertResult;
-import com.github.leeonky.dal.util.PropertyAccessor;
+import com.github.leeonky.dal.runtime.AssertResult;
+import com.github.leeonky.dal.runtime.PropertyAccessor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.json.JSONException;

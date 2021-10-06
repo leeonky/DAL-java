@@ -1,9 +1,9 @@
 package com.github.leeonky.dal.spec;
 
-import com.github.leeonky.dal.AssertResult;
-import com.github.leeonky.dal.AssertionFailure;
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.DalException;
+import com.github.leeonky.dal.ast.AssertionFailure;
+import com.github.leeonky.dal.runtime.AssertResult;
+import com.github.leeonky.dal.runtime.DalException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;

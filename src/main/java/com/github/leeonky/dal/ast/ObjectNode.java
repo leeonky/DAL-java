@@ -1,14 +1,13 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.AssertionFailure;
-import com.github.leeonky.dal.RuntimeContext;
-import com.github.leeonky.dal.util.DataObject;
+import com.github.leeonky.dal.runtime.DataObject;
+import com.github.leeonky.dal.runtime.RuntimeContext;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.AssertionFailure.assertUnexpectedFields;
+import static com.github.leeonky.dal.ast.AssertionFailure.assertUnexpectedFields;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 

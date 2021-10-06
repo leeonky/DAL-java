@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.util;
 
-import com.github.leeonky.dal.Compiler;
+import com.github.leeonky.dal.compiler.Compiler;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

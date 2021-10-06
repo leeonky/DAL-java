@@ -1,15 +1,13 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.AssertionFailure;
-import com.github.leeonky.dal.RuntimeContext;
-import com.github.leeonky.dal.RuntimeException;
-import com.github.leeonky.dal.token.IllegalTypeException;
+import com.github.leeonky.dal.runtime.IllegalTypeException;
+import com.github.leeonky.dal.runtime.RuntimeContext;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.Constants.SCHEMA_DELIMITER;
+import static com.github.leeonky.dal.compiler.Constants.SCHEMA_DELIMITER;
 import static java.lang.String.format;
 
 public class SchemaExpression extends Node {

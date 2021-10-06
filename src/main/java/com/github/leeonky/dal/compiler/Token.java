@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.compiler;
 
-import com.github.leeonky.dal.SyntaxException;
 import com.github.leeonky.dal.ast.*;
 
 import java.math.BigDecimal;
@@ -49,9 +48,8 @@ public class Token {
         return contentBuilder.toString();
     }
 
-    public Token append(char c) {
+    public void append(char c) {
         contentBuilder.append(c);
-        return this;
     }
 
     public Token append(String str) {

@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.util;
+package com.github.leeonky.dal.runtime;
 
 import java.util.function.Predicate;
 

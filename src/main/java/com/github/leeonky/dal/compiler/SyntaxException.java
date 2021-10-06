@@ -1,4 +1,6 @@
-package com.github.leeonky.dal;
+package com.github.leeonky.dal.compiler;
+
+import com.github.leeonky.dal.runtime.DalException;
 
 public class SyntaxException extends DalException {
 

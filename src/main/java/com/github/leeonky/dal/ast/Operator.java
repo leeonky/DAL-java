@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.Constants;
-import com.github.leeonky.dal.RuntimeContext;
-import com.github.leeonky.dal.util.Calculator;
+import com.github.leeonky.dal.compiler.Constants;
+import com.github.leeonky.dal.runtime.Calculator;
+import com.github.leeonky.dal.runtime.RuntimeContext;
 
 public abstract class Operator {
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
