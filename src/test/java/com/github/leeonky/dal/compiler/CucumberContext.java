@@ -69,7 +69,7 @@ public class CucumberContext {
     }
 
     public void giveDalSourceCode(String code) {
-        tokenParser = new TokenParser(sourceCodeString = parseTabAndSpace(code));
+        tokenParser = new TokenParser(new SourceCode(sourceCodeString = parseTabAndSpace(code)));
     }
 
     private String parseTabAndSpace(String code) {
@@ -81,7 +81,7 @@ public class CucumberContext {
     }
 
     public void assertNodeValue(String assertion, String factory) {
-        dal.assertData(matcherMap.get(factory).fetch(new TokenParser(sourceCodeString)).orElse(null)
+        dal.assertData(matcherMap.get(factory).fetch(new TokenParser(new SourceCode(sourceCodeString))).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
     }
 

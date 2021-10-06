@@ -8,10 +8,10 @@ public interface OperatorMatcher {
     Optional<Operator> fetch(TokenParser tokenParser);
 
     default OperatorFactory or(OperatorFactory compiler) {
-        return parser -> fetch(parser).orElseGet(() -> compiler.fetch(parser));
+        return tokenParser -> fetch(tokenParser).orElseGet(() -> compiler.fetch(tokenParser));
     }
 
     default OperatorFactory or(String message) {
-        return parser -> fetch(parser).orElseThrow(() -> new SyntaxException(message, parser.getPosition()));
+        return tokenParser -> fetch(tokenParser).orElseThrow(() -> tokenParser.getSourceCode().syntaxError(message, 0));
     }
 }

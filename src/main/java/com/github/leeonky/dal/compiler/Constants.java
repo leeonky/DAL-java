@@ -23,6 +23,7 @@ public class Constants {
     public static final String LIST_TAIL = "...";
     public static final Set<String> ALL_KEY_WORDS = new HashSet<>(asList(IS, WHICH, TRUE, FALSE, NULL, AND, OR));
 
+    //TODO Key words => keyword matcher
     public static class KeyWords {
         public static final String WHICH = "which";
         public static final String IS = "is";

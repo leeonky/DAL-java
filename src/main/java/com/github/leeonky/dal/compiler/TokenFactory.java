@@ -5,9 +5,12 @@ import com.github.leeonky.dal.ast.Node;
 import java.util.function.Function;
 
 public interface TokenFactory {
-    Token fetch(TokenParser tokenParser);
+    Token fetch(SourceCode sourceCode);
 
     default NodeFactory map(Function<Token, Node> mapper) {
-        return parser -> mapper.apply(fetch(parser));
+        return parser -> {
+            Token token = fetch(parser.getSourceCode());
+            return mapper.apply(token).setPositionBegin(token.getPosition());
+        };
     }
 }

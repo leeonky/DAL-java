@@ -18,6 +18,6 @@ public interface NodeMatcher {
     }
 
     default NodeFactory or(String message) {
-        return parser -> fetch(parser).orElseThrow(() -> new SyntaxException(message, parser.getPosition()));
+        return parser -> fetch(parser).orElseThrow(() -> parser.getSourceCode().syntaxError(message, 0));
     }
 }
