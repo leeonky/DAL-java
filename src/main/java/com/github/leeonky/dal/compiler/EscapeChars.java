@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 //TODO move to Source Code Inner
+//TODO constructor ==> function
 public class EscapeChars {
     private final List<EscapeChar> escapeChars = new ArrayList<>();
 

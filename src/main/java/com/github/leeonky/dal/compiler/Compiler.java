@@ -12,48 +12,36 @@ import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.IS;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.WHICH;
 import static com.github.leeonky.dal.compiler.SourceCode.DEFAULT_JUDGEMENT_OPERATOR;
-import static com.github.leeonky.dal.compiler.SourceCode.OperatorFactory;
+import static com.github.leeonky.dal.compiler.SourceCode.operatorParser;
+import static com.github.leeonky.dal.runtime.Function.not;
 import static java.util.Optional.empty;
 
 public class Compiler {
     //    TODO complex expression test
     public static final OperatorParser BINARY_ARITHMETIC_OPERATORS = oneOf(
-            new OperatorFactory("&&", () -> new Operator.And("&&")),
-            new OperatorFactory("||", () -> new Operator.Or("||")),
-            new OperatorFactory("and", () -> new Operator.And("and")),
-            new OperatorFactory(",", () -> new Operator.And(",")) {
-                @Override
-                protected boolean matches(SourceCode sourceCode) {
-                    return super.matches(sourceCode) && isEnableAndComma(sourceCode);
-                }
-            },
-            new OperatorFactory("or", () -> new Operator.Or("or")),
-            new OperatorFactory(">=", Operator.GreaterOrEqual::new),
-            new OperatorFactory("<=", Operator.LessOrEqual::new),
-            new OperatorFactory(">", Operator.Greater::new),
-            new OperatorFactory("<", Operator.Less::new),
-            new OperatorFactory("+", Operator.Plus::new),
-            new OperatorFactory("-", Operator.Subtraction::new),
-            new OperatorFactory("*", Operator.Multiplication::new),
-            new OperatorFactory("/", Operator.Division::new),
-            new OperatorFactory("!=", Operator.NotEqual::new)),
-            UNARY_OPERATORS = oneOf(
-                    new OperatorFactory("-", Operator.Minus::new) {
-                        @Override
-                        protected boolean matches(SourceCode sourceCode) {
-                            return super.matches(sourceCode) && !sourceCode.isBeginning();
-                        }
-                    }, new OperatorFactory("!", Operator.Not::new) {
-                        @Override
-                        protected boolean matches(SourceCode sourceCode) {
-                            return super.matches(sourceCode) && !sourceCode.startsWith("!=");
-                        }
-                    }),
-            JUDGEMENT_OPERATORS = oneOf(
-                    new OperatorFactory(":", Operator.Matcher::new),
-                    new OperatorFactory("=", Operator.Equal::new));
+            operatorParser("&&", () -> new Operator.And("&&")),
+            operatorParser("||", () -> new Operator.Or("||")),
+            operatorParser("and", () -> new Operator.And("and")),
+            operatorParser(",", () -> new Operator.And(","), SourceCode::isEnableAndComma),
+            operatorParser("or", () -> new Operator.Or("or")),
+            operatorParser(">=", Operator.GreaterOrEqual::new),
+            operatorParser("<=", Operator.LessOrEqual::new),
+            operatorParser(">", Operator.Greater::new),
+            operatorParser("<", Operator.Less::new),
+            operatorParser("+", Operator.Plus::new),
+            operatorParser("-", Operator.Subtraction::new),
+            operatorParser("*", Operator.Multiplication::new),
+            operatorParser("/", Operator.Division::new),
+            operatorParser("!=", Operator.NotEqual::new));
+    public static final OperatorParser UNARY_OPERATORS = oneOf(
+            operatorParser("-", Operator.Minus::new, not(SourceCode::isBeginning)),
+            operatorParser("!", Operator.Not::new, sourceCode -> !sourceCode.startsWith("!=")));
+    public static final OperatorParser JUDGEMENT_OPERATORS = oneOf(
+            operatorParser(":", Operator.Matcher::new),
+            operatorParser("=", Operator.Equal::new));
 
-    private static final EscapeChars SINGLE_QUOTED_ESCAPES = new EscapeChars().escape("\\\\", '\\').escape("\\'", '\''),
+    private static final EscapeChars
+            SINGLE_QUOTED_ESCAPES = new EscapeChars().escape("\\\\", '\\').escape("\\'", '\''),
             DOUBLE_QUOTED_ESCAPES = new EscapeChars().escape("\\\\", '\\').escape("\\n", '\n').escape("\\t", '\t')
                     .escape("\\\"", '"'),
             REGEX_ESCAPES = new EscapeChars().escape("\\/", '/');

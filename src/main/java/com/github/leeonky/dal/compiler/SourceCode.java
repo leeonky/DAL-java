@@ -99,6 +99,15 @@ public class SourceCode {
         });
     }
 
+    public Optional<Node> fetchString(char opening, char closing, Function<String, Node> nodeFactory,
+                                      EscapeChars escapeChars) {
+        return when(whenFirstChar(c -> c == opening)).optional(() -> {
+            int startPosition = position++;
+            return nodeFactory.apply(fetchElements(BY_CHAR, closing, i -> escapedPop(escapeChars))
+                    .stream().map(String::valueOf).collect(joining(""))).setPositionBegin(startPosition);
+        });
+    }
+
     private <T> List<T> fetchElements(FetchBy fetchBy, char closing, Function<Integer, T> element) {
         List<T> elements = new ArrayList<>();
         int index = 0;
@@ -142,6 +151,10 @@ public class SourceCode {
         return commaAnd(false, nodeFactory);
     }
 
+    public Optional<Node> enableCommaAnd(Supplier<Optional<Node>> nodeFactory) {
+        return commaAnd(true, nodeFactory);
+    }
+
     private Optional<Node> commaAnd(boolean b, Supplier<Optional<Node>> nodeFactory) {
         enableAndComma.push(b);
         try {
@@ -151,21 +164,8 @@ public class SourceCode {
         }
     }
 
-    public Optional<Node> enableCommaAnd(Supplier<Optional<Node>> nodeFactory) {
-        return commaAnd(true, nodeFactory);
-    }
-
     public Optional<Node> fetchInput() {
         return when(isBeginning()).optional(() -> InputNode.INSTANCE);
-    }
-
-    public Optional<Node> fetchString(char opening, char closing, Function<String, Node> nodeFactory,
-                                      EscapeChars escapeChars) {
-        return when(whenFirstChar(c -> c == opening)).optional(() -> {
-            int startPosition = position++;
-            return nodeFactory.apply(fetchElements(BY_CHAR, closing, i -> escapedPop(escapeChars))
-                    .stream().map(String::valueOf).collect(joining(""))).setPositionBegin(startPosition);
-        });
     }
 
     @SuppressWarnings("unchecked")
@@ -196,6 +196,10 @@ public class SourceCode {
         }
     }
 
+    public boolean isEnableAndComma() {
+        return enableAndComma.getFirst();
+    }
+
     public enum FetchBy {
         BY_CHAR,
         BY_NODE {
@@ -217,30 +221,16 @@ public class SourceCode {
     public static final OperatorCompiler DEFAULT_JUDGEMENT_OPERATOR = sourceCode -> sourceCode.operators.isEmpty() ?
             new Operator.Matcher() : sourceCode.operators.getFirst();
 
-    public static class OperatorFactory implements OperatorParser {
-        private final String symbol;
-        private final Supplier<Operator> factory;
+    public static OperatorParser operatorParser(String symbol, Supplier<Operator> factory,
+                                                Predicate<SourceCode> matcher) {
+        return sourceCode -> when(sourceCode.startsWith(symbol) && matcher.test(sourceCode)).optional(() -> {
+            int p = sourceCode.position;
+            sourceCode.position += symbol.length();
+            return factory.get().setPosition(p);
+        });
+    }
 
-        public OperatorFactory(String symbol, Supplier<Operator> factory) {
-            this.symbol = symbol;
-            this.factory = factory;
-        }
-
-        @Override
-        public Optional<Operator> fetch(SourceCode sourceCode) {
-            return when(matches(sourceCode)).optional(() -> {
-                int p = sourceCode.position;
-                sourceCode.position += symbol.length();
-                return factory.get().setPosition(p);
-            });
-        }
-
-        protected boolean matches(SourceCode sourceCode) {
-            return sourceCode.startsWith(symbol);
-        }
-
-        public boolean isEnableAndComma(SourceCode sourceCode) {
-            return sourceCode.enableAndComma.getFirst();
-        }
+    public static OperatorParser operatorParser(String symbol, Supplier<Operator> factory) {
+        return operatorParser(symbol, factory, s -> true);
     }
 }
