@@ -7,7 +7,7 @@ import java.util.function.Function;
 public interface TokenFactory {
     Token fetch(SourceCode sourceCode);
 
-    default NodeCompiler map(Function<Token, Node> mapper) {
+    default NodeFactory map(Function<Token, Node> mapper) {
         return sourceCode -> mapper.apply(fetch(sourceCode));
     }
 }

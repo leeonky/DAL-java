@@ -22,14 +22,14 @@ import static java.util.stream.Collectors.joining;
 
 //TODO refactor methods
 public class SourceCode {
-    public static final TokenParser
-            NUMBER = createTokenParser(DIGITAL::contains, emptyList(), false, DELIMITER, Token::isNumber),
-            INTEGER = createTokenParser(DIGITAL_OR_MINUS::contains, emptyList(), false, DELIMITER, Token::isNumber),
-            IDENTITY_PROPERTY = createTokenParser(not(DELIMITER::contains), ALL_KEY_WORDS, false, DELIMITER_OR_DOT,
+    public static final TokenMatcher
+            NUMBER = tokenMatcher(DIGITAL::contains, emptyList(), false, DELIMITER, Token::isNumber),
+            INTEGER = tokenMatcher(DIGITAL_OR_MINUS::contains, emptyList(), false, DELIMITER, Token::isNumber),
+            IDENTITY_PROPERTY = tokenMatcher(not(DELIMITER::contains), ALL_KEY_WORDS, false, DELIMITER_OR_DOT,
                     not(Token::isNumber)),
-            DOT_PROPERTY = createTokenParser(DOT::equals, singletonList(LIST_TAIL), true, DELIMITER_OR_DOT, Token::all);
+            DOT_PROPERTY = tokenMatcher(DOT::equals, singletonList(LIST_TAIL), true, DELIMITER_OR_DOT, Token::all);
 
-    public static final TokenFactory SCHEMA = createTokenParser(not(DELIMITER::contains), ALL_KEY_WORDS,
+    public static final TokenFactory SCHEMA = tokenMatcher(not(DELIMITER::contains), ALL_KEY_WORDS,
             false, DELIMITER, not(Token::isNumber)).or("expect a schema");
 
     private final String code;
@@ -43,8 +43,8 @@ public class SourceCode {
         chars = code.toCharArray();
     }
 
-    public static TokenParser createTokenParser(Predicate<Character> startsWith, Collection<String> excluded,
-                                                boolean trim, Set<Character> delimiters, Predicate<Token> validator) {
+    public static TokenMatcher tokenMatcher(Predicate<Character> startsWith, Collection<String> excluded,
+                                            boolean trim, Set<Character> delimiters, Predicate<Token> validator) {
         return sourceCode -> {
             if (sourceCode.whenFirstChar(startsWith) && sourceCode.hasCode()
                     && excluded.stream().noneMatch(sourceCode::startsWith)) {
@@ -83,12 +83,12 @@ public class SourceCode {
     }
 
     public Optional<Node> fetchNode(char opening, char closing, Function<Node, Node> nodeFactory,
-                                    NodeCompiler nodeParser, String message) {
+                                    NodeFactory nodeMatcher, String message) {
         return fetchNodes(opening, closing, args -> {
             if (args.size() != 1)
                 throw new SyntaxException(message, getPosition() - 1);
             return nodeFactory.apply(args.get(0));
-        }, i -> nodeParser.fetch(this));
+        }, i -> nodeMatcher.fetch(this));
     }
 
     public <T extends Node> Optional<Node> fetchNodes(char opening, char closing, Function<List<T>, Node> nodeFactory,
@@ -169,7 +169,7 @@ public class SourceCode {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Node> List<T> fetchNodes(String delimiter, NodeCompiler factory) {
+    public <T extends Node> List<T> fetchNodes(String delimiter, NodeFactory factory) {
         return new ArrayList<T>() {{
             add((T) factory.fetch(SourceCode.this));
             while (fetchWord(delimiter).isPresent())
@@ -177,20 +177,20 @@ public class SourceCode {
         }};
     }
 
-    public Optional<Node> fetchNodeAfter(String token, NodeCompiler nodeCompiler) {
-        return fetchWord(token).map(t -> nodeCompiler.fetch(this).setPositionBegin(t.getPosition()));
+    public Optional<Node> fetchNodeAfter(String token, NodeFactory nodeFactory) {
+        return fetchWord(token).map(t -> nodeFactory.fetch(this).setPositionBegin(t.getPosition()));
     }
 
-    public Optional<Node> fetchExpression(Node left, OperatorParser operatorParser, NodeCompiler rightParser) {
-        return operatorParser.fetch(this).map(opt -> (OperatorCompiler) _ignore -> opt)
-                .map(operatorCompiler -> fetchExpression(left, operatorCompiler, rightParser));
+    public Optional<Node> fetchExpression(Node left, OperatorMatcher operatorMatcher, NodeFactory rightCompiler) {
+        return operatorMatcher.fetch(this).map(opt -> (OperatorFactory) _ignore -> opt)
+                .map(operatorFactory -> fetchExpression(left, operatorFactory, rightCompiler));
     }
 
-    public Expression fetchExpression(Node left, OperatorCompiler operatorCompiler, NodeCompiler rightParser) {
-        Operator operator = operatorCompiler.fetch(this);
+    public Expression fetchExpression(Node left, OperatorFactory operatorFactory, NodeFactory rightCompiler) {
+        Operator operator = operatorFactory.fetch(this);
         operators.push(operator);
         try {
-            return new Expression(left, operator, rightParser.fetch(this)).adjustOperatorOrder();
+            return new Expression(left, operator, rightCompiler.fetch(this)).adjustOperatorOrder();
         } finally {
             operators.pop();
         }
@@ -218,11 +218,11 @@ public class SourceCode {
         return IntStream.range(0, position).mapToObj(i -> chars[i]).allMatch(Character::isWhitespace);
     }
 
-    public static final OperatorCompiler DEFAULT_JUDGEMENT_OPERATOR = sourceCode -> sourceCode.operators.isEmpty() ?
+    public static final OperatorFactory DEFAULT_JUDGEMENT_OPERATOR = sourceCode -> sourceCode.operators.isEmpty() ?
             new Operator.Matcher() : sourceCode.operators.getFirst();
 
-    public static OperatorParser operatorParser(String symbol, Supplier<Operator> factory,
-                                                Predicate<SourceCode> matcher) {
+    public static OperatorMatcher operatorMatcher(String symbol, Supplier<Operator> factory,
+                                                  Predicate<SourceCode> matcher) {
         return sourceCode -> when(sourceCode.startsWith(symbol) && matcher.test(sourceCode)).optional(() -> {
             int p = sourceCode.position;
             sourceCode.position += symbol.length();
@@ -230,7 +230,7 @@ public class SourceCode {
         });
     }
 
-    public static OperatorParser operatorParser(String symbol, Supplier<Operator> factory) {
-        return operatorParser(symbol, factory, s -> true);
+    public static OperatorMatcher operatorMatcher(String symbol, Supplier<Operator> factory) {
+        return operatorMatcher(symbol, factory, s -> true);
     }
 }

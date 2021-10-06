@@ -4,14 +4,14 @@ import com.github.leeonky.dal.ast.Operator;
 
 import java.util.Optional;
 
-public interface OperatorParser {
+public interface OperatorMatcher {
     Optional<Operator> fetch(SourceCode sourceCode);
 
-    default OperatorCompiler or(OperatorCompiler compiler) {
+    default OperatorFactory or(OperatorFactory compiler) {
         return sourceCode -> fetch(sourceCode).orElseGet(() -> compiler.fetch(sourceCode));
     }
 
-    default OperatorCompiler or(String message) {
+    default OperatorFactory or(String message) {
         return sourceCode -> fetch(sourceCode).orElseThrow(() -> new SyntaxException(message, sourceCode.getPosition()));
     }
 }

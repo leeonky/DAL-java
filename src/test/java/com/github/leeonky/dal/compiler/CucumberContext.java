@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CucumberContext {
     private static final Compiler compiler = new Compiler();
-    private static final Map<String, NodeParser> parserMap = new HashMap<String, NodeParser>() {{
+    private static final Map<String, NodeMatcher> matcherMap = new HashMap<String, NodeMatcher>() {{
         put("number", compiler.NUMBER);
         put("integer", compiler.INTEGER);
         put("single-quoted-string", compiler.SINGLE_QUOTED_STRING);
@@ -43,8 +43,8 @@ public class CucumberContext {
         put("schema", optional(compiler.SCHEMA));
     }};
 
-    private static NodeParser optional(NodeCompiler nodeCompiler) {
-        return sourceCode -> Optional.ofNullable(nodeCompiler.fetch(sourceCode));
+    private static NodeMatcher optional(NodeFactory nodeFactory) {
+        return sourceCode -> Optional.ofNullable(nodeFactory.fetch(sourceCode));
     }
 
     public static CucumberContext INSTANCE = new CucumberContext();
@@ -81,7 +81,7 @@ public class CucumberContext {
     }
 
     public void assertNodeValue(String assertion, String factory) {
-        dal.assertData(parserMap.get(factory).fetch(new SourceCode(sourceCodeString)).orElse(null)
+        dal.assertData(matcherMap.get(factory).fetch(new SourceCode(sourceCodeString)).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
     }
 
@@ -90,7 +90,7 @@ public class CucumberContext {
     }
 
     public void failedToGetNodeWithMessage(String factory, String message) {
-        dalException = assertThrows(DalException.class, () -> parserMap.get(factory).fetch(sourceCode));
+        dalException = assertThrows(DalException.class, () -> matcherMap.get(factory).fetch(sourceCode));
         shouldHasDalMessage(message);
     }
 
@@ -100,7 +100,7 @@ public class CucumberContext {
 
     public void compileAndAssertNode(String factory, String assertion) {
         try {
-            node = parserMap.get(factory).fetch(sourceCode).orElse(null);
+            node = matcherMap.get(factory).fetch(sourceCode).orElse(null);
         } catch (DalException e) {
             System.err.println(e.show(sourceCodeString));
             throw e;
@@ -137,7 +137,7 @@ public class CucumberContext {
     }
 
     public void ignoreNodeBy(String factory) {
-        parserMap.get(factory).fetch(sourceCode);
+        matcherMap.get(factory).fetch(sourceCode);
     }
 
     public void registerSchema(String schemaCode) {

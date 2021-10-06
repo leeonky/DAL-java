@@ -5,10 +5,10 @@ import com.github.leeonky.dal.ast.Node;
 
 import java.util.Optional;
 
-public interface ExpressionParser {
+public interface ExpressionMatcher {
     Optional<Node> fetch(SourceCode sourceCode, Node previous);
 
-    default NodeParser defaultInputNode() {
+    default NodeMatcher defaultInputNode() {
         return sourceCode -> fetch(sourceCode, InputNode.INSTANCE);
     }
 }

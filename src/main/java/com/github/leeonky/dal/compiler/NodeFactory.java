@@ -5,21 +5,21 @@ import com.github.leeonky.dal.ast.Node;
 import java.util.Optional;
 import java.util.function.Function;
 
-public interface NodeCompiler {
+public interface NodeFactory {
 
     Node fetch(SourceCode sourceCode);
 
-    default NodeCompiler recursive(ExpressionParser expressionParser) {
+    default NodeFactory recursive(ExpressionMatcher expressionMatcher) {
         return sourceCode -> {
             Node node = fetch(sourceCode);
-            Optional<Node> optionalNode = expressionParser.fetch(sourceCode, node);
+            Optional<Node> optionalNode = expressionMatcher.fetch(sourceCode, node);
             while (optionalNode.isPresent())
-                optionalNode = expressionParser.fetch(sourceCode, node = optionalNode.get());
+                optionalNode = expressionMatcher.fetch(sourceCode, node = optionalNode.get());
             return node;
         };
     }
 
-    default NodeCompiler map(Function<Node, Node> mapping) {
+    default NodeFactory map(Function<Node, Node> mapping) {
         return sourceCode -> mapping.apply(fetch(sourceCode));
     }
 }

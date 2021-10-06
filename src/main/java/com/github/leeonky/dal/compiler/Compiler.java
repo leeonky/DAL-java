@@ -12,33 +12,33 @@ import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.IS;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.WHICH;
 import static com.github.leeonky.dal.compiler.SourceCode.DEFAULT_JUDGEMENT_OPERATOR;
-import static com.github.leeonky.dal.compiler.SourceCode.operatorParser;
+import static com.github.leeonky.dal.compiler.SourceCode.operatorMatcher;
 import static com.github.leeonky.dal.runtime.Function.not;
 import static java.util.Optional.empty;
 
 public class Compiler {
     //    TODO complex expression test
-    public static final OperatorParser BINARY_ARITHMETIC_OPERATORS = oneOf(
-            operatorParser("&&", () -> new Operator.And("&&")),
-            operatorParser("||", () -> new Operator.Or("||")),
-            operatorParser("and", () -> new Operator.And("and")),
-            operatorParser(",", () -> new Operator.And(","), SourceCode::isEnableAndComma),
-            operatorParser("or", () -> new Operator.Or("or")),
-            operatorParser(">=", Operator.GreaterOrEqual::new),
-            operatorParser("<=", Operator.LessOrEqual::new),
-            operatorParser(">", Operator.Greater::new),
-            operatorParser("<", Operator.Less::new),
-            operatorParser("+", Operator.Plus::new),
-            operatorParser("-", Operator.Subtraction::new),
-            operatorParser("*", Operator.Multiplication::new),
-            operatorParser("/", Operator.Division::new),
-            operatorParser("!=", Operator.NotEqual::new));
-    public static final OperatorParser UNARY_OPERATORS = oneOf(
-            operatorParser("-", Operator.Minus::new, not(SourceCode::isBeginning)),
-            operatorParser("!", Operator.Not::new, sourceCode -> !sourceCode.startsWith("!=")));
-    public static final OperatorParser JUDGEMENT_OPERATORS = oneOf(
-            operatorParser(":", Operator.Matcher::new),
-            operatorParser("=", Operator.Equal::new));
+    public static final OperatorMatcher BINARY_ARITHMETIC_OPERATORS = oneOf(
+            operatorMatcher("&&", () -> new Operator.And("&&")),
+            operatorMatcher("||", () -> new Operator.Or("||")),
+            operatorMatcher("and", () -> new Operator.And("and")),
+            SourceCode.operatorMatcher(",", () -> new Operator.And(","), SourceCode::isEnableAndComma),
+            operatorMatcher("or", () -> new Operator.Or("or")),
+            operatorMatcher(">=", Operator.GreaterOrEqual::new),
+            operatorMatcher("<=", Operator.LessOrEqual::new),
+            operatorMatcher(">", Operator.Greater::new),
+            operatorMatcher("<", Operator.Less::new),
+            operatorMatcher("+", Operator.Plus::new),
+            operatorMatcher("-", Operator.Subtraction::new),
+            operatorMatcher("*", Operator.Multiplication::new),
+            operatorMatcher("/", Operator.Division::new),
+            operatorMatcher("!=", Operator.NotEqual::new));
+    public static final OperatorMatcher UNARY_OPERATORS = oneOf(
+            SourceCode.operatorMatcher("-", Operator.Minus::new, not(SourceCode::isBeginning)),
+            SourceCode.operatorMatcher("!", Operator.Not::new, sourceCode -> !sourceCode.startsWith("!=")));
+    public static final OperatorMatcher JUDGEMENT_OPERATORS = oneOf(
+            operatorMatcher(":", Operator.Matcher::new),
+            operatorMatcher("=", Operator.Equal::new));
 
     private static final EscapeChars
             SINGLE_QUOTED_ESCAPES = new EscapeChars().escape("\\\\", '\\').escape("\\'", '\''),
@@ -46,7 +46,7 @@ public class Compiler {
                     .escape("\\\"", '"'),
             REGEX_ESCAPES = new EscapeChars().escape("\\/", '/');
 
-    NodeParser INPUT = SourceCode::fetchInput,
+    NodeMatcher INPUT = SourceCode::fetchInput,
             NUMBER = SourceCode.NUMBER.map(Token::toConstNumber),
             INTEGER = SourceCode.INTEGER.map(Token::toConstInteger),
             SINGLE_QUOTED_STRING = sourceCode -> sourceCode.fetchString('\'', '\'', ConstNode::new, SINGLE_QUOTED_ESCAPES),
@@ -60,11 +60,11 @@ public class Compiler {
             PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_WHICH_CLAUSE, SCHEMA_JUDGEMENT_CLAUSE,
             UNARY_OPERATOR_EXPRESSION;
 
-    NodeCompiler SCHEMA = SourceCode.SCHEMA.map(Token::toSchemaNode),
+    NodeFactory SCHEMA = SourceCode.SCHEMA.map(Token::toSchemaNode),
             PROPERTY_CHAIN, OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION,
             JUDGEMENT_EXPRESSION_OPERAND;
 
-    ExpressionParser DOT_PROPERTY = (sourceCode, previous) -> SourceCode.DOT_PROPERTY.fetch(sourceCode)
+    ExpressionMatcher DOT_PROPERTY = (sourceCode, previous) -> SourceCode.DOT_PROPERTY.fetch(sourceCode)
             .map(token -> token.toDotProperty(previous)),
             BRACKET_PROPERTY, EXPLICIT_PROPERTY, BINARY_ARITHMETIC_EXPRESSION, BINARY_JUDGEMENT_EXPRESSION,
             BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION;
@@ -110,8 +110,8 @@ public class Compiler {
         EXPRESSION = OPERAND.recursive(oneOf(BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION));
     }
 
-    private ExpressionCompiler compileSchemaExpression(Function<SchemaExpression, NodeParser> whichClause1,
-                                                       Function<SchemaExpression, NodeParser> whichClause2) {
+    private ExpressionFactory compileSchemaExpression(Function<SchemaExpression, NodeMatcher> whichClause1,
+                                                      Function<SchemaExpression, NodeMatcher> whichClause2) {
         return (sourceCode, previous) -> {
             SchemaExpression schemaExpression = new SchemaExpression(previous, sourceCode.fetchNodes("/", SCHEMA));
             return oneOf(whichClause1.apply(schemaExpression), whichClause2.apply(schemaExpression))
@@ -119,9 +119,9 @@ public class Compiler {
         };
     }
 
-    private Function<SchemaExpression, NodeParser> whichClause(NodeParser clauseNodeParser, BiFunction<SchemaExpression,
+    private Function<SchemaExpression, NodeMatcher> whichClause(NodeMatcher clauseNodeMatcher, BiFunction<SchemaExpression,
             Node, SchemaWhichExpression> appendWay) {
-        return schemaExpression -> clauseNodeParser.map(node -> appendWay.apply(schemaExpression, node));
+        return schemaExpression -> clauseNodeMatcher.map(node -> appendWay.apply(schemaExpression, node));
     }
 
     public Node compile(SourceCode sourceCode) {
@@ -135,18 +135,18 @@ public class Compiler {
         return ((PropertyNode) PROPERTY_CHAIN.fetch(new SourceCode(s))).getChain();
     }
 
-    private static NodeParser oneOf(NodeParser parser, NodeParser... parsers) {
-        return sourceCode -> Stream.concat(Stream.of(parser), Stream.of(parsers))
+    private static NodeMatcher oneOf(NodeMatcher matcher, NodeMatcher... matchers) {
+        return sourceCode -> Stream.concat(Stream.of(matcher), Stream.of(matchers))
                 .map(p -> p.fetch(sourceCode)).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 
-    private static ExpressionParser oneOf(ExpressionParser parser, ExpressionParser... parsers) {
-        return (sourceCode, previous) -> Stream.concat(Stream.of(parser), Stream.of(parsers))
+    private static ExpressionMatcher oneOf(ExpressionMatcher matcher, ExpressionMatcher... matchers) {
+        return (sourceCode, previous) -> Stream.concat(Stream.of(matcher), Stream.of(matchers))
                 .map(p -> p.fetch(sourceCode, previous)).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 
-    private static OperatorParser oneOf(OperatorParser parser, OperatorParser... parsers) {
-        return sourceCode -> Stream.concat(Stream.of(parser), Stream.of(parsers))
+    private static OperatorMatcher oneOf(OperatorMatcher matcher, OperatorMatcher... matchers) {
+        return sourceCode -> Stream.concat(Stream.of(matcher), Stream.of(matchers))
                 .map(p -> p.fetch(sourceCode)).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 }
