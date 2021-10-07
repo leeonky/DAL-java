@@ -27,7 +27,7 @@ Feature: schema expression
     """
     1
     """
-    Then evaluate result is:
+    Then node evaluate result is:
     """
     = true
     """

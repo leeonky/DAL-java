@@ -13,7 +13,7 @@ Feature: operand node
     """
       1
     """
-    Then evaluate result is:
+    Then node evaluate result is:
     """
     : 1
     """
@@ -55,7 +55,7 @@ Feature: operand node
     """
       { "order": { "lines": [{ "name": "book" }] } }
     """
-    Then evaluate result is:
+    Then node evaluate result is:
     """
     : 'book'
     """
@@ -74,7 +74,7 @@ Feature: operand node
       positionBegin: 2
     }
     """
-    Then evaluate result is:
+    Then node evaluate result is:
     """
     : -1
     """
@@ -105,7 +105,7 @@ Feature: operand node
       inspect: '!false'
     }
     """
-    And evaluate result is:
+    And node evaluate result is:
     """
     =true
     """

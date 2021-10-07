@@ -23,7 +23,7 @@ Feature: integer node
       positionBegin: 1
     }
     """
-    And evaluate result is:
+    And node evaluate result is:
     """
     : <evaluate>
     """
@@ -39,7 +39,7 @@ Feature: integer node
     """
      1<delimiter>
     """
-    Then evaluate as "integer" result is:
+    Then node evaluate as "integer" result is:
     """
     : 1
     """

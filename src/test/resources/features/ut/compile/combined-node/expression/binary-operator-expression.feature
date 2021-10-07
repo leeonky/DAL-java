@@ -105,7 +105,7 @@ Feature: binary operator expression
       inspect: '<operator> *'
     }
     """
-    And evaluate result is:
+    And node evaluate result is:
     """
     :true
     """

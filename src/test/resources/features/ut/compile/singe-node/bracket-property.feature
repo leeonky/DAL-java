@@ -27,7 +27,7 @@ Feature: bracket property node
     """
       [0, 1]
     """
-    Then evaluate result is:
+    Then node evaluate result is:
     """
     : 1
     """
@@ -49,7 +49,7 @@ Feature: bracket property node
     """
       { "first name": "Tom" }
     """
-    Then evaluate result is:
+    Then node evaluate result is:
     """
     : 'Tom'
     """
@@ -74,7 +74,7 @@ Feature: bracket property node
     """
       [0, 1]
     """
-    Then evaluate result is:
+    Then node evaluate result is:
     """
     : 1
     """

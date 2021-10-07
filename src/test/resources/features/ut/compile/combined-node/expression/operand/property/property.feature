@@ -23,7 +23,7 @@ Feature: compile property node
     """
       {"a": 1}
     """
-    Then evaluate result is:
+    Then node evaluate result is:
     """
     : 1
     """

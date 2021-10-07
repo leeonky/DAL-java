@@ -33,7 +33,7 @@ Feature: "string"
     """
     "\\\n\t\""
     """
-    And evaluate as "double-quoted-string" result is:
+    And node evaluate as "double-quoted-string" result is:
     """
     : '\\
     	"'
@@ -44,7 +44,7 @@ Feature: "string"
     """
     "\h"
     """
-    And evaluate as "double-quoted-string" result is:
+    And node evaluate as "double-quoted-string" result is:
     """
     : "\\h"
     """

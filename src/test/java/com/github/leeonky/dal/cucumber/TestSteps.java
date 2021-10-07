@@ -6,7 +6,6 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
-//TODO refactor steps
 public class TestSteps {
     @Before
     public void clearEnv() {
@@ -28,14 +27,12 @@ public class TestSteps {
         CucumberContext.INSTANCE.compileAndAssertNode(factory, assertion);
     }
 
-    //TODO rename
-    @Then("evaluate result is:")
+    @Then("node evaluate result is:")
     public void evaluate_result_is(String assertion) {
         CucumberContext.INSTANCE.assertLastNodeValue(assertion);
     }
 
-    //TODO rename
-    @Then("evaluate as {string} result is:")
+    @Then("node evaluate as {string} result is:")
     public void evaluate_as_result_is(String factory, String assertion) {
         CucumberContext.INSTANCE.assertNodeValue(assertion, factory);
     }

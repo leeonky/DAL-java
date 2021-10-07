@@ -33,7 +33,7 @@ Feature: 'string'
     """
     '\\\''
     """
-    And evaluate as "single-quoted-string" result is:
+    And node evaluate as "single-quoted-string" result is:
     """
     : "\\'"
     """
@@ -43,7 +43,7 @@ Feature: 'string'
     """
     '\h'
     """
-    And evaluate as "single-quoted-string" result is:
+    And node evaluate as "single-quoted-string" result is:
     """
     : "\\h"
     """

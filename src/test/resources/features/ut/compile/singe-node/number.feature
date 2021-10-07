@@ -23,7 +23,7 @@ Feature: const number node
       positionBegin: 1
     }
     """
-    And evaluate result is:
+    And node evaluate result is:
     """
     : <evaluate>
     """
@@ -39,7 +39,7 @@ Feature: const number node
     """
      1<delimiter>
     """
-    Then evaluate as "number" result is:
+    Then node evaluate as "number" result is:
     """
     : 1
     """

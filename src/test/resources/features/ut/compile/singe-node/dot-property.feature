@@ -27,7 +27,7 @@ Feature: compile property starts with dot
     """
       {"name": "Tom"}
     """
-    Then evaluate result is:
+    Then node evaluate result is:
     """
       : 'Tom'
     """

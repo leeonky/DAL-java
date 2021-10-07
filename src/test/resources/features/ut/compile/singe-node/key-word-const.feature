@@ -13,7 +13,7 @@ Feature: compile key word const value (true false null)
       positionBegin: 1
     }
     """
-    And evaluate result is:
+    And node evaluate result is:
     """
     : true
     """
@@ -31,7 +31,7 @@ Feature: compile key word const value (true false null)
       positionBegin: 1
     }
     """
-    And evaluate result is:
+    And node evaluate result is:
     """
     : false
     """
@@ -49,7 +49,7 @@ Feature: compile key word const value (true false null)
       positionBegin: 1
     }
     """
-    And evaluate result is:
+    And node evaluate result is:
     """
     : null
     """

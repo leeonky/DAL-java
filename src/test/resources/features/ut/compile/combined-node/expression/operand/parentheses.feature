@@ -23,7 +23,7 @@ Feature: parentheses node
       positionBegin: 1
     }
     """
-    And evaluate result is:
+    And node evaluate result is:
     """
     : 1
     """
@@ -41,7 +41,7 @@ Feature: parentheses node
       positionBegin: 1
     }
     """
-    And evaluate result is:
+    And node evaluate result is:
     """
     : 2
     """
