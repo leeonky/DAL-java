@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BasicVerify extends Base {
@@ -41,13 +40,11 @@ class BasicVerify extends Base {
 
     @Nested
     class Basic {
-
         @Test
         void should_use_root_value_as_assertion_expression_when_source_code_is_empty() {
             assertPass(true, "");
-
-            AssertResult assertResult = dal.assertData(false, "");
-            assertFalse(assertResult.isPassed());
+            AssertResult assertResult = dal.assertTrue(false, "");
+            assertThat(assertResult.isPassed()).isFalse();
             assertThat(assertResult.getMessage()).contains("Expected root value to be [true] but was <false>");
         }
 
@@ -55,13 +52,13 @@ class BasicVerify extends Base {
         @Test
         void verify_expression_return_type_should_be_boolean() {
             IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
-                    () -> dal.assertData(1, ""));
+                    () -> dal.assertTrue(1, ""));
             assertThat(illegalStateException).hasMessage("Verification result should be boolean but 'java.lang.Integer'");
         }
 
         @Test
         void verify_const_value() {
-            assertPass(null, "true");
+            assertTrue(null, "true");
         }
 
         @Test
@@ -82,18 +79,18 @@ class BasicVerify extends Base {
 
         @Test
         void verify_logical_combinations() {
-            assertPass(null, "!false");
+            assertTrue(null, "!false");
 
-            assertPass(null, "true and true");
-            assertPass(null, "true or false");
+            assertTrue(null, "true and true");
+            assertTrue(null, "true or false");
         }
 
         @Test
         void alias_of_operator_and() {
-            assertPass(null, "true , true");
-            assertFailed(null, "true , false");
-            assertFailed(null, "false , true");
-            assertFailed(null, "false , false");
+            assertTrue(null, "true , true");
+            assertFalse(null, "true , false");
+            assertFalse(null, "false , true");
+            assertFalse(null, "false , false");
         }
 
         @Test
@@ -108,22 +105,22 @@ class BasicVerify extends Base {
 
         @Test
         void should_access_root_value_property_when_no_instance_specified() {
-            assertPass("", ".empty");
+            assertTrue("", ".empty");
         }
 
         @Test
         void should_support_ignore_begin_dot() {
-            assertPass("", "empty");
+            assertTrue("", "empty");
         }
 
         @Test
         void should_support_access_property_through_public_field() {
-            assertPass(new Bean().setField(true), ".field");
+            assertTrue(new Bean().setField(true), ".field");
         }
 
         @Test
         void should_support_access_property_through_getter() {
-            assertPass(null, "''.empty");
+            assertTrue(null, "''.empty");
         }
 
         @Test
@@ -148,7 +145,7 @@ class BasicVerify extends Base {
                     return instance == null || instance.equals(JSONObject.NULL);
                 }
             });
-            assertPass(new JSONObject("{\"field\": true}"), ".field");
+            assertTrue(new JSONObject("{\"field\": true}"), ".field");
         }
 
         @Test

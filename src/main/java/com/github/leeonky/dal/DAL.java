@@ -20,8 +20,7 @@ public class DAL {
         return runtimeContextBuilder;
     }
 
-    @Deprecated
-    public AssertResult assertData(Object actual, String expression) {
+    public AssertResult assertTrue(Object actual, String expression) {
         Object result = evaluate(actual, expression);
         if (result instanceof Boolean)
             return (boolean) result ? AssertResult.passedResult()
@@ -30,8 +29,8 @@ public class DAL {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> List<T> evaluateAll(Object input, String expression) {
-        return compiler.compile(new SourceCode(expression)).stream()
+    public <T> List<T> evaluateAll(Object input, String expressions) {
+        return compiler.compile(new SourceCode(expressions)).stream()
                 .map(node -> (T) node.evaluate(runtimeContextBuilder.build(input)))
                 .collect(Collectors.toList());
     }
@@ -42,9 +41,5 @@ public class DAL {
         if (nodes.size() > 1)
             throw new SyntaxException("more than one expression", nodes.get(1).getPositionBegin());
         return (T) nodes.get(0).evaluate(runtimeContextBuilder.build(input));
-    }
-
-    public Compiler getCompiler() {
-        return compiler;
     }
 }

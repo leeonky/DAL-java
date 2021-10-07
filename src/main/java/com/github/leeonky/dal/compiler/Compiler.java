@@ -17,7 +17,6 @@ import static com.github.leeonky.dal.compiler.TokenParser.operatorMatcher;
 import static java.util.Optional.empty;
 
 public class Compiler {
-    //    TODO complex expression test
     private static final OperatorMatcher AND = operatorMatcher("&&", () -> new Operator.And("&&")),
             OR = operatorMatcher("||", () -> new Operator.Or("||")),
             AND_IN_KEY_WORD = operatorMatcher("and", () -> new Operator.And("and")),
@@ -123,21 +122,13 @@ public class Compiler {
         return schemaExpression -> clauseNodeMatcher.map(node -> appendWay.apply(schemaExpression, node));
     }
 
-    @Deprecated
-    public Node compileBk(SourceCode sourceCode) {
-        Node node = EXPRESSION.fetch(new TokenParser(sourceCode));
-        if (sourceCode.hasCode())
-            throw sourceCode.syntaxError("unexpected token", 0);
-        return node;
-    }
-
     public List<Node> compile(SourceCode sourceCode) {
         return new ArrayList<Node>() {{
             TokenParser parser = new TokenParser(sourceCode);
             add(EXPRESSION.fetch(parser));
-            if (sourceCode.isBeginning() && sourceCode.hasCode())
+            if (sourceCode.isBeginning() && sourceCode.isEndOfCode())
                 throw sourceCode.syntaxError("unexpected token", 0);
-            while (sourceCode.hasCode())
+            while (sourceCode.isEndOfCode())
                 add(EXPRESSION.fetch(parser));
         }};
     }

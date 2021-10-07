@@ -251,14 +251,14 @@ class VerifySchema extends Base {
         @Test
         void should_error_when_no_type_property() {
             RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                    () -> dal.assertData(new JSONObject("{\"v\": {\"id\": 1}}"), "is V"));
+                    () -> dal.evaluate(new JSONObject("{\"v\": {\"id\": 1}}"), "is V"));
             assertThat(runtimeException).hasMessage("Cannot guess sub type through property type value[null]");
         }
 
         @Test
         void should_error_when_no_matched_subtype() {
             RuntimeException runtimeException = assertThrows(RuntimeException.class,
-                    () -> dal.assertData(new JSONObject("{\"v\": {\"id\": 1, \"type\": V3}}"), "is V"));
+                    () -> dal.evaluate(new JSONObject("{\"v\": {\"id\": 1, \"type\": V3}}"), "is V"));
             assertThat(runtimeException).hasMessage("Cannot guess sub type through property type value[V3]");
         }
 

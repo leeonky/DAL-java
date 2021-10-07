@@ -77,11 +77,11 @@ public class CucumberContext {
     }
 
     public void assertLastNodeValue(String assertion) {
-        dal.assertData(node.evaluate(dal.getRuntimeContextBuilder().build(inputObject)), assertion);
+        dal.evaluate(node.evaluate(dal.getRuntimeContextBuilder().build(inputObject)), assertion);
     }
 
     public void assertNodeValue(String assertion, String factory) {
-        dal.assertData(matcherMap.get(factory).fetch(new TokenParser(new SourceCode(sourceCodeString))).orElse(null)
+        dal.evaluate(matcherMap.get(factory).fetch(new TokenParser(new SourceCode(sourceCodeString))).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
     }
 
@@ -106,7 +106,7 @@ public class CucumberContext {
             throw e;
         }
         try {
-            dal.assertData(INSTANCE.node, assertion);
+            dal.evaluate(INSTANCE.node, assertion);
         } catch (DalException e) {
             System.err.println(e.show(assertion));
             throw e;
@@ -121,7 +121,7 @@ public class CucumberContext {
                             "import java.util.*;\n" + s)
                     .collect(Collectors.toList()))
                     .forEach(dal.getRuntimeContextBuilder()::registerSchema);
-            dal.assertData(inputObject, assertion);
+            dal.evaluate(inputObject, assertion);
         } catch (DalException e) {
             dalException = e;
         }

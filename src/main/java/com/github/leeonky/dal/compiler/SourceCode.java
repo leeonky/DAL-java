@@ -20,16 +20,16 @@ public class SourceCode {
     public static TokenMatcher tokenMatcher(Predicate<Character> startsWith, Collection<String> excluded,
                                             boolean trim, Set<Character> delimiters, Predicate<Token> validator) {
         return sourceCode -> {
-            if (sourceCode.whenFirstChar(startsWith) && sourceCode.hasCode()
+            if (sourceCode.whenFirstChar(startsWith) && sourceCode.isEndOfCode()
                     && excluded.stream().noneMatch(sourceCode::startsWith)) {
                 Token token = new Token(sourceCode.position);
                 if (trim) {
                     sourceCode.popChar();
                     sourceCode.leftTrim();
                 }
-                if (sourceCode.hasCode())
+                if (sourceCode.isEndOfCode())
                     do token.append(sourceCode.popChar());
-                    while (sourceCode.hasCode() && !delimiters.contains(sourceCode.currentChar()));
+                    while (sourceCode.isEndOfCode() && !delimiters.contains(sourceCode.currentChar()));
                 if (validator.test(token))
                     return of(token);
                 sourceCode.position = token.getPosition();
@@ -58,16 +58,15 @@ public class SourceCode {
     }
 
     private boolean whenFirstChar(Predicate<Character> predicate) {
-        return leftTrim().hasCode() && predicate.test(currentChar());
+        return leftTrim().isEndOfCode() && predicate.test(currentChar());
     }
 
-    //TODO private
-    public boolean hasCode() {
+    public boolean isEndOfCode() {
         return position < chars.length;
     }
 
     public SourceCode leftTrim() {
-        while (hasCode() && Character.isWhitespace(currentChar()))
+        while (isEndOfCode() && Character.isWhitespace(currentChar()))
             position++;
         return this;
     }
@@ -106,11 +105,11 @@ public class SourceCode {
             int startPosition = seek(1);
             List<T> elements = new ArrayList<>();
             int index = 0;
-            while (hasCode() && closing != currentChar()) {
+            while (isEndOfCode() && closing != currentChar()) {
                 elements.add(element.apply(index++));
                 fetchBy.afterFetchElement(this);
             }
-            if (!hasCode())
+            if (!isEndOfCode())
                 throw syntaxError(String.format("should end with `%c`", closing), 0);
             seek(1);
             return nodeFactory.apply(elements).setPositionBegin(startPosition);

@@ -136,11 +136,11 @@ public class VerifyValueInSchema extends Base {
                 .registerSchema(MissingTypeArg.class)
                 .registerSchema(MissingTypeArgButGivenValue.class);
 
-        assertThrows(RuntimeException.class, () -> dal.assertData(new HashMap<String, Object>() {{
+        assertThrows(RuntimeException.class, () -> dal.evaluate(new HashMap<String, Object>() {{
             put("value", 1);
         }}, "is MissingTypeArg"));
 
-        assertThrows(RuntimeException.class, () -> dal.assertData(new HashMap<String, Object>() {{
+        assertThrows(RuntimeException.class, () -> dal.evaluate(new HashMap<String, Object>() {{
             put("value", 1);
         }}, "is MissingTypeArgButGivenValue"));
     }
