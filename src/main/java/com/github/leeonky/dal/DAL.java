@@ -20,6 +20,10 @@ public class DAL {
         return runtimeContextBuilder;
     }
 
+    /**
+     * Use evaluateAll instead
+     */
+    @Deprecated
     public AssertResult assertTrue(Object actual, String expression) {
         Object result = evaluate(actual, expression);
         if (result instanceof Boolean)
