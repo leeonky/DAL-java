@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -23,8 +24,8 @@ class CompilerTest {
                 .hasMessage(message);
     }
 
-    private void assertCompileNode(String sourceCode, Node expected) {
-        assertThat(compiler.compile(new SourceCode(sourceCode))).isEqualTo(expected);
+    private void assertCompileNode(String sourceCode, Node... expected) {
+        assertThat(compiler.compile(new SourceCode(sourceCode))).isEqualTo(asList(expected));
     }
 
     @Nested
@@ -72,7 +73,7 @@ class CompilerTest {
 
         @Test
         void miss_opening_bracket() {
-            assertSyntaxException("1]", 1, "unexpected token");
+            assertSyntaxException("1]", 1, "expect a value or expression");
         }
     }
 
@@ -185,7 +186,7 @@ class CompilerTest {
 
         @Test
         void miss_opening_parenthesis_should_raise_error() {
-            assertSyntaxException("1)", 1, "unexpected token");
+            assertSyntaxException("1)", 1, "expect a value or expression");
         }
     }
 
@@ -246,6 +247,11 @@ class CompilerTest {
 
     @Test
     void miss_opening_brace() {
-        assertSyntaxException("1}", 1, "unexpected token");
+        assertSyntaxException("1}", 1, "expect a value or expression");
+    }
+
+    @Test
+    void support_compile_multi_expression() {
+        assertCompileNode("1 2", new ConstNode(1), new ConstNode(2));
     }
 }

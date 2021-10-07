@@ -6,6 +6,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
+//TODO refactor steps
 public class TestSteps {
     @Before
     public void clearEnv() {
@@ -27,11 +28,13 @@ public class TestSteps {
         CucumberContext.INSTANCE.compileAndAssertNode(factory, assertion);
     }
 
+    //TODO rename
     @Then("evaluate result is:")
     public void evaluate_result_is(String assertion) {
         CucumberContext.INSTANCE.assertLastNodeValue(assertion);
     }
 
+    //TODO rename
     @Then("evaluate as {string} result is:")
     public void evaluate_as_result_is(String factory, String assertion) {
         CucumberContext.INSTANCE.assertNodeValue(assertion, factory);
@@ -71,5 +74,20 @@ public class TestSteps {
     @Given("the following schema:")
     public void the_following_schema(String schemaCode) {
         CucumberContext.INSTANCE.registerSchema(schemaCode);
+    }
+
+    @When("evaluate list by the following code:")
+    public void evaluate_list_by_the_following_code(String sourceCode) {
+        CucumberContext.INSTANCE.giveDalSourceCode(sourceCode);
+    }
+
+    @Then("single result is:")
+    public void single_result_is(String assertionCode) {
+        CucumberContext.INSTANCE.assertEvaluateValue(assertionCode);
+    }
+
+    @Then("multi result is:")
+    public void multi_result_is(String assertionCode) {
+        CucumberContext.INSTANCE.assertEvaluateValues(assertionCode);
     }
 }

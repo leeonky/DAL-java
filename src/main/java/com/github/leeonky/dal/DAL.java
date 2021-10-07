@@ -1,9 +1,14 @@
 package com.github.leeonky.dal;
 
+import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.compiler.Compiler;
 import com.github.leeonky.dal.compiler.SourceCode;
+import com.github.leeonky.dal.compiler.SyntaxException;
 import com.github.leeonky.dal.runtime.AssertResult;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 
@@ -15,6 +20,7 @@ public class DAL {
         return runtimeContextBuilder;
     }
 
+    @Deprecated
     public AssertResult assertData(Object actual, String expression) {
         Object result = evaluate(actual, expression);
         if (result instanceof Boolean)
@@ -24,8 +30,18 @@ public class DAL {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T evaluate(Object root, String expression) {
-        return (T) compiler.compile(new SourceCode(expression)).evaluate(runtimeContextBuilder.build(root));
+    public <T> List<T> evaluateAll(Object input, String expression) {
+        return compiler.compile(new SourceCode(expression)).stream()
+                .map(node -> (T) node.evaluate(runtimeContextBuilder.build(input)))
+                .collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T evaluate(Object input, String expression) {
+        List<Node> nodes = compiler.compile(new SourceCode(expression));
+        if (nodes.size() > 1)
+            throw new SyntaxException("more than one expression", nodes.get(1).getPositionBegin());
+        return (T) nodes.get(0).evaluate(runtimeContextBuilder.build(input));
     }
 
     public Compiler getCompiler() {

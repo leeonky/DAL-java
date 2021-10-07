@@ -143,4 +143,38 @@ public class CucumberContext {
     public void registerSchema(String schemaCode) {
         schemas.add(schemaCode);
     }
+
+    public void assertEvaluateValue(String assertionCode) {
+        Object evaluate;
+        try {
+            evaluate = dal.evaluate(inputObject, sourceCodeString);
+        } catch (DalException dalException) {
+            System.out.println(dalException.show(sourceCodeString));
+            throw dalException;
+        }
+
+        try {
+            dal.evaluateAll(evaluate, assertionCode);
+        } catch (DalException dalException) {
+            System.out.println(dalException.show(assertionCode));
+            throw dalException;
+        }
+    }
+
+    public void assertEvaluateValues(String assertionCode) {
+        Object evaluate;
+        try {
+            evaluate = dal.evaluateAll(inputObject, sourceCodeString);
+        } catch (DalException dalException) {
+            System.out.println(dalException.show(sourceCodeString));
+            throw dalException;
+        }
+
+        try {
+            dal.evaluateAll(evaluate, assertionCode);
+        } catch (DalException dalException) {
+            System.out.println(dalException.show(assertionCode));
+            throw dalException;
+        }
+    }
 }

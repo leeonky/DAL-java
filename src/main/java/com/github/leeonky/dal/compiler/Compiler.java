@@ -2,6 +2,7 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -122,11 +123,23 @@ public class Compiler {
         return schemaExpression -> clauseNodeMatcher.map(node -> appendWay.apply(schemaExpression, node));
     }
 
-    public Node compile(SourceCode sourceCode) {
+    @Deprecated
+    public Node compileBk(SourceCode sourceCode) {
         Node node = EXPRESSION.fetch(new TokenParser(sourceCode));
         if (sourceCode.hasCode())
             throw sourceCode.syntaxError("unexpected token", 0);
         return node;
+    }
+
+    public List<Node> compile(SourceCode sourceCode) {
+        return new ArrayList<Node>() {{
+            TokenParser parser = new TokenParser(sourceCode);
+            add(EXPRESSION.fetch(parser));
+            if (sourceCode.isBeginning() && sourceCode.hasCode())
+                throw sourceCode.syntaxError("unexpected token", 0);
+            while (sourceCode.hasCode())
+                add(EXPRESSION.fetch(parser));
+        }};
     }
 
     public List<Object> toChainNodes(String sourceCode) {
