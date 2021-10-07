@@ -159,7 +159,7 @@ class CompilerTest {
                             new ConstNode(1)
                             , new Operator.Plus(),
                             new Expression(
-                                    new ConstNode(null)
+                                    null
                                     , new Operator.Minus(),
                                     new ConstNode(1)
                             )
@@ -231,13 +231,13 @@ class CompilerTest {
 
         @Test
         void logical_not() {
-            assertCompileNode("!true", new Expression(new ConstNode(null), new Operator.Not(), new ConstNode(true)));
+            assertCompileNode("!true", new Expression(null, new Operator.Not(), new ConstNode(true)));
         }
 
         @Test
         void logical_not_should_has_highest_precedence() {
             assertCompileNode("!true=false", new Expression(
-                    new Expression(new ConstNode(null), new Operator.Not(), new ConstNode(true))
+                    new Expression(null, new Operator.Not(), new ConstNode(true))
                     , new Operator.Equal(),
                     new ConstNode(false)
             ));

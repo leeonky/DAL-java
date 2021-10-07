@@ -5,10 +5,7 @@ import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.ast.Operator;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -22,7 +19,6 @@ import static com.github.leeonky.dal.runtime.IfThenFactory.when;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.joining;
 
-//TODO refactor methods
 public class TokenParser {
     public static final TokenMatcher
             NUMBER = tokenMatcher(DIGITAL::contains, emptyList(), false, DELIMITER, Token::isNumber),
@@ -61,7 +57,7 @@ public class TokenParser {
     }
 
     public Optional<Node> fetchString(Character opening, char closing, Function<String, Node> nodeFactory,
-                                      EscapeChars escapeChars) {
+                                      Map<String, Character> escapeChars) {
         return sourceCode.fetchElements(BY_CHAR, opening, closing, i -> sourceCode.escapedPop(escapeChars),
                 chars -> nodeFactory.apply(chars.stream().map(String::valueOf).collect(joining())));
     }

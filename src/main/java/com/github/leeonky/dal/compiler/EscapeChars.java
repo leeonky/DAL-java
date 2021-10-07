@@ -1,41 +1,10 @@
 package com.github.leeonky.dal.compiler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.HashMap;
 
-//TODO move to Source Code Inner
-//TODO constructor ==> function
-public class EscapeChars {
-    private final List<EscapeChar> escapeChars = new ArrayList<>();
-
+public class EscapeChars extends HashMap<String, Character> {
     public EscapeChars escape(String target, char c) {
-        escapeChars.add(new EscapeChar(target, c));
+        put(target, c);
         return this;
-    }
-
-    public Optional<Character> escapeAt(String code, int position, Consumer<Integer> codeLength) {
-        return escapeChars.stream().filter(e -> e.matchesAt(code, position))
-                .findFirst().map(escapeChar -> escapeChar.returnTargetLengthAndPopEscapedChar(codeLength));
-    }
-
-    private static class EscapeChar {
-        private final String target;
-        private final char c;
-
-        EscapeChar(String target, char c) {
-            this.target = target;
-            this.c = c;
-        }
-
-        boolean matchesAt(String code, int startIndex) {
-            return code.startsWith(target, startIndex);
-        }
-
-        private char returnTargetLengthAndPopEscapedChar(Consumer<Integer> escapedLength) {
-            escapedLength.accept(target.length());
-            return c;
-        }
     }
 }

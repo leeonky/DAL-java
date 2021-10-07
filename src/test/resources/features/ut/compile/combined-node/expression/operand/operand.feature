@@ -100,6 +100,7 @@ Feature: operand node
     Then got the following "operand" node:
     """
     : {
+      leftOperand: null
       class.simpleName: 'Expression'
       inspect: '!false'
     }
@@ -107,6 +108,20 @@ Feature: operand node
     And evaluate result is:
     """
     =true
+    """
+
+  Scenario: logic not and not equal
+    Given the following dal code:
+    """
+    !=1
+    """
+    Then got the following "expression" node:
+    """
+    : {
+      class.simpleName: 'Expression'
+      inspect: '!= 1'
+      leftOperand.class.simpleName: 'InputNode'
+    }
     """
 
   Scenario: should raise error when not a evaluable node

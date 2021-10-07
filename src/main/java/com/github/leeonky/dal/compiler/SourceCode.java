@@ -77,8 +77,11 @@ public class SourceCode {
         return (code.startsWith(word, position));
     }
 
-    public char escapedPop(EscapeChars escapeChars) {
-        return escapeChars.escapeAt(code, position, length -> position += length).orElseGet(this::popChar);
+    public char escapedPop(Map<String, Character> escapeChars) {
+        return escapeChars.entrySet().stream().filter(e -> code.startsWith(e.getKey(), position)).map(e -> {
+            seek(e.getKey().length());
+            return e.getValue();
+        }).findFirst().orElseGet(this::popChar);
     }
 
     public boolean isBeginning() {

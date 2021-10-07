@@ -16,35 +16,31 @@ import static com.github.leeonky.dal.compiler.TokenParser.operatorMatcher;
 import static java.util.Optional.empty;
 
 public class Compiler {
-    public static final OperatorMatcher AND = operatorMatcher("&&", () -> new Operator.And("&&"));
-    public static final OperatorMatcher OR = operatorMatcher("||", () -> new Operator.Or("||"));
-    public static final OperatorMatcher AND_IN_KEY_WORD = operatorMatcher("and", () -> new Operator.And("and"));
-    public static final OperatorMatcher COMMA_AND = operatorMatcher(",", () -> new Operator.And(","),
-            TokenParser::isEnableCommaAnd);
-    public static final OperatorMatcher OR_IN_KEY_WORD = operatorMatcher("or", () -> new Operator.Or("or"));
-    public static final OperatorMatcher GREATER_OR_EQUAL = operatorMatcher(">=", Operator.GreaterOrEqual::new);
-    public static final OperatorMatcher LESS_OR_EQUAL = operatorMatcher("<=", Operator.LessOrEqual::new);
-    public static final OperatorMatcher GREATER = operatorMatcher(">", Operator.Greater::new);
-    public static final OperatorMatcher LESS = operatorMatcher("<", Operator.Less::new);
-    public static final OperatorMatcher PLUS = operatorMatcher("+", Operator.Plus::new);
-    public static final OperatorMatcher SUBTRACTION = operatorMatcher("-", Operator.Subtraction::new);
-    public static final OperatorMatcher MULTIPLICATION = operatorMatcher("*", Operator.Multiplication::new);
-    public static final OperatorMatcher DIVISION = operatorMatcher("/", Operator.Division::new);
-    public static final OperatorMatcher NOT_EQUAL = operatorMatcher("!=", Operator.NotEqual::new);
-    public static final OperatorMatcher MINUS = operatorMatcher("-", Operator.Minus::new,
-            tokenParser -> !tokenParser.getSourceCode().isBeginning());
-    public static final OperatorMatcher NOT = operatorMatcher("!", Operator.Not::new,
-            tokenParser -> !tokenParser.getSourceCode().startsWith("!="));
-    public static final OperatorMatcher MATCHER = operatorMatcher(":", Operator.Matcher::new);
-    public static final OperatorMatcher EQUAL = operatorMatcher("=", Operator.Equal::new);
-
-    public static final OperatorMatcher BINARY_ARITHMETIC_OPERATORS = oneOf(AND, OR, AND_IN_KEY_WORD, COMMA_AND, NOT_EQUAL,
-            OR_IN_KEY_WORD, GREATER_OR_EQUAL, LESS_OR_EQUAL, GREATER, LESS, PLUS, SUBTRACTION, MULTIPLICATION, DIVISION);
     //    TODO complex expression test
-    public static final OperatorMatcher UNARY_OPERATORS = oneOf(MINUS, NOT);
-    public static final OperatorMatcher JUDGEMENT_OPERATORS = oneOf(MATCHER, EQUAL);
-    private static final EscapeChars
-            SINGLE_QUOTED_ESCAPES = new EscapeChars().escape("\\\\", '\\').escape("\\'", '\''),
+    private static final OperatorMatcher AND = operatorMatcher("&&", () -> new Operator.And("&&")),
+            OR = operatorMatcher("||", () -> new Operator.Or("||")),
+            AND_IN_KEY_WORD = operatorMatcher("and", () -> new Operator.And("and")),
+            COMMA_AND = operatorMatcher(",", () -> new Operator.And(","), TokenParser::isEnableCommaAnd),
+            OR_IN_KEY_WORD = operatorMatcher("or", () -> new Operator.Or("or")),
+            GREATER_OR_EQUAL = operatorMatcher(">=", Operator.GreaterOrEqual::new),
+            LESS_OR_EQUAL = operatorMatcher("<=", Operator.LessOrEqual::new),
+            GREATER = operatorMatcher(">", Operator.Greater::new),
+            LESS = operatorMatcher("<", Operator.Less::new),
+            PLUS = operatorMatcher("+", Operator.Plus::new),
+            SUBTRACTION = operatorMatcher("-", Operator.Subtraction::new),
+            MULTIPLICATION = operatorMatcher("*", Operator.Multiplication::new),
+            DIVISION = operatorMatcher("/", Operator.Division::new),
+            NOT_EQUAL = operatorMatcher("!=", Operator.NotEqual::new),
+            MINUS = operatorMatcher("-", Operator.Minus::new, tokenParser -> !tokenParser.getSourceCode().isBeginning()),
+            NOT = operatorMatcher("!", Operator.Not::new, tokenParser -> !tokenParser.getSourceCode().startsWith("!=")),
+            MATCHER = operatorMatcher(":", Operator.Matcher::new),
+            EQUAL = operatorMatcher("=", Operator.Equal::new),
+            BINARY_ARITHMETIC_OPERATORS = oneOf(AND, OR, AND_IN_KEY_WORD, COMMA_AND, NOT_EQUAL, OR_IN_KEY_WORD,
+                    GREATER_OR_EQUAL, LESS_OR_EQUAL, GREATER, LESS, PLUS, SUBTRACTION, MULTIPLICATION, DIVISION),
+            UNARY_OPERATORS = oneOf(MINUS, NOT),
+            JUDGEMENT_OPERATORS = oneOf(MATCHER, EQUAL);
+
+    private static final EscapeChars SINGLE_QUOTED_ESCAPES = new EscapeChars().escape("\\\\", '\\').escape("\\'", '\''),
             DOUBLE_QUOTED_ESCAPES = new EscapeChars().escape("\\\\", '\\').escape("\\n", '\n').escape("\\t", '\t')
                     .escape("\\\"", '"'),
             REGEX_ESCAPES = new EscapeChars().escape("\\/", '/');
@@ -93,7 +89,7 @@ public class Compiler {
                         : parser.fetchExpression(new PropertyNode(InputNode.INSTANCE, i, BRACKET),
                         JUDGEMENT_OPERATORS.or(parser.DEFAULT_JUDGEMENT_OPERATOR), JUDGEMENT_EXPRESSION_OPERAND)));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD);
-        UNARY_OPERATOR_EXPRESSION = parser -> parser.fetchExpression(new ConstNode(null), UNARY_OPERATORS, OPERAND);
+        UNARY_OPERATOR_EXPRESSION = parser -> parser.fetchExpression(null, UNARY_OPERATORS, OPERAND);
         OPERAND = UNARY_OPERATOR_EXPRESSION.or(oneOf(CONST, PROPERTY, PARENTHESES, INPUT)
                 .or("expect a value or expression").recursive(EXPLICIT_PROPERTY).map(Node::avoidListMapping));
         BINARY_ARITHMETIC_EXPRESSION = (parser, previous) -> parser.fetchExpression(
