@@ -57,6 +57,7 @@ Feature: compile identity property
       | a    |
       | 1a   |
       | _1a  |
+      | 1_d  |
 
   Scenario Outline: identity property should end with delimiter and dot
     Given the following dal code:

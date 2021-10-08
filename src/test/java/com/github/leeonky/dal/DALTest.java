@@ -21,7 +21,7 @@ class DALTest {
     DAL dal = new DAL();
 
     @Test
-    void number_types() {
+    void number_types_via_postfix() {
         assertThat((Object) dal.evaluate(null, "1y")).isEqualTo((byte) 1);
         assertThat((Object) dal.evaluate(null, "0x10y")).isEqualTo((byte) 16);
         assertThat((Object) dal.evaluate(null, "1Y")).isEqualTo((byte) 1);
@@ -50,5 +50,42 @@ class DALTest {
 
         assertThat((Object) dal.evaluate(null, "1bd")).isEqualTo(BigDecimal.valueOf(1));
         assertThat((Object) dal.evaluate(null, "1BD")).isEqualTo(BigDecimal.valueOf(1));
+    }
+
+    @Test
+    void integer_number_from_value() {
+        assertThat((Object) dal.evaluate(null, "1")).isEqualTo(1);
+        assertThat((Object) dal.evaluate(null, "0x10")).isEqualTo(16);
+    }
+
+    @Test
+    void long_number_from_value() {
+        assertThat((Object) dal.evaluate(null, "0x80000000")).isEqualTo(0x80000000L);
+        assertThat((Object) dal.evaluate(null, "0x7fffffffffffffff")).isEqualTo(0x7fffffffffffffffL);
+    }
+
+    @Test
+    void big_integer_from_value() {
+        assertThat((Object) dal.evaluate(null, "0x80000000000000000")).isEqualTo(new BigInteger("80000000000000000", 16));
+    }
+
+    @Test
+    void double_from_value() {
+        assertThat((Object) dal.evaluate(null, "1.1")).isEqualTo(1.1);
+        assertThat((Object) dal.evaluate(null, "1e1")).isEqualTo(1e1);
+        assertThat((Object) dal.evaluate(null, "1e+1")).isEqualTo(1e+1);
+        assertThat((Object) dal.evaluate(null, "1e-1")).isEqualTo(1e-1);
+        assertThat((Object) dal.evaluate(null, "1E1")).isEqualTo(1e1);
+        assertThat((Object) dal.evaluate(null, "1E+1")).isEqualTo(1e+1);
+        assertThat((Object) dal.evaluate(null, "1E-1")).isEqualTo(1e-1);
+    }
+
+    @Test
+    void big_decimal_from_value() {
+        assertThat((Object) dal.evaluate(null, "2.7976931348623157e308"))
+                .isEqualTo(new BigDecimal("2.7976931348623157e308"));
+
+        assertThat((Object) dal.evaluate(null, "(-2.7976931348623157e308)"))
+                .isEqualTo(new BigDecimal("-2.7976931348623157e308"));
     }
 }

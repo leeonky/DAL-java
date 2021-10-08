@@ -3,6 +3,7 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.ast.Node;
 
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -17,8 +18,13 @@ public class SourceCode {
     private final char[] chars;
     private int position = 0;
 
-    public static TokenMatcher tokenMatcher(Predicate<Character> startsWith, Collection<String> excluded,
-                                            boolean trim, Set<Character> delimiters, Predicate<Token> validator) {
+    public static TokenMatcher tokenMatcher(Predicate<Character> startsWith, Collection<String> excluded, boolean trim,
+                                            Set<Character> delimiters, Predicate<Token> validator) {
+        return tokenMatcher(startsWith, excluded, trim, (c1, c2) -> delimiters.contains(c2), validator);
+    }
+
+    public static TokenMatcher tokenMatcher(Predicate<Character> startsWith, Collection<String> excluded, boolean trim,
+                                            BiPredicate<Character, Character> endsWith, Predicate<Token> validator) {
         return sourceCode -> {
             if (sourceCode.whenFirstChar(startsWith) && sourceCode.isEndOfCode()
                     && excluded.stream().noneMatch(sourceCode::startsWith)) {
@@ -29,7 +35,7 @@ public class SourceCode {
                 }
                 if (sourceCode.isEndOfCode())
                     do token.append(sourceCode.popChar());
-                    while (sourceCode.isEndOfCode() && !delimiters.contains(sourceCode.currentChar()));
+                    while (sourceCode.isEndOfCode() && !endsWith.test(token.lastChar(), sourceCode.currentChar()));
                 if (validator.test(token))
                     return of(token);
                 sourceCode.position = token.getPosition();

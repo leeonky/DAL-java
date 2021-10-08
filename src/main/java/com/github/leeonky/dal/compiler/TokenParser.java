@@ -21,7 +21,8 @@ import static java.util.stream.Collectors.joining;
 
 public class TokenParser {
     public static final TokenMatcher
-            NUMBER = tokenMatcher(DIGITAL::contains, emptyList(), false, DELIMITER, Token::isNumber),
+            NUMBER = tokenMatcher(DIGITAL::contains, emptyList(), false, (c1, c2) ->
+            ((c1 != 'e' && c1 != 'E') || (c2 != '-' && c2 != '+')) && DELIMITER.contains(c2), Token::isNumber),
             INTEGER = tokenMatcher(DIGITAL_OR_MINUS::contains, emptyList(), false, DELIMITER, Token::isNumber),
             IDENTITY_PROPERTY = tokenMatcher(not(DELIMITER::contains), ALL_KEY_WORDS, false, DELIMITER_OR_DOT,
                     not(Token::isNumber)),

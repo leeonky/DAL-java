@@ -32,27 +32,32 @@ public class Token {
             try {
                 return Long.decode(content);
             } catch (NumberFormatException ignore2) {
-                Pattern pattern = Pattern.compile("([^_]*)[yY]$");
-                Matcher matcher = pattern.matcher(content);
-                if (matcher.matches()) {
-                    return Byte.decode(matcher.group(1));
+                try {
+                    return decodeBigInteger(content);
+                } catch (NumberFormatException ignore3) {
+
+                    Pattern pattern = Pattern.compile("([^_]*)(y|Y)$");
+                    Matcher matcher = pattern.matcher(content);
+                    if (matcher.matches()) {
+                        return Byte.decode(matcher.group(1));
+                    }
+                    pattern = Pattern.compile("([^_]*)(s|S)$");
+                    matcher = pattern.matcher(content);
+                    if (matcher.matches()) {
+                        return Short.decode(matcher.group(1));
+                    }
+                    pattern = Pattern.compile("([^_]*)(l|L)$");
+                    matcher = pattern.matcher(content);
+                    if (matcher.matches()) {
+                        return Long.decode(matcher.group(1));
+                    }
+                    pattern = Pattern.compile("([^_]*)(bi|BI)$");
+                    matcher = pattern.matcher(content);
+                    if (matcher.matches()) {
+                        return decodeBigInteger(matcher.group(1));
+                    }
+                    throw new SyntaxException("expect an integer", position);
                 }
-                pattern = Pattern.compile("([^_]*)[sS]$");
-                matcher = pattern.matcher(content);
-                if (matcher.matches()) {
-                    return Short.decode(matcher.group(1));
-                }
-                pattern = Pattern.compile("([^_]*)[lL]$");
-                matcher = pattern.matcher(content);
-                if (matcher.matches()) {
-                    return Long.decode(matcher.group(1));
-                }
-                pattern = Pattern.compile("([^_]*)(bi|BI)$");
-                matcher = pattern.matcher(content);
-                if (matcher.matches()) {
-                    return decodeBigInteger(matcher.group(1));
-                }
-                throw new SyntaxException("expect an integer", position);
             }
         }
     }
@@ -70,7 +75,7 @@ public class Token {
         } catch (SyntaxException ignore) {
             //    TODO refactor
             String content = getContent();
-            Pattern pattern = Pattern.compile("([^_]*)[fF]$");
+            Pattern pattern = Pattern.compile("([^_]*)(f|F)$");
             Matcher matcher = pattern.matcher(content);
             if (matcher.matches()) {
                 return Float.valueOf(matcher.group(1));
@@ -80,14 +85,21 @@ public class Token {
             if (matcher.matches()) {
                 return new BigDecimal(matcher.group(1));
             }
-            pattern = Pattern.compile("([^_]*)[dD]$");
+            pattern = Pattern.compile("([^_]*)(d|D)$");
             matcher = pattern.matcher(content);
             if (matcher.matches()) {
                 return Double.valueOf(matcher.group(1));
             }
 
-//          TODO should parse BigInteger, float, double, BigDecimal
-            return new BigDecimal(content);
+//          TODO should parse BigInteger, double, BigDecimal
+            try {
+                Double value = Double.valueOf(content);
+                if (value.isInfinite())
+                    return new BigDecimal(content);
+                return value;
+            } catch (Exception e) {
+                return new BigDecimal(content);
+            }
         }
     }
 
@@ -97,6 +109,10 @@ public class Token {
 
     public void append(char c) {
         contentBuilder.append(c);
+    }
+
+    public char lastChar() {
+        return contentBuilder.charAt(contentBuilder.length() - 1);
     }
 
     public Token append(String str) {
