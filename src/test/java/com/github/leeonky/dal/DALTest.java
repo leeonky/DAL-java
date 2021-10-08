@@ -85,7 +85,7 @@ class DALTest {
         assertThat((Object) dal.evaluate(null, "2.7976931348623157e308"))
                 .isEqualTo(new BigDecimal("2.7976931348623157e308"));
 
-        assertThat((Object) dal.evaluate(null, "(-2.7976931348623157e308)"))
-                .isEqualTo(new BigDecimal("-2.7976931348623157e308"));
+        assertThat((Object) dal.evaluate(null, "(-2.7976931348623157e10308)"))
+                .isEqualTo(new BigDecimal("-2.7976931348623157e10308"));
     }
 }

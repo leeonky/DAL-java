@@ -14,7 +14,7 @@ import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.SourceCode.tokenMatcher;
 import static com.github.leeonky.dal.compiler.TokenParser.FetchBy.BY_CHAR;
 import static com.github.leeonky.dal.compiler.TokenParser.FetchBy.BY_NODE;
-import static com.github.leeonky.dal.runtime.Function.not;
+import static com.github.leeonky.dal.runtime.FunctionUtil.not;
 import static com.github.leeonky.dal.runtime.IfThenFactory.when;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.joining;
