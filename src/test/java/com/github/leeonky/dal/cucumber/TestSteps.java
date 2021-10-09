@@ -60,7 +60,7 @@ public class TestSteps {
     @Then("the following assertion should pass:")
     public void the_following_assertion_should_pass(String assertionCode) {
         CucumberContext.INSTANCE.assertInputData(assertionCode);
-        CucumberContext.INSTANCE.shouldNoException();
+        CucumberContext.INSTANCE.shouldNoException(assertionCode);
     }
 
     @Given("the following input data:")
@@ -86,5 +86,16 @@ public class TestSteps {
     @Then("multi result is:")
     public void multi_result_is(String assertionCode) {
         CucumberContext.INSTANCE.assertEvaluateValues(assertionCode);
+    }
+
+    @Given("the following input java class data:")
+    public void the_following_input_java_class_data(String javaClassDataSourceCode) {
+        CucumberContext.INSTANCE.addInputJavaClass(javaClassDataSourceCode);
+    }
+
+    @Then("the following assertion for {string} should pass:")
+    public void the_following_assertion_for_should_pass(String className, String assertion) {
+        CucumberContext.INSTANCE.assertJavaClass(className, assertion);
+        CucumberContext.INSTANCE.shouldNoException(assertion);
     }
 }

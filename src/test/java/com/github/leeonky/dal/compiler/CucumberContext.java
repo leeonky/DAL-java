@@ -56,6 +56,7 @@ public class CucumberContext {
     DalException dalException;
     Node node = null;
     private List<String> schemas = new ArrayList<>();
+    private List<String> javaClasses = new ArrayList<>();
 
     public static void reset() {
         INSTANCE = new CucumberContext();
@@ -116,7 +117,9 @@ public class CucumberContext {
     public void assertInputData(String assertion) {
         giveDalSourceCode(assertion);
         try {
-            new com.github.leeonky.dal.cucumber.Compiler().compileToClasses(schemas.stream().map(s ->
+            com.github.leeonky.dal.cucumber.Compiler compiler
+                    = new com.github.leeonky.dal.cucumber.Compiler();
+            compiler.compileToClasses(schemas.stream().map(s ->
                     "import com.github.leeonky.dal.type.*;\n" +
                             "import java.util.*;\n" + s)
                     .collect(Collectors.toList()))
@@ -127,7 +130,9 @@ public class CucumberContext {
         }
     }
 
-    public void shouldNoException() {
+    public void shouldNoException(String assertion) {
+        if (dalException != null)
+            System.err.println(dalException.show(assertion));
         assertThat(dalException).isNull();
     }
 
@@ -175,6 +180,27 @@ public class CucumberContext {
         } catch (DalException dalException) {
             System.out.println(dalException.show(assertionCode));
             throw dalException;
+        }
+    }
+
+    public void addInputJavaClass(String sourceCode) {
+        javaClasses.add(sourceCode);
+    }
+
+    @SneakyThrows
+    public void assertJavaClass(String className, String assertion) {
+        giveDalSourceCode(assertion);
+        try {
+            com.github.leeonky.dal.cucumber.Compiler compiler
+                    = new com.github.leeonky.dal.cucumber.Compiler();
+            List<Class<?>> classes = compiler.compileToClasses(javaClasses.stream().map(s ->
+                    "import java.math.*;\n" + s).collect(Collectors.toList()));
+            Class<?> type = classes.stream().filter(clazz -> clazz.getName().equals(className))
+                    .findFirst().orElseThrow(() -> new IllegalArgumentException
+                            ("cannot find bean class: " + className + "\nclasses: " + classes));
+            dal.evaluateAll(type.newInstance(), assertion);
+        } catch (DalException e) {
+            dalException = e;
         }
     }
 }
