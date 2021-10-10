@@ -120,9 +120,15 @@ Feature: basic assertion
       | :        |
 
   Scenario Outline: compare null and null
+    Given the following input data:
+    """
+      {
+        "value": null
+      }
+    """
     Then the following assertion should pass:
     """
-      null <operator> null
+      value <operator> null and null <operator> value
     """
     Examples:
       | operator |

@@ -1,9 +1,12 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.ast.ConstNode;
+
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -17,6 +20,14 @@ public class DataObject {
         this.instance = instance;
         this.schemaType = schemaType;
         runtimeContext = context.registerPropertyAccessor(instance);
+    }
+
+    public String inspect() {
+        if (isNull())
+            return " null ";
+        Object value = getInstance();
+//TODO should not wrap '' with string
+        return String.format(" %s\n<%s>\n", getClassName(value), ConstNode.inspectValue(value));
     }
 
     public Object getInstance() {
@@ -108,5 +119,9 @@ public class DataObject {
 
     public Object firstFieldFromAlias(Object alias) {
         return schemaType.firstFieldFromAlias(alias);
+    }
+
+    public DataObject convert(Class<?> target) {
+        return new DataObject(runtimeContext.getConverter().convert(target, instance), runtimeContext, schemaType);
     }
 }

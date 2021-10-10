@@ -1,7 +1,10 @@
 package com.github.leeonky.dal;
 
+import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.Calculator;
+import com.github.leeonky.dal.runtime.RuntimeContext;
 import com.github.leeonky.util.Converter;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -102,35 +105,52 @@ class CalculatorTest {
 
     @Nested
     class Equal {
+        private final RuntimeContext runtimeContext = new DAL().getRuntimeContextBuilder()
+                .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
+                .build(null);
 
         @Test
         void both_null_is_equal() {
-            assertTrue(Calculator.equals(null, null));
+            assertEqual(null, null);
         }
 
         @Test
         void null_is_not_equal_to_not_null() {
-            assertFalse(Calculator.equals(null, 1));
-            assertFalse(Calculator.equals(1, null));
+            assertNotEqual(null, 1);
+            assertNotEqual(1, null);
         }
 
         @Test
         void string_equals() {
-            assertTrue(Calculator.equals("a", "a"));
-            assertFalse(Calculator.equals("a", "b"));
+            assertEqual("a", "a");
+            assertNotEqual("a", "b");
         }
 
         @Test
         void number_equals() {
-            assertTrue(Calculator.equals(1, 1));
+            assertEqual(1, 1);
         }
 
         @Test
         void number_equal_in_different_number_type() {
-            assertFalse(Calculator.equals(1, 2));
-            assertFalse(Calculator.equals(1, 1L));
-            assertFalse(Calculator.equals(1, 1.0));
-            assertFalse(Calculator.equals(0, 0.0));
+            assertNotEqual(1, 2);
+            assertNotEqual(1, 1L);
+            assertNotEqual(1, 1.0);
+            assertNotEqual(0, 0.0);
+        }
+
+        @Test
+        void customized_null() {
+            assertEqual(null, JSONObject.NULL);
+            assertEqual(JSONObject.NULL, null);
+        }
+
+        private void assertNotEqual(Object v1, Object v2) {
+            assertFalse(Calculator.equals(runtimeContext.wrap(v1), runtimeContext.wrap(v2)));
+        }
+
+        private void assertEqual(Object value1, Object value2) {
+            assertTrue(Calculator.equals(runtimeContext.wrap(value1), runtimeContext.wrap(value2)));
         }
     }
 

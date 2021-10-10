@@ -103,7 +103,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            return !Calculator.equals(node1.evaluate(context), node2.evaluate(context));
+            return !Calculator.equals(node1.evaluateDataObject(context), node2.evaluateDataObject(context));
         }
     }
 

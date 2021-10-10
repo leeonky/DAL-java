@@ -20,8 +20,10 @@ public class Calculator {
                 getClassName(v1), v1, getClassName(v2), v2));
     }
 
-    public static boolean equals(Object v1, Object v2) {
-        return Objects.equals(v1, v2);
+    public static boolean equals(DataObject v1, DataObject v2) {
+        if (v1.isNull())
+            return v2.isNull();
+        return !v2.isNull() && Objects.equals(v1.getInstance(), v2.getInstance());
     }
 
     public static Object plus(Object v1, Object v2, Converter converter) {

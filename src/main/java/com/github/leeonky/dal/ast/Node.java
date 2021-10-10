@@ -1,10 +1,10 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.ast.Operator.Matcher;
 import com.github.leeonky.dal.runtime.DataObject;
 import com.github.leeonky.dal.runtime.RuntimeContext;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.*;
-import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
 
 public abstract class Node {
@@ -19,19 +19,19 @@ public abstract class Node {
     }
 
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
-        return assertEquals(evaluate(context), actualNode.evaluate(context), getPositionBegin());
+        return assertEquals(evaluateDataObject(context), actualNode.evaluateDataObject(context), getPositionBegin());
     }
 
-    public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
-        Object expect = evaluate(context);
-        Object actual = actualNode.evaluate(context);
-        if (expect == null)
+    public boolean judge(Node actualNode, Matcher operator, RuntimeContext context) {
+        DataObject expected = evaluateDataObject(context);
+        DataObject actual = actualNode.evaluateDataObject(context);
+        if (expected.isNull())
             return assertMatchNull(actual, actualNode.getPositionBegin());
-        shouldBeSameTypeIfTypeIs(Number.class, actual, expect, operator);
-        shouldBeSameTypeIfTypeIs(Boolean.class, actual, expect, operator);
-        invalidTypeToMatchStringValue(Number.class, actual, expect, operator);
-        invalidTypeToMatchStringValue(Boolean.class, actual, expect, operator);
-        return assertMatch(expect, actual, getPositionBegin(), context.getConverter());
+        shouldBeSameTypeIfTypeIs(Number.class, actual, operator, expected);
+        shouldBeSameTypeIfTypeIs(Boolean.class, actual, operator, expected);
+        invalidTypeToMatchStringValue(Number.class, actual, expected, operator);
+        invalidTypeToMatchStringValue(Boolean.class, actual, expected, operator);
+        return assertMatch(expected, actual, getPositionBegin(), context.getConverter());
     }
 
     public int getPositionBegin() {
@@ -45,16 +45,16 @@ public abstract class Node {
 
     public abstract String inspect();
 
-    private void invalidTypeToMatchStringValue(Class<?> type, Object value1, Object value2, Operator.Matcher operator) {
-        if (type.isInstance(value1) && value2 instanceof String)
-            throw new RuntimeException(format("Cannot matches between type '%s' and 'java.lang.String'",
-                    type.getName()), operator.getPosition());
+    private void invalidTypeToMatchStringValue(Class<?> type, DataObject actual, DataObject expected, Matcher operator) {
+        if (type.isInstance(actual.getInstance()) && expected.getInstance() instanceof String)
+            throw new RuntimeException(format("Cannot compare between%sand 'java.lang.String'", actual.inspect()),
+                    operator.getPosition());
     }
 
-    private void shouldBeSameTypeIfTypeIs(Class<?> type, Object value1, Object value2, Operator.Matcher operator) {
-        if (type.isInstance(value2) && value1 != null && !type.isInstance(value1))
-            throw new RuntimeException(format("Cannot matches between type '%s' and '%s'",
-                    getClassName(value1), type.getName()), operator.getPosition());
+    private void shouldBeSameTypeIfTypeIs(Class<?> type, DataObject value1, Matcher operator, DataObject value2) {
+        if (type.isInstance(value2.getInstance()) && !value1.isNull() && !type.isInstance(value1.getInstance()))
+            throw new RuntimeException(format("Cannot compare between%sand%s", value1.inspect(), value2.inspect()),
+                    operator.getPosition());
     }
 
     public Node avoidListMapping() {

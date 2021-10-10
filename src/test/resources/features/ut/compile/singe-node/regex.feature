@@ -60,7 +60,9 @@ Feature: regex node
     """
     Then failed with the following message:
     """
-    expected java.lang.String <'hello'> matches /unmatched/ but was not
+    expected java.lang.String
+    <'hello'>
+    matches /unmatched/ but was not
     """
     And got the following source code information:
     """

@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.runtime.DataObject;
 import com.github.leeonky.dal.runtime.RuntimeContext;
-import com.github.leeonky.util.BeanClass;
 
 import java.util.regex.Pattern;
 
@@ -19,22 +19,22 @@ public class RegexNode extends Node {
         return format("/%s/", pattern.toString());
     }
 
-    private boolean matches(String actual, String typeName) {
-        return AssertionFailure.assertRegexMatches(pattern, actual, getPositionBegin(), typeName);
+    private boolean matches(String actual, DataObject input) {
+        return AssertionFailure.assertRegexMatches(pattern, actual, getPositionBegin(), input);
     }
 
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
-        Object actual = actualNode.evaluate(context);
-        if (actual instanceof String)
-            return matches((String) actual, String.class.getName());
+        DataObject actual = actualNode.evaluateDataObject(context);
+        if (actual.getInstance() instanceof String)
+            return matches((String) actual.getInstance(), actual);
         throw new RuntimeException("Operator = before regex need a string input value", operator.getPosition());
     }
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
-        Object actual = actualNode.evaluate(context);
-        return matches(context.getConverter().convert(String.class, actual), BeanClass.getClassName(actual));
+        DataObject actual = actualNode.evaluateDataObject(context);
+        return matches((String) actual.convert(String.class).getInstance(), actual);
     }
 
     @Override

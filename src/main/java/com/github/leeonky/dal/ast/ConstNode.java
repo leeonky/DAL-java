@@ -16,6 +16,7 @@ public class ConstNode extends Node {
         return value;
     }
 
+    //    TODO inline
     public static String inspectValue(Object value) {
         if (value == null)
             return "null";
