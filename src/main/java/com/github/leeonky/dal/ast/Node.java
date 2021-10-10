@@ -19,7 +19,7 @@ public abstract class Node {
     }
 
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
-        return assertEquals(actualNode.evaluate(context), evaluate(context), getPositionBegin());
+        return assertEquals(evaluate(context), actualNode.evaluate(context), getPositionBegin());
     }
 
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {

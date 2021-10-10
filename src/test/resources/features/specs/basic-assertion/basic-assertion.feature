@@ -1,6 +1,6 @@
 Feature: basic assertion
 
-  Scenario Outline: non null equal to null
+  Scenario Outline: non null equals to null
     Given the following input data:
     """
       <value>
@@ -11,14 +11,16 @@ Feature: basic assertion
     """
     Then failed with the following message:
     """
-    expected [<message>] equal to [null] but was not
+    expected <type>
+    <<message>>
+    equal to null but was not
     """
     Examples:
-      | value | message |
-      | 0     | 0       |
-      | ""    | ''      |
-      | {}    | {}      |
-      | []    | []      |
+      | value | type                | message |
+      | 0     | java.lang.Integer   | 0       |
+      | ""    | java.lang.String    | ''      |
+      | {}    | org.json.JSONObject | {}      |
+      | []    | org.json.JSONArray  | []      |
 
   Scenario Outline: non null matches null
     Given the following input data:
@@ -31,23 +33,27 @@ Feature: basic assertion
     """
     Then failed with the following message:
     """
-    [<message>] does not match null
+    expected <type>
+    <<message>>
+    matches null but was not
     """
     Examples:
-      | value | message |
-      | 0     | 0       |
-      | ""    | ''      |
-      | {}    | {}      |
-      | []    | []      |
+      | value | type                | message |
+      | 0     | java.lang.Integer   | 0       |
+      | ""    | java.lang.String    | ''      |
+      | {}    | org.json.JSONObject | {}      |
+      | []    | org.json.JSONArray  | []      |
 
-  Scenario Outline: null equal to non null
+  Scenario Outline: null equals to non null
     When assert by the following code:
     """
       null = <value>
     """
     Then failed with the following message:
     """
-    expected [null] equal to [<message>] but was not
+    expected null equal to <type>
+    <<message>>
+    but was not
     """
     And got the following source code information:
     """
@@ -55,25 +61,63 @@ Feature: basic assertion
              ^
     """
     Examples:
-      | value | message |
-      | 0     | 0       |
-      | ""    | ''      |
-      | {}    | {}      |
+      | value | message | type              |
+      | 0     | 0       | java.lang.Integer |
+      | ""    | ''      | java.lang.String  |
 
   Scenario Outline: null matches non null
     When assert by the following code:
     """
-      null : <value>
+    null: <value>
     """
     Then failed with the following message:
     """
-    expected [null] matches [<message>] but was not
+    expected null matches <type>
+    <<message>>
+    but was not
     """
     Examples:
-      | value | message |
-      | 0     | 0       |
-      | ""    | ''      |
-      | {}    | {}      |
+      | value | message | type              |
+      | 0     | 0       | java.lang.Integer |
+      | ""    | ''      | java.lang.String  |
+
+  Scenario Outline: null matches list
+    When assert by the following code:
+    """
+      null <operator> []
+    """
+    Then failed with the following message:
+    """
+    null is not a list
+    """
+    And got the following source code information:
+    """
+      null <operator> []
+             ^
+    """
+    Examples:
+      | operator |
+      | =        |
+      | :        |
+
+  Scenario Outline: null equals to/matches object
+    When assert by the following code:
+    """
+      null <operator> {}
+    """
+    Then failed with the following message:
+    """
+    actual value is null
+    """
+    And got the following source code information:
+    """
+      null <operator> {}
+             ^
+    """
+    Examples:
+      | operator |
+      | =        |
+      | :        |
 
   Scenario Outline: compare null and null
     Then the following assertion should pass:

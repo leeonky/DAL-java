@@ -37,7 +37,11 @@ Feature: judge object
     """
     Then failed with the following message:
     """
-    expected ['2'] matches ['unmatched'] but was not
+    expected java.lang.String
+    <'2'>
+    matches java.lang.String
+    <'unmatched'>
+    but was not
     """
     And got the following source code information:
     """
@@ -71,7 +75,11 @@ Feature: judge object
     """
     Then failed with the following message:
     """
-    expected ['2'] matches ['unmatched'] but was not
+    expected java.lang.String
+    <'2'>
+    matches java.lang.String
+    <'unmatched'>
+    but was not
     """
     And got the following source code information:
     """
@@ -138,7 +146,11 @@ Feature: judge object
     """
     Then failed with the following message:
     """
-    expected [3] matches [100] but was not
+    expected java.lang.Integer
+    <3>
+    matches java.lang.Integer
+    <100>
+    but was not
     """
     And got the following source code information:
     """
@@ -213,7 +225,11 @@ Feature: judge object
     """
     Then failed with the following message:
     """
-    expected [10] matches [100] but was not
+    expected java.lang.Integer
+    <10>
+    matches java.lang.Integer
+    <100>
+    but was not
     """
     And got the following source code information:
     """

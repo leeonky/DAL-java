@@ -41,6 +41,7 @@ public class ListNode extends Node {
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
         DataObject dataObject = actualNode.evaluateDataObject(context);
         if (!dataObject.isList())
+//            TODO change message
             throw new AssertionFailure(String.format("%s is not a list", actualNode.inspect()), getPositionBegin());
         return judgeAll(context, dataObject);
     }
@@ -49,6 +50,7 @@ public class ListNode extends Node {
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
         DataObject dataObject = actualNode.evaluateDataObject(context);
         if (!dataObject.isList())
+//            TODO change message
             throw new AssertionFailure(String.format("%s is not a list", actualNode.inspect()), getPositionBegin());
         return judgeAll(context, dataObject);
     }

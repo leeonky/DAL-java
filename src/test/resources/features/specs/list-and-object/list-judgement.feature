@@ -15,7 +15,7 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    expected list size [1] but was [2]
+    expected list size <1> but was <2>
     """
     And got the following source code information:
     """
@@ -28,7 +28,11 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    expected [2] equal to [3] but was not
+    expected java.lang.Integer
+    <2>
+    equal to java.lang.Integer
+    <3>
+    but was not
     """
     And got the following source code information:
     """
@@ -51,7 +55,7 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    expected list size [1] but was [2]
+    expected list size <1> but was <2>
     """
     And got the following source code information:
     """
@@ -64,7 +68,11 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    expected [2] matches [3] but was not
+    expected java.lang.Integer
+    <2>
+    matches java.lang.Integer
+    <3>
+    but was not
     """
     And got the following source code information:
     """
@@ -131,7 +139,7 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    expected list size [1] but was [2]
+    expected list size <1> but was <2>
     """
     And got the following source code information:
     """
@@ -144,7 +152,11 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    expected [3] equal to [4] but was not
+    expected java.lang.Integer
+    <3>
+    equal to java.lang.Integer
+    <4>
+    but was not
     """
     And got the following source code information:
     """

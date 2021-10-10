@@ -31,7 +31,6 @@ public class Calculator {
             return v1.toString() + v2;
         if (v2 instanceof String)
             return v1 + v2.toString();
-//        TODO message reformat type+value
         throw new IllegalArgumentException(String.format("Can not plus '%s' and '%s'", getClassName(v1), getClassName(v2)));
     }
 
