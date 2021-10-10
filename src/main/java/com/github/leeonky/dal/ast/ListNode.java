@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.DataObject;
-import com.github.leeonky.dal.runtime.RuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,16 +38,16 @@ public class ListNode extends Node {
     }
 
     @Override
-    public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
+    public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
         return judgeAll(context, actualNode.evaluateDataObject(context));
     }
 
     @Override
-    public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
+    public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
         return judgeAll(context, actualNode.evaluateDataObject(context));
     }
 
-    private boolean judgeAll(RuntimeContext context, DataObject dataObject) {
+    private boolean judgeAll(RuntimeContextBuilder.RuntimeContext context, DataObject dataObject) {
         if (!dataObject.isList())
             throw new RuntimeException(format("cannot compare%sand list", dataObject.inspect()), getPositionBegin());
         if (!incomplete)

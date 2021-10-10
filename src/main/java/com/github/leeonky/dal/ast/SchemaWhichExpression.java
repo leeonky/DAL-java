@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.runtime.RuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 public class SchemaWhichExpression extends Node {
     private final SchemaExpression schemaExpression;
@@ -19,7 +19,7 @@ public class SchemaWhichExpression extends Node {
     }
 
     @Override
-    public Object evaluate(RuntimeContext context) {
+    public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
         try {
             schemaExpression.evaluate(context);
             return context.wrapInputValueAndEvaluate(schemaExpression.getTypeInstance(), clause, schemaExpression.getSchemaName());

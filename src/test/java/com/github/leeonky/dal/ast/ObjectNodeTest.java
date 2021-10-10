@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.ast.Operator.Equal;
-import com.github.leeonky.dal.runtime.RuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,7 @@ class ObjectNodeTest {
 
     @Nested
     class EqualTo {
-        RuntimeContext runtimeContext = new RuntimeContextBuilder().build(null);
+        RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder().build(null);
         ObjectNode objectNode = new ObjectNode();
 
         @Test
@@ -37,7 +36,7 @@ class ObjectNodeTest {
 
     @Nested
     class Matches {
-        RuntimeContext runtimeContext = new RuntimeContextBuilder().build(null);
+        RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder().build(null);
         ObjectNode objectNode = new ObjectNode();
 
         @Test

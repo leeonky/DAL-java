@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.DataObject;
-import com.github.leeonky.dal.runtime.RuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 public class InputNode extends Node {
     public static final InputNode INSTANCE = new InputNode();
@@ -10,12 +10,12 @@ public class InputNode extends Node {
     }
 
     @Override
-    public Object evaluate(RuntimeContext context) {
+    public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
         return evaluateDataObject(context).getInstance();
     }
 
     @Override
-    public DataObject evaluateDataObject(RuntimeContext context) {
+    public DataObject evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
         return context.getInputValue();
     }
 

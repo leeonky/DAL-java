@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.runtime.RuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.Objects;
 
@@ -39,7 +39,7 @@ public class Expression extends Node {
     }
 
     @Override
-    public Object evaluate(RuntimeContext context) {
+    public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
         try {
             Object result = operator.calculate(node1, node2, context);
             if (operator.isNeedInspect() && (result instanceof Boolean) && !(boolean) result)

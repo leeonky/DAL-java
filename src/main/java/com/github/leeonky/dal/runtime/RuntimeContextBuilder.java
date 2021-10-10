@@ -1,21 +1,25 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.NoSuchAccessorException;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class RuntimeContextBuilder {
-    private final ClassKeyMap<PropertyAccessor<?>> propertyAccessors = new ClassKeyMap<>();
-    private final ClassKeyMap<ListAccessor<?>> listAccessors = new ClassKeyMap<>();
+    private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
+    private final ClassKeyMap<ListAccessor<Object>> listAccessors = new ClassKeyMap<>();
     private final Map<String, ConstructorViaSchema> constructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
+    private Converter converter = Converter.createDefault();
 
     public RuntimeContextBuilder() {
         registerValueFormat(new Formatters.String())
@@ -52,7 +56,7 @@ public class RuntimeContextBuilder {
     }
 
     public RuntimeContext build(Object inputValue) {
-        return new RuntimeContext(inputValue, propertyAccessors, constructors, listAccessors, schemas);
+        return new RuntimeContext(inputValue);
     }
 
     public RuntimeContextBuilder registerValueFormat(Formatter<?, ?> formatter) {
@@ -84,17 +88,153 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public <T> RuntimeContextBuilder registerPropertyAccessor(Class<T> type, PropertyAccessor<? extends T> propertyAccessor) {
-        propertyAccessors.put(type, propertyAccessor);
+        propertyAccessors.put(type, (PropertyAccessor<Object>) propertyAccessor);
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public <T> RuntimeContextBuilder registerListAccessor(Class<T> type, ListAccessor<? extends T> listAccessor) {
-        listAccessors.put(type, listAccessor);
+        listAccessors.put(type, (ListAccessor<Object>) listAccessor);
         return this;
     }
 
     public RuntimeContextBuilder registerSchema(NameStrategy nameStrategy, Class<?> schema) {
         return registerSchema(nameStrategy.toName(schema), schema);
+    }
+
+    public RuntimeContextBuilder setConverter(Converter converter) {
+        this.converter = converter;
+        return this;
+    }
+
+    public class RuntimeContext {
+        private final LinkedList<DataObject> thisStack = new LinkedList<>();
+        private final Set<Class<?>> schemaSet;
+        private boolean listMapping = false;
+
+        public RuntimeContext(Object inputValue) {
+            schemaSet = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
+            thisStack.push(wrap(inputValue));
+        }
+
+        public DataObject getInputValue() {
+            return thisStack.getFirst();
+        }
+
+        public Object wrapInputValueAndEvaluate(Object value, Node node, String schema) {
+            return newThisScope(new DataObject(value, this, SchemaType.create(schemas.get(schema))),
+                    () -> node.evaluate(this));
+        }
+
+        public <T> T newThisScope(DataObject dataObject, Supplier<T> supplier) {
+            try {
+                thisStack.push(dataObject);
+                return supplier.get();
+            } finally {
+                thisStack.pop();
+            }
+        }
+
+        public Optional<ConstructorViaSchema> searchConstructor(String type) {
+            return Optional.ofNullable(constructors.get(type));
+        }
+
+        public boolean isSchemaRegistered(Class<?> fieldType) {
+            return schemaSet.contains(fieldType);
+        }
+
+        public Set<String> findPropertyReaderNames(Object instance) {
+            return propertyAccessors.getData(instance).getPropertyNames(instance);
+        }
+
+        public Boolean isNull(Object instance) {
+            return propertyAccessors.tryGetData(instance).map(f -> f.isNull(instance))
+                    .orElseGet(() -> Objects.equals(instance, null));
+        }
+
+        public Object getPropertyValue(Object instance, String name) {
+            return propertyAccessors.getData(instance).getValue(instance, name);
+        }
+
+        @SuppressWarnings("unchecked")
+        public Iterable<Object> getList(Object instance) {
+            return listAccessors.tryGetData(instance).map(l -> (Iterable<Object>) l.toIterable(instance))
+                    .orElseGet(() -> arrayIterable(instance));
+        }
+
+        private Iterable<Object> arrayIterable(Object instance) {
+            return () -> new Iterator<Object>() {
+                private final int length = Array.getLength(instance);
+                private int index = 0;
+
+                @Override
+                public boolean hasNext() {
+                    return index < length;
+                }
+
+                @Override
+                public Object next() {
+                    return Array.get(instance, index++);
+                }
+            };
+        }
+
+        public boolean isRegisteredList(Object instance) {
+            return listAccessors.containsType(instance);
+        }
+
+        public Converter getConverter() {
+            return converter;
+        }
+
+        public DataObject wrap(Object instance) {
+            return new DataObject(instance, this, SchemaType.createRoot());
+        }
+
+        public RuntimeContext registerPropertyAccessor(Object instance) {
+            if (!Objects.equals(instance, null) && !propertyAccessors.containsType(instance)) {
+                propertyAccessors.put(BeanClass.getClass(instance), new PropertyAccessor<Object>() {
+                    private final BeanClass<Object> beanClass = BeanClass.createFrom(instance);
+
+                    @Override
+                    public Object getValue(Object instance1, String name) {
+                        try {
+                            return beanClass.getPropertyValue(instance1, name);
+                        } catch (NoSuchAccessorException ignore) {
+                            try {
+                                return beanClass.getType().getMethod(name).invoke(instance1);
+                            } catch (Exception e) {
+                                throw new IllegalStateException(e);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public Set<String> getPropertyNames(Object instance1) {
+                        return beanClass.getPropertyReaders().keySet();
+                    }
+
+                    @Override
+                    public boolean isNull(Object instance1) {
+                        return Objects.equals(instance1, null);
+                    }
+                });
+            }
+            return this;
+        }
+
+        public void beginListMapping() {
+            listMapping = true;
+        }
+
+        public boolean isListMapping() {
+            return listMapping;
+        }
+
+        public void endListMapping() {
+            listMapping = false;
+        }
     }
 }

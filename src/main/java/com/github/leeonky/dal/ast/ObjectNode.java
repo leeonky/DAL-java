@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.DataObject;
-import com.github.leeonky.dal.runtime.RuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -34,7 +34,7 @@ public class ObjectNode extends Node {
     }
 
     @Override
-    public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
+    public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
         DataObject dataObject = actualNode.evaluateDataObject(context);
         if (dataObject.isNull())
             throw new AssertionFailure("the input value is null", getPositionBegin());
@@ -56,14 +56,14 @@ public class ObjectNode extends Node {
     }
 
     @Override
-    public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
+    public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
         DataObject dataObject = actualNode.evaluateDataObject(context);
         if (dataObject.isNull())
             throw new AssertionFailure("the input value is null", getPositionBegin());
         return judgeAll(context, dataObject);
     }
 
-    private boolean judgeAll(RuntimeContext context, DataObject dataObject) {
+    private boolean judgeAll(RuntimeContextBuilder.RuntimeContext context, DataObject dataObject) {
         return context.newThisScope(dataObject,
                 () -> expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context)));
     }

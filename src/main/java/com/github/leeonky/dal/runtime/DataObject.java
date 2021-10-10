@@ -10,11 +10,11 @@ import static java.util.stream.StreamSupport.stream;
 
 public class DataObject {
     private final SchemaType schemaType;
-    private final RuntimeContext runtimeContext;
+    private final RuntimeContextBuilder.RuntimeContext runtimeContext;
     private final Object instance;
     private List<Object> listValue;
 
-    public DataObject(Object instance, RuntimeContext context, SchemaType schemaType) {
+    public DataObject(Object instance, RuntimeContextBuilder.RuntimeContext context, SchemaType schemaType) {
         this.instance = instance;
         this.schemaType = schemaType;
         runtimeContext = context.registerPropertyAccessor(instance);

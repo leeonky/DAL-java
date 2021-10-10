@@ -21,10 +21,10 @@ import static java.util.stream.IntStream.range;
 
 public class SchemaVerifier {
     private final DataObject object;
-    private final RuntimeContext runtimeContext;
+    private final RuntimeContextBuilder.RuntimeContext runtimeContext;
     private static final Compiler compiler = new Compiler();
 
-    public SchemaVerifier(RuntimeContext runtimeContext, DataObject object) {
+    public SchemaVerifier(RuntimeContextBuilder.RuntimeContext runtimeContext, DataObject object) {
         this.runtimeContext = runtimeContext;
         this.object = object;
     }

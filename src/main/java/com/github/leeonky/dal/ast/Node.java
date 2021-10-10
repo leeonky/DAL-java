@@ -2,7 +2,7 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.ast.Operator.Matcher;
 import com.github.leeonky.dal.runtime.DataObject;
-import com.github.leeonky.dal.runtime.RuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.*;
 import static java.lang.String.format;
@@ -10,19 +10,19 @@ import static java.lang.String.format;
 public abstract class Node {
     private int positionBegin;
 
-    public Object evaluate(RuntimeContext context) {
+    public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
         throw new IllegalStateException();
     }
 
-    public DataObject evaluateDataObject(RuntimeContext context) {
+    public DataObject evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
         return context.wrap(evaluate(context));
     }
 
-    public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
+    public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
         return assertEquals(evaluateDataObject(context), actualNode.evaluateDataObject(context), getPositionBegin());
     }
 
-    public boolean judge(Node actualNode, Matcher operator, RuntimeContext context) {
+    public boolean judge(Node actualNode, Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
         DataObject expected = evaluateDataObject(context);
         DataObject actual = actualNode.evaluateDataObject(context);
         if (expected.isNull())

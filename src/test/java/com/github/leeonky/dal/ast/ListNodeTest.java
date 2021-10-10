@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.runtime.RuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +11,7 @@ class ListNodeTest {
 
     public static final Operator.Equal EQUAL = new Operator.Equal();
     public static final Operator.Matcher MATCHER = new Operator.Matcher();
-    RuntimeContext runtimeContext = new RuntimeContextBuilder().build(null);
+    RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder().build(null);
     ListNode listNode = new ListNode();
 
     @Test

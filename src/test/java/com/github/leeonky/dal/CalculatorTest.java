@@ -2,7 +2,7 @@ package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.Calculator;
-import com.github.leeonky.dal.runtime.RuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.util.Converter;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Nested;
@@ -105,7 +105,7 @@ class CalculatorTest {
 
     @Nested
     class Equal {
-        private final RuntimeContext runtimeContext = new DAL().getRuntimeContextBuilder()
+        private final RuntimeContextBuilder.RuntimeContext runtimeContext = new DAL().getRuntimeContextBuilder()
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
                 .build(null);
 

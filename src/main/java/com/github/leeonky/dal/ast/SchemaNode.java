@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.ConstructorViaSchema;
-import com.github.leeonky.dal.runtime.RuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 public class SchemaNode extends Node {
     private final String schema;
@@ -10,7 +10,7 @@ public class SchemaNode extends Node {
         this.schema = schema;
     }
 
-    public ConstructorViaSchema getConstructorViaSchema(RuntimeContext context) {
+    public ConstructorViaSchema getConstructorViaSchema(RuntimeContextBuilder.RuntimeContext context) {
         return context.searchConstructor(schema).orElseThrow(() ->
                 new RuntimeException("Schema '" + schema + "' not registered", getPositionBegin()));
     }

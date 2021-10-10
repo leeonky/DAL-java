@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.IllegalTypeException;
-import com.github.leeonky.dal.runtime.RuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ public class SchemaExpression extends Node {
     }
 
     @Override
-    public Object evaluate(RuntimeContext context) {
+    public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
         try {
             return matches(context, objectRef);
         } catch (IllegalStateException e) {
@@ -37,11 +37,11 @@ public class SchemaExpression extends Node {
         }
     }
 
-    private boolean matches(RuntimeContext context, ObjectRef objectRef) {
+    private boolean matches(RuntimeContextBuilder.RuntimeContext context, ObjectRef objectRef) {
         return schemaNodes.stream().allMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
     }
 
-    private boolean verifyAndConvertAsSchemaType(RuntimeContext context, SchemaNode schemaNode, ObjectRef objectRef) {
+    private boolean verifyAndConvertAsSchemaType(RuntimeContextBuilder.RuntimeContext context, SchemaNode schemaNode, ObjectRef objectRef) {
         try {
             objectRef.instance = schemaNode.getConstructorViaSchema(context).apply(instance.evaluateDataObject(context));
             return true;

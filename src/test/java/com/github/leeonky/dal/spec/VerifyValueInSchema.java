@@ -2,7 +2,7 @@ package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.ast.RuntimeException;
 import com.github.leeonky.dal.format.Value;
-import com.github.leeonky.dal.runtime.RuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.util.BeanClass;
 import org.junit.jupiter.api.Nested;
@@ -239,7 +239,7 @@ public class VerifyValueInSchema extends Base {
     public static class ToIntegerAndIncrease extends Value<Integer> {
 
         @Override
-        public Integer convertAs(RuntimeContext runtimeContext, Object instance, BeanClass<?> type) {
+        public Integer convertAs(RuntimeContextBuilder.RuntimeContext runtimeContext, Object instance, BeanClass<?> type) {
             return (int) instance + 1;
         }
 

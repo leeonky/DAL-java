@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.format;
 
 import com.github.leeonky.dal.runtime.IllegalFieldException;
-import com.github.leeonky.dal.runtime.RuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.Objects;
@@ -94,7 +94,7 @@ public abstract class Value<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public T convertAs(RuntimeContext runtimeContext, Object instance, BeanClass<?> type) {
+    public T convertAs(RuntimeContextBuilder.RuntimeContext runtimeContext, Object instance, BeanClass<?> type) {
         if (type == null)
             throw new IllegalFieldException();
         return (T) runtimeContext.getConverter().tryConvert(type.getType(), instance);
