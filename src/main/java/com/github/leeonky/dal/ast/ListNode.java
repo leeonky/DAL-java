@@ -39,26 +39,20 @@ public class ListNode extends Node {
 
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
-        DataObject dataObject = actualNode.evaluateDataObject(context);
-        if (!dataObject.isList())
-//            TODO change message
-            throw new AssertionFailure(String.format("%s is not a list", actualNode.inspect()), getPositionBegin());
-        return judgeAll(context, dataObject);
+        return judgeAll(context, actualNode.evaluateDataObject(context));
     }
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
-        DataObject dataObject = actualNode.evaluateDataObject(context);
-        if (!dataObject.isList())
-//            TODO change message
-            throw new AssertionFailure(String.format("%s is not a list", actualNode.inspect()), getPositionBegin());
-        return judgeAll(context, dataObject);
+        return judgeAll(context, actualNode.evaluateDataObject(context));
     }
 
     private boolean judgeAll(RuntimeContext context, DataObject dataObject) {
+        if (!dataObject.isList())
+            throw new RuntimeException(format("cannot compare%sand list", dataObject.inspect()), getPositionBegin());
         if (!incomplete)
             assertListSize(expressions.size(), dataObject.getListSize(), getPositionBegin());
-        return context.newThisScope(dataObject,
-                () -> expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context)));
+        return context.newThisScope(dataObject, () -> expressions.stream()
+                .allMatch(expression -> (boolean) expression.evaluate(context)));
     }
 }

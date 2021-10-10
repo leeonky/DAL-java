@@ -13,12 +13,12 @@ Feature: basic assertion
     """
     expected <type>
     <<message>>
-    equal to null but was not
+    equals to null but was not
     """
     Examples:
       | value | type                | message |
       | 0     | java.lang.Integer   | 0       |
-      | ""    | java.lang.String    | ''      |
+      | ""    | java.lang.String    |         |
       | {}    | org.json.JSONObject | {}      |
       | []    | org.json.JSONArray  | []      |
 
@@ -40,7 +40,7 @@ Feature: basic assertion
     Examples:
       | value | type                | message |
       | 0     | java.lang.Integer   | 0       |
-      | ""    | java.lang.String    | ''      |
+      | ""    | java.lang.String    |         |
       | {}    | org.json.JSONObject | {}      |
       | []    | org.json.JSONArray  | []      |
 
@@ -51,7 +51,7 @@ Feature: basic assertion
     """
     Then failed with the following message:
     """
-    expected null equal to <type>
+    expected null equals to <type>
     <<message>>
     but was not
     """
@@ -63,7 +63,7 @@ Feature: basic assertion
     Examples:
       | value | message | type              |
       | 0     | 0       | java.lang.Integer |
-      | ""    | ''      | java.lang.String  |
+      | ""    |         | java.lang.String  |
 
   Scenario Outline: null matches non null
     When assert by the following code:
@@ -79,16 +79,16 @@ Feature: basic assertion
     Examples:
       | value | message | type              |
       | 0     | 0       | java.lang.Integer |
-      | ""    | ''      | java.lang.String  |
+      | ""    |         | java.lang.String  |
 
-  Scenario Outline: null matches list
+  Scenario Outline: compare null and list
     When assert by the following code:
     """
       null <operator> []
     """
     Then failed with the following message:
     """
-    null is not a list
+    cannot compare null and list
     """
     And got the following source code information:
     """
@@ -100,14 +100,14 @@ Feature: basic assertion
       | =        |
       | :        |
 
-  Scenario Outline: null equals to/matches object
+  Scenario Outline: compare null and object
     When assert by the following code:
     """
       null <operator> {}
     """
     Then failed with the following message:
     """
-    actual value is null
+    the input value is null
     """
     And got the following source code information:
     """

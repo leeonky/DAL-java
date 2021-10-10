@@ -30,7 +30,7 @@ Feature: judge list
     """
     expected java.lang.Integer
     <2>
-    equal to java.lang.Integer
+    equals to java.lang.Integer
     <3>
     but was not
     """
@@ -154,7 +154,7 @@ Feature: judge list
     """
     expected java.lang.Integer
     <3>
-    equal to java.lang.Integer
+    equals to java.lang.Integer
     <4>
     but was not
     """
@@ -215,7 +215,9 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    1 is not a list
+    cannot compare java.lang.Integer
+    <1>
+    and list
     """
     And got the following source code information:
     """
@@ -228,7 +230,9 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    1 is not a list
+    cannot compare java.lang.Integer
+    <1>
+    and list
     """
     And got the following source code information:
     """

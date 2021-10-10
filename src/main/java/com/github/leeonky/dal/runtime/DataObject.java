@@ -1,7 +1,5 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.dal.ast.ConstNode;
-
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,11 +21,7 @@ public class DataObject {
     }
 
     public String inspect() {
-        if (isNull())
-            return " null ";
-        Object value = getInstance();
-//TODO should not wrap '' with string
-        return String.format(" %s\n<%s>\n", getClassName(value), ConstNode.inspectValue(value));
+        return isNull() ? " null " : String.format(" %s\n<%s>\n", getClassName(getInstance()), getInstance());
     }
 
     public Object getInstance() {

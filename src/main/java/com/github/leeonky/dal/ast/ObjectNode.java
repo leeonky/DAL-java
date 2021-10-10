@@ -37,8 +37,7 @@ public class ObjectNode extends Node {
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContext context) {
         DataObject dataObject = actualNode.evaluateDataObject(context);
         if (dataObject.isNull())
-//            TODO change message
-            throw new AssertionFailure("actual value is null", getPositionBegin());
+            throw new AssertionFailure("the input value is null", getPositionBegin());
         if (dataObject.isList()) {
             AtomicInteger integer = new AtomicInteger(0);
             dataObject.getListObjects().forEach(element -> assertUnexpectedFields(collectUnexpectedFields(element),
@@ -60,8 +59,7 @@ public class ObjectNode extends Node {
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContext context) {
         DataObject dataObject = actualNode.evaluateDataObject(context);
         if (dataObject.isNull())
-//            TODO change message
-            throw new AssertionFailure("actual value is null", getPositionBegin());
+            throw new AssertionFailure("the input value is null", getPositionBegin());
         return judgeAll(context, dataObject);
     }
 

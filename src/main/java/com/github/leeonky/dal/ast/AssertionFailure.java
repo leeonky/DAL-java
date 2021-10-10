@@ -53,7 +53,7 @@ public class AssertionFailure extends DalException {
 
     public static boolean assertEquals(DataObject expected, DataObject actual, int position) {
         if (!Calculator.equals(actual, expected))
-            throw new AssertionFailure(format("expected%sequal to%sbut was not",
+            throw new AssertionFailure(format("expected%sequals to%sbut was not",
                     actual.inspect(), expected.inspect()), position);
         return true;
     }

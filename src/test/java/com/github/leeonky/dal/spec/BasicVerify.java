@@ -232,12 +232,12 @@ class BasicVerify extends Base {
 
         @Test
         void do_not_allow_auto_convert_to_number() {
-            assertRuntimeException("1", ": 1", 0, "Cannot compare between java.lang.String\n<'1'>\nand java.lang.Integer\n<1>\n");
+            assertRuntimeException("1", ": 1", 0, "Cannot compare between java.lang.String\n<1>\nand java.lang.Integer\n<1>\n");
         }
 
         @Test
         void do_not_allow_auto_convert_to_boolean() {
-            assertRuntimeException("true", ": true", 0, "Cannot compare between java.lang.String\n<'true'>\nand java.lang.Boolean\n<true>\n");
+            assertRuntimeException("true", ": true", 0, "Cannot compare between java.lang.String\n<true>\nand java.lang.Boolean\n<true>\n");
         }
 
         @Test

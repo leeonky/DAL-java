@@ -66,7 +66,7 @@ Feature: number and types
     """
     expected java.lang.Byte
     <1>
-    equal to java.lang.Integer
+    equals to java.lang.Integer
     <1>
     but was not
     """

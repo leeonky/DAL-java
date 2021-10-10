@@ -16,15 +16,6 @@ public class ConstNode extends Node {
         return value;
     }
 
-    //    TODO inline
-    public static String inspectValue(Object value) {
-        if (value == null)
-            return "null";
-        if (value instanceof String)
-            return String.format("'%s'", value);
-        return value.toString();
-    }
-
     @Override
     public Object evaluate(RuntimeContext context) {
         return value;
@@ -37,6 +28,10 @@ public class ConstNode extends Node {
 
     @Override
     public String inspect() {
-        return inspectValue(value);
+        if (value == null)
+            return "null";
+        if (value instanceof String)
+            return String.format("'%s'", value);
+        return value.toString();
     }
 }

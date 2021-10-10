@@ -38,9 +38,9 @@ Feature: judge object
     Then failed with the following message:
     """
     expected java.lang.String
-    <'2'>
+    <2>
     matches java.lang.String
-    <'unmatched'>
+    <unmatched>
     but was not
     """
     And got the following source code information:
@@ -76,9 +76,9 @@ Feature: judge object
     Then failed with the following message:
     """
     expected java.lang.String
-    <'2'>
+    <2>
     matches java.lang.String
-    <'unmatched'>
+    <unmatched>
     but was not
     """
     And got the following source code information:
