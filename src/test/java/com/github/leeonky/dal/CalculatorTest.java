@@ -1,6 +1,7 @@
 package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.runtime.Calculator;
+import com.github.leeonky.util.Converter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -12,8 +13,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CalculatorTest {
+    private final Converter converter = Converter.createDefault();
+
     private void assertCompare(Object v1, Object v2, int result) {
-        assertThat(Calculator.compare(v1, v2)).isEqualTo(result);
+        assertThat(Calculator.compare(v1, v2, converter)).isEqualTo(result);
     }
 
     private void assertIllegalArgument(Executable executable, String message) {
@@ -25,33 +28,29 @@ class CalculatorTest {
     class NumberCompare {
 
         @Test
-        void all_params_should_not_be_null() {
-            assertIllegalArgument(() -> Calculator.compare(1, null), "Can not compare [1] and [null]");
-            assertIllegalArgument(() -> Calculator.compare(null, null), "Can not compare [null] and [null]");
-            assertIllegalArgument(() -> Calculator.compare(null, 1), "Can not compare [null] and [1]");
-        }
-
-        @Test
-        void compare_number_with_three_result() {
+        void compare_in_same_type() {
             assertCompare(1, 1, 0);
             assertCompare(1, 0, 1);
             assertCompare(0, 1, -1);
         }
 
         @Test
-        void compare_number_in_different_number_type() {
-            assertCompare(1, 1.0, 0);
-            assertCompare(1, (byte) 1, 0);
-            assertCompare(1, (short) (byte) 1, 0);
-            assertCompare(1, (long) (byte) 1, 0);
-            assertCompare(1, new BigDecimal(1), 0);
-            assertCompare(1, new BigInteger("1"), 0);
-            assertCompare(1, 0, 1);
+        void compare_in_different_number_type() {
+            assertCompare(1, 1L, 0);
+            assertCompare(1, BigInteger.ZERO, 1);
+            assertCompare(BigDecimal.ZERO, 1, -1);
+        }
+
+        @Test
+        void all_params_should_not_be_null() {
+            assertIllegalArgument(() -> Calculator.compare(1, null, converter), "Can not compare [1] and [null]");
+            assertIllegalArgument(() -> Calculator.compare(null, null, converter), "Can not compare [null] and [null]");
+            assertIllegalArgument(() -> Calculator.compare(null, 1, converter), "Can not compare [null] and [1]");
         }
 
         @Test
         void do_not_allow_compare_in_different_type() {
-            assertIllegalArgument(() -> Calculator.compare(1, "1"), "Can not compare [java.lang.Integer: 1] and [java.lang.String: 1]");
+            assertIllegalArgument(() -> Calculator.compare(1, "1", converter), "Can not compare [java.lang.Integer: 1] and [java.lang.String: 1]");
         }
     }
 
@@ -69,20 +68,35 @@ class CalculatorTest {
     @Nested
     class Plus {
 
-        @Test
-        void plus_number_in_different_number_type() {
-            assertThat(Calculator.plus(1, 1L)).isEqualTo(new BigDecimal(2));
+        @Nested
+        class Number {
+
+            @Test
+            void plus_in_same_type() {
+                assertThat(Calculator.plus(1, 1, converter)).isEqualTo(2);
+                assertThat(Calculator.plus(BigInteger.valueOf(1), BigInteger.valueOf(1), converter)).isEqualTo(BigInteger.valueOf(2));
+            }
+
+            @Test
+            void plus_number_in_different_type() {
+                assertThat(Calculator.plus(1, 1L, converter)).isEqualTo(2L);
+            }
         }
 
-        @Test
-        void plus_object_and_string_should_call_to_string_of_object() {
-            assertThat(Calculator.plus(1, "")).isEqualTo("1");
-            assertThat(Calculator.plus("", 1)).isEqualTo("1");
+        @Nested
+        class _String {
+
+            @Test
+            void plus_object_and_string_should_call_to_string_of_object() {
+                assertThat(Calculator.plus(1, "", converter)).isEqualTo("1");
+                assertThat(Calculator.plus("", 1, converter)).isEqualTo("1");
+            }
         }
 
         @Test
         void should_raise_error_when_input_object_type_does_not_suit_for_plus() {
-            assertIllegalArgument(() -> Calculator.plus(true, 1), "Can not plus 'java.lang.Boolean' and 'java.lang.Integer'");
+            assertIllegalArgument(() -> Calculator.plus(true, 1, converter),
+                    "Can not plus 'java.lang.Boolean' and 'java.lang.Integer'");
         }
     }
 
@@ -101,11 +115,6 @@ class CalculatorTest {
         }
 
         @Test
-        void number_equal_in_different_number_type() {
-            assertTrue(Calculator.equals(1, 1L));
-        }
-
-        @Test
         void string_equals() {
             assertTrue(Calculator.equals("a", "a"));
             assertFalse(Calculator.equals("a", "b"));
@@ -113,15 +122,15 @@ class CalculatorTest {
 
         @Test
         void number_equals() {
-            assertTrue(Calculator.equals(1, 1L));
-            assertTrue(Calculator.equals(1, 1.0));
-            assertTrue(Calculator.equals(0, 0.0));
-            assertFalse(Calculator.equals(1, 2L));
+            assertTrue(Calculator.equals(1, 1));
         }
 
         @Test
-        void should_raise_error_when_type_not_matched() {
-            assertIllegalArgument(() -> Calculator.equals("a", 1), "Can not compare 'java.lang.String' and 'java.lang.Integer'");
+        void number_equal_in_different_number_type() {
+            assertFalse(Calculator.equals(1, 2));
+            assertFalse(Calculator.equals(1, 1L));
+            assertFalse(Calculator.equals(1, 1.0));
+            assertFalse(Calculator.equals(0, 0.0));
         }
     }
 
@@ -129,27 +138,36 @@ class CalculatorTest {
     class Multi {
 
         @Test
-        void support_calculate_in_different_number_type() {
-            assertThat(Calculator.multiply(1, 2L)).isEqualTo(new BigDecimal(2));
+        void support_calculate_in_same_type() {
+            assertThat(Calculator.multiply(1, 2, converter)).isEqualTo(2);
+        }
+
+        @Test
+        void support_calculate_in_different_type() {
+            assertThat(Calculator.multiply(1, 2L, converter)).isEqualTo(2L);
         }
 
         @Test
         void all_input_number_should_number_type() {
-            assertIllegalArgument(() -> Calculator.multiply("2", "4"), "Operands should be number but 'java.lang.String' and 'java.lang.String'");
+            assertIllegalArgument(() -> Calculator.multiply("2", "4", converter), "Operands should be number but 'java.lang.String' and 'java.lang.String'");
         }
     }
 
     @Nested
     class Div {
+        @Test
+        void support_calculate_in_same_number_type() {
+            assertThat(Calculator.divide(8, 2, converter)).isEqualTo(4);
+        }
 
         @Test
         void support_calculate_in_different_number_type() {
-            assertThat(Calculator.divide(8, 2)).isEqualTo(new BigDecimal(4));
+            assertThat(Calculator.divide(8, 2L, converter)).isEqualTo(4L);
         }
 
         @Test
         void all_input_number_should_number_type() {
-            assertIllegalArgument(() -> Calculator.divide("2", "4"), "Operands should be number but 'java.lang.String' and 'java.lang.String'");
+            assertIllegalArgument(() -> Calculator.divide("2", "4", converter), "Operands should be number but 'java.lang.String' and 'java.lang.String'");
         }
     }
 
@@ -157,13 +175,18 @@ class CalculatorTest {
     class Sub {
 
         @Test
+        void support_calculate_in_same_number_type() {
+            assertThat(Calculator.subtract(4, 1, converter)).isEqualTo(3);
+        }
+
+        @Test
         void support_calculate_in_different_number_type() {
-            assertThat(Calculator.subtract(4, 1)).isEqualTo(new BigDecimal(3));
+            assertThat(Calculator.subtract(4, 1L, converter)).isEqualTo(3L);
         }
 
         @Test
         void all_input_number_should_number_type() {
-            assertIllegalArgument(() -> Calculator.subtract("2", "4"), "Operands should be number but 'java.lang.String' and 'java.lang.String'");
+            assertIllegalArgument(() -> Calculator.subtract("2", "4", converter), "Operands should be number but 'java.lang.String' and 'java.lang.String'");
         }
     }
 
@@ -172,9 +195,8 @@ class CalculatorTest {
 
         @Test
         void support_all_number_type() {
-            assertThat(Calculator.negate(1)).isEqualTo(new BigDecimal(-1));
-            assertThat(Calculator.negate(1L)).isEqualTo(new BigDecimal(-1));
-            assertThat(Calculator.negate(1.0)).isEqualTo(new BigDecimal("-1.0"));
+            assertThat(Calculator.negate(1)).isEqualTo(-1);
+            assertThat(Calculator.negate(1L)).isEqualTo(-1L);
         }
 
         @Test

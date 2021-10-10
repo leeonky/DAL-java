@@ -34,11 +34,11 @@ class ExpressionTest {
 
         assertCalculate("1", new Operator.Plus(), "2", "12");
 
-        assertCalculate(2, new Operator.Subtraction(), 1, new BigDecimal(1));
+        assertCalculate(2, new Operator.Subtraction(), 1, 1);
 
-        assertCalculate(2, new Operator.Multiplication(), 3, new BigDecimal(6));
+        assertCalculate(2, new Operator.Multiplication(), 3, 6);
 
-        assertCalculate(6, new Operator.Division(), 3, new BigDecimal(2));
+        assertCalculate(6, new Operator.Division(), 3, 2);
 
         assertCalculate(1, new Operator.Minus(), new BigDecimal(2), new BigDecimal(-2));
     }

@@ -3,8 +3,8 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.runtime.Calculator;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.NumberUtil;
 
-import java.math.BigDecimal;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -30,11 +30,11 @@ public class AssertionFailure extends DalException {
         return true;
     }
 
-    //TODO process different type of number
+    //    TODO update message value+type
     public static boolean assertMatch(Object expect, Object actual, int position, Converter converter) {
-        if (expect instanceof Number && actual instanceof Number && !expect.getClass().equals(actual.getClass()))
-            return assertMatch(new BigDecimal(expect.toString()), new BigDecimal(actual.toString()), position, converter);
-        if (!Calculator.equals(converter.convert(expect.getClass(), actual), expect))
+        if (expect instanceof Number && actual instanceof Number ?
+                NumberUtil.compare((Number) expect, (Number) actual, converter) != 0
+                : !Calculator.equals(converter.convert(expect.getClass(), actual), expect))
             throw new AssertionFailure(format("expected [%s] matches [%s] but was not",
                     inspectValue(actual), inspectValue(expect)), position);
         return true;
@@ -54,6 +54,7 @@ public class AssertionFailure extends DalException {
 
     public static boolean assertEquals(Object actual, Object expected, int position) {
         if (!Calculator.equals(actual, expected))
+//            TODO refactor message type+value
             throw new AssertionFailure(format("expected [%s] equal to [%s] but was not",
                     inspectValue(actual), inspectValue(expected)), position);
         return true;

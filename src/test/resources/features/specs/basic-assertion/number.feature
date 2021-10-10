@@ -56,3 +56,13 @@ Feature: number and types
       bigIntegerValue: 1
       bigDecimalValue: 1
     """
+
+  Scenario: number1=number2 means number1 and number2 are the same type
+    When assert "Bean" by the following code:
+    """
+      byteValue = 1
+    """
+    Then failed with the following message:
+    """
+    expected [1] equal to [1] but was not
+    """

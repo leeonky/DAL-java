@@ -70,7 +70,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            return Calculator.compare(node1.evaluate(context), node2.evaluate(context)) < 0;
+            return Calculator.compare(node1.evaluate(context), node2.evaluate(context), context.getConverter()) < 0;
         }
     }
 
@@ -81,7 +81,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            return Calculator.compare(node1.evaluate(context), node2.evaluate(context)) >= 0;
+            return Calculator.compare(node1.evaluate(context), node2.evaluate(context), context.getConverter()) >= 0;
         }
     }
 
@@ -92,7 +92,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            return Calculator.compare(node1.evaluate(context), node2.evaluate(context)) <= 0;
+            return Calculator.compare(node1.evaluate(context), node2.evaluate(context), context.getConverter()) <= 0;
         }
     }
 
@@ -114,7 +114,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            return Calculator.plus(node1.evaluate(context), node2.evaluate(context));
+            return Calculator.plus(node1.evaluate(context), node2.evaluate(context), context.getConverter());
         }
     }
 
@@ -125,7 +125,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            return Calculator.compare(node1.evaluate(context), node2.evaluate(context)) > 0;
+            return Calculator.compare(node1.evaluate(context), node2.evaluate(context), context.getConverter()) > 0;
         }
     }
 
@@ -136,7 +136,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            return Calculator.subtract(node1.evaluate(context), node2.evaluate(context));
+            return Calculator.subtract(node1.evaluate(context), node2.evaluate(context), context.getConverter());
         }
     }
 
@@ -147,7 +147,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            return Calculator.multiply(node1.evaluate(context), node2.evaluate(context));
+            return Calculator.multiply(node1.evaluate(context), node2.evaluate(context), context.getConverter());
         }
     }
 
@@ -158,7 +158,7 @@ public abstract class Operator {
 
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContext context) {
-            return Calculator.divide(node1.evaluate(context), node2.evaluate(context));
+            return Calculator.divide(node1.evaluate(context), node2.evaluate(context), context.getConverter());
         }
     }
 

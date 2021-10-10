@@ -17,6 +17,7 @@ public class RuntimeContext {
     private final Map<String, ConstructorViaSchema> constructors;
     private final Set<Class<?>> schemas;
     private final Map<String, BeanClass<?>> schemaMap;
+    //   TODO user can change converter
     private final Converter converter = Converter.createDefault();
     private boolean listMapping = false;
 

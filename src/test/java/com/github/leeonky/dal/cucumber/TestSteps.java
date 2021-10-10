@@ -98,4 +98,9 @@ public class TestSteps {
         CucumberContext.INSTANCE.assertJavaClass(className, assertion);
         CucumberContext.INSTANCE.shouldNoException(assertion);
     }
+
+    @When("assert {string} by the following code:")
+    public void assert_by_the_following_code(String className, String assertion) {
+        CucumberContext.INSTANCE.assertJavaClass(className, assertion);
+    }
 }
