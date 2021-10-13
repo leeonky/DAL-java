@@ -65,6 +65,14 @@
 <T> List<T> evaluateAll(Object input, String expressions)
 ```
 
+evaluateAll 会执行多条语句并把多个语句的结果以集合形式返回：
+``` java
+new DAL().evaluate(1, "+ 1");   // return 2
+new DAL().evaluate(null, "asList(1, 2)"");      //return [1, 2]
+new DAL().evaluateAll(null, "asList(1, 2)"");   //return [[1, 2]]
+new DAL().evaluateAll(null, "1 2");             //return [1, 2]
+```
+无论是访问数据还是断言数据，都推荐用以上两个API。访问数据时返回得到的数据。断言数据时，如果断言失败则直接抛出 `AssertionFailure` 异常。
 
 ## 数据访问
 
@@ -90,7 +98,6 @@
 #### DAL中的属性包括：
 - Java Class中定义的公有的Getter
 - Java Class中定义的公有的Field
-- Java Class中定义的公有的无参数方法
 - java.util.Map中对应的键值
 - 通过registerPropertyAccessor注册的属性
 
@@ -154,6 +161,12 @@ DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集�
     list.@[-1]       // [1, 3, 5]
 ```
 
+#### 调用对象方法
+如果输入数据是一个Java对象，DAL可以通过无`()`的方式调用一个无参数方法，并返回值。
+``` json
+"hello".length  //  "hello".length()
+```
+
 ### DAL支持的运算
 #### 字面值常量
 目前DAL是基于Java实现的，基本的数值类型都是Java中的常用类型，但DAL添加了一些额外的字符后缀用以描述 byte，short，BigInteger，BigDecimal 字面值：
@@ -168,9 +181,12 @@ DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集�
 |BigInteger   | 100BI|
 |BigDecimal   | 100BD|
 
+#### 字符串常量
+DAL支持通过`''`或`""`包含的字符串常量
+
 如果没有给定任何后缀，DAL会尝试按照 int / long / BigInteger / double / BigDecimal 顺序选择一个合适的类型
 
-#### 操作符
+#### 运算操作符
 | 符号        | 意义             |
 | ----      | ----           |
 | +         | 加              |
@@ -185,8 +201,90 @@ DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集�
 | <=        | 小于等于           |
 | !=        | 不等             |
 | ( )|括号|
+数学运算规则和Java语言中的运算规则一致，在不同类型之间的运算会涉及类型提升。
 
 ## 对数据进行断言
 
+自动化测试的用例都应该是明确和可预知的，DAL只通符号（`=`和`:`）和`is`关键字，来对数据进行断言。
+DAL可以进行与**值**、**正则匹配**、**对象**、**集合**有关的断言，也可以通过预定义具名 Scheam 来断言**数据报文格式**。
 
+``` java
+new DAL().evaluateAll("hello", "= 'hello'");    // Pass!
+```
+
+### "AssertEqual"
+- #### 严格断定（ `=` ）
+    判断值相等是测试中的最常见的断言。DAL通过`=`来达到此效果，它表示一种严格的断定，要求类型和值都相同。比如有如下的数据：
+    ``` json
+    {
+        "number": 1.0
+        "string": "hello"
+    }
+    ```
+    那么如下的断言：
+    ``` java
+    number = 1          // 失败，类型不符合
+    number = 1.0        // 如果依赖的 JSON 库将输入 JSON 数据中的1.0按 double 处理，则断言通过
+    string = 'hello'    // 通过
+    ```
+    
+- #### 不严格断定（语义断定）(`:`)
+    如果从业务而非代码的视角来看待测试用例，我们可能不太关心属性的类型。比如该用 int 还是 long 类型的数字做比较。DAL 通过`:`提供语义断定。比如有如下Java数据
+    ``` java
+    public class Bean {
+        public BigDecimal number = new BigDecimal("1.0");
+        public Type type = Type.B;
+        public enum Type {
+            A, B
+        }
+    }
+    ```
+    那么如下的断言：
+    ``` java
+    number = 1      // 数值相符，通过。
+    number = 1.0    // 数值相符，通过。
+    type = 'B'      // 值相符，通过
+    ```
+    DAL在处理`:`断言时，如果比较对象都是数字，那么先提升某一个操作数的类型，然后再进行数值比较。如果是其他类型，则尝试通过内部`Converter`将输入值转换成比对值的类型，上例中将`type`属性的断言就是将`enum Type`转换成 String 类型后再比较。
+    
+    ##### 注：DAL目前的版本实现下，`:`不允许在`Number` `String`和`Boolean`之间自动转换
+    
+    ``` json
+    '1': 1          //不通过
+    1: '1'          //不通过
+    true: 'true'    //不通过
+    ```
+    
+### 正则匹配
+DAL通过`/regex/`定义正则表达，然后结合`=`和`:`来进行匹配断言。 `=`要求输入类型必须是字符串类型，`:`则先将输入值转换成字符串，然后再进行正则匹配。
+``` json
+    'hello' = /hello/   // 通过
+    1: /\d/             // 通过，先将1转换为'1'再比较
+```
+
+注：只有在`=`和`:`后的`/ /`才会被识别为正则表达式。
+
+### 断言一个数据对象
+常见的测试框架在对数据对象断言时，都是先定义一个新对象，然后再通过各种策略与待测对象比较。DAL不支持定义对象，但是可以用`{}`的方式达到断言对象的效果，并且将对象断言表达的更加直接和清晰。
+DAL对象断言仍以`=`或`:`开始，后边跟随一个`{}`，在`{}`中阐明各子属性的断言，并且支持嵌套。比如有如下的数据：
+
+``` json
+    {
+        "number": 1.0
+        "string": "hello"
+        "object": {
+            "value": 2
+        }
+    }
+```
+那么如下的断言可以通过：
+``` java
+    = {
+        number: 1
+        string: 'hello'
+        object.value: 2
+    }
+```
+**注：这里并非定义了一个新对象，而是通过类似的形式达到对象的断言效果**
+开头的`=`也是严格断言的意思，表示待断言对象中的所有属性都应该出现在`{}`中。
 
