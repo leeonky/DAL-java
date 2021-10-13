@@ -10,9 +10,10 @@
 [![Code Climate issues](https://img.shields.io/codeclimate/issues/leeonky/DAL-java.svg)](https://codeclimate.com/github/leeonky/DAL-java/maintainability)
 [![Code Climate maintainability (percentage)](https://img.shields.io/codeclimate/maintainability-percentage/leeonky/DAL-java.svg)](https://codeclimate.com/github/leeonky/DAL-java/maintainability)
 
-- DAL是一个比较简单的表达式语言，主要用于在自动化测试环境中对数据（Java Bean，Java Map/List，Json等）进行读取和断言。
+- DAL是一个比较简单的表达式语言，主要用于在自动化测试环境中对数据进行读取和断言。
 - DAL的应用场景比较专注于在测试中操作数据，因此相较于编程语言，它的语言复杂性低，没有逻辑控制或变量系统，但能够集中语言特性以针对数据操作提供更多的便利性。
-- DAL的执行总是针对一个输入的数据（根数据），通过`registerPropertyAccessor`和`registerListAccessor`可以泛化数据的形式（比如Json对象）:
+- DAL的执行总是针对一个输入数据（根数据）。
+- DAL输入的数据是一个泛化的类型，不但可以是 Java Class，Java Map/List，还可以通过`registerPropertyAccessor`和`registerListAccessor`方法的注册而支持其他类型格式。以下代码用来支持 JsonObject 类型数据：
 ``` java
         DAL dal = new DAL();
         dal.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
@@ -56,7 +57,9 @@
             }
         });
 ```
-- 通过如下两个API来执行代码并返回结果
+
+## 执行 DAL 语句
+通过如下两个API来执行代码并返回结果
 ``` java
 <T> T evaluate(Object input, String expression)`
 <T> List<T> evaluateAll(Object input, String expressions)
@@ -130,8 +133,7 @@ DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集�
 {
     "list": [{
         "value": 1
-    },
-    {
+    },{
         "value": 2
     }]
 }
@@ -149,10 +151,26 @@ DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集�
 
 ``` json
     list.@.size     // [2, 3, 4]
-    list.@[0]       // [0, 1, 2]
+    list.@[-1]       // [1, 3, 5]
 ```
 
-### DAL支持的一些常规运算：
+### DAL支持的运算
+#### 字面值常量
+目前DAL是基于Java实现的，基本的数值类型都是Java中的常用类型，但DAL添加了一些额外的字符后缀用以描述 byte，short，BigInteger，BigDecimal 字面值：
+|Java 类型|DAL 代码举例|
+|---------|--------|
+|byte/Byte   | 100Y |
+|short/Short | 100S |
+|int/Integer | 100  |
+|long/Long   | 100L |
+|float/Float | 100F |
+|double/Double| 100D |
+|BigInteger   | 100BI|
+|BigDecimal   | 100BD|
+
+如果没有给定任何后缀，DAL会尝试按照 int / long / BigInteger / double / BigDecimal 顺序选择一个合适的类型
+
+#### 操作符
 | 符号        | 意义             |
 | ----      | ----           |
 | +         | 加              |
@@ -166,7 +184,7 @@ DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集�
 | >=        | 大于等于           |
 | <=        | 小于等于           |
 | !=        | 不等             |
-| ()|括号|
+| ( )|括号|
 
 ## 对数据进行断言
 
