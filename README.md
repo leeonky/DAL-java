@@ -59,19 +59,18 @@
 ```
 
 ## 执行 DAL 语句
-通过如下两个API来执行代码并返回结果
+DAL通过如下两个API来执行代码并返回结果
 ``` java
 <T> T evaluate(Object input, String expression)`
 <T> List<T> evaluateAll(Object input, String expressions)
 ```
 
-evaluateAll 会执行多条语句并把多个语句的结果以集合形式返回：
+`evaluateAll` 会执行多条语句并把多个语句的结果以集合形式返回：
 ``` java
-new DAL().evaluate(1, "+ 1");   // return 2
-new DAL().evaluate(null, "asList(1, 2)"");      //return [1, 2]
-new DAL().evaluateAll(null, "asList(1, 2)"");   //return [[1, 2]]
-new DAL().evaluateAll(null, "1 2");             //return [1, 2]
+new DAL().evaluate(1, "+ 1");           // return 2
+new DAL().evaluateAll(null, "1 2");     //return [1, 2]
 ```
+
 无论是访问数据还是断言数据，都推荐用以上两个API。访问数据时返回得到的数据。断言数据时，如果断言失败则直接抛出 `AssertionFailure` 异常。
 
 ## 数据访问
@@ -181,10 +180,10 @@ DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集�
 |BigInteger   | 100BI|
 |BigDecimal   | 100BD|
 
+如果没有给定任何后缀，DAL会尝试按照 int / long / BigInteger / double / BigDecimal 顺序选择一个合适的类型
+
 #### 字符串常量
 DAL支持通过`''`或`""`包含的字符串常量
-
-如果没有给定任何后缀，DAL会尝试按照 int / long / BigInteger / double / BigDecimal 顺序选择一个合适的类型
 
 #### 运算操作符
 | 符号        | 意义             |
@@ -206,85 +205,173 @@ DAL支持通过`''`或`""`包含的字符串常量
 ## 对数据进行断言
 
 自动化测试的用例都应该是明确和可预知的，DAL只通符号（`=`和`:`）和`is`关键字，来对数据进行断言。
-DAL可以进行与**值**、**正则匹配**、**对象**、**集合**有关的断言，也可以通过预定义具名 Scheam 来断言**数据报文格式**。
+DAL可以进行与**值**、**正则匹配**、**对象**、**集合**有关的断言，也可以通过预定义具名 Scheam 来断言。
 
 ``` java
 new DAL().evaluateAll("hello", "= 'hello'");    // Pass!
+new DAL().evaluateAll(1+1, "= 1+1");    // Pass!
 ```
 
 ### "AssertEqual"
 - #### 严格断定（ `=` ）
-    判断值相等是测试中的最常见的断言。DAL通过`=`来达到此效果，它表示一种严格的断定，要求类型和值都相同。比如有如下的数据：
-    ``` json
-    {
-        "number": 1.0
-        "string": "hello"
-    }
-    ```
-    那么如下的断言：
-    ``` java
-    number = 1          // 失败，类型不符合
-    number = 1.0        // 如果依赖的 JSON 库将输入 JSON 数据中的1.0按 double 处理，则断言通过
-    string = 'hello'    // 通过
-    ```
+判断值相等是测试中的最常见的断言。DAL通过`=`来达到此效果，它表示一种严格的断定，要求类型和值都相同。比如有如下的数据：
+``` json
+{
+    "number": 2.0
+    "string": "hello"
+}
+```
+那么如下的断言：
+``` java
+number= 2              // 失败，类型不符合
+number= 2.0            // 如果依赖的 JSON 库将输入 JSON 数据中的 2.0 按 double 处理，则断言通过
+string= 'hello'        // 通过
+string= 'hel' + 'lo'   // 通过
+```
     
 - #### 不严格断定（语义断定）(`:`)
-    如果从业务而非代码的视角来看待测试用例，我们可能不太关心属性的类型。比如该用 int 还是 long 类型的数字做比较。DAL 通过`:`提供语义断定。比如有如下Java数据
-    ``` java
-    public class Bean {
-        public BigDecimal number = new BigDecimal("1.0");
-        public Type type = Type.B;
-        public enum Type {
-            A, B
-        }
+如果从业务而非代码的视角来看待测试用例，我们可能不太关心属性的类型。比如该用 int 还是 long 类型的数字做比较。DAL 通过`:`提供语义断定。比如有如下Java数据
+``` java
+public class Bean {
+    public BigDecimal number = new BigDecimal("2.0");
+    public Type type = Type.B;
+    public enum Type {
+        A, B
     }
-    ```
-    那么如下的断言：
-    ``` java
-    number = 1      // 数值相符，通过。
-    number = 1.0    // 数值相符，通过。
-    type = 'B'      // 值相符，通过
-    ```
-    DAL在处理`:`断言时，如果比较对象都是数字，那么先提升某一个操作数的类型，然后再进行数值比较。如果是其他类型，则尝试通过内部`Converter`将输入值转换成比对值的类型，上例中将`type`属性的断言就是将`enum Type`转换成 String 类型后再比较。
+}
+```
+那么如下的断言：
+``` java
+number= 2      // 数值相符，通过。
+number= 2.0    // 数值相符，通过。
+type= 'B'      // 值相符，通过
+```
+DAL在处理`:`断言时，如果比较对象都是数字，那么先提升某一个操作数的类型，然后再进行数值比较。如果是其他类型，则尝试通过内部`Converter`将输入值转换成比对值的类型，上例中将`type`属性的断言就是将`enum Type`转换成 String 类型后再比较。
     
-    ##### 注：DAL目前的版本实现下，`:`不允许在`Number` `String`和`Boolean`之间自动转换
+##### 注：DAL目前的版本实现下，`:`不允许在`Number` `String`和`Boolean`之间自动转换
     
-    ``` json
-    '1': 1          //不通过
-    1: '1'          //不通过
-    true: 'true'    //不通过
-    ```
+``` javascript
+'1': 1          //不通过
+1: '1'          //不通过
+true: 'true'    //不通过
+```
     
 ### 正则匹配
 DAL通过`/regex/`定义正则表达，然后结合`=`和`:`来进行匹配断言。 `=`要求输入类型必须是字符串类型，`:`则先将输入值转换成字符串，然后再进行正则匹配。
-``` json
+``` javascript
     'hello' = /hello/   // 通过
-    1: /\d/             // 通过，先将1转换为'1'再比较
+    1 : /\d/            // 通过，先将1转换为'1'再比较
+    1 = /\d/            // 不通过，1不是字符串
 ```
 
 注：只有在`=`和`:`后的`/ /`才会被识别为正则表达式。
 
-### 断言一个数据对象
-常见的测试框架在对数据对象断言时，都是先定义一个新对象，然后再通过各种策略与待测对象比较。DAL不支持定义对象，但是可以用`{}`的方式达到断言对象的效果，并且将对象断言表达的更加直接和清晰。
-DAL对象断言仍以`=`或`:`开始，后边跟随一个`{}`，在`{}`中阐明各子属性的断言，并且支持嵌套。比如有如下的数据：
+### 通配符匹配
+如果将期望值指定为`*`，则无论是`=`还是`:`，无论输入值是任何值或类型，断言结果都为通过。`*`主要在对象或集合的断言中，起到占位符的作用。
+``` javascript
+1: *        // 通过
+1= *        // 通过
+null: *     // 通过
+null= *     // 通过
+```
 
+### 断言一个数据对象
+常见的测试框架在对数据对象断言时，都是先定义一个新对象，然后再通过各种策略与待测对象比较。DAL不支持定义对象。考虑如下输入数据：
 ``` json
-    {
-        "number": 1.0
-        "string": "hello"
-        "object": {
-            "value": 2
+{
+    message: {
+        "id": 1,
+        "value": "hello Tom",
+        “receiver": {
+            "id": "007",
+            "name": "James"
+        }
+    }
+}
+```
+我们可以用DAL以如下的方式断言：
+``` javascript
+    message.id= 1
+    message.value= /^hello/
+    message.receiver.id= '007'
+    message.receiver.name= 'James'
+```
+这里会键入多次`message`。而且随着数据层级的增多，重复会越来越多。
+DAL提供了`{}`用类似定义对象的方式来断言对象，并且在`{}`内可以嵌套混杂各种计算表达式、正则表达式或子对象、集合断言。将对象断言表达的更加直接和清晰。刚才的实例可以写成：
+```
+    message= {
+        id= 1
+        value= /^hello/
+        receiver= {
+            id= '007'
+            name= 'James'
         }
     }
 ```
-那么如下的断言可以通过：
-``` java
-    = {
-        number: 1
-        string: 'hello'
-        object.value: 2
+**注：这里并非定义了一个新对象。可以把`{}`理解为一个语句块，然后在不同层级的语句块中定义断言表达式。**
+
+- #### 限定属性
+DAL对象断言仍以`=`或`:`开始，后边跟随一个`{}`，在`{}`中阐明各子属性的断言。开头的`=`也是严格断言的意思，表示待断言对象中不能有`{}`中没有提及的属性。刚才的实例如果写成如下将会断言失败：
+```javascript
+    message= {
+        id= 1
     }
+    //  失败。未预期的属性：value, receiver
 ```
-**注：这里并非定义了一个新对象，而是通过类似的形式达到对象的断言效果**
-开头的`=`也是严格断言的意思，表示待断言对象中的所有属性都应该出现在`{}`中。
+如果仅对数据中部分属性进行断言，又不想写出全部属性名。可以使用`:`断言：
+```javascript
+    message: {
+        id= 1
+        receiver.name= 'James'
+    }
+    //  通过。忽略其他属性，仅断言 id 和 receiver.name 属性
+```
+每个子属性断言语句之间如果没有歧义，可以不用写`,`。
+
+- #### 跳过属性值
+结合`*`和`= {}`可以做到期望数据必须某个属性而忽略其值：
+```javascript
+    message= {
+        id: *
+        value: *
+        receiver: *
+    }
+    //  也可以写成 = *
+```
+
+- #### 非空对象
+DAL目前没有提供否定语义的断言支持。`!=` 仅是一般的逻辑运算符，并不具有`not =`的效果。因此 `null != null` 仅返回一个false的boolean值，并不会触发断言不通过的异常。要想达到 not null 的判定可以通过`: {}`来实现：
+``` javascript
+null: {}    // 失败
+1: {}       // 通过
+"": {}      // 通过
+```
+
+### 断言一个集合
+与对象断言一样，DAL不支持定义集合，但是可以用`[]`的方式达到断言集合的效果，同样使用例更加直接和清晰。比如有如下的数据：
+``` javascript
+    [100, "hello"]
+```
+那么如下的断言可以通过：
+``` javascript
+    = [100 'hello']     // [0]= 100 and [1]= 'hello'
+    : [/100/ 'hello']   // [0]: /100/ and [1]: 'hello'
+```
+
+- #### 元素的默认/特定断言规则
+`[]`前的`=`/`:`表示每个元素和对应位置的期望值进行断言的默认规则，同时也可以单独为某一个元素指定与之不同的断言规则：
+``` javascript
+    : [
+        100
+        ='hello'
+    ]
+```
+注意，换行并不是DAL的语句分割符，可以使用`,`分割不同元素的期望值，每个期望值之间如果没有歧义，可以不用写`,`。
+
+
+
+
+### 和`null`比较
+可以通过`: {}`的语句达到被测数据非`null`的效果
+
 
