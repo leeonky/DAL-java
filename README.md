@@ -79,7 +79,7 @@ new DAL().evaluateAll(null, "1 2");     //return [1, 2]
 与很多动态语言类似，通过圆点`.` + 标识符的形式获取对象的属性，通过`[字符串]`获取含有特殊字符的属性。比如有如下的数据：
 ``` json
     {
-        "property1": 1,
+        "property": 1,
         "object value": "hello"
     }
 ```
@@ -90,11 +90,10 @@ new DAL().evaluateAll(null, "1 2");     //return [1, 2]
 ```
 开头的圆点可以省略：
 ``` json
-    property            // 1
-    ['object value']    // hello
+    property            // 与.property 等效
 ```
 
-#### DAL中的属性包括：
+#### DAL支持的属性包括：
 - Java Class中定义的公有的Getter
 - Java Class中定义的公有的Field
 - java.util.Map中对应的键值
@@ -127,7 +126,7 @@ DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集�
     items.size   // size of list 2
 ```
 
-#### DAL会把如下类型做为集合：
+#### DAL把以下类型视为集合：
 - java.lang.Iterable
 - java.util.stream.Stream
 - Array
@@ -185,7 +184,7 @@ DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集�
 #### 字符串常量
 DAL支持通过`''`或`""`包含的字符串常量
 
-#### 运算操作符
+#### 运算符
 | 符号        | 意义             |
 | ----      | ----           |
 | +         | 加              |
@@ -201,12 +200,13 @@ DAL支持通过`''`或`""`包含的字符串常量
 | <=        | 小于等于           |
 | !=        | 不等             |
 | ( )|括号|
+
 数学运算规则和Java语言中的运算规则一致，在不同类型之间的运算会涉及类型提升。
 
 ## 数据断言
 
 自动化测试的用例都应该是明确和可预知的，DAL只通符号（`=`和`:`）和`is`关键字，来对数据进行断言。
-DAL可以进行与**值**、**正则匹配**、**对象**、**集合**有关的断言，也可以通过预定义具名 Scheam 来断言。
+DAL可以进行与**值**、**正则匹配**、**对象**、**集合**有关的断言，也可以通过预定义具名 Schema 来断言。
 
 ``` java
 new DAL().evaluateAll("hello", "= 'hello'");    // Pass!
@@ -218,7 +218,7 @@ new DAL().evaluateAll(1+1, "= 1+1");    // Pass!
 判断值相等是测试中的最常见的断言。DAL通过`=`来达到此效果，它表示一种严格的断定，要求类型和值都相同。比如有如下的数据：
 ``` json
 {
-    "number": 2.0
+    "number": 2.0,
     "string": "hello"
 }
 ```
@@ -247,7 +247,7 @@ number: 2      // 数值相符，通过。
 number: 2.0    // 数值相符，通过。
 type: 'B'      // 值相符，通过
 ```
-DAL在处理`:`断言时，如果比较对象都是数字，那么先提升某一个操作数的类型，然后再进行数值比较。如果是其他类型，则尝试通过内部`Converter`将输入值转换成比对值的类型，上例中将`type`属性的断言就是将`enum Type`转换成 String 类型后再比较。
+DAL在处理`:`断言时，如果比较对象都是数字，那么先提升某一个操作数的类型，然后再进行数值比较。如果是其他类型，则尝试通过内部`Converter`将输入值转换成比对值的类型，上例中`type`属性的断言就是将`enum Type`转换成 String 类型后再比较。
     
 ##### 注：DAL目前的版本实现下，`:`不允许在`Number` `String`和`Boolean`之间自动转换
     
@@ -256,7 +256,16 @@ DAL在处理`:`断言时，如果比较对象都是数字，那么先提升某�
 1: '1'          //不通过
 true: 'true'    //不通过
 ```
-    
+
+##### 特别注意：DAL中只有 `=` 和 `:` 有断言效果，断言表达式在断言通过的情况下返回 true，不通过则直接抛出异常。`> < >= <= != && and || or` 这几个逻辑运算符不具有断言效果。执行他们会返回 true 或 false 结果。不会抛出 `AssertionFailure` 异常。
+
+``` javascript
+1 > 2       // 返回 false
+1 != 1      // 返回 false
+```
+##### 同时 `!` 也不能和 `=` 与 `:`组合使用。断言数据都应是正面给出的确切期望值。
+
+
 ### 正则匹配
 DAL通过`/regex/`定义正则表达，然后结合`=`和`:`来进行匹配断言。 `=`要求输入类型必须是字符串类型，`:`则先将输入值转换成字符串，然后再进行正则匹配。
 ``` javascript
@@ -277,7 +286,7 @@ null= *     // 通过
 ```
 
 ### 和`null`比较
-DAL中任何非 null 对象和 `null` 的`=`或`:`断言都不通过。同样的如果输入值是 `null`，除`*`和 `null` 外，其他任何断言也都不通过。
+DAL中任何非 null 对象和 `null` 的`=`或`:`断言都不通过。同样的如果输入值是 `null`，除`*`和 `null` 外，其他任何期望值也都不通过。
 ```
 null: null  // 通过
 null= null  // 通过
@@ -291,7 +300,7 @@ null= *     // 通过
 {
     message: {
         "id": 1,
-        "value": "hello Tom",
+        "value": "hello James",
         “receiver": {
             "id": "007",
             "name": "James"
@@ -299,7 +308,7 @@ null= *     // 通过
     }
 }
 ```
-我们用DAL现有方式断言：
+我们当然可以用现有DAL方式断言：
 ``` javascript
     message.id= 1
     message.value= /^hello/
@@ -369,7 +378,7 @@ null: {}    // 失败
 ```
 
 - #### 元素的默认/特定断言规则
-`[]`前的`=`/`:`表示每个元素和对应位置的期望值进行断言的默认规则，同时也可以单独为某一个元素指定与之不同的断言规则：
+`[]`前的`=`和`:`表示每个元素和对应位置的期望值进行断言的默认规则。除此之外，也可以单独为某一个元素指定与之不同的断言规则：
 ``` javascript
     : [
         100
@@ -472,7 +481,7 @@ dal.getRuntimeContextBuilder().registerSchema(已支付的订单.class);
 order is 已支付的订单 which paymentData.amount: 100
 ```
 
-注：which后只能接一条断言语句，如果需要多条语句，请使用 `and` 或 `,` 连接。`which`后也可以跟随`=` `:`引导的断言表达式：
+注：which后只能接一条断言语句，如果需要多条语句，请使用 `and` 或 `,` 连接。当然，如果要断言多个属性，`which`后可以直接跟随`=` `:`引导的断言表达式：
 ``` javascript
 order is 已支付的订单 which: {
     paymentData.amount: 100
@@ -489,7 +498,7 @@ order is 已支付的订单: {
 - 属性值和类型
 
 在开始定义 `Schema` 的例子中，`public String status = 'PAID'` 表示数据包含属性 status，其值为 String 类型的 PAID。 
-属性 amount 使用了 `Formatters.Number`，表示数据会出现一个Number类型的`Formatter`，有关 `Formatter` 将在后边描述。除此 `Formatter` 之外还可以使用 `Type` 和 `Value` 两个接口：
+属性 amount 使用了 `Formatters.Number`，表示数据会出现一个Number类型的`Formatter`，有关 `Formatter` 将在后边描述。除了 `Formatter` 之外还可以使用 `Type` 和 `Value` 两个接口：
 ``` java
 public interface Type<T> {
     boolean verify(T value);
@@ -512,7 +521,7 @@ public class 已支付的支付记录{
 
 - 部分验证
 
-前述的 Schema 即验证数据，又验证数据格式，确保属性都应出现在结果中。如果不关心其他属性，可以使用 `@Partial` 注解，只验证 Schema 中出现的属性：
+前述的 Schema 即验证数据，又验证数据格式，类似 `= {}`，要求Schema 中罗列的属性都应出现在结果中。如果不关心其他属性，可以使用 `@Partial` 注解，只验证 Schema 中出现的属性：
 
 ``` java
 @Partial
@@ -520,7 +529,7 @@ public class 已支付的支付记录{
     public String status = 'DONE';
 }
 ```
-如果属性值有可能为null，可以在字段定义时加上 `@AllowNull` 注解
+如果属性值有可能为null，可以在属性上加注 `@AllowNull` 注解
 
 - 属性别名
 
@@ -563,5 +572,6 @@ public class 已支付的订单 implements 订单{
 ``` javascript
 time is LocalDateTime which year= 2001
 ```
-DAL目前内置的 `Formatter` 都在 `Formatters`中定义。
+DAL内置的 `Formatter` 都在 `Formatters`中定义。
+
 
