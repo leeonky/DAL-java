@@ -163,7 +163,7 @@ DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集�
 #### 调用对象方法
 如果输入数据是一个Java对象，DAL可以通过无`()`的方式调用一个无参数方法，并返回值。
 ``` json
-"hello".length  //  "hello".length()
+"hello".length  // "hello".length()
 ```
 
 ### DAL支持的运算
@@ -203,7 +203,7 @@ DAL支持通过`''`或`""`包含的字符串常量
 | ( )|括号|
 数学运算规则和Java语言中的运算规则一致，在不同类型之间的运算会涉及类型提升。
 
-## 对数据进行断言
+## 数据断言
 
 自动化测试的用例都应该是明确和可预知的，DAL只通符号（`=`和`:`）和`is`关键字，来对数据进行断言。
 DAL可以进行与**值**、**正则匹配**、**对象**、**集合**有关的断言，也可以通过预定义具名 Scheam 来断言。
@@ -243,9 +243,9 @@ public class Bean {
 ```
 那么如下的断言：
 ``` java
-number= 2      // 数值相符，通过。
-number= 2.0    // 数值相符，通过。
-type= 'B'      // 值相符，通过
+number: 2      // 数值相符，通过。
+number: 2.0    // 数值相符，通过。
+type: 'B'      // 值相符，通过
 ```
 DAL在处理`:`断言时，如果比较对象都是数字，那么先提升某一个操作数的类型，然后再进行数值比较。如果是其他类型，则尝试通过内部`Converter`将输入值转换成比对值的类型，上例中将`type`属性的断言就是将`enum Type`转换成 String 类型后再比较。
     
@@ -277,7 +277,13 @@ null= *     // 通过
 ```
 
 ### 和`null`比较
-DAL中任何非 null 对象和 null 的`=`或`:`断言都不通过。同样的如果输入值是 null，除`*`断言外，其他任何断言也都不通过。
+DAL中任何非 null 对象和 `null` 的`=`或`:`断言都不通过。同样的如果输入值是 `null`，除`*`和 `null` 外，其他任何断言也都不通过。
+```
+null: null  // 通过
+null= null  // 通过
+null: *     // 通过
+null= *     // 通过
+```
 
 ### 断言一个数据对象
 常见的测试框架在对数据对象断言时，都是先定义一个新对象，然后再通过各种策略与待测对象比较。DAL不支持定义对象。考虑如下输入数据：
@@ -293,7 +299,7 @@ DAL中任何非 null 对象和 null 的`=`或`:`断言都不通过。同样的�
     }
 }
 ```
-我们可以用DAL以如下的方式断言：
+我们用DAL现有方式断言：
 ``` javascript
     message.id= 1
     message.value= /^hello/
@@ -333,7 +339,7 @@ DAL对象断言仍以`=`或`:`开始，后边跟随一个`{}`，在`{}`中阐明
 每个子属性断言语句之间如果没有歧义，可以不用写`,`。
 
 - #### 跳过属性值
-结合`*`和`= {}`可以做到期望数据必须某个属性而忽略其值：
+结合`*`和`= {}`可以做到期望数据必须含有某个属性而忽略其值：
 ```javascript
     message= {
         id: *
@@ -371,7 +377,7 @@ null: {}    // 失败
         = 'world'
     ]
 ```
-注意，换行并不是DAL的语句分割符，可以使用`,`分割不同元素的期望值，每个期望值之间如果没有歧义，可以不用写`,`。
+注意，换行并不是DAL的语句分割符，可以使用`,`分割不同元素的期望值，期望值之间如果没有歧义，可以不用写`,`。
 
 - #### 部分元素断言
 如果仅对集合的前 n 个元素进行断言，则可以在 n+1 的位置写入`...`来终止集合断言：
@@ -415,46 +421,123 @@ lines.product.name: ['iPad' 'iPhone' 'ITouch']
 ```
 
 ### is 断言
-通过 `=` 和 `:` 直接书写的断言语句其实是用例的细节实现。对于某些大粒度的验收测试，可能并不太关心具体的值是多少，而是希望某些数据是某种具有业务意义的状态。对比如下的断言：
+通过 `=` 和 `:` 直接书写的断言语句其实是用例的细节实现。对于某些大粒度的验收测试，可能并不太关心具体的值是多少，而是希望某些数据是某种具有业务意义的状态。比如一个API返回如下的数据：
+``` json
+{
+    "order": {
+        "id": "001",
+        "status": "PAID",
+        "paymentData": {
+            "amount": "100",
+            "status": "DONE"
+        }
+    }
+}
+```
+可以通过如下的断言测试其已经支付的状态和金额：
 ``` javascript
 order: {
     status: 'PAID'
+    paymentData: {
+        amount: 100
+        status: 'DONE'
+    }
 }
 ```
-与
+这个测试用例体现了已支付状态的细节，即 status 为 'PAID'，并且 paymentData.status 为 'DONE'。如果我们不关系这个细节或者在这层细节之上抽象出一个业务层，并将其描述“已支付的订单”：
 ``` javascript
 order is 已支付的订单
 ```
-前者面向实现细节的判断，而后者则更面向业务的表达。
+如此以来，这个用例更能接近业务需求的描述，而非对程序实现的测试。
+
 - #### Scheam
-DAL 通过 `is`关键字，以及预定义的 Java 类型 Scheam 来实现刚才的效果。
-首先定义Java类：
+DAL 通过 `is`关键字，以及预定义的 Java 类型 `Scheam` 来实现刚才的效果。首先定义 `Schema` 类：
 ``` java
 public class 已支付的订单{
-    public String status = 'PAID'
+    public String status = 'PAID';
+    public 已支付的支付记录 paymentData;
+}
+
+public class 已支付的支付记录{
+    public Formatters.Number amount;
+    public String status = 'DONE';
 }
 ```
 然后通过 `registerSchema` 方法注册到DAL中，就可以引用了。
 ``` java
 dal.getRuntimeContextBuilder().registerSchema(已支付的订单.class);
 ```
-同时 `is` 语句后还可以跟随一个 `which` 子句，进行其他属性的断言：
+同时 `is` 语句后还可以跟随一个 `which` 子句，进一步验证其他属性：
 ``` javascript
-order is 已支付的订单 which status: 'PAID'
+order is 已支付的订单 which paymentData.amount: 100
 ```
 
-注：which后只能接一条断言语句，如果需要多条语句，请使用 `and` 或 `,` 连接。
-
-`which`后也可以跟随`=` `:`引导的断言表达式：
+注：which后只能接一条断言语句，如果需要多条语句，请使用 `and` 或 `,` 连接。`which`后也可以跟随`=` `:`引导的断言表达式：
 ``` javascript
 order is 已支付的订单 which: {
-    status: 'PAID'
+    paymentData.amount: 100
 }
 ```
 同时在此种场景也也可以不写`which`：
+
 ``` javascrpit
 order is 已支付的订单: {
-    status: 'PAID'
+    paymentData.amount: 100
 }
+```
+
+- 部分验证
+
+在定义 Schema 时出现的 `Formatters.Number amount` 表示数据会出现一个Number类型的`Formatter`，有关 `Formatter` 将在后边描述。这样的 Schema 即验证数据，又验证数据格式，确保属性都应出现在结果中。如果不关心其他属性，可以使用 `@Partial` 注解，只验证 Schema 中出现的属性：
+
+``` java
+@Partial
+public class 已支付的支付记录{
+    public String status = 'DONE';
+}
+```
+如果属性值有可能为null，可以再字段定义时加上 `@AllowNull` 注解
+
+- 属性别名
+
+刚才的实例中验证金额的部分是通过 paymentData.amount 来判断的，从某种程度上讲，这也体现了实现细节。为了能更直接表述“金额”这个业务名词，DAL提供了属性别名来抽象之，具体做法是在 Order 的 Schema 定义中用 `@FieldAlias` 定义别名：
+``` java
+@FieldAliases({
+    @FieldAlias(alias = "支付金额", field = "paymentData.amount"),
+})
+public class 已支付的订单{
+    public String status = 'PAID';
+    public 已支付的支付记录 paymentData;
+}
+```
+
+然后再断言中使用：
+``` javascript
+order is 已支付的订单 which 支付金额: 100
+order is 已支付的订单: {支付金额: 100}
+```
+属性别名可以定在 `Schema` 实现的接口或基类中：
+``` java
+@FieldAliases({
+    @FieldAlias(alias = "支付金额", field = "paymentData.amount"),
+})
+public interface 订单 {
+}
+
+public class 已支付的订单 implements 订单{
+    public String status = 'PAID';
+    public 已支付的支付记录 paymentData;
+}
+```
+
+- #### Formatter
+
+`is` 后除了可以使用 Schema 外还可以使用 `Formatter`，`Formatter` 在 JSON 验证中有一定作用。其主要用意是将一种输入数据，转换为另一种类型，然后对转换后的值进行断言。JSON 中的数值类型有限，如果用JSON返回一个时间数据，常用做法是用字符串描述时间：
+``` json
+{ "time": "2001-10-11T01:00:00" }
+```
+对 time 断言时，如果只匹配时间的部分值。那么只能使用比较晦涩的正则表达式。但如果使用`Formatter`，则可以先将其转换为一个时间类型（比如 LocalDateTime），然后再获取需要的属性进行断言：
+``` javascript
+time is LocalDateTime which year= 2001
 ```
 
