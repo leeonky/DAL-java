@@ -486,9 +486,33 @@ order is 已支付的订单: {
 }
 ```
 
+- 属性值和类型
+
+在开始定义 `Schema` 的例子中，`public String status = 'PAID'` 表示数据包含属性 status，其值为 String 类型的 PAID。 
+属性 amount 使用了 `Formatters.Number`，表示数据会出现一个Number类型的`Formatter`，有关 `Formatter` 将在后边描述。除此 `Formatter` 之外还可以使用 `Type` 和 `Value` 两个接口：
+``` java
+public interface Type<T> {
+    boolean verify(T value);
+    String errorMessage(String field, Object actual);
+}
+
+public abstract class Value<T> {
+    public abstract boolean verify(T actual);
+}
+```
+
+这两个接口都是为了在Schema中描述属性的限制信息。比如：
+``` java
+public class 已支付的支付记录{
+    public Value<Integer> amount = Value.greaterThan(0);    // 表示 amount 必须是大于 0 的 Integer
+    public String status = 'DONE';
+}
+```
+`Type` 会比较类型和值，而 `Value` 不进行类型比较。
+
 - 部分验证
 
-在定义 Schema 时出现的 `Formatters.Number amount` 表示数据会出现一个Number类型的`Formatter`，有关 `Formatter` 将在后边描述。这样的 Schema 即验证数据，又验证数据格式，确保属性都应出现在结果中。如果不关心其他属性，可以使用 `@Partial` 注解，只验证 Schema 中出现的属性：
+前述的 Schema 即验证数据，又验证数据格式，确保属性都应出现在结果中。如果不关心其他属性，可以使用 `@Partial` 注解，只验证 Schema 中出现的属性：
 
 ``` java
 @Partial
@@ -496,11 +520,11 @@ public class 已支付的支付记录{
     public String status = 'DONE';
 }
 ```
-如果属性值有可能为null，可以再字段定义时加上 `@AllowNull` 注解
+如果属性值有可能为null，可以在字段定义时加上 `@AllowNull` 注解
 
 - 属性别名
 
-刚才的实例中验证金额的部分是通过 paymentData.amount 来判断的，从某种程度上讲，这也体现了实现细节。为了能更直接表述“金额”这个业务名词，DAL提供了属性别名来抽象之，具体做法是在 Order 的 Schema 定义中用 `@FieldAlias` 定义别名：
+刚才的实例中验证金额的部分是通过 paymentData.amount 来判断的，从某种程度上讲，这也体现了实现细节。为了能更直接表述“支付金额”这个业务名词，DAL提供了属性别名来抽象之，具体做法是在 Order 的 Schema 定义中用 `@FieldAlias` 定义别名：
 ``` java
 @FieldAliases({
     @FieldAlias(alias = "支付金额", field = "paymentData.amount"),
@@ -510,8 +534,7 @@ public class 已支付的订单{
     public 已支付的支付记录 paymentData;
 }
 ```
-
-然后再断言中使用：
+然后在断言中使用：
 ``` javascript
 order is 已支付的订单 which 支付金额: 100
 order is 已支付的订单: {支付金额: 100}
@@ -540,4 +563,5 @@ public class 已支付的订单 implements 订单{
 ``` javascript
 time is LocalDateTime which year= 2001
 ```
+DAL目前内置的 `Formatter` 都在 `Formatters`中定义。
 
