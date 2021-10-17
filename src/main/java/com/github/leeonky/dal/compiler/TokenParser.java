@@ -26,7 +26,7 @@ public class TokenParser {
             INTEGER = tokenMatcher(DIGITAL_OR_MINUS::contains, emptyList(), false, DELIMITER, Token::isNumber),
             IDENTITY_PROPERTY = tokenMatcher(not(DELIMITER::contains), ALL_KEY_WORDS, false, DELIMITER_OR_DOT,
                     not(Token::isNumber)),
-            DOT_PROPERTY = tokenMatcher(DOT::equals, singletonList(LIST_TAIL), true, DELIMITER_OR_DOT, Token::all);
+            DOT_PROPERTY = tokenMatcher(DOT::equals, singletonList(LIST_ELLIPSIS), true, DELIMITER_OR_DOT, Token::all);
 
     public static final TokenFactory SCHEMA = tokenMatcher(not(DELIMITER::contains), ALL_KEY_WORDS,
             false, DELIMITER, not(Token::isNumber)).or("expect a schema");

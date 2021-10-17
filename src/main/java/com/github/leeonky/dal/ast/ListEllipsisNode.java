@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-public class ListTailNode extends Node {
+public class ListEllipsisNode extends Node {
     @Override
     public String inspect() {
         return "...";

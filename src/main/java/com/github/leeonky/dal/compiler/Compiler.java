@@ -85,7 +85,7 @@ public class Compiler {
                 i -> parser.fetchExpression(PROPERTY_CHAIN.fetch(parser),
                         JUDGEMENT_OPERATORS.or("expect operator `:` or `=`"), JUDGEMENT_EXPRESSION_OPERAND)));
         LIST = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('[', ']', ListNode::new,
-                i -> parser.wordToken(Constants.LIST_TAIL, token -> new ListTailNode()).isPresent() ? null
+                i -> parser.wordToken(Constants.LIST_ELLIPSIS, token -> new ListEllipsisNode()).isPresent() ? null
                         : parser.fetchExpression(new PropertyNode(InputNode.INSTANCE, i, BRACKET),
                         JUDGEMENT_OPERATORS.or(parser.DEFAULT_JUDGEMENT_OPERATOR), JUDGEMENT_EXPRESSION_OPERAND)));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD);

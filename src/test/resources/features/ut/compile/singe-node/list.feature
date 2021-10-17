@@ -104,6 +104,23 @@ Feature: list node
     }
     """
 
+  Scenario: support incomplete List 2
+    Given the following dal code:
+    """
+     [... 1]
+    """
+    Then got the following "list" node:
+    """
+    : {
+      class.simpleName: 'ListNode'
+      inspect: '[... 1]'
+      positionBegin: 1
+      expressions.inspect: [
+        '[-1] : 1'
+      ]
+    }
+    """
+
   Scenario Outline: support different judgement operator in element
     Given the following dal code:
     """

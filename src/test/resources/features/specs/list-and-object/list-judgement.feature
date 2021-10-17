@@ -240,6 +240,20 @@ Feature: judge list
         ^
     """
 
+  Scenario: use ... at first of list to ignore list size and assert element from last
+    Given the following input data:
+    """
+      [1, 2, 3]
+    """
+    Then the following assertion should pass:
+    """
+      = [... 3]
+    """
+    And the following assertion should pass:
+    """
+      : [... 3]
+    """
+
   Scenario: support mapping list element property to new list by optional `.@`
     Given the following input data:
     """
