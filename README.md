@@ -28,11 +28,8 @@
 
             @Override
             public Set<String> getPropertyNames(JSONObject instance) {
-                Set<String> set = new HashSet<>();
-                Iterator iterator = instance.keys();
-                while (iterator.hasNext())
-                    set.add(iterator.next().toString());
-                return set;
+                return stream(spliteratorUnknownSize((Iterator<String>) instance.keys(), Spliterator.NONNULL), false)
+                        .collect(Collectors.toSet());
             }
 
             @Override
@@ -61,7 +58,7 @@
 ## 执行 DAL 语句
 DAL通过如下两个API来执行代码并返回结果
 ``` java
-<T> T evaluate(Object input, String expression)`
+<T> T evaluate(Object input, String expression)
 <T> List<T> evaluateAll(Object input, String expressions)
 ```
 
@@ -393,6 +390,11 @@ null: {}    // 失败
 ``` javascript
     = [100 'hello' ...]     // 仅断言前两个元素
 ```
+同时也可以对末尾若干个元素进行断言：
+``` javascript
+    = [... 'hello' 'world']     // 仅断言最后两个元素
+```
+
 同样可以使用`*`跳过某个元素：
 ``` javascript
     = [100, *, 'world']       // 跳过第二个元素，这里使用逗号分隔，否则会解释为100 乘以 'world'
