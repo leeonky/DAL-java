@@ -49,17 +49,17 @@ public class TokenParser {
             if (args.size() != 1)
                 throw sourceCode.syntaxError(message, -1);
             return nodeFactory.apply(args.get(0));
-        }, i -> nodeMatcher.fetch(this));
+        }, () -> nodeMatcher.fetch(this));
     }
 
-    public <T extends Node> Optional<Node> fetchNodes(Character opening, char closing, Function<List<T>,
-            Node> nodeFactory, Function<Integer, T> element) {
+    public <T> Optional<Node> fetchNodes(Character opening, char closing, Function<List<T>,
+            Node> nodeFactory, Supplier<T> element) {
         return sourceCode.fetchElements(BY_NODE, opening, closing, element, nodeFactory);
     }
 
     public Optional<Node> fetchString(Character opening, char closing, Function<String, Node> nodeFactory,
                                       Map<String, Character> escapeChars) {
-        return sourceCode.fetchElements(BY_CHAR, opening, closing, i -> sourceCode.escapedPop(escapeChars),
+        return sourceCode.fetchElements(BY_CHAR, opening, closing, () -> sourceCode.escapedPop(escapeChars),
                 chars -> nodeFactory.apply(chars.stream().map(String::valueOf).collect(joining())));
     }
 
@@ -110,6 +110,18 @@ public class TokenParser {
         } finally {
             operators.pop();
         }
+    }
+
+    public Function<Node, Expression> fetchExpression(OperatorFactory operatorFactory, NodeFactory rightCompiler) {
+        Operator operator = operatorFactory.fetch(this);
+        operators.push(operator);
+        Node fetch;
+        try {
+            fetch = rightCompiler.fetch(this);
+        } finally {
+            operators.pop();
+        }
+        return node -> new Expression(node, operator, fetch).adjustOperatorOrder();
     }
 
     public boolean isEnableCommaAnd() {

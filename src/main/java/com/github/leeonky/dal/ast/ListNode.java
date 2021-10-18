@@ -6,32 +6,35 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.assertListSize;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static java.lang.String.format;
+import static java.util.stream.IntStream.range;
 
 public class ListNode extends Node {
     // TODO New type JudgementExpression
     private final List<Expression> expressions;
     private final Type type;
 
-    //        TODO ... should only be the first or last of list
-    public ListNode(List<Expression> expressions) {
-        this.expressions = expressions.stream().filter(Objects::nonNull).collect(Collectors.toList());
-        if (expressions.size() > 0) {
-            if (expressions.get(0) == null) {
-                for (int i = 0; i < this.expressions.size(); i++) {
-                    this.expressions.set(i, this.expressions.get(i).updateLeft(new PropertyNode(InputNode.INSTANCE, -1 * this.expressions.size(), BRACKET)));
-                }
-                type = Type.LAST_N_ITEMS;
-            } else if (expressions.get(expressions.size() - 1) == null) {
-                type = Type.FIRST_N_ITEMS;
-            } else
-                type = Type.ALL_ITEMS;
-        } else
-            type = Type.ALL_ITEMS;
+    public ListNode(List<Function<Node, Expression>> expressionFactories) {
+        List<Function<Node, Expression>> elementFactories = expressionFactories.stream().filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        int size = elementFactories.size();
+        type = guessType(expressionFactories);
+        expressions = range(0, size).mapToObj(i -> elementFactories.get(i).apply(new PropertyNode(InputNode.INSTANCE,
+                type.indexOfNode(i, size), BRACKET))).collect(Collectors.toList());
+    }
+
+    private Type guessType(List<Function<Node, Expression>> expressionFactories) {
+        if (expressionFactories.size() > 0 && expressionFactories.get(expressionFactories.size() - 1) == null)
+            return Type.FIRST_N_ITEMS;
+        else if (expressionFactories.size() > 0 && expressionFactories.get(0) == null)
+            return Type.LAST_N_ITEMS;
+        else
+            return Type.ALL_ITEMS;
     }
 
     public ListNode() {
@@ -71,6 +74,15 @@ public class ListNode extends Node {
     }
 
     private enum Type {
-        ALL_ITEMS, FIRST_N_ITEMS, LAST_N_ITEMS
+        ALL_ITEMS, FIRST_N_ITEMS, LAST_N_ITEMS {
+            @Override
+            int indexOfNode(int i, int count) {
+                return i - count;
+            }
+        };
+
+        int indexOfNode(int i, int count) {
+            return i;
+        }
     }
 }

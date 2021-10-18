@@ -106,13 +106,12 @@ public class SourceCode {
     }
 
     public <T> Optional<Node> fetchElements(TokenParser.FetchBy fetchBy, Character opening, char closing,
-                                            Function<Integer, T> element, Function<List<T>, Node> nodeFactory) {
+                                            Supplier<T> element, Function<List<T>, Node> nodeFactory) {
         return when(whenFirstChar(opening::equals)).optional(() -> {
             int startPosition = seek(1);
             List<T> elements = new ArrayList<>();
-            int index = 0;
             while (isEndOfCode() && closing != currentChar()) {
-                elements.add(element.apply(index++));
+                elements.add(element.get());
                 fetchBy.afterFetchElement(this);
             }
             if (!isEndOfCode())

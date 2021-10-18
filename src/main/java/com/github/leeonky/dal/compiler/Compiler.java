@@ -82,12 +82,12 @@ public class Compiler {
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(), IDENTITY_PROPERTY);
         PROPERTY_CHAIN = parser -> PROPERTY.or("expect a object property").recursive(EXPLICIT_PROPERTY).fetch(parser);
         OBJECT = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('{', '}', ObjectNode::new,
-                i -> parser.fetchExpression(PROPERTY_CHAIN.fetch(parser),
+                () -> parser.fetchExpression(PROPERTY_CHAIN.fetch(parser),
                         JUDGEMENT_OPERATORS.or("expect operator `:` or `=`"), JUDGEMENT_EXPRESSION_OPERAND)));
         LIST = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('[', ']', ListNode::new,
-                i -> parser.wordToken(Constants.LIST_ELLIPSIS, token -> new ListEllipsisNode()).isPresent() ? null
-                        : parser.fetchExpression(new PropertyNode(InputNode.INSTANCE, i, BRACKET),
-                        JUDGEMENT_OPERATORS.or(parser.DEFAULT_JUDGEMENT_OPERATOR), JUDGEMENT_EXPRESSION_OPERAND)));
+                () -> parser.wordToken(Constants.LIST_ELLIPSIS, token -> new ListEllipsisNode()).isPresent() ? null
+                        : parser.fetchExpression(JUDGEMENT_OPERATORS.or(parser.DEFAULT_JUDGEMENT_OPERATOR),
+                        JUDGEMENT_EXPRESSION_OPERAND)));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD);
         UNARY_OPERATOR_EXPRESSION = parser -> parser.fetchExpression(null, UNARY_OPERATORS, OPERAND);
         OPERAND = UNARY_OPERATOR_EXPRESSION.or(oneOf(CONST, PROPERTY, PARENTHESES, INPUT)
