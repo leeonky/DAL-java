@@ -60,4 +60,12 @@ public abstract class Node {
     public Node avoidListMapping() {
         return this;
     }
+
+    public Object getRootName() {
+        return null;
+    }
+
+    public String inspectClause() {
+        return inspect();
+    }
 }

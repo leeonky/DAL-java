@@ -62,4 +62,14 @@ public class Expression extends Node {
     public String inspect() {
         return operator.inspect(node1, node2);
     }
+
+    @Override
+    public Object getRootName() {
+        return node1.getRootName();
+    }
+
+    @Override
+    public String inspectClause() {
+        return node2.inspect();
+    }
 }

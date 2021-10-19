@@ -12,15 +12,14 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
 public class ObjectNode extends Node {
-
     // TODO New type JudgementExpression
-    private final List<Expression> expressions = new ArrayList<>();
+    private final List<Node> expressions = new ArrayList<>();
 
-    public ObjectNode(List<Expression> expressions) {
+    public ObjectNode(List<Node> expressions) {
         this.expressions.addAll(expressions);
     }
 
-    public List<Expression> getExpressions() {
+    public List<Node> getExpressions() {
         return expressions;
     }
 
@@ -30,7 +29,7 @@ public class ObjectNode extends Node {
 
     @Override
     public String inspect() {
-        return format("{%s}", expressions.stream().map(Expression::inspect).collect(joining(" ")));
+        return format("{%s}", expressions.stream().map(Node::inspect).collect(joining(" ")));
     }
 
     @Override
@@ -48,11 +47,11 @@ public class ObjectNode extends Node {
     }
 
     private Set<String> collectUnexpectedFields(DataObject dataObject) {
-        Set<String> dataFields = new LinkedHashSet<>(dataObject.getFieldNames());
-        dataFields.removeAll(expressions.stream().map(expression ->
-                dataObject.firstFieldFromAlias(((PropertyNode) expression.getLeftOperand()).getRootName()))
-                .collect(Collectors.toSet()));
-        return dataFields;
+        return new LinkedHashSet<String>(dataObject.getFieldNames()) {{
+            removeAll(expressions.stream().map(expression ->
+                    dataObject.firstFieldFromAlias(expression.getRootName()))
+                    .collect(Collectors.toSet()));
+        }};
     }
 
     @Override

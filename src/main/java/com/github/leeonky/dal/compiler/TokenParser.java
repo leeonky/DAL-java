@@ -112,7 +112,7 @@ public class TokenParser {
         }
     }
 
-    public Function<Node, Expression> fetchExpression(OperatorFactory operatorFactory, NodeFactory rightCompiler) {
+    public ExpressionClause fetchExpression(OperatorFactory operatorFactory, NodeFactory rightCompiler) {
         Operator operator = operatorFactory.fetch(this);
         operators.push(operator);
         Node fetch;
@@ -121,7 +121,7 @@ public class TokenParser {
         } finally {
             operators.pop();
         }
-        return node -> new Expression(node, operator, fetch).adjustOperatorOrder();
+        return input -> new Expression(input, operator, fetch).adjustOperatorOrder();
     }
 
     public boolean isEnableCommaAnd() {
@@ -146,8 +146,8 @@ public class TokenParser {
         }
     }
 
-    public final OperatorFactory DEFAULT_JUDGEMENT_OPERATOR = tokenParser -> operators.isEmpty() ?
-            new Operator.Matcher() : operators.getFirst();
+    public static final OperatorFactory DEFAULT_JUDGEMENT_OPERATOR = tokenParser -> tokenParser.operators.isEmpty() ?
+            new Operator.Matcher() : tokenParser.operators.getFirst();
 
     public static OperatorMatcher operatorMatcher(String symbol, Supplier<Operator> factory,
                                                   Predicate<TokenParser> matcher) {

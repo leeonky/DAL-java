@@ -1,12 +1,12 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.compiler.ExpressionClause;
 import com.github.leeonky.dal.runtime.DataObject;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.assertListSize;
@@ -16,19 +16,19 @@ import static java.util.stream.IntStream.range;
 
 public class ListNode extends Node {
     // TODO New type JudgementExpression
-    private final List<Expression> expressions;
+    private final List<Node> expressions;
     private final Type type;
 
-    public ListNode(List<Function<Node, Expression>> expressionFactories) {
-        List<Function<Node, Expression>> elementFactories = expressionFactories.stream().filter(Objects::nonNull)
+    public ListNode(List<ExpressionClause> expressionFactories) {
+        List<ExpressionClause> elementFactories = expressionFactories.stream().filter(Objects::nonNull)
                 .collect(Collectors.toList());
         int size = elementFactories.size();
         type = guessType(expressionFactories);
-        expressions = range(0, size).mapToObj(i -> elementFactories.get(i).apply(new PropertyNode(InputNode.INSTANCE,
+        expressions = range(0, size).mapToObj(i -> elementFactories.get(i).makeExpression(new PropertyNode(InputNode.INSTANCE,
                 type.indexOfNode(i, size), BRACKET))).collect(Collectors.toList());
     }
 
-    private Type guessType(List<Function<Node, Expression>> expressionFactories) {
+    private Type guessType(List<ExpressionClause> expressionFactories) {
         if (expressionFactories.size() > 0 && expressionFactories.get(expressionFactories.size() - 1) == null)
             return Type.FIRST_N_ITEMS;
         else if (expressionFactories.size() > 0 && expressionFactories.get(0) == null)
@@ -41,16 +41,14 @@ public class ListNode extends Node {
         this(Collections.emptyList());
     }
 
-    public List<Expression> getExpressions() {
+    public List<Node> getExpressions() {
         return expressions;
     }
 
     @Override
     public String inspect() {
-        return format("[%s%s%s]",
-                type == Type.LAST_N_ITEMS ? "... " : "",
-                expressions.stream().map(Expression::getRightOperand)
-                        .map(Node::inspect).collect(Collectors.joining(" ")),
+        return format("[%s%s%s]", type == Type.LAST_N_ITEMS ? "... " : "",
+                expressions.stream().map(Node::inspectClause).collect(Collectors.joining(" ")),
                 type == Type.FIRST_N_ITEMS ? " ..." : "");
     }
 

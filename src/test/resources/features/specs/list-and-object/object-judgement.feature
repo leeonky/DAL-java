@@ -255,3 +255,25 @@ Feature: judge object
         .key2= '2'
       }
     """
+
+#  Scenario: use schema expression in object
+#    Given the following schema:
+#    """
+#    public class IdZero {
+#        public int id = 0;
+#    }
+#    """
+#    Given the following input data:
+#    """
+#      {
+#        "key1": {
+#          "id": 0
+#        }
+#      }
+#    """
+#    Then the following assertion should pass:
+#    """
+#      = {
+#        key1 is IdZero
+#      }
+#    """

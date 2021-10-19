@@ -22,4 +22,11 @@ public interface NodeFactory {
     default NodeFactory map(Function<Node, Node> mapping) {
         return parser -> mapping.apply(fetch(parser));
     }
+
+    default NodeFactory withClause(ExpressionClauseFactory expressionClauseFactory) {
+        return parser -> {
+            Node node = fetch(parser);
+            return expressionClauseFactory.fetch(parser).makeExpression(node);
+        };
+    }
 }

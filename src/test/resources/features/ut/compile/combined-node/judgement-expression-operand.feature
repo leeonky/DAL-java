@@ -13,7 +13,6 @@ Feature: compile judgement expression operand
     }
     """
 
-
   Scenario Outline: property node
     Given the following dal code:
     """

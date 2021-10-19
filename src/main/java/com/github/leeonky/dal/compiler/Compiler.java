@@ -69,6 +69,10 @@ public class Compiler {
             BRACKET_PROPERTY, EXPLICIT_PROPERTY, BINARY_ARITHMETIC_EXPRESSION, BINARY_JUDGEMENT_EXPRESSION,
             BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION;
 
+    private ExpressionClauseFactory shortJudgementClause(OperatorFactory or) {
+        return parser -> parser.fetchExpression(or, JUDGEMENT_EXPRESSION_OPERAND);
+    }
+
     public Compiler() {
         CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL);
         LIST_INDEX_OR_MAP_KEY = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING)
@@ -82,12 +86,13 @@ public class Compiler {
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(), IDENTITY_PROPERTY);
         PROPERTY_CHAIN = parser -> PROPERTY.or("expect a object property").recursive(EXPLICIT_PROPERTY).fetch(parser);
         OBJECT = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('{', '}', ObjectNode::new,
-                () -> parser.fetchExpression(PROPERTY_CHAIN.fetch(parser),
-                        JUDGEMENT_OPERATORS.or("expect operator `:` or `=`"), JUDGEMENT_EXPRESSION_OPERAND)));
+                () -> PROPERTY_CHAIN.withClause(
+                        shortJudgementClause(JUDGEMENT_OPERATORS.or("expect operator `:` or `=`")))
+                        .fetch(parser)));
         LIST = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('[', ']', ListNode::new,
                 () -> parser.wordToken(Constants.LIST_ELLIPSIS, token -> new ListEllipsisNode()).isPresent() ? null
-                        : parser.fetchExpression(JUDGEMENT_OPERATORS.or(parser.DEFAULT_JUDGEMENT_OPERATOR),
-                        JUDGEMENT_EXPRESSION_OPERAND)));
+                        : shortJudgementClause(JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR))
+                        .fetch(parser)));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD);
         UNARY_OPERATOR_EXPRESSION = parser -> parser.fetchExpression(null, UNARY_OPERATORS, OPERAND);
         OPERAND = UNARY_OPERATOR_EXPRESSION.or(oneOf(CONST, PROPERTY, PARENTHESES, INPUT)

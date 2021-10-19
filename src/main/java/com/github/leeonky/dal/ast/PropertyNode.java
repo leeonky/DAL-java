@@ -59,10 +59,10 @@ public class PropertyNode extends Node {
         return type.format(instanceNode.inspect(), name);
     }
 
+    @Override
     public Object getRootName() {
-        if (instanceNode instanceof PropertyNode)
-            return ((PropertyNode) instanceNode).getRootName();
-        return name;
+        Object parentRoot = instanceNode.getRootName();
+        return parentRoot == null ? name : parentRoot;
     }
 
     @Override
