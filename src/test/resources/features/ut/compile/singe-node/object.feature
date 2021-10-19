@@ -150,3 +150,19 @@ Feature: object node
     """
     inspect: '{key1 : 1 key2 : 2}'
     """
+
+  Scenario: support schema expression
+    Given the following dal code:
+    """
+     {
+       key1 is Schema
+     }
+    """
+    Then got the following "object" node:
+    """
+    inspect: '{key1 is Schema}'
+    expressions[0]: {
+      class.simpleName: 'SchemaExpression'
+      inspect: 'key1 is Schema'
+    }
+    """

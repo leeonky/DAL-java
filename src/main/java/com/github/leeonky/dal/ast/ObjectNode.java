@@ -63,7 +63,9 @@ public class ObjectNode extends Node {
     }
 
     private boolean judgeAll(RuntimeContextBuilder.RuntimeContext context, DataObject dataObject) {
-        return context.newThisScope(dataObject,
-                () -> expressions.stream().allMatch(expression -> (boolean) expression.evaluate(context)));
+        return context.newThisScope(dataObject, () -> {
+            expressions.forEach(expression -> expression.evaluate(context));
+            return true;
+        });
     }
 }

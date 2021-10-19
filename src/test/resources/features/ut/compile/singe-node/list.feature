@@ -104,7 +104,7 @@ Feature: list node
     }
     """
 
-  Scenario: support incomplete List 2
+  Scenario: support match list from last index
     Given the following dal code:
     """
      [... 1]
@@ -212,4 +212,18 @@ Feature: list node
     Then got the following "list" node:
     """
     inspect: '[true]'
+    """
+
+  Scenario: support schema expression
+    Given the following dal code:
+    """
+     [is Schema]
+    """
+    Then got the following "list" node:
+    """
+    inspect: '[is Schema]'
+    expressions[0]: {
+      class.simpleName: 'SchemaExpression'
+      inspect: '[0] is Schema'
+    }
     """

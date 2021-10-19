@@ -97,6 +97,11 @@ public class TokenParser {
         return sourceCode.popWord(token).map(t -> nodeFactory.fetch(this).setPositionBegin(t.getPosition()));
     }
 
+    public Optional<ExpressionClause> fetchNodeAfter(String token, ExpressionClauseFactory expressionClauseFactory) {
+        return sourceCode.popWord(token).map(t -> expressionClauseFactory.fetch(this)
+                .map(node -> node.setPositionBegin(t.getPosition())));
+    }
+
     public Optional<Node> fetchExpression(Node left, OperatorMatcher operatorMatcher, NodeFactory rightCompiler) {
         return operatorMatcher.fetch(this).map(opt -> (OperatorFactory) _ignore -> opt)
                 .map(operatorFactory -> fetchExpression(left, operatorFactory, rightCompiler));

@@ -319,3 +319,19 @@ Feature: judge list
     """
       list.@[0] = [1 1]
     """
+
+  Scenario: use schema expression in object
+    Given the following schema:
+    """
+    public class IdZero {
+        public int id = 0;
+    }
+    """
+    Given the following input data:
+    """
+      [{ "id": 0 }]
+    """
+    Then the following assertion should pass:
+    """
+      = [is IdZero]
+    """

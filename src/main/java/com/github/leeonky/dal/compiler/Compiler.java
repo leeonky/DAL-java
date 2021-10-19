@@ -69,8 +69,11 @@ public class Compiler {
             BRACKET_PROPERTY, EXPLICIT_PROPERTY, BINARY_ARITHMETIC_EXPRESSION, BINARY_JUDGEMENT_EXPRESSION,
             BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION;
 
-    private ExpressionClauseFactory shortJudgementClause(OperatorFactory or) {
-        return parser -> parser.fetchExpression(or, JUDGEMENT_EXPRESSION_OPERAND);
+    private ExpressionClauseFactory shortJudgementClause(OperatorFactory operatorFactory) {
+        return ((ExpressionClauseMatcher) parser -> parser.fetchNodeAfter(IS, (ExpressionClauseFactory) parser1 -> {
+            List<SchemaNode> schemaNodes = parser1.fetchNodes("/", SCHEMA);
+            return previous -> new SchemaExpression(previous, schemaNodes);
+        })).or(parser -> parser.fetchExpression(operatorFactory, JUDGEMENT_EXPRESSION_OPERAND));
     }
 
     public Compiler() {
@@ -87,8 +90,7 @@ public class Compiler {
         PROPERTY_CHAIN = parser -> PROPERTY.or("expect a object property").recursive(EXPLICIT_PROPERTY).fetch(parser);
         OBJECT = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('{', '}', ObjectNode::new,
                 () -> PROPERTY_CHAIN.withClause(
-                        shortJudgementClause(JUDGEMENT_OPERATORS.or("expect operator `:` or `=`")))
-                        .fetch(parser)));
+                        shortJudgementClause(JUDGEMENT_OPERATORS.or("expect operator `:` or `=`"))).fetch(parser)));
         LIST = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('[', ']', ListNode::new,
                 () -> parser.wordToken(Constants.LIST_ELLIPSIS, token -> new ListEllipsisNode()).isPresent() ? null
                         : shortJudgementClause(JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR))

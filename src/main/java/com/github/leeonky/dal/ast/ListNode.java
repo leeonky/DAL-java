@@ -67,8 +67,10 @@ public class ListNode extends Node {
             throw new RuntimeException(format("cannot compare%sand list", dataObject.inspect()), getPositionBegin());
         if (type == Type.ALL_ITEMS)
             assertListSize(expressions.size(), dataObject.getListSize(), getPositionBegin());
-        return context.newThisScope(dataObject, () -> expressions.stream()
-                .allMatch(expression -> (boolean) expression.evaluate(context)));
+        return context.newThisScope(dataObject, () -> {
+            expressions.forEach(expression -> expression.evaluate(context));
+            return true;
+        });
     }
 
     private enum Type {

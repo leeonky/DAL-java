@@ -49,9 +49,7 @@ public class SchemaExpression extends Node {
 
     @Override
     public String inspect() {
-        String instanceInspect = instance instanceof InputNode ? "" : instance.inspect() + " ";
-        return format("%sis %s", instanceInspect, schemaNodes.stream().map(SchemaNode::inspect)
-                .collect(Collectors.joining(format(" %s ", SCHEMA_DELIMITER))));
+        return (instance instanceof InputNode ? "" : instance.inspect() + " ") + inspectClause();
     }
 
     public SchemaWhichExpression which(Node whichClause, boolean omitWhich) {
@@ -69,5 +67,16 @@ public class SchemaExpression extends Node {
 
     static class ObjectRef {
         public Object instance;
+    }
+
+    @Override
+    public String inspectClause() {
+        return format("is %s", schemaNodes.stream().map(SchemaNode::inspect)
+                .collect(Collectors.joining(format(" %s ", SCHEMA_DELIMITER))));
+    }
+
+    @Override
+    public Object getRootName() {
+        return instance.getRootName();
     }
 }
