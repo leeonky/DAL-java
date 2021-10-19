@@ -59,6 +59,7 @@ public class Formatters {
         }
     }
 
+    //TODO  keep origin type, 1.0 => should integer
     public static class Integer extends BaseFormatter<java.lang.Number, BigInteger> {
         public static Integer equalTo(long expect) {
             return new Integer() {

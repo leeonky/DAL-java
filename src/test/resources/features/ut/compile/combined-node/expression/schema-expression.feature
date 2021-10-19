@@ -29,7 +29,7 @@ Feature: schema expression
     """
     Then node evaluate result is:
     """
-    = true
+    = 1BI
     """
 
   Scenario: raise error when right operand is not schema

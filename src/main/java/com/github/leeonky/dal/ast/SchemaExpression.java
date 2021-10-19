@@ -20,10 +20,6 @@ public class SchemaExpression extends Node {
         this.schemaNodes.addAll(schemaNodes);
     }
 
-    public Object getTypeInstance() {
-        return objectRef.instance;
-    }
-
     public String getSchemaName() {
         return schemaNodes.get(0).getSchema();
     }
@@ -31,7 +27,8 @@ public class SchemaExpression extends Node {
     @Override
     public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
         try {
-            return matches(context, objectRef);
+            matches(context, objectRef);
+            return objectRef.instance;
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), getPositionBegin());
         }

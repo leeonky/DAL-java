@@ -3,6 +3,7 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
 import java.time.Instant;
 
 import static java.util.Collections.singletonList;
@@ -24,20 +25,18 @@ class SchemaExpressionTest {
     }
 
     @Test
-    void should_return_true_when_type_matches() {
+    void should_return_instance_when_type_matches() {
         SchemaExpression schemaExpression = new SchemaExpression(new ConstNode(1), singletonList(new SchemaNode("Integer")));
 
         assertThat(schemaExpression.evaluate(runtimeContextBuilder.build(null)))
-                .isEqualTo(true);
+                .isEqualTo(BigInteger.valueOf(1));
     }
 
     @Test
     void support_return_value_as_schema_type() {
         SchemaExpression schemaExpression = new SchemaExpression(new ConstNode("2000-10-10T00:00:00Z"), singletonList(new SchemaNode("Instant")));
 
-        schemaExpression.evaluate(runtimeContextBuilder.build(null));
-
-        assertThat(schemaExpression.getTypeInstance())
+        assertThat(schemaExpression.evaluate(runtimeContextBuilder.build(null)))
                 .isEqualTo(Instant.parse("2000-10-10T00:00:00Z"));
     }
 
