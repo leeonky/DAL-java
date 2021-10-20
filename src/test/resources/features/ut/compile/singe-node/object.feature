@@ -166,3 +166,27 @@ Feature: object node
       inspect: 'key1 is Schema'
     }
     """
+
+  Scenario: support schema in judgement expression
+    Given the following dal code:
+    """
+     {
+       key1 is String: 'hello'
+     }
+    """
+    Then got the following "object" node:
+    """
+    inspect: "{key1 is String : 'hello'}"
+    expressions[0]: {
+      class.simpleName: 'Expression'
+      leftOperand: {
+        class.simpleName: 'SchemaExpression'
+        inspect: 'key1 is String'
+      }
+      operator.class.simpleName: 'Matcher'
+      rightOperand: {
+        class.simpleName: 'ConstNode'
+        inspect: "'hello'"
+      }
+    }
+    """

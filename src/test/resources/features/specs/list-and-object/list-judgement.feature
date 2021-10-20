@@ -335,3 +335,29 @@ Feature: judge list
     """
       = [is IdZero]
     """
+
+  Scenario: use schema in judgement expression
+    Given the following schema:
+    """
+    @Partial
+    public class IdZero {
+        public int id = 0;
+    }
+    """
+    Given the following input data:
+    """
+      [
+        {
+          "id": 0,
+          "value": 100
+        }
+      ]
+    """
+    Then the following assertion should pass:
+    """
+      = [
+        is IdZero: {
+          value: 100
+        }
+      ]
+    """

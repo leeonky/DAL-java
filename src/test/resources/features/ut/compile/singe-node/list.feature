@@ -227,3 +227,25 @@ Feature: list node
       inspect: '[0] is Schema'
     }
     """
+
+  Scenario: support schema in judgement expression
+    Given the following dal code:
+    """
+     [ is String: 'hello' ]
+    """
+    Then got the following "list" node:
+    """
+    inspect: "[is String : 'hello']"
+    expressions[0]: {
+      class.simpleName: 'Expression'
+      leftOperand: {
+        class.simpleName: 'SchemaExpression'
+        inspect: '[0] is String'
+      }
+      operator.class.simpleName: 'Matcher'
+      rightOperand: {
+        class.simpleName: 'ConstNode'
+        inspect: "'hello'"
+      }
+    }
+    """

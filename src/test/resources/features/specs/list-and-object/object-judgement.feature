@@ -277,3 +277,29 @@ Feature: judge object
         key1 is IdZero
       }
     """
+
+  Scenario: use schema in judgement expression
+    Given the following schema:
+    """
+    @Partial
+    public class IdZero {
+        public int id = 0;
+    }
+    """
+    Given the following input data:
+    """
+      {
+        "key1": {
+          "id": 0,
+          "value": 100
+        }
+      }
+    """
+    Then the following assertion should pass:
+    """
+      = {
+        key1 is IdZero: {
+          value: 100
+        }
+      }
+    """

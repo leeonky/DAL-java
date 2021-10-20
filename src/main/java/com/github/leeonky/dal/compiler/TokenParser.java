@@ -117,8 +117,11 @@ public class TokenParser {
         }
     }
 
-    public ExpressionClause fetchExpression(OperatorFactory operatorFactory, NodeFactory rightCompiler) {
-        Operator operator = operatorFactory.fetch(this);
+    public ExpressionClause fetchExpressionClause(OperatorFactory operatorFactory, NodeFactory rightCompiler) {
+        return fetchExpressionClause(operatorFactory.fetch(this), rightCompiler);
+    }
+
+    private ExpressionClause fetchExpressionClause(Operator operator, NodeFactory rightCompiler) {
         operators.push(operator);
         Node fetch;
         try {
@@ -127,6 +130,10 @@ public class TokenParser {
             operators.pop();
         }
         return input -> new Expression(input, operator, fetch).adjustOperatorOrder();
+    }
+
+    public Optional<ExpressionClause> fetchExpressionClause(OperatorMatcher operatorMatcher, NodeFactory rightCompiler) {
+        return operatorMatcher.fetch(this).map(operator -> fetchExpressionClause(operator, rightCompiler));
     }
 
     public boolean isEnableCommaAnd() {

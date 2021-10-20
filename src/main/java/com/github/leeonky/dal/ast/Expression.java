@@ -70,6 +70,8 @@ public class Expression extends Node {
 
     @Override
     public String inspectClause() {
+        if (node1 instanceof SchemaExpression)
+            return node1.inspectClause() + " " + operator.inspect() + " " + node2.inspect();
         return node2.inspect();
     }
 }

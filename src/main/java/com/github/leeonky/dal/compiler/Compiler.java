@@ -72,8 +72,11 @@ public class Compiler {
     private ExpressionClauseFactory shortJudgementClause(OperatorFactory operatorFactory) {
         return ((ExpressionClauseMatcher) parser -> parser.fetchNodeAfter(IS, (ExpressionClauseFactory) parser1 -> {
             List<SchemaNode> schemaNodes = parser1.fetchNodes("/", SCHEMA);
-            return previous -> new SchemaExpression(previous, schemaNodes);
-        })).or(parser -> parser.fetchExpression(operatorFactory, JUDGEMENT_EXPRESSION_OPERAND));
+            return parser.fetchExpressionClause(JUDGEMENT_OPERATORS, JUDGEMENT_EXPRESSION_OPERAND)
+                    .<ExpressionClause>map(clause ->
+                            previous -> clause.makeExpression(new SchemaExpression(previous, schemaNodes)))
+                    .orElseGet(() -> previous -> new SchemaExpression(previous, schemaNodes));
+        })).or(parser -> parser.fetchExpressionClause(operatorFactory, JUDGEMENT_EXPRESSION_OPERAND));
     }
 
     public Compiler() {
