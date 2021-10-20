@@ -35,7 +35,7 @@ Feature: list node
       class.simpleName: 'ListNode'
       inspect: '[1]'
       positionBegin: 1
-      expressions.inspect: ['[0] : 1']
+      expressions.inspect: ['[0]: 1']
     }
     """
 
@@ -51,8 +51,8 @@ Feature: list node
       inspect: '[1 2]'
       positionBegin: 1
       expressions.inspect: [
-        '[0] : 1'
-        '[1] : 2'
+        '[0]: 1'
+        '[1]: 2'
       ]
     }
     """
@@ -99,7 +99,7 @@ Feature: list node
       inspect: '[1 ...]'
       positionBegin: 1
       expressions.inspect: [
-        '[0] : 1'
+        '[0]: 1'
       ]
     }
     """
@@ -116,7 +116,7 @@ Feature: list node
       inspect: '[... 1]'
       positionBegin: 1
       expressions.inspect: [
-        '[-1] : 1'
+        '[-1]: 1'
       ]
     }
     """
@@ -129,7 +129,7 @@ Feature: list node
     Then got the following "list" node:
     """
     expressions.inspect: [
-      '[0] <result> 1'
+      '[0]<result> 1'
     ]
     """
     Examples:
@@ -146,7 +146,7 @@ Feature: list node
     Then got the following "list" node:
     """
     expressions[0].rightOperand.expressions.inspect: [
-      '[0] <result> 1'
+      '[0]<result> 1'
     ]
     """
     Examples:
@@ -235,7 +235,7 @@ Feature: list node
     """
     Then got the following "list" node:
     """
-    inspect: "[is String : 'hello']"
+    inspect: "[is String: 'hello']"
     expressions[0]: {
       class.simpleName: 'Expression'
       leftOperand: {

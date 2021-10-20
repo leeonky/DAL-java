@@ -86,7 +86,7 @@ Feature: compile all nodes with delimiter
     """
     : {
       class.simpleName: 'ObjectNode'
-      inspect: '{a : 1}'
+      inspect: '{a: 1}'
     }
     """
     And got the following "schema" node:

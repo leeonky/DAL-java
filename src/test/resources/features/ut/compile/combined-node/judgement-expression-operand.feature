@@ -201,8 +201,8 @@ Feature: compile judgement expression operand
     Then got the following "object" node:
     """
     expressions[0].rightOperand.expressions.inspect: [
-      '[0] <operator> 1'
-      '[1] <operator> 2'
+      '[0]<operator> 1'
+      '[1]<operator> 2'
     ]
     """
     Examples:

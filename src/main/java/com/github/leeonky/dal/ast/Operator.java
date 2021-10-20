@@ -12,7 +12,7 @@ public abstract class Operator {
     private static final int PRECEDENCE_UNARY_OPERATION = 500;
     private static final int PRECEDENCE_INDEX = 501;
     private final int precedence;
-    private final String inspect;
+    protected final String inspect;
     private final boolean needInspect;
     private int position;
 
@@ -46,16 +46,10 @@ public abstract class Operator {
         return this;
     }
 
-    //    TODO refactor
-    public String inspect(Node node1, Node node2) {
-        if (node1 instanceof InputNode)
-            return String.format("%s %s", inspect, node2.inspect());
-        return String.format("%s %s %s", node1.inspect(), inspect, node2.inspect());
-    }
-
-    //    TODO refactor
-    public String inspect() {
-        return inspect;
+    public String inspect(String node1, String node2) {
+        if (node1 == null || node1.isEmpty())
+            return String.format("%s %s", inspect, node2);
+        return String.format("%s %s %s", node1, inspect, node2);
     }
 
     public static class Equal extends Operator {
@@ -66,6 +60,11 @@ public abstract class Operator {
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContextBuilder.RuntimeContext context) {
             return node2.judge(node1, this, context);
+        }
+
+        @Override
+        public String inspect(String node1, String node2) {
+            return String.format("%s%s %s", node1, inspect, node2);
         }
     }
 
@@ -201,8 +200,8 @@ public abstract class Operator {
         }
 
         @Override
-        public String inspect(Node node1, Node node2) {
-            return "!" + node2.inspect();
+        public String inspect(String node1, String node2) {
+            return "!" + node2;
         }
     }
 
@@ -218,8 +217,8 @@ public abstract class Operator {
         }
 
         @Override
-        public String inspect(Node node1, Node node2) {
-            return "-" + node2.inspect();
+        public String inspect(String node1, String node2) {
+            return "-" + node2;
         }
     }
 
@@ -232,6 +231,11 @@ public abstract class Operator {
         @Override
         public Object calculate(Node node1, Node node2, RuntimeContextBuilder.RuntimeContext context) {
             return node2.judge(node1, this, context);
+        }
+
+        @Override
+        public String inspect(String node1, String node2) {
+            return String.format("%s%s %s", node1, inspect, node2);
         }
     }
 }

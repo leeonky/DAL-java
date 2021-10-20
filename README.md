@@ -576,4 +576,20 @@ time is LocalDateTime which year= 2001
 ```
 DAL内置的 `Formatter` 都在 `Formatters`中定义。
 
+- #### 在对象和集合断言中使用 `is`
+在对象与集合断言时也可以通过 `is` 指定 `Schema`:
+``` javascript
+= {
+    response is 已支付的订单: {
+        支付金额: 100
+    }
+}
+```
+在集合中使用 `is`
+``` javascript
+: [is 已支付的订单: {
+        支付金额: 100
+    }]
+```
+在对象与集合中不能添加 `which` 关键字
 
