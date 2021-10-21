@@ -5,10 +5,12 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.compiler.Constants.SCHEMA_DELIMITER;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 
 public class SchemaExpression extends Node {
     private final Node instance;
@@ -29,24 +31,37 @@ public class SchemaExpression extends Node {
     @Override
     public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
         try {
-            matches(context, objectRef);
+            schemaNodes.stream().allMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
             return objectRef.instance;
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), getPositionBegin());
         }
     }
 
-    private boolean matches(RuntimeContextBuilder.RuntimeContext context, ObjectRef objectRef) {
-        return schemaNodes.stream().allMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
-    }
-
-    private boolean verifyAndConvertAsSchemaType(RuntimeContextBuilder.RuntimeContext context, SchemaNode schemaNode, ObjectRef objectRef) {
-        try {
-            objectRef.instance = schemaNode.getConstructorViaSchema(context).apply(instance.evaluateDataObject(context));
+    //    TODO refactor
+    private boolean verifyAndConvertAsSchemaType(RuntimeContextBuilder.RuntimeContext context,
+                                                 SchemaNode schemaNode, ObjectRef objectRef) {
+        if (elementSchema) {
+            AtomicInteger index = new AtomicInteger(0);
+            objectRef.instance = instance.evaluateDataObject(context).getListObjects().stream()
+                    .map(dataObject -> {
+                        int i = index.getAndIncrement();
+                        try {
+                            return schemaNode.getConstructorViaSchema(context).apply(dataObject);
+                        } catch (IllegalTypeException exception) {
+                            throw new AssertionFailure(exception.assertionFailureMessage(schemaNode, i),
+                                    schemaNode.getPositionBegin());
+                        }
+                    })
+                    .collect(Collectors.toList());
             return true;
-        } catch (IllegalTypeException exception) {
-            throw new AssertionFailure(exception.assertionFailureMessage(schemaNode), schemaNode.getPositionBegin());
-        }
+        } else
+            try {
+                objectRef.instance = schemaNode.getConstructorViaSchema(context).apply(instance.evaluateDataObject(context));
+                return true;
+            } catch (IllegalTypeException exception) {
+                throw new AssertionFailure(exception.assertionFailureMessage(schemaNode), schemaNode.getPositionBegin());
+            }
     }
 
     @Override
@@ -73,8 +88,11 @@ public class SchemaExpression extends Node {
 
     @Override
     public String inspectClause() {
-        return format("is %s", schemaNodes.stream().map(SchemaNode::inspect)
-                .collect(Collectors.joining(format(" %s ", SCHEMA_DELIMITER))));
+        String schemaChain = schemaNodes.stream().map(SchemaNode::inspect)
+                .collect(joining(format(" %s ", SCHEMA_DELIMITER)));
+        if (elementSchema)
+            return format("is [%s]", schemaChain);
+        return format("is %s", schemaChain);
     }
 
     @Override

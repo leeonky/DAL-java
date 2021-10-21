@@ -90,25 +90,28 @@ Feature: schema expression
                 ^
     """
 
-#  TODO
-#  Scenario: support element schema expression
-#    Given the following dal code:
-#    """
-#      is [Integer]
-#    """
-#    Then got the following "schema-expression" node:
-#    """
-#    : {
-#      class.simpleName: 'SchemaExpression'
-#      inspect: 'is [Integer]'
-#      positionBegin: 2
-#    }
-#    """
-#    When the following input data:
-#    """
-#    [1]
-#    """
-#    Then node evaluate result is:
-#    """
-#    = [1BI]
-#    """
+  Scenario: support element schema expression
+    Given the following dal code:
+    """
+      is [Integer]
+    """
+    Then got the following "schema-expression" node:
+    """
+    : {
+      class.simpleName: 'SchemaExpression'
+      inspect: 'is [Integer]'
+      positionBegin: 2
+    }
+    """
+    When the following input data:
+    """
+    [1]
+    """
+    Then node evaluate result is:
+    """
+    = [1BI]
+    """
+
+# TODO 1 is [Integer]
+# support field alias in element schema in list judgement
+# support field alias in element schema in which clause

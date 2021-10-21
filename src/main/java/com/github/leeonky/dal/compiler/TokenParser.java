@@ -64,9 +64,9 @@ public class TokenParser {
     }
 
     public <T> Optional<T> fetchOne(Character opening, char closing, Supplier<T> supplier) {
-        return when(sourceCode.startsWith(opening.toString())).optional(() -> {
+        return sourceCode.popWord(opening.toString()).map(token -> {
             T result = supplier.get();
-//            TODO need test
+//            TODO need test match closing char
             sourceCode.popWord(String.valueOf(closing));
             return result;
         });
