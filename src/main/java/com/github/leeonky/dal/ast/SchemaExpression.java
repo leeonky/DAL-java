@@ -14,10 +14,12 @@ public class SchemaExpression extends Node {
     private final Node instance;
     private final List<SchemaNode> schemaNodes = new ArrayList<>();
     private final ObjectRef objectRef = new ObjectRef();
+    private final boolean elementSchema;
 
-    public SchemaExpression(Node previous, List<SchemaNode> schemaNodes) {
+    public SchemaExpression(Node previous, List<SchemaNode> schemaNodes, boolean elementSchema) {
         instance = previous;
         this.schemaNodes.addAll(schemaNodes);
+        this.elementSchema = elementSchema;
     }
 
     public String getSchemaName() {

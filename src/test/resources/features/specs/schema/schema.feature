@@ -91,3 +91,42 @@ Feature: schema verification
         id: 0
       }
     """
+
+#  TODO
+#  Scenario: support element schema
+#    Given the following schema:
+#    """
+#    public class IdZero {
+#        public int id = 0;
+#    }
+#    """
+#    When the following input data:
+#    """
+#      [{
+#        "id": 0
+#      }, {
+#        "id": 0
+#      }]
+#    """
+#    Then the following assertion should pass:
+#    """
+#      is [IdZero]
+#    """
+#    When the following input data:
+#    """
+#      [{
+#        "id": 0
+#      }, {
+#        "id": 1
+#      }]
+#    """
+#    Then failed with the following message:
+#    """
+#    expect element[1] matches schema `IdZero` but was not
+#    expected field `.id` equal to java.lang.Integer[0], but was java.lang.Integer[1]
+#    """
+#    And got the following source code information:
+#    """
+#    is [IdZero]
+#    ^
+#    """

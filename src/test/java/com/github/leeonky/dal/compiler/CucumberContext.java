@@ -40,7 +40,7 @@ public class CucumberContext {
         put("object", compiler.OBJECT);
         put("list", compiler.LIST);
         put("judgement-expression-operand", optional(compiler.JUDGEMENT_EXPRESSION_OPERAND));
-        put("schema", optional(compiler.SCHEMA));
+        put("schema", optional(SchemaExpressionClauseFactory.SCHEMA));
     }};
 
     private static NodeMatcher optional(NodeFactory nodeFactory) {

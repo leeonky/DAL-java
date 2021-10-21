@@ -8,7 +8,7 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SchemaWhichExpressionTest {
-    private static final SchemaExpression MATCHES_TYPE_EXPRESSION = new SchemaExpression(new ConstNode(1), singletonList(new SchemaNode("Integer")));
+    private static final SchemaExpression MATCHES_TYPE_EXPRESSION = new SchemaExpression(new ConstNode(1), singletonList(new SchemaNode("Integer")), false);
     RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
 
     @Test
@@ -26,7 +26,7 @@ class SchemaWhichExpressionTest {
     @Test
     void should_wrapper_object_as_target_type() {
 
-        SchemaWhichExpression schemaWhichExpression = new SchemaExpression(new ConstNode("http://www.baidu.com"), singletonList(new SchemaNode("URL"))).which(new PropertyNode(InputNode.INSTANCE, "protocol", DOT), false);
+        SchemaWhichExpression schemaWhichExpression = new SchemaExpression(new ConstNode("http://www.baidu.com"), singletonList(new SchemaNode("URL")), false).which(new PropertyNode(InputNode.INSTANCE, "protocol", DOT), false);
 
         assertThat(schemaWhichExpression.evaluate(runtimeContextBuilder.build(null))).isEqualTo("http");
     }

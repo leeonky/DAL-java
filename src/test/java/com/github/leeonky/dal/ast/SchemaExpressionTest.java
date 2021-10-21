@@ -15,7 +15,7 @@ class SchemaExpressionTest {
 
     @Test
     void unexpected_data_type_should_raise_error() {
-        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode(1), singletonList((SchemaNode) new SchemaNode("String").setPositionBegin(100)));
+        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode(1), singletonList((SchemaNode) new SchemaNode("String").setPositionBegin(100)), false);
 
         assertThat(assertThrows(AssertionFailure.class, () ->
                 schemaExpression.evaluate(runtimeContextBuilder.build(null))))
@@ -26,7 +26,7 @@ class SchemaExpressionTest {
 
     @Test
     void should_return_instance_when_type_matches() {
-        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode(1), singletonList(new SchemaNode("Integer")));
+        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode(1), singletonList(new SchemaNode("Integer")), false);
 
         assertThat(schemaExpression.evaluate(runtimeContextBuilder.build(null)))
                 .isEqualTo(BigInteger.valueOf(1));
@@ -34,7 +34,7 @@ class SchemaExpressionTest {
 
     @Test
     void support_return_value_as_schema_type() {
-        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode("2000-10-10T00:00:00Z"), singletonList(new SchemaNode("Instant")));
+        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode("2000-10-10T00:00:00Z"), singletonList(new SchemaNode("Instant")), false);
 
         assertThat(schemaExpression.evaluate(runtimeContextBuilder.build(null)))
                 .isEqualTo(Instant.parse("2000-10-10T00:00:00Z"));
@@ -42,7 +42,7 @@ class SchemaExpressionTest {
 
     @Test
     void support_return_schema_name() {
-        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode(1), singletonList(new SchemaNode("Integer")));
+        SchemaExpression schemaExpression = new SchemaExpression(new ConstNode(1), singletonList(new SchemaNode("Integer")), false);
 
         assertThat(schemaExpression.getSchemaName()).isEqualTo("Integer");
     }
@@ -50,7 +50,7 @@ class SchemaExpressionTest {
     @Test
     void record_schema_position_in_parsing() {
         RuntimeException runtimeException = assertThrows(RuntimeException.class, () ->
-                new SchemaExpression(new ConstNode(1), singletonList((SchemaNode) new SchemaNode("Unknown").setPositionBegin(5)))
+                new SchemaExpression(new ConstNode(1), singletonList((SchemaNode) new SchemaNode("Unknown").setPositionBegin(5)), false)
                         .evaluate(new RuntimeContextBuilder().build(null)));
 
         assertThat(runtimeException)

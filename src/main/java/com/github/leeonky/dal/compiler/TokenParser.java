@@ -54,13 +54,22 @@ public class TokenParser {
 
     public <T> Optional<Node> fetchNodes(Character opening, char closing, Function<List<T>,
             Node> nodeFactory, Supplier<T> element) {
-        return sourceCode.fetchElements(BY_NODE, opening, closing, element, nodeFactory);
+        return sourceCode.fetchElementNode(BY_NODE, opening, closing, element, nodeFactory);
     }
 
     public Optional<Node> fetchString(Character opening, char closing, Function<String, Node> nodeFactory,
                                       Map<String, Character> escapeChars) {
-        return sourceCode.fetchElements(BY_CHAR, opening, closing, () -> sourceCode.escapedPop(escapeChars),
+        return sourceCode.fetchElementNode(BY_CHAR, opening, closing, () -> sourceCode.escapedPop(escapeChars),
                 chars -> nodeFactory.apply(chars.stream().map(String::valueOf).collect(joining())));
+    }
+
+    public <T> Optional<T> fetchOne(Character opening, char closing, Supplier<T> supplier) {
+        return when(sourceCode.startsWith(opening.toString())).optional(() -> {
+            T result = supplier.get();
+//            TODO need test
+            sourceCode.popWord(String.valueOf(closing));
+            return result;
+        });
     }
 
     public Optional<Node> disableCommaAnd(Supplier<Optional<Node>> nodeFactory) {

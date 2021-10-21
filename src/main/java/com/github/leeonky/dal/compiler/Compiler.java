@@ -60,8 +60,7 @@ public class Compiler {
             PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_WHICH_CLAUSE, SCHEMA_JUDGEMENT_CLAUSE,
             UNARY_OPERATOR_EXPRESSION;
 
-    NodeFactory SCHEMA = TokenParser.SCHEMA.map(token -> new SchemaNode(token.getContent())),
-            PROPERTY_CHAIN, OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION,
+    public NodeFactory PROPERTY_CHAIN, OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION,
             JUDGEMENT_EXPRESSION_OPERAND;
 
     ExpressionMatcher DOT_PROPERTY = (parser, previous) -> TokenParser.DOT_PROPERTY.
@@ -70,14 +69,18 @@ public class Compiler {
             BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION;
 
     private ExpressionClauseFactory shortJudgementClause(OperatorFactory operatorFactory) {
-        return ((ExpressionClauseMatcher) parser -> parser.fetchNodeAfter(IS, (ExpressionClauseFactory) parser1 -> {
-            List<SchemaNode> schemaNodes = parser1.fetchNodes("/", SCHEMA);
-            return parser.fetchExpressionClause(JUDGEMENT_OPERATORS, JUDGEMENT_EXPRESSION_OPERAND)
-                    .<ExpressionClause>map(clause ->
-                            previous -> clause.makeExpression(new SchemaExpression(previous, schemaNodes)))
-                    .orElseGet(() -> previous -> new SchemaExpression(previous, schemaNodes));
-        })).or(parser -> parser.fetchExpressionClause(operatorFactory, JUDGEMENT_EXPRESSION_OPERAND));
+        return ((ExpressionClauseMatcher) parser -> parser.fetchNodeAfter(IS, (ExpressionClauseFactory) parser1 ->
+                schemaJudgement(parser, SCHEMA_CLAUSE.fetch(parser))))
+                .or(parser -> parser.fetchExpressionClause(operatorFactory, JUDGEMENT_EXPRESSION_OPERAND));
     }
+
+    private ExpressionClause schemaJudgement(TokenParser parser, ExpressionClause expressionClause) {
+        return parser.fetchExpressionClause(JUDGEMENT_OPERATORS, JUDGEMENT_EXPRESSION_OPERAND)
+                .<ExpressionClause>map(clause -> previous ->
+                        clause.makeExpression(expressionClause.makeExpression(previous))).orElse(expressionClause);
+    }
+
+    private static final ExpressionClauseFactory SCHEMA_CLAUSE = new SchemaExpressionClauseFactory();
 
     public Compiler() {
         CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL);
@@ -121,7 +124,7 @@ public class Compiler {
     private ExpressionFactory compileSchemaExpression(Function<SchemaExpression, NodeMatcher> whichClause1,
                                                       Function<SchemaExpression, NodeMatcher> whichClause2) {
         return (parser, previous) -> {
-            SchemaExpression schemaExpression = new SchemaExpression(previous, parser.fetchNodes("/", SCHEMA));
+            SchemaExpression schemaExpression = (SchemaExpression) SCHEMA_CLAUSE.fetch(parser).makeExpression(previous);
             return oneOf(whichClause1.apply(schemaExpression), whichClause2.apply(schemaExpression))
                     .fetch(parser).orElse(schemaExpression);
         };

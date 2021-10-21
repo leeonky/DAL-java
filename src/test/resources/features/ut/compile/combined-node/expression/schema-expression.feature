@@ -89,3 +89,26 @@ Feature: schema expression
     is Integer /
                 ^
     """
+
+#  TODO
+#  Scenario: support element schema expression
+#    Given the following dal code:
+#    """
+#      is [Integer]
+#    """
+#    Then got the following "schema-expression" node:
+#    """
+#    : {
+#      class.simpleName: 'SchemaExpression'
+#      inspect: 'is [Integer]'
+#      positionBegin: 2
+#    }
+#    """
+#    When the following input data:
+#    """
+#    [1]
+#    """
+#    Then node evaluate result is:
+#    """
+#    = [1BI]
+#    """
