@@ -125,7 +125,7 @@ Feature: schema verification
     """
     Then failed with the following message:
     """
-    Expecting element[1] to match schema `IdZero` but was not
+    Expecting [1] to match schema `IdZero` but was not
         Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
     """
     And got the following source code information:

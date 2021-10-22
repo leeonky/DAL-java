@@ -19,9 +19,9 @@ public class IllegalTypeException extends java.lang.RuntimeException {
     }
 
     //TODO duplicated string
-    public String assertionFailureMessage(SchemaNode schemaNode, int i) {
+    public String assertionFailureMessage(String input, SchemaNode schemaNode) {
         if (getMessage() == null)
-            return format("expecting element[%d] to match schema `%s` but was not", i, schemaNode.getSchema());
-        return format("Expecting element[%d] to match schema `%s` but was not\n    %s", i, schemaNode.getSchema(), getMessage());
+            return format("Expecting " + input + "to match schema `%s` but was not", schemaNode.getSchema());
+        return format("Expecting " + input + "to match schema `%s` but was not\n    %s", schemaNode.getSchema(), getMessage());
     }
 }

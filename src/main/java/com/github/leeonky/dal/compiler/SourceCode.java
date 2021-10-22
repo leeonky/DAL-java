@@ -3,7 +3,10 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.ast.Node;
 
 import java.util.*;
-import java.util.function.*;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 import static com.github.leeonky.dal.runtime.IfThenFactory.when;
@@ -104,13 +107,6 @@ public class SourceCode {
 
     public <T> Optional<Node> fetchElementNode(TokenParser.FetchBy fetchBy, Character opening, char closing,
                                                Supplier<T> element, Function<List<T>, Node> nodeFactory) {
-        return fetchElements(fetchBy, opening, closing, element, (position, list) ->
-                nodeFactory.apply(list).setPositionBegin(position));
-    }
-
-    //    TODO inline
-    public <T, N> Optional<N> fetchElements(TokenParser.FetchBy fetchBy, Character opening, char closing,
-                                            Supplier<T> element, BiFunction<Integer, List<T>, N> factory) {
         return when(whenFirstChar(opening::equals)).optional(() -> {
             int startPosition = seek(1);
             List<T> elements = new ArrayList<>();
@@ -121,7 +117,7 @@ public class SourceCode {
             if (!isEndOfCode())
                 throw syntaxError(String.format("should end with `%c`", closing), 0);
             seek(1);
-            return factory.apply(startPosition, elements);
+            return nodeFactory.apply(elements).setPositionBegin(startPosition);
         });
     }
 }

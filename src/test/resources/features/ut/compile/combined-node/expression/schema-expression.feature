@@ -112,6 +112,32 @@ Feature: schema expression
     = [1BI]
     """
 
-# TODO 1 is [Integer]
+  Scenario: raise error when no closing ]
+    Given the following dal code:
+    """
+      is [Integer
+    """
+    Then failed to get "schema-expression" node with the following message:
+    """
+    should end with ]
+    """
+    And got the following source code information:
+    """
+      is [Integer
+                 ^
+    """
+
+  Scenario: should raise error when input is not list
+    When assert by the following code:
+    """
+      1 is [Integer]
+    """
+    Then failed with the following message:
+    """
+    Expecting a list but was java.lang.Integer
+    <1>
+    """
+
+# TODO [[1]] is [[Integer]]
 # TODO support field alias in element schema in list judgement
 # TODO support field alias in element schema in which clause

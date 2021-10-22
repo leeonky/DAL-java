@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.compiler.SyntaxException;
+import com.github.leeonky.dal.runtime.DataObject;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
@@ -31,37 +33,35 @@ public class SchemaExpression extends Node {
     @Override
     public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
         try {
-            schemaNodes.stream().allMatch(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
+            schemaNodes.forEach(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
             return objectRef.instance;
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), getPositionBegin());
         }
     }
 
-    //    TODO refactor
-    private boolean verifyAndConvertAsSchemaType(RuntimeContextBuilder.RuntimeContext context,
-                                                 SchemaNode schemaNode, ObjectRef objectRef) {
+    private void verifyAndConvertAsSchemaType(RuntimeContextBuilder.RuntimeContext context,
+                                              SchemaNode schemaNode, ObjectRef objectRef) {
+        DataObject input = instance.evaluateDataObject(context);
         if (elementSchema) {
+            if (!input.isList())
+                throw new SyntaxException("Expecting a list but was" + input.inspect(), instance.getPositionBegin());
             AtomicInteger index = new AtomicInteger(0);
-            objectRef.instance = instance.evaluateDataObject(context).getListObjects().stream()
-                    .map(dataObject -> {
-                        int i = index.getAndIncrement();
-                        try {
-                            return schemaNode.getConstructorViaSchema(context).apply(dataObject);
-                        } catch (IllegalTypeException exception) {
-                            throw new AssertionFailure(exception.assertionFailureMessage(schemaNode, i),
-                                    schemaNode.getPositionBegin());
-                        }
-                    })
+            objectRef.instance = input.getListObjects().stream().map(element -> convertViaSchema(context, schemaNode,
+                    element, format("%s[%d] ", instance.inspect(), index.getAndIncrement())))
                     .collect(Collectors.toList());
-            return true;
         } else
-            try {
-                objectRef.instance = schemaNode.getConstructorViaSchema(context).apply(instance.evaluateDataObject(context));
-                return true;
-            } catch (IllegalTypeException exception) {
-                throw new AssertionFailure(exception.assertionFailureMessage(schemaNode), schemaNode.getPositionBegin());
-            }
+            objectRef.instance = convertViaSchema(context, schemaNode, input, instance.inspect());
+    }
+
+    private Object convertViaSchema(RuntimeContextBuilder.RuntimeContext context, SchemaNode schemaNode,
+                                    DataObject element, String input) {
+        try {
+            return schemaNode.getConstructorViaSchema(context).apply(element);
+        } catch (IllegalTypeException exception) {
+            throw new AssertionFailure(exception.assertionFailureMessage(input, schemaNode),
+                    schemaNode.getPositionBegin());
+        }
     }
 
     @Override
@@ -69,7 +69,7 @@ public class SchemaExpression extends Node {
         return (instance instanceof InputNode ? "" : instance.inspect() + " ") + inspectClause();
     }
 
-    public SchemaWhichExpression which(Node whichClause, boolean omitWhich) {
+    private SchemaWhichExpression which(Node whichClause, boolean omitWhich) {
         return (SchemaWhichExpression) new SchemaWhichExpression(this, whichClause, omitWhich)
                 .setPositionBegin(getPositionBegin());
     }
