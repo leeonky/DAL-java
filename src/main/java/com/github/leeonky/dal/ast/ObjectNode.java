@@ -12,7 +12,6 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
 public class ObjectNode extends Node {
-    // TODO New type JudgementExpression
     private final List<Node> expressions = new ArrayList<>();
 
     public ObjectNode(List<Node> expressions) {
@@ -35,8 +34,7 @@ public class ObjectNode extends Node {
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
         DataObject dataObject = actualNode.evaluateDataObject(context);
-        if (dataObject.isNull())
-            throw new AssertionFailure("the input value is null", getPositionBegin());
+        checkNull(dataObject);
         if (dataObject.isList()) {
             AtomicInteger integer = new AtomicInteger(0);
             dataObject.getListObjects().forEach(element -> assertUnexpectedFields(collectUnexpectedFields(element),
@@ -44,6 +42,11 @@ public class ObjectNode extends Node {
         } else
             assertUnexpectedFields(collectUnexpectedFields(dataObject), operator.getPosition());
         return judgeAll(context, dataObject);
+    }
+
+    private void checkNull(DataObject dataObject) {
+        if (dataObject.isNull())
+            throw new AssertionFailure("The input value is null", getPositionBegin());
     }
 
     private Set<String> collectUnexpectedFields(DataObject dataObject) {
@@ -57,8 +60,7 @@ public class ObjectNode extends Node {
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
         DataObject dataObject = actualNode.evaluateDataObject(context);
-        if (dataObject.isNull())
-            throw new AssertionFailure("the input value is null", getPositionBegin());
+        checkNull(dataObject);
         return judgeAll(context, dataObject);
     }
 

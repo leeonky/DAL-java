@@ -113,5 +113,5 @@ Feature: schema expression
     """
 
 # TODO 1 is [Integer]
-# support field alias in element schema in list judgement
-# support field alias in element schema in which clause
+# TODO support field alias in element schema in list judgement
+# TODO support field alias in element schema in which clause

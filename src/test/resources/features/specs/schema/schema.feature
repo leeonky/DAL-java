@@ -30,8 +30,8 @@ Feature: schema verification
     """
     Then failed with the following message:
     """
-    expect matches schema `IdZero` but was not
-        unexpected field `unexpected field` for schema IdZero[IdZero]
+    Expecting to match schema `IdZero` but was not
+        Unexpected field `unexpected field` for schema IdZero[IdZero]
     """
     When the following input data:
     """
@@ -43,8 +43,8 @@ Feature: schema verification
     """
     Then failed with the following message:
     """
-    expect matches schema `IdZero` but was not
-        expected field `id` for type IdZero[IdZero], but does not exist
+    Expecting to match schema `IdZero` but was not
+        Expecting field `id` to be type IdZero[IdZero], but does not exist
     """
     When the following input data:
     """
@@ -58,8 +58,8 @@ Feature: schema verification
     """
     Then failed with the following message:
     """
-    expect matches schema `IdZero` but was not
-        expected field `.id` equal to java.lang.Integer[0], but was java.lang.String[0]
+    Expecting to match schema `IdZero` but was not
+        Expecting field `.id` to be java.lang.Integer[0], but was java.lang.String[0]
     """
 
   Scenario: verify data matches schema and which clause
@@ -125,8 +125,8 @@ Feature: schema verification
     """
     Then failed with the following message:
     """
-    expect element[1] matches schema `IdZero` but was not
-        expected field `.id` equal to java.lang.Integer[0], but was java.lang.Integer[1]
+    Expecting element[1] to match schema `IdZero` but was not
+        Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
     """
     And got the following source code information:
     """

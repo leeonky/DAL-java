@@ -158,33 +158,33 @@ public class VerifyValueInSchema extends Base {
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is MatchString1", "expect matches schema `MatchString1` but was not\n" +
-                "    Expect field `.value` [2] to be equal to [1], but was not.");
+        }}, "is MatchString1", "Expecting to match schema `MatchString1` but was not\n" +
+                "    Expecting field `.value` [2] to be equal to [1], but was not.");
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is MatchNullValue", "expect matches schema `MatchNullValue` but was not\n" +
-                "    Expect field `.value` [2] to be null, but was not.");
+        }}, "is MatchNullValue", "Expecting to match schema `MatchNullValue` but was not\n" +
+                "    Expecting field `.value` [2] to be null, but was not.");
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is MatchLessThan2", "expect matches schema `MatchLessThan2` but was not\n" +
-                "    Expect field `.value` [2] to be less than [2], but was not.");
+        }}, "is MatchLessThan2", "Expecting to match schema `MatchLessThan2` but was not\n" +
+                "    Expecting field `.value` [2] to be less than [2], but was not.");
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is MatchGreaterThan3", "expect matches schema `MatchGreaterThan3` but was not\n" +
-                "    Expect field `.value` [2] to be greater than [3], but was not.");
+        }}, "is MatchGreaterThan3", "Expecting to match schema `MatchGreaterThan3` but was not\n" +
+                "    Expecting field `.value` [2] to be greater than [3], but was not.");
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 4);
-        }}, "is MatchLessOrEqualTo3", "expect matches schema `MatchLessOrEqualTo3` but was not\n" +
-                "    Expect field `.value` [4] to be less or equal to [3], but was not.");
+        }}, "is MatchLessOrEqualTo3", "Expecting to match schema `MatchLessOrEqualTo3` but was not\n" +
+                "    Expecting field `.value` [4] to be less or equal to [3], but was not.");
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is MatchGreaterOrEqualTo3", "expect matches schema `MatchGreaterOrEqualTo3` but was not\n" +
-                "    Expect field `.value` [2] to be greater or equal to [3], but was not.");
+        }}, "is MatchGreaterOrEqualTo3", "Expecting to match schema `MatchGreaterOrEqualTo3` but was not\n" +
+                "    Expecting field `.value` [2] to be greater or equal to [3], but was not.");
     }
 
     public static class MatchString1 {

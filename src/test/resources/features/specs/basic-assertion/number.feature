@@ -64,9 +64,9 @@ Feature: number and types
     """
     Then failed with the following message:
     """
-    expected java.lang.Byte
+    Expecting java.lang.Byte
     <1>
-    equals to java.lang.Integer
+    to be equal to java.lang.Integer
     <1>
     but was not
     """

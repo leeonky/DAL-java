@@ -19,12 +19,12 @@ public class AssertionFailure extends DalException {
 
     public static void assertListSize(int expected, int actual, int position) {
         if (expected != actual)
-            throw new AssertionFailure(format("expected list size <%d> but was <%d>", expected, actual), position);
+            throw new AssertionFailure(format("Expecting list size to be <%d> but was <%d>", expected, actual), position);
     }
 
     public static boolean assertMatchNull(DataObject actual, int position) {
         if (!actual.isNull())
-            throw new AssertionFailure(format("expected%smatches null but was not", actual.inspect()), position);
+            throw new AssertionFailure(format("Expecting%sto match null but was not", actual.inspect()), position);
         return true;
     }
 
@@ -34,33 +34,33 @@ public class AssertionFailure extends DalException {
         if (expectedValue instanceof Number && actualValue instanceof Number ?
                 NumberUtil.compare((Number) expectedValue, (Number) actualValue, converter) != 0
                 : !Calculator.equals(actual.convert(expectedValue.getClass()), expected))
-            throw new AssertionFailure(format("expected%smatches%sbut was not",
+            throw new AssertionFailure(format("Expecting%sto match%sbut was not",
                     actual.inspect(), expected.inspect()), position);
         return true;
     }
 
     public static void assertUnexpectedFields(Set<String> dataFields, int position) {
         if (!dataFields.isEmpty())
-            throw new AssertionFailure("unexpected fields " +
+            throw new AssertionFailure("Unexpected fields " +
                     dataFields.stream().map(s -> format("`%s`", s)).collect(joining(", ")), position);
     }
 
     public static void assertUnexpectedFields(Set<String> dataFields, String element, int position) {
         if (!dataFields.isEmpty())
-            throw new AssertionFailure(format("unexpected fields %s in %s",
+            throw new AssertionFailure(format("Unexpected fields %s in %s",
                     dataFields.stream().map(s -> format("`%s`", s)).collect(joining(", ")), element), position);
     }
 
     public static boolean assertEquals(DataObject expected, DataObject actual, int position) {
         if (!Calculator.equals(actual, expected))
-            throw new AssertionFailure(format("expected%sequals to%sbut was not",
+            throw new AssertionFailure(format("Expecting%sto be equal to%sbut was not",
                     actual.inspect(), expected.inspect()), position);
         return true;
     }
 
     public static boolean assertRegexMatches(Pattern pattern, String actual, int position, DataObject input) {
         if (!pattern.matcher(actual).matches())
-            throw new AssertionFailure(format("expected%smatches /%s/ but was not", input.inspect(), pattern), position);
+            throw new AssertionFailure(format("Expecting%sto match /%s/ but was not", input.inspect(), pattern), position);
         return true;
     }
 }

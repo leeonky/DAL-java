@@ -21,7 +21,7 @@ Feature: judge object
     """
     Then failed with the following message:
     """
-    unexpected fields `key1`, `key2`
+    Unexpected fields `key1`, `key2`
     """
     And got the following source code information:
     """
@@ -37,9 +37,9 @@ Feature: judge object
     """
     Then failed with the following message:
     """
-    expected java.lang.String
+    Expecting java.lang.String
     <2>
-    matches java.lang.String
+    to match java.lang.String
     <unmatched>
     but was not
     """
@@ -75,9 +75,9 @@ Feature: judge object
     """
     Then failed with the following message:
     """
-    expected java.lang.String
+    Expecting java.lang.String
     <2>
-    matches java.lang.String
+    to match java.lang.String
     <unmatched>
     but was not
     """
@@ -146,9 +146,9 @@ Feature: judge object
     """
     Then failed with the following message:
     """
-    expected java.lang.Integer
+    Expecting java.lang.Integer
     <3>
-    matches java.lang.Integer
+    to match java.lang.Integer
     <100>
     but was not
     """
@@ -207,7 +207,7 @@ Feature: judge object
     """
     Then failed with the following message:
     """
-    unexpected fields `key2`
+    Unexpected fields `key2`
     """
     And got the following source code information:
     """
@@ -225,9 +225,9 @@ Feature: judge object
     """
     Then failed with the following message:
     """
-    expected java.lang.Integer
+    Expecting java.lang.Integer
     <10>
-    matches java.lang.Integer
+    to match java.lang.Integer
     <100>
     but was not
     """

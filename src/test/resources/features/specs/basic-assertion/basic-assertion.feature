@@ -11,9 +11,9 @@ Feature: basic assertion
     """
     Then failed with the following message:
     """
-    expected <type>
+    Expecting <type>
     <<message>>
-    equals to null but was not
+    to be equal to null but was not
     """
     Examples:
       | value | type                | message |
@@ -33,9 +33,9 @@ Feature: basic assertion
     """
     Then failed with the following message:
     """
-    expected <type>
+    Expecting <type>
     <<message>>
-    matches null but was not
+    to match null but was not
     """
     Examples:
       | value | type                | message |
@@ -51,7 +51,7 @@ Feature: basic assertion
     """
     Then failed with the following message:
     """
-    expected null equals to <type>
+    Expecting null to be equal to <type>
     <<message>>
     but was not
     """
@@ -72,7 +72,7 @@ Feature: basic assertion
     """
     Then failed with the following message:
     """
-    expected null matches <type>
+    Expecting null to match <type>
     <<message>>
     but was not
     """
@@ -88,7 +88,7 @@ Feature: basic assertion
     """
     Then failed with the following message:
     """
-    cannot compare null and list
+    Cannot compare null and list
     """
     And got the following source code information:
     """
@@ -107,7 +107,7 @@ Feature: basic assertion
     """
     Then failed with the following message:
     """
-    the input value is null
+    The input value is null
     """
     And got the following source code information:
     """

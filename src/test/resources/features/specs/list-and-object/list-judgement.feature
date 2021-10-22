@@ -15,7 +15,7 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    expected list size <1> but was <2>
+    Expecting list size to be <1> but was <2>
     """
     And got the following source code information:
     """
@@ -28,9 +28,9 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    expected java.lang.Integer
+    Expecting java.lang.Integer
     <2>
-    equals to java.lang.Integer
+    to be equal to java.lang.Integer
     <3>
     but was not
     """
@@ -55,7 +55,7 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    expected list size <1> but was <2>
+    Expecting list size to be <1> but was <2>
     """
     And got the following source code information:
     """
@@ -68,9 +68,9 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    expected java.lang.Integer
+    Expecting java.lang.Integer
     <2>
-    matches java.lang.Integer
+    to match java.lang.Integer
     <3>
     but was not
     """
@@ -139,7 +139,7 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    expected list size <1> but was <2>
+    Expecting list size to be <1> but was <2>
     """
     And got the following source code information:
     """
@@ -152,9 +152,9 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    expected java.lang.Integer
+    Expecting java.lang.Integer
     <3>
-    equals to java.lang.Integer
+    to be equal to java.lang.Integer
     <4>
     but was not
     """
@@ -215,7 +215,7 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    cannot compare java.lang.Integer
+    Cannot compare java.lang.Integer
     <1>
     and list
     """
@@ -230,7 +230,7 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    cannot compare java.lang.Integer
+    Cannot compare java.lang.Integer
     <1>
     and list
     """
@@ -297,7 +297,7 @@ Feature: judge list
     """
     Then failed with the following message:
     """
-    unexpected fields `unexpected` in list[1]
+    Unexpected fields `unexpected` in list[1]
     """
 
   Scenario: use @size to mapping sub list size ot new list

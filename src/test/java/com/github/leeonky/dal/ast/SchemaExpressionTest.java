@@ -19,7 +19,7 @@ class SchemaExpressionTest {
 
         assertThat(assertThrows(AssertionFailure.class, () ->
                 schemaExpression.evaluate(runtimeContextBuilder.build(null))))
-                .hasMessage("expect matches schema `String` but was not")
+                .hasMessage("Expecting to match schema `String` but was not")
                 .hasFieldOrPropertyWithValue("position", 100)
         ;
     }

@@ -15,7 +15,6 @@ import static java.lang.String.format;
 import static java.util.stream.IntStream.range;
 
 public class ListNode extends Node {
-    // TODO New type JudgementExpression
     private final List<Node> expressions;
     private final Type type;
 
@@ -64,7 +63,7 @@ public class ListNode extends Node {
 
     private boolean judgeAll(RuntimeContextBuilder.RuntimeContext context, DataObject dataObject) {
         if (!dataObject.isList())
-            throw new RuntimeException(format("cannot compare%sand list", dataObject.inspect()), getPositionBegin());
+            throw new RuntimeException(format("Cannot compare%sand list", dataObject.inspect()), getPositionBegin());
         if (type == Type.ALL_ITEMS)
             assertListSize(expressions.size(), dataObject.getListSize(), getPositionBegin());
         return context.newThisScope(dataObject, () -> {

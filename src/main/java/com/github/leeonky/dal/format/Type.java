@@ -12,7 +12,7 @@ public interface Type<T> {
 
             @Override
             public String errorMessage(String field, Object actual) {
-                return String.format("Expect field `%s` [%s] to be equal to [%s], but was not.", field, actual, expect);
+                return String.format("Expecting field `%s` [%s] to be equal to [%s], but was not.", field, actual, expect);
             }
         };
     }
@@ -26,7 +26,7 @@ public interface Type<T> {
 
             @Override
             public String errorMessage(String field, Object actual) {
-                return String.format("Expect field `%s` [%s] to be null, but was not.", field, actual);
+                return String.format("Expecting field `%s` [%s] to be null, but was not.", field, actual);
             }
         };
     }
@@ -40,7 +40,7 @@ public interface Type<T> {
 
             @Override
             public String errorMessage(String field, Object actual) {
-                return String.format("Expect field `%s` [%s] to be less than [%s], but was not.", field, actual, value);
+                return String.format("Expecting field `%s` [%s] to be less than [%s], but was not.", field, actual, value);
             }
         };
     }
@@ -55,7 +55,7 @@ public interface Type<T> {
 
             @Override
             public String errorMessage(String field, Object actual) {
-                return String.format("Expect field `%s` [%s] to be greater than [%s], but was not.", field, actual, value);
+                return String.format("Expecting field `%s` [%s] to be greater than [%s], but was not.", field, actual, value);
             }
         };
     }
@@ -69,7 +69,7 @@ public interface Type<T> {
 
             @Override
             public String errorMessage(String field, Object actual) {
-                return String.format("Expect field `%s` [%s] to be less or equal to [%s], but was not.", field, actual, value);
+                return String.format("Expecting field `%s` [%s] to be less or equal to [%s], but was not.", field, actual, value);
             }
         };
     }
@@ -83,7 +83,7 @@ public interface Type<T> {
 
             @Override
             public String errorMessage(String field, Object actual) {
-                return String.format("Expect field `%s` [%s] to be greater or equal to [%s], but was not.", field, actual, value);
+                return String.format("Expecting field `%s` [%s] to be greater or equal to [%s], but was not.", field, actual, value);
             }
         };
     }

@@ -78,15 +78,15 @@ class VerifyValueTypeInSchema extends Base {
         assertErrorContains(new JavaTypeInSchema() {{
                                 stringValue = "world";
                             }}, "is WrappedJavaTypeWithValueInSchema",
-                "expect matches schema `WrappedJavaTypeWithValueInSchema` but was not\n" +
-                        "    Expect field `.stringValue` [world] to be equal to [hello], but was not.");
+                "Expecting to match schema `WrappedJavaTypeWithValueInSchema` but was not\n" +
+                        "    Expecting field `.stringValue` [world] to be equal to [hello], but was not.");
 
         dal.getRuntimeContextBuilder().registerSchema(WrappedJavaTypeNullReferenceInSchema.class);
         assertErrorContains(new JavaTypeInSchema() {{
                                 stringValue = "world";
                             }}, "is WrappedJavaTypeNullReferenceInSchema",
-                "expect matches schema `WrappedJavaTypeNullReferenceInSchema` but was not\n" +
-                        "    Expect field `.stringValue` [world] to be null, but was not.");
+                "Expecting to match schema `WrappedJavaTypeNullReferenceInSchema` but was not\n" +
+                        "    Expecting field `.stringValue` [world] to be null, but was not.");
     }
 
     @Test
@@ -156,23 +156,23 @@ class VerifyValueTypeInSchema extends Base {
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is LessThan2", "expect matches schema `LessThan2` but was not\n" +
-                "    Expect field `.value` [2] to be less than [2], but was not.");
+        }}, "is LessThan2", "Expecting to match schema `LessThan2` but was not\n" +
+                "    Expecting field `.value` [2] to be less than [2], but was not.");
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is GreaterThan3", "expect matches schema `GreaterThan3` but was not\n" +
-                "    Expect field `.value` [2] to be greater than [3], but was not.");
+        }}, "is GreaterThan3", "Expecting to match schema `GreaterThan3` but was not\n" +
+                "    Expecting field `.value` [2] to be greater than [3], but was not.");
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 4);
-        }}, "is LessOrEqualTo3", "expect matches schema `LessOrEqualTo3` but was not\n" +
-                "    Expect field `.value` [4] to be less or equal to [3], but was not.");
+        }}, "is LessOrEqualTo3", "Expecting to match schema `LessOrEqualTo3` but was not\n" +
+                "    Expecting field `.value` [4] to be less or equal to [3], but was not.");
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is GreaterOrEqualTo3", "expect matches schema `GreaterOrEqualTo3` but was not\n" +
-                "    Expect field `.value` [2] to be greater or equal to [3], but was not.");
+        }}, "is GreaterOrEqualTo3", "Expecting to match schema `GreaterOrEqualTo3` but was not\n" +
+                "    Expecting field `.value` [2] to be greater or equal to [3], but was not.");
     }
 
     public static class JavaTypeInSchema {

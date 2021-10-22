@@ -12,17 +12,16 @@ public class IllegalTypeException extends java.lang.RuntimeException {
         super(message);
     }
 
-    //    TODO fix incorrect words: expect
     public String assertionFailureMessage(SchemaNode schemaNode) {
         if (getMessage() == null)
-            return format("expect matches schema `%s` but was not", schemaNode.getSchema());
-        return format("expect matches schema `%s` but was not\n    %s", schemaNode.getSchema(), getMessage());
+            return format("Expecting to match schema `%s` but was not", schemaNode.getSchema());
+        return format("Expecting to match schema `%s` but was not\n    %s", schemaNode.getSchema(), getMessage());
     }
 
     //TODO duplicated string
     public String assertionFailureMessage(SchemaNode schemaNode, int i) {
         if (getMessage() == null)
-            return format("expect element[%d] matches schema `%s` but was not", i, schemaNode.getSchema());
-        return format("expect element[%d] matches schema `%s` but was not\n    %s", i, schemaNode.getSchema(), getMessage());
+            return format("expecting element[%d] to match schema `%s` but was not", i, schemaNode.getSchema());
+        return format("Expecting element[%d] to match schema `%s` but was not\n    %s", i, schemaNode.getSchema(), getMessage());
     }
 }
