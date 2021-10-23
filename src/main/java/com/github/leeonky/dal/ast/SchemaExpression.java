@@ -29,7 +29,7 @@ public class SchemaExpression extends Node {
     }
 
     public String getSchemaName() {
-        return schemaNodes.get(0).getSchema();
+        return schemaNodes.get(schemaNodes.size() - 1).getSchema();
     }
 
     @Override
@@ -42,6 +42,11 @@ public class SchemaExpression extends Node {
         }
     }
 
+    @Override
+    public DataObject evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
+        return context.wrap(evaluate(context), getSchemaName());
+    }
+
     private void verifyAndConvertAsSchemaType(RuntimeContextBuilder.RuntimeContext context,
                                               SchemaNode schemaNode, ObjectRef objectRef) {
         DataObject input = instance.evaluateDataObject(context);
@@ -50,10 +55,10 @@ public class SchemaExpression extends Node {
                 throw new SyntaxException("Expecting a list but was" + input.inspect(), instance.getPositionBegin());
             AtomicInteger index = new AtomicInteger(0);
             objectRef.instance = input.getListObjects().stream().map(element -> convertViaSchema(context, schemaNode,
-                    element, format("%s[%d] ", instance.inspect(), index.getAndIncrement())))
+                    element, format("%s[%d]", instance.inspect(), index.getAndIncrement())))
                     .collect(Collectors.toList());
         } else
-            objectRef.instance = convertViaSchema(context, schemaNode, input, instance.inspect() + " ");
+            objectRef.instance = convertViaSchema(context, schemaNode, input, instance.inspect());
     }
 
     private Object convertViaSchema(RuntimeContextBuilder.RuntimeContext context, SchemaNode schemaNode,
@@ -61,8 +66,8 @@ public class SchemaExpression extends Node {
         try {
             return schemaNode.getConstructorViaSchema(context).apply(element);
         } catch (IllegalTypeException exception) {
-            throw new AssertionFailure(exception.assertionFailureMessage(input.equals(" ") ? "" : input, schemaNode),
-                    schemaNode.getPositionBegin());
+            throw new AssertionFailure(exception.assertionFailureMessage(input.isEmpty() ? input : input + " ",
+                    schemaNode), schemaNode.getPositionBegin());
         }
     }
 

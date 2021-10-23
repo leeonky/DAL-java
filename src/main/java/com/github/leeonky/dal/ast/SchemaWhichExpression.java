@@ -21,7 +21,7 @@ public class SchemaWhichExpression extends Node {
     @Override
     public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
         try {
-            return context.wrapInputValueAndEvaluate(schemaExpression.evaluate(context), clause, schemaExpression.getSchemaName());
+            return context.newThisScope(schemaExpression.evaluateDataObject(context), () -> clause.evaluate(context));
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), getPositionBegin());
         }

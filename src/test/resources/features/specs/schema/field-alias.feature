@@ -119,7 +119,7 @@ Feature: define field alias in schema
       is Order which .user.aliasOfAge = 18
     """
 
-  Scenario: alias in object judgement
+  Scenario: provide schema via is and use alias in object judgement
     Given the following schema:
     """
     @Partial
@@ -148,7 +148,7 @@ Feature: define field alias in schema
       }
     """
 
-  Scenario: alias in nested object judgement
+  Scenario: provide schema via is and use alias alias in nested object judgement
     Given the following schema:
     """
     @Partial
@@ -189,7 +189,7 @@ Feature: define field alias in schema
       }
     """
 
-  Scenario: alias in list judgement
+  Scenario: provide schema via is and use alias in list judgement
     Given the following schema:
     """
     public class Order {
@@ -225,7 +225,7 @@ Feature: define field alias in schema
       }
     """
 
-  Scenario: alias in nested list judgement
+  Scenario: provide schema via is and use alias in nested list judgement
     Given the following schema:
     """
     public class Image {
@@ -260,7 +260,7 @@ Feature: define field alias in schema
       }
     """
 
-  Scenario: alias in list mapping
+  Scenario: provide schema via is and use alias in list mapping
     Given the following schema:
     """
     public class Order {
@@ -349,6 +349,59 @@ Feature: define field alias in schema
       }
     """
 
+  Scenario: provide schema via object judgement key
+    Given the following schema:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfId", field = "id")
+    })
+    public class Order {
+    }
+    """
+    When the following input data:
+    """
+      {
+        data: {
+          "id": 0
+        }
+      }
+    """
+    Then assert by the following code:
+    """
+    : {
+      data is Order: {
+        aliasOfId: 0
+      }
+    }
+    """
+
+  Scenario: provide schema via list judgement element
+    Given the following schema:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfId", field = "id")
+    })
+    public class Order {
+    }
+    """
+    When the following input data:
+    """
+      [{
+          "id": 0
+      }]
+    """
+    Then assert by the following code:
+    """
+    : [
+        is Order: {
+          aliasOfId: 0
+        }
+      ]
+    """
+
+# TODO
 #  Scenario: alias in list element schema in list judgement
 #    Given the following schema:
 #    """
@@ -372,4 +425,5 @@ Feature: define field alias in schema
 #      data is [Order]: [{aliasOfId: 0}]
 #    """
 
+# TODO
 #  Scenario: alias in list element schema in which clause

@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.util.BeanClass;
@@ -123,11 +122,6 @@ public class RuntimeContextBuilder {
             return thisStack.getFirst();
         }
 
-        public Object wrapInputValueAndEvaluate(Object value, Node node, String schema) {
-            return newThisScope(new DataObject(value, this, SchemaType.create(schemas.get(schema))),
-                    () -> node.evaluate(this));
-        }
-
         public <T> T newThisScope(DataObject dataObject, Supplier<T> supplier) {
             try {
                 thisStack.push(dataObject);
@@ -191,6 +185,10 @@ public class RuntimeContextBuilder {
 
         public DataObject wrap(Object instance) {
             return new DataObject(instance, this, SchemaType.createRoot());
+        }
+
+        public DataObject wrap(Object instance, String schema) {
+            return new DataObject(instance, this, SchemaType.create(schemas.get(schema)));
         }
 
         public RuntimeContext registerPropertyAccessor(Object instance) {

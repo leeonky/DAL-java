@@ -23,8 +23,9 @@ public class ListNode extends Node {
                 .collect(Collectors.toList());
         int size = elementFactories.size();
         type = guessType(expressionFactories);
-        expressions = range(0, size).mapToObj(i -> elementFactories.get(i).makeExpression(new PropertyNode(InputNode.INSTANCE,
-                type.indexOfNode(i, size), BRACKET))).collect(Collectors.toList());
+        expressions = range(0, size).mapToObj(i -> elementFactories.get(i).makeExpression(
+                new PropertyNode(InputNode.INSTANCE, type.indexOfNode(i, size), BRACKET)))
+                .collect(Collectors.toList());
     }
 
     private Type guessType(List<ExpressionClause> expressionFactories) {
