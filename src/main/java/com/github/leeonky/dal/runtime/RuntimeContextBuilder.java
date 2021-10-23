@@ -187,8 +187,11 @@ public class RuntimeContextBuilder {
             return new DataObject(instance, this, SchemaType.createRoot());
         }
 
-        public DataObject wrap(Object instance, String schema) {
-            return new DataObject(instance, this, SchemaType.create(schemas.get(schema)));
+        public DataObject wrap(Object instance, String schema, boolean isList) {
+            BeanClass<?> schemaBeanClass = schemas.get(schema);
+            if (isList)
+                schemaBeanClass = BeanClass.create(Array.newInstance(schemaBeanClass.getType(), 0).getClass());
+            return new DataObject(instance, this, SchemaType.create(schemaBeanClass));
         }
 
         public RuntimeContext registerPropertyAccessor(Object instance) {

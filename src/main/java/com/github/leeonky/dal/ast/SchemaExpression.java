@@ -44,7 +44,7 @@ public class SchemaExpression extends Node {
 
     @Override
     public DataObject evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
-        return context.wrap(evaluate(context), getSchemaName());
+        return context.wrap(evaluate(context), getSchemaName(), dimension > 0);
     }
 
     private void verifyAndConvertAsSchemaType(RuntimeContextBuilder.RuntimeContext context,

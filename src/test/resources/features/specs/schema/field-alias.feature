@@ -392,7 +392,7 @@ Feature: define field alias in schema
           "id": 0
       }]
     """
-    Then assert by the following code:
+    Then the following assertion should pass:
     """
     : [
         is Order: {
@@ -401,29 +401,73 @@ Feature: define field alias in schema
       ]
     """
 
-# TODO
-#  Scenario: alias in list element schema in list judgement
-#    Given the following schema:
-#    """
-#    @Partial
-#    @FieldAliases({
-#            @FieldAlias(alias = "aliasOfId", field = "id")
-#    })
-#    public class Order {
-#    }
-#    """
-#    When the following input data:
-#    """
-#      {
-#        data: [{
-#          "id": 0
-#        }]
-#      }
-#    """
-#    Then the following assertion should pass:
-#    """
-#      data is [Order]: [{aliasOfId: 0}]
-#    """
+  Scenario: provide element schema via is and use alias in which clause
+    Given the following schema:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfId", field = "id")
+    })
+    public class Order {
+    }
+    """
+    When the following input data:
+    """
+      [{
+          "id": 0
+      }]
+    """
+    Then the following assertion should pass:
+    """
+    is [Order] which [0].aliasOfId: 0
+    """
 
-# TODO
-#  Scenario: alias in list element schema in which clause
+  Scenario: provide element schema via object judgement key
+    Given the following schema:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfId", field = "id")
+    })
+    public class Order {
+    }
+    """
+    When the following input data:
+    """
+      {
+        data: [{
+          "id": 0
+        }]
+      }
+    """
+    Then the following assertion should pass:
+    """
+      : {
+        data is [Order]: [{aliasOfId: 0}]
+      }
+    """
+
+  Scenario: provide element schema via list judgement key
+    Given the following schema:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfId", field = "id")
+    })
+    public class Order {
+    }
+    """
+    When the following input data:
+    """
+      [
+        [{
+          "id": 0
+        }]
+      ]
+    """
+    Then the following assertion should pass:
+    """
+      : [
+        is [Order]: [{aliasOfId: 0}]
+      ]
+    """
