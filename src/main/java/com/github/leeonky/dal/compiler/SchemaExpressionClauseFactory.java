@@ -10,11 +10,15 @@ public class SchemaExpressionClauseFactory implements ExpressionClauseFactory {
 
     @Override
     public ExpressionClause fetch(TokenParser tokenParser) {
-        return tokenParser.<List<SchemaNode>>fetchOne('[', ']', () -> tokenParser.fetchNodes("/", SCHEMA))
-                .<ExpressionClause>map(schemaNodes -> input -> new SchemaExpression(input, schemaNodes, true))
-                .orElseGet(() -> {
-                    List<SchemaNode> schemaNodes = tokenParser.fetchNodes("/", SCHEMA);
-                    return input -> new SchemaExpression(input, schemaNodes, false);
-                });
+        return fetchSchemaClause(tokenParser, 0);
+    }
+
+    private ExpressionClause fetchSchemaClause(TokenParser tokenParser, int dimension) {
+        if (dimension > 1)
+            throw tokenParser.getSourceCode().syntaxError("Not support multidimensional schema", 0);
+        return tokenParser.fetchOne('[', ']', () -> fetchSchemaClause(tokenParser, dimension + 1)).orElseGet(() -> {
+            List<SchemaNode> schemaNodes = tokenParser.fetchNodes("/", SCHEMA);
+            return input -> new SchemaExpression(input, schemaNodes, dimension);
+        });
     }
 }

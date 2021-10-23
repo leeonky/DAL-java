@@ -138,6 +138,17 @@ Feature: schema expression
     <1>
     """
 
-# TODO [[1]] is [[Integer]]
-# TODO support field alias in element schema in list judgement
-# TODO support field alias in element schema in which clause
+  Scenario: not support element schema expression in multidimensional list
+    Given the following dal code:
+    """
+      is [[Integer]]
+    """
+    Then failed to get "schema-expression" node with the following message:
+    """
+    Not support multidimensional schema
+    """
+    And got the following source code information:
+    """
+      is [[Integer]]
+           ^
+    """

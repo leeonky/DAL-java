@@ -348,3 +348,28 @@ Feature: define field alias in schema
         nameInSuper: 'hello'
       }
     """
+
+#  Scenario: alias in list element schema in list judgement
+#    Given the following schema:
+#    """
+#    @Partial
+#    @FieldAliases({
+#            @FieldAlias(alias = "aliasOfId", field = "id")
+#    })
+#    public class Order {
+#    }
+#    """
+#    When the following input data:
+#    """
+#      {
+#        data: [{
+#          "id": 0
+#        }]
+#      }
+#    """
+#    Then the following assertion should pass:
+#    """
+#      data is [Order]: [{aliasOfId: 0}]
+#    """
+
+#  Scenario: alias in list element schema in which clause

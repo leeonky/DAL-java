@@ -12,18 +12,20 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.compiler.Constants.SCHEMA_DELIMITER;
 import static java.lang.String.format;
+import static java.lang.String.join;
+import static java.util.Collections.nCopies;
 import static java.util.stream.Collectors.joining;
 
 public class SchemaExpression extends Node {
     private final Node instance;
     private final List<SchemaNode> schemaNodes = new ArrayList<>();
     private final ObjectRef objectRef = new ObjectRef();
-    private final boolean elementSchema;
+    private final int dimension;
 
-    public SchemaExpression(Node previous, List<SchemaNode> schemaNodes, boolean elementSchema) {
+    public SchemaExpression(Node previous, List<SchemaNode> schemaNodes, int dimension) {
         instance = previous;
         this.schemaNodes.addAll(schemaNodes);
-        this.elementSchema = elementSchema;
+        this.dimension = dimension;
     }
 
     public String getSchemaName() {
@@ -43,7 +45,7 @@ public class SchemaExpression extends Node {
     private void verifyAndConvertAsSchemaType(RuntimeContextBuilder.RuntimeContext context,
                                               SchemaNode schemaNode, ObjectRef objectRef) {
         DataObject input = instance.evaluateDataObject(context);
-        if (elementSchema) {
+        if (dimension == 1) {
             if (!input.isList())
                 throw new SyntaxException("Expecting a list but was" + input.inspect(), instance.getPositionBegin());
             AtomicInteger index = new AtomicInteger(0);
@@ -51,7 +53,7 @@ public class SchemaExpression extends Node {
                     element, format("%s[%d] ", instance.inspect(), index.getAndIncrement())))
                     .collect(Collectors.toList());
         } else
-            objectRef.instance = convertViaSchema(context, schemaNode, input, instance.inspect());
+            objectRef.instance = convertViaSchema(context, schemaNode, input, instance.inspect() + " ");
     }
 
     private Object convertViaSchema(RuntimeContextBuilder.RuntimeContext context, SchemaNode schemaNode,
@@ -59,7 +61,7 @@ public class SchemaExpression extends Node {
         try {
             return schemaNode.getConstructorViaSchema(context).apply(element);
         } catch (IllegalTypeException exception) {
-            throw new AssertionFailure(exception.assertionFailureMessage(input, schemaNode),
+            throw new AssertionFailure(exception.assertionFailureMessage(input.equals(" ") ? "" : input, schemaNode),
                     schemaNode.getPositionBegin());
         }
     }
@@ -88,11 +90,9 @@ public class SchemaExpression extends Node {
 
     @Override
     public String inspectClause() {
-        String schemaChain = schemaNodes.stream().map(SchemaNode::inspect)
-                .collect(joining(format(" %s ", SCHEMA_DELIMITER)));
-        if (elementSchema)
-            return format("is [%s]", schemaChain);
-        return format("is %s", schemaChain);
+        return format("is %s%s%s", join("", nCopies(dimension, "[")),
+                schemaNodes.stream().map(SchemaNode::inspect).collect(joining(format(" %s ", SCHEMA_DELIMITER))),
+                join("", nCopies(dimension, "]")));
     }
 
     @Override
