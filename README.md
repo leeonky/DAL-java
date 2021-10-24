@@ -577,7 +577,19 @@ time is LocalDateTime which year= 2001
 DAL内置的 `Formatter` 都在 `Formatters`中定义。
 
 - #### 在对象和集合断言中使用 `is`
-在对象与集合断言时也可以通过 `is` 指定 `Schema`:
+在对如下对象数据断言时：
+``` json
+{
+    "response": {
+        status: 'PAID'
+        paymentData: {
+            amount: 100
+            status: 'DONE'
+        }
+    }
+}
+```
+可以在属性后通过 `is` 指定 `Schema`：
 ``` javascript
 = {
     response is 已支付的订单: {
@@ -585,11 +597,61 @@ DAL内置的 `Formatter` 都在 `Formatters`中定义。
     }
 }
 ```
-在集合中使用 `is`
+同时如果是如下集合数据：
+``` json
+[
+    {
+        status: 'PAID'
+        paymentData: {
+            amount: 100
+            status: 'DONE'
+        }
+    }
+]
+```
+可以直接通过 `is` 指定相应位置元素的 `Schema`:
 ``` javascript
 : [is 已支付的订单: {
         支付金额: 100
     }]
 ```
-在对象与集合中不能添加 `which` 关键字
+以上两种情形都不能添加 `which` 关键字
 
+- #### 元素 Schema
+
+如果数据是一个集合：
+``` json
+[
+    {
+        status: 'PAID'
+        paymentData: {
+            amount: 100
+            status: 'DONE'
+        }
+    },{
+        status: 'PAID'
+        paymentData: {
+            amount: 200
+            status: 'DONE'
+        }
+    }
+]
+```
+按照前边的例子，断言可以写成：
+``` javascript
+: [
+    is 已支付的订单: {
+        支付金额: 100
+    }
+    is 已支付的订单: {
+        支付金额: 200
+    }
+]
+```
+但是这样写需要重复指定每个元素的 `Schema`。为了避免不必要的重复，DAL支持集合元素 `Schema`，上边的断言可以简化为：
+``` javascript
+is [已支付的订单]: {
+    支付金额: [100, 200]
+}
+```
+也就是说当待断言数据是一个集合时可以使用 `[Schema]` 的形式自动为每一个元素同时制定 `Schema`。
