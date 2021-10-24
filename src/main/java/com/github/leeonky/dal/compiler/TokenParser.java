@@ -63,11 +63,11 @@ public class TokenParser {
                 chars -> nodeFactory.apply(chars.stream().map(String::valueOf).collect(joining())));
     }
 
-    public <T> Optional<T> fetchOne(Character opening, char closing, Supplier<T> supplier) {
-        return sourceCode.popWord(opening.toString()).map(token -> {
+    public <T> Optional<T> fetchBetween(String opening, String closing, Supplier<T> supplier) {
+        return sourceCode.popWord(opening).map(token -> {
             T result = supplier.get();
-            sourceCode.popWord(String.valueOf(closing))
-                    .orElseThrow(() -> sourceCode.syntaxError("should end with ]", 0));
+            sourceCode.popWord(closing)
+                    .orElseThrow(() -> sourceCode.syntaxError("should end with " + closing, 0));
             return result;
         });
     }
@@ -151,6 +151,23 @@ public class TokenParser {
 
     public Optional<Node> wordToken(String word, Function<Token, Node> factory) {
         return sourceCode.popWord(word).map(t -> factory.apply(t).setPositionBegin(t.getPosition()));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends Node> Optional<List<T>> fetchRow(NodeFactory cellFactory) {
+        return when(sourceCode.popWord("|").isPresent()).optional(() -> {
+//            TODO while to append list
+//            TODO last |: with \n; with space+\n
+            List<T> cells = new ArrayList<>();
+            while (sourceCode.hasCode()) {
+                cells.add((T) cellFactory.fetch(this));
+                sourceCode.popWord("|");
+            }
+//
+//            cells.add((T) cellFactory.fetch(this));
+//            sourceCode.popWord("|");
+            return cells;
+        });
     }
 
     public static final OperatorFactory DEFAULT_JUDGEMENT_OPERATOR = tokenParser -> tokenParser.operators.isEmpty() ?

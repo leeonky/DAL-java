@@ -107,7 +107,7 @@ public class CucumberContext {
             throw e;
         }
         try {
-            dal.evaluateAll(INSTANCE.node, assertion);
+            dal.evaluateAll(node, assertion);
         } catch (DalException e) {
             System.err.println(e.show(assertion));
             throw e;

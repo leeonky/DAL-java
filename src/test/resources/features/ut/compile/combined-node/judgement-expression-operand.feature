@@ -209,3 +209,17 @@ Feature: compile judgement expression operand
       | operator |
       | =        |
       | :        |
+
+#  TODO assert via table node
+#  Scenario: support table node
+#    Given the following dal code:
+#    """
+#    | name: | age= |
+#    """
+#    Then got the following "judgement-expression-operand" node:
+#    """
+#    : {
+#      class.simpleName: 'TableNode'
+#      inspect: '| name: | age= |'
+#    }
+#    """

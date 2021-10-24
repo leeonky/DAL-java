@@ -58,7 +58,7 @@ public class Compiler {
                     new PropertyNode(InputNode.INSTANCE, token.getContent(), IDENTIFIER)),
             WILDCARD = parser -> parser.wordToken("*", token -> new WildcardNode()),
             PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_WHICH_CLAUSE, SCHEMA_JUDGEMENT_CLAUSE,
-            UNARY_OPERATOR_EXPRESSION;
+            UNARY_OPERATOR_EXPRESSION, TABLE = new TableMatcher();
 
     public NodeFactory PROPERTY_CHAIN, OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION,
             JUDGEMENT_EXPRESSION_OPERAND;
@@ -101,7 +101,7 @@ public class Compiler {
                 () -> parser.wordToken(Constants.LIST_ELLIPSIS, token -> new ListEllipsisNode()).isPresent() ? null
                         : shortJudgementClause(JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR))
                         .fetch(parser)));
-        JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD);
+        JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         UNARY_OPERATOR_EXPRESSION = parser -> parser.fetchExpression(null, UNARY_OPERATORS, OPERAND);
         OPERAND = UNARY_OPERATOR_EXPRESSION.or(oneOf(CONST, PROPERTY, PARENTHESES, INPUT)
                 .or("expect a value or expression").recursive(EXPLICIT_PROPERTY).map(Node::avoidListMapping));
@@ -139,9 +139,9 @@ public class Compiler {
         return new ArrayList<Node>() {{
             TokenParser parser = new TokenParser(sourceCode);
             add(EXPRESSION.fetch(parser));
-            if (sourceCode.isBeginning() && sourceCode.isEndOfCode())
+            if (sourceCode.isBeginning() && sourceCode.hasCode())
                 throw sourceCode.syntaxError("unexpected token", 0);
-            while (sourceCode.isEndOfCode())
+            while (sourceCode.hasCode())
                 add(EXPRESSION.fetch(parser));
         }};
     }
@@ -163,5 +163,19 @@ public class Compiler {
     private static OperatorMatcher oneOf(OperatorMatcher matcher, OperatorMatcher... matchers) {
         return parser -> Stream.concat(Stream.of(matcher), Stream.of(matchers))
                 .map(p -> p.fetch(parser)).filter(Optional::isPresent).findFirst().orElse(empty());
+    }
+
+    public class TableMatcher implements NodeMatcher {
+        private final NodeFactory HEADER_NODE = parser -> {
+//         TODO default table operator
+            return new HeaderNode(PROPERTY_CHAIN.fetch(parser), JUDGEMENT_OPERATORS.fetch(parser).get());
+        };
+
+        @Override
+        public Optional<Node> fetch(TokenParser parser) {
+            Optional<List<HeaderNode>> headerNodes = parser.fetchRow(HEADER_NODE);
+//            TODO append cell
+            return headerNodes.map(headers -> new TableNode(headers));
+        }
     }
 }
