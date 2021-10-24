@@ -153,14 +153,13 @@ public class TokenParser {
         return sourceCode.popWord(word).map(t -> factory.apply(t).setPositionBegin(t.getPosition()));
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends Node> Optional<List<T>> fetchRow(NodeFactory cellFactory) {
+    public <T> Optional<List<T>> fetchRow(Supplier<T> factory) {
         return when(sourceCode.popWord("|").isPresent()).optional(() -> {
 //            TODO while to append list
 //            TODO last |: with \n; with space+\n
             List<T> cells = new ArrayList<>();
-            while (sourceCode.hasCode()) {
-                cells.add((T) cellFactory.fetch(this));
+            while (sourceCode.hasCode() && !sourceCode.startsWith("|")) {
+                cells.add(factory.get());
                 sourceCode.popWord("|");
             }
 //

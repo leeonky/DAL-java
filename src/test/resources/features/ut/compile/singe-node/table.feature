@@ -13,20 +13,20 @@ Feature: compile table node
     }
     """
 
-#  Scenario: support table with header and cell
-#    Given the following dal code:
-#    """
-#    | name: |
-#    | 'Tom' |
-#    """
-#    Then got the following "judgement-expression-operand" node:
-#    """
-#    : {
-#      class.simpleName: 'TableNode'
-#      inspect: '| name: |
-#      | 'Tom' |'
-#    }
-#    """
+  Scenario: support table with header and cell
+    Given the following dal code:
+    """
+    | name: |
+    | 'Tom' |
+    """
+    Then got the following "judgement-expression-operand" node:
+    """
+    : {
+      class.simpleName: 'TableNode'
+      inspect: "| name: |
+    | 'Tom' |"
+    }
+    """
 
 #TODO default table judgement operator to header
 #TODO default header judgement operator to cell

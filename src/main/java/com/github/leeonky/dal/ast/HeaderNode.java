@@ -14,4 +14,8 @@ public class HeaderNode extends Node {
     public String inspect() {
         return operator.inspect(property.inspect(), "").trim();
     }
+
+    public Node propertyNode() {
+        return property;
+    }
 }
