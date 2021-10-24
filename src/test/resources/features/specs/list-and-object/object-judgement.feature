@@ -97,7 +97,7 @@ Feature: judge object
     """
     Then the following assertion should pass:
     """
-      = {}
+      = { }
     """
 
   Scenario Outline: any non-null object matches {}
@@ -107,7 +107,7 @@ Feature: judge object
     """
     Then the following assertion should pass:
     """
-      : {}
+      : { }
     """
     Examples:
       | data         |

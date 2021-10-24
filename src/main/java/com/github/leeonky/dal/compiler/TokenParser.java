@@ -11,9 +11,9 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.compiler.Constants.*;
+import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_CHAR;
+import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_NODE;
 import static com.github.leeonky.dal.compiler.SourceCode.tokenMatcher;
-import static com.github.leeonky.dal.compiler.TokenParser.FetchBy.BY_CHAR;
-import static com.github.leeonky.dal.compiler.TokenParser.FetchBy.BY_NODE;
 import static com.github.leeonky.dal.runtime.FunctionUtil.not;
 import static com.github.leeonky.dal.runtime.IfThenFactory.when;
 import static java.util.Collections.*;
@@ -151,20 +151,6 @@ public class TokenParser {
 
     public Optional<Node> wordToken(String word, Function<Token, Node> factory) {
         return sourceCode.popWord(word).map(t -> factory.apply(t).setPositionBegin(t.getPosition()));
-    }
-
-    public enum FetchBy {
-        BY_CHAR,
-        BY_NODE {
-            @Override
-            protected void afterFetchElement(SourceCode sourceCode) {
-                sourceCode.popWord(",");
-                sourceCode.leftTrim();
-            }
-        };
-
-        protected void afterFetchElement(SourceCode tokenParser) {
-        }
     }
 
     public static final OperatorFactory DEFAULT_JUDGEMENT_OPERATOR = tokenParser -> tokenParser.operators.isEmpty() ?

@@ -105,12 +105,12 @@ public class SourceCode {
         return when(startsWith(word) && predicate.get()).optional(() -> new Token(seek(word.length())).append(word));
     }
 
-    public <T> Optional<Node> fetchElementNode(TokenParser.FetchBy fetchBy, Character opening, char closing,
+    public <T> Optional<Node> fetchElementNode(FetchBy fetchBy, Character opening, char closing,
                                                Supplier<T> element, Function<List<T>, Node> nodeFactory) {
         return when(whenFirstChar(opening::equals)).optional(() -> {
             int startPosition = seek(1);
             List<T> elements = new ArrayList<>();
-            while (isEndOfCode() && closing != currentChar()) {
+            while (isEndOfCode() && !fetchBy.isClosing(closing, this)) {
                 elements.add(element.get());
                 fetchBy.afterFetchElement(this);
             }
@@ -119,5 +119,28 @@ public class SourceCode {
             seek(1);
             return nodeFactory.apply(elements).setPositionBegin(startPosition);
         });
+    }
+
+    public enum FetchBy {
+        BY_CHAR,
+        BY_NODE {
+            @Override
+            protected void afterFetchElement(SourceCode sourceCode) {
+                sourceCode.popWord(",");
+                sourceCode.leftTrim();
+            }
+
+            @Override
+            protected boolean isClosing(char closing, SourceCode sourceCode) {
+                return sourceCode.startsWith(String.valueOf(closing));
+            }
+        };
+
+        protected void afterFetchElement(SourceCode tokenParser) {
+        }
+
+        protected boolean isClosing(char closing, SourceCode sourceCode) {
+            return closing == sourceCode.currentChar();
+        }
     }
 }
