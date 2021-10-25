@@ -1,6 +1,10 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.compiler.ExpressionClause;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 
@@ -18,5 +22,20 @@ public class TableNode extends Node {
         return String.join("\n", headers.stream().map(HeaderNode::inspect).collect(joining(" | ", "| ", " |")),
                 rowsCells.stream().map(cells -> cells.stream().map(Node::inspectClause).collect(joining(" | ", "| ", " |")))
                         .collect(joining("\n")));
+    }
+
+    @Override
+    public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
+        return toListNode(operator).judge(actualNode, operator, context);
+    }
+
+    private ListNode toListNode(Operator operator) {
+        return new ListNode(rowsCells.stream().<ExpressionClause>map(cells -> input ->
+                new Expression(input, operator, new ObjectNode(cells))).collect(Collectors.toList()));
+    }
+
+    @Override
+    public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
+        return toListNode(operator).judge(actualNode, operator, context);
     }
 }
