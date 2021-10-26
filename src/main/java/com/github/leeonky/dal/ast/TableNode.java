@@ -19,9 +19,9 @@ public class TableNode extends Node {
 
     @Override
     public String inspect() {
-        return String.join("\n", headers.stream().map(HeaderNode::inspect).collect(joining(" | ", "| ", " |")),
-                rowsCells.stream().map(cells -> cells.stream().map(Node::inspectClause).collect(joining(" | ", "| ", " |")))
-                        .collect(joining("\n")));
+        return headers.stream().map(HeaderNode::inspect).collect(joining(" | ", "| ", " |")) +
+                rowsCells.stream().map(cells -> cells.stream().map(Node::inspectClause).collect(joining(" | ", "\n| ", " |")))
+                        .collect(joining());
     }
 
     @Override

@@ -162,11 +162,18 @@ public class TokenParser {
                 cells.add(factory.get());
                 sourceCode.popWord("|");
             }
-//
-//            cells.add((T) cellFactory.fetch(this));
-//            sourceCode.popWord("|");
             return cells;
         });
+    }
+
+    public <T> List<List<T>> fetchRows(Supplier<T> factory) {
+        List<List<T>> result = new ArrayList<>();
+        Optional<List<T>> list = Optional.empty();
+        do {
+            list = fetchRow(factory);
+            list.map(result::add);
+        } while (list.isPresent());
+        return result;
     }
 
     public static final OperatorFactory DEFAULT_JUDGEMENT_OPERATOR = tokenParser -> tokenParser.operators.isEmpty() ?

@@ -173,20 +173,15 @@ public class Compiler {
             return new HeaderNode(PROPERTY_CHAIN.fetch(parser), JUDGEMENT_OPERATORS.fetch(parser).get());
         };
 
-        //            TODO refactor
         @Override
         public Optional<Node> fetch(TokenParser parser) {
-            Optional<List<HeaderNode>> headerNodes = parser.fetchRow(() -> (HeaderNode) HEADER_NODE.fetch(parser));
-            return headerNodes.map(headers -> {
-                List<List<Node>> cells = new ArrayList<>();
-                Optional<List<ExpressionClause>> cellClauses = parser.fetchRow(() ->
-                        shortJudgementClause(JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR)).fetch(parser));
-
+            return parser.fetchRow(() -> (HeaderNode) HEADER_NODE.fetch(parser)).map(headers -> {
                 //            TODO raise error when different header and cell count
-                cellClauses.ifPresent(clauses ->
-                        cells.add(IntStream.range(0, headers.size()).mapToObj(i ->
-                                clauses.get(i).makeExpression(headers.get(i).propertyNode())).collect(Collectors.toList())));
-                return new TableNode(headers, cells);
+                return new TableNode(headers, parser.fetchRows(() ->
+                        shortJudgementClause(JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR)).fetch(parser))
+                        .stream().map(clauses -> IntStream.range(0, headers.size()).mapToObj(i ->
+                                clauses.get(i).makeExpression(headers.get(i).propertyNode())).collect(Collectors.toList()))
+                        .collect(Collectors.toList()));
             });
         }
 

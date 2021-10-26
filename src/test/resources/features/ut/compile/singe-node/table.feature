@@ -13,18 +13,20 @@ Feature: compile table node
     }
     """
 
-  Scenario: support table with header and cell
+  Scenario: support table with header and cells
     Given the following dal code:
     """
     | name: |
     | 'Tom' |
+    | 'Ada' |
     """
     Then got the following "judgement-expression-operand" node:
     """
     : {
       class.simpleName: 'TableNode'
       inspect: "| name: |
-    | 'Tom' |"
+    | 'Tom' |
+    | 'Ada' |"
     }
     """
 
