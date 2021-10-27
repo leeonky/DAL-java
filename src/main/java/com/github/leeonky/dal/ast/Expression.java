@@ -72,6 +72,6 @@ public class Expression extends Node {
     public String inspectClause() {
         if (node1 instanceof SchemaExpression)
             return operator.inspect(node1.inspectClause(), node2.inspect());
-        return node2.inspect();
+        return operator.inspect("", node2.inspect());
     }
 }

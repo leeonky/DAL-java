@@ -153,20 +153,21 @@ public class TokenParser {
         return sourceCode.popWord(word).map(t -> factory.apply(t).setPositionBegin(t.getPosition()));
     }
 
-    public <T> Optional<List<T>> fetchRow(Supplier<T> factory) {
+    public <T> Optional<List<T>> fetchRow(Function<Integer, T> factory) {
         return when(sourceCode.popWord("|").isPresent()).optional(() -> {
 //            TODO while to append list
 //            TODO last |: with \n; with space+\n
             List<T> cells = new ArrayList<>();
+            int col = 0;
             while (sourceCode.hasCode() && !sourceCode.startsWith("|")) {
-                cells.add(factory.get());
+                cells.add(factory.apply(col++));
                 sourceCode.popWord("|");
             }
             return cells;
         });
     }
 
-    public <T> List<List<T>> fetchRows(Supplier<T> factory) {
+    public <T> List<List<T>> fetchRows(Function<Integer, T> factory) {
         List<List<T>> result = new ArrayList<>();
         Optional<List<T>> list = Optional.empty();
         do {

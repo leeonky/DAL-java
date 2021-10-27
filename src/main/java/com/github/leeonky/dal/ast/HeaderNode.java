@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.compiler.OperatorFactory;
+
 public class HeaderNode extends Node {
     private final Node property;
     private final Operator operator;
@@ -15,7 +17,15 @@ public class HeaderNode extends Node {
         return operator.inspect(property.inspect(), "").trim();
     }
 
-    public Node propertyNode() {
+    public Node getProperty() {
         return property;
+    }
+
+    public Operator getOperator() {
+        return operator;
+    }
+
+    public OperatorFactory defaultHeaderOperator() {
+        return tokenParser -> operator;
     }
 }

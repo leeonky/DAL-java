@@ -168,19 +168,19 @@ public class Compiler {
     }
 
     public class TableMatcher implements NodeMatcher {
-        private final NodeFactory HEADER_NODE = parser -> {
-//         TODO default table operator
-            return new HeaderNode(PROPERTY_CHAIN.fetch(parser), JUDGEMENT_OPERATORS.fetch(parser).get());
-        };
+        private final NodeFactory HEADER_NODE = parser -> new HeaderNode(PROPERTY_CHAIN.fetch(parser),
+                JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR).fetch(parser));
 
         @Override
         public Optional<Node> fetch(TokenParser parser) {
-            return parser.fetchRow(() -> (HeaderNode) HEADER_NODE.fetch(parser)).map(headers -> {
+            return parser.fetchRow(columnIndex -> (HeaderNode) HEADER_NODE.fetch(parser)).map(headers -> {
                 //            TODO raise error when different header and cell count
-                return new TableNode(headers, parser.fetchRows(() ->
-                        shortJudgementClause(JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR)).fetch(parser))
+                return new TableNode(headers, parser.fetchRows(columnIndex ->
+//                        TODO bug use cell operator > header operator > table operator
+                        shortJudgementClause(JUDGEMENT_OPERATORS.or(headers.get(columnIndex).defaultHeaderOperator()))
+                                .fetch(parser))
                         .stream().map(clauses -> IntStream.range(0, headers.size()).mapToObj(i ->
-                                clauses.get(i).makeExpression(headers.get(i).propertyNode())).collect(Collectors.toList()))
+                                clauses.get(i).makeExpression(headers.get(i).getProperty())).collect(Collectors.toList()))
                         .collect(Collectors.toList()));
             });
         }

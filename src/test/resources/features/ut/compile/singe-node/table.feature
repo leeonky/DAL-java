@@ -1,32 +1,76 @@
 Feature: compile table node
 
-  Scenario: support table with only header and header judgement operator was specified
+  Scenario: compile table header with only header and use table default judgement operator
     Given the following dal code:
     """
-    | name: |
+    | name |
     """
     Then got the following "judgement-expression-operand" node:
     """
     : {
       class.simpleName: 'TableNode'
       inspect: '| name: |'
+      headers: [{
+        property.inspect: 'name'
+        operator.class.simpleName: 'Matcher'
+      }]
     }
     """
 
-  Scenario: support table with header and cells
+  Scenario: compile table header with only header and header judgement operator was specified
     Given the following dal code:
     """
-    | name: |
-    | 'Tom' |
-    | 'Ada' |
+    | name= |
     """
     Then got the following "judgement-expression-operand" node:
     """
     : {
       class.simpleName: 'TableNode'
-      inspect: "| name: |
+      inspect: '| name= |'
+      headers: [{
+        property.inspect: 'name'
+        operator.class.simpleName: 'Equal'
+      }]
+    }
+    """
+
+  Scenario: compile table with header and cells and cell use default row judgement operator
+    Given the following dal code:
+    """
+    | name= |
     | 'Tom' |
-    | 'Ada' |"
+    """
+    Then got the following "judgement-expression-operand" node:
+    """
+    : {
+      class.simpleName: 'TableNode'
+      inspect: "| name= |
+    | = 'Tom' |"
+      rows: [[{
+        leftOperand.inspect: 'name'
+        operator.class.simpleName: 'Equal'
+        rightOperand.inspect: "'Tom'"
+        }]]
+    }
+    """
+
+  Scenario: compile table and cell use cell judgement operator
+    Given the following dal code:
+    """
+    | name=  |
+    | :'Tom' |
+    """
+    Then got the following "judgement-expression-operand" node:
+    """
+    : {
+      class.simpleName: 'TableNode'
+      inspect: "| name= |
+    | : 'Tom' |"
+      rows: [[{
+        leftOperand.inspect: 'name'
+        operator.class.simpleName: 'Matcher'
+        rightOperand.inspect: "'Tom'"
+        }]]
     }
     """
 
@@ -72,9 +116,6 @@ Feature: compile table node
 #  TODO incorrect size
 #  TODO unexpected fields
 
-#TODO default table judgement operator to header
-#TODO default header judgement operator to cell
-#TODO specify cell judgement operator
 #TODO schema in header
 #TODO schema in header alias in cell
 #TODO schema in cell alias in cell sub object
