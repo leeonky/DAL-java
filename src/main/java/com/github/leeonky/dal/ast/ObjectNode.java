@@ -28,7 +28,7 @@ public class ObjectNode extends Node {
 
     @Override
     public String inspect() {
-        return format("{%s}", expressions.stream().map(Node::inspect).collect(joining(" ")));
+        return format("{%s}", expressions.stream().map(Node::inspect).collect(joining(", ")));
     }
 
     @Override

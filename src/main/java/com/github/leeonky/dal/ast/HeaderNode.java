@@ -6,7 +6,6 @@ public class HeaderNode extends Node {
     private final Node property;
     private final Operator operator;
 
-    //TODO default table operator
     public HeaderNode(Node property, Operator operator) {
         this.property = property;
         this.operator = operator;

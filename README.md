@@ -295,7 +295,7 @@ null= *     // 通过
 常见的测试框架在对数据对象断言时，都是先定义一个新对象，然后再通过各种策略与待测对象比较。DAL不支持定义对象。考虑如下输入数据：
 ``` json
 {
-    message: {
+    "message": {
         "id": 1,
         "value": "hello James",
         “receiver": {
@@ -383,7 +383,7 @@ null: {}    // 失败
         = 'world'
     ]
 ```
-注意，换行并不是DAL的语句分割符，可以使用`,`分割不同元素的期望值，期望值之间如果没有歧义，可以不用写`,`。
+注意，换行并不是DAL的语句分割符，可以使用`,`分割不同元素的期望值，期望值之间如果没有歧义，可以不用写逗号。
 
 - #### 部分元素断言
 如果仅对集合的前 n 个元素进行断言，则可以在 n+1 的位置写入`...`来终止集合断言：
@@ -489,7 +489,7 @@ order is 已支付的订单 which: {
     paymentData.amount: 100
 }
 ```
-同时在此种场景也也可以不写`which`：
+同时在此种场景下也可以不写`which`：
 
 ``` javascrpit
 order is 已支付的订单: {
@@ -581,10 +581,10 @@ DAL内置的 `Formatter` 都在 `Formatters`中定义。
 ``` json
 {
     "response": {
-        status: 'PAID'
-        paymentData: {
-            amount: 100
-            status: 'DONE'
+        "status": "PAID"
+        "paymentData": {
+            "amount": 100
+            "status": "DONE"
         }
     }
 }
@@ -601,10 +601,10 @@ DAL内置的 `Formatter` 都在 `Formatters`中定义。
 ``` json
 [
     {
-        status: 'PAID'
-        paymentData: {
-            amount: 100
-            status: 'DONE'
+        "status": "PAID"
+        "paymentData": {
+            "amount": 100
+            "status": "DONE"
         }
     }
 ]
@@ -655,3 +655,4 @@ is [已支付的订单]: {
 }
 ```
 也就是说当待断言数据是一个集合时可以使用 `[Schema]` 的形式自动为每一个元素同时制定 `Schema`。
+

@@ -176,7 +176,6 @@ public class Compiler {
             return parser.fetchRow(columnIndex -> (HeaderNode) HEADER_NODE.fetch(parser)).map(headers -> {
                 //            TODO raise error when different header and cell count
                 return new TableNode(headers, parser.fetchRows(columnIndex ->
-//                        TODO bug use cell operator > header operator > table operator
                         shortJudgementClause(JUDGEMENT_OPERATORS.or(headers.get(columnIndex).defaultHeaderOperator()))
                                 .fetch(parser))
                         .stream().map(clauses -> IntStream.range(0, headers.size()).mapToObj(i ->

@@ -84,31 +84,31 @@ Feature: compile table node
     """
     Then the following assertion should pass:
     """
-    = | name= | age= |
-      | 'Tom' | 10   |
+    = | name  | age |
+      | 'Tom' | 10  |
     """
     And the following assertion should pass:
     """
-    : | name= | age= |
-      | 'Tom' | 10   |
+    : | name  | age  |
+      | 'Tom' | 10.0 |
     """
     When assert by the following code:
     """
-    = | name= | age= |
-      | 'Tom' | 11   |
+    = | name  | age  |
+      | 'Tom' | 10.0 |
     """
     Then failed with the following message:
     """
     Expecting java.lang.Integer
     <10>
-    to be equal to java.lang.Integer
-    <11>
+    to be equal to java.lang.Double
+    <10.0>
     but was not
     """
     And got the following source code information:
     """
-    = | name= | age= |
-      | 'Tom' | 11   |
+    = | name  | age  |
+      | 'Tom' | 10.0 |
                 ^
     """
 

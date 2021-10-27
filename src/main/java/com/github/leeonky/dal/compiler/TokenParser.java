@@ -155,7 +155,6 @@ public class TokenParser {
 
     public <T> Optional<List<T>> fetchRow(Function<Integer, T> factory) {
         return when(sourceCode.popWord("|").isPresent()).optional(() -> {
-//            TODO while to append list
 //            TODO last |: with \n; with space+\n
             List<T> cells = new ArrayList<>();
             int col = 0;
@@ -168,13 +167,13 @@ public class TokenParser {
     }
 
     public <T> List<List<T>> fetchRows(Function<Integer, T> factory) {
-        List<List<T>> result = new ArrayList<>();
-        Optional<List<T>> list = Optional.empty();
-        do {
-            list = fetchRow(factory);
-            list.map(result::add);
-        } while (list.isPresent());
-        return result;
+        return new ArrayList<List<T>>() {{
+            Optional<List<T>> list;
+            do {
+                list = fetchRow(factory);
+                list.map(this::add);
+            } while (list.isPresent());
+        }};
     }
 
     public static final OperatorFactory DEFAULT_JUDGEMENT_OPERATOR = tokenParser -> tokenParser.operators.isEmpty() ?

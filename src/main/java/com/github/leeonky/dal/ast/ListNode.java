@@ -48,7 +48,7 @@ public class ListNode extends Node {
     @Override
     public String inspect() {
         return format("[%s%s%s]", type == Type.LAST_N_ITEMS ? "... " : "",
-                expressions.stream().map(Node::inspectClause).collect(Collectors.joining(" ")),
+                expressions.stream().map(Node::inspectClause).collect(Collectors.joining(", ")),
                 type == Type.FIRST_N_ITEMS ? " ..." : "");
     }
 

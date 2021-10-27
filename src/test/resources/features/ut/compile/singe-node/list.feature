@@ -48,7 +48,7 @@ Feature: list node
     """
     : {
       class.simpleName: 'ListNode'
-      inspect: '[: 1 : 2]'
+      inspect: '[: 1, : 2]'
       positionBegin: 1
       expressions.inspect: [
         '[0]: 1'
@@ -181,7 +181,7 @@ Feature: list node
     """
     Then got the following "list" node:
     """
-    inspect: '[: true : false]'
+    inspect: '[: true, : false]'
     """
 
   Scenario: comma as and in parentheses
@@ -191,7 +191,7 @@ Feature: list node
     """
     Then got the following "list" node:
     """
-    inspect: '[: (a , b) : c]'
+    inspect: '[: (a , b), : c]'
     """
 
   Scenario: support optional comma before bracket

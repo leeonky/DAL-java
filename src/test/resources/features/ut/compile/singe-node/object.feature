@@ -59,7 +59,7 @@ Feature: object node
     """
     : {
       class.simpleName: 'ObjectNode'
-      inspect: "{name= 'Tom' age= 30}"
+      inspect: "{name= 'Tom', age= 30}"
     }
     """
 
@@ -148,7 +148,7 @@ Feature: object node
     """
     Then got the following "object" node:
     """
-    inspect: '{key1: 1 key2: 2}'
+    inspect: '{key1: 1, key2: 2}'
     """
 
   Scenario: support schema expression
