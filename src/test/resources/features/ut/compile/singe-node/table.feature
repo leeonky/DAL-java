@@ -111,10 +111,55 @@ Feature: compile table node
       | 'Tom' | 10.0 |
                 ^
     """
+    When assert by the following code:
+    """
+    = | name  |
+      | 'Tom' |
+    """
+    Then failed with the following message:
+    """
+    Unexpected fields `age` in [0]
+    """
+    And got the following source code information:
+    """
+    = | name  |
+    ^
+      | 'Tom' |
+    """
 
-#  TODO incorrect cell value
-#  TODO incorrect size
-#  TODO unexpected fields
+  Scenario: syntax error too many headers
+    Given the following dal code:
+    """
+    | name  |
+    | 'Tom' | 30 |
+    """
+    Then failed to get "judgement-expression-operand" node with the following message:
+    """
+    Different cell size
+    """
+    And got the following source code information:
+    """
+    | name  |
+    | 'Tom' | 30 |
+              ^
+    """
+
+  Scenario: syntax error too many cells
+    Given the following dal code:
+    """
+    | name  | age |
+    | 'Tom' |
+    """
+    Then failed to get "judgement-expression-operand" node with the following message:
+    """
+    Different cell size
+    """
+    And got the following source code information:
+    """
+    | name  | age |
+    | 'Tom' |
+             ^
+    """
 
 #TODO schema in header
 #TODO schema in header alias in cell

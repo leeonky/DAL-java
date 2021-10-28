@@ -40,7 +40,7 @@ public class ObjectNode extends Node {
             dataObject.getListObjects().forEach(element -> assertUnexpectedFields(collectUnexpectedFields(element),
                     actualNode.inspect() + format("[%d]", integer.getAndIncrement()), operator.getPosition()));
         } else
-            assertUnexpectedFields(collectUnexpectedFields(dataObject), operator.getPosition());
+            assertUnexpectedFields(collectUnexpectedFields(dataObject), actualNode.inspect(), operator.getPosition());
         return judgeAll(context, dataObject);
     }
 

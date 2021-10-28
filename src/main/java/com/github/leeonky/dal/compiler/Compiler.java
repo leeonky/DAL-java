@@ -173,16 +173,16 @@ public class Compiler {
 
         @Override
         public Optional<Node> fetch(TokenParser parser) {
-            return parser.fetchRow(columnIndex -> (HeaderNode) HEADER_NODE.fetch(parser)).map(headers -> {
-                //            TODO raise error when different header and cell count
-                return new TableNode(headers, parser.fetchRows(columnIndex ->
-                        shortJudgementClause(JUDGEMENT_OPERATORS.or(headers.get(columnIndex).defaultHeaderOperator()))
-                                .fetch(parser))
-                        .stream().map(clauses -> IntStream.range(0, headers.size()).mapToObj(i ->
-                                clauses.get(i).makeExpression(headers.get(i).getProperty())).collect(Collectors.toList()))
-                        .collect(Collectors.toList()));
-            });
+            try {
+                return parser.fetchRow(columnIndex -> (HeaderNode) HEADER_NODE.fetch(parser)).map(headers ->
+                        new TableNode(headers, parser.fetchRows(columnIndex -> shortJudgementClause(JUDGEMENT_OPERATORS
+                                .or(headers.get(columnIndex).defaultHeaderOperator())).fetch(parser))
+                                .stream().map(clauses -> IntStream.range(0, headers.size()).mapToObj(i -> clauses.get(i)
+                                        .makeExpression(headers.get(i).getProperty()))
+                                        .collect(Collectors.toList())).collect(Collectors.toList())));
+            } catch (IndexOutOfBoundsException ignore) {
+                throw parser.getSourceCode().syntaxError("Different cell size", 0);
+            }
         }
-
     }
 }
