@@ -1,15 +1,10 @@
 package com.github.leeonky.dal.runtime;
 
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import static java.util.stream.Collectors.toCollection;
+import static java.util.Collections.nCopies;
 
 public class DalException extends java.lang.RuntimeException {
     private final int position;
+    private Position secondPosition;
 
     protected DalException(String message, int position) {
         super(message);
@@ -20,14 +15,38 @@ public class DalException extends java.lang.RuntimeException {
         return position;
     }
 
+    public DalException multiPosition(int positionBegin) {
+        secondPosition = new Position(Position.Type.CHAR, positionBegin);
+        return this;
+    }
+
     public String show(String code) {
-        List<String> codeLines = new BufferedReader(new StringReader(code)).lines()
-                .collect(toCollection(ArrayList::new));
-        int position = this.position;
-        int lineIndex = 0;
-        for (; lineIndex < codeLines.size() && position > codeLines.get(lineIndex).length(); lineIndex++)
-            position -= codeLines.get(lineIndex).length() + 1;
-        codeLines.add(lineIndex + 1, String.join("", Collections.nCopies(position, " ")) + "^");
-        return String.join("\n", codeLines);
+        int line = code.indexOf('\n', position);
+        String firstPart = firstPart(code, line);
+        return firstPart + "\n" + String.join("", nCopies(position - firstPart.lastIndexOf('\n') - 1, " ")) + "^"
+                + lastPart(code, line);
+    }
+
+    private String lastPart(String str, int begin) {
+        return begin == -1 ? "" : str.substring(begin);
+    }
+
+    private String firstPart(String str, int end) {
+        return end == -1 ? str : str.substring(0, end);
+    }
+
+    public static class Position {
+        private final Type type;
+        private final int position;
+
+        public Position(Type type, int position) {
+            this.type = type;
+            this.position = position;
+        }
+
+        public enum Type {
+            CHAR,
+            LINE,
+        }
     }
 }

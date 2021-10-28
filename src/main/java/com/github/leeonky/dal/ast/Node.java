@@ -19,12 +19,13 @@ public abstract class Node {
     }
 
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
-        return assertEquals(evaluateDataObject(context), actualNode.evaluateDataObject(context), getPositionBegin());
+        return assertEquals(evaluateDataObject(context), evaluateAndWrapperFailureMessage(actualNode, context),
+                getPositionBegin());
     }
 
     public boolean judge(Node actualNode, Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
         DataObject expected = evaluateDataObject(context);
-        DataObject actual = actualNode.evaluateDataObject(context);
+        DataObject actual = evaluateAndWrapperFailureMessage(actualNode, context);
         if (expected.isNull())
             return assertMatchNull(actual, actualNode.getPositionBegin());
         shouldBeSameTypeIfTypeIs(Number.class, actual, operator, expected);
@@ -32,6 +33,14 @@ public abstract class Node {
         invalidTypeToMatchStringValue(Number.class, actual, expected, operator);
         invalidTypeToMatchStringValue(Boolean.class, actual, expected, operator);
         return assertMatch(expected, actual, getPositionBegin(), context.getConverter());
+    }
+
+    private DataObject evaluateAndWrapperFailureMessage(Node actualNode, RuntimeContextBuilder.RuntimeContext context) {
+        try {
+            return actualNode.evaluateDataObject(context);
+        } catch (AssertionFailure assertionFailure) {
+            throw assertionFailure.multiPosition(getPositionBegin());
+        }
     }
 
     public int getPositionBegin() {

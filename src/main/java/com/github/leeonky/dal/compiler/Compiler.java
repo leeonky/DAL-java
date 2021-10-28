@@ -168,8 +168,12 @@ public class Compiler {
     }
 
     public class TableMatcher implements NodeMatcher {
-        private final NodeFactory HEADER_NODE = parser -> new HeaderNode(PROPERTY_CHAIN.fetch(parser),
-                JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR).fetch(parser));
+        private final NodeFactory HEADER_NODE = parser -> {
+            Node property = PROPERTY_CHAIN.fetch(parser);
+            return new HeaderNode(parser.fetchNodeAfter(IS, SCHEMA_CLAUSE)
+                    .map(expressionClause -> expressionClause.makeExpression(property)).orElse(property),
+                    JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR).fetch(parser));
+        };
 
         @Override
         public Optional<Node> fetch(TokenParser parser) {

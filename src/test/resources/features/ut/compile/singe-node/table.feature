@@ -121,6 +121,7 @@ Feature: compile table node
     Unexpected fields `age` in [0]
     """
     And got the following source code information:
+#    TODO code position
     """
     = | name  |
     ^
@@ -161,7 +162,66 @@ Feature: compile table node
              ^
     """
 
-#TODO schema in header
+  Scenario: compile schema in header
+    Given the following dal code:
+    """
+    | name is String |
+    | 'Tom'          |
+    """
+    Then got the following "judgement-expression-operand" node:
+    """
+    : {
+      inspect: "| name is String: |
+    | is String: 'Tom' |"
+      headers: [{
+        property: {
+          class.simpleName: 'SchemaExpression'
+        }
+      }]
+      rows: [[{
+        leftOperand.inspect: 'name is String'
+        operator.class.simpleName: 'Matcher'
+        rightOperand.inspect: "'Tom'"
+        }]]
+    }
+    """
+
+  Scenario: use schema in header
+    When the following input data:
+    """
+    [{
+      "name": "Tom",
+      "age": 10
+    }]
+    """
+    Then the following assertion should pass:
+    """
+    : | name is String |
+      | 'Tom'          |
+    """
+    And assert by the following code:
+    """
+    : | age is String |
+      | 10            |
+    """
+    Then failed with the following message:
+    """
+    Expecting age to match schema `String` but was not
+    """
+#    TODO code position and message
+    And got the following source code information:
+    """
+    : | age is String |
+               ^
+      | 10            |
+        ^
+    """
+
+#  Scenario: compile schema in cell
+#  Scenario: compile schema in header and cell
+
+#TODO  Scenario: assert schema in table and header and cell
+
 #TODO schema in header alias in cell
 #TODO schema in cell alias in cell sub object
 #TODO schema for table alias in header and cell
