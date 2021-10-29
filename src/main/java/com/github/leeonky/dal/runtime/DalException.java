@@ -1,38 +1,33 @@
 package com.github.leeonky.dal.runtime;
 
+import java.util.Comparator;
+import java.util.TreeSet;
+
 import static java.util.Collections.nCopies;
 
 public class DalException extends java.lang.RuntimeException {
-    private final int position;
-    private Position secondPosition;
+    private final TreeSet<Position> positions = new TreeSet<>(Comparator.<Position>comparingInt(o -> o.position).reversed());
 
     protected DalException(String message, int position) {
         super(message);
-        this.position = position;
+        positions.add(new Position(Position.Type.CHAR, position));
     }
 
-    public int getPosition() {
-        return position;
-    }
-
-    public DalException multiPosition(int positionBegin) {
-        secondPosition = new Position(Position.Type.CHAR, positionBegin);
+    public DalException multiPosition(int positionBegin, Position.Type type) {
+        positions.add(new Position(type, positionBegin));
         return this;
     }
 
+    @Deprecated
+    public int getPosition() {
+        return positions.first().position;
+    }
+
     public String show(String code) {
-        int line = code.indexOf('\n', position);
-        String firstPart = firstPart(code, line);
-        return firstPart + "\n" + String.join("", nCopies(position - firstPart.lastIndexOf('\n') - 1, " ")) + "^"
-                + lastPart(code, line);
-    }
-
-    private String lastPart(String str, int begin) {
-        return begin == -1 ? "" : str.substring(begin);
-    }
-
-    private String firstPart(String str, int end) {
-        return end == -1 ? str : str.substring(0, end);
+        String result = code;
+        for (Position marker : positions)
+            result = marker.process(result);
+        return result;
     }
 
     public static class Position {
@@ -44,9 +39,28 @@ public class DalException extends java.lang.RuntimeException {
             this.position = position;
         }
 
+        public String process(String code) {
+            int endLineIndex = code.indexOf('\n', position);
+            endLineIndex = endLineIndex == -1 ? code.length() : endLineIndex;
+            return code.substring(0, endLineIndex) + "\n" + type.markLine(code, position, endLineIndex)
+                    + code.substring(endLineIndex);
+        }
+
         public enum Type {
-            CHAR,
-            LINE,
+            CHAR {
+                @Override
+                protected String markLine(String code, int position, int endLineIndex) {
+                    return String.join("", nCopies(position - code.lastIndexOf('\n', position) - 1, " ")) + "^";
+                }
+            },
+            LINE {
+                @Override
+                protected String markLine(String code, int position, int endLineIndex) {
+                    return String.join("", nCopies(endLineIndex - code.lastIndexOf('\n', position) - 1, "^"));
+                }
+            };
+
+            protected abstract String markLine(String code, int position, int endLineIndex);
         }
     }
 }

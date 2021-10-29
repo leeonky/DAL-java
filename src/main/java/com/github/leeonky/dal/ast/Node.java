@@ -39,7 +39,7 @@ public abstract class Node {
         try {
             return actualNode.evaluateDataObject(context);
         } catch (AssertionFailure assertionFailure) {
-            throw assertionFailure.multiPosition(getPositionBegin());
+            throw assertionFailure.multiPosition(getPositionBegin(), Position.Type.CHAR);
         }
     }
 
