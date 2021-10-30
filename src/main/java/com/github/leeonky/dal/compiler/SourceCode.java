@@ -3,12 +3,10 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.ast.Node;
 
 import java.util.*;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.IntStream;
 
+import static com.github.leeonky.dal.runtime.FunctionUtil.allOptional;
 import static com.github.leeonky.dal.runtime.IfThenFactory.when;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -127,6 +125,13 @@ public class SourceCode {
         if (!optionalNode.isPresent())
             this.position = position;
         return optionalNode;
+    }
+
+    public <T> Optional<T> repeatWords(String word, IntFunction<T> intFunction) {
+        List<Token> tokens = allOptional(() -> popWord(word));
+        if (!tokens.isEmpty())
+            return of(intFunction.apply(tokens.size()));
+        return empty();
     }
 
     public enum FetchBy {

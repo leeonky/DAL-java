@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.runtime.FunctionUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,11 +16,14 @@ import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.IDENTIFIER;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.IS;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.WHICH;
+import static com.github.leeonky.dal.compiler.Constants.SEQUENCE_AZ;
+import static com.github.leeonky.dal.compiler.Constants.SEQUENCE_ZA;
 import static com.github.leeonky.dal.compiler.TokenParser.operatorMatcher;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 
 public class Compiler {
+
     private static final OperatorMatcher AND = operatorMatcher("&&", () -> new Operator.And("&&")),
             OR = operatorMatcher("||", () -> new Operator.Or("||")),
             AND_IN_KEY_WORD = operatorMatcher("and", () -> new Operator.And("and")),
@@ -171,9 +175,15 @@ public class Compiler {
     }
 
     public class TableMatcher implements NodeMatcher {
+        private final NodeFactory SEQUENCE = parser -> FunctionUtil.oneOf(
+                parser.sequenceOf(SEQUENCE_AZ, SequenceNode.Type.AZ),
+                parser.sequenceOf(SEQUENCE_ZA, SequenceNode.Type.ZA))
+                .orElse(SequenceNode.noSequence());
+
         private final NodeFactory HEADER_NODE = parser -> {
+            SequenceNode sequence = (SequenceNode) SEQUENCE.fetch(parser);
             Node property = PROPERTY_CHAIN.fetch(parser);
-            return new HeaderNode(parser.fetchNodeAfter(IS, SCHEMA_CLAUSE)
+            return new HeaderNode(sequence, parser.fetchNodeAfter(IS, SCHEMA_CLAUSE)
                     .map(expressionClause -> expressionClause.makeExpression(property)).orElse(property),
                     JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR).fetch(parser));
         };
@@ -190,6 +200,7 @@ public class Compiler {
 
         private List<List<Node>> getRows(TokenParser parser, List<HeaderNode> headers) {
             return new ArrayList<List<Node>>() {{
+//                TODO try to use optionStream
                 for (; ; ) {
                     List<Node> nodes;
                     if (parser.fetchBetween("|", "|", LIST_ELLIPSIS).isPresent())

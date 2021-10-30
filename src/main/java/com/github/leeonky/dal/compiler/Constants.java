@@ -22,6 +22,8 @@ public class Constants {
     public static final String SCHEMA_DELIMITER = "/";
     public static final String LIST_ELLIPSIS = "...";
     public static final Set<String> ALL_KEY_WORDS = new HashSet<>(asList(IS, WHICH, TRUE, FALSE, NULL, AND, OR));
+    public static final String SEQUENCE_AZ = "+";
+    public static final String SEQUENCE_ZA = "-";
 
     public static class KeyWords {
         public static final String WHICH = "which";

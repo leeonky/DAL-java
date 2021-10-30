@@ -54,6 +54,32 @@ Feature: compile table node
     }
     """
 
+  Scenario: compile table header with sort constructors
+    Given the following dal code:
+    """
+    | ++name | -age |
+    """
+    Then got the following "judgement-expression-operand" node:
+    """
+    : {
+      class.simpleName: 'TableNode'
+      headers: [{
+        property.inspect: 'name'
+        sequence: {
+          value: 2
+          type: 'AZ'
+        }
+      }{
+        property.inspect: 'age'
+        sequence: {
+          value: 1
+          type: 'ZA'
+        }
+      }]
+      inspect: '| ++ name: | - age: |'
+    }
+    """
+
   Scenario: compile table and cell use cell judgement operator
     Given the following dal code:
     """
@@ -257,7 +283,25 @@ Feature: compile table node
       | 'Lily' | 15 |
     """
 
-#TODO sort in header
+#  Scenario: support sort list by header before assertion
+#    When the following input data:
+#    """
+#    [{
+#      "name": "Tom",
+#      "age": 10
+#    },{
+#      "name": "John",
+#      "age": 20
+#    }]
+#    """
+#    Then the following assertion should pass:
+#    """
+#    = | name   | -age |
+#      | 'John' | 20   |
+#      | 'Tom'  | 10   |
+#    """
+
+#TODO sort in header +-↑↓
 #TODO  Scenario: compile schema in cell
 #TODO  Scenario: compile schema in header and cell
 #TODO  Scenario: assert schema in table and header and cell

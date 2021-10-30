@@ -39,4 +39,11 @@ public class FunctionUtil {
             throw exception;
         }
     }
+
+    public static <T> List<T> allOptional(Supplier<Optional<T>> optional) {
+        return new ArrayList<T>() {{
+            for (Optional<T> t = optional.get(); t.isPresent(); t = optional.get())
+                add(t.get());
+        }};
+    }
 }

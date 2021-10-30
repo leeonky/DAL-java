@@ -1,9 +1,6 @@
 package com.github.leeonky.dal.compiler;
 
-import com.github.leeonky.dal.ast.Expression;
-import com.github.leeonky.dal.ast.InputNode;
-import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.ast.Operator;
+import com.github.leeonky.dal.ast.*;
 
 import java.util.*;
 import java.util.function.Function;
@@ -171,6 +168,7 @@ public class TokenParser {
 //            TODO last |: with \n; with space+\n
             List<T> cells = new ArrayList<>();
             int col = 0;
+//            TODO bug: table code in object compiling error
             while (sourceCode.hasCode() && !sourceCode.startsWith("|")) {
                 cells.add(factory.apply(col++));
                 sourceCode.popWord("|");
@@ -190,5 +188,9 @@ public class TokenParser {
 
     public static OperatorMatcher operatorMatcher(String symbol, Supplier<Operator> factory) {
         return operatorMatcher(symbol, factory, s -> true);
+    }
+
+    public Supplier<Optional<? extends SequenceNode>> sequenceOf(String sequenceChar, SequenceNode.Type type) {
+        return () -> getSourceCode().repeatWords(sequenceChar, count -> new SequenceNode(count, type, sequenceChar));
     }
 }
