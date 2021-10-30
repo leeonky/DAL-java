@@ -62,7 +62,7 @@ public class Compiler {
             WILDCARD = parser -> parser.wordToken("*", token -> new WildcardNode("*")),
             ROW_WILDCARD = parser -> parser.wordToken("***", token -> new WildcardNode("***")),
             PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_WHICH_CLAUSE, SCHEMA_JUDGEMENT_CLAUSE,
-            UNARY_OPERATOR_EXPRESSION, TABLE = new TableMatcher();
+            LIST_ELLIPSIS, UNARY_OPERATOR_EXPRESSION, TABLE = new TableMatcher();
 
     public NodeFactory PROPERTY_CHAIN, OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION,
             JUDGEMENT_EXPRESSION_OPERAND;
@@ -101,8 +101,9 @@ public class Compiler {
         OBJECT = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('{', '}', ObjectNode::new,
                 () -> PROPERTY_CHAIN.withClause(
                         shortJudgementClause(JUDGEMENT_OPERATORS.or("expect operator `:` or `=`"))).fetch(parser)));
+        LIST_ELLIPSIS = parser -> parser.wordToken(Constants.LIST_ELLIPSIS, token -> new ListEllipsisNode());
         LIST = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('[', ']', ListNode::new,
-                () -> parser.wordToken(Constants.LIST_ELLIPSIS, token -> new ListEllipsisNode()).isPresent() ? null
+                () -> LIST_ELLIPSIS.fetch(parser).isPresent() ? null
                         : shortJudgementClause(JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR))
                         .fetch(parser)));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
@@ -180,29 +181,33 @@ public class Compiler {
         @Override
         public Optional<Node> fetch(TokenParser parser) {
             try {
-                return parser.fetchRow(columnIndex -> (HeaderNode) HEADER_NODE.fetch(parser)).map(headers ->
-                        new TableNode(headers, new ArrayList<List<Node>>() {{
-                            for (; ; ) {
-                                List<Node> nodes = fetchRowCells(parser, headers);
-                                if (nodes == null)
-                                    break;
-                                add(nodes);
-                            }
-                        }}));
+                return parser.fetchRow(columnIndex -> (HeaderNode) HEADER_NODE.fetch(parser))
+                        .map(headers -> new TableNode(headers, getRows(parser, headers)));
             } catch (IndexOutOfBoundsException ignore) {
                 throw parser.getSourceCode().syntaxError("Different cell size", 0);
             }
         }
 
-        private List<Node> fetchRowCells(TokenParser parser, List<HeaderNode> headers) {
-            if (parser.fetchBetween("|", "|", ROW_WILDCARD).isPresent())
-                return emptyList();
-            else
-                return parser.fetchRow(columnIndex -> shortJudgementClause(JUDGEMENT_OPERATORS
-                        .or(headers.get(columnIndex).defaultHeaderOperator())).fetch(parser))
-                        .map(l -> IntStream.range(0, headers.size()).mapToObj(i -> l.get(i)
-                                .makeExpression(headers.get(i).getProperty()))
-                                .collect(Collectors.toList())).orElse(null);
+        private List<List<Node>> getRows(TokenParser parser, List<HeaderNode> headers) {
+            return new ArrayList<List<Node>>() {{
+                for (; ; ) {
+                    List<Node> nodes;
+                    if (parser.fetchBetween("|", "|", LIST_ELLIPSIS).isPresent())
+                        nodes = null;
+                    else if (parser.fetchBetween("|", "|", ROW_WILDCARD).isPresent())
+                        nodes = emptyList();
+                    else {
+                        nodes = parser.fetchRow(columnIndex -> shortJudgementClause(JUDGEMENT_OPERATORS
+                                .or(headers.get(columnIndex).defaultHeaderOperator())).fetch(parser))
+                                .map(l -> IntStream.range(0, headers.size()).mapToObj(i -> l.get(i)
+                                        .makeExpression(headers.get(i).getProperty()))
+                                        .collect(Collectors.toList())).orElse(null);
+                        if (nodes == null)
+                            break;
+                    }
+                    add(nodes);
+                }
+            }};
         }
     }
 }

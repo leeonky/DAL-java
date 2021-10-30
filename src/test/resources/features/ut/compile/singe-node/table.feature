@@ -216,7 +216,7 @@ Feature: compile table node
         ^
     """
 
-  Scenario: support skip row with | *** |
+  Scenario: skip row with | *** |
     When the following input data:
     """
     [{
@@ -230,11 +230,34 @@ Feature: compile table node
       | ***             |
     """
 
-#TODO | *** | skip current row
+  Scenario: assert parts of rows
+    When the following input data:
+    """
+    [{
+      "name": "Tom",
+      "age": 10
+    },{
+      "name": "John",
+      "age": 20
+    },{
+      "name": "Lily",
+      "age": 15
+    }]
+    """
+    Then the following assertion should pass:
+    """
+    = | name  | age |
+      | 'Tom' | 10  |
+      | ...         |
+    """
+    And the following assertion should pass:
+    """
+    = | name  | age |
+      | ...         |
+      | 'Lily' | 15 |
+    """
 
 #TODO sort in header
-#TODO | ... | skip elements
-
 #TODO  Scenario: compile schema in cell
 #TODO  Scenario: compile schema in header and cell
 #TODO  Scenario: assert schema in table and header and cell

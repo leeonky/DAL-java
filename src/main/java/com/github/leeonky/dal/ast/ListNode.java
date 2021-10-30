@@ -21,6 +21,7 @@ public class ListNode extends Node {
     private final boolean multiLineList;
 
     public ListNode(List<ExpressionClause> expressionFactories, boolean multiLineList) {
+//        TODO raise error when incorrect LIST_ELLIPSIS
         List<ExpressionClause> elementFactories = expressionFactories.stream().filter(Objects::nonNull)
                 .collect(Collectors.toList());
         int size = elementFactories.size();

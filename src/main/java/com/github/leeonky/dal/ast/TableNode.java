@@ -41,7 +41,7 @@ public class TableNode extends Node {
     }
 
     private ListNode toListNode(Operator operator) {
-        return new ListNode(rows.stream().<ExpressionClause>map(cells -> input ->
+        return new ListNode(rows.stream().<ExpressionClause>map(cells -> cells == null ? null : input ->
                 new Expression(input, operator, cellsToOneOperandNode(cells))).collect(toList()), true);
     }
 
