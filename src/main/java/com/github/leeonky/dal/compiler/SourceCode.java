@@ -121,6 +121,14 @@ public class SourceCode {
         });
     }
 
+    public Optional<Node> tryFetch(Supplier<Optional<Node>> supplier) {
+        int position = this.position;
+        Optional<Node> optionalNode = supplier.get();
+        if (!optionalNode.isPresent())
+            this.position = position;
+        return optionalNode;
+    }
+
     public enum FetchBy {
         BY_CHAR,
         BY_NODE {

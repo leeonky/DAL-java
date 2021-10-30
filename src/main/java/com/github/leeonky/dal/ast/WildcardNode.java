@@ -3,6 +3,11 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 public class WildcardNode extends Node {
+    private final String code;
+
+    public WildcardNode(String code) {
+        this.code = code;
+    }
 
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
@@ -16,6 +21,6 @@ public class WildcardNode extends Node {
 
     @Override
     public String inspect() {
-        return "*";
+        return code;
     }
 }

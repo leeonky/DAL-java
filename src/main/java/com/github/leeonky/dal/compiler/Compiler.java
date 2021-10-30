@@ -16,6 +16,7 @@ import static com.github.leeonky.dal.ast.PropertyNode.Type.IDENTIFIER;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.IS;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.WHICH;
 import static com.github.leeonky.dal.compiler.TokenParser.operatorMatcher;
+import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 
 public class Compiler {
@@ -58,7 +59,8 @@ public class Compiler {
             REGEX = parser -> parser.fetchString('/', '/', RegexNode::new, REGEX_ESCAPES),
             IDENTITY_PROPERTY = TokenParser.IDENTITY_PROPERTY.map(token ->
                     new PropertyNode(InputNode.INSTANCE, token.getContent(), IDENTIFIER)),
-            WILDCARD = parser -> parser.wordToken("*", token -> new WildcardNode()),
+            WILDCARD = parser -> parser.wordToken("*", token -> new WildcardNode("*")),
+            ROW_WILDCARD = parser -> parser.wordToken("***", token -> new WildcardNode("***")),
             PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_WHICH_CLAUSE, SCHEMA_JUDGEMENT_CLAUSE,
             UNARY_OPERATOR_EXPRESSION, TABLE = new TableMatcher();
 
@@ -179,11 +181,22 @@ public class Compiler {
         public Optional<Node> fetch(TokenParser parser) {
             try {
                 return parser.fetchRow(columnIndex -> (HeaderNode) HEADER_NODE.fetch(parser)).map(headers ->
-                        new TableNode(headers, parser.fetchRows(columnIndex -> shortJudgementClause(JUDGEMENT_OPERATORS
-                                .or(headers.get(columnIndex).defaultHeaderOperator())).fetch(parser))
-                                .stream().map(clauses -> IntStream.range(0, headers.size()).mapToObj(i -> clauses.get(i)
-                                        .makeExpression(headers.get(i).getProperty()))
-                                        .collect(Collectors.toList())).collect(Collectors.toList())));
+                        new TableNode(headers, new ArrayList<List<Node>>() {{
+                            for (; ; ) {
+                                if (parser.fetchBetween("|", "|", ROW_WILDCARD).isPresent()) {
+                                    add(emptyList());
+                                } else {
+                                    Optional<List<ExpressionClause>> list = parser.fetchRow(columnIndex ->
+                                            shortJudgementClause(JUDGEMENT_OPERATORS.or(headers.get(columnIndex)
+                                                    .defaultHeaderOperator())).fetch(parser));
+                                    list.ifPresent(l -> add(IntStream.range(0, headers.size()).mapToObj(i -> l.get(i)
+                                            .makeExpression(headers.get(i).getProperty()))
+                                            .collect(Collectors.toList())));
+                                    if (!list.isPresent())
+                                        break;
+                                }
+                            }
+                        }}));
             } catch (IndexOutOfBoundsException ignore) {
                 throw parser.getSourceCode().syntaxError("Different cell size", 0);
             }

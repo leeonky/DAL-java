@@ -72,6 +72,19 @@ public class TokenParser {
         });
     }
 
+    public Optional<Node> fetchBetween(String opening, String closing, NodeMatcher nodeMatcher) {
+        return sourceCode.tryFetch(() -> {
+            Optional<Node> optionalNode = Optional.empty();
+            if (sourceCode.popWord(opening).isPresent()) {
+                optionalNode = nodeMatcher.fetch(this);
+                if (optionalNode.isPresent())
+                    sourceCode.popWord(closing).orElseThrow(() ->
+                            sourceCode.syntaxError("should end with " + closing, 0));
+            }
+            return optionalNode;
+        });
+    }
+
     public Optional<Node> disableCommaAnd(Supplier<Optional<Node>> nodeFactory) {
         return commaAnd(false, nodeFactory);
     }
@@ -164,16 +177,6 @@ public class TokenParser {
             }
             return cells;
         });
-    }
-
-    public <T> List<List<T>> fetchRows(Function<Integer, T> factory) {
-        return new ArrayList<List<T>>() {{
-            Optional<List<T>> list;
-            do {
-                list = fetchRow(factory);
-                list.map(this::add);
-            } while (list.isPresent());
-        }};
     }
 
     public static final OperatorFactory DEFAULT_JUDGEMENT_OPERATOR = tokenParser -> tokenParser.operators.isEmpty() ?

@@ -42,7 +42,13 @@ public class TableNode extends Node {
 
     private ListNode toListNode(Operator operator) {
         return new ListNode(rows.stream().<ExpressionClause>map(cells -> input ->
-                new Expression(input, operator, new ObjectNode(cells))).collect(toList()), true);
+                new Expression(input, operator, rowNode(cells))).collect(toList()), true);
+    }
+
+    private Node rowNode(List<Node> cells) {
+        if (cells.isEmpty())
+            return new WildcardNode("***");
+        return new ObjectNode(cells);
     }
 
     @Override

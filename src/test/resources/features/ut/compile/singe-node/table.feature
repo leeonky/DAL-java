@@ -216,8 +216,23 @@ Feature: compile table node
         ^
     """
 
-#TODO sort in header
+  Scenario: support skip row with | *** |
+    When the following input data:
+    """
+    [{
+      "name": "Tom",
+      "age": 10
+    }]
+    """
+    Then the following assertion should pass:
+    """
+    = | name | age | id |
+      | ***             |
+    """
+
 #TODO | *** | skip current row
+
+#TODO sort in header
 #TODO | ... | skip elements
 
 #TODO  Scenario: compile schema in cell

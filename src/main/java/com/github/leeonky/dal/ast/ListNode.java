@@ -74,6 +74,7 @@ public class ListNode extends Node {
             throw new RuntimeException(format("Cannot compare%sand list", dataObject.inspect()), getPositionBegin());
         if (type == Type.ALL_ITEMS)
             assertListSize(expressions.size(), dataObject.getListSize(), getPositionBegin());
+//        TODO refactor
         return context.newThisScope(dataObject, () -> {
             if (multiLineList)
                 expressions.forEach(expression -> {
