@@ -74,20 +74,21 @@ public class ListNode extends Node {
             throw new RuntimeException(format("Cannot compare%sand list", dataObject.inspect()), getPositionBegin());
         if (type == Type.ALL_ITEMS)
             assertListSize(expressions.size(), dataObject.getListSize(), getPositionBegin());
-//        TODO refactor
-        return context.newThisScope(dataObject, () -> {
-            if (multiLineList)
-                expressions.forEach(expression -> {
-                    try {
-                        expression.evaluate(context);
-                    } catch (DalException dalException) {
-                        throw dalException.multiPosition(expression.getOperandPosition(), DalException.Position.Type.LINE);
-                    }
-                });
-            else
-                expressions.forEach(expression -> expression.evaluate(context));
-            return true;
-        });
+        return context.newThisScope(dataObject, () -> assertElementExpressions(context));
+    }
+
+    private boolean assertElementExpressions(RuntimeContextBuilder.RuntimeContext context) {
+        if (multiLineList)
+            expressions.forEach(expression -> {
+                try {
+                    expression.evaluate(context);
+                } catch (DalException dalException) {
+                    throw dalException.multiPosition(expression.getOperandPosition(), DalException.Position.Type.LINE);
+                }
+            });
+        else
+            expressions.forEach(expression -> expression.evaluate(context));
+        return true;
     }
 
     private enum Type {

@@ -183,23 +183,26 @@ public class Compiler {
                 return parser.fetchRow(columnIndex -> (HeaderNode) HEADER_NODE.fetch(parser)).map(headers ->
                         new TableNode(headers, new ArrayList<List<Node>>() {{
                             for (; ; ) {
-                                if (parser.fetchBetween("|", "|", ROW_WILDCARD).isPresent()) {
-                                    add(emptyList());
-                                } else {
-                                    Optional<List<ExpressionClause>> list = parser.fetchRow(columnIndex ->
-                                            shortJudgementClause(JUDGEMENT_OPERATORS.or(headers.get(columnIndex)
-                                                    .defaultHeaderOperator())).fetch(parser));
-                                    list.ifPresent(l -> add(IntStream.range(0, headers.size()).mapToObj(i -> l.get(i)
-                                            .makeExpression(headers.get(i).getProperty()))
-                                            .collect(Collectors.toList())));
-                                    if (!list.isPresent())
-                                        break;
-                                }
+                                List<Node> nodes = fetchRowCells(parser, headers);
+                                if (nodes == null)
+                                    break;
+                                add(nodes);
                             }
                         }}));
             } catch (IndexOutOfBoundsException ignore) {
                 throw parser.getSourceCode().syntaxError("Different cell size", 0);
             }
+        }
+
+        private List<Node> fetchRowCells(TokenParser parser, List<HeaderNode> headers) {
+            if (parser.fetchBetween("|", "|", ROW_WILDCARD).isPresent())
+                return emptyList();
+            else
+                return parser.fetchRow(columnIndex -> shortJudgementClause(JUDGEMENT_OPERATORS
+                        .or(headers.get(columnIndex).defaultHeaderOperator())).fetch(parser))
+                        .map(l -> IntStream.range(0, headers.size()).mapToObj(i -> l.get(i)
+                                .makeExpression(headers.get(i).getProperty()))
+                                .collect(Collectors.toList())).orElse(null);
         }
     }
 }
