@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.compiler.ExpressionClause;
+import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.DataObject;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
@@ -17,8 +18,9 @@ import static java.util.stream.IntStream.range;
 public class ListNode extends Node {
     private final List<Node> expressions;
     private final Type type;
+    private final boolean multiLineList;
 
-    public ListNode(List<ExpressionClause> expressionFactories) {
+    public ListNode(List<ExpressionClause> expressionFactories, boolean multiLineList) {
         List<ExpressionClause> elementFactories = expressionFactories.stream().filter(Objects::nonNull)
                 .collect(Collectors.toList());
         int size = elementFactories.size();
@@ -26,6 +28,11 @@ public class ListNode extends Node {
         expressions = range(0, size).mapToObj(i -> elementFactories.get(i).makeExpression(
                 new PropertyNode(InputNode.INSTANCE, type.indexOfNode(i, size), BRACKET)))
                 .collect(Collectors.toList());
+        this.multiLineList = multiLineList;
+    }
+
+    public ListNode(List<ExpressionClause> expressionFactories) {
+        this(expressionFactories, false);
     }
 
     private Type guessType(List<ExpressionClause> expressionFactories) {
@@ -62,13 +69,22 @@ public class ListNode extends Node {
         return judgeAll(context, actualNode.evaluateDataObject(context));
     }
 
-    private boolean judgeAll(RuntimeContextBuilder.RuntimeContext context, DataObject dataObject) {
+    public boolean judgeAll(RuntimeContextBuilder.RuntimeContext context, DataObject dataObject) {
         if (!dataObject.isList())
             throw new RuntimeException(format("Cannot compare%sand list", dataObject.inspect()), getPositionBegin());
         if (type == Type.ALL_ITEMS)
             assertListSize(expressions.size(), dataObject.getListSize(), getPositionBegin());
         return context.newThisScope(dataObject, () -> {
-            expressions.forEach(expression -> expression.evaluate(context));
+            if (multiLineList)
+                expressions.forEach(expression -> {
+                    try {
+                        expression.evaluate(context);
+                    } catch (DalException dalException) {
+                        throw dalException.multiPosition(expression.getOperandPosition(), DalException.Position.Type.LINE);
+                    }
+                });
+            else
+                expressions.forEach(expression -> expression.evaluate(context));
             return true;
         });
     }

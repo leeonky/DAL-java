@@ -121,11 +121,11 @@ Feature: compile table node
     Unexpected fields `age` in [0]
     """
     And got the following source code information:
-#    TODO code position
     """
     = | name  |
     ^
       | 'Tom' |
+    ^^^^^^^^^^^
     """
 
   Scenario: syntax error too many headers
@@ -208,7 +208,6 @@ Feature: compile table node
     """
     Expecting age to match schema `String` but was not
     """
-#    TODO code position and message
     And got the following source code information:
     """
     : | age is String |
@@ -217,13 +216,15 @@ Feature: compile table node
         ^
     """
 
-#  Scenario: compile schema in cell
-#  Scenario: compile schema in header and cell
+#TODO sort in header
+#TODO | *** | skip current row
+#TODO | ... | skip elements
 
+#TODO  Scenario: compile schema in cell
+#TODO  Scenario: compile schema in header and cell
 #TODO  Scenario: assert schema in table and header and cell
-
 #TODO schema in header alias in cell
 #TODO schema in cell alias in cell sub object
 #TODO schema for table alias in header and cell
-#TODO sort in header
+#TODO is Xxx | ... | Row schema
 #TODO table transpose

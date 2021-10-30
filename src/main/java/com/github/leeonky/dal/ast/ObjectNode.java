@@ -70,4 +70,10 @@ public class ObjectNode extends Node {
             return true;
         });
     }
+
+    @Override
+    public int getOperandPosition() {
+        return expressions.size() > 0 ? expressions.get(expressions.size() - 1).getOperandPosition()
+                : getPositionBegin();
+    }
 }

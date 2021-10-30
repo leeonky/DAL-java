@@ -77,4 +77,8 @@ public abstract class Node {
     public String inspectClause() {
         return inspect();
     }
+
+    public int getOperandPosition() {
+        return positionBegin;
+    }
 }

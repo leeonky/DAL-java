@@ -74,4 +74,9 @@ public class Expression extends Node {
             return operator.inspect(node1.inspectClause(), node2.inspect());
         return operator.inspect("", node2.inspect());
     }
+
+    @Override
+    public int getOperandPosition() {
+        return node2.getOperandPosition();
+    }
 }

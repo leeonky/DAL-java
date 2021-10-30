@@ -37,12 +37,12 @@ public class TableNode extends Node {
 
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
-        return toListNode(operator).judge(actualNode, operator, context);
+        return toListNode(operator).judgeAll(context, actualNode.evaluateDataObject(context));
     }
 
     private ListNode toListNode(Operator operator) {
         return new ListNode(rows.stream().<ExpressionClause>map(cells -> input ->
-                new Expression(input, operator, new ObjectNode(cells))).collect(toList()));
+                new Expression(input, operator, new ObjectNode(cells))).collect(toList()), true);
     }
 
     @Override
