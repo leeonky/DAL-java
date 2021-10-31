@@ -1,12 +1,13 @@
 package com.github.leeonky.dal.runtime;
 
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.TreeSet;
+import java.util.List;
 
 import static java.util.Collections.nCopies;
 
 public class DalException extends java.lang.RuntimeException {
-    private final TreeSet<Position> positions = new TreeSet<>(Comparator.<Position>comparingInt(o -> o.position).reversed());
+    private final List<Position> positions = new ArrayList<>();
 
     protected DalException(String message, int position) {
         super(message);
@@ -20,11 +21,13 @@ public class DalException extends java.lang.RuntimeException {
 
     @Deprecated
     public int getPosition() {
-        return positions.first().position;
+        return positions.get(0).position;
     }
 
     public String show(String code) {
         String result = code;
+        positions.sort(Comparator.<Position>comparingInt(o -> o.position).reversed()
+                .thenComparing(Comparator.<Position, Position.Type>comparing(o -> o.type).reversed()));
         for (Position marker : positions)
             result = marker.process(result);
         return result;

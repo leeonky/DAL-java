@@ -4,8 +4,10 @@ import com.github.leeonky.dal.compiler.ExpressionClause;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
+import static com.github.leeonky.dal.ast.HeaderNode.bySequence;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -37,22 +39,23 @@ public class TableNode extends Node {
 
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
-        return toListNode(operator).judgeAll(context, actualNode.evaluateDataObject(context));
-    }
-
-    private ListNode toListNode(Operator operator) {
-        return new ListNode(rows.stream().<ExpressionClause>map(cells -> cells == null ? null : input ->
-                new Expression(input, operator, cellsToOneOperandNode(cells))).collect(toList()), true);
-    }
-
-    private Node cellsToOneOperandNode(List<Node> cells) {
-        if (cells.isEmpty())
-            return new WildcardNode("***");
-        return new ObjectNode(cells);
+        return judgeRows(actualNode, operator, context);
     }
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
-        return toListNode(operator).judge(actualNode, operator, context);
+        return judgeRows(actualNode, operator, context);
+    }
+
+    private boolean judgeRows(Node actualNode, Operator operator, RuntimeContextBuilder.RuntimeContext context) {
+        return new ListNode(rows.stream().<ExpressionClause>map(cells -> cells == null ? null : input ->
+                new Expression(input, operator,
+                        cells.isEmpty() ? new WildcardNode("***") : new ObjectNode(cells))).collect(toList()), true)
+                .judgeAll(context, actualNode.evaluateDataObject(context).setListComparator(collectComparator(context)));
+    }
+
+    private Comparator<Object> collectComparator(RuntimeContextBuilder.RuntimeContext context) {
+        return headers.stream().sorted(bySequence())
+                .map(headerNode -> headerNode.getListComparator(context)).findFirst().get();
     }
 }

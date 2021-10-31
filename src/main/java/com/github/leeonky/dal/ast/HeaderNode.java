@@ -1,6 +1,9 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.compiler.OperatorFactory;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+
+import java.util.Comparator;
 
 public class HeaderNode extends Node {
     private final SequenceNode sequence;
@@ -32,5 +35,13 @@ public class HeaderNode extends Node {
 
     public SequenceNode getSequence() {
         return sequence;
+    }
+
+    public Comparator<Object> getListComparator(RuntimeContextBuilder.RuntimeContext context) {
+        return sequence.getComparator(o -> context.newThisScope(context.wrap(o), () -> property.evaluate(context)));
+    }
+
+    public static Comparator<HeaderNode> bySequence() {
+        return Comparator.<HeaderNode>comparingInt(node -> node.sequence.getValue()).reversed();
     }
 }

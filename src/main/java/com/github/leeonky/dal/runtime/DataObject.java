@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,6 +14,7 @@ public class DataObject {
     private final RuntimeContextBuilder.RuntimeContext runtimeContext;
     private final Object instance;
     private List<Object> listValue;
+    private Comparator<Object> listComparator = (o1, o2) -> 0;
 
     public DataObject(Object instance, RuntimeContextBuilder.RuntimeContext context, SchemaType schemaType) {
         this.instance = instance;
@@ -41,9 +43,8 @@ public class DataObject {
     }
 
     private List<Object> getListValues() {
-        if (listValue == null)
-            listValue = stream(runtimeContext.getList(instance).spliterator(), false).collect(toList());
-        return listValue;
+        return listValue == null ? (listValue = stream(runtimeContext.getList(instance).spliterator(), false)
+                .sorted(listComparator).collect(toList())) : listValue;
     }
 
     public List<DataObject> getListObjects() {
@@ -117,5 +118,10 @@ public class DataObject {
 
     public DataObject convert(Class<?> target) {
         return new DataObject(runtimeContext.getConverter().convert(target, instance), runtimeContext, schemaType);
+    }
+
+    public DataObject setListComparator(Comparator<Object> listComparator) {
+        this.listComparator = listComparator;
+        return this;
     }
 }
