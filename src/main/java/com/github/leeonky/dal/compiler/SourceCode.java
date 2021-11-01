@@ -134,6 +134,14 @@ public class SourceCode {
         return empty();
     }
 
+    public boolean isEndOfLine() {
+        if (!hasCode())
+            return true;
+        while (Character.isWhitespace(currentChar()) && currentChar() != '\n')
+            popChar();
+        return currentChar() == '\n';
+    }
+
     public enum FetchBy {
         BY_CHAR,
         BY_NODE {

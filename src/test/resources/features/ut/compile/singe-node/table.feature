@@ -63,20 +63,10 @@ Feature: compile table node
     """
     : {
       class.simpleName: 'TableNode'
-      headers: [{
-        property.inspect: 'name'
-        sequence: {
-          value: 2
-          type: 'AZ'
-        }
-      }{
-        property.inspect: 'age'
-        sequence: {
-          value: 1
-          type: 'ZA'
-        }
-      }]
       inspect: '| ++ name: | - age: |'
+      headers: | property.inspect | sequence.value | sequence.type |
+               | 'name'           | 2              | 'AZ'          |
+               | 'age'            | 1              | 'ZA'          |
     }
     """
 
@@ -187,6 +177,21 @@ Feature: compile table node
     | name  | age |
     | 'Tom' |
              ^
+    """
+
+  Scenario: syntax error missing |
+    Given the following dal code:
+    """
+    | name
+    """
+    Then failed to get "judgement-expression-operand" node with the following message:
+    """
+    Should end with `|`
+    """
+    And got the following source code information:
+    """
+    | name
+          ^
     """
 
   Scenario: compile schema in header

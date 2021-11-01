@@ -164,17 +164,13 @@ public class TokenParser {
     }
 
     public <T> Optional<List<T>> fetchRow(Function<Integer, T> factory) {
-        return when(sourceCode.popWord("|").isPresent()).optional(() -> {
-//            TODO last |: with \n; with space+\n
-            List<T> cells = new ArrayList<>();
+        return when(sourceCode.popWord("|").isPresent()).optional(() -> new ArrayList<T>() {{
             int col = 0;
-//            TODO bug: table code in object compiling error
-            while (sourceCode.hasCode() && !sourceCode.startsWith("|")) {
-                cells.add(factory.apply(col++));
-                sourceCode.popWord("|");
+            while (!sourceCode.isEndOfLine()) {
+                add(factory.apply(col++));
+                sourceCode.popWord("|").orElseThrow(() -> sourceCode.syntaxError("Should end with `|`", 0));
             }
-            return cells;
-        });
+        }});
     }
 
     public static final OperatorFactory DEFAULT_JUDGEMENT_OPERATOR = tokenParser -> tokenParser.operators.isEmpty() ?
