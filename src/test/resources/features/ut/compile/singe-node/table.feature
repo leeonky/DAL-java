@@ -70,6 +70,22 @@ Feature: compile table node
     }
     """
 
+  Scenario: compile table header with another style of sort constructors
+    Given the following dal code:
+    """
+    | ↑↑ name | ↓ age |
+    """
+    Then got the following "judgement-expression-operand" node:
+    """
+    : {
+      class.simpleName: 'TableNode'
+      inspect: '| ↑↑ name: | ↓ age: |'
+      headers: | property.inspect | sequence.value | sequence.type |
+               | 'name'           | 2              | 'AZ'          |
+               | 'age'            | 1              | 'ZA'          |
+    }
+    """
+
   Scenario: compile table and cell use cell judgement operator
     Given the following dal code:
     """
@@ -96,22 +112,28 @@ Feature: compile table node
     [{
       "name": "Tom",
       "age": 10
+    },{
+      "name": "Lucy",
+      "age": 14
     }]
     """
     Then the following assertion should pass:
     """
-    = | name  | age |
-      | 'Tom' | 10  |
+    = | name   | age |
+      | 'Tom'  | 10  |
+      | 'Lucy' | 14  |
     """
     And the following assertion should pass:
     """
-    : | name  | age  |
-      | 'Tom' | 10.0 |
+    : | name   | age  |
+      | 'Tom'  | 10.0 |
+      | 'Lucy' | 14.0 |
     """
     When assert by the following code:
     """
-    = | name  | age  |
-      | 'Tom' | 10.0 |
+    = | name   | age  |
+      | 'Tom'  | 10.0 |
+      | 'Lucy' | 14   |
     """
     Then failed with the following message:
     """
@@ -123,15 +145,17 @@ Feature: compile table node
     """
     And got the following source code information:
     """
-    = | name  | age  |
-      | 'Tom' | 10.0 |
-                ^
-    ^^^^^^^^^^^^^^^^^^
+    = | name   | age  |
+      | 'Tom'  | 10.0 |
+                 ^
+    ^^^^^^^^^^^^^^^^^^^
+      | 'Lucy' | 14   |
     """
     When assert by the following code:
     """
-    = | name  |
-      | 'Tom' |
+    = | name   |
+      | 'Tom'  |
+      | 'Lucy' |
     """
     Then failed with the following message:
     """
@@ -139,10 +163,11 @@ Feature: compile table node
     """
     And got the following source code information:
     """
-    = | name  |
+    = | name   |
     ^
-      | 'Tom' |
-    ^^^^^^^^^^^
+      | 'Tom'  |
+    ^^^^^^^^^^^^
+      | 'Lucy' |
     """
 
   Scenario: syntax error too many headers
@@ -301,7 +326,7 @@ Feature: compile table node
     """
     Then the following assertion should pass:
     """
-    = | + name |
+    = | ↑ name |
       | 'John' |
       | 'Tom'  |
     """
@@ -317,33 +342,33 @@ Feature: compile table node
     """
     Then the following assertion should pass:
     """
-    = | - name |
+    = | ↓ name |
       | 'Tom'  |
       | 'John' |
     """
 
-#  Scenario: support sort list by multi headers before assertion
-#    When the following input data:
-#    """
-#    [{
-#      "name": "Tom",
-#      "age": 10
-#    },{
-#      "name": "John",
-#      "age": 10
-#    },{
-#      "name": "John",
-#      "age": 20
-#    }]
-#    """
-#    Then the following assertion should pass:
-#    """
-#    = | name   | -age |
-#      | 'John' | 20   |
-#      | 'Tom'  | 10   |
-#    """
-#TODO sort multi row
-#TODO sort in header +-↑↓
+  Scenario: support sort list by multi headers before assertion
+    When the following input data:
+    """
+    [{
+      "name": "Tom",
+      "age": 10
+    },{
+      "name": "John",
+      "age": 10
+    },{
+      "name": "Tomas",
+      "age": 20
+    }]
+    """
+    Then the following assertion should pass:
+    """
+    = | ↑ name   | ↓↓ age |
+      | 'Tomas'  | 20     |
+      | 'John'   | 10     |
+      | 'Tom'    | 10     |
+    """
+
 #TODO  Scenario: compile schema in cell
 #TODO  Scenario: compile schema in header and cell
 #TODO  Scenario: assert schema in table and header and cell

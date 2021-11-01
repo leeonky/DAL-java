@@ -25,6 +25,9 @@ public class Constants {
     public static final String SEQUENCE_AZ = "+";
     public static final String SEQUENCE_ZA = "-";
 
+    public static final String SEQUENCE_AZ_2 = "↑";
+    public static final String SEQUENCE_ZA_2 = "↓";
+
     public static class KeyWords {
         public static final String WHICH = "which";
         public static final String IS = "is";

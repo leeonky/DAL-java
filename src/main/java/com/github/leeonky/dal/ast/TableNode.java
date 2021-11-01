@@ -56,6 +56,8 @@ public class TableNode extends Node {
 
     private Comparator<Object> collectComparator(RuntimeContextBuilder.RuntimeContext context) {
         return headers.stream().sorted(bySequence())
-                .map(headerNode -> headerNode.getListComparator(context)).findFirst().get();
+                .map(headerNode -> headerNode.getListComparator(context))
+                .reduce(Comparator::thenComparing)
+                .orElse(SequenceNode.NOP_COMPARATOR);
     }
 }

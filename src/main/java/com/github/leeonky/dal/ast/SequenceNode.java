@@ -5,10 +5,11 @@ import java.util.Comparator;
 import java.util.function.Function;
 
 public class SequenceNode extends Node {
+    public static final Comparator<Object> NOP_COMPARATOR = (o1, o2) -> 0;
     public static final SequenceNode NO_SEQUENCE = new SequenceNode(0, Type.AZ, null) {
         @Override
         public Comparator<Object> getComparator(Function<Object, Object> orderBy) {
-            return (o1, o2) -> 0;
+            return NOP_COMPARATOR;
         }
     };
     private final int value;

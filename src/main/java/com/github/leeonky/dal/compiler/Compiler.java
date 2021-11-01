@@ -16,8 +16,7 @@ import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.IDENTIFIER;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.IS;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.WHICH;
-import static com.github.leeonky.dal.compiler.Constants.SEQUENCE_AZ;
-import static com.github.leeonky.dal.compiler.Constants.SEQUENCE_ZA;
+import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.TokenParser.operatorMatcher;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
@@ -177,7 +176,9 @@ public class Compiler {
     public class TableMatcher implements NodeMatcher {
         private final NodeFactory SEQUENCE = parser -> FunctionUtil.oneOf(
                 parser.sequenceOf(SEQUENCE_AZ, SequenceNode.Type.AZ),
-                parser.sequenceOf(SEQUENCE_ZA, SequenceNode.Type.ZA))
+                parser.sequenceOf(SEQUENCE_ZA, SequenceNode.Type.ZA),
+                parser.sequenceOf(SEQUENCE_AZ_2, SequenceNode.Type.AZ),
+                parser.sequenceOf(SEQUENCE_ZA_2, SequenceNode.Type.ZA))
                 .orElse(SequenceNode.noSequence());
 
         private final NodeFactory HEADER_NODE = parser -> {

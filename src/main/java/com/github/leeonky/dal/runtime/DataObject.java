@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.ast.SequenceNode;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -14,7 +16,7 @@ public class DataObject {
     private final RuntimeContextBuilder.RuntimeContext runtimeContext;
     private final Object instance;
     private List<Object> listValue;
-    private Comparator<Object> listComparator = (o1, o2) -> 0;
+    private Comparator<Object> listComparator = SequenceNode.NOP_COMPARATOR;
 
     public DataObject(Object instance, RuntimeContextBuilder.RuntimeContext context, SchemaType schemaType) {
         this.instance = instance;
