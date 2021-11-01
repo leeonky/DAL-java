@@ -314,6 +314,69 @@ Feature: compile table node
       | ...         |
       | 'Lily' | 15 |
     """
+# TODO
+#  Scenario: should raise error when invalid table
+#    Given the following dal code:
+#    """
+#      | name   | age |
+#      | ...          |
+#      | 'Tom'  | 10  |
+#      | ...          |
+#      | 'Lily' | 20  |
+#    """
+#    Then failed to get "list" node with the following message:
+#    """
+#    unexpected token
+#    """
+#    And got the following source code information:
+#    """
+#      | name   | age |
+#      | ...          |
+#      | 'Tom'  | 10  |
+#      | ...          |
+#        ^
+#      | 'Lily' | 20  |
+#    """
+#    Given the following dal code:
+#    """
+#      | name   | age |
+#      | 'Lily' | 20  |
+#      | ...          |
+#      | 'Tom'  | 10  |
+#      | ...          |
+#    """
+#    Then failed to get "list" node with the following message:
+#    """
+#    unexpected token
+#    """
+#    And got the following source code information:
+#    """
+#      | name   | age |
+#      | 'Lily' | 20  |
+#      | ...          |
+#        ^
+#      | 'Tom'  | 10  |
+#      | ...          |
+#    """
+#    Given the following dal code:
+#    """
+#      | name   | age |
+#      | 'Lily' | 20  |
+#      | ...          |
+#      | 'Tom'  | 10  |
+#    """
+#    Then failed to get "list" node with the following message:
+#    """
+#    unexpected token
+#    """
+#    And got the following source code information:
+#    """
+#      | name   | age |
+#      | 'Lily' | 20  |
+#      | ...          |
+#        ^
+#      | 'Tom'  | 10  |
+#    """
 
   Scenario: support sort list by header from a to z
     When the following input data:

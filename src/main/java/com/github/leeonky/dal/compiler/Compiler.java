@@ -18,6 +18,7 @@ import static com.github.leeonky.dal.compiler.Constants.KeyWords.IS;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.WHICH;
 import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.TokenParser.operatorMatcher;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 
@@ -65,7 +66,7 @@ public class Compiler {
             WILDCARD = parser -> parser.wordToken("*", token -> new WildcardNode("*")),
             ROW_WILDCARD = parser -> parser.wordToken("***", token -> new WildcardNode("***")),
             PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_WHICH_CLAUSE, SCHEMA_JUDGEMENT_CLAUSE,
-            LIST_ELLIPSIS, UNARY_OPERATOR_EXPRESSION, TABLE = new TableMatcher();
+            ELEMENT_ELLIPSIS, UNARY_OPERATOR_EXPRESSION, TABLE = new TableMatcher();
 
     public NodeFactory PROPERTY_CHAIN, OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION,
             JUDGEMENT_EXPRESSION_OPERAND;
@@ -104,11 +105,10 @@ public class Compiler {
         OBJECT = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('{', '}', ObjectNode::new,
                 () -> PROPERTY_CHAIN.withClause(
                         shortJudgementClause(JUDGEMENT_OPERATORS.or("expect operator `:` or `=`"))).fetch(parser)));
-        LIST_ELLIPSIS = parser -> parser.wordToken(Constants.LIST_ELLIPSIS, token -> new ListEllipsisNode());
+        ELEMENT_ELLIPSIS = parser -> parser.wordToken(Constants.ELEMENT_ELLIPSIS, token -> new ListEllipsisNode());
         LIST = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('[', ']', ListNode::new,
-                () -> LIST_ELLIPSIS.fetch(parser).isPresent() ? null
-                        : shortJudgementClause(JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR))
-                        .fetch(parser)));
+                () -> ELEMENT_ELLIPSIS.fetch(parser).<ExpressionClause>map(node -> p -> node).orElseGet(() ->
+                        shortJudgementClause(JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR)).fetch(parser))));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         UNARY_OPERATOR_EXPRESSION = parser -> parser.fetchExpression(null, UNARY_OPERATORS, OPERAND);
         OPERAND = UNARY_OPERATOR_EXPRESSION.or(oneOf(CONST, PROPERTY, PARENTHESES, INPUT)
@@ -204,8 +204,9 @@ public class Compiler {
 //                TODO try to use optionStream
                 for (; ; ) {
                     List<Node> nodes;
-                    if (parser.fetchBetween("|", "|", LIST_ELLIPSIS).isPresent())
-                        nodes = null;
+                    Optional<Node> ellipsis = parser.fetchBetween("|", "|", ELEMENT_ELLIPSIS);
+                    if (ellipsis.isPresent())
+                        nodes = asList(ellipsis.get());
                     else if (parser.fetchBetween("|", "|", ROW_WILDCARD).isPresent())
                         nodes = emptyList();
                     else {

@@ -7,28 +7,26 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.assertListSize;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
 public class ListNode extends Node {
     private final List<Node> expressions;
+    private final List<Node> inputExpressions;
     private final Type type;
     private final boolean multiLineList;
 
     public ListNode(List<ExpressionClause> expressionFactories, boolean multiLineList) {
-//        TODO raise error when incorrect LIST_ELLIPSIS
-        List<ExpressionClause> elementFactories = expressionFactories.stream().filter(Objects::nonNull)
-                .collect(Collectors.toList());
-        int size = elementFactories.size();
+        int size = expressionFactories.size();
         type = guessType(expressionFactories);
-        expressions = range(0, size).mapToObj(i -> elementFactories.get(i).makeExpression(
-                new PropertyNode(InputNode.INSTANCE, type.indexOfNode(i, size), BRACKET)))
-                .collect(Collectors.toList());
+        inputExpressions = range(0, size).mapToObj(i -> expressionFactories.get(i).makeExpression(
+                new PropertyNode(InputNode.INSTANCE, type.indexOfNode(i, size), BRACKET))).collect(toList());
+        expressions = inputExpressions.stream().filter(node -> !(node instanceof ListEllipsisNode)).collect(toList());
         this.multiLineList = multiLineList;
     }
 
@@ -37,12 +35,11 @@ public class ListNode extends Node {
     }
 
     private Type guessType(List<ExpressionClause> expressionFactories) {
-        if (expressionFactories.size() > 0 && expressionFactories.get(expressionFactories.size() - 1) == null)
+        if (expressionFactories.size() > 0 && expressionFactories.get(expressionFactories.size() - 1).isListEllipsis())
             return Type.FIRST_N_ITEMS;
-        else if (expressionFactories.size() > 0 && expressionFactories.get(0) == null)
+        else if (expressionFactories.size() > 0 && expressionFactories.get(0).isListEllipsis())
             return Type.LAST_N_ITEMS;
-        else
-            return Type.ALL_ITEMS;
+        return Type.ALL_ITEMS;
     }
 
     public ListNode() {
@@ -55,9 +52,7 @@ public class ListNode extends Node {
 
     @Override
     public String inspect() {
-        return format("[%s%s%s]", type == Type.LAST_N_ITEMS ? "... " : "",
-                expressions.stream().map(Node::inspectClause).collect(Collectors.joining(", ")),
-                type == Type.FIRST_N_ITEMS ? " ..." : "");
+        return inputExpressions.stream().map(Node::inspectClause).collect(joining(", ", "[", "]"));
     }
 
     @Override
@@ -93,11 +88,14 @@ public class ListNode extends Node {
     }
 
     private enum Type {
-        ALL_ITEMS, FIRST_N_ITEMS, LAST_N_ITEMS {
+        ALL_ITEMS {
+        }, FIRST_N_ITEMS {
+        }, LAST_N_ITEMS {
             @Override
             int indexOfNode(int i, int count) {
                 return i - count;
             }
+
         };
 
         int indexOfNode(int i, int count) {

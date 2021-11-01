@@ -96,7 +96,7 @@ Feature: list node
     """
     : {
       class.simpleName: 'ListNode'
-      inspect: '[: 1 ...]'
+      inspect: '[: 1, ...]'
       positionBegin: 1
       expressions.inspect: [
         '[0]: 1'
@@ -113,13 +113,54 @@ Feature: list node
     """
     : {
       class.simpleName: 'ListNode'
-      inspect: '[... : 1]'
+      inspect: '[..., : 1]'
       positionBegin: 1
       expressions.inspect: [
         '[-1]: 1'
       ]
     }
     """
+
+#  Scenario: should raise error when invalid incomplete List
+#    Given the following dal code:
+#    """
+#     [... 1 ... 2]
+#    """
+#    Then failed to get "list" node with the following message:
+#    """
+#    unexpected token
+#    """
+#    And got the following source code information:
+#    """
+#     [... 1 ... 2]
+#            ^
+#    """
+#    Given the following dal code:
+#    """
+#     [0 ... 1 ...]
+#    """
+#    Then failed to get "list" node with the following message:
+#    """
+#    unexpected token
+#    """
+#    And got the following source code information:
+#    """
+#     [0 ... 1 ...]
+#        ^
+#    """
+#    Given the following dal code:
+#    """
+#     [0 ... 1]
+#    """
+#    Then failed to get "list" node with the following message:
+#    """
+#    unexpected token
+#    """
+#    And got the following source code information:
+#    """
+#     [0 ... 1]
+#        ^
+#    """
 
   Scenario Outline: support different judgement operator in element
     Given the following dal code:
