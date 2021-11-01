@@ -31,10 +31,19 @@ Feature: table
     """
     Then the following assertion should pass:
     """
+      : | name=   | age: |
+        | 'John'  | 18.0 |
+        | /Tomas/ | 21.0 |
+    """
+    And the following assertion should pass:
+    """
       : | name    | age |
         | 'John'  | 18  |
         | 'Tomas' | 21  |
     """
-
-#  TODO default judgement operator in header
-#  TODO sort list by header
+    And the following assertion should pass:
+    """
+      : | name    | ↓ age |
+        | 'Tomas' | 21    |
+        | 'John'  | 18    |
+    """
