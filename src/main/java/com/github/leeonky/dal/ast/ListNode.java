@@ -1,12 +1,14 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.compiler.ExpressionClause;
+import com.github.leeonky.dal.compiler.SyntaxException;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.DataObject;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.assertListSize;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
@@ -24,9 +26,9 @@ public class ListNode extends Node {
     public ListNode(List<ExpressionClause> expressionFactories, boolean multiLineList) {
         int size = expressionFactories.size();
         type = guessType(expressionFactories);
-        inputExpressions = range(0, size).mapToObj(i -> expressionFactories.get(i).makeExpression(
-                new PropertyNode(InputNode.INSTANCE, type.indexOfNode(i, size), BRACKET))).collect(toList());
-        expressions = inputExpressions.stream().filter(node -> !(node instanceof ListEllipsisNode)).collect(toList());
+        expressions = type.checkElements(inputExpressions = range(0, size).mapToObj(i -> expressionFactories.get(i)
+                .makeExpression(new PropertyNode(InputNode.INSTANCE, type.indexOfNode(i, size), BRACKET)))
+                .collect(toList())).stream().filter(node -> !(node instanceof ListEllipsisNode)).collect(toList());
         this.multiLineList = multiLineList;
     }
 
@@ -89,17 +91,39 @@ public class ListNode extends Node {
 
     private enum Type {
         ALL_ITEMS {
+            @Override
+            protected Stream<Node> toChecking(List<Node> inputExpressions) {
+                return inputExpressions.stream();
+            }
         }, FIRST_N_ITEMS {
+            @Override
+            protected Stream<Node> toChecking(List<Node> inputExpressions) {
+                return inputExpressions.stream().limit(inputExpressions.size() - 1);
+            }
         }, LAST_N_ITEMS {
             @Override
             int indexOfNode(int i, int count) {
                 return i - count;
             }
 
+            @Override
+            protected Stream<Node> toChecking(List<Node> inputExpressions) {
+                return inputExpressions.stream().skip(1);
+            }
         };
 
         int indexOfNode(int i, int count) {
             return i;
+        }
+
+        protected abstract Stream<Node> toChecking(List<Node> inputExpressions);
+
+        public List<Node> checkElements(List<Node> inputExpressions) {
+            toChecking(inputExpressions).forEach(node -> {
+                if (node instanceof ListEllipsisNode)
+                    throw new SyntaxException("unexpected token", node.getPositionBegin());
+            });
+            return inputExpressions;
         }
     }
 }
