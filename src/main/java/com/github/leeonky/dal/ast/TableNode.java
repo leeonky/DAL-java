@@ -49,13 +49,17 @@ public class TableNode extends Node {
 
     private boolean judgeRows(Node actualNode, Operator operator, RuntimeContextBuilder.RuntimeContext context) {
         return new ListNode(rows.stream().<ExpressionClause>map(cells ->
-                input -> isEllipsis(cells) ? cells.get(0) : new Expression(input, operator, cells.isEmpty() ?
-                        new WildcardNode("***") : new ObjectNode(cells))).collect(toList()), true)
+                input -> isEllipsis(cells) ? cells.get(0) : new Expression(input, operator,
+                        isRowWildcard(cells) ? cells.get(0) : new ObjectNode(cells))).collect(toList()), true)
                 .judgeAll(context, actualNode.evaluateDataObject(context).setListComparator(collectComparator(context)));
     }
 
     private boolean isEllipsis(List<Node> cells) {
         return cells.size() == 1 && cells.get(0) instanceof ListEllipsisNode;
+    }
+
+    private boolean isRowWildcard(List<Node> cells) {
+        return cells.size() == 1 && cells.get(0) instanceof WildcardNode;
     }
 
     private Comparator<Object> collectComparator(RuntimeContextBuilder.RuntimeContext context) {

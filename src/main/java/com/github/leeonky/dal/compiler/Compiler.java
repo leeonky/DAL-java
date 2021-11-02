@@ -4,6 +4,7 @@ import com.github.leeonky.dal.ast.*;
 import com.github.leeonky.dal.runtime.FunctionUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -18,8 +19,6 @@ import static com.github.leeonky.dal.compiler.Constants.KeyWords.IS;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.WHICH;
 import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.TokenParser.operatorMatcher;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 
 public class Compiler {
@@ -200,27 +199,14 @@ public class Compiler {
         }
 
         private List<List<Node>> getRows(TokenParser parser, List<HeaderNode> headers) {
-            return new ArrayList<List<Node>>() {{
-//                TODO try to use optionStream
-                for (; ; ) {
-                    List<Node> nodes;
-                    Optional<Node> ellipsis = parser.fetchBetween("|", "|", ELEMENT_ELLIPSIS);
-                    if (ellipsis.isPresent())
-                        nodes = asList(ellipsis.get());
-                    else if (parser.fetchBetween("|", "|", ROW_WILDCARD).isPresent())
-                        nodes = emptyList();
-                    else {
-                        nodes = parser.fetchRow(columnIndex -> shortJudgementClause(JUDGEMENT_OPERATORS
-                                .or(headers.get(columnIndex).defaultHeaderOperator())).fetch(parser))
-                                .map(l -> IntStream.range(0, headers.size()).mapToObj(i -> l.get(i)
-                                        .makeExpression(headers.get(i).getProperty()))
-                                        .collect(Collectors.toList())).orElse(null);
-                        if (nodes == null)
-                            break;
-                    }
-                    add(nodes);
-                }
-            }};
+            return FunctionUtil.allOptional(() -> FunctionUtil.oneOf(
+                    () -> parser.fetchBetween("|", "|", ELEMENT_ELLIPSIS).map(Collections::singletonList),
+                    () -> parser.fetchBetween("|", "|", ROW_WILDCARD).map(Collections::singletonList),
+                    () -> parser.fetchRow(columnIndex -> shortJudgementClause(JUDGEMENT_OPERATORS
+                            .or(headers.get(columnIndex).defaultHeaderOperator())).fetch(parser))
+                            .map(l -> IntStream.range(0, headers.size()).mapToObj(i -> l.get(i)
+                                    .makeExpression(headers.get(i).getProperty()))
+                                    .collect(Collectors.toList()))));
         }
     }
 }
