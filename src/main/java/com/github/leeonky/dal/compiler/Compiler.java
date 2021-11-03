@@ -191,22 +191,26 @@ public class Compiler {
         @Override
         public Optional<Node> fetch(TokenParser parser) {
             try {
+                List<ExpressionClause> rowSchemas = new ArrayList<>();
                 return parser.fetchRow(columnIndex -> (HeaderNode) HEADER_NODE.fetch(parser))
-                        .map(headers -> new TableNode(headers, getRows(parser, headers)));
+                        .map(headers -> new TableNode(headers, getRows(parser, headers, rowSchemas), rowSchemas));
             } catch (IndexOutOfBoundsException ignore) {
                 throw parser.getSourceCode().syntaxError("Different cell size", 0);
             }
         }
 
-        private List<List<Node>> getRows(TokenParser parser, List<HeaderNode> headers) {
-            return FunctionUtil.allOptional(() -> FunctionUtil.oneOf(
-                    () -> parser.fetchBetween("|", "|", ELEMENT_ELLIPSIS).map(Collections::singletonList),
-                    () -> parser.fetchBetween("|", "|", ROW_WILDCARD).map(Collections::singletonList),
-                    () -> parser.fetchRow(columnIndex -> shortJudgementClause(JUDGEMENT_OPERATORS
-                            .or(headers.get(columnIndex).defaultHeaderOperator())).fetch(parser))
-                            .map(l -> IntStream.range(0, headers.size()).mapToObj(i -> l.get(i)
-                                    .makeExpression(headers.get(i).getProperty()))
-                                    .collect(Collectors.toList()))));
+        private List<List<Node>> getRows(TokenParser parser, List<HeaderNode> headers, List<ExpressionClause> rowSchemas) {
+            return FunctionUtil.allOptional(() -> {
+                rowSchemas.add(parser.fetchNodeAfter(IS, SCHEMA_CLAUSE).orElse(null));
+                return FunctionUtil.oneOf(
+                        () -> parser.fetchBetween("|", "|", ELEMENT_ELLIPSIS).map(Collections::singletonList),
+                        () -> parser.fetchBetween("|", "|", ROW_WILDCARD).map(Collections::singletonList),
+                        () -> parser.fetchRow(columnIndex -> shortJudgementClause(JUDGEMENT_OPERATORS
+                                .or(headers.get(columnIndex).defaultHeaderOperator())).fetch(parser))
+                                .map(l -> IntStream.range(0, headers.size()).mapToObj(i -> l.get(i)
+                                        .makeExpression(headers.get(i).getProperty()))
+                                        .collect(Collectors.toList())));
+            });
         }
     }
 }

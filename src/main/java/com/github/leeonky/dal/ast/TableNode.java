@@ -6,6 +6,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.leeonky.dal.ast.HeaderNode.bySequence;
 import static java.util.stream.Collectors.joining;
@@ -14,10 +15,12 @@ import static java.util.stream.Collectors.toList;
 public class TableNode extends Node {
     private final List<HeaderNode> headers;
     private final List<List<Node>> rows;
+    private final List<ExpressionClause> rowSchemas;
 
-    public TableNode(List<HeaderNode> headers, List<List<Node>> rows) {
-        this.headers = headers;
-        this.rows = rows;
+    public TableNode(List<HeaderNode> headers, List<List<Node>> rows, List<ExpressionClause> rowSchemas) {
+        this.headers = new ArrayList<>(headers);
+        this.rows = new ArrayList<>(rows);
+        this.rowSchemas = rowSchemas.subList(0, rowSchemas.size() - 1);
     }
 
     public List<HeaderNode> getHeaders() {
@@ -26,6 +29,10 @@ public class TableNode extends Node {
 
     public List<List<Node>> getRows() {
         return rows;
+    }
+
+    public List<ExpressionClause> getRowSchemas() {
+        return rowSchemas;
     }
 
     @Override
@@ -48,9 +55,14 @@ public class TableNode extends Node {
     }
 
     private boolean judgeRows(Node actualNode, Operator operator, RuntimeContextBuilder.RuntimeContext context) {
-        return new ListNode(rows.stream().<ExpressionClause>map(cells ->
-                input -> isEllipsis(cells) ? cells.get(0) : new Expression(input, operator,
-                        isRowWildcard(cells) ? cells.get(0) : new ObjectNode(cells))).collect(toList()), true)
+//        TODO refactor
+        AtomicInteger row = new AtomicInteger(0);
+        return new ListNode(rows.stream().<ExpressionClause>map(cells -> {
+            int r = row.getAndIncrement();
+            return input -> isEllipsis(cells) ? cells.get(0) : new Expression(
+                    rowSchemas.get(r) == null ? input : rowSchemas.get(r).makeExpression(input),
+                    operator, isRowWildcard(cells) ? cells.get(0) : new ObjectNode(cells));
+        }).collect(toList()), true)
                 .judgeAll(context, actualNode.evaluateDataObject(context).setListComparator(collectComparator(context)));
     }
 

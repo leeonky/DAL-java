@@ -126,6 +126,7 @@ public class CucumberContext {
                     .collect(Collectors.toList()))
                     .forEach(dal.getRuntimeContextBuilder()::registerSchema);
             dal.evaluate(inputObject, assertion);
+            dalException = null;
         } catch (DalException e) {
             dalException = e;
         }

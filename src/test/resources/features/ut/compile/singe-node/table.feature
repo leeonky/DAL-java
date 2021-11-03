@@ -489,8 +489,70 @@ Feature: compile table node
       | is LocalDateTime: {year: 2000} |
     """
 
+  Scenario: compile schema in row
+    Given the following dal code:
+    """
+              | name   |
+    is Person | 'Tom'  |
+              | 'John' |
+    """
+    Then got the following "table" node:
+    """
+    : {
+      class.simpleName: 'TableNode'
+      rowSchemas: [{} null]
+    }
+    """
+
+  Scenario: schema in row
+    Given the following schema:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfName", field = "name")
+    })
+    public class IdZero {
+        public int id = 0;
+    }
+    """
+    And the following input data:
+    """
+      [{
+        "id": 1,
+        "name": 'Tom'
+      }]
+    """
+    When assert by the following code:
+    """
+    :         | name  |
+    is IdZero | 'Tom' |
+    """
+    Then failed with the following message:
+    """
+    Expecting [0] to match schema `IdZero` but was not
+        Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
+    """
+    And got the following source code information:
+    """
+    :         | name  |
+    is IdZero | 'Tom' |
+       ^
+    ^^^^^^^^^^^^^^^^^^^
+    """
+    When the following input data:
+    """
+      [{
+        "id": 0,
+        "name": 'Tom'
+      }]
+    """
+    Then the following assertion should pass:
+    """
+    :         | aliasOfName |
+    is IdZero | 'Tom'       |
+    """
+
 #TODO schema in header alias in cell
 #TODO schema in cell alias in cell sub object
 #TODO schema for table alias in header and cell
-#TODO is Xxx | ... | Row schema
 #TODO table transpose
