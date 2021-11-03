@@ -432,9 +432,63 @@ Feature: compile table node
       | 'Tom'    | 10     |
     """
 
-#TODO  Scenario: compile schema in cell
-#TODO  Scenario: compile schema in header and cell
-#TODO  Scenario: assert schema in table and header and cell
+  Scenario: compile schema in cell
+    Given the following dal code:
+    """
+    | name      |
+    | is String |
+    """
+    Then got the following "table" node:
+    """
+    : {
+      inspect: "| name: |
+    | is String |"
+      rows: [[{
+        class.simpleName: 'SchemaExpression'
+        inspect: 'name is String'
+        }]]
+    }
+    """
+
+  Scenario: compile schema in header and cell
+    Given the following dal code:
+    """
+    | time is String           |
+    | is Instant: {year: 2000} |
+    """
+    Then got the following "table" node:
+    """
+    : {
+      inspect: "| time is String: |
+    | is Instant: {year: 2000} |"
+      rows: [[{
+        class.simpleName: 'Expression'
+        operator.class.simpleName: 'Matcher'
+        leftOperand: {
+          class.simpleName: 'SchemaExpression'
+          inspect: 'time is String is Instant'
+        }
+        rightOperand: {
+          class.simpleName: 'ObjectNode'
+          inspect: "{year: 2000}"
+        }
+      }]]
+    }
+    """
+
+  Scenario: assert schema in table and header and cell
+    Given the following input data:
+    """
+    [{
+      "time": "2000-01-01T00:00:00"
+    }]
+    """
+    Then the following assertion should pass:
+    """
+    : | time                           |
+      | is LocalDateTime: {year: 2000} |
+    """
+
 #TODO schema in header alias in cell
 #TODO schema in cell alias in cell sub object
 #TODO schema for table alias in header and cell
