@@ -656,3 +656,57 @@ is [已支付的订单]: {
 ```
 也就是说当待断言数据是一个集合时可以使用 `[Schema]` 的形式自动为每一个元素同时制定 `Schema`。
 
+### 表格断言
+考虑有如下数据：
+``` json
+[
+    {
+        "name": "Tom",
+        "age": 18
+    },{
+        "name": "John",
+        "age": 20
+    },{
+        "name": "Lucy",
+        "age": 20
+    }
+]
+```
+我们可以如下形式断言：
+``` javascript
+: [
+    {
+        name: 'Tom'
+        age: 18
+    }
+    {
+        name: 'John'
+        age: 20
+    }
+    {
+        name: 'Lucy'
+        age: 20
+    }
+]
+```
+这里会重复非常多的属性名，`DAL` 支持对集合对象以表格形式进行断言：
+``` javascript
+: | name   | age |
+  | 'Tom'  | 18  |
+  | 'John' | 20  |
+  | 'Lucy' | 20  |
+```
+表格断言其实是另一种形式的集合断言。因此也支持在表中中指定 `Schema` 或元素的特定断言, 表格支持写成如下的形式：
+``` javascript
+:         | name                         | age is Number |
+is Person | 'Tom' is String: {length: 3} | 18            |
+```
+同时表格还支持排序后再断言：
+``` javascript
+: | +name   | --age |
+  | 'John'  | 20    |
+  | 'Lucy'  | 20    |
+  | 'Tom'   | 18    |
+```
+上边的断言表示先对数据按 age 属性降序，然后按 name 属性升序后再进行断言。
+

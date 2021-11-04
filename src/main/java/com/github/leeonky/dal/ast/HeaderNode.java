@@ -1,16 +1,17 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.compiler.OperatorFactory;
+import com.github.leeonky.dal.compiler.OperatorMatcher;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.Comparator;
+import java.util.Optional;
 
 public class HeaderNode extends Node {
     private final SequenceNode sequence;
     private final Node property;
-    private final Operator operator;
+    private final Optional<Operator> operator;
 
-    public HeaderNode(SequenceNode sequence, Node property, Operator operator) {
+    public HeaderNode(SequenceNode sequence, Node property, Optional<Operator> operator) {
         this.sequence = sequence;
         this.property = property;
         this.operator = operator;
@@ -18,18 +19,19 @@ public class HeaderNode extends Node {
 
     @Override
     public String inspect() {
-        return sequence.inspect() + operator.inspect(property.inspect(), "").trim();
+        String inspect = property.inspect();
+        return sequence.inspect() + operator.map(o -> o.inspect(inspect, "").trim()).orElse(inspect);
     }
 
     public Node getProperty() {
         return property;
     }
 
-    public Operator getOperator() {
+    public Optional<Operator> getOperator() {
         return operator;
     }
 
-    public OperatorFactory defaultHeaderOperator() {
+    public OperatorMatcher headerOperator() {
         return tokenParser -> operator;
     }
 

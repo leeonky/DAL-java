@@ -16,11 +16,15 @@ public class TableNode extends Node {
     private final List<HeaderNode> headers;
     private final List<List<Node>> rows;
     private final List<ExpressionClause> rowSchemas;
+    private final List<Operator> rowOperators;
 
-    public TableNode(List<HeaderNode> headers, List<List<Node>> rows, List<ExpressionClause> rowSchemas) {
+    //    TODO use class RowNode
+    public TableNode(List<HeaderNode> headers, List<List<Node>> rows, List<ExpressionClause> rowSchemas,
+                     List<Operator> rowOperators) {
         this.headers = new ArrayList<>(headers);
         this.rows = new ArrayList<>(rows);
         this.rowSchemas = rowSchemas.subList(0, rowSchemas.size() - 1);
+        this.rowOperators = rowOperators.subList(0, rowOperators.size() - 1);
     }
 
     public List<HeaderNode> getHeaders() {
@@ -61,7 +65,8 @@ public class TableNode extends Node {
             int r = row.getAndIncrement();
             return input -> isEllipsis(cells) ? cells.get(0) : new Expression(
                     rowSchemas.get(r) == null ? input : rowSchemas.get(r).makeExpression(input),
-                    operator, isRowWildcard(cells) ? cells.get(0) : new ObjectNode(cells));
+                    rowOperators.get(r) == null ? operator : rowOperators.get(r),
+                    isRowWildcard(cells) ? cells.get(0) : new ObjectNode(cells));
         }).collect(toList()), true)
                 .judgeAll(context, actualNode.evaluateDataObject(context).setListComparator(collectComparator(context)));
     }
@@ -79,5 +84,9 @@ public class TableNode extends Node {
                 .map(headerNode -> headerNode.getListComparator(context))
                 .reduce(Comparator::thenComparing)
                 .orElse(SequenceNode.NOP_COMPARATOR);
+    }
+
+    public List<Operator> getRowOperators() {
+        return rowOperators;
     }
 }

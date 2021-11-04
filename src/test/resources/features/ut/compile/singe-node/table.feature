@@ -9,10 +9,10 @@ Feature: compile table node
     """
     : {
       class.simpleName: 'TableNode'
-      inspect: '| name: |'
+      inspect: '| name |'
       headers: [{
         property.inspect: 'name'
-        operator.class.simpleName: 'Matcher'
+        operator.isPresent: false
       }]
     }
     """
@@ -29,7 +29,7 @@ Feature: compile table node
       inspect: '| name= |'
       headers: [{
         property.inspect: 'name'
-        operator.class.simpleName: 'Equal'
+        operator.get.class.simpleName: 'Equal'
       }]
     }
     """
@@ -53,6 +53,27 @@ Feature: compile table node
         }]]
     }
     """
+#TODO more test for operator priority
+  Scenario: compile table with row judgement operator
+    Given the following dal code:
+    """
+      | name   |
+      | 'John' |
+    = | 'Tom'  |
+    """
+    Then got the following "table" node:
+    """
+    : {
+      class.simpleName: 'TableNode'
+      rowOperators: [
+        null
+        { class.simpleName: 'Equal' }
+        ]
+      rows.@[0]: | leftOperand.inspect | operator.class.simpleName | rightOperand.inspect |
+                 | 'name'              | 'Matcher'                 | "'John'"             |
+                 | 'name'              | 'Equal'                   | "'Tom'"              |
+    }
+    """
 
   Scenario: compile table header with sort constructors
     Given the following dal code:
@@ -63,7 +84,7 @@ Feature: compile table node
     """
     : {
       class.simpleName: 'TableNode'
-      inspect: '| ++ name: | - age: |'
+      inspect: '| ++ name | - age |'
       headers: | property.inspect | sequence.value | sequence.type |
                | 'name'           | 2              | 'AZ'          |
                | 'age'            | 1              | 'ZA'          |
@@ -79,7 +100,7 @@ Feature: compile table node
     """
     : {
       class.simpleName: 'TableNode'
-      inspect: '| ↑↑ name: | ↓ age: |'
+      inspect: '| ↑↑ name | ↓ age |'
       headers: | property.inspect | sequence.value | sequence.type |
                | 'name'           | 2              | 'AZ'          |
                | 'age'            | 1              | 'ZA'          |
@@ -170,6 +191,37 @@ Feature: compile table node
       | 'Lucy' |
     """
 
+  Scenario: assert by row judgement operator
+    Given the following input data:
+    """
+    [{
+      "name": "Tom",
+      "age": 10
+    },{
+      "name": "Lucy",
+      "age": 10,
+      "id": 1
+    }]
+    """
+    When assert by the following code:
+    """
+    : | name   | age  |
+      | 'Tom'  | 10.0 |
+    = | 'Lucy' | 14.0 |
+    """
+    Then failed with the following message:
+    """
+    Unexpected fields `id` in [1]
+    """
+    And got the following source code information:
+    """
+    : | name   | age  |
+      | 'Tom'  | 10.0 |
+    = | 'Lucy' | 14.0 |
+    ^
+    ^^^^^^^^^^^^^^^^^^^
+    """
+
   Scenario: syntax error too many headers
     Given the following dal code:
     """
@@ -228,7 +280,7 @@ Feature: compile table node
     Then got the following "table" node:
     """
     : {
-      inspect: "| name is String: |
+      inspect: "| name is String |
     | is String: 'Tom' |"
       headers: [{
         property: {
@@ -441,7 +493,7 @@ Feature: compile table node
     Then got the following "table" node:
     """
     : {
-      inspect: "| name: |
+      inspect: "| name |
     | is String |"
       rows: [[{
         class.simpleName: 'SchemaExpression'
@@ -459,7 +511,7 @@ Feature: compile table node
     Then got the following "table" node:
     """
     : {
-      inspect: "| time is String: |
+      inspect: "| time is String |
     | is Instant: {year: 2000} |"
       rows: [[{
         class.simpleName: 'Expression'
@@ -690,4 +742,5 @@ Feature: compile table node
                  | 'Tom'       |
     """
 
+#TODO table row judgement operator
 #TODO table transpose
