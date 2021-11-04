@@ -44,7 +44,7 @@ Feature: schema verification
     Then failed with the following message:
     """
     Expecting to match schema `IdZero` but was not
-        Expecting field `id` to be type IdZero[IdZero], but does not exist
+        Expecting field `id` to be in type IdZero[IdZero], but does not exist
     """
     When the following input data:
     """
@@ -133,3 +133,6 @@ Feature: schema verification
     is [IdZero]
         ^
     """
+
+#    TODO support field alias in multi schema list: is A / B
+#    TODO support field alias in nested schema: is A is B

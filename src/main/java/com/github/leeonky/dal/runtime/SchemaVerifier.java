@@ -87,7 +87,7 @@ public class SchemaVerifier {
 
     private <T> boolean shouldContainsField(Set<String> actualFields, BeanClass<T> polymorphicBeanClass, PropertyReader<T> propertyReader) {
         return actualFields.contains(propertyReader.getName())
-                || errorLog("Expecting field `%s` to be type %s[%s], but does not exist", propertyReader.getName(),
+                || errorLog("Expecting field `%s` to be in type %s[%s], but does not exist", propertyReader.getName(),
                 polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 

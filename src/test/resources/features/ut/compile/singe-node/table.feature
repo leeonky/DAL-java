@@ -476,17 +476,108 @@ Feature: compile table node
     }
     """
 
-  Scenario: assert schema in table and header and cell
+  Scenario: assert schema in header
+    Given the following schema:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfName", field = "name")
+    })
+    public class IdZero {
+        public int id = 0;
+    }
+    """
     Given the following input data:
     """
     [{
-      "time": "2000-01-01T00:00:00"
+      "obj": {
+        "id": 1,
+        "name": 'Tom'
+      }
+    }]
+    """
+    When assert by the following code:
+    """
+    : | obj is IdZero        |
+      | {aliasOfName: 'Tom'} |
+    """
+    Then failed with the following message:
+    """
+    Expecting obj to match schema `IdZero` but was not
+        Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
+    """
+    And got the following source code information:
+    """
+    : | obj is IdZero        |
+               ^
+      | {aliasOfName: 'Tom'} |
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    """
+    When the following input data:
+    """
+    [{
+      "obj": {
+        "id": 0,
+        "name": 'Tom'
+      }
     }]
     """
     Then the following assertion should pass:
     """
-    : | time                           |
-      | is LocalDateTime: {year: 2000} |
+    : | obj is IdZero        |
+      | {aliasOfName: 'Tom'} |
+    """
+
+  Scenario: assert schema in cell
+    Given the following schema:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfName", field = "name")
+    })
+    public class IdZero {
+        public int id = 0;
+    }
+    """
+    Given the following input data:
+    """
+    [{
+      "obj": {
+        "id": 1,
+        "name": 'Tom'
+      }
+    }]
+    """
+    When assert by the following code:
+    """
+    : | obj                             |
+      | is IdZero: {aliasOfName: 'Tom'} |
+    """
+    Then failed with the following message:
+    """
+    Expecting obj to match schema `IdZero` but was not
+        Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
+    """
+    And got the following source code information:
+    """
+    : | obj                             |
+      | is IdZero: {aliasOfName: 'Tom'} |
+           ^
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    """
+    When the following input data:
+    """
+    [{
+      "obj": {
+        "id": 0,
+        "name": 'Tom'
+      }
+    }]
+    """
+    Then the following assertion should pass:
+    """
+    : | obj                             |
+      | is IdZero: {aliasOfName: 'Tom'} |
     """
 
   Scenario: compile schema in row
@@ -552,7 +643,51 @@ Feature: compile table node
     is IdZero | 'Tom'       |
     """
 
-#TODO schema in header alias in cell
-#TODO schema in cell alias in cell sub object
-#TODO schema for table alias in header and cell
+  Scenario: use field alias of element schema in header
+    Given the following schema:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfName", field = "name")
+    })
+    public class IdZero {
+        public int id = 0;
+    }
+    """
+    Given the following input data:
+    """
+    [{
+      "id": 1,
+      "name": 'Tom'
+    }]
+    """
+    When assert by the following code:
+    """
+    is [IdZero]: | aliasOfName |
+                 | 'Tom'       |
+    """
+    Then failed with the following message:
+    """
+    Expecting [0] to match schema `IdZero` but was not
+        Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
+    """
+    And got the following source code information:
+    """
+    is [IdZero]: | aliasOfName |
+        ^
+                 | 'Tom'       |
+    """
+    Given the following input data:
+    """
+    [{
+      "id": 0,
+      "name": 'Tom'
+    }]
+    """
+    Then the following assertion should pass:
+    """
+    is [IdZero]: | aliasOfName |
+                 | 'Tom'       |
+    """
+
 #TODO table transpose
