@@ -6,7 +6,6 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.leeonky.dal.ast.HeaderNode.bySequence;
 import static java.util.stream.Collectors.joining;
@@ -14,37 +13,39 @@ import static java.util.stream.Collectors.toList;
 
 public class TableNode extends Node {
     private final List<HeaderNode> headers;
-    private final List<List<Node>> rows;
-    private final List<ExpressionClause> rowSchemas;
-    private final List<Operator> rowOperators;
+    private final List<RowNode> rows;
 
-    //    TODO use class RowNode
-    public TableNode(List<HeaderNode> headers, List<List<Node>> rows, List<ExpressionClause> rowSchemas,
-                     List<Operator> rowOperators) {
+    public TableNode(List<HeaderNode> headers, List<RowNode> row) {
         this.headers = new ArrayList<>(headers);
-        this.rows = new ArrayList<>(rows);
-        this.rowSchemas = rowSchemas.subList(0, rowSchemas.size() - 1);
-        this.rowOperators = rowOperators.subList(0, rowOperators.size() - 1);
+        rows = new ArrayList<>(row);
     }
 
     public List<HeaderNode> getHeaders() {
         return headers;
     }
 
+    //    TODO move to row node
     public List<List<Node>> getRows() {
-        return rows;
+        return rows.stream().map(rows2 -> rows2.nodes).collect(toList());
     }
 
+    //    TODO move to row node
     public List<ExpressionClause> getRowSchemas() {
-        return rowSchemas;
+        return rows.stream().map(rows2 -> rows2.expressionClause.orElse(null)).collect(toList());
+    }
+
+    //    TODO move to row node
+    public List<Operator> getRowOperators() {
+        return rows.stream().map(rows2 -> rows2.operator.orElse(null)).collect(toList());
     }
 
     @Override
     public String inspect() {
+//        TODO to be refactor
         return new ArrayList<List<String>>() {{
             add(headers.stream().map(HeaderNode::inspect).collect(toList()));
-            addAll(rows.stream().map(cells -> cells.stream().map(Node::inspectClause)
-                    .collect(toList())).collect(toList()));
+            addAll(rows.stream().map(row -> row.nodes.stream().map(Node::inspectClause).collect(toList())
+            ).collect(toList()));
         }}.stream().map(cells -> cells.stream().collect(joining(" | ", "| ", " |"))).collect(joining("\n"));
     }
 
@@ -59,24 +60,8 @@ public class TableNode extends Node {
     }
 
     private boolean judgeRows(Node actualNode, Operator operator, RuntimeContextBuilder.RuntimeContext context) {
-//        TODO refactor
-        AtomicInteger row = new AtomicInteger(0);
-        return new ListNode(rows.stream().<ExpressionClause>map(cells -> {
-            int r = row.getAndIncrement();
-            return input -> isEllipsis(cells) ? cells.get(0) : new Expression(
-                    rowSchemas.get(r) == null ? input : rowSchemas.get(r).makeExpression(input),
-                    rowOperators.get(r) == null ? operator : rowOperators.get(r),
-                    isRowWildcard(cells) ? cells.get(0) : new ObjectNode(cells));
-        }).collect(toList()), true)
+        return new ListNode(rows.stream().map(rowNode -> rowNode.toExpressionClause(operator)).collect(toList()), true)
                 .judgeAll(context, actualNode.evaluateDataObject(context).setListComparator(collectComparator(context)));
-    }
-
-    private boolean isEllipsis(List<Node> cells) {
-        return cells.size() == 1 && cells.get(0) instanceof ListEllipsisNode;
-    }
-
-    private boolean isRowWildcard(List<Node> cells) {
-        return cells.size() == 1 && cells.get(0) instanceof WildcardNode;
     }
 
     private Comparator<Object> collectComparator(RuntimeContextBuilder.RuntimeContext context) {
@@ -84,9 +69,5 @@ public class TableNode extends Node {
                 .map(headerNode -> headerNode.getListComparator(context))
                 .reduce(Comparator::thenComparing)
                 .orElse(SequenceNode.NOP_COMPARATOR);
-    }
-
-    public List<Operator> getRowOperators() {
-        return rowOperators;
     }
 }

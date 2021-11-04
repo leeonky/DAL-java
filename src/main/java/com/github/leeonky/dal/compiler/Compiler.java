@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
@@ -180,43 +178,47 @@ public class Compiler {
                 parser.sequenceOf(SEQUENCE_ZA_2, SequenceNode.Type.ZA))
                 .orElse(SequenceNode.noSequence());
 
-        private final NodeFactory HEADER_NODE = parser -> {
+        private HeaderNode getHeaderNode(TokenParser parser) {
             SequenceNode sequence = (SequenceNode) SEQUENCE.fetch(parser);
             Node property = PROPERTY_CHAIN.fetch(parser);
             return new HeaderNode(sequence, parser.fetchNodeAfter(IS, SCHEMA_CLAUSE)
                     .map(expressionClause -> expressionClause.makeExpression(property)).orElse(property),
                     JUDGEMENT_OPERATORS.fetch(parser));
-        };
+        }
 
         @Override
         public Optional<Node> fetch(TokenParser parser) {
             try {
-                List<ExpressionClause> rowSchemas = new ArrayList<>();
-                List<Operator> rowOperators = new ArrayList<>();
-                return parser.fetchRow(columnIndex -> (HeaderNode) HEADER_NODE.fetch(parser))
-                        .map(headers -> new TableNode(headers, getRows(parser, headers, rowSchemas, rowOperators),
-                                rowSchemas, rowOperators));
+                return parser.fetchRow(columnIndex -> getHeaderNode(parser))
+                        .map(headers -> new TableNode(headers, getRowNodes(parser, headers)));
             } catch (IndexOutOfBoundsException ignore) {
                 throw parser.getSourceCode().syntaxError("Different cell size", 0);
             }
         }
 
-        private List<List<Node>> getRows(TokenParser parser, List<HeaderNode> headers, List<ExpressionClause> rowSchemas, List<Operator> rowOperators) {
+        private List<RowNode> getRowNodes(TokenParser parser, List<HeaderNode> headers) {
             return FunctionUtil.allOptional(() -> {
-                rowSchemas.add(parser.fetchNodeAfter(IS, SCHEMA_CLAUSE).orElse(null));
-//                TODO operator
+                Optional<ExpressionClause> rowSchemaClause = parser.fetchNodeAfter(IS, SCHEMA_CLAUSE);
                 Optional<Operator> rowOperator = JUDGEMENT_OPERATORS.fetch(parser);
-                rowOperators.add(rowOperator.orElse(null));
                 return FunctionUtil.oneOf(
                         () -> parser.fetchBetween("|", "|", ELEMENT_ELLIPSIS).map(Collections::singletonList),
                         () -> parser.fetchBetween("|", "|", ROW_WILDCARD).map(Collections::singletonList),
-                        () -> parser.fetchRow(columnIndex -> shortJudgementClause(oneOf(JUDGEMENT_OPERATORS,
-                                headers.get(columnIndex).headerOperator(), tokenParser -> rowOperator
-                        ).or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR))
-                                .fetch(parser)).map(l -> IntStream.range(0, headers.size()).mapToObj(i -> l.get(i)
-                                .makeExpression(headers.get(i).getProperty()))
-                                .collect(Collectors.toList())));
+                        () -> parser.fetchRow(column -> getRowCells(parser, headers, rowOperator, column))
+                                .map(cellClauses -> checkCellSize(parser, headers, cellClauses))
+                ).map(nodes -> new RowNode(rowSchemaClause, rowOperator, nodes));
             });
+        }
+
+        private List<Node> checkCellSize(TokenParser parser, List<HeaderNode> headers, List<Node> cellClauses) {
+            if (cellClauses.size() != headers.size())
+                throw parser.getSourceCode().syntaxError("Different cell size", 0);
+            return cellClauses;
+        }
+
+        private Node getRowCells(TokenParser parser, List<HeaderNode> headers, Optional<Operator> rowOperator, int column) {
+            return shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headers.get(column).headerOperator(),
+                    parser1 -> rowOperator).or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR))
+                    .fetch(parser).makeExpression(headers.get(column).getProperty());
         }
     }
 }
