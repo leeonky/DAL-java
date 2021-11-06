@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.compiler.ExpressionClause;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.ArrayList;
@@ -24,29 +23,16 @@ public class TableNode extends Node {
         return headers;
     }
 
-    //    TODO move to row node
-    public List<List<Node>> getRows() {
-        return rows.stream().map(rows2 -> rows2.nodes).collect(toList());
-    }
-
-    //    TODO move to row node
-    public List<ExpressionClause> getRowSchemas() {
-        return rows.stream().map(rows2 -> rows2.expressionClause.orElse(null)).collect(toList());
-    }
-
-    //    TODO move to row node
-    public List<Operator> getRowOperators() {
-        return rows.stream().map(rows2 -> rows2.operator.orElse(null)).collect(toList());
+    public List<RowNode> getRows() {
+        return rows;
     }
 
     @Override
     public String inspect() {
-//        TODO to be refactor
-        return new ArrayList<List<String>>() {{
-            add(headers.stream().map(HeaderNode::inspect).collect(toList()));
-            addAll(rows.stream().map(row -> row.nodes.stream().map(Node::inspectClause).collect(toList())
-            ).collect(toList()));
-        }}.stream().map(cells -> cells.stream().collect(joining(" | ", "| ", " |"))).collect(joining("\n"));
+        return String.join("\n", new ArrayList<String>() {{
+            add(headers.stream().map(HeaderNode::inspect).collect(joining(" | ", "| ", " |")));
+            rows.stream().map(RowNode::inspect).forEach(this::add);
+        }});
     }
 
     @Override

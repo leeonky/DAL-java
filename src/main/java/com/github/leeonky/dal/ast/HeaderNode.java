@@ -27,6 +27,7 @@ public class HeaderNode extends Node {
         return property;
     }
 
+    @Deprecated
     public Optional<Operator> getOperator() {
         return operator;
     }
@@ -35,6 +36,7 @@ public class HeaderNode extends Node {
         return tokenParser -> operator;
     }
 
+    @Deprecated
     public SequenceNode getSequence() {
         return sequence;
     }

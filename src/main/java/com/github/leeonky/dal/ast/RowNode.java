@@ -4,36 +4,42 @@ import com.github.leeonky.dal.compiler.ExpressionClause;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class RowNode extends Node {
-    //    TODO to be private
-    final List<Node> nodes;
-    final Optional<Operator> operator;
-    final Optional<ExpressionClause> expressionClause;
+    private final List<Node> cells;
+    private final Optional<Operator> operator;
+    private final Optional<ExpressionClause> expressionClause;
 
-    public RowNode(Optional<ExpressionClause> expressionClause, Optional<Operator> operator, List<Node> nodes) {
-        this.nodes = nodes;
+    public RowNode(Optional<ExpressionClause> expressionClause, Optional<Operator> operator, List<Node> cells) {
+        this.cells = cells;
         this.operator = operator;
         this.expressionClause = expressionClause;
     }
 
     @Override
     public String inspect() {
-        return null;
+        String cells = this.cells.stream().map(Node::inspectClause).collect(Collectors.joining(" | ", "| ", " |"));
+        return expressionClause.map(clause -> clause.makeExpression(null).inspectClause() + " ").orElse("")
+                + operator.map(o -> o.inspect("", cells)).orElse(cells);
     }
 
     private boolean isRowWildcard() {
-        return nodes.size() == 1 && nodes.get(0) instanceof WildcardNode;
+        return cells.size() == 1 && cells.get(0) instanceof WildcardNode;
     }
 
     private boolean isEllipsis() {
-        return nodes.size() == 1 && nodes.get(0) instanceof ListEllipsisNode;
+        return cells.size() == 1 && cells.get(0) instanceof ListEllipsisNode;
     }
 
     //        TODO refactor
     public ExpressionClause toExpressionClause(Operator operator) {
-        return input -> isEllipsis() ? nodes.get(0) :
+        return input -> isEllipsis() ? cells.get(0) :
                 new Expression(expressionClause.map(c -> c.makeExpression(input)).orElse(input),
-                        this.operator.orElse(operator), isRowWildcard() ? nodes.get(0) : new ObjectNode(nodes));
+                        this.operator.orElse(operator), isRowWildcard() ? cells.get(0) : new ObjectNode(cells));
+    }
+
+    public List<Node> getCells() {
+        return cells;
     }
 }
