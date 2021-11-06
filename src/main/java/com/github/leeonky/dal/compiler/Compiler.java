@@ -3,10 +3,7 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.ast.*;
 import com.github.leeonky.dal.runtime.FunctionUtil;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -18,6 +15,7 @@ import static com.github.leeonky.dal.compiler.Constants.KeyWords.WHICH;
 import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.TokenParser.operatorMatcher;
 import static java.util.Optional.empty;
+import static java.util.stream.Collectors.toList;
 
 public class Compiler {
 
@@ -63,7 +61,7 @@ public class Compiler {
             WILDCARD = parser -> parser.wordToken("*", token -> new WildcardNode("*")),
             ROW_WILDCARD = parser -> parser.wordToken("***", token -> new WildcardNode("***")),
             PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_WHICH_CLAUSE, SCHEMA_JUDGEMENT_CLAUSE,
-            ELEMENT_ELLIPSIS, UNARY_OPERATOR_EXPRESSION, TABLE = new TableMatcher();
+            ELEMENT_ELLIPSIS, UNARY_OPERATOR_EXPRESSION, TABLE = oneOf(new TableMatcher(), new TransposedTable());
 
     public NodeFactory PROPERTY_CHAIN, OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION,
             JUDGEMENT_EXPRESSION_OPERAND;
@@ -170,40 +168,40 @@ public class Compiler {
                 .map(p -> p.fetch(parser)).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 
+    private final NodeFactory SEQUENCE = parser -> FunctionUtil.oneOf(
+            parser.sequenceOf(SEQUENCE_AZ, SequenceNode.Type.AZ),
+            parser.sequenceOf(SEQUENCE_ZA, SequenceNode.Type.ZA),
+            parser.sequenceOf(SEQUENCE_AZ_2, SequenceNode.Type.AZ),
+            parser.sequenceOf(SEQUENCE_ZA_2, SequenceNode.Type.ZA))
+            .orElse(SequenceNode.noSequence());
+
+    private final NodeFactory TABLE_HEADER = parser -> {
+        SequenceNode sequence = (SequenceNode) SEQUENCE.fetch(parser);
+        Node property = PROPERTY_CHAIN.fetch(parser);
+        return new HeaderNode(sequence, parser.fetchNodeAfter(IS, SCHEMA_CLAUSE)
+                .map(expressionClause -> expressionClause.makeExpression(property)).orElse(property),
+                JUDGEMENT_OPERATORS.fetch(parser));
+    };
+
     public class TableMatcher implements NodeMatcher {
-        private final NodeFactory SEQUENCE = parser -> FunctionUtil.oneOf(
-                parser.sequenceOf(SEQUENCE_AZ, SequenceNode.Type.AZ),
-                parser.sequenceOf(SEQUENCE_ZA, SequenceNode.Type.ZA),
-                parser.sequenceOf(SEQUENCE_AZ_2, SequenceNode.Type.AZ),
-                parser.sequenceOf(SEQUENCE_ZA_2, SequenceNode.Type.ZA))
-                .orElse(SequenceNode.noSequence());
-
-        private HeaderNode getHeaderNode(TokenParser parser) {
-            SequenceNode sequence = (SequenceNode) SEQUENCE.fetch(parser);
-            Node property = PROPERTY_CHAIN.fetch(parser);
-            return new HeaderNode(sequence, parser.fetchNodeAfter(IS, SCHEMA_CLAUSE)
-                    .map(expressionClause -> expressionClause.makeExpression(property)).orElse(property),
-                    JUDGEMENT_OPERATORS.fetch(parser));
-        }
-
         @Override
         public Optional<Node> fetch(TokenParser parser) {
             try {
-                return parser.fetchRow(columnIndex -> getHeaderNode(parser))
+                return parser.fetchRow(columnIndex -> (HeaderNode) TABLE_HEADER.fetch(parser))
                         .map(headers -> new TableNode(headers, getRowNodes(parser, headers)));
             } catch (IndexOutOfBoundsException ignore) {
                 throw parser.getSourceCode().syntaxError("Different cell size", 0);
             }
         }
 
-        private List<RowNode> getRowNodes(TokenParser parser, List<HeaderNode> headers) {
+        protected List<RowNode> getRowNodes(TokenParser parser, List<HeaderNode> headers) {
             return FunctionUtil.allOptional(() -> {
                 Optional<ExpressionClause> rowSchemaClause = parser.fetchNodeAfter(IS, SCHEMA_CLAUSE);
                 Optional<Operator> rowOperator = JUDGEMENT_OPERATORS.fetch(parser);
                 return FunctionUtil.oneOf(
                         () -> parser.fetchBetween("|", "|", ELEMENT_ELLIPSIS).map(Collections::singletonList),
                         () -> parser.fetchBetween("|", "|", ROW_WILDCARD).map(Collections::singletonList),
-                        () -> parser.fetchRow(column -> getRowCells(parser, headers, rowOperator, column))
+                        () -> parser.fetchRow(column -> getRowCell(parser, rowOperator, headers.get(column)))
                                 .map(cellClauses -> checkCellSize(parser, headers, cellClauses))
                 ).map(nodes -> new RowNode(rowSchemaClause, rowOperator, nodes));
             });
@@ -214,11 +212,34 @@ public class Compiler {
                 throw parser.getSourceCode().syntaxError("Different cell size", 0);
             return cellClauses;
         }
+    }
 
-        private Node getRowCells(TokenParser parser, List<HeaderNode> headers, Optional<Operator> rowOperator, int column) {
-            return shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headers.get(column).headerOperator(),
-                    parser1 -> rowOperator).or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR))
-                    .fetch(parser).makeExpression(headers.get(column).getProperty());
+    private Node getRowCell(TokenParser parser, Optional<Operator> rowOperator, HeaderNode headerNode) {
+        return shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(),
+                parser1 -> rowOperator).or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR))
+                .fetch(parser).makeExpression(headerNode.getProperty());
+    }
+
+    public class TransposedTable implements NodeMatcher {
+
+        @Override
+        public Optional<Node> fetch(TokenParser parser) {
+            return parser.getSourceCode().popWord(">>").map(x -> {
+                List<HeaderNode> headerNodes = new ArrayList<>();
+                Map<Integer, List<Node>> cells = new LinkedHashMap<>();
+                while (parser.fetchNodeAfter("|", TABLE_HEADER).map(HeaderNode.class::cast).map(headerNode -> {
+                    headerNodes.add(headerNode);
+                    Optional<List<Node>> objects = parser.fetchRow(row -> getRowCell(parser, empty(), headerNode));
+                    objects.ifPresent(colCells -> {
+                        for (int i = 0; i < colCells.size(); i++)
+                            cells.computeIfAbsent(i, key -> new ArrayList<>()).add(colCells.get(i));
+                    });
+                    return headerNode;
+                }).isPresent()) ;
+                List<RowNode> rows = cells.values().stream().map(row -> new RowNode(empty(), empty(), row))
+                        .collect(toList());
+                return new TableNode(headerNodes, rows, TableNode.Type.TRANSPOSED);
+            });
         }
     }
 }

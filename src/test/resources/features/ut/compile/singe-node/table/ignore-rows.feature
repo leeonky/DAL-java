@@ -40,5 +40,3 @@ Feature: ignore some rows
       | ...         |
       | 'Lily' | 15 |
     """
-
-#TODO table transpose

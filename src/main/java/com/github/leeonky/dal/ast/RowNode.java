@@ -32,7 +32,6 @@ public class RowNode extends Node {
         return cells.size() == 1 && cells.get(0) instanceof ListEllipsisNode;
     }
 
-    //        TODO refactor
     public ExpressionClause toExpressionClause(Operator operator) {
         return input -> isEllipsis() ? cells.get(0) :
                 new Expression(expressionClause.map(c -> c.makeExpression(input)).orElse(input),

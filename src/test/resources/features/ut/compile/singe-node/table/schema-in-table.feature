@@ -262,4 +262,3 @@ Feature: schema in table
     : | obj                             |
       | is IdZero: {aliasOfName: 'Tom'} |
     """
-

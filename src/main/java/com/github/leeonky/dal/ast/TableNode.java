@@ -13,10 +13,16 @@ import static java.util.stream.Collectors.toList;
 public class TableNode extends Node {
     private final List<HeaderNode> headers;
     private final List<RowNode> rows;
+    private final Type type;
 
     public TableNode(List<HeaderNode> headers, List<RowNode> row) {
+        this(headers, row, Type.NORMAL);
+    }
+
+    public TableNode(List<HeaderNode> headers, List<RowNode> row, Type type) {
         this.headers = new ArrayList<>(headers);
         rows = new ArrayList<>(row);
+        this.type = type;
     }
 
     public List<HeaderNode> getHeaders() {
@@ -29,6 +35,9 @@ public class TableNode extends Node {
 
     @Override
     public String inspect() {
+        if (type == Type.TRANSPOSED) {
+            return ">>" + headers.stream().map(HeaderNode::inspect).collect(joining(" |\n| ", "| ", " |"));
+        }
         return String.join("\n", new ArrayList<String>() {{
             add(headers.stream().map(HeaderNode::inspect).collect(joining(" | ", "| ", " |")));
             rows.stream().map(RowNode::inspect).forEach(this::add);
@@ -55,5 +64,9 @@ public class TableNode extends Node {
                 .map(headerNode -> headerNode.getListComparator(context))
                 .reduce(Comparator::thenComparing)
                 .orElse(SequenceNode.NOP_COMPARATOR);
+    }
+
+    public enum Type {
+        NORMAL, TRANSPOSED
     }
 }
