@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 public class RowNode extends Node {
     private final List<Node> cells;
     private final Optional<Operator> operator;
@@ -40,5 +42,9 @@ public class RowNode extends Node {
 
     public List<Node> getCells() {
         return cells;
+    }
+
+    public List<String> inspectCells() {
+        return cells.stream().map(Node::inspectClause).collect(toList());
     }
 }

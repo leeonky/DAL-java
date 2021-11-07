@@ -4,10 +4,12 @@ import com.github.leeonky.dal.compiler.ExpressionClause;
 import com.github.leeonky.dal.compiler.SyntaxException;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.DataObject;
+import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.assertListSize;
@@ -77,11 +79,11 @@ public class ListNode extends Node {
 
     private boolean assertElementExpressions(RuntimeContextBuilder.RuntimeContext context) {
         if (multiLineList)
-            expressions.forEach(expression -> {
+            IntStream.range(0, expressions.size()).forEach(i -> {
                 try {
-                    expression.evaluate(context);
+                    expressions.get(i).evaluate(context);
                 } catch (DalException dalException) {
-                    throw dalException.multiPosition(expression.getOperandPosition(), DalException.Position.Type.LINE);
+                    throw new ElementAssertionFailure(expressions, i, dalException);
                 }
             });
         else

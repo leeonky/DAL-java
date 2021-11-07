@@ -1,13 +1,15 @@
 package com.github.leeonky.dal.runtime;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.IntStream.range;
 
 public class FunctionUtil {
     public static <T> Predicate<T> not(Predicate<T> t) {
@@ -46,4 +48,34 @@ public class FunctionUtil {
                 add(t.get());
         }};
     }
+
+    public static <T> List<List<T>> transpose(List<List<T>> list) {
+        return transpose(list.stream()).collect(Collectors.toList());
+    }
+
+    public static <T> Stream<List<T>> transpose(Stream<List<T>> list) {
+        return new LinkedHashMap<Integer, List<T>>() {{
+            list.forEach(colCells -> range(0, colCells.size()).forEach(i ->
+                    computeIfAbsent(i, key -> new ArrayList<>()).add(colCells.get(i))));
+        }}.values().stream();
+    }
+
+    public static <A, B, C> Stream<C> zip(Stream<A> streamA, Stream<B> streamB, BiFunction<A, B, C> zipper) {
+        Iterator<A> iteratorA = streamA.iterator();
+        Iterator<B> iteratorB = streamB.iterator();
+        Iterator<C> iteratorC = new Iterator<C>() {
+            @Override
+            public boolean hasNext() {
+                return iteratorA.hasNext() && iteratorB.hasNext();
+            }
+
+            @Override
+            public C next() {
+                return zipper.apply(iteratorA.next(), iteratorB.next());
+            }
+        };
+        return StreamSupport.stream(((Iterable<C>) () -> iteratorC).spliterator(),
+                streamA.isParallel() || streamB.isParallel());
+    }
+
 }

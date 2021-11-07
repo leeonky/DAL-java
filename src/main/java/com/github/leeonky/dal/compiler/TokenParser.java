@@ -64,7 +64,7 @@ public class TokenParser {
         return sourceCode.popWord(opening).map(token -> {
             T result = supplier.get();
             sourceCode.popWord(closing)
-                    .orElseThrow(() -> sourceCode.syntaxError("should end with " + closing, 0));
+                    .orElseThrow(() -> sourceCode.syntaxError("should end with `" + closing + "`", 0));
             return result;
         });
     }
@@ -76,7 +76,7 @@ public class TokenParser {
                 optionalNode = nodeMatcher.fetch(this);
                 if (optionalNode.isPresent())
                     sourceCode.popWord(closing).orElseThrow(() ->
-                            sourceCode.syntaxError("should end with " + closing, 0));
+                            sourceCode.syntaxError("should end with `" + closing + "`", 0));
             }
             return optionalNode;
         });

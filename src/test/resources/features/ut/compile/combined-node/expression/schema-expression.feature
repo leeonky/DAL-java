@@ -119,7 +119,7 @@ Feature: schema expression
     """
     Then failed to get "schema-expression" node with the following message:
     """
-    should end with ]
+    should end with `]`
     """
     And got the following source code information:
     """

@@ -92,7 +92,7 @@ Feature: compile table with judgement
     Given the following input data:
     """
     [{
-      amount: 10.0
+      "amount": 10.0
     }]
     """
     When assert by the following code:
