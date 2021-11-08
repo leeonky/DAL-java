@@ -43,13 +43,6 @@ public class TableNode extends Node {
         return type.inspect(headers, rows);
     }
 
-    private String getString(List<HeaderNode> headers, List<RowNode> rows) {
-        return String.join("\n", new ArrayList<String>() {{
-            add(headers.stream().map(HeaderNode::inspect).collect(joining(" | ", "| ", " |")));
-            rows.stream().map(RowNode::inspect).forEach(this::add);
-        }});
-    }
-
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
         return judgeRows(actualNode, operator, context);
@@ -98,13 +91,19 @@ public class TableNode extends Node {
 
             @Override
             protected String inspect(List<HeaderNode> headers, List<RowNode> rows) {
+//    TODO refactor
+                String table = zip(headers.stream().map(HeaderNode::inspect).collect(toList()).stream(),
+                        transpose(rows.stream().map(RowNode::inspectCells).collect(toList())).stream(),
+                        (h, cells) -> new ArrayList<String>() {{
+                            add(h);
+                            addAll(cells);
+                        }}).map(l -> l.stream().collect(joining(" | ", "| ", " |"))).collect(joining("\n"));
                 if (!rows.isEmpty()) {
-                    return ">>" + zip(headers.stream().map(HeaderNode::inspect).collect(toList()).stream(),
-                            transpose(rows.stream().map(RowNode::inspectCells).collect(toList())).stream(),
-                            (h, cells) -> new ArrayList<String>() {{
-                                add(h);
-                                addAll(cells);
-                            }}).map(l -> l.stream().collect(joining(" | ", "| ", " |"))).collect(joining("\n"));
+                    if (rows.stream().anyMatch(RowNode::hasSchemaOrOperator)) {
+                        return "| >> " + rows.stream().map(rowNode -> rowNode.inspectSchemaAndOperator().trim())
+                                .collect(joining(" | ", "| ", " |")) + "\n" + table;
+                    }
+                    return ">>" + table;
                 }
                 return ">>" + headers.stream().map(HeaderNode::inspect).collect(joining(" |\n| ", "| ", " |"));
             }

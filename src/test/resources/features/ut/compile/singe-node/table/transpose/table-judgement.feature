@@ -27,6 +27,18 @@ Feature: compile table with judgement
     }
     """
 
+  Scenario: compile table with row judgement operator which has higher priority than table judgement operator
+    Given the following dal code:
+    """
+    : | >>     | =     |
+      | name   | 'Tom' |
+    """
+    Then got the following "expression" node:
+    """
+    rightOperand.inspect: "| >> | = |
+    | name | = 'Tom' |"
+    """
+
   Scenario: judgement table with empty list
     Given the following input data:
     """

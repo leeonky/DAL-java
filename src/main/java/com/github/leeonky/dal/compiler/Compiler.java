@@ -19,6 +19,7 @@ import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.TokenParser.operatorMatcher;
 import static com.github.leeonky.dal.runtime.FunctionUtil.allOptional;
 import static com.github.leeonky.dal.runtime.FunctionUtil.transpose;
+import static com.github.leeonky.dal.runtime.IfThenFactory.when;
 import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 
@@ -66,7 +67,8 @@ public class Compiler {
             WILDCARD = parser -> parser.wordToken("*", token -> new WildcardNode("*")),
             ROW_WILDCARD = parser -> parser.wordToken("***", token -> new WildcardNode("***")),
             PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_WHICH_CLAUSE, SCHEMA_JUDGEMENT_CLAUSE,
-            ELEMENT_ELLIPSIS, UNARY_OPERATOR_EXPRESSION, TABLE = oneOf(new TableMatcher(), new TransposedTable());
+            ELEMENT_ELLIPSIS, UNARY_OPERATOR_EXPRESSION,
+            TABLE = oneOf(new TransposedTableWithRowOperator(), new TableMatcher(), new TransposedTable());
 
     public NodeFactory PROPERTY_CHAIN, OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION,
             JUDGEMENT_EXPRESSION_OPERAND;
@@ -225,6 +227,7 @@ public class Compiler {
                 .fetch(parser).makeExpression(headerNode.getProperty());
     }
 
+    //    TODO refactor
     public class TransposedTable implements NodeMatcher {
         @Override
         public Optional<Node> fetch(TokenParser parser) {
@@ -238,9 +241,47 @@ public class Compiler {
             return transpose(allOptional(() -> parser.fetchNodeAfter("|", TABLE_HEADER)
                     .map(HeaderNode.class::cast).map(headerNode -> {
                         headerNodes.add(headerNode);
-                        return parser.fetchRow(row1 -> getRowCell(parser, empty(), headerNode))
+                        return parser.fetchRow(row -> getRowCell(parser, empty(), headerNode))
                                 .orElseThrow(() -> parser.getSourceCode().syntaxError("should end with `|`", 0));
                     }))).stream().map(row -> new RowNode(empty(), empty(), row)).collect(toList());
+        }
+    }
+
+    //    TODO refactor
+    public class TransposedTableWithRowOperator implements NodeMatcher {
+
+        @Override
+        public Optional<Node> fetch(TokenParser parser) {
+            return parser.getSourceCode().tryFetch(() -> when(parser.getSourceCode().popWord("|").isPresent()
+                    && parser.getSourceCode().popWord(">>").isPresent()).optional(() -> {
+                List<Optional<ExpressionClause>> rowSchemaClauses = new ArrayList<>();
+                List<Optional<Operator>> rowOperators = new ArrayList<>();
+                parser.fetchRow(row -> {
+                    rowSchemaClauses.add(parser.fetchNodeAfter(IS, SCHEMA_CLAUSE));
+                    rowOperators.add(JUDGEMENT_OPERATORS.fetch(parser));
+                    return null;
+                });
+
+                List<HeaderNode> headerNodes = new ArrayList<>();
+                return new TableNode(headerNodes, getRowNodes(parser, headerNodes, rowSchemaClauses, rowOperators),
+                        TableNode.Type.TRANSPOSED);
+            }));
+        }
+
+        private List<RowNode> getRowNodes(TokenParser parser, List<HeaderNode> headerNodes,
+                                          List<Optional<ExpressionClause>> rowSchemaClauses,
+                                          List<Optional<Operator>> rowOperators) {
+            List<List<Node>> transpose = transpose(allOptional(() -> parser.fetchNodeAfter("|", TABLE_HEADER)
+                    .map(HeaderNode.class::cast).map(headerNode -> {
+                        headerNodes.add(headerNode);
+                        return parser.fetchRow(row -> getRowCell(parser, rowOperators.get(row), headerNode))
+                                .orElseThrow(() -> parser.getSourceCode().syntaxError("should end with `|`", 0));
+                    })));
+            return new ArrayList<RowNode>() {{
+                for (int i = 0; i < transpose.size(); i++) {
+                    add(new RowNode(rowSchemaClauses.get(i), rowOperators.get(i), transpose.get(i)));
+                }
+            }};
         }
     }
 }

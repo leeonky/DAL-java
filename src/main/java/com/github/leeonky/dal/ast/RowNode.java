@@ -10,8 +10,9 @@ import static java.util.stream.Collectors.toList;
 
 public class RowNode extends Node {
     private final List<Node> cells;
-    private final Optional<Operator> operator;
-    private final Optional<ExpressionClause> expressionClause;
+    //    TODO refactor
+    final Optional<Operator> operator;
+    final Optional<ExpressionClause> expressionClause;
 
     public RowNode(Optional<ExpressionClause> expressionClause, Optional<Operator> operator, List<Node> cells) {
         this.cells = cells;
@@ -21,9 +22,13 @@ public class RowNode extends Node {
 
     @Override
     public String inspect() {
-        String cells = this.cells.stream().map(Node::inspectClause).collect(Collectors.joining(" | ", "| ", " |"));
+        return inspectSchemaAndOperator() + cells.stream().map(Node::inspectClause)
+                .collect(Collectors.joining(" | ", "| ", " |"));
+    }
+
+    public String inspectSchemaAndOperator() {
         return expressionClause.map(clause -> clause.makeExpression(null).inspectClause() + " ").orElse("")
-                + operator.map(o -> o.inspect("", cells)).orElse(cells);
+                + operator.map(o -> o.inspect("", "")).orElse("");
     }
 
     private boolean isRowWildcard() {
@@ -38,6 +43,10 @@ public class RowNode extends Node {
         return input -> isEllipsis() ? cells.get(0) :
                 new Expression(expressionClause.map(c -> c.makeExpression(input)).orElse(input),
                         this.operator.orElse(operator), isRowWildcard() ? cells.get(0) : new ObjectNode(cells));
+    }
+
+    public boolean hasSchemaOrOperator() {
+        return operator.isPresent() || expressionClause.isPresent();
     }
 
     public List<Node> getCells() {
