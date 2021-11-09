@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.Arrays.asList;
-import static java.util.stream.IntStream.range;
 
 public class FunctionUtil {
     public static <T> Predicate<T> not(Predicate<T> t) {
@@ -57,8 +56,8 @@ public class FunctionUtil {
 
     public static <T> Stream<List<T>> transpose(Stream<List<T>> list) {
         return new LinkedHashMap<Integer, List<T>>() {{
-            list.forEach(colCells -> range(0, colCells.size()).forEach(i ->
-                    computeIfAbsent(i, key -> new ArrayList<>()).add(colCells.get(i))));
+            list.forEach(colCells -> eachWithIndex(colCells.stream(),
+                    (i, colCell) -> computeIfAbsent(i, key -> new ArrayList<>()).add(colCell)));
         }}.values().stream();
     }
 

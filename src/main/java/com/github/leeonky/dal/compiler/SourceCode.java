@@ -2,9 +2,9 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.Node;
 
+import java.nio.CharBuffer;
 import java.util.*;
 import java.util.function.*;
-import java.util.stream.IntStream;
 
 import static com.github.leeonky.dal.runtime.FunctionUtil.allOptional;
 import static com.github.leeonky.dal.runtime.IfThenFactory.when;
@@ -88,7 +88,7 @@ public class SourceCode {
     }
 
     public boolean isBeginning() {
-        return IntStream.range(0, position).mapToObj(i -> chars[i]).allMatch(Character::isWhitespace);
+        return CharBuffer.wrap(chars).chars().limit(position).allMatch(Character::isWhitespace);
     }
 
     public SyntaxException syntaxError(String message, int positionOffset) {
