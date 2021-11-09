@@ -167,8 +167,8 @@ Feature: compile table with judgement
     """
     And the following assertion should pass:
     """
-    = | amount: |
-      | 18      |
+    : | amount: |
+    = | 18      |
     """
 
   Scenario: judgement table by specified cell judgement

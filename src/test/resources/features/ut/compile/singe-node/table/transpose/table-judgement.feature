@@ -39,6 +39,28 @@ Feature: compile table with judgement
     | name | = 'Tom' |"
     """
 
+  Scenario: compile table and specified header judgement operator which has higher priority than row judgement operator
+    Given the following dal code:
+    """
+    | >>    | =     |
+    | name: | 'Tom' |
+    """
+    Then got the following "table" node:
+    """
+    inspect: "| >> | = |
+    | name: | : 'Tom' |"
+    """
+
+  Scenario: compile table and specified cell judgement operator which has higher priority than header judgement operator
+    Given the following dal code:
+    """
+    >>| name= | : 'Tom' |
+    """
+    Then got the following "table" node:
+    """
+    inspect: ">>| name= | : 'Tom' |"
+    """
+
   Scenario: judgement table with empty list
     Given the following input data:
     """
@@ -101,4 +123,65 @@ Feature: compile table with judgement
     | amount | 10    |
     """
 
-#TODO table transpose
+  Scenario: judgement table by row judgement operator
+    Given the following input data:
+    """
+    [{
+      "name": "Tom",
+      "age": 10
+    },{
+      "name": "Lucy",
+      "age": 10,
+      "id": 1
+    }]
+    """
+    When assert by the following code:
+    """
+    : | >>   |       | =      |
+      | name | 'Tom' | 'Lucy' |
+      | age  | 10.0  | 10.0   |
+    """
+    Then failed with the following message:
+    """
+    Unexpected fields `id` in [1]
+    """
+    And got the following source code information:
+    """
+    : | >>   |       | =      |
+                       ^
+      | name | 'Tom' | 'Lucy' |
+                       ^
+      | age  | 10.0  | 10.0   |
+                       ^
+    """
+    And the following assertion should pass:
+    """
+    = | >>   |       | :      |
+      | name | 'Tom' | 'Lucy' |
+      | age  | 10    | 10     |
+    """
+
+  Scenario: judgement table by specified header judgement
+    Given the following input data:
+    """
+    [{
+      "amount": 18.0
+    }]
+    """
+    And the following assertion should pass:
+    """
+    = | >>      | =  |
+      | amount: | 18 |
+    """
+
+  Scenario: judgement table by specified cell judgement
+    Given the following input data:
+    """
+    [{
+      "amount": 18.0
+    }]
+    """
+    And the following assertion should pass:
+    """
+    : >>| amount= | : 18 |
+    """

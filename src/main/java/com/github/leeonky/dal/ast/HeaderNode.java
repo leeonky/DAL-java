@@ -27,18 +27,8 @@ public class HeaderNode extends Node {
         return property;
     }
 
-    @Deprecated
-    public Optional<Operator> getOperator() {
-        return operator;
-    }
-
     public OperatorMatcher headerOperator() {
         return tokenParser -> operator;
-    }
-
-    @Deprecated
-    public SequenceNode getSequence() {
-        return sequence;
     }
 
     public Comparator<Object> getListComparator(RuntimeContextBuilder.RuntimeContext context) {
@@ -46,6 +36,6 @@ public class HeaderNode extends Node {
     }
 
     public static Comparator<HeaderNode> bySequence() {
-        return Comparator.<HeaderNode>comparingInt(node -> node.sequence.getValue()).reversed();
+        return Comparator.comparing(headerNode -> headerNode.sequence, SequenceNode.comparator().reversed());
     }
 }

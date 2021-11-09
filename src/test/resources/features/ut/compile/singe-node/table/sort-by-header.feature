@@ -10,9 +10,6 @@ Feature: sort list in table
     : {
       class.simpleName: 'TableNode'
       inspect: '| ++ name | - age |'
-      headers: | property.inspect | sequence.value | sequence.type |
-               | 'name'           | 2              | 'AZ'          |
-               | 'age'            | 1              | 'ZA'          |
     }
     """
 
@@ -26,9 +23,6 @@ Feature: sort list in table
     : {
       class.simpleName: 'TableNode'
       inspect: '| ↑↑ name | ↓ age |'
-      headers: | property.inspect | sequence.value | sequence.type |
-               | 'name'           | 2              | 'AZ'          |
-               | 'age'            | 1              | 'ZA'          |
     }
     """
 

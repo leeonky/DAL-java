@@ -31,14 +31,6 @@ public class SequenceNode extends Node {
         return value == 0 ? "" : String.join("", Collections.nCopies(value, word)) + " ";
     }
 
-    public int getValue() {
-        return value;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
     @SuppressWarnings("unchecked")
     public Comparator<Object> getComparator(Function<Object, Object> orderBy) {
         return type.azOrZa(Comparator.comparing(o -> (Comparable<Object>) orderBy.apply(o)));
@@ -55,5 +47,9 @@ public class SequenceNode extends Node {
         Comparator<Object> azOrZa(Comparator<Object> comparator) {
             return comparator;
         }
+    }
+
+    public static Comparator<SequenceNode> comparator() {
+        return Comparator.comparingInt(sequenceNode -> sequenceNode.value);
     }
 }
