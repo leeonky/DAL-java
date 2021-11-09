@@ -1,6 +1,8 @@
 package com.github.leeonky.dal.runtime;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -78,4 +80,14 @@ public class FunctionUtil {
                 streamA.isParallel() || streamB.isParallel());
     }
 
+    //    TODO replace range
+    public static <T> void eachWithIndex(Stream<T> stream, BiConsumer<Integer, T> consumer) {
+        AtomicInteger atomicInteger = new AtomicInteger(0);
+        stream.forEach(element -> consumer.accept(atomicInteger.getAndIncrement(), element));
+    }
+
+    public static <T, R> Stream<R> mapWithIndex(Stream<T> stream, BiFunction<Integer, T, R> biFunction) {
+        AtomicInteger atomicInteger = new AtomicInteger(0);
+        return stream.map(element -> biFunction.apply(atomicInteger.getAndIncrement(), element));
+    }
 }

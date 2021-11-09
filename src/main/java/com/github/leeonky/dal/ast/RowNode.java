@@ -2,22 +2,32 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.compiler.ExpressionClause;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class RowNode extends Node {
     private final List<Node> cells;
-    //    TODO refactor
-    final Optional<Operator> operator;
-    final Optional<ExpressionClause> expressionClause;
+    private final Optional<Operator> operator;
+    private final Optional<ExpressionClause> expressionClause;
 
     public RowNode(Optional<ExpressionClause> expressionClause, Optional<Operator> operator, List<Node> cells) {
         this.cells = cells;
         this.operator = operator;
         this.expressionClause = expressionClause;
+    }
+
+    public static String printTableRow(Stream<String> stream) {
+        return stream.collect(joining(" | ", "| ", " |"));
+    }
+
+    public static String printTableRow(Collection<String> collection) {
+        return printTableRow(collection.stream());
     }
 
     @Override

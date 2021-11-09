@@ -20,6 +20,7 @@ import static com.github.leeonky.dal.compiler.TokenParser.operatorMatcher;
 import static com.github.leeonky.dal.runtime.FunctionUtil.allOptional;
 import static com.github.leeonky.dal.runtime.FunctionUtil.transpose;
 import static com.github.leeonky.dal.runtime.IfThenFactory.when;
+import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 
@@ -227,7 +228,6 @@ public class Compiler {
                 .fetch(parser).makeExpression(headerNode.getProperty());
     }
 
-    //    TODO refactor
     public class TransposedTable implements NodeMatcher {
         @Override
         public Optional<Node> fetch(TokenParser parser) {
@@ -247,7 +247,6 @@ public class Compiler {
         }
     }
 
-    //    TODO refactor
     public class TransposedTableWithRowOperator implements NodeMatcher {
 
         @Override
@@ -255,13 +254,10 @@ public class Compiler {
             return parser.getSourceCode().tryFetch(() -> when(parser.getSourceCode().popWord("|").isPresent()
                     && parser.getSourceCode().popWord(">>").isPresent()).optional(() -> {
                 List<Optional<ExpressionClause>> rowSchemaClauses = new ArrayList<>();
-                List<Optional<Operator>> rowOperators = new ArrayList<>();
-                parser.fetchRow(row -> {
+                List<Optional<Operator>> rowOperators = parser.fetchRow(row -> {
                     rowSchemaClauses.add(parser.fetchNodeAfter(IS, SCHEMA_CLAUSE));
-                    rowOperators.add(JUDGEMENT_OPERATORS.fetch(parser));
-                    return null;
-                });
-
+                    return JUDGEMENT_OPERATORS.fetch(parser);
+                }).orElse(emptyList());
                 List<HeaderNode> headerNodes = new ArrayList<>();
                 return new TableNode(headerNodes, getRowNodes(parser, headerNodes, rowSchemaClauses, rowOperators),
                         TableNode.Type.TRANSPOSED);
@@ -271,17 +267,18 @@ public class Compiler {
         private List<RowNode> getRowNodes(TokenParser parser, List<HeaderNode> headerNodes,
                                           List<Optional<ExpressionClause>> rowSchemaClauses,
                                           List<Optional<Operator>> rowOperators) {
-            List<List<Node>> transpose = transpose(allOptional(() -> parser.fetchNodeAfter("|", TABLE_HEADER)
-                    .map(HeaderNode.class::cast).map(headerNode -> {
+            return FunctionUtil.mapWithIndex(getCells(parser, headerNodes, rowOperators), (i, row) ->
+                    new RowNode(rowSchemaClauses.get(i), rowOperators.get(i), row)).collect(toList());
+        }
+
+        private Stream<List<Node>> getCells(TokenParser parser, List<HeaderNode> headerNodes,
+                                            List<Optional<Operator>> rowOperators) {
+            return transpose(allOptional(() -> parser.fetchNodeAfter("|", TABLE_HEADER).map(HeaderNode.class::cast)
+                    .map(headerNode -> {
                         headerNodes.add(headerNode);
                         return parser.fetchRow(row -> getRowCell(parser, rowOperators.get(row), headerNode))
                                 .orElseThrow(() -> parser.getSourceCode().syntaxError("should end with `|`", 0));
-                    })));
-            return new ArrayList<RowNode>() {{
-                for (int i = 0; i < transpose.size(); i++) {
-                    add(new RowNode(rowSchemaClauses.get(i), rowOperators.get(i), transpose.get(i)));
-                }
-            }};
+                    }))).stream();
         }
     }
 }
