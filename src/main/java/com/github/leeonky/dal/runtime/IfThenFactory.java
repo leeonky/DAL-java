@@ -24,5 +24,4 @@ public class IfThenFactory {
             return empty();
         }
     }
-
 }

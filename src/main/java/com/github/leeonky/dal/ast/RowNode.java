@@ -42,11 +42,11 @@ public class RowNode extends Node {
     }
 
     private boolean isRowWildcard() {
-        return cells.size() == 1 && cells.get(0) instanceof WildcardNode;
+        return cells.size() >= 1 && cells.get(0) instanceof WildcardNode;
     }
 
     private boolean isEllipsis() {
-        return cells.size() == 1 && cells.get(0) instanceof ListEllipsisNode;
+        return cells.size() >= 1 && cells.get(0) instanceof ListEllipsisNode;
     }
 
     public ExpressionClause toExpressionClause(Operator operator) {

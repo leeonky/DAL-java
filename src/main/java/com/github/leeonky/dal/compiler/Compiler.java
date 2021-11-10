@@ -69,6 +69,7 @@ public class Compiler {
             ROW_WILDCARD = parser -> parser.wordToken("***", token -> new WildcardNode("***")),
             PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_WHICH_CLAUSE, SCHEMA_JUDGEMENT_CLAUSE,
             ELEMENT_ELLIPSIS, UNARY_OPERATOR_EXPRESSION,
+            EMPTY_CELL = parser -> when(parser.getSourceCode().startsWith("|")).optional(EmptyCellNode::new),
             TABLE = oneOf(new TransposedTableWithRowOperator(), new TableMatcher(), new TransposedTable());
 
     public NodeFactory PROPERTY_CHAIN, OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION,
@@ -223,9 +224,9 @@ public class Compiler {
     }
 
     private Node getRowCell(TokenParser parser, Optional<Operator> rowOperator, HeaderNode headerNode) {
-        return shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(),
-                parser1 -> rowOperator).or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR))
-                .fetch(parser).makeExpression(headerNode.getProperty());
+        return oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL).or(ROW_WILDCARD.or(
+                shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(), parser1 -> rowOperator)
+                        .or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR)).input(headerNode.getProperty()))).fetch(parser);
     }
 
     public class TransposedTable implements NodeMatcher {
