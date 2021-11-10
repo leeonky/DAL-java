@@ -77,6 +77,6 @@ public class Expression extends Node {
 
     @Override
     public int getOperandPosition() {
-        return node2.getOperandPosition();
+        return node2.getPositionBegin();
     }
 }

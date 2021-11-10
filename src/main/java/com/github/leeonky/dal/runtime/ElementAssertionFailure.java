@@ -22,7 +22,7 @@ public class ElementAssertionFailure extends RuntimeException {
 
     public DalException columnPositionException(TableNode tableNode) {
         tableNode.getRows().get(row).getCells().forEach(cell ->
-                dalException.multiPosition(cell.getOperandPosition(), DalException.Position.Type.CHAR));
+                dalException.multiPosition(cell.getPositionBegin(), DalException.Position.Type.CHAR));
         return dalException;
     }
 }

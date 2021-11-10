@@ -181,7 +181,7 @@ Feature: schema in table
     """
     : >>| obj is IdZero | {aliasOfName: 'Tom'} |
                  ^
-                                        ^
+                          ^
     """
     When the following input data:
     """
@@ -229,10 +229,9 @@ Feature: schema in table
     And got the following source code information:
     """
     : >>| obj | is IdZero: {aliasOfName: 'Tom'} |
+                ^
                    ^
-                                         ^
     """
-#   TODO incorrect cell position in transposed table
     When the following input data:
     """
     [{
@@ -246,3 +245,5 @@ Feature: schema in table
     """
     : >>| obj | is IdZero: {aliasOfName: 'Tom'} |
     """
+
+#   TODO incorrect cell position in transposed table

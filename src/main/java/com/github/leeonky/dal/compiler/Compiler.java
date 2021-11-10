@@ -224,9 +224,11 @@ public class Compiler {
     }
 
     private Node getRowCell(TokenParser parser, Optional<Operator> rowOperator, HeaderNode headerNode) {
+        int cellPosition = parser.getSourceCode().nextPosition();
         return oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL).or(ROW_WILDCARD.or(
                 shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(), parser1 -> rowOperator)
-                        .or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR)).input(headerNode.getProperty()))).fetch(parser);
+                        .or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR)).input(headerNode.getProperty()))).fetch(parser)
+                .setPositionBegin(cellPosition);
     }
 
     public class TransposedTable implements NodeMatcher {

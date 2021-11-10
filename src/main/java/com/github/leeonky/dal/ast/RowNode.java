@@ -52,7 +52,8 @@ public class RowNode extends Node {
     public ExpressionClause toExpressionClause(Operator operator) {
         return input -> isEllipsis() ? cells.get(0) :
                 new Expression(expressionClause.map(c -> c.makeExpression(input)).orElse(input),
-                        this.operator.orElse(operator), isRowWildcard() ? cells.get(0) : new ObjectNode(cells));
+                        this.operator.orElse(operator), isRowWildcard() ? cells.get(0)
+                        : new ObjectNode(cells).setPositionBegin(cells.get(0).getOperandPosition()));
     }
 
     public boolean hasSchemaOrOperator() {

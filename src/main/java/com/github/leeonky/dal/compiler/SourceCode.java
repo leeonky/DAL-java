@@ -142,6 +142,10 @@ public class SourceCode {
         return currentChar() == '\n';
     }
 
+    public int nextPosition() {
+        return leftTrim().position;
+    }
+
     public enum FetchBy {
         BY_CHAR,
         BY_NODE {

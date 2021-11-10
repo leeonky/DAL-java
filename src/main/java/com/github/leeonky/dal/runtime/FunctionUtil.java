@@ -79,7 +79,6 @@ public class FunctionUtil {
                 streamA.isParallel() || streamB.isParallel());
     }
 
-    //    TODO replace range
     public static <T> void eachWithIndex(Stream<T> stream, BiConsumer<Integer, T> consumer) {
         AtomicInteger atomicInteger = new AtomicInteger(0);
         stream.forEach(element -> consumer.accept(atomicInteger.getAndIncrement(), element));
