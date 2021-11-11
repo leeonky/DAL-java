@@ -47,3 +47,20 @@ Feature: table
         | 'Tomas' | 21    |
         | 'John'  | 18    |
     """
+
+  Scenario: support table transpose
+    Given the following input data:
+    """
+      [{
+        "name": "John",
+        "age": 18
+      }, {
+        "name": "Tomas",
+        "age": 21
+      }]
+    """
+    Then the following assertion should pass:
+    """
+    = >>| name: | 'John' | 'Tomas' |
+        | age:  | 18     | 21      |
+    """
