@@ -7,17 +7,23 @@ import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.NoSuchAccessorException;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.of;
+
 public class RuntimeContextBuilder {
     private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
     private final ClassKeyMap<ListAccessor<Object>> listAccessors = new ClassKeyMap<>();
     private final Map<String, ConstructorViaSchema> constructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
+    private final Set<Class<?>> staticMethodExtensionClasses = new HashSet<>();
     private Converter converter = Converter.createDefault();
 
     public RuntimeContextBuilder() {
@@ -108,10 +114,18 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    public RuntimeContextBuilder registerStaticMethodExtension(Class<?> staticMethodExtensionClass) {
+        staticMethodExtensionClasses.add(staticMethodExtensionClass);
+        return this;
+    }
+
     public class RuntimeContext {
         private final LinkedList<DataObject> thisStack = new LinkedList<>();
         private final Set<Class<?>> schemaSet;
         private boolean listMapping = false;
+        private final List<Method> extensionMethods = staticMethodExtensionClasses.stream().flatMap(c -> of(c.getMethods()))
+                .filter(RuntimeContextBuilder.this::maybeExtensionMethods)
+                .collect(toList());
 
         public RuntimeContext(Object inputValue) {
             schemaSet = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
@@ -205,12 +219,14 @@ public class RuntimeContextBuilder {
                     private final BeanClass<Object> beanClass = BeanClass.createFrom(instance);
 
                     @Override
-                    public Object getValue(Object instance1, String name) {
+                    public Object getValue(Object instance, String name) {
                         try {
-                            return beanClass.getPropertyValue(instance1, name);
+                            return beanClass.getPropertyValue(instance, name);
                         } catch (NoSuchAccessorException ignore) {
                             try {
-                                return beanClass.getType().getMethod(name).invoke(instance1);
+                                return beanClass.getType().getMethod(name).invoke(instance);
+                            } catch (IllegalAccessException | NoSuchMethodException e) {
+                                return invokeExtensionMethod(instance, name);
                             } catch (Exception e) {
                                 throw new IllegalStateException(e);
                             }
@@ -218,17 +234,48 @@ public class RuntimeContextBuilder {
                     }
 
                     @Override
-                    public Set<String> getPropertyNames(Object instance1) {
+                    public Set<String> getPropertyNames(Object instance) {
                         return beanClass.getPropertyReaders().keySet();
                     }
 
                     @Override
-                    public boolean isNull(Object instance1) {
-                        return Objects.equals(instance1, null);
+                    public boolean isNull(Object instance) {
+                        return Objects.equals(instance, null);
                     }
                 });
             }
             return this;
+        }
+
+        private Object invokeExtensionMethod(Object instance, String name) {
+//            TODO more than one base class instance
+//            TODO no method
+            return FunctionUtil.oneOf(() -> findMethodWithSameType(instance, name),
+                    () -> findMethodWithFromBaseType(instance, name)).map(method -> {
+                try {
+                    return method.invoke(null, instance);
+                } catch (Exception e) {
+                    throw new IllegalStateException(e);
+                }
+            }).orElse(null);
+        }
+
+        private Optional<Method> findMethodWithFromBaseType(Object instance, String name) {
+            return extensionMethods.stream().filter(method -> methodWithBaseType(instance, name, method)).findFirst();
+        }
+
+        private Optional<Method> findMethodWithSameType(Object instance, String name) {
+            return extensionMethods.stream().filter(method -> methodWithSameType(instance, name, method)).findFirst();
+        }
+
+        private boolean methodWithBaseType(Object instance, String name, Method method) {
+            return method.getName().equals(name)
+                    && method.getParameterTypes()[0].equals(instance.getClass());
+        }
+
+        private boolean methodWithSameType(Object instance, String name, Method method) {
+            return method.getName().equals(name)
+                    && method.getParameterTypes()[0].isAssignableFrom(instance.getClass());
         }
 
         public void beginListMapping() {
@@ -242,5 +289,11 @@ public class RuntimeContextBuilder {
         public void endListMapping() {
             listMapping = false;
         }
+    }
+
+    private boolean maybeExtensionMethods(Method method) {
+        return method.getParameterCount() == 1
+                && Modifier.isStatic(method.getModifiers())
+                && Modifier.isPublic(method.getModifiers());
     }
 }
