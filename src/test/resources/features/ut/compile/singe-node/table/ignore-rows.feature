@@ -103,5 +103,4 @@ Feature: ignore some rows
     -1 | 'Lily' | 15  |
     """
 
-# TODO support set first index of list
 # TODO customized assertion in schema

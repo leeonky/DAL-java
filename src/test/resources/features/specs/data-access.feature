@@ -1,6 +1,6 @@
 Feature: access data
 
-  Scenario: access data
+  Scenario: access list element by index
     Given the following input data:
     """
       [1, 2, 3]
