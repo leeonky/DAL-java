@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.compiler.ExpressionClause;
+import com.github.leeonky.dal.compiler.SyntaxException;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
@@ -8,9 +10,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.HeaderNode.bySequence;
 import static com.github.leeonky.dal.ast.RowNode.printTableRow;
+import static com.github.leeonky.dal.runtime.DalException.Position.Type.CHAR;
+import static com.github.leeonky.dal.runtime.DalException.Position.Type.LINE;
 import static com.github.leeonky.dal.runtime.FunctionUtil.transpose;
 import static com.github.leeonky.dal.runtime.FunctionUtil.zip;
 import static java.util.Collections.emptyList;
@@ -27,11 +32,17 @@ public class TableNode extends Node {
         this(headers, row, Type.NORMAL);
     }
 
-    public TableNode(List<HeaderNode> headers, List<RowNode> row, Type type) {
+    public TableNode(List<HeaderNode> headers, List<RowNode> rows, Type type) {
         this.headers = new ArrayList<>(headers);
-        rows = new ArrayList<>(row);
+        this.rows = new ArrayList<>(rows);
         this.type = type;
-        hasRowIndex = (!row.isEmpty()) && row.get(0).hasIndex();
+        hasRowIndex = (!rows.isEmpty()) && rows.get(0).hasIndex();
+        checkRowIndex(rows);
+    }
+
+    private void checkRowIndex(List<RowNode> rows) {
+        rows.stream().skip(1).filter(rowNode -> hasRowIndex ^ rowNode.hasIndex()).findAny()
+                .ifPresent(row -> type.raiseInvalidRowIndex(rows.get(0), row));
     }
 
     public List<HeaderNode> getHeaders() {
@@ -59,16 +70,18 @@ public class TableNode extends Node {
 
     private boolean judgeRows(Node actualNode, Operator operator, RuntimeContextBuilder.RuntimeContext context) {
         try {
-            if (hasRowIndex) {
-                return new ListNode(rows.stream().map(rowNode -> rowNode.toExpressionClause(operator)
-                        .makeExpression(null)).collect(toList()), true, ListNode.Type.FIRST_N_ITEMS)
-                        .judgeAll(context, actualNode.evaluateDataObject(context).setListComparator(collectComparator(context)));
-            }
-            return new ListNode(rows.stream().map(rowNode -> rowNode.toExpressionClause(operator)).collect(toList()), true)
-                    .judgeAll(context, actualNode.evaluateDataObject(context).setListComparator(collectComparator(context)));
+            return transformToListNode(operator).judgeAll(context, actualNode.evaluateDataObject(context)
+                    .setListComparator(collectComparator(context)));
         } catch (ElementAssertionFailure elementAssertionFailure) {
             throw type.toDalException(elementAssertionFailure, this);
         }
+    }
+
+    private ListNode transformToListNode(Operator operator) {
+        Stream<ExpressionClause> rowExpressionClauses = rows.stream().map(rowNode -> rowNode.toExpressionClause(operator));
+        return hasRowIndex ? new ListNode(rowExpressionClauses.map(rowNode -> rowNode.makeExpression(null))
+                .collect(toList()), true, ListNode.Type.FIRST_N_ITEMS)
+                : new ListNode(rowExpressionClauses.collect(toList()), true);
     }
 
     private Comparator<Object> collectComparator(RuntimeContextBuilder.RuntimeContext context) {
@@ -79,33 +92,31 @@ public class TableNode extends Node {
     }
 
     public enum Type {
-        NORMAL {
+        NORMAL, TRANSPOSED {
             @Override
-            protected DalException toDalException(ElementAssertionFailure elementAssertionFailure, TableNode tableNode) {
-                return elementAssertionFailure.linePositionException();
-            }
-
-            @Override
-            protected String inspect(List<HeaderNode> headers, List<RowNode> rows) {
-                return String.join("\n", new ArrayList<String>() {{
-                    add(printTableRow(headers.stream().map(HeaderNode::inspect)));
-                    rows.stream().map(RowNode::inspect).forEach(this::add);
-                }});
-            }
-        }, TRANSPOSED {
-            @Override
-            protected DalException toDalException(ElementAssertionFailure elementAssertionFailure, TableNode tableNode) {
+            public DalException toDalException(ElementAssertionFailure elementAssertionFailure, TableNode tableNode) {
                 return elementAssertionFailure.columnPositionException(tableNode);
             }
 
             @Override
-            protected String inspect(List<HeaderNode> headers, List<RowNode> rows) {
+            public String inspect(List<HeaderNode> headers, List<RowNode> rows) {
                 String tableContent = zip(headers.stream().map(HeaderNode::inspect).collect(toList()).stream(),
                         inspectCells(rows, headers.size()).stream(), this::mergeHeaderAndCells)
                         .map(RowNode::printTableRow).collect(joining("\n"));
                 return rows.stream().anyMatch(RowNode::hasSchemaOrOperator) ?
                         String.format("| >> %s\n%s", printTableRow(rows.stream().map(rowNode ->
                                 rowNode.inspectSchemaAndOperator().trim())), tableContent) : ">>" + tableContent;
+            }
+
+            @Override
+            public void raiseInvalidRowIndex(RowNode firstRow, RowNode invalidRow) {
+                throw new SyntaxException("Row index should be consistent",
+                        firstRow.getCells().get(0).getPositionBegin(), CHAR) {{
+                    firstRow.getCells().stream().skip(1).forEach(cell ->
+                            multiPosition(cell.getPositionBegin(), CHAR));
+                    invalidRow.getCells().forEach(cell ->
+                            multiPosition(cell.getPositionBegin(), CHAR));
+                }};
             }
 
             private ArrayList<String> mergeHeaderAndCells(String h, List<String> cells) {
@@ -121,8 +132,20 @@ public class TableNode extends Node {
             }
         };
 
-        protected abstract DalException toDalException(ElementAssertionFailure elementAssertionFailure, TableNode tableNode);
+        public DalException toDalException(ElementAssertionFailure elementAssertionFailure, TableNode tableNode) {
+            return elementAssertionFailure.linePositionException();
+        }
 
-        protected abstract String inspect(List<HeaderNode> headers, List<RowNode> rows);
+        public String inspect(List<HeaderNode> headers, List<RowNode> rows) {
+            return String.join("\n", new ArrayList<String>() {{
+                add(printTableRow(headers.stream().map(HeaderNode::inspect)));
+                rows.stream().map(RowNode::inspect).forEach(this::add);
+            }});
+        }
+
+        public void raiseInvalidRowIndex(RowNode firstRow, RowNode invalidRow) {
+            throw new SyntaxException("Row index should be consistent", invalidRow.getPositionBegin(), LINE)
+                    .multiPosition(firstRow.getPositionBegin(), LINE);
+        }
     }
 }

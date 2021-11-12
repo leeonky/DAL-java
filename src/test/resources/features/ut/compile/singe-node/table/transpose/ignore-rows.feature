@@ -80,3 +80,25 @@ Feature: ignore some rows
       | name | 'Lily' |
       | age  | 15     |
     """
+
+  Scenario: raise error when some row has index and some row not
+    Given the following dal code:
+    """
+    | >>   |       | 1      | 2      |
+    | name | 'Tom' | 'John' | 'Lily' |
+    | age  | 10    | 15     | 20     |
+    """
+    Then failed to get "table" node with the following message:
+    """
+    Row index should be consistent
+    """
+    And got the following source code information:
+    """
+    | >>   |       | 1      | 2      |
+    | name | 'Tom' | 'John' | 'Lily' |
+             ^
+                     ^
+    | age  | 10    | 15     | 20     |
+             ^
+                     ^
+    """

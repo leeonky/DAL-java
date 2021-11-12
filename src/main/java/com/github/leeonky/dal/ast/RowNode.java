@@ -24,6 +24,7 @@ public class RowNode extends Node {
         this.operator = operator;
         this.schemaClause = schemaClause;
         this.index = index;
+        setPositionBegin(cells.get(0).getOperandPosition());
     }
 
     public static String printTableRow(Stream<String> stream) {

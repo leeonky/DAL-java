@@ -10,8 +10,12 @@ public class DalException extends java.lang.RuntimeException {
     private final List<Position> positions = new ArrayList<>();
 
     protected DalException(String message, int position) {
+        this(message, position, Position.Type.CHAR);
+    }
+
+    protected DalException(String message, int position, Position.Type type) {
         super(message);
-        positions.add(new Position(Position.Type.CHAR, position));
+        positions.add(new Position(type, position));
     }
 
     public DalException multiPosition(int positionBegin, Position.Type type) {

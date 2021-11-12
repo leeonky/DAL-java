@@ -57,6 +57,26 @@ Feature: ignore some rows
     }
     """
 
+  Scenario: raise error when some row has index and some row not
+    Given the following dal code:
+    """
+      | name   |
+    0 | 'Tom'  |
+      | 'John' |
+    """
+    Then failed to get "table" node with the following message:
+    """
+    Row index should be consistent
+    """
+    And got the following source code information:
+    """
+      | name   |
+    0 | 'Tom'  |
+    ^^^^^^^^^^^^
+      | 'John' |
+    ^^^^^^^^^^^^
+    """
+
   Scenario: assert row with specified index
     When the following input data:
     """
@@ -83,7 +103,5 @@ Feature: ignore some rows
     -1 | 'Lily' | 15  |
     """
 
-# TODO support specify index in table
-# TODO syntax error when some row has index and some row not
 # TODO support set first index of list
 # TODO customized assertion in schema
