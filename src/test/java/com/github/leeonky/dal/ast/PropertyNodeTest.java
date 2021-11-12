@@ -9,6 +9,7 @@ import java.util.Arrays;
 
 import static com.github.leeonky.dal.ast.InputNode.INSTANCE;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PropertyNodeTest {
@@ -30,5 +31,18 @@ class PropertyNodeTest {
 
         assertThat(new PropertyNode(INSTANCE, 1, BRACKET).evaluate(runtimeContext)).isEqualTo(1);
         assertThat(new PropertyNode(INSTANCE, -1, BRACKET).evaluate(runtimeContext)).isEqualTo(2);
+    }
+
+    public static class CustomizedList {
+        public int value = 100;
+    }
+
+    @Test
+    void access_customized_list_property() {
+        RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
+                .registerListAccessor(CustomizedList.class, instance -> emptyList())
+                .build(new CustomizedList());
+
+        assertThat(new PropertyNode(INSTANCE, "value", BRACKET).evaluate(runtimeContext)).isEqualTo(100);
     }
 }

@@ -92,6 +92,8 @@ public class DataObject {
             return instance;
         }
         if (property instanceof String) {
+            if (runtimeContext.findPropertyReaderNames(instance).contains(property))
+                return runtimeContext.getPropertyValue(instance, (String) property);
             runtimeContext.beginListMapping();
             return getValueFromList(subProperty((String) property));
         }
