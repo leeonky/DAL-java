@@ -21,6 +21,7 @@ public class TableNode extends Node {
     private final List<HeaderNode> headers;
     private final List<RowNode> rows;
     private final Type type;
+    private final boolean hasRowIndex;
 
     public TableNode(List<HeaderNode> headers, List<RowNode> row) {
         this(headers, row, Type.NORMAL);
@@ -30,6 +31,7 @@ public class TableNode extends Node {
         this.headers = new ArrayList<>(headers);
         rows = new ArrayList<>(row);
         this.type = type;
+        hasRowIndex = (!row.isEmpty()) && row.get(0).hasIndex();
     }
 
     public List<HeaderNode> getHeaders() {
@@ -57,6 +59,11 @@ public class TableNode extends Node {
 
     private boolean judgeRows(Node actualNode, Operator operator, RuntimeContextBuilder.RuntimeContext context) {
         try {
+            if (hasRowIndex) {
+                return new ListNode(rows.stream().map(rowNode -> rowNode.toExpressionClause(operator)
+                        .makeExpression(null)).collect(toList()), true, ListNode.Type.FIRST_N_ITEMS)
+                        .judgeAll(context, actualNode.evaluateDataObject(context).setListComparator(collectComparator(context)));
+            }
             return new ListNode(rows.stream().map(rowNode -> rowNode.toExpressionClause(operator)).collect(toList()), true)
                     .judgeAll(context, actualNode.evaluateDataObject(context).setListComparator(collectComparator(context)));
         } catch (ElementAssertionFailure elementAssertionFailure) {

@@ -205,6 +205,7 @@ public class Compiler {
 
         protected List<RowNode> getRowNodes(TokenParser parser, List<HeaderNode> headers) {
             return allOptional(() -> {
+                Optional<Integer> index = getRowIndex(parser);
                 Optional<ExpressionClause> rowSchemaClause = parser.fetchNodeAfter(IS, SCHEMA_CLAUSE);
                 Optional<Operator> rowOperator = JUDGEMENT_OPERATORS.fetch(parser);
                 return FunctionUtil.oneOf(
@@ -212,7 +213,7 @@ public class Compiler {
                         () -> parser.fetchBetween("|", "|", ROW_WILDCARD).map(Collections::singletonList),
                         () -> parser.fetchRow(column -> getRowCell(parser, rowOperator, headers.get(column)))
                                 .map(cellClauses -> checkCellSize(parser, headers, cellClauses))
-                ).map(nodes -> new RowNode(rowSchemaClause, rowOperator, nodes));
+                ).map(nodes -> new RowNode(index, rowSchemaClause, rowOperator, nodes));
             });
         }
 
@@ -246,8 +247,12 @@ public class Compiler {
                         headerNodes.add(headerNode);
                         return parser.fetchRow(row -> getRowCell(parser, empty(), headerNode))
                                 .orElseThrow(() -> parser.getSourceCode().syntaxError("should end with `|`", 0));
-                    }))).stream().map(row -> new RowNode(empty(), empty(), row)).collect(toList());
+                    }))).stream().map(row -> new RowNode(empty(), empty(), empty(), row)).collect(toList());
         }
+    }
+
+    private Optional<Integer> getRowIndex(TokenParser parser) {
+        return INTEGER.fetch(parser).map(node -> (Integer) ((ConstNode) node).getValue());
     }
 
     public class TransposedTableWithRowOperator implements NodeMatcher {
@@ -256,22 +261,24 @@ public class Compiler {
         public Optional<Node> fetch(TokenParser parser) {
             return parser.getSourceCode().tryFetch(() -> when(parser.getSourceCode().popWord("|").isPresent()
                     && parser.getSourceCode().popWord(">>").isPresent()).optional(() -> {
+                List<Optional<Integer>> rowIndexes = new ArrayList<>();
                 List<Optional<ExpressionClause>> rowSchemaClauses = new ArrayList<>();
                 List<Optional<Operator>> rowOperators = parser.fetchRow(row -> {
+                    rowIndexes.add(getRowIndex(parser));
                     rowSchemaClauses.add(parser.fetchNodeAfter(IS, SCHEMA_CLAUSE));
                     return JUDGEMENT_OPERATORS.fetch(parser);
                 }).orElse(emptyList());
                 List<HeaderNode> headerNodes = new ArrayList<>();
-                return new TableNode(headerNodes, getRowNodes(parser, headerNodes, rowSchemaClauses, rowOperators),
-                        TableNode.Type.TRANSPOSED);
+                return new TableNode(headerNodes, getRowNodes(parser, headerNodes, rowSchemaClauses, rowOperators,
+                        rowIndexes), TableNode.Type.TRANSPOSED);
             }));
         }
 
         private List<RowNode> getRowNodes(TokenParser parser, List<HeaderNode> headerNodes,
                                           List<Optional<ExpressionClause>> rowSchemaClauses,
-                                          List<Optional<Operator>> rowOperators) {
+                                          List<Optional<Operator>> rowOperators, List<Optional<Integer>> rowIndexes) {
             return FunctionUtil.mapWithIndex(getCells(parser, headerNodes, rowOperators), (i, row) ->
-                    new RowNode(rowSchemaClauses.get(i), rowOperators.get(i), row)).collect(toList());
+                    new RowNode(rowIndexes.get(i), rowSchemaClauses.get(i), rowOperators.get(i), row)).collect(toList());
         }
 
         private Stream<List<Node>> getCells(TokenParser parser, List<HeaderNode> headerNodes,

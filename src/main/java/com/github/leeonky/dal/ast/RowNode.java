@@ -8,18 +8,22 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class RowNode extends Node {
     private final List<Node> cells;
+    private final Optional<Integer> index;
     private final Optional<Operator> operator;
-    private final Optional<ExpressionClause> expressionClause;
+    private final Optional<ExpressionClause> schemaClause;
 
-    public RowNode(Optional<ExpressionClause> expressionClause, Optional<Operator> operator, List<Node> cells) {
+    public RowNode(Optional<Integer> index, Optional<ExpressionClause> schemaClause, Optional<Operator> operator,
+                   List<Node> cells) {
         this.cells = cells;
         this.operator = operator;
-        this.expressionClause = expressionClause;
+        this.schemaClause = schemaClause;
+        this.index = index;
     }
 
     public static String printTableRow(Stream<String> stream) {
@@ -37,7 +41,8 @@ public class RowNode extends Node {
     }
 
     public String inspectSchemaAndOperator() {
-        return expressionClause.map(clause -> clause.makeExpression(null).inspectClause() + " ").orElse("")
+        return index.map(i -> i + " ").orElse("")
+                + schemaClause.map(clause -> clause.makeExpression(null).inspectClause() + " ").orElse("")
                 + operator.map(o -> o.inspect("", "")).orElse("");
     }
 
@@ -50,14 +55,18 @@ public class RowNode extends Node {
     }
 
     public ExpressionClause toExpressionClause(Operator operator) {
-        return input -> isEllipsis() ? cells.get(0) :
-                new Expression(expressionClause.map(c -> c.makeExpression(input)).orElse(input),
-                        this.operator.orElse(operator), isRowWildcard() ? cells.get(0)
-                        : new ObjectNode(cells).setPositionBegin(cells.get(0).getOperandPosition()));
+        return input -> isEllipsis() ? cells.get(0) : transformRowToExpression(operator,
+                index.<Node>map(i -> new PropertyNode(InputNode.INSTANCE, i, BRACKET)).orElse(input));
+    }
+
+    private Expression transformRowToExpression(Operator operator, Node inputElement) {
+        return new Expression(schemaClause.map(c -> c.makeExpression(inputElement)).orElse(inputElement),
+                this.operator.orElse(operator), isRowWildcard() ? cells.get(0)
+                : new ObjectNode(cells).setPositionBegin(cells.get(0).getOperandPosition()));
     }
 
     public boolean hasSchemaOrOperator() {
-        return operator.isPresent() || expressionClause.isPresent();
+        return operator.isPresent() || schemaClause.isPresent() || hasIndex();
     }
 
     public List<Node> getCells() {
@@ -66,5 +75,9 @@ public class RowNode extends Node {
 
     public List<String> inspectCells() {
         return cells.stream().map(Node::inspectClause).collect(toList());
+    }
+
+    public boolean hasIndex() {
+        return index.isPresent();
     }
 }

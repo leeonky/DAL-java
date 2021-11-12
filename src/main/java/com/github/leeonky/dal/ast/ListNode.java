@@ -7,6 +7,7 @@ import com.github.leeonky.dal.runtime.DataObject;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -32,6 +33,12 @@ public class ListNode extends Node {
                 -> clause.makeExpression(new PropertyNode(InputNode.INSTANCE, type.indexOfNode(i, size), BRACKET)))
                 .collect(toList())).stream().filter(node -> !(node instanceof ListEllipsisNode)).collect(toList());
         this.multiLineList = multiLineList;
+    }
+
+    public ListNode(List<Node> inputExpressions, boolean multiLineList, Type type) {
+        expressions = this.inputExpressions = new ArrayList<>(inputExpressions);
+        this.multiLineList = multiLineList;
+        this.type = type;
     }
 
     public ListNode(List<ExpressionClause> expressionFactories) {
@@ -91,7 +98,7 @@ public class ListNode extends Node {
         return true;
     }
 
-    private enum Type {
+    public enum Type {
         ALL_ITEMS {
             @Override
             protected Stream<Node> toChecking(List<Node> inputExpressions) {
