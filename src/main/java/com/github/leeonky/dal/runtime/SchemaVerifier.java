@@ -46,12 +46,24 @@ public class SchemaVerifier {
 
     public boolean verify(Class<?> clazz, Object schemaInstance, String subPrefix) {
         Set<String> propertyReaderNames = object.getFieldNames();
-        BeanClass<Object> schema = getPolymorphicSchemaType(clazz);
+        BeanClass<Object> schemaType = getPolymorphicSchemaType(clazz);
+        Object schema = schemaInstance == null ? schemaType.newInstance() : schemaInstance;
         return (clazz.getAnnotation(Partial.class) != null ||
-                noMoreUnexpectedField(schema, schema.getPropertyReaders().keySet(), propertyReaderNames))
-                && allMandatoryPropertyShouldBeExist(schema, propertyReaderNames)
-                && allPropertyValueShouldBeValid(subPrefix, schema,
-                schemaInstance == null ? schema.newInstance() : schemaInstance);
+                noMoreUnexpectedField(schemaType, schemaType.getPropertyReaders().keySet(), propertyReaderNames))
+                && allMandatoryPropertyShouldBeExist(schemaType, propertyReaderNames)
+                && allPropertyValueShouldBeValid(subPrefix, schemaType, schema)
+                && schemaVerificationShouldPass(schema);
+    }
+
+    private boolean schemaVerificationShouldPass(Object schema) {
+        if (schema instanceof Schema) {
+            try {
+                ((Schema) schema).verify(object);
+            } catch (SchemaAssertionFailure schemaAssertionFailure) {
+                return errorLog(schemaAssertionFailure.getMessage());
+            }
+        }
+        return true;
     }
 
     private <T> boolean noMoreUnexpectedField(BeanClass<T> polymorphicBeanClass, Set<String> expectedFields, Set<String> actualFields) {

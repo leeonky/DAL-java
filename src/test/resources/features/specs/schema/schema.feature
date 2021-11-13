@@ -134,5 +134,36 @@ Feature: schema verification
         ^
     """
 
+  Scenario: customized schema verification
+    Given the following schema:
+    """
+    @Partial
+    public class SchemaVerify implements Schema {
+        public void verify(DataObject data) throws SchemaAssertionFailure {
+            throw new SchemaAssertionFailure((String)data.getValue("message").getInstance());
+        }
+    }
+    """
+    When the following input data:
+    """
+    {
+      "message": "a message"
+    }
+    """
+    And assert by the following code:
+    """
+    is SchemaVerify
+    """
+    Then failed with the following message:
+    """
+    Expecting to match schema `SchemaVerify` but was not
+        a message
+    """
+    And got the following source code information:
+    """
+    is SchemaVerify
+       ^
+    """
+
 #    TODO support field alias in multi schema list: is A / B
 #    TODO support field alias in nested schema: is A is B

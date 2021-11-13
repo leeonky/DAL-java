@@ -122,6 +122,7 @@ public class CucumberContext {
                     = new com.github.leeonky.dal.cucumber.Compiler();
             compiler.compileToClasses(schemas.stream().map(s ->
                     "import com.github.leeonky.dal.type.*;\n" +
+                            "import com.github.leeonky.dal.runtime.*;\n" +
                             "import java.util.*;\n" + s)
                     .collect(Collectors.toList()))
                     .forEach(dal.getRuntimeContextBuilder()::registerSchema);
