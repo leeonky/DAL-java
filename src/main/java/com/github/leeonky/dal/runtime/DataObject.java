@@ -92,6 +92,7 @@ public class DataObject {
             return instance;
         }
         if (property instanceof String) {
+//            TODO contains method and static method extension
             if (runtimeContext.findPropertyReaderNames(instance).contains(property))
                 return runtimeContext.getPropertyValue(instance, (String) property);
             runtimeContext.beginListMapping();

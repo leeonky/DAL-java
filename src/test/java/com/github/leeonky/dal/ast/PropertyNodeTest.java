@@ -12,6 +12,7 @@ import static com.github.leeonky.dal.ast.InputNode.INSTANCE;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PropertyNodeTest {
 
@@ -63,6 +64,12 @@ class PropertyNodeTest {
         }
     }
 
+    public static class BeanMethods2 {
+        public static int getInt(Bean bean) {
+            return 100;
+        }
+    }
+
     @Nested
     class StaticMethodExtension {
 
@@ -82,6 +89,17 @@ class PropertyNodeTest {
                     .build(new Bean());
 
             assertThat(new PropertyNode(INSTANCE, "getIntFromBase", BRACKET).evaluate(runtimeContext)).isEqualTo(200);
+        }
+
+        @Test
+        void raise_error_when_more_than_one_method() {
+            RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
+                    .registerStaticMethodExtension(BeanMethods.class)
+                    .registerStaticMethodExtension(BeanMethods2.class)
+                    .build(new Bean());
+
+            assertThrows(RuntimeException.class, () -> new PropertyNode(INSTANCE, "getInt", BRACKET)
+                    .evaluate(runtimeContext));
         }
     }
 }

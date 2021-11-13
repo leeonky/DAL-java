@@ -233,7 +233,6 @@ public class RuntimeContextBuilder {
     }
 
     public Object invokeExtensionMethod(Object instance, String name) {
-//            TODO more than one base class instance
         return FunctionUtil.oneOf(() -> findExtensionMethod(instance, name, Class::isAssignableFrom),
                 () -> findExtensionMethod(instance, name, Object::equals)).map(method -> {
             try {
@@ -246,8 +245,13 @@ public class RuntimeContextBuilder {
     }
 
     private Optional<Method> findExtensionMethod(Object instance, String name, BiPredicate<Class<?>, Class<?>> condition) {
-        return extensionMethods.stream().filter(method -> method.getName().equals(name)
-                && condition.test(method.getParameterTypes()[0], instance.getClass())).findFirst();
+        Stream<Method> methodStream = extensionMethods.stream().filter(method -> method.getName().equals(name)
+                && condition.test(method.getParameterTypes()[0], instance.getClass()));
+        List<Method> methods = methodStream.collect(Collectors.toList());
+        if (methods.size() > 1)
+            throw new IllegalStateException("Ambiguous method call:\n"
+                    + methods.stream().map(Method::toString).collect(Collectors.joining("\n")));
+        return methods.stream().findFirst();
     }
 
     private boolean maybeExtensionMethods(Method method) {
