@@ -51,8 +51,8 @@ public class DataObject {
 
     public List<DataObject> getListObjects() {
         AtomicInteger index = new AtomicInteger(0);
-        return getListValues().stream().map(object ->
-                new DataObject(object, runtimeContext, schemaType.access(index.incrementAndGet()))).collect(toList());
+        return getListValues().stream().map(object -> new DataObject(object, runtimeContext,
+                schemaType.access(index.incrementAndGet()))).collect(toList());
     }
 
     public boolean isNull() {
@@ -92,11 +92,12 @@ public class DataObject {
             return instance;
         }
         if (property instanceof String) {
-//            TODO contains method and static method extension
-            if (runtimeContext.findPropertyReaderNames(instance).contains(property))
+            try {
                 return runtimeContext.getPropertyValue(instance, (String) property);
-            runtimeContext.beginListMapping();
-            return getValueFromList(subProperty((String) property));
+            } catch (Exception e) {
+                runtimeContext.beginListMapping();
+                return getValueFromList(subProperty((String) property));
+            }
         }
         if ((int) property < 0)
             return getListValues().get(getListSize() + (int) property);

@@ -37,6 +37,16 @@ class PropertyNodeTest {
 
     public static class CustomizedList {
         public int value = 100;
+
+        public boolean isEmpty() {
+            return true;
+        }
+    }
+
+    public static class CustomizedListStaticExtensionMethod {
+        public static String method(CustomizedList customizedList) {
+            return "extension";
+        }
     }
 
     @Test
@@ -46,6 +56,25 @@ class PropertyNodeTest {
                 .build(new CustomizedList());
 
         assertThat(new PropertyNode(INSTANCE, "value", BRACKET).evaluate(runtimeContext)).isEqualTo(100);
+    }
+
+    @Test
+    void access_customized_list_method() {
+        RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
+                .registerListAccessor(CustomizedList.class, instance -> emptyList())
+                .build(new CustomizedList());
+
+        assertThat(new PropertyNode(INSTANCE, "isEmpty", BRACKET).evaluate(runtimeContext)).isEqualTo(true);
+    }
+
+    @Test
+    void access_customized_list_static_extension_method() {
+        RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
+                .registerListAccessor(CustomizedList.class, instance -> emptyList())
+                .registerStaticMethodExtension(CustomizedListStaticExtensionMethod.class)
+                .build(new CustomizedList());
+
+        assertThat(new PropertyNode(INSTANCE, "method", BRACKET).evaluate(runtimeContext)).isEqualTo("extension");
     }
 
     public static class BaseBean {
