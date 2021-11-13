@@ -3,6 +3,7 @@ package com.github.leeonky.dal.runtime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.nCopies;
 
@@ -29,10 +30,14 @@ public class DalException extends java.lang.RuntimeException {
     }
 
     public String show(String code) {
-        String result = code;
+        return show(code, 0);
+    }
+
+    public String show(String code, int offset) {
+        String result = code.substring(offset);
         positions.sort(Comparator.<Position>comparingInt(o -> o.position).reversed()
                 .thenComparing(Comparator.<Position, Position.Type>comparing(o -> o.type).reversed()));
-        for (Position marker : positions)
+        for (Position marker : positions.stream().map(position -> position.offset(offset)).collect(Collectors.toList()))
             result = marker.process(result);
         return result;
     }
@@ -51,6 +56,10 @@ public class DalException extends java.lang.RuntimeException {
             endLineIndex = endLineIndex == -1 ? code.length() : endLineIndex;
             return code.substring(0, endLineIndex) + "\n" + type.markLine(code, position, endLineIndex)
                     + code.substring(endLineIndex);
+        }
+
+        public Position offset(int offset) {
+            return offset == 0 ? this : new Position(type, position - offset);
         }
 
         public enum Type {
