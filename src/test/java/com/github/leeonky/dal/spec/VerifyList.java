@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class VerifyList extends Base {
 
@@ -41,7 +43,12 @@ class VerifyList extends Base {
 
     @Test
     void should_raise_error_when_invalid_index() {
-        assertRuntimeException(asList("hello"), "[1] = 'hello'", 0, "Index out of bounds (Index: 1, Size: 1)");
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () ->
+                dal.evaluate(asList("hello"), "[1] = 'hello'"));
+
+        assertThat(runtimeException)
+                .hasFieldOrPropertyWithValue("position", 0)
+                .hasMessageContaining("Index out of bounds");
     }
 
     @Test

@@ -32,7 +32,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.1.4' + System.env.VERSION_SCOPE
+version = '0.1.5' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -47,7 +47,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.leeonky:bean-util:0.2.9'
+    implementation 'com.github.leeonky:bean-util:0.2.10'
     testImplementation 'org.assertj:assertj-core:3.10.0'
     testImplementation 'org.skyscreamer:jsonassert:1.5.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
@@ -56,6 +56,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
     testAnnotationProcessor('org.projectlombok:lombok:1.18.4')
     testCompile('org.projectlombok:lombok:1.18.4')
+    testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.0.0'
 
     pitest 'io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.3.1'
 }
