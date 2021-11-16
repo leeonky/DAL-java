@@ -95,7 +95,6 @@ new DAL().evaluateAll(null, "1 2");     //return [1, 2]
 - Java Class中定义的公有的Field
 - java.util.Map中对应的键值
 - 通过registerPropertyAccessor注册的属性
-- 静态方法扩展
 
 ### 从集合中获取数据
 DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集合的方法。可以通过`[]`读取集合的元素，比如有如下数据：
@@ -164,6 +163,20 @@ DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集�
 ```
 
 #### 静态方法扩展
+可以通过`DAL` 注册一个类的静态方法，做为该方法参数的属性访问：
+``` java
+public class StringMethods {
+    public static int stringLength(String value) {
+        return value.length();
+    }
+}
+
+dal.getRuntimeContextBuilder().registerStaticMethodExtension(StringMethods.class);
+```
+那么可以在`DAL`中可以像访问属性一样访问这个静态方法：
+```
+    'string'.stringLength = 6
+```
 
 ### DAL支持的运算
 #### 字面值常量
@@ -822,3 +835,4 @@ is Person | is String: {length: 3} | 18            |
 上边的断言表示先对输入数据按 age 属性降序，然后按 name 属性升序后再进行断言。当排序符号重复出现时，表示更高的排序优先级。
 
 - #### 转置
+
