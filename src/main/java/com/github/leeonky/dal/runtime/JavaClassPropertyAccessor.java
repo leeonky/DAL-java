@@ -31,12 +31,12 @@ public class JavaClassPropertyAccessor<T> implements PropertyAccessor<T> {
     }
 
     @Override
-    public Set<String> getPropertyNames(Object instance) {
+    public Set<String> getPropertyNames(T instance) {
         return beanClass.getPropertyReaders().keySet();
     }
 
     @Override
-    public boolean isNull(Object instance) {
+    public boolean isNull(T instance) {
         return Objects.equals(instance, null);
     }
 }
