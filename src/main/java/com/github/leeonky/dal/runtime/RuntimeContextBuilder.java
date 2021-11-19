@@ -120,6 +120,10 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    public Converter getConverter() {
+        return converter;
+    }
+
     public class RuntimeContext {
         private final LinkedList<DataObject> thisStack = new LinkedList<>();
         private final Set<Class<?>> schemaSet;
