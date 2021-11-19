@@ -245,5 +245,3 @@ Feature: schema in table
     """
     : >>| obj | is IdZero: {aliasOfName: 'Tom'} |
     """
-
-#   TODO incorrect cell position in transposed table

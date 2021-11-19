@@ -84,47 +84,56 @@ class PropertyNodeTest {
     }
 
     public static class BeanMethods {
-        public static int getInt(Bean bean) {
+        public static int getIntFromBean(Bean bean) {
             return 100;
         }
 
         public static int getIntFromBase(BaseBean bean) {
             return 200;
         }
+
+        public static int getInt(Bean bean) {
+            return 300;
+        }
+
+        public static int getInt(BaseBean bean) {
+            return 400;
+        }
     }
 
-    public static class BeanMethods2 {
+    public static class SameStaticBeanMethods {
         public static int getInt(Bean bean) {
-            return 100;
+            return 300;
         }
     }
 
     @Nested
     class StaticMethodExtension {
+        RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
+                .registerStaticMethodExtension(BeanMethods.class)
+                .build(new Bean());
 
         @Test
         void support_static_method_extension() {
-            RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
-                    .registerStaticMethodExtension(BeanMethods.class)
-                    .build(new Bean());
-
-            assertThat(new PropertyNode(INSTANCE, "getInt", BRACKET).evaluate(runtimeContext)).isEqualTo(100);
+            assertThat(new PropertyNode(INSTANCE, "getIntFromBean", BRACKET).evaluate(runtimeContext)).isEqualTo(100);
         }
 
         @Test
         void invoke_from_base_instance() {
-            RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
-                    .registerStaticMethodExtension(BeanMethods.class)
-                    .build(new Bean());
 
             assertThat(new PropertyNode(INSTANCE, "getIntFromBase", BRACKET).evaluate(runtimeContext)).isEqualTo(200);
+        }
+
+        @Test
+        void should_invoke_by_instance_type() {
+            assertThat(new PropertyNode(INSTANCE, "getInt", BRACKET).evaluate(runtimeContext)).isEqualTo(300);
         }
 
         @Test
         void raise_error_when_more_than_one_method() {
             RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
                     .registerStaticMethodExtension(BeanMethods.class)
-                    .registerStaticMethodExtension(BeanMethods2.class)
+                    .registerStaticMethodExtension(SameStaticBeanMethods.class)
                     .build(new Bean());
 
             assertThrows(RuntimeException.class, () -> new PropertyNode(INSTANCE, "getInt", BRACKET)

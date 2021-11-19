@@ -102,5 +102,3 @@ Feature: ignore some rows
     =  | name   | age |
     -1 | 'Lily' | 15  |
     """
-
-# TODO customized assertion in schema

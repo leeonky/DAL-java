@@ -233,8 +233,8 @@ public class RuntimeContextBuilder {
     }
 
     public Object invokeExtensionMethod(Object instance, String name) {
-        return FunctionUtil.oneOf(() -> findExtensionMethod(instance, name, Class::isAssignableFrom),
-                () -> findExtensionMethod(instance, name, Object::equals)).map(method -> {
+        return FunctionUtil.oneOf(() -> findExtensionMethod(instance, name, Object::equals),
+                () -> findExtensionMethod(instance, name, Class::isAssignableFrom)).map(method -> {
             try {
                 return method.invoke(null, instance);
             } catch (Exception e) {
