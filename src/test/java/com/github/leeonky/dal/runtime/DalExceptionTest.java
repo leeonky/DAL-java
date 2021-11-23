@@ -21,6 +21,30 @@ class DalExceptionTest {
         }
 
         @Test
+        void position_for_chinese_chars() {
+            assertShowCode(new DalException("", 7), new StringBuilder()
+                            .append("a你c").append("\n")
+                            .append("d你你好")
+                    , new StringBuilder()
+                            .append("a你c").append("\n")
+                            .append("d你你好").append("\n")
+                            .append("     ^")
+            );
+        }
+
+        @Test
+        void position_for_chinese_chars_in_line_mode() {
+            assertShowCode(new DalException("", 3, LINE), new StringBuilder()
+                            .append("a你").append("\n")
+                            .append("d你")
+                    , new StringBuilder()
+                            .append("a你").append("\n")
+                            .append("d你").append("\n")
+                            .append("^^^")
+            );
+        }
+
+        @Test
         void show_single_position_in_the_first_char_of_one_line_code() {
             assertShowCode(new DalException("", 0), new StringBuilder()
                             .append("a")
@@ -92,6 +116,16 @@ class DalExceptionTest {
                             .append("^").append("\n")
                             .append("b").append("\n")
                             .append("c").append("\n")
+                            .append("^")
+            );
+        }
+
+        @Test
+        void support_line_mark_for_one_line() {
+            assertShowCode(new DalException("", 0, LINE), new StringBuilder()
+                            .append("a")
+                    , new StringBuilder()
+                            .append("a").append("\n")
                             .append("^")
             );
         }

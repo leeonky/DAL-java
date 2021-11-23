@@ -11,6 +11,7 @@ import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
+//TODO rename to DATA
 public class DataObject {
     private final SchemaType schemaType;
     private final RuntimeContextBuilder.RuntimeContext runtimeContext;

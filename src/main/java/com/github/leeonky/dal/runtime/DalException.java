@@ -1,5 +1,8 @@
 package com.github.leeonky.dal.runtime;
 
+import com.ibm.icu.lang.UCharacter;
+import com.ibm.icu.lang.UProperty;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -66,15 +69,26 @@ public class DalException extends java.lang.RuntimeException {
             CHAR {
                 @Override
                 protected String markLine(String code, int position, int endLineIndex) {
-                    return String.join("", nCopies(position - code.lastIndexOf('\n', position) - 1, " ")) + "^";
+                    int startOfCurrentLine = code.lastIndexOf('\n', position);
+                    int fullWidthCharCount = (int) code.chars().limit(position).skip(startOfCurrentLine == -1 ? 0 : startOfCurrentLine)
+                            .filter(Type::isFullWidthChar).count();
+
+                    return String.join("", nCopies(position - startOfCurrentLine + fullWidthCharCount - 1, " ")) + "^";
                 }
             },
             LINE {
                 @Override
                 protected String markLine(String code, int position, int endLineIndex) {
-                    return String.join("", nCopies(endLineIndex - code.lastIndexOf('\n', position) - 1, "^"));
+                    int startOfCurrentLine = code.lastIndexOf('\n', position);
+                    int fullWidthCharCount = (int) code.chars().limit(endLineIndex).skip(startOfCurrentLine == -1 ? 0 : startOfCurrentLine)
+                            .filter(Type::isFullWidthChar).count();
+                    return String.join("", nCopies(endLineIndex - startOfCurrentLine - 1 + fullWidthCharCount, "^"));
                 }
             };
+
+            private static boolean isFullWidthChar(int c) {
+                return (UCharacter.getIntPropertyValue(c, UProperty.EAST_ASIAN_WIDTH) & UCharacter.EastAsianWidth.FULLWIDTH) != 0;
+            }
 
             protected abstract String markLine(String code, int position, int endLineIndex);
         }
