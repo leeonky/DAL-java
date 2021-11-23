@@ -6,8 +6,9 @@ import com.ibm.icu.lang.UProperty;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.runtime.FunctionUtil.notAllowParallelReduce;
+import static com.ibm.icu.lang.UCharacter.getIntPropertyValue;
 import static java.util.Collections.nCopies;
 
 public class DalException extends java.lang.RuntimeException {
@@ -37,12 +38,10 @@ public class DalException extends java.lang.RuntimeException {
     }
 
     public String show(String code, int offset) {
-        String result = code.substring(offset);
         positions.sort(Comparator.<Position>comparingInt(o -> o.position).reversed()
                 .thenComparing(Comparator.<Position, Position.Type>comparing(o -> o.type).reversed()));
-        for (Position marker : positions.stream().map(position -> position.offset(offset)).collect(Collectors.toList()))
-            result = marker.process(result);
-        return result;
+        return positions.stream().map(position -> position.offset(offset))
+                .reduce(code.substring(offset), (r, p) -> p.process(r), notAllowParallelReduce());
     }
 
     public static class Position {
@@ -57,7 +56,8 @@ public class DalException extends java.lang.RuntimeException {
         public String process(String code) {
             int endLineIndex = code.indexOf('\n', position);
             endLineIndex = endLineIndex == -1 ? code.length() : endLineIndex;
-            return code.substring(0, endLineIndex) + "\n" + type.markLine(code, position, endLineIndex)
+            return code.substring(0, endLineIndex) + "\n"
+                    + type.markLine(code, position, code.lastIndexOf('\n', position), endLineIndex)
                     + code.substring(endLineIndex);
         }
 
@@ -68,29 +68,25 @@ public class DalException extends java.lang.RuntimeException {
         public enum Type {
             CHAR {
                 @Override
-                protected String markLine(String code, int position, int endLineIndex) {
-                    int startOfCurrentLine = code.lastIndexOf('\n', position);
-                    int fullWidthCharCount = (int) code.chars().limit(position).skip(startOfCurrentLine == -1 ? 0 : startOfCurrentLine)
-                            .filter(Type::isFullWidthChar).count();
-
-                    return String.join("", nCopies(position - startOfCurrentLine + fullWidthCharCount - 1, " ")) + "^";
+                protected String markLine(String code, int position, int startLineIndex, int endLineIndex) {
+                    return String.join("", nCopies(charCountBeforeMark(code, position, startLineIndex), " ")) + "^";
                 }
             },
             LINE {
                 @Override
-                protected String markLine(String code, int position, int endLineIndex) {
-                    int startOfCurrentLine = code.lastIndexOf('\n', position);
-                    int fullWidthCharCount = (int) code.chars().limit(endLineIndex).skip(startOfCurrentLine == -1 ? 0 : startOfCurrentLine)
-                            .filter(Type::isFullWidthChar).count();
-                    return String.join("", nCopies(endLineIndex - startOfCurrentLine - 1 + fullWidthCharCount, "^"));
+                protected String markLine(String code, int position, int startLineIndex, int endLineIndex) {
+                    return String.join("", nCopies(charCountBeforeMark(code, endLineIndex, startLineIndex), "^"));
                 }
             };
 
-            private static boolean isFullWidthChar(int c) {
-                return (UCharacter.getIntPropertyValue(c, UProperty.EAST_ASIAN_WIDTH) & UCharacter.EastAsianWidth.FULLWIDTH) != 0;
+            private static int charCountBeforeMark(String code, int position, int startLineIndex) {
+                int fullWidthCharCount = (int) code.chars().limit(position).skip(startLineIndex == -1 ? 0 : startLineIndex)
+                        .filter(c -> (getIntPropertyValue(c, UProperty.EAST_ASIAN_WIDTH) & UCharacter.EastAsianWidth.FULLWIDTH) != 0)
+                        .count();
+                return position - startLineIndex + fullWidthCharCount - 1;
             }
 
-            protected abstract String markLine(String code, int position, int endLineIndex);
+            protected abstract String markLine(String code, int position, int startOfCurrentLine, int endLineIndex);
         }
     }
 }
