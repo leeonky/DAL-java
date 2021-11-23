@@ -16,13 +16,13 @@ Feature: sort list in table
   Scenario: compile table header with another style of sort constructors
     Given the following dal code:
     """
-    | ↑↑ name | ↓ age |
+    | ￪￪ name | ￬ age |
     """
     Then got the following "table" node:
     """
     : {
       class.simpleName: 'TableNode'
-      inspect: '| ↑↑ name | ↓ age |'
+      inspect: '| ￪￪ name | ￬ age |'
     }
     """
 
@@ -37,7 +37,7 @@ Feature: sort list in table
     """
     Then the following assertion should pass:
     """
-    = | ↑ name |
+    = | ￪ name |
       | 'John' |
       | 'Tom'  |
     """
@@ -53,7 +53,7 @@ Feature: sort list in table
     """
     Then the following assertion should pass:
     """
-    = | ↓ name |
+    = | ￬ name |
       | 'Tom'  |
       | 'John' |
     """
@@ -74,7 +74,7 @@ Feature: sort list in table
     """
     Then the following assertion should pass:
     """
-    = | ↑ name   | ↓↓ age |
+    = | ￪ name   | ￬￬ age |
       | 'Tomas'  | 20     |
       | 'John'   | 10     |
       | 'Tom'    | 10     |

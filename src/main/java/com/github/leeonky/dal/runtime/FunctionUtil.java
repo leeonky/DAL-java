@@ -2,10 +2,7 @@ package com.github.leeonky.dal.runtime;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -87,5 +84,11 @@ public class FunctionUtil {
     public static <T, R> Stream<R> mapWithIndex(Stream<T> stream, BiFunction<Integer, T, R> biFunction) {
         AtomicInteger atomicInteger = new AtomicInteger(0);
         return stream.map(element -> biFunction.apply(atomicInteger.getAndIncrement(), element));
+    }
+
+    public static <T> BinaryOperator<T> notAllowParallelReduce() {
+        return (o1, o2) -> {
+            throw new IllegalStateException("Not allow parallel here!");
+        };
     }
 }

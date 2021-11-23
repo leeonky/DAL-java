@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.github.leeonky.dal.runtime.FunctionUtil.notAllowParallelReduce;
 import static java.util.Arrays.asList;
 
 public class SchemaType {
@@ -64,9 +65,7 @@ public class SchemaType {
         if (Objects.equals(property, alias))
             return subSchema(property);
         List<Object> chain = compiler.toChainNodes(property);
-        return chain.stream().skip(1).reduce(access(chain.get(0)), SchemaType::access, (o1, o2) -> {
-            throw new IllegalStateException("Not allow parallel here!");
-        });
+        return chain.stream().skip(1).reduce(access(chain.get(0)), SchemaType::access, notAllowParallelReduce());
     }
 
     private SchemaType subSchema(Object property) {

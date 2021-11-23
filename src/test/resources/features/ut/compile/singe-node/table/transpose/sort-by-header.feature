@@ -18,15 +18,15 @@ Feature: sort list in table
   Scenario: compile table header with another style of sort constructors
     Given the following dal code:
     """
-    >>| ↑↑ name |
-    | ↓ age |
+    >>| ￪￪ name |
+    | ￬ age |
     """
     Then got the following "table" node:
     """
     : {
       class.simpleName: 'TableNode'
-      inspect: '>>| ↑↑ name |
-    | ↓ age |'
+      inspect: '>>| ￪￪ name |
+    | ￬ age |'
     }
     """
 
@@ -41,7 +41,7 @@ Feature: sort list in table
     """
     Then the following assertion should pass:
     """
-    = >>| ↑ name | 'John' | 'Tom' |
+    = >>| ￪ name | 'John' | 'Tom' |
     """
 
   Scenario: support sort list by header from z to a
@@ -55,7 +55,7 @@ Feature: sort list in table
     """
     Then the following assertion should pass:
     """
-    = >>| ↓ name | 'Tom' | 'John' |
+    = >>| ￬ name | 'Tom' | 'John' |
     """
 
   Scenario: support sort list by multi headers before assertion
@@ -74,6 +74,6 @@ Feature: sort list in table
     """
     Then the following assertion should pass:
     """
-    = >>|  ↑ name | 'Tomas' | 'John' | 'Tom' |
-        | ↓↓ age  | 20      | 10     | 10    |
+    = >>|  ￪ name | 'Tomas' | 'John' | 'Tom' |
+        | ￬￬ age  | 20      | 10     | 10    |
     """

@@ -43,7 +43,7 @@ Feature: table
     """
     And the following assertion should pass:
     """
-      : | name    | ↓ age |
+      : | name    | ￬ age |
         | 'Tomas' | 21    |
         | 'John'  | 18    |
     """
