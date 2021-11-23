@@ -1,14 +1,10 @@
 package com.github.leeonky.dal.runtime;
 
-import com.ibm.icu.lang.UCharacter;
-import com.ibm.icu.lang.UProperty;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 import static com.github.leeonky.dal.runtime.FunctionUtil.notAllowParallelReduce;
-import static com.ibm.icu.lang.UCharacter.getIntPropertyValue;
 import static java.util.Collections.nCopies;
 
 public class DalException extends java.lang.RuntimeException {
@@ -80,10 +76,13 @@ public class DalException extends java.lang.RuntimeException {
             };
 
             private static int charCountBeforeMark(String code, int position, int startLineIndex) {
-                int fullWidthCharCount = (int) code.chars().limit(position).skip(startLineIndex == -1 ? 0 : startLineIndex)
-                        .filter(c -> (getIntPropertyValue(c, UProperty.EAST_ASIAN_WIDTH) & UCharacter.EastAsianWidth.FULLWIDTH) != 0)
-                        .count();
+                int fullWidthCharCount = (int) code.chars().limit(position)
+                        .skip(startLineIndex == -1 ? 0 : startLineIndex).filter(Type::isFullWidth).count();
                 return position - startLineIndex + fullWidthCharCount - 1;
+            }
+
+            private static boolean isFullWidth(int c) {
+                return !('\u0000' <= c && c <= '\u00FF' || '\uFF61' <= c && c <= '\uFFDC' || '\uFFE8' <= c && c <= '\uFFEE');
             }
 
             protected abstract String markLine(String code, int position, int startOfCurrentLine, int endLineIndex);
