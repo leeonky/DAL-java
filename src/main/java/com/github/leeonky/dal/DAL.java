@@ -7,9 +7,7 @@ import com.github.leeonky.dal.compiler.SyntaxException;
 import com.github.leeonky.dal.runtime.AssertResult;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
@@ -17,13 +15,12 @@ import static com.github.leeonky.util.BeanClass.getClassName;
 public class DAL {
     private final Compiler compiler = new Compiler();
     private final RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
-    public static final DAL INSTANCE = create();
+    private static DAL instance;
 
-    public static DAL create() {
-        Iterator<DALFactory> iterator = ServiceLoader.load(DALFactory.class).iterator();
-        if (iterator.hasNext())
-            return iterator.next().create();
-        return new DAL();
+    public static DAL getInstance() {
+        if (instance == null)
+            instance = DALFactory.create();
+        return instance;
     }
 
     public RuntimeContextBuilder getRuntimeContextBuilder() {

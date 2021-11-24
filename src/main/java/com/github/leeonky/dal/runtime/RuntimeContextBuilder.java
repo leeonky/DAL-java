@@ -22,7 +22,7 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<ListAccessor<Object>> listAccessors = new ClassKeyMap<>();
     private final Map<String, ConstructorViaSchema> constructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
-    private Converter converter = Converter.INSTANCE;
+    private Converter converter = Converter.getInstance();
     private final Set<Method> extensionMethods = new HashSet<>();
 
     public RuntimeContextBuilder() {
