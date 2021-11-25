@@ -1,0 +1,79 @@
+Feature: number calculator
+
+  Scenario: supported number type
+    Given the following input java class data:
+    """
+    public class Numbers {
+      public byte byteValue = 0;
+      public Byte boxedByteValue = 0;
+      public short shortValue = 1;
+      public Short boxedShortValue = 1;
+      public int intValue = 2;
+      public Integer boxedIntValue = 2;
+      public long longValue = 3;
+      public Long boxedLongValue = 3l;
+      public float floatValue = 4.0f;
+      public Float boxedFloatValue = 4.0f;
+      public double doubleValue = 5.0;
+      public Double boxedDoubleValue = 5.0;
+      public BigInteger bigInteger = new BigInteger("6");
+      public BigDecimal bigDecimal = new BigDecimal("7.0");
+      public boolean booleanValue = true;
+      public Boolean boxedBooleanValue = false;
+    }
+    """
+    Then the following assertion for "Numbers" should pass:
+    """
+    : {
+      byteValue = 0y
+      boxedByteValue = 0Y
+      shortValue = 1s
+      boxedShortValue = 1S
+      intValue = 2
+      boxedIntValue = 2
+      longValue = 3l
+      boxedLongValue = 3L
+      floatValue = 4.0f
+      boxedFloatValue = 4.0F
+      doubleValue = 5.0d
+      boxedDoubleValue = 5.0D
+      bigInteger = 6bi
+      bigInteger = 6BI
+      bigDecimal = 7.0bd
+      bigDecimal = 7.0BD
+      booleanValue = true
+      boxedBooleanValue = false
+    }
+    """
+    Then the following assertion for "Numbers" should pass:
+    """
+    : {
+      intValue = 0x2
+    }
+    """
+
+  Scenario: use integer with proper type
+    Given the following input java class data:
+    """
+    public class Numbers {
+      public byte byteValue = 16;
+      public Byte boxedByteValue = 16;
+      public short shortValue = 17;
+      public Short boxedShortValue = 17;
+      public int intValue = 18;
+      public Integer boxedIntValue = 18;
+      public long longValue = 19;
+      public Long boxedLongValue = 19l;
+      public BigInteger bigInteger = new BigInteger("20");
+    }
+    """
+    Then the following assertion for "Numbers" should pass:
+    """
+    : {
+      byteValue = 0x10y
+      shortValue = 0x11s
+      intValue = 0x12
+      longValue = 0x13l
+      bigInteger = 0x14bi
+    }
+    """

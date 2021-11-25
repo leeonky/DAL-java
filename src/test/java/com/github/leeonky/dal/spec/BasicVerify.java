@@ -42,7 +42,6 @@ class BasicVerify extends Base {
     class Basic {
         @Test
         void should_use_root_value_as_assertion_expression_when_source_code_is_empty() {
-            assertPass(true, "");
             AssertResult assertResult = dal.assertTrue(false, "");
             assertThat(assertResult.isPassed()).isFalse();
             assertThat(assertResult.getMessage()).contains("Expected root value to be [true] but was <false>");
@@ -54,11 +53,6 @@ class BasicVerify extends Base {
             IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
                     () -> dal.assertTrue(1, ""));
             assertThat(illegalStateException).hasMessage("Verification result should be boolean but 'java.lang.Integer'");
-        }
-
-        @Test
-        void verify_const_value() {
-            assertTrue(null, "true");
         }
 
         @Test

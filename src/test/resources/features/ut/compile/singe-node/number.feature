@@ -80,3 +80,24 @@ Feature: const number node
       inspect: '12Invalid'
     }
     """
+
+  Scenario: supported hex integer in any case
+    Given the following input java class data:
+    """
+    public class Numbers {
+      public long value = 15;
+    }
+    """
+    Then the following assertion for "Numbers" should pass:
+    """
+    : {
+      value = 0xfl
+      value = 0xfL
+      value = 0xFl
+      value = 0xFL
+      value = 0Xfl
+      value = 0XfL
+      value = 0XFl
+      value = 0XFL
+    }
+    """

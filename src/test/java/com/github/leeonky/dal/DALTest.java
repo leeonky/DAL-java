@@ -21,44 +21,6 @@ class DALTest {
     DAL dal = new DAL();
 
     @Test
-    void number_types_via_postfix() {
-        assertThat((Object) dal.evaluate(null, "1y")).isEqualTo((byte) 1);
-        assertThat((Object) dal.evaluate(null, "0x10y")).isEqualTo((byte) 16);
-        assertThat((Object) dal.evaluate(null, "1Y")).isEqualTo((byte) 1);
-        assertThat((Object) dal.evaluate(null, "0x10Y")).isEqualTo((byte) 16);
-
-        assertThat((Object) dal.evaluate(null, "1s")).isEqualTo((short) 1);
-        assertThat((Object) dal.evaluate(null, "0x10s")).isEqualTo((short) 16);
-        assertThat((Object) dal.evaluate(null, "1S")).isEqualTo((short) 1);
-        assertThat((Object) dal.evaluate(null, "0x10S")).isEqualTo((short) 16);
-
-        assertThat((Object) dal.evaluate(null, "1l")).isEqualTo(1L);
-        assertThat((Object) dal.evaluate(null, "0x10l")).isEqualTo(16L);
-        assertThat((Object) dal.evaluate(null, "1L")).isEqualTo(1L);
-        assertThat((Object) dal.evaluate(null, "0x10L")).isEqualTo(16L);
-
-        assertThat((Object) dal.evaluate(null, "1d")).isEqualTo(1d);
-        assertThat((Object) dal.evaluate(null, "1D")).isEqualTo(1d);
-
-        assertThat((Object) dal.evaluate(null, "1f")).isEqualTo(1f);
-        assertThat((Object) dal.evaluate(null, "1F")).isEqualTo(1f);
-
-        assertThat((Object) dal.evaluate(null, "1bi")).isEqualTo(BigInteger.valueOf(1));
-        assertThat((Object) dal.evaluate(null, "0x10bi")).isEqualTo(BigInteger.valueOf(16L));
-        assertThat((Object) dal.evaluate(null, "1BI")).isEqualTo(BigInteger.valueOf(1L));
-        assertThat((Object) dal.evaluate(null, "0x10BI")).isEqualTo(BigInteger.valueOf(16L));
-
-        assertThat((Object) dal.evaluate(null, "1bd")).isEqualTo(BigDecimal.valueOf(1));
-        assertThat((Object) dal.evaluate(null, "1BD")).isEqualTo(BigDecimal.valueOf(1));
-    }
-
-    @Test
-    void integer_number_from_value() {
-        assertThat((Object) dal.evaluate(null, "1")).isEqualTo(1);
-        assertThat((Object) dal.evaluate(null, "0x10")).isEqualTo(16);
-    }
-
-    @Test
     void long_number_from_value() {
         assertThat((Object) dal.evaluate(null, "0x80000000")).isEqualTo(0x80000000L);
         assertThat((Object) dal.evaluate(null, "0x7fffffffffffffff")).isEqualTo(0x7fffffffffffffffL);
