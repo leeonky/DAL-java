@@ -101,3 +101,14 @@ Feature: const number node
       value = 0XFL
     }
     """
+
+  Scenario: parse float number
+    * the following assertion should pass:
+    """
+      1e1: 10.0,
+      1e+1: 10.0,
+      1e-1: 0.1,
+      1E1: 10.0,
+      1E+1: 10.0,
+      1E-1: 0.1
+    """

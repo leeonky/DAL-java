@@ -77,3 +77,19 @@ Feature: number calculator
       bigInteger = 0x14bi
     }
     """
+
+  Scenario: use proper type (int, long, biginteger) to take int value
+    * the following assertion should pass:
+    """
+    0x80000000 = 0x80000000L,
+    0x7fffffffffffffff = 0x7fffffffffffffffL,
+    0x80000000000000000 = 0x80000000000000000BI
+    """
+
+  Scenario: use proper type (double, big decimal) to take float value
+    * the following assertion should pass:
+    """
+    0.1 = 0.1D,
+    2.7976931348623157e308 = 2.7976931348623157e308bd,
+    -2.7976931348623157e10308 = -2.7976931348623157e10308bd
+    """
