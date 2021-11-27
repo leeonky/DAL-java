@@ -72,7 +72,7 @@ test {
 
 pitest {
     targetClasses = ['com.github.leeonky.dal.*']
-    excludedClasses = ['com.github.leeonky.dal.spec.*']
+    excludedClasses = ['com.github.leeonky.dal.spec.*', 'com.github.leeonky.dal.runtime.Schema']
     outputFormats = ['HTML2']
     pitestVersion = '1.6.9'
     threads = 8
