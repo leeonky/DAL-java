@@ -37,10 +37,10 @@ public class Compiler {
         matcher = Pattern.compile(".* class\\s(.*)\\simplements.*", Pattern.DOTALL).matcher(schemaCode);
         if (matcher.matches())
             return matcher.group(1).trim();
-        matcher = Pattern.compile(".* class\\s(.*)\\s\\{.*", Pattern.DOTALL).matcher(schemaCode);
+        matcher = Pattern.compile(".* class\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(schemaCode);
         if (matcher.matches())
             return matcher.group(1).trim();
-        matcher = Pattern.compile(".* interface\\s(.*)\\s\\{.*", Pattern.DOTALL).matcher(schemaCode);
+        matcher = Pattern.compile(".* interface\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(schemaCode);
         if (matcher.matches())
             return matcher.group(1).trim();
         matcher = Pattern.compile(".* interface\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(schemaCode);

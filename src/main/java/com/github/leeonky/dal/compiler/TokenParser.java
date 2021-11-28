@@ -13,17 +13,18 @@ import static com.github.leeonky.dal.compiler.SourceCode.FetchBy.BY_NODE;
 import static com.github.leeonky.dal.compiler.SourceCode.tokenMatcher;
 import static com.github.leeonky.dal.runtime.FunctionUtil.not;
 import static com.github.leeonky.dal.runtime.IfThenFactory.when;
-import static java.util.Collections.*;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 
 public class TokenParser {
     public static final TokenMatcher
-            NUMBER = tokenMatcher(DIGITAL::contains, emptyList(), false, (c1, c2) ->
-            ((c1 != 'e' && c1 != 'E') || (c2 != '-' && c2 != '+')) && DELIMITER.contains(c2), Token::isNumber),
-            INTEGER = tokenMatcher(DIGITAL_OR_MINUS::contains, emptyList(), false, DELIMITER, Token::isNumber),
-            IDENTITY_PROPERTY = tokenMatcher(not(DELIMITER::contains), ALL_KEY_WORDS, false, DELIMITER_OR_DOT,
-                    not(Token::isNumber)),
-            DOT_PROPERTY = tokenMatcher(DOT::equals, singletonList(ELEMENT_ELLIPSIS), true, DELIMITER_OR_DOT, Token::all);
+            NUMBER = tokenMatcher(DIGITAL::contains, emptySet(), false, (lastChar, nextChar) ->
+            ((lastChar != 'e' && lastChar != 'E') || (nextChar != '-' && nextChar != '+')) && DELIMITER.contains(nextChar), Token::isNumber),
+            INTEGER = tokenMatcher(DIGITAL_OR_MINUS::contains, emptySet(), false, DELIMITER, Token::isNumber),
+            IDENTITY_PROPERTY = tokenMatcher(not(DELIMITER::contains), ALL_KEY_WORDS, false, DELIMITER_OR_DOT, not(Token::isNumber)),
+            DOT_PROPERTY = tokenMatcher(DOT::equals, new HashSet<>(asList(ELEMENT_ELLIPSIS, DOT.toString())), true, DELIMITER_OR_DOT, Token::all);
 
     public static final TokenFactory SCHEMA = tokenMatcher(not(DELIMITER::contains), ALL_KEY_WORDS,
             false, DELIMITER, not(Token::isNumber)).or("expect a schema");

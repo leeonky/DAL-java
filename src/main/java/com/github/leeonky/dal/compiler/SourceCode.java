@@ -16,16 +16,15 @@ public class SourceCode {
     private final char[] chars;
     private int position = 0;
 
-    public static TokenMatcher tokenMatcher(Predicate<Character> startsWith, Collection<String> excluded, boolean trim,
+    public static TokenMatcher tokenMatcher(Predicate<Character> startsWith, Set<String> excluded, boolean trim,
                                             Set<Character> delimiters, Predicate<Token> validator) {
         return tokenMatcher(startsWith, excluded, trim, (c1, c2) -> delimiters.contains(c2), validator);
     }
 
-    public static TokenMatcher tokenMatcher(Predicate<Character> startsWith, Collection<String> excluded, boolean trim,
+    public static TokenMatcher tokenMatcher(Predicate<Character> startsWith, Set<String> excluded, boolean trim,
                                             BiPredicate<Character, Character> endsWith, Predicate<Token> validator) {
         return sourceCode -> {
-            if (sourceCode.whenFirstChar(startsWith) && sourceCode.hasCode()
-                    && excluded.stream().noneMatch(sourceCode::startsWith)) {
+            if (sourceCode.whenFirstChar(startsWith) && sourceCode.hasCode()) {
                 Token token = new Token(sourceCode.position);
                 if (trim) {
                     sourceCode.popChar();
@@ -34,7 +33,7 @@ public class SourceCode {
                 if (sourceCode.hasCode())
                     do token.append(sourceCode.popChar());
                     while (sourceCode.hasCode() && !endsWith.test(token.lastChar(), sourceCode.currentChar()));
-                if (validator.test(token))
+                if (!excluded.contains(token.getContent()) && validator.test(token))
                     return of(token);
                 sourceCode.position = token.getPosition();
             }

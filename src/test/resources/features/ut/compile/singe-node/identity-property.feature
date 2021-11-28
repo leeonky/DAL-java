@@ -93,3 +93,20 @@ Feature: compile identity property
       | `TAB      |
       | `SPACE    |
       | .         |
+
+  Scenario Outline: identity-property start with match key word
+    Given the following dal code:
+    """
+    <identity-property>
+    """
+    Then got the following "identity-property" node:
+    """
+    : {
+      class.simpleName: 'PropertyNode'
+      inspect: '<identity-property>'
+    }
+    """
+    Examples:
+      | identity-property |
+      | orderCount        |
+      | isOk              |
