@@ -103,4 +103,9 @@ public class TestSteps {
     public void assert_by_the_following_code(String className, String assertion) {
         CucumberContext.INSTANCE.assertJavaClass(className, assertion);
     }
+
+    @Given("defined US dollar money object with the following regex")
+    public void definedUSDollarMoneyObjectWithTheFollowingRegex(String regex) {
+        CucumberContext.INSTANCE.registerUSMoney(regex);
+    }
 }

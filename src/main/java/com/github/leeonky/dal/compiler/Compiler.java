@@ -2,6 +2,7 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.*;
 import com.github.leeonky.dal.runtime.FunctionUtil;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,6 +63,7 @@ public class Compiler {
             CONST_TRUE = parser -> parser.wordToken(Constants.KeyWords.TRUE, token -> new ConstNode(true)),
             CONST_FALSE = parser -> parser.wordToken(Constants.KeyWords.FALSE, token -> new ConstNode(false)),
             CONST_NULL = parser -> parser.wordToken(Constants.KeyWords.NULL, token -> new ConstNode(null)),
+            CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
             REGEX = parser -> parser.fetchString('/', '/', RegexNode::new, REGEX_ESCAPES),
             IDENTITY_PROPERTY = TokenParser.IDENTITY_PROPERTY.map(token ->
                     new PropertyNode(InputNode.INSTANCE, token.getContent(), IDENTIFIER)),
@@ -147,9 +149,9 @@ public class Compiler {
         return schemaExpression -> clauseNodeMatcher.map(node -> appendWay.apply(schemaExpression, node));
     }
 
-    public List<Node> compile(SourceCode sourceCode) {
+    public List<Node> compile(SourceCode sourceCode, RuntimeContextBuilder.RuntimeContext runtimeContext) {
         return new ArrayList<Node>() {{
-            TokenParser parser = new TokenParser(sourceCode);
+            TokenParser parser = new TokenParser(sourceCode, runtimeContext);
             add(EXPRESSION.fetch(parser));
             if (sourceCode.isBeginning() && sourceCode.hasCode())
                 throw sourceCode.syntaxError("unexpected token", 0);
@@ -159,7 +161,7 @@ public class Compiler {
     }
 
     public List<Object> toChainNodes(String sourceCode) {
-        return ((PropertyNode) PROPERTY_CHAIN.fetch(new TokenParser(new SourceCode(sourceCode)))).getChain();
+        return ((PropertyNode) PROPERTY_CHAIN.fetch(new TokenParser(new SourceCode(sourceCode), null))).getChain();
     }
 
     private static NodeMatcher oneOf(NodeMatcher matcher, NodeMatcher... matchers) {
@@ -290,5 +292,12 @@ public class Compiler {
                                 .orElseThrow(() -> parser.getSourceCode().syntaxError("should end with `|`", 0));
                     }))).stream();
         }
+    }
+
+    private Optional<Node> compileUserDefinedLiteral(TokenParser parser) {
+        return parser.getSourceCode().tryFetch(() -> {
+//            TokenParser.IDENTITY_PROPERTY
+            return null;
+        });
     }
 }

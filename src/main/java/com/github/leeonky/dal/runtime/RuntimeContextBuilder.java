@@ -24,6 +24,7 @@ public class RuntimeContextBuilder {
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
     private Converter converter = Converter.getInstance();
     private final Set<Method> extensionMethods = new HashSet<>();
+    private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
 
     public RuntimeContextBuilder() {
         registerValueFormat(new Formatters.String())
@@ -122,6 +123,11 @@ public class RuntimeContextBuilder {
 
     public Converter getConverter() {
         return converter;
+    }
+
+    public RuntimeContextBuilder registerUserDefinedLiterals(UserLiteralRule rule) {
+        userDefinedLiterals.add(rule);
+        return this;
     }
 
     public class RuntimeContext {

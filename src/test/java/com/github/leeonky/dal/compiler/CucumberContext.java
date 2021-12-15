@@ -5,6 +5,9 @@ import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.DalException;
+import com.github.leeonky.dal.runtime.Result;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -57,7 +60,7 @@ public class CucumberContext {
     DalException dalException;
     Node node = null;
     private List<String> schemas = new ArrayList<>();
-    private List<String> javaClasses = new ArrayList<>();
+    private final List<String> javaClasses = new ArrayList<>();
 
     public static void reset() {
         INSTANCE = new CucumberContext();
@@ -71,7 +74,8 @@ public class CucumberContext {
     }
 
     public void giveDalSourceCode(String code) {
-        tokenParser = new TokenParser(new SourceCode(sourceCodeString = parseTabAndSpace(code)));
+        tokenParser = new TokenParser(new SourceCode(sourceCodeString = parseTabAndSpace(code)),
+                dal.getRuntimeContextBuilder().build(null));
     }
 
     private String parseTabAndSpace(String code) {
@@ -83,7 +87,8 @@ public class CucumberContext {
     }
 
     public void assertNodeValue(String assertion, String factory) {
-        dal.evaluate(matcherMap.get(factory).fetch(new TokenParser(new SourceCode(sourceCodeString))).orElse(null)
+        dal.evaluate(matcherMap.get(factory).fetch(new TokenParser(new SourceCode(sourceCodeString),
+                dal.getRuntimeContextBuilder().build(null))).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
     }
 
@@ -204,6 +209,21 @@ public class CucumberContext {
             dal.evaluateAll(type.newInstance(), assertion);
         } catch (DalException e) {
             dalException = e;
+        }
+    }
+
+    public void registerUSMoney(String regex) {
+        dal.getRuntimeContextBuilder().registerUserDefinedLiterals(token -> token.matches(regex) ?
+                Result.of(new USDollar(Integer.parseInt(token.replace("$", "")))) : Result.empty());
+    }
+
+    @Getter
+    @Setter
+    public static class USDollar {
+        private int amount;
+
+        public USDollar(int amount) {
+            this.amount = amount;
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.*;
 import java.util.function.Function;
@@ -33,7 +34,7 @@ public class TokenParser {
     private final LinkedList<Operator> operators = new LinkedList<>();
     private final LinkedList<Boolean> enableAndComma = new LinkedList<>(singleton(true));
 
-    public TokenParser(SourceCode sourceCode) {
+    public TokenParser(SourceCode sourceCode, RuntimeContextBuilder.RuntimeContext runtimeContext) {
         this.sourceCode = sourceCode;
     }
 

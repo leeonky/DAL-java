@@ -4,6 +4,7 @@ import com.github.leeonky.dal.ast.*;
 import com.github.leeonky.dal.compiler.Compiler;
 import com.github.leeonky.dal.compiler.SourceCode;
 import com.github.leeonky.dal.compiler.SyntaxException;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -15,17 +16,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class CompilerTest {
 
     private final Compiler compiler = new Compiler();
+    private final RuntimeContextBuilder.RuntimeContext runtimeContext = new DAL().getRuntimeContextBuilder().build(null);
 
     private void assertSyntaxException(String sourceCode, int position, String message) {
         SyntaxException syntaxException = assertThrows(SyntaxException.class,
-                () -> compiler.compile(new SourceCode(sourceCode)));
+                () -> compiler.compile(new SourceCode(sourceCode), runtimeContext));
         assertThat(syntaxException)
                 .hasFieldOrPropertyWithValue("position", position)
                 .hasMessage(message);
     }
 
     private void assertCompileNode(String sourceCode, Node... expected) {
-        assertThat(compiler.compile(new SourceCode(sourceCode))).isEqualTo(asList(expected));
+        assertThat(compiler.compile(new SourceCode(sourceCode), runtimeContext)).isEqualTo(asList(expected));
     }
 
     @Nested

@@ -41,16 +41,18 @@ public class DAL {
 
     @SuppressWarnings("unchecked")
     public <T> List<T> evaluateAll(Object input, String expressions) {
-        return compiler.compile(new SourceCode(expressions)).stream()
-                .map(node -> (T) node.evaluate(runtimeContextBuilder.build(input)))
+        RuntimeContextBuilder.RuntimeContext runtimeContext = runtimeContextBuilder.build(input);
+        return compiler.compile(new SourceCode(expressions), runtimeContext).stream()
+                .map(node -> (T) node.evaluate(runtimeContext))
                 .collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
     public <T> T evaluate(Object input, String expression) {
-        List<Node> nodes = compiler.compile(new SourceCode(expression));
+        RuntimeContextBuilder.RuntimeContext runtimeContext = runtimeContextBuilder.build(input);
+        List<Node> nodes = compiler.compile(new SourceCode(expression), runtimeContext);
         if (nodes.size() > 1)
             throw new SyntaxException("more than one expression", nodes.get(1).getPositionBegin());
-        return (T) nodes.get(0).evaluate(runtimeContextBuilder.build(input));
+        return (T) nodes.get(0).evaluate(runtimeContext);
     }
 }
