@@ -240,6 +240,11 @@ public class RuntimeContextBuilder {
             listMapping = false;
         }
 
+        public Optional<Result> takeUserDefinedLiteral(String token) {
+            return userDefinedLiterals.stream().map(userLiteralRule -> userLiteralRule.compile(token))
+                    .filter(Result::hasResult)
+                    .findFirst();
+        }
     }
 
     public Object invokeExtensionMethod(Object instance, String name) {

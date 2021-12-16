@@ -59,7 +59,7 @@ public class CucumberContext {
     String sourceCodeString = null;
     DalException dalException;
     Node node = null;
-    private List<String> schemas = new ArrayList<>();
+    private final List<String> schemas = new ArrayList<>();
     private final List<String> javaClasses = new ArrayList<>();
 
     public static void reset() {

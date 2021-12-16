@@ -97,7 +97,8 @@ public class Compiler {
     private static final ExpressionClauseFactory SCHEMA_CLAUSE = new SchemaExpressionClauseFactory();
 
     public Compiler() {
-        CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL);
+        CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
+                CONST_USER_DEFINED_LITERAL);
         LIST_INDEX_OR_MAP_KEY = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING)
                 .or("should given one property or array index in `[]`");
         PARENTHESES = parser -> parser.enableCommaAnd(() -> parser.fetchNode('(', ')',
@@ -295,9 +296,8 @@ public class Compiler {
     }
 
     private Optional<Node> compileUserDefinedLiteral(TokenParser parser) {
-        return parser.getSourceCode().tryFetch(() -> {
-//            TokenParser.IDENTITY_PROPERTY
-            return null;
-        });
+        return parser.getSourceCode().tryFetch(() -> TokenParser.IDENTITY_PROPERTY.fetch(parser.getSourceCode())
+                .flatMap(token -> parser.getRuntimeContext().takeUserDefinedLiteral(token.getContent())
+                        .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }
 }

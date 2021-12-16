@@ -31,11 +31,13 @@ public class TokenParser {
             false, DELIMITER, not(Token::isNumber)).or("expect a schema");
 
     private final SourceCode sourceCode;
+    private final RuntimeContextBuilder.RuntimeContext runtimeContext;
     private final LinkedList<Operator> operators = new LinkedList<>();
     private final LinkedList<Boolean> enableAndComma = new LinkedList<>(singleton(true));
 
     public TokenParser(SourceCode sourceCode, RuntimeContextBuilder.RuntimeContext runtimeContext) {
         this.sourceCode = sourceCode;
+        this.runtimeContext = runtimeContext;
     }
 
     public SourceCode getSourceCode() {
@@ -190,5 +192,9 @@ public class TokenParser {
 
     public Supplier<Optional<? extends SequenceNode>> sequenceOf(String sequenceChar, SequenceNode.Type type) {
         return () -> getSourceCode().repeatWords(sequenceChar, count -> new SequenceNode(count, type, sequenceChar));
+    }
+
+    public RuntimeContextBuilder.RuntimeContext getRuntimeContext() {
+        return runtimeContext;
     }
 }
