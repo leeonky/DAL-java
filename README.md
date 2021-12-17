@@ -216,6 +216,30 @@ DAL支持通过`''`或`""`包含的字符串常量
 
 数学运算规则和Java语言中的运算规则一致，在不同类型之间的运算会涉及类型提升。
 
+#### 用户自定义字面值
+DAL提供了如下方法用来注册用户自定义字面量：
+``` java
+    dal.getRuntimeContextBuilder().registerUserDefinedLiterals(UserLiteralRule rule);
+```
+比如，系统中存在一种类型为`USDollar`：
+``` java
+    public class USDollar {
+        private int amount;
+        public USDollar(int amount) {
+            this.amount = amount;
+        }
+    }
+```
+然后通过一个正则表达式来注册用户自定义字面量：
+``` java
+    dal.getRuntimeContextBuilder().registerUserDefinedLiterals(token -> token.matches("^\\$\\d+) ?
+            Result.of(new USDollar(Integer.parseInt(token.replace("$", "")))) : Result.empty());
+```
+那么如下的DAL语言则直接返回一个 `USDollar` 对象
+``` java
+    dal.evaluate(null, "$1"); // return USDollar amount is 1
+```
+
 ## 数据断言
 
 自动化测试的用例都应该是明确和可预知的，DAL只通符号（`=`和`:`）和`is`关键字，来对数据进行断言。
@@ -829,7 +853,7 @@ is Person | is String: {length: 3} | 18            |
   | 'Lucy'  | 20  |
 ```
 用 `***` 忽略一整行元素：
-``` json
+``` javascript
 : |  name  | age |
   | 'John' | 20  |
   | ***          |
@@ -854,5 +878,9 @@ is Person | is String: {length: 3} | 18            |
 上边的断言表示先对输入数据按 age 属性降序，然后按 name 属性升序后再进行断言。当排序符号重复出现时，表示更高的排序优先级。
 
 - #### 转置
-
+可以再表格前通过 `>>` 符号表示转置表格：
+``` javascript
+: >>| + name | 'John' | 'Lucy' | 'Tom' |
+    | -- age |  20    |  20    |  18   |
+```
 

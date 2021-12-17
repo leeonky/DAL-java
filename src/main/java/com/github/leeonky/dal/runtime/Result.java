@@ -5,7 +5,7 @@ public class Result {
     private final boolean hasResult;
     private final Object value;
 
-    public Result(boolean hasResult, Object value) {
+    private Result(boolean hasResult, Object value) {
         this.hasResult = hasResult;
         this.value = value;
     }
