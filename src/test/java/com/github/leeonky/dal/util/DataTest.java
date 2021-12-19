@@ -2,7 +2,7 @@ package com.github.leeonky.dal.util;
 
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
-import com.github.leeonky.dal.runtime.DataObject;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.PropertyAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.SchemaType;
@@ -28,7 +28,7 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-class DataObjectTest {
+class DataTest {
 
     @Test
     void check_null_for_customer_schema() {
@@ -140,7 +140,7 @@ class DataObjectTest {
 
         @Test
         void support_get_value_via_field_alias() {
-            assertThat(new DataObject(new HashMap<String, Object>() {{
+            assertThat(new Data(new HashMap<String, Object>() {{
                 put("age", 100);
             }}, runtimeContextBuilder.build(null), SchemaType.create(BeanClass.create(User.class)))
                     .getValue("aliasOfAge").getInstance()).isEqualTo(100);

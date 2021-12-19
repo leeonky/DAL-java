@@ -39,7 +39,7 @@ public class RuntimeContextBuilder {
                 .registerValueFormat(new Formatters.PositiveNumber())
                 .registerValueFormat(new Formatters.ZeroNumber())
                 .registerValueFormat(new Formatters.Boolean())
-                .registerSchema("List", DataObject::isList)
+                .registerSchema("List", Data::isList)
                 .registerListAccessor(Iterable.class, iterable -> iterable)
                 .registerListAccessor(Stream.class, stream -> stream::iterator)
                 .registerPropertyAccessor(Map.class, new PropertyAccessor<Map<String, ?>>() {
@@ -84,7 +84,7 @@ public class RuntimeContextBuilder {
                 .verify(schema, null, ""));
     }
 
-    public RuntimeContextBuilder registerSchema(String name, Function<DataObject, Boolean> predicate) {
+    public RuntimeContextBuilder registerSchema(String name, Function<Data, Boolean> predicate) {
         constructors.put(name, (o) -> {
             if (predicate.apply(o))
                 return o.getInstance();
@@ -131,7 +131,7 @@ public class RuntimeContextBuilder {
     }
 
     public class RuntimeContext {
-        private final LinkedList<DataObject> thisStack = new LinkedList<>();
+        private final LinkedList<Data> thisStack = new LinkedList<>();
         private final Set<Class<?>> schemaSet;
         private boolean listMapping = false;
 
@@ -140,13 +140,13 @@ public class RuntimeContextBuilder {
             thisStack.push(wrap(inputValue));
         }
 
-        public DataObject getInputValue() {
+        public Data getInputValue() {
             return thisStack.getFirst();
         }
 
-        public <T> T newThisScope(DataObject dataObject, Supplier<T> supplier) {
+        public <T> T newThisScope(Data data, Supplier<T> supplier) {
             try {
-                thisStack.push(dataObject);
+                thisStack.push(data);
                 return supplier.get();
             } finally {
                 thisStack.pop();
@@ -210,15 +210,15 @@ public class RuntimeContextBuilder {
             return converter;
         }
 
-        public DataObject wrap(Object instance) {
-            return new DataObject(instance, this, SchemaType.createRoot());
+        public Data wrap(Object instance) {
+            return new Data(instance, this, SchemaType.createRoot());
         }
 
-        public DataObject wrap(Object instance, String schema, boolean isList) {
+        public Data wrap(Object instance, String schema, boolean isList) {
             BeanClass<?> schemaBeanClass = schemas.get(schema);
             if (isList)
                 schemaBeanClass = BeanClass.create(Array.newInstance(schemaBeanClass.getType(), 0).getClass());
-            return new DataObject(instance, this, SchemaType.create(schemaBeanClass));
+            return new Data(instance, this, SchemaType.create(schemaBeanClass));
         }
 
         public <T> RuntimeContext registerPropertyAccessor(T instance) {

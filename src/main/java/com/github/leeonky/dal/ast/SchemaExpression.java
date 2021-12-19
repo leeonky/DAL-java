@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.compiler.SyntaxException;
-import com.github.leeonky.dal.runtime.DataObject;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
@@ -43,13 +43,13 @@ public class SchemaExpression extends Node {
     }
 
     @Override
-    public DataObject evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
+    public Data evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
         return context.wrap(evaluate(context), getSchemaName(), dimension > 0);
     }
 
     private void verifyAndConvertAsSchemaType(RuntimeContextBuilder.RuntimeContext context,
                                               SchemaNode schemaNode, ObjectRef objectRef) {
-        DataObject input = instance.evaluateDataObject(context);
+        Data input = instance.evaluateDataObject(context);
         if (dimension == 1) {
             if (!input.isList())
                 throw new SyntaxException("Expecting a list but was" + input.inspect(), instance.getPositionBegin());
@@ -62,7 +62,7 @@ public class SchemaExpression extends Node {
     }
 
     private Object convertViaSchema(RuntimeContextBuilder.RuntimeContext context, SchemaNode schemaNode,
-                                    DataObject element, String input) {
+                                    Data element, String input) {
         try {
             return schemaNode.getConstructorViaSchema(context).apply(element);
         } catch (IllegalTypeException exception) {

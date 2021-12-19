@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.ast.Operator.Matcher;
-import com.github.leeonky.dal.runtime.DataObject;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.*;
@@ -14,7 +14,7 @@ public abstract class Node {
         throw new IllegalStateException();
     }
 
-    public DataObject evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
+    public Data evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
         return context.wrap(evaluate(context));
     }
 
@@ -24,8 +24,8 @@ public abstract class Node {
     }
 
     public boolean judge(Node actualNode, Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
-        DataObject expected = evaluateDataObject(context);
-        DataObject actual = evaluateAndWrapperFailureMessage(actualNode, context);
+        Data expected = evaluateDataObject(context);
+        Data actual = evaluateAndWrapperFailureMessage(actualNode, context);
         if (expected.isNull())
             return assertMatchNull(actual, actualNode.getPositionBegin());
         shouldBeSameTypeIfTypeIs(Number.class, actual, operator, expected);
@@ -35,7 +35,7 @@ public abstract class Node {
         return assertMatch(expected, actual, getPositionBegin(), context.getConverter());
     }
 
-    private DataObject evaluateAndWrapperFailureMessage(Node actualNode, RuntimeContextBuilder.RuntimeContext context) {
+    private Data evaluateAndWrapperFailureMessage(Node actualNode, RuntimeContextBuilder.RuntimeContext context) {
         try {
             return actualNode.evaluateDataObject(context);
         } catch (AssertionFailure assertionFailure) {
@@ -54,13 +54,13 @@ public abstract class Node {
 
     public abstract String inspect();
 
-    private void invalidTypeToMatchStringValue(Class<?> type, DataObject actual, DataObject expected, Matcher operator) {
+    private void invalidTypeToMatchStringValue(Class<?> type, Data actual, Data expected, Matcher operator) {
         if (type.isInstance(actual.getInstance()) && expected.getInstance() instanceof String)
             throw new RuntimeException(format("Cannot compare between%sand 'java.lang.String'", actual.inspect()),
                     operator.getPosition());
     }
 
-    private void shouldBeSameTypeIfTypeIs(Class<?> type, DataObject value1, Matcher operator, DataObject value2) {
+    private void shouldBeSameTypeIfTypeIs(Class<?> type, Data value1, Matcher operator, Data value2) {
         if (type.isInstance(value2.getInstance()) && !value1.isNull() && !type.isInstance(value1.getInstance()))
             throw new RuntimeException(format("Cannot compare between%sand%s", value1.inspect(), value2.inspect()),
                     operator.getPosition());

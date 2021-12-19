@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.runtime.DataObject;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.*;
@@ -33,39 +33,39 @@ public class ObjectNode extends Node {
 
     @Override
     public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
-        DataObject dataObject = actualNode.evaluateDataObject(context);
-        checkNull(dataObject);
-        if (dataObject.isList()) {
+        Data data = actualNode.evaluateDataObject(context);
+        checkNull(data);
+        if (data.isList()) {
             AtomicInteger integer = new AtomicInteger(0);
-            dataObject.getListObjects().forEach(element -> assertUnexpectedFields(collectUnexpectedFields(element),
+            data.getListObjects().forEach(element -> assertUnexpectedFields(collectUnexpectedFields(element),
                     actualNode.inspect() + format("[%d]", integer.getAndIncrement()), operator.getPosition()));
         } else
-            assertUnexpectedFields(collectUnexpectedFields(dataObject), actualNode.inspect(), operator.getPosition());
-        return judgeAll(context, dataObject);
+            assertUnexpectedFields(collectUnexpectedFields(data), actualNode.inspect(), operator.getPosition());
+        return judgeAll(context, data);
     }
 
-    private void checkNull(DataObject dataObject) {
-        if (dataObject.isNull())
+    private void checkNull(Data data) {
+        if (data.isNull())
             throw new AssertionFailure("The input value is null", getPositionBegin());
     }
 
-    private Set<String> collectUnexpectedFields(DataObject dataObject) {
-        return new LinkedHashSet<String>(dataObject.getFieldNames()) {{
+    private Set<String> collectUnexpectedFields(Data data) {
+        return new LinkedHashSet<String>(data.getFieldNames()) {{
             removeAll(expressions.stream().map(expression ->
-                    dataObject.firstFieldFromAlias(expression.getRootName()))
+                    data.firstFieldFromAlias(expression.getRootName()))
                     .collect(Collectors.toSet()));
         }};
     }
 
     @Override
     public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
-        DataObject dataObject = actualNode.evaluateDataObject(context);
-        checkNull(dataObject);
-        return judgeAll(context, dataObject);
+        Data data = actualNode.evaluateDataObject(context);
+        checkNull(data);
+        return judgeAll(context, data);
     }
 
-    private boolean judgeAll(RuntimeContextBuilder.RuntimeContext context, DataObject dataObject) {
-        return context.newThisScope(dataObject, () -> {
+    private boolean judgeAll(RuntimeContextBuilder.RuntimeContext context, Data data) {
+        return context.newThisScope(data, () -> {
             expressions.forEach(expression -> expression.evaluate(context));
             return true;
         });

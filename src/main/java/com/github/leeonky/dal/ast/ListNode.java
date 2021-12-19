@@ -3,7 +3,7 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.compiler.ExpressionClause;
 import com.github.leeonky.dal.compiler.SyntaxException;
 import com.github.leeonky.dal.runtime.DalException;
-import com.github.leeonky.dal.runtime.DataObject;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
@@ -89,13 +89,13 @@ public class ListNode extends Node {
         return judgeAll(context, actualNode.evaluateDataObject(context));
     }
 
-    public boolean judgeAll(RuntimeContextBuilder.RuntimeContext context, DataObject dataObject) {
-        if (!dataObject.isList())
-            throw new RuntimeException(format("Cannot compare%sand list", dataObject.inspect()), getPositionBegin());
-        List<Node> expressions = getExpressions(dataObject.getListFirstIndex());
+    public boolean judgeAll(RuntimeContextBuilder.RuntimeContext context, Data data) {
+        if (!data.isList())
+            throw new RuntimeException(format("Cannot compare%sand list", data.inspect()), getPositionBegin());
+        List<Node> expressions = getExpressions(data.getListFirstIndex());
         if (type == Type.ALL_ITEMS)
-            assertListSize(expressions.size(), dataObject.getListSize(), getPositionBegin());
-        return context.newThisScope(dataObject, () -> assertElementExpressions(context, expressions));
+            assertListSize(expressions.size(), data.getListSize(), getPositionBegin());
+        return context.newThisScope(data, () -> assertElementExpressions(context, expressions));
     }
 
     private boolean assertElementExpressions(RuntimeContextBuilder.RuntimeContext context, List<Node> expressions) {

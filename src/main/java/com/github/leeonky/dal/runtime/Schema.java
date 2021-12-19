@@ -1,5 +1,5 @@
 package com.github.leeonky.dal.runtime;
 
 public interface Schema {
-    void verify(DataObject data) throws SchemaAssertionFailure;
+    void verify(Data data) throws SchemaAssertionFailure;
 }

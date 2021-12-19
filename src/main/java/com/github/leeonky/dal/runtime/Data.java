@@ -11,15 +11,14 @@ import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
-//TODO rename to DATA
-public class DataObject {
+public class Data {
     private final SchemaType schemaType;
     private final RuntimeContextBuilder.RuntimeContext runtimeContext;
     private final Object instance;
     private List<Object> listValue;
     private Comparator<Object> listComparator = SequenceNode.NOP_COMPARATOR;
 
-    public DataObject(Object instance, RuntimeContextBuilder.RuntimeContext context, SchemaType schemaType) {
+    public Data(Object instance, RuntimeContextBuilder.RuntimeContext context, SchemaType schemaType) {
         this.instance = instance;
         this.schemaType = schemaType;
         runtimeContext = context.registerPropertyAccessor(instance);
@@ -50,9 +49,9 @@ public class DataObject {
                 .sorted(listComparator).collect(toList())) : listValue;
     }
 
-    public List<DataObject> getListObjects() {
+    public List<Data> getListObjects() {
         AtomicInteger index = new AtomicInteger(0);
-        return getListValues().stream().map(object -> new DataObject(object, runtimeContext,
+        return getListValues().stream().map(object -> new Data(object, runtimeContext,
                 schemaType.access(index.incrementAndGet()))).collect(toList());
     }
 
@@ -64,16 +63,16 @@ public class DataObject {
         return new SchemaVerifier(runtimeContext, this);
     }
 
-    public DataObject getValue(List<Object> properties) {
+    public Data getValue(List<Object> properties) {
         if (properties.isEmpty())
             return this;
         return getValue(properties.get(0)).getValue(properties.subList(1, properties.size()));
     }
 
-    public DataObject getValue(Object property) {
+    public Data getValue(Object property) {
         List<Object> propertyChain = schemaType.access(property).getPropertyChainBefore(schemaType);
         if (propertyChain.size() == 1 && propertyChain.get(0).equals(property))
-            return new DataObject(getPropertyValue(property), runtimeContext, propertySchema(property));
+            return new Data(getPropertyValue(property), runtimeContext, propertySchema(property));
         return getValue(propertyChain);
     }
 
@@ -127,11 +126,11 @@ public class DataObject {
         return schemaType.firstFieldFromAlias(alias);
     }
 
-    public DataObject convert(Class<?> target) {
-        return new DataObject(runtimeContext.getConverter().convert(target, instance), runtimeContext, schemaType);
+    public Data convert(Class<?> target) {
+        return new Data(runtimeContext.getConverter().convert(target, instance), runtimeContext, schemaType);
     }
 
-    public DataObject setListComparator(Comparator<Object> listComparator) {
+    public Data setListComparator(Comparator<Object> listComparator) {
         this.listComparator = listComparator;
         return this;
     }

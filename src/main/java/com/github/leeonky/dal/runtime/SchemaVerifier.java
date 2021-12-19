@@ -20,11 +20,11 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
 public class SchemaVerifier {
-    private final DataObject object;
+    private final Data object;
     private final RuntimeContextBuilder.RuntimeContext runtimeContext;
     private static final Compiler compiler = new Compiler();
 
-    public SchemaVerifier(RuntimeContextBuilder.RuntimeContext runtimeContext, DataObject object) {
+    public SchemaVerifier(RuntimeContextBuilder.RuntimeContext runtimeContext, Data object) {
         this.runtimeContext = runtimeContext;
         this.object = object;
     }
@@ -80,7 +80,7 @@ public class SchemaVerifier {
     private <T> boolean allPropertyValueShouldBeValid(String subPrefix, BeanClass<T> polymorphicBeanClass, T schemaInstance) {
         return polymorphicBeanClass.getPropertyReaders().values().stream()
                 .allMatch(propertyReader -> {
-                    DataObject wrappedPropertyValue = object.getValue(propertyReader.getName());
+                    Data wrappedPropertyValue = object.getValue(propertyReader.getName());
                     return allowNullAndIsNull(propertyReader, wrappedPropertyValue)
                             || wrappedPropertyValue.createSchemaVerifier()
                             .verifySchemaInGenericType(subPrefix + "." + propertyReader.getName(),
@@ -88,7 +88,7 @@ public class SchemaVerifier {
                 });
     }
 
-    private <T> boolean allowNullAndIsNull(PropertyReader<T> propertyReader, DataObject propertyValueWrapper) {
+    private <T> boolean allowNullAndIsNull(PropertyReader<T> propertyReader, Data propertyValueWrapper) {
         return propertyReader.getAnnotation(AllowNull.class) != null && propertyValueWrapper.isNull();
     }
 
@@ -183,16 +183,16 @@ public class SchemaVerifier {
     }
 
     private boolean verifyCollection(String subPrefix, BeanClass<?> elementType, Object schemaProperties) {
-        List<DataObject> dataObjectList = object.getListObjects();
+        List<Data> dataList = object.getListObjects();
         if (schemaProperties == null)
-            return range(0, dataObjectList.size())
-                    .allMatch(i -> dataObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(
+            return range(0, dataList.size())
+                    .allMatch(i -> dataList.get(i).createSchemaVerifier().verifySchemaInGenericType(
                             format("%s[%d]", subPrefix, i), elementType, null));
         else {
             List<Object> schemaPropertyList = arrayCollectionToStream(schemaProperties).collect(toList());
-            return shouldBeSameSize(subPrefix, dataObjectList, schemaPropertyList)
-                    && range(0, dataObjectList.size())
-                    .allMatch(i -> dataObjectList.get(i).createSchemaVerifier().verifySchemaInGenericType(
+            return shouldBeSameSize(subPrefix, dataList, schemaPropertyList)
+                    && range(0, dataList.size())
+                    .allMatch(i -> dataList.get(i).createSchemaVerifier().verifySchemaInGenericType(
                             format("%s[%d]", subPrefix, i), elementType, schemaPropertyList.get(i)));
         }
     }

@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.compiler.SyntaxException;
-import com.github.leeonky.dal.runtime.DataObject;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class PropertyNode extends Node {
     }
 
     @Override
-    public DataObject evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
+    public Data evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
         try {
             return instanceNode.evaluateDataObject(context).getValue(name);
         } catch (IndexOutOfBoundsException ex) {
