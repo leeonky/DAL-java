@@ -139,7 +139,7 @@ Feature: schema verification
     """
     @Partial
     public class SchemaVerify implements Schema {
-        public void verify(DataObject data) throws SchemaAssertionFailure {
+        public void verify(Data data) throws SchemaAssertionFailure {
             throw new SchemaAssertionFailure((String)data.getValue("message").getInstance());
         }
     }
