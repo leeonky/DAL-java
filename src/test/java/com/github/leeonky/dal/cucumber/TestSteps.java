@@ -2,6 +2,7 @@ package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.compiler.CucumberContext;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -107,5 +108,10 @@ public class TestSteps {
     @Given("defined US dollar money object with the following regex")
     public void definedUSDollarMoneyObjectWithTheFollowingRegex(String regex) {
         CucumberContext.INSTANCE.registerUSMoney(regex);
+    }
+
+    @And("set the first element index to {int} of list type {string}")
+    public void setTheFirstElementIndexToOfListType(int index, String type) {
+        CucumberContext.INSTANCE.setArrayFirstIndex(type, index);
     }
 }

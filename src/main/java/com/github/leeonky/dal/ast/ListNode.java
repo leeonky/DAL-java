@@ -21,22 +21,34 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public class ListNode extends Node {
-    private final List<Node> expressions;
-    private final List<Node> inputExpressions;
+    private List<Node> expressions__;
+    private List<Node> inputExpressions;
+    private List<ExpressionClause> expressionFactories;
     private final Type type;
     private final boolean multiLineList;
 
     public ListNode(List<ExpressionClause> expressionFactories, boolean multiLineList) {
-        int size = expressionFactories.size();
         type = guessType(expressionFactories);
-        expressions = type.checkElements(inputExpressions = mapWithIndex(expressionFactories.stream(), (i, clause)
-                -> clause.makeExpression(new PropertyNode(InputNode.INSTANCE, type.indexOfNode(i, size), BRACKET)))
-                .collect(toList())).stream().filter(node -> !(node instanceof ListEllipsisNode)).collect(toList());
+        this.expressionFactories = expressionFactories;
         this.multiLineList = multiLineList;
+
+        // just use side effect to check list syntax: [1 ... 2 ... ]
+        getExpressions(0);
+    }
+
+    private List<Node> getExpressions(int firstIndex) {
+        return expressions__ != null ? expressions__ : type.checkElements(getInputExpressions(firstIndex)).stream()
+                .filter(node -> !(node instanceof ListEllipsisNode)).collect(toList());
+    }
+
+    private List<Node> getInputExpressions(int firstIndex) {
+        return inputExpressions != null ? inputExpressions : mapWithIndex(expressionFactories.stream(),
+                (i, clause) -> clause.makeExpression(new PropertyNode(InputNode.INSTANCE,
+                        type.indexOfNode(firstIndex, i, expressionFactories.size()), BRACKET))).collect(toList());
     }
 
     public ListNode(List<Node> inputExpressions, boolean multiLineList, Type type) {
-        expressions = this.inputExpressions = new ArrayList<>(inputExpressions);
+        expressions__ = this.inputExpressions = new ArrayList<>(inputExpressions);
         this.multiLineList = multiLineList;
         this.type = type;
     }
@@ -57,13 +69,14 @@ public class ListNode extends Node {
         this(Collections.emptyList());
     }
 
+    // Only for test
     public List<Node> getExpressions() {
-        return expressions;
+        return getExpressions(0);
     }
 
     @Override
     public String inspect() {
-        return inputExpressions.stream().map(Node::inspectClause).collect(joining(", ", "[", "]"));
+        return getInputExpressions(0).stream().map(Node::inspectClause).collect(joining(", ", "[", "]"));
     }
 
     @Override
@@ -79,12 +92,13 @@ public class ListNode extends Node {
     public boolean judgeAll(RuntimeContextBuilder.RuntimeContext context, DataObject dataObject) {
         if (!dataObject.isList())
             throw new RuntimeException(format("Cannot compare%sand list", dataObject.inspect()), getPositionBegin());
+        List<Node> expressions = getExpressions(dataObject.getListFirstIndex());
         if (type == Type.ALL_ITEMS)
             assertListSize(expressions.size(), dataObject.getListSize(), getPositionBegin());
-        return context.newThisScope(dataObject, () -> assertElementExpressions(context));
+        return context.newThisScope(dataObject, () -> assertElementExpressions(context, expressions));
     }
 
-    private boolean assertElementExpressions(RuntimeContextBuilder.RuntimeContext context) {
+    private boolean assertElementExpressions(RuntimeContextBuilder.RuntimeContext context, List<Node> expressions) {
         if (multiLineList)
             eachWithIndex(expressions.stream(), (i, expression) -> {
                 try {
@@ -111,8 +125,8 @@ public class ListNode extends Node {
             }
         }, LAST_N_ITEMS {
             @Override
-            int indexOfNode(int i, int count) {
-                return i - count;
+            int indexOfNode(int firstIndex, int index, int count) {
+                return index - count;
             }
 
             @Override
@@ -121,8 +135,8 @@ public class ListNode extends Node {
             }
         };
 
-        int indexOfNode(int i, int count) {
-            return i;
+        int indexOfNode(int firstIndex, int index, int count) {
+            return index + firstIndex;
         }
 
         protected abstract Stream<Node> toChecking(List<Node> inputExpressions);

@@ -5,6 +5,7 @@ import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.DalException;
+import com.github.leeonky.dal.runtime.ListAccessor;
 import com.github.leeonky.dal.runtime.Result;
 import lombok.Getter;
 import lombok.Setter;
@@ -203,9 +204,22 @@ public class CucumberContext {
                     = new com.github.leeonky.dal.cucumber.Compiler();
             List<Class<?>> classes = compiler.compileToClasses(javaClasses.stream().map(s ->
                     "import java.math.*;\n" + s).collect(Collectors.toList()));
-            Class<?> type = classes.stream().filter(clazz -> clazz.getName().equals(className))
+            Class type = classes.stream().filter(clazz -> clazz.getName().equals(className))
                     .findFirst().orElseThrow(() -> new IllegalArgumentException
                             ("cannot find bean class: " + className + "\nclasses: " + classes));
+            if (firstIndexes.containsKey(className)) {
+                dal.getRuntimeContextBuilder().registerListAccessor(type, new ListAccessor<Object>() {
+                    @Override
+                    public Iterable<?> toIterable(Object instance) {
+                        return (Iterable<?>) instance;
+                    }
+
+                    @Override
+                    public int firstIndex() {
+                        return firstIndexes.get(className);
+                    }
+                });
+            }
             dal.evaluateAll(type.newInstance(), assertion);
         } catch (DalException e) {
             dalException = e;
@@ -216,6 +230,12 @@ public class CucumberContext {
         dal.getRuntimeContextBuilder().registerUserDefinedLiterals(token -> token.matches(regex) ?
                 Result.of(new USDollar(Integer.parseInt(token.replace("$", "")))) : Result.empty());
     }
+
+    public void setArrayFirstIndex(String type, int index) {
+        firstIndexes.put(type, index);
+    }
+
+    private final Map<String, Integer> firstIndexes = new HashMap<>();
 
     @Getter
     @Setter

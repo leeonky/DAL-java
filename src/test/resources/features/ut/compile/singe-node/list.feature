@@ -290,3 +290,83 @@ Feature: list node
       }
     }
     """
+
+  Scenario: support user define first element index
+    Given the following input java class data:
+    """
+    public class Table extends java.util.ArrayList<Row> {
+      public Table() {
+        Row row = new Row();
+        row.v1 = 11;
+        row.v2 = 12;
+        add(row);
+
+        row = new Row();
+        row.v1 = 21;
+        row.v2 = 22;
+        add(row);
+      }
+    }
+    """
+    And the following input java class data:
+    """
+    public class Row {
+      public int v1, v2;
+    }
+    """
+    And set the first element index to 1 of list type "Table"
+    And the following assertion for "Table" should pass:
+    """
+    : {
+      [1]: {
+        v1: 11
+        v2: 12
+      }
+      [2]: {
+        v1: 21
+        v2: 22
+      }
+    }
+    """
+    And the following assertion for "Table" should pass:
+    """
+    [-2]: {
+      v1: 11
+      v2: 12
+    }
+    """
+    And the following assertion for "Table" should pass:
+    """
+    : [{
+      v1: 11
+      v2: 12
+    }{
+      v1: 21
+      v2: 22
+    }]
+    """
+    And the following assertion for "Table" should pass:
+    """
+    : [{
+      v1: 11
+      v2: 12
+    } ...]
+    """
+    And the following assertion for "Table" should pass:
+    """
+    : [... {
+      v1: 21
+      v2: 22
+    }]
+    """
+    And the following assertion for "Table" should pass:
+    """
+    : | v1 | v2 |
+      | 11 | 12 |
+      | 21 | 22 |
+    """
+    And the following assertion for "Table" should pass:
+    """
+    : >>| v1 | 11 | 21 |
+        | v2 | 12 | 22 |
+    """

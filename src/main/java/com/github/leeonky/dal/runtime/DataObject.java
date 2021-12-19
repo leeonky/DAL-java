@@ -102,7 +102,11 @@ public class DataObject {
         }
         if ((int) property < 0)
             return getListValues().get(getListSize() + (int) property);
-        return getListValues().get((int) property - runtimeContext.getListFirstIndex(instance));
+        return getListValues().get((int) property - getListFirstIndex());
+    }
+
+    public int getListFirstIndex() {
+        return runtimeContext.getListFirstIndex(instance);
     }
 
     private Object subProperty(String property) {
