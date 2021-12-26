@@ -8,7 +8,7 @@ public interface DALFactory {
         Iterator<DALFactory> iterator = ServiceLoader.load(DALFactory.class).iterator();
         if (iterator.hasNext())
             return iterator.next().newInstance();
-        return new DAL();
+        return new DAL().extend();
     }
 
     DAL newInstance();

@@ -5,7 +5,9 @@ import com.github.leeonky.dal.compiler.Compiler;
 import com.github.leeonky.dal.compiler.SourceCode;
 import com.github.leeonky.dal.compiler.SyntaxException;
 import com.github.leeonky.dal.runtime.AssertResult;
+import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.util.BeanClass;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,5 +56,11 @@ public class DAL {
         if (nodes.size() > 1)
             throw new SyntaxException("more than one expression", nodes.get(1).getPositionBegin());
         return (T) nodes.get(0).evaluate(runtimeContext);
+    }
+
+    public DAL extend() {
+        BeanClass.subTypesOf(Extension.class, "com.github.leeonky.dal.extensions")
+                .forEach(c -> ((Extension) BeanClass.newInstance(c)).extend(this));
+        return this;
     }
 }

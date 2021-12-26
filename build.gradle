@@ -32,7 +32,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.1.12' + System.env.VERSION_SCOPE
+version = '0.1.13' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -47,7 +47,7 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.leeonky:bean-util:0.2.13'
+    compile 'com.github.leeonky:bean-util:0.2.14'
     testImplementation 'org.assertj:assertj-core:3.10.0'
     testImplementation 'org.skyscreamer:jsonassert:1.5.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
