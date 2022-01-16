@@ -2,7 +2,6 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.Node;
 
-import java.nio.CharBuffer;
 import java.util.*;
 import java.util.function.*;
 
@@ -13,7 +12,6 @@ import static java.util.Optional.of;
 
 public class SourceCode {
     private final String code;
-    private final char[] chars;
     private int position = 0;
 
     public static TokenMatcher tokenMatcher(Predicate<Character> startsWith, Set<String> excluded, boolean trim,
@@ -43,7 +41,6 @@ public class SourceCode {
 
     public SourceCode(String code) {
         this.code = code;
-        chars = code.toCharArray();
     }
 
     private int seek(int seek) {
@@ -53,11 +50,11 @@ public class SourceCode {
     }
 
     private char currentChar() {
-        return chars[position];
+        return code.charAt(position);
     }
 
     private char popChar() {
-        return chars[position++];
+        return code.charAt(position++);
     }
 
     private boolean whenFirstChar(Predicate<Character> predicate) {
@@ -65,7 +62,7 @@ public class SourceCode {
     }
 
     public boolean hasCode() {
-        return position < chars.length;
+        return position < code.length();
     }
 
     public SourceCode leftTrim() {
@@ -87,7 +84,7 @@ public class SourceCode {
     }
 
     public boolean isBeginning() {
-        return CharBuffer.wrap(chars).chars().limit(position).allMatch(Character::isWhitespace);
+        return code.chars().limit(position).allMatch(Character::isWhitespace);
     }
 
     public SyntaxException syntaxError(String message, int positionOffset) {

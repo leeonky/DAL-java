@@ -236,12 +236,12 @@ class BasicVerify extends Base {
 
         @Test
         void do_not_allow_number_auto_convert_to_string() {
-            assertRuntimeException(1, ": '1'", 0, "Cannot compare between java.lang.Integer\n<1>\nand 'java.lang.String'");
+            assertRuntimeException(1, ": '1'", 0, "Cannot compare between java.lang.Integer\n<1>\nand java.lang.String\n<1>\n");
         }
 
         @Test
         void do_not_allow_boolean_auto_convert_to_string() {
-            assertRuntimeException(true, ": 'true'", 0, "Cannot compare between java.lang.Boolean\n<true>\nand 'java.lang.String'");
+            assertRuntimeException(true, ": 'true'", 0, "Cannot compare between java.lang.Boolean\n<true>\nand java.lang.String\n<true>\n");
         }
 
         @Test

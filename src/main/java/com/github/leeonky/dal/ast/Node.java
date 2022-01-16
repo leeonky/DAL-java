@@ -28,10 +28,12 @@ public abstract class Node {
         Data actual = evaluateAndWrapperFailureMessage(actualNode, context);
         if (expected.isNull())
             return assertMatchNull(actual, actualNode.getPositionBegin());
-        shouldBeSameTypeIfTypeIs(Number.class, actual, operator, expected);
-        shouldBeSameTypeIfTypeIs(Boolean.class, actual, operator, expected);
-        invalidTypeToMatchStringValue(Number.class, actual, expected, operator);
-        invalidTypeToMatchStringValue(Boolean.class, actual, expected, operator);
+
+        invalidTypeToMatchValue(String.class, actual, Number.class, expected, operator);
+        invalidTypeToMatchValue(String.class, actual, Boolean.class, expected, operator);
+
+        invalidTypeToMatchValue(Number.class, actual, String.class, expected, operator);
+        invalidTypeToMatchValue(Boolean.class, actual, String.class, expected, operator);
         return assertMatch(expected, actual, getPositionBegin(), context.getConverter());
     }
 
@@ -54,15 +56,9 @@ public abstract class Node {
 
     public abstract String inspect();
 
-    private void invalidTypeToMatchStringValue(Class<?> type, Data actual, Data expected, Matcher operator) {
-        if (type.isInstance(actual.getInstance()) && expected.getInstance() instanceof String)
-            throw new RuntimeException(format("Cannot compare between%sand 'java.lang.String'", actual.inspect()),
-                    operator.getPosition());
-    }
-
-    private void shouldBeSameTypeIfTypeIs(Class<?> type, Data value1, Matcher operator, Data value2) {
-        if (type.isInstance(value2.getInstance()) && !value1.isNull() && !type.isInstance(value1.getInstance()))
-            throw new RuntimeException(format("Cannot compare between%sand%s", value1.inspect(), value2.inspect()),
+    private void invalidTypeToMatchValue(Class<?> actualType, Data actual, Class<?> expectedType, Data expected, Matcher operator) {
+        if (actualType.isInstance(actual.getInstance()) && expectedType.isInstance(expected.getInstance()))
+            throw new RuntimeException(format("Cannot compare between%sand%s", actual.inspect(), expected.inspect()),
                     operator.getPosition());
     }
 
