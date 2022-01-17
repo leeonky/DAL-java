@@ -1,6 +1,9 @@
-package com.github.leeonky.dal.compiler;
+package com.github.leeonky.interpreter;
 
 import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.compiler.SyntaxException;
+import com.github.leeonky.dal.compiler.Token;
+import com.github.leeonky.dal.compiler.TokenMatcher;
 
 import java.util.*;
 import java.util.function.*;
@@ -49,11 +52,11 @@ public class SourceCode {
         return position;
     }
 
-    private char currentChar() {
+    char currentChar() {
         return code.charAt(position);
     }
 
-    private char popChar() {
+    char popChar() {
         return code.charAt(position++);
     }
 
@@ -65,7 +68,7 @@ public class SourceCode {
         return position < code.length();
     }
 
-    public SourceCode leftTrim() {
+    private SourceCode leftTrim() {
         while (hasCode() && Character.isWhitespace(currentChar()))
             position++;
         return this;
