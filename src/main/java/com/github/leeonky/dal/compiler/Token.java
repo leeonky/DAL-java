@@ -2,6 +2,7 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.ast.PropertyNode;
+import com.github.leeonky.interpreter.SyntaxException;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

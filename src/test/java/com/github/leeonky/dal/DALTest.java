@@ -1,7 +1,7 @@
 package com.github.leeonky.dal;
 
-import com.github.leeonky.dal.compiler.SyntaxException;
 import com.github.leeonky.dal.extensions.DALExtension;
+import com.github.leeonky.interpreter.SyntaxException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

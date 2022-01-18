@@ -1,11 +1,11 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.compiler.ExpressionClause;
-import com.github.leeonky.dal.compiler.SyntaxException;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
 import java.util.Collections;

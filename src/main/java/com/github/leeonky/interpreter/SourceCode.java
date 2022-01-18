@@ -1,7 +1,6 @@
 package com.github.leeonky.interpreter;
 
 import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.compiler.SyntaxException;
 import com.github.leeonky.dal.compiler.Token;
 import com.github.leeonky.dal.compiler.TokenMatcher;
 
@@ -52,11 +51,11 @@ public class SourceCode {
         return position;
     }
 
-    char currentChar() {
+    private char currentChar() {
         return code.charAt(position);
     }
 
-    char popChar() {
+    private char popChar() {
         return code.charAt(position++);
     }
 

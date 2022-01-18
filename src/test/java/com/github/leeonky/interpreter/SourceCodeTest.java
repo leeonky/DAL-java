@@ -1,11 +1,16 @@
 package com.github.leeonky.interpreter;
 
+import com.github.leeonky.dal.compiler.EscapeChars;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SourceCodeTest {
+
+    public static final HashMap<String, Character> NO_ESCAPE = new HashMap<>();
 
     @Nested
     class HasCode {
@@ -24,11 +29,11 @@ class SourceCodeTest {
         @Test
         void check_has_code_after_pop() {
             SourceCode code = new SourceCode("ab ");
-            code.popChar();
+            code.escapedPop(NO_ESCAPE);
             assertThat(code.hasCode()).isTrue();
-            code.popChar();
+            code.escapedPop(NO_ESCAPE);
             assertThat(code.hasCode()).isTrue();
-            code.popChar();
+            code.escapedPop(NO_ESCAPE);
             assertThat(code.hasCode()).isFalse();
         }
     }
@@ -50,11 +55,61 @@ class SourceCodeTest {
         void trim_blank_and_start_with_given_word() {
             assertThat(new SourceCode(" \n\r\tab").startsWith("a")).isTrue();
         }
+
+        @Test
+        void starts_with_after_pop() {
+            SourceCode sourceCode = new SourceCode("x \n\r\tab");
+            sourceCode.escapedPop(NO_ESCAPE);
+            assertThat(sourceCode.startsWith("a")).isTrue();
+        }
     }
 
     @Nested
     class EscapedPop {
-       
+
+        @Test
+        void pop_up_when_no_escape() {
+            SourceCode sourceCode = new SourceCode("a");
+            assertThat(sourceCode.escapedPop(NO_ESCAPE)).isEqualTo('a');
+            assertThat(sourceCode.hasCode()).isFalse();
+        }
+
+        @Test
+        void pop_up_when_escape_not_match() {
+            SourceCode sourceCode = new SourceCode("a");
+            assertThat(sourceCode.escapedPop(new EscapeChars().escape("b", 'a'))).isEqualTo('a');
+            assertThat(sourceCode.hasCode()).isFalse();
+        }
+
+        @Test
+        void pop_up_when_escaped() {
+            SourceCode sourceCode = new SourceCode("aabbx");
+            EscapeChars escape = new EscapeChars().escape("bb", 'a').escape("aa", 'b');
+            assertThat(sourceCode.escapedPop(escape)).isEqualTo('b');
+            assertThat(sourceCode.escapedPop(escape)).isEqualTo('a');
+            assertThat(sourceCode.escapedPop(escape)).isEqualTo('x');
+        }
+    }
+
+    @Nested
+    class isBeginning {
+
+        @Test
+        void position_is_0() {
+            assertThat(new SourceCode("a").isBeginning()).isTrue();
+            assertThat(new SourceCode(" ").isBeginning()).isTrue();
+            assertThat(new SourceCode("").isBeginning()).isTrue();
+        }
+
+        @Test
+        void also_is_beginning_even_pop_blanks() {
+            SourceCode sourceCode = new SourceCode(" \n\r\t");
+            sourceCode.escapedPop(NO_ESCAPE);
+            sourceCode.escapedPop(NO_ESCAPE);
+            sourceCode.escapedPop(NO_ESCAPE);
+            sourceCode.escapedPop(NO_ESCAPE);
+            assertThat(sourceCode.isBeginning()).isTrue();
+        }
     }
 
     @Nested

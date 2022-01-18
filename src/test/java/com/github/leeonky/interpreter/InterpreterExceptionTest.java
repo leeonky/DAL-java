@@ -1,28 +1,29 @@
-package com.github.leeonky.dal.runtime;
+package com.github.leeonky.interpreter;
 
+import com.github.leeonky.dal.runtime.DalException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.runtime.DalException.Position.Type.CHAR;
-import static com.github.leeonky.dal.runtime.DalException.Position.Type.LINE;
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.CHAR;
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DalExceptionTest {
+class InterpreterExceptionTest {
 
     @Nested
     class Position {
 
-        private void assertShowCode(DalException dalException, StringBuilder code, StringBuilder expected) {
-            assertShowCode(dalException, code, expected, 0);
+        private void assertShowCode(InterpreterException interpreterException, StringBuilder code, StringBuilder expected) {
+            assertShowCode(interpreterException, code, expected, 0);
         }
 
-        private void assertShowCode(DalException dalException, StringBuilder code, StringBuilder expected, int offset) {
-            assertThat(dalException.show(code.toString(), offset)).isEqualTo(expected.toString());
+        private void assertShowCode(InterpreterException interpreterException, StringBuilder code, StringBuilder expected, int offset) {
+            assertThat(interpreterException.show(code.toString(), offset)).isEqualTo(expected.toString());
         }
 
         @Test
         void position_for_chinese_chars() {
-            assertShowCode(new DalException("", 7), new StringBuilder()
+            assertShowCode(new InterpreterException("", 7), new StringBuilder()
                             .append("a你c").append("\n")
                             .append("d你你好")
                     , new StringBuilder()
@@ -34,7 +35,7 @@ class DalExceptionTest {
 
         @Test
         void position_for_chinese_chars_in_line_mode() {
-            assertShowCode(new DalException("", 3, LINE), new StringBuilder()
+            assertShowCode(new InterpreterException("", 3, LINE), new StringBuilder()
                             .append("a你").append("\n")
                             .append("d你")
                     , new StringBuilder()
@@ -46,7 +47,7 @@ class DalExceptionTest {
 
         @Test
         void show_single_position_in_the_first_char_of_one_line_code() {
-            assertShowCode(new DalException("", 0), new StringBuilder()
+            assertShowCode(new InterpreterException("", 0), new StringBuilder()
                             .append("a")
                     , new StringBuilder()
                             .append("a").append("\n")
@@ -56,7 +57,7 @@ class DalExceptionTest {
 
         @Test
         void show_single_position_in_the_one_line_code() {
-            assertShowCode(new DalException("", 1), new StringBuilder()
+            assertShowCode(new InterpreterException("", 1), new StringBuilder()
                             .append("abc")
                     , new StringBuilder()
                             .append("abc").append("\n")
@@ -66,7 +67,7 @@ class DalExceptionTest {
 
         @Test
         void show_single_position_in_the_first_line_of_double_line_code() {
-            assertShowCode(new DalException("", 1), new StringBuilder()
+            assertShowCode(new InterpreterException("", 1), new StringBuilder()
                             .append("abc").append("\n")
                             .append("efg")
                     , new StringBuilder()
@@ -78,7 +79,7 @@ class DalExceptionTest {
 
         @Test
         void show_single_position_in_second_line() {
-            assertShowCode(new DalException("", 2), new StringBuilder()
+            assertShowCode(new InterpreterException("", 2), new StringBuilder()
                             .append("a").append("\n")
                             .append("b").append("\n")
                             .append("c")
@@ -92,7 +93,7 @@ class DalExceptionTest {
 
         @Test
         void show_second_char_position_before_line_of_position() {
-            assertShowCode(new DalException("", 4).multiPosition(2, CHAR), new StringBuilder()
+            assertShowCode(new InterpreterException("", 4).multiPosition(2, CHAR), new StringBuilder()
                             .append("a").append("\n")
                             .append("b").append("\n")
                             .append("c")
@@ -107,7 +108,7 @@ class DalExceptionTest {
 
         @Test
         void show_second_char_position_after_line_of_position() {
-            assertShowCode(new DalException("", 0).multiPosition(4, CHAR), new StringBuilder()
+            assertShowCode(new InterpreterException("", 0).multiPosition(4, CHAR), new StringBuilder()
                             .append("a").append("\n")
                             .append("b").append("\n")
                             .append("c")
@@ -122,7 +123,7 @@ class DalExceptionTest {
 
         @Test
         void support_line_mark_for_one_line() {
-            assertShowCode(new DalException("", 0, LINE), new StringBuilder()
+            assertShowCode(new InterpreterException("", 0, LINE), new StringBuilder()
                             .append("a")
                     , new StringBuilder()
                             .append("a").append("\n")
@@ -132,7 +133,7 @@ class DalExceptionTest {
 
         @Test
         void support_line_mark() {
-            assertShowCode(new DalException("", 0).multiPosition(3, LINE), new StringBuilder()
+            assertShowCode(new InterpreterException("", 0).multiPosition(3, LINE), new StringBuilder()
                             .append("a").append("\n")
                             .append("bcde").append("\n")
                             .append("c")
@@ -150,7 +151,7 @@ class DalExceptionTest {
 
             @Test
             void show_single_position_in_the_first_char_of_one_line_code() {
-                assertShowCode(new DalException("", 3), new StringBuilder()
+                assertShowCode(new InterpreterException("", 3), new StringBuilder()
                                 .append("***a")
                         , new StringBuilder()
                                 .append("a").append("\n")
@@ -170,7 +171,7 @@ class DalExceptionTest {
 
             @Test
             void show_single_position_in_the_first_line_of_double_line_code() {
-                assertShowCode(new DalException("", 4), new StringBuilder()
+                assertShowCode(new InterpreterException("", 4), new StringBuilder()
                                 .append("***abc").append("\n")
                                 .append("efg")
                         , new StringBuilder()
@@ -182,7 +183,7 @@ class DalExceptionTest {
 
             @Test
             void show_single_position_in_second_line() {
-                assertShowCode(new DalException("", 5), new StringBuilder()
+                assertShowCode(new InterpreterException("", 5), new StringBuilder()
                                 .append("***a").append("\n")
                                 .append("b").append("\n")
                                 .append("c")
@@ -196,7 +197,7 @@ class DalExceptionTest {
 
             @Test
             void show_second_char_position_before_line_of_position() {
-                assertShowCode(new DalException("", 7).multiPosition(5, CHAR), new StringBuilder()
+                assertShowCode(new InterpreterException("", 7).multiPosition(5, CHAR), new StringBuilder()
                                 .append("***a").append("\n")
                                 .append("b").append("\n")
                                 .append("c")
@@ -211,7 +212,7 @@ class DalExceptionTest {
 
             @Test
             void show_second_char_position_after_line_of_position() {
-                assertShowCode(new DalException("", 3).multiPosition(7, CHAR), new StringBuilder()
+                assertShowCode(new InterpreterException("", 3).multiPosition(7, CHAR), new StringBuilder()
                                 .append("***a").append("\n")
                                 .append("b").append("\n")
                                 .append("c")
@@ -226,7 +227,7 @@ class DalExceptionTest {
 
             @Test
             void support_line_mark() {
-                assertShowCode(new DalException("", 3).multiPosition(6, LINE), new StringBuilder()
+                assertShowCode(new InterpreterException("", 3).multiPosition(6, LINE), new StringBuilder()
                                 .append("***a").append("\n")
                                 .append("bcde").append("\n")
                                 .append("c")

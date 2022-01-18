@@ -4,9 +4,9 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.Node;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
-import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.ListAccessor;
 import com.github.leeonky.dal.runtime.Result;
+import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.SourceCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -59,7 +59,7 @@ public class CucumberContext {
     Object inputObject = null;
     TokenParser tokenParser = null;
     String sourceCodeString = null;
-    DalException dalException;
+    InterpreterException interpreterException;
     Node node = null;
     private final List<String> schemas = new ArrayList<>();
     private final List<String> javaClasses = new ArrayList<>();
@@ -95,28 +95,28 @@ public class CucumberContext {
     }
 
     public void shouldShowSourceCodePosition(String sourceCodePosition) {
-        assertThat("\n" + dalException.show(sourceCodeString)).isEqualTo("\n" + sourceCodePosition);
+        assertThat("\n" + interpreterException.show(sourceCodeString)).isEqualTo("\n" + sourceCodePosition);
     }
 
     public void failedToGetNodeWithMessage(String factory, String message) {
-        dalException = assertThrows(DalException.class, () -> matcherMap.get(factory).fetch(tokenParser));
+        interpreterException = assertThrows(InterpreterException.class, () -> matcherMap.get(factory).fetch(tokenParser));
         shouldHasDalMessage(message);
     }
 
     public void shouldHasDalMessage(String message) {
-        assertThat(dalException).hasMessage(message);
+        assertThat(interpreterException).hasMessage(message);
     }
 
     public void compileAndAssertNode(String factory, String assertion) {
         try {
             node = matcherMap.get(factory).fetch(tokenParser).orElse(null);
-        } catch (DalException e) {
+        } catch (InterpreterException e) {
             System.err.println(e.show(sourceCodeString));
             throw e;
         }
         try {
             dal.evaluateAll(node, assertion);
-        } catch (DalException e) {
+        } catch (InterpreterException e) {
             System.err.println(e.show(assertion));
             throw e;
         }
@@ -134,16 +134,16 @@ public class CucumberContext {
                     .collect(Collectors.toList()))
                     .forEach(dal.getRuntimeContextBuilder()::registerSchema);
             dal.evaluate(inputObject, assertion);
-            dalException = null;
-        } catch (DalException e) {
-            dalException = e;
+            interpreterException = null;
+        } catch (InterpreterException e) {
+            interpreterException = e;
         }
     }
 
     public void shouldNoException(String assertion) {
-        if (dalException != null)
-            System.err.println(dalException.show(assertion));
-        assertThat(dalException).isNull();
+        if (interpreterException != null)
+            System.err.println(interpreterException.show(assertion));
+        assertThat(interpreterException).isNull();
     }
 
     @SneakyThrows
@@ -163,14 +163,14 @@ public class CucumberContext {
         Object evaluate;
         try {
             evaluate = dal.evaluate(inputObject, sourceCodeString);
-        } catch (DalException dalException) {
+        } catch (InterpreterException dalException) {
             System.out.println(dalException.show(sourceCodeString));
             throw dalException;
         }
 
         try {
             dal.evaluateAll(evaluate, assertionCode);
-        } catch (DalException dalException) {
+        } catch (InterpreterException dalException) {
             System.out.println(dalException.show(assertionCode));
             throw dalException;
         }
@@ -180,14 +180,14 @@ public class CucumberContext {
         Object evaluate;
         try {
             evaluate = dal.evaluateAll(inputObject, sourceCodeString);
-        } catch (DalException dalException) {
+        } catch (InterpreterException dalException) {
             System.out.println(dalException.show(sourceCodeString));
             throw dalException;
         }
 
         try {
             dal.evaluateAll(evaluate, assertionCode);
-        } catch (DalException dalException) {
+        } catch (InterpreterException dalException) {
             System.out.println(dalException.show(assertionCode));
             throw dalException;
         }
@@ -222,8 +222,8 @@ public class CucumberContext {
                 });
             }
             dal.evaluateAll(type.newInstance(), assertion);
-        } catch (DalException e) {
-            dalException = e;
+        } catch (InterpreterException e) {
+            interpreterException = e;
         }
     }
 

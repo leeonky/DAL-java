@@ -1,10 +1,10 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.compiler.ExpressionClause;
-import com.github.leeonky.dal.compiler.SyntaxException;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,10 +14,10 @@ import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.HeaderNode.bySequence;
 import static com.github.leeonky.dal.ast.RowNode.printTableRow;
-import static com.github.leeonky.dal.runtime.DalException.Position.Type.CHAR;
-import static com.github.leeonky.dal.runtime.DalException.Position.Type.LINE;
 import static com.github.leeonky.dal.runtime.FunctionUtil.transpose;
 import static com.github.leeonky.dal.runtime.FunctionUtil.zip;
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.CHAR;
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;

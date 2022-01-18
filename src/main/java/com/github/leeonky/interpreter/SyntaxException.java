@@ -1,11 +1,9 @@
-package com.github.leeonky.dal.compiler;
+package com.github.leeonky.interpreter;
 
-import com.github.leeonky.dal.runtime.DalException;
-
-public class SyntaxException extends DalException {
+public class SyntaxException extends InterpreterException {
 
     public SyntaxException(String message, int position) {
-        super(message.trim(), position);
+        this(message, position, Position.Type.CHAR);
     }
 
     public SyntaxException(String message, int position, Position.Type type) {
