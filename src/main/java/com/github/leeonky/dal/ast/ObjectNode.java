@@ -11,14 +11,14 @@ import static com.github.leeonky.dal.ast.AssertionFailure.assertUnexpectedFields
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
-public class ObjectNode extends Node {
-    private final List<Node> expressions = new ArrayList<>();
+public class ObjectNode extends DALNode {
+    private final List<DALNode> expressions = new ArrayList<>();
 
-    public ObjectNode(List<Node> expressions) {
+    public ObjectNode(List<DALNode> expressions) {
         this.expressions.addAll(expressions);
     }
 
-    public List<Node> getExpressions() {
+    public List<DALNode> getExpressions() {
         return expressions;
     }
 
@@ -28,11 +28,11 @@ public class ObjectNode extends Node {
 
     @Override
     public String inspect() {
-        return format("{%s}", expressions.stream().map(Node::inspect).collect(joining(", ")));
+        return format("{%s}", expressions.stream().map(DALNode::inspect).collect(joining(", ")));
     }
 
     @Override
-    public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
         Data data = actualNode.evaluateDataObject(context);
         checkNull(data);
         if (data.isList()) {
@@ -58,7 +58,7 @@ public class ObjectNode extends Node {
     }
 
     @Override
-    public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
         Data data = actualNode.evaluateDataObject(context);
         checkNull(data);
         return judgeAll(context, data);

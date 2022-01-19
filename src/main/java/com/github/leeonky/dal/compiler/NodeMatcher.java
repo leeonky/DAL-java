@@ -5,19 +5,19 @@ import com.github.leeonky.dal.ast.Node;
 import java.util.Optional;
 import java.util.function.Function;
 
-public interface NodeMatcher {
+public interface NodeMatcher<N extends Node<N>> {
 
-    Optional<Node> fetch(TokenParser parser);
+    Optional<N> fetch(TokenParser<N> parser);
 
-    default NodeMatcher map(Function<Node, Node> mapping) {
+    default NodeMatcher<N> map(Function<N, N> mapping) {
         return parser -> fetch(parser).map(mapping);
     }
 
-    default NodeFactory or(NodeFactory nodeFactory) {
+    default NodeFactory<N> or(NodeFactory<N> nodeFactory) {
         return parser -> fetch(parser).orElseGet(() -> nodeFactory.fetch(parser));
     }
 
-    default NodeFactory or(String message) {
+    default NodeFactory<N> or(String message) {
         return parser -> fetch(parser).orElseThrow(() -> parser.getSourceCode().syntaxError(message, 0));
     }
 }

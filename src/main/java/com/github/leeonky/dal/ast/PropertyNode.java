@@ -10,12 +10,12 @@ import java.util.Objects;
 
 import static java.lang.String.format;
 
-public class PropertyNode extends Node {
-    private final Node instanceNode;
+public class PropertyNode extends DALNode {
+    private final DALNode instanceNode;
     private final Object name;
     private final Type type;
 
-    public PropertyNode(Node instanceNode, Object name, Type type) {
+    public PropertyNode(DALNode instanceNode, Object name, Type type) {
         this.instanceNode = instanceNode;
         this.name = name;
         this.type = type;
@@ -66,7 +66,7 @@ public class PropertyNode extends Node {
     }
 
     @Override
-    public Node avoidListMapping() {
+    public DALNode avoidListMapping() {
         if ("@".equals(name))
             throw new SyntaxException("element property needed", getPositionBegin());
         return this;

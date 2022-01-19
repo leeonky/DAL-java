@@ -4,7 +4,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.Objects;
 
-public class ConstNode extends Node {
+public class ConstNode extends DALNode {
 
     private final Object value;
 

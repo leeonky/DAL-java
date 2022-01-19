@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.compiler;
 
-import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.PropertyNode;
 import com.github.leeonky.interpreter.SyntaxException;
 
@@ -86,7 +86,7 @@ public class Token {
         return this;
     }
 
-    public Node toDotProperty(Node instanceNode) {
+    public DALNode toDotProperty(DALNode instanceNode) {
         if (contentBuilder.length() == 0)
             throw new SyntaxException("property is not finished", position);
         return new PropertyNode(instanceNode, getContent(), DOT);

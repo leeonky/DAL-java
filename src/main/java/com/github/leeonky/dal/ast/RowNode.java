@@ -12,14 +12,14 @@ import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class RowNode extends Node {
-    private final List<Node> cells;
+public class RowNode extends DALNode {
+    private final List<DALNode> cells;
     private final Optional<Integer> index;
     private final Optional<Operator> operator;
-    private final Optional<ExpressionClause> schemaClause;
+    private final Optional<ExpressionClause<DALNode>> schemaClause;
 
-    public RowNode(Optional<Integer> index, Optional<ExpressionClause> schemaClause, Optional<Operator> operator,
-                   List<Node> cells) {
+    public RowNode(Optional<Integer> index, Optional<ExpressionClause<DALNode>> schemaClause, Optional<Operator> operator,
+                   List<DALNode> cells) {
         this.cells = cells;
         this.operator = operator;
         this.schemaClause = schemaClause;
@@ -37,7 +37,7 @@ public class RowNode extends Node {
 
     @Override
     public String inspect() {
-        return inspectSchemaAndOperator() + cells.stream().map(Node::inspectClause)
+        return inspectSchemaAndOperator() + cells.stream().map(DALNode::inspectClause)
                 .collect(Collectors.joining(" | ", "| ", " |"));
     }
 
@@ -55,12 +55,12 @@ public class RowNode extends Node {
         return cells.size() >= 1 && cells.get(0) instanceof ListEllipsisNode;
     }
 
-    public ExpressionClause toExpressionClause(Operator operator) {
+    public ExpressionClause<DALNode> toExpressionClause(Operator operator) {
         return input -> isEllipsis() ? cells.get(0) : transformRowToExpression(operator,
-                index.<Node>map(i -> new PropertyNode(InputNode.INSTANCE, i, BRACKET)).orElse(input));
+                index.<DALNode>map(i -> new PropertyNode(InputNode.INSTANCE, i, BRACKET)).orElse(input));
     }
 
-    private Expression transformRowToExpression(Operator operator, Node inputElement) {
+    private Expression transformRowToExpression(Operator operator, DALNode inputElement) {
         return new Expression(schemaClause.map(c -> c.makeExpression(inputElement)).orElse(inputElement),
                 this.operator.orElse(operator), isRowWildcard() ? cells.get(0)
                 : new ObjectNode(cells).setPositionBegin(cells.get(0).getOperandPosition()));
@@ -70,12 +70,12 @@ public class RowNode extends Node {
         return operator.isPresent() || schemaClause.isPresent() || hasIndex();
     }
 
-    public List<Node> getCells() {
+    public List<DALNode> getCells() {
         return cells;
     }
 
     public List<String> inspectCells() {
-        return cells.stream().map(Node::inspectClause).collect(toList());
+        return cells.stream().map(DALNode::inspectClause).collect(toList());
     }
 
     public boolean hasIndex() {

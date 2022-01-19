@@ -2,12 +2,12 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
-public class SchemaWhichExpression extends Node {
+public class SchemaWhichExpression extends DALNode {
     private final SchemaExpression schemaExpression;
-    private final Node clause;
+    private final DALNode clause;
     private final boolean omitWhich;
 
-    public SchemaWhichExpression(SchemaExpression schemaExpression, Node clause, boolean omitWhich) {
+    public SchemaWhichExpression(SchemaExpression schemaExpression, DALNode clause, boolean omitWhich) {
         this.schemaExpression = schemaExpression;
         this.clause = clause;
         this.omitWhich = omitWhich;

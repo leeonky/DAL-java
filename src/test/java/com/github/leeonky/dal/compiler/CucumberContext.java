@@ -1,7 +1,8 @@
 package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.ast.DALNode;
+import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.ListAccessor;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CucumberContext {
     private static final Compiler compiler = new Compiler();
-    private static final Map<String, NodeMatcher> matcherMap = new HashMap<String, NodeMatcher>() {{
+    private static final Map<String, NodeMatcher<DALNode>> matcherMap = new HashMap<String, NodeMatcher<DALNode>>() {{
         put("number", compiler.NUMBER);
         put("integer", compiler.INTEGER);
         put("single-quoted-string", compiler.SINGLE_QUOTED_STRING);
@@ -32,14 +33,14 @@ public class CucumberContext {
         put("const-null", compiler.CONST_NULL);
         put("const", compiler.CONST);
         put("regex", compiler.REGEX);
-        put("dot-property", compiler.DOT_PROPERTY.defaultInputNode());
+        put("dot-property", compiler.DOT_PROPERTY.defaultInputNode(InputNode.INSTANCE));
         put("identity-property", compiler.IDENTITY_PROPERTY);
-        put("bracket-property", compiler.BRACKET_PROPERTY.defaultInputNode());
-        put("explicit-property", compiler.EXPLICIT_PROPERTY.defaultInputNode());
+        put("bracket-property", compiler.BRACKET_PROPERTY.defaultInputNode(InputNode.INSTANCE));
+        put("explicit-property", compiler.EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE));
         put("property", compiler.PROPERTY);
         put("operand", optional(compiler.OPERAND));
-        put("binary-operator-expression", compiler.BINARY_OPERATOR_EXPRESSION.defaultInputNode());
-        put("schema-expression", compiler.SCHEMA_EXPRESSION.defaultInputNode());
+        put("binary-operator-expression", compiler.BINARY_OPERATOR_EXPRESSION.defaultInputNode(InputNode.INSTANCE));
+        put("schema-expression", compiler.SCHEMA_EXPRESSION.defaultInputNode(InputNode.INSTANCE));
         put("expression", optional(compiler.EXPRESSION));
         put("parentheses", compiler.PARENTHESES);
         put("object", compiler.OBJECT);
@@ -49,7 +50,7 @@ public class CucumberContext {
         put("schema", optional(SchemaExpressionClauseFactory.SCHEMA));
     }};
 
-    private static NodeMatcher optional(NodeFactory nodeFactory) {
+    private static NodeMatcher<DALNode> optional(NodeFactory<DALNode> nodeFactory) {
         return parser -> Optional.ofNullable(nodeFactory.fetch(parser));
     }
 
@@ -57,10 +58,10 @@ public class CucumberContext {
     DAL dal = new DAL();
 
     Object inputObject = null;
-    TokenParser tokenParser = null;
+    TokenParser<DALNode> tokenParser = null;
     String sourceCodeString = null;
     InterpreterException interpreterException;
-    Node node = null;
+    DALNode node = null;
     private final List<String> schemas = new ArrayList<>();
     private final List<String> javaClasses = new ArrayList<>();
 
@@ -76,7 +77,7 @@ public class CucumberContext {
     }
 
     public void giveDalSourceCode(String code) {
-        tokenParser = new TokenParser(new SourceCode(sourceCodeString = parseTabAndSpace(code)),
+        tokenParser = new TokenParser<>(new SourceCode(sourceCodeString = parseTabAndSpace(code)),
                 dal.getRuntimeContextBuilder().build(null));
     }
 
@@ -89,7 +90,7 @@ public class CucumberContext {
     }
 
     public void assertNodeValue(String assertion, String factory) {
-        dal.evaluate(matcherMap.get(factory).fetch(new TokenParser(new SourceCode(sourceCodeString),
+        dal.evaluate(matcherMap.get(factory).fetch(new TokenParser<>(new SourceCode(sourceCodeString),
                 dal.getRuntimeContextBuilder().build(null))).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
     }

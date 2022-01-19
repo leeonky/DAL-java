@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 
-public class RegexNode extends Node {
+public class RegexNode extends DALNode {
     private final Pattern pattern;
 
     public RegexNode(String regex) {
@@ -24,7 +24,7 @@ public class RegexNode extends Node {
     }
 
     @Override
-    public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
         Data actual = actualNode.evaluateDataObject(context);
         if (actual.getInstance() instanceof String)
             return matches((String) actual.getInstance(), actual);
@@ -32,7 +32,7 @@ public class RegexNode extends Node {
     }
 
     @Override
-    public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
         Data actual = actualNode.evaluateDataObject(context);
         return matches((String) actual.convert(String.class).getInstance(), actual);
     }

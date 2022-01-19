@@ -4,12 +4,12 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.Objects;
 
-public class Expression extends Node {
-    private final Node node1;
+public class Expression extends DALNode {
+    private final DALNode node1;
     private final Operator operator;
-    private final Node node2;
+    private final DALNode node2;
 
-    public Expression(Node node1, Operator operator, Node node2) {
+    public Expression(DALNode node1, Operator operator, DALNode node2) {
         this.node1 = node1;
         this.node2 = node2;
         this.operator = operator;

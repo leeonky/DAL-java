@@ -5,27 +5,27 @@ import com.github.leeonky.dal.ast.Node;
 import java.util.Optional;
 import java.util.function.Function;
 
-public interface NodeFactory {
+public interface NodeFactory<N extends Node<N>> {
 
-    Node fetch(TokenParser parser);
+    N fetch(TokenParser<N> parser);
 
-    default NodeFactory recursive(ExpressionMatcher expressionMatcher) {
+    default NodeFactory<N> recursive(ExpressionMatcher<N> expressionMatcher) {
         return parser -> {
-            Node node = fetch(parser);
-            Optional<Node> optionalNode = expressionMatcher.fetch(parser, node);
+            N node = fetch(parser);
+            Optional<N> optionalNode = expressionMatcher.fetch(parser, node);
             while (optionalNode.isPresent())
                 optionalNode = expressionMatcher.fetch(parser, node = optionalNode.get());
             return node;
         };
     }
 
-    default NodeFactory map(Function<Node, Node> mapping) {
+    default NodeFactory<N> map(Function<N, N> mapping) {
         return parser -> mapping.apply(fetch(parser));
     }
 
-    default NodeFactory withClause(ExpressionClauseFactory expressionClauseFactory) {
+    default NodeFactory<N> withClause(ExpressionClauseFactory<N> expressionClauseFactory) {
         return parser -> {
-            Node node = fetch(parser);
+            N node = fetch(parser);
             return expressionClauseFactory.fetch(parser).makeExpression(node);
         };
     }

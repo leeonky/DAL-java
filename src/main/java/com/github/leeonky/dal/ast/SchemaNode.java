@@ -3,7 +3,7 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.runtime.ConstructorViaSchema;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
-public class SchemaNode extends Node {
+public class SchemaNode extends DALNode {
     private final String schema;
 
     public SchemaNode(String schema) {

@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.function.Function;
 
-public class SequenceNode extends Node {
+public class SequenceNode extends DALNode {
     public static final Comparator<Object> NOP_COMPARATOR = (o1, o2) -> 0;
     public static final SequenceNode NO_SEQUENCE = new SequenceNode(0, Type.AZ, null) {
         @Override

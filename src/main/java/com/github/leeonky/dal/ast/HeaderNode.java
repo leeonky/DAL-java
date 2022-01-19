@@ -6,12 +6,12 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import java.util.Comparator;
 import java.util.Optional;
 
-public class HeaderNode extends Node {
+public class HeaderNode extends DALNode {
     private final SequenceNode sequence;
-    private final Node property;
+    private final DALNode property;
     private final Optional<Operator> operator;
 
-    public HeaderNode(SequenceNode sequence, Node property, Optional<Operator> operator) {
+    public HeaderNode(SequenceNode sequence, DALNode property, Optional<Operator> operator) {
         this.sequence = sequence;
         this.property = property;
         this.operator = operator;
@@ -23,11 +23,11 @@ public class HeaderNode extends Node {
         return sequence.inspect() + operator.map(o -> o.inspect(inspect, "").trim()).orElse(inspect);
     }
 
-    public Node getProperty() {
+    public DALNode getProperty() {
         return property;
     }
 
-    public OperatorMatcher headerOperator() {
+    public OperatorMatcher<DALNode> headerOperator() {
         return tokenParser -> operator;
     }
 

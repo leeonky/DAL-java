@@ -3,7 +3,7 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
-public class InputNode extends Node {
+public class InputNode extends DALNode {
     public static final InputNode INSTANCE = new InputNode();
 
     private InputNode() {

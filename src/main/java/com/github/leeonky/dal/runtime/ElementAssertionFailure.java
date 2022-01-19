@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.TableNode;
 
 import java.util.List;
@@ -8,9 +8,9 @@ import java.util.List;
 public class ElementAssertionFailure extends RuntimeException {
     private final int row;
     private final DalException dalException;
-    private final List<Node> expressions;
+    private final List<DALNode> expressions;
 
-    public ElementAssertionFailure(List<Node> expressions, int row, DalException dalException) {
+    public ElementAssertionFailure(List<DALNode> expressions, int row, DalException dalException) {
         this.row = row;
         this.dalException = dalException;
         this.expressions = expressions;

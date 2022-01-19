@@ -1,14 +1,13 @@
 package com.github.leeonky.dal.compiler;
 
-import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.Node;
 
 import java.util.Optional;
 
-public interface ExpressionMatcher {
-    Optional<Node> fetch(TokenParser tokenParser, Node previous);
+public interface ExpressionMatcher<N extends Node<N>> {
+    Optional<N> fetch(TokenParser<N> tokenParser, N previous);
 
-    default NodeMatcher defaultInputNode() {
-        return parser -> fetch(parser, InputNode.INSTANCE);
+    default NodeMatcher<N> defaultInputNode(N instance) {
+        return parser -> fetch(parser, instance);
     }
 }

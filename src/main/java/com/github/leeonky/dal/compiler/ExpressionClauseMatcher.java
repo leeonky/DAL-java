@@ -1,11 +1,13 @@
 package com.github.leeonky.dal.compiler;
 
+import com.github.leeonky.dal.ast.Node;
+
 import java.util.Optional;
 
-public interface ExpressionClauseMatcher {
-    Optional<ExpressionClause> fetch(TokenParser tokenParser);
+public interface ExpressionClauseMatcher<N extends Node<N>> {
+    Optional<ExpressionClause<N>> fetch(TokenParser<N> tokenParser);
 
-    default ExpressionClauseFactory or(ExpressionClauseFactory expressionClauseFactory) {
+    default ExpressionClauseFactory<N> or(ExpressionClauseFactory<N> expressionClauseFactory) {
         return parser -> fetch(parser).orElseGet(() -> expressionClauseFactory.fetch(parser));
     }
 }

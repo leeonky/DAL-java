@@ -20,14 +20,14 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class ListNode extends Node {
-    private List<Node> expressions__;
-    private List<Node> inputExpressions;
-    private List<ExpressionClause> expressionFactories;
+public class ListNode extends DALNode {
+    private List<DALNode> expressions__;
+    private List<DALNode> inputExpressions;
+    private List<ExpressionClause<DALNode>> expressionFactories;
     private final Type type;
     private final boolean multiLineList;
 
-    public ListNode(List<ExpressionClause> expressionFactories, boolean multiLineList) {
+    public ListNode(List<ExpressionClause<DALNode>> expressionFactories, boolean multiLineList) {
         type = guessType(expressionFactories);
         this.expressionFactories = expressionFactories;
         this.multiLineList = multiLineList;
@@ -36,28 +36,28 @@ public class ListNode extends Node {
         getExpressions(0);
     }
 
-    private List<Node> getExpressions(int firstIndex) {
+    private List<DALNode> getExpressions(int firstIndex) {
         return expressions__ != null ? expressions__ : type.checkElements(getInputExpressions(firstIndex)).stream()
                 .filter(node -> !(node instanceof ListEllipsisNode)).collect(toList());
     }
 
-    private List<Node> getInputExpressions(int firstIndex) {
+    private List<DALNode> getInputExpressions(int firstIndex) {
         return inputExpressions != null ? inputExpressions : mapWithIndex(expressionFactories.stream(),
                 (i, clause) -> clause.makeExpression(new PropertyNode(InputNode.INSTANCE,
                         type.indexOfNode(firstIndex, i, expressionFactories.size()), BRACKET))).collect(toList());
     }
 
-    public ListNode(List<Node> inputExpressions, boolean multiLineList, Type type) {
+    public ListNode(List<DALNode> inputExpressions, boolean multiLineList, Type type) {
         expressions__ = this.inputExpressions = new ArrayList<>(inputExpressions);
         this.multiLineList = multiLineList;
         this.type = type;
     }
 
-    public ListNode(List<ExpressionClause> expressionFactories) {
+    public ListNode(List<ExpressionClause<DALNode>> expressionFactories) {
         this(expressionFactories, false);
     }
 
-    private Type guessType(List<ExpressionClause> expressionFactories) {
+    private Type guessType(List<ExpressionClause<DALNode>> expressionFactories) {
         if (expressionFactories.size() > 0 && expressionFactories.get(expressionFactories.size() - 1).isListEllipsis())
             return Type.FIRST_N_ITEMS;
         else if (expressionFactories.size() > 0 && expressionFactories.get(0).isListEllipsis())
@@ -70,35 +70,35 @@ public class ListNode extends Node {
     }
 
     // Only for test
-    public List<Node> getExpressions() {
+    public List<DALNode> getExpressions() {
         return getExpressions(0);
     }
 
     @Override
     public String inspect() {
-        return getInputExpressions(0).stream().map(Node::inspectClause).collect(joining(", ", "[", "]"));
+        return getInputExpressions(0).stream().map(DALNode::inspectClause).collect(joining(", ", "[", "]"));
     }
 
     @Override
-    public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
         return judgeAll(context, actualNode.evaluateDataObject(context));
     }
 
     @Override
-    public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
         return judgeAll(context, actualNode.evaluateDataObject(context));
     }
 
     public boolean judgeAll(RuntimeContextBuilder.RuntimeContext context, Data data) {
         if (!data.isList())
             throw new RuntimeException(format("Cannot compare%sand list", data.inspect()), getPositionBegin());
-        List<Node> expressions = getExpressions(data.getListFirstIndex());
+        List<DALNode> expressions = getExpressions(data.getListFirstIndex());
         if (type == Type.ALL_ITEMS)
             assertListSize(expressions.size(), data.getListSize(), getPositionBegin());
         return context.newThisScope(data, () -> assertElementExpressions(context, expressions));
     }
 
-    private boolean assertElementExpressions(RuntimeContextBuilder.RuntimeContext context, List<Node> expressions) {
+    private boolean assertElementExpressions(RuntimeContextBuilder.RuntimeContext context, List<DALNode> expressions) {
         if (multiLineList)
             eachWithIndex(expressions.stream(), (i, expression) -> {
                 try {
@@ -115,12 +115,12 @@ public class ListNode extends Node {
     public enum Type {
         ALL_ITEMS {
             @Override
-            protected Stream<Node> toChecking(List<Node> inputExpressions) {
+            protected Stream<DALNode> toChecking(List<DALNode> inputExpressions) {
                 return inputExpressions.stream();
             }
         }, FIRST_N_ITEMS {
             @Override
-            protected Stream<Node> toChecking(List<Node> inputExpressions) {
+            protected Stream<DALNode> toChecking(List<DALNode> inputExpressions) {
                 return inputExpressions.stream().limit(inputExpressions.size() - 1);
             }
         }, LAST_N_ITEMS {
@@ -130,7 +130,7 @@ public class ListNode extends Node {
             }
 
             @Override
-            protected Stream<Node> toChecking(List<Node> inputExpressions) {
+            protected Stream<DALNode> toChecking(List<DALNode> inputExpressions) {
                 return inputExpressions.stream().skip(1);
             }
         };
@@ -139,9 +139,9 @@ public class ListNode extends Node {
             return index + firstIndex;
         }
 
-        protected abstract Stream<Node> toChecking(List<Node> inputExpressions);
+        protected abstract Stream<DALNode> toChecking(List<DALNode> inputExpressions);
 
-        public List<Node> checkElements(List<Node> inputExpressions) {
+        public List<DALNode> checkElements(List<DALNode> inputExpressions) {
             toChecking(inputExpressions).forEach(node -> {
                 if (node instanceof ListEllipsisNode)
                     throw new SyntaxException("unexpected token", node.getPositionBegin());

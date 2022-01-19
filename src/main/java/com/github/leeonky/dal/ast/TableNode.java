@@ -22,7 +22,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class TableNode extends Node {
+public class TableNode extends DALNode {
     private final List<HeaderNode> headers;
     private final List<RowNode> rows;
     private final Type type;
@@ -59,16 +59,16 @@ public class TableNode extends Node {
     }
 
     @Override
-    public boolean judge(Node actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
         return judgeRows(actualNode, operator, context);
     }
 
     @Override
-    public boolean judge(Node actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
         return judgeRows(actualNode, operator, context);
     }
 
-    private boolean judgeRows(Node actualNode, Operator operator, RuntimeContextBuilder.RuntimeContext context) {
+    private boolean judgeRows(DALNode actualNode, Operator operator, RuntimeContextBuilder.RuntimeContext context) {
         try {
             return transformToListNode(operator).judgeAll(context, actualNode.evaluateDataObject(context)
                     .setListComparator(collectComparator(context)));
@@ -78,7 +78,7 @@ public class TableNode extends Node {
     }
 
     private ListNode transformToListNode(Operator operator) {
-        Stream<ExpressionClause> rowExpressionClauses = rows.stream().map(rowNode -> rowNode.toExpressionClause(operator));
+        Stream<ExpressionClause<DALNode>> rowExpressionClauses = rows.stream().map(rowNode -> rowNode.toExpressionClause(operator));
         return hasRowIndex ? new ListNode(rowExpressionClauses.map(rowNode -> rowNode.makeExpression(null))
                 .collect(toList()), true, ListNode.Type.FIRST_N_ITEMS)
                 : new ListNode(rowExpressionClauses.collect(toList()), true);

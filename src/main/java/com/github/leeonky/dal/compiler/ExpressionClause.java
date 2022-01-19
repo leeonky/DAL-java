@@ -5,10 +5,10 @@ import com.github.leeonky.dal.ast.Node;
 
 import java.util.function.Function;
 
-public interface ExpressionClause {
-    Node makeExpression(Node input);
+public interface ExpressionClause<N extends Node<N>> {
+    N makeExpression(N input);
 
-    default ExpressionClause map(Function<Node, Node> mapper) {
+    default ExpressionClause<N> map(Function<N, N> mapper) {
         return node -> mapper.apply(makeExpression(node));
     }
 

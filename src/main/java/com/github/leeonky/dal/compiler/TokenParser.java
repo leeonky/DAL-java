@@ -20,7 +20,7 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 
-public class TokenParser {
+public class TokenParser<N extends Node<N>> {
     public static final TokenMatcher
             NUMBER = tokenMatcher(DIGITAL::contains, emptySet(), false, (lastChar, nextChar) ->
             ((lastChar != 'e' && lastChar != 'E') || (nextChar != '-' && nextChar != '+')) && DELIMITER.contains(nextChar), Token::isNumber),
@@ -45,8 +45,8 @@ public class TokenParser {
         return sourceCode;
     }
 
-    public Optional<Node> fetchNode(char opening, char closing, Function<Node, Node> nodeFactory,
-                                    NodeFactory nodeMatcher, String message) {
+    public Optional<N> fetchNode(char opening, char closing, Function<N, N> nodeFactory,
+                                 NodeFactory<N> nodeMatcher, String message) {
         return fetchNodes(opening, closing, args -> {
             if (args.size() != 1)
                 throw sourceCode.syntaxError(message, -1);
@@ -54,13 +54,12 @@ public class TokenParser {
         }, () -> nodeMatcher.fetch(this));
     }
 
-    public <T> Optional<Node> fetchNodes(Character opening, char closing, Function<List<T>,
-            Node> nodeFactory, Supplier<T> element) {
+    public <T> Optional<N> fetchNodes(Character opening, char closing, Function<List<T>, N> nodeFactory, Supplier<T> element) {
         return sourceCode.fetchElementNode(BY_NODE, opening, closing, element, nodeFactory);
     }
 
-    public Optional<Node> fetchString(Character opening, char closing, Function<String, Node> nodeFactory,
-                                      Map<String, Character> escapeChars) {
+    public Optional<N> fetchString(Character opening, char closing, Function<String, N> nodeFactory,
+                                   Map<String, Character> escapeChars) {
         return sourceCode.fetchElementNode(BY_CHAR, opening, closing, () -> sourceCode.escapedPop(escapeChars),
                 chars -> nodeFactory.apply(chars.stream().map(String::valueOf).collect(joining())));
     }
@@ -74,9 +73,9 @@ public class TokenParser {
         });
     }
 
-    public Optional<Node> fetchBetween(String opening, String closing, NodeMatcher nodeMatcher) {
+    public Optional<N> fetchBetween(String opening, String closing, NodeMatcher<N> nodeMatcher) {
         return sourceCode.tryFetch(() -> {
-            Optional<Node> optionalNode = Optional.empty();
+            Optional<N> optionalNode = Optional.empty();
             if (sourceCode.popWord(opening).isPresent()) {
                 optionalNode = nodeMatcher.fetch(this);
                 if (optionalNode.isPresent())
@@ -87,15 +86,15 @@ public class TokenParser {
         });
     }
 
-    public Optional<Node> disableCommaAnd(Supplier<Optional<Node>> nodeFactory) {
+    public Optional<N> disableCommaAnd(Supplier<Optional<N>> nodeFactory) {
         return commaAnd(false, nodeFactory);
     }
 
-    public Optional<Node> enableCommaAnd(Supplier<Optional<Node>> nodeFactory) {
+    public Optional<N> enableCommaAnd(Supplier<Optional<N>> nodeFactory) {
         return commaAnd(true, nodeFactory);
     }
 
-    private Optional<Node> commaAnd(boolean b, Supplier<Optional<Node>> nodeFactory) {
+    private Optional<N> commaAnd(boolean b, Supplier<Optional<N>> nodeFactory) {
         enableAndComma.push(b);
         try {
             return nodeFactory.get();
@@ -104,12 +103,13 @@ public class TokenParser {
         }
     }
 
-    public Optional<Node> fetchInput() {
-        return when(sourceCode.isBeginning()).optional(() -> InputNode.INSTANCE);
+    public Optional<N> fetchInput() {
+//            TODO to be generic
+        return when(sourceCode.isBeginning()).optional(() -> (N) InputNode.INSTANCE);
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Node> List<T> fetchNodes(String delimiter, NodeFactory factory) {
+    public <T> List<T> fetchNodes(String delimiter, NodeFactory<N> factory) {
         return new ArrayList<T>() {{
             add((T) factory.fetch(TokenParser.this));
             while (sourceCode.popWord(delimiter).isPresent())
@@ -117,46 +117,49 @@ public class TokenParser {
         }};
     }
 
-    public Optional<Node> fetchNodeAfter(String token, NodeFactory nodeFactory) {
+    public Optional<N> fetchNodeAfter(String token, NodeFactory<N> nodeFactory) {
         return sourceCode.popWord(token).map(t -> nodeFactory.fetch(this).setPositionBegin(t.getPosition()));
     }
 
-    public Optional<ExpressionClause> fetchNodeAfter(String token, ExpressionClauseFactory expressionClauseFactory) {
+    public Optional<ExpressionClause<N>> fetchNodeAfter(String token, ExpressionClauseFactory<N> expressionClauseFactory) {
         return sourceCode.popWord(token).map(t -> expressionClauseFactory.fetch(this)
                 .map(node -> node.setPositionBegin(t.getPosition())));
     }
 
-    public Optional<Node> fetchExpression(Node left, OperatorMatcher operatorMatcher, NodeFactory rightCompiler) {
-        return operatorMatcher.fetch(this).map(opt -> (OperatorFactory) _ignore -> opt)
-                .map(operatorFactory -> fetchExpression(left, operatorFactory, rightCompiler));
+    public Optional<N> fetchExpression(N left, OperatorMatcher<N> operatorMatcher, NodeFactory<N> rightCompiler) {
+        return operatorMatcher.fetch(this).map(opt -> (OperatorFactory<N>) _ignore -> opt)
+//            TODO to be generic
+                .map(operatorFactory -> (N) fetchExpression(left, operatorFactory, rightCompiler));
     }
 
-    public Expression fetchExpression(Node left, OperatorFactory operatorFactory, NodeFactory rightCompiler) {
+    public Expression fetchExpression(N left, OperatorFactory<N> operatorFactory, NodeFactory<N> rightCompiler) {
         Operator operator = operatorFactory.fetch(this);
         operators.push(operator);
         try {
-            return new Expression(left, operator, rightCompiler.fetch(this)).adjustOperatorOrder();
+//            TODO to be generic
+            return new Expression((DALNode) left, operator, (DALNode) rightCompiler.fetch(this)).adjustOperatorOrder();
         } finally {
             operators.pop();
         }
     }
 
-    public ExpressionClause fetchExpressionClause(OperatorFactory operatorFactory, NodeFactory rightCompiler) {
+    public ExpressionClause<N> fetchExpressionClause(OperatorFactory<N> operatorFactory, NodeFactory<N> rightCompiler) {
         return fetchExpressionClause(operatorFactory.fetch(this), rightCompiler);
     }
 
-    private ExpressionClause fetchExpressionClause(Operator operator, NodeFactory rightCompiler) {
+    private ExpressionClause<N> fetchExpressionClause(Operator operator, NodeFactory<N> rightCompiler) {
         operators.push(operator);
-        Node fetch;
+        N fetch;
         try {
             fetch = rightCompiler.fetch(this);
         } finally {
             operators.pop();
         }
-        return input -> new Expression(input, operator, fetch).adjustOperatorOrder();
+//        TODO to generic
+        return input -> (N) new Expression((DALNode) input, operator, (DALNode) fetch).adjustOperatorOrder();
     }
 
-    public Optional<ExpressionClause> fetchExpressionClause(OperatorMatcher operatorMatcher, NodeFactory rightCompiler) {
+    public Optional<ExpressionClause<N>> fetchExpressionClause(OperatorMatcher<N> operatorMatcher, NodeFactory<N> rightCompiler) {
         return operatorMatcher.fetch(this).map(operator -> fetchExpressionClause(operator, rightCompiler));
     }
 
@@ -164,7 +167,7 @@ public class TokenParser {
         return enableAndComma.getFirst();
     }
 
-    public Optional<Node> wordToken(String word, Function<Token, Node> factory) {
+    public <N extends Node<N>> Optional<N> wordToken(String word, Function<Token, N> factory) {
         return sourceCode.popWord(word).map(t -> factory.apply(t).setPositionBegin(t.getPosition()));
     }
 
@@ -178,16 +181,16 @@ public class TokenParser {
         }});
     }
 
-    public static final OperatorFactory DEFAULT_JUDGEMENT_OPERATOR = tokenParser -> tokenParser.operators.isEmpty() ?
+    public static final OperatorFactory<DALNode> DEFAULT_JUDGEMENT_OPERATOR = tokenParser -> tokenParser.operators.isEmpty() ?
             new Operator.Matcher() : tokenParser.operators.getFirst();
 
-    public static OperatorMatcher operatorMatcher(String symbol, Supplier<Operator> factory,
-                                                  Predicate<TokenParser> matcher) {
+    public static OperatorMatcher<DALNode> operatorMatcher(String symbol, Supplier<Operator> factory,
+                                                           Predicate<TokenParser<DALNode>> matcher) {
         return tokenParser -> tokenParser.getSourceCode().popWord(symbol, () -> matcher.test(tokenParser))
                 .map(token -> factory.get().setPosition(token.getPosition()));
     }
 
-    public static OperatorMatcher operatorMatcher(String symbol, Supplier<Operator> factory) {
+    public static OperatorMatcher<DALNode> operatorMatcher(String symbol, Supplier<Operator> factory) {
         return operatorMatcher(symbol, factory, s -> true);
     }
 

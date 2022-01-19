@@ -2,10 +2,10 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
-public class ParenthesesNode extends Node {
-    private final Node node;
+public class ParenthesesNode extends DALNode {
+    private final DALNode node;
 
-    public ParenthesesNode(Node node) {
+    public ParenthesesNode(DALNode node) {
         this.node = node;
     }
 

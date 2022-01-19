@@ -16,13 +16,13 @@ import static java.lang.String.join;
 import static java.util.Collections.nCopies;
 import static java.util.stream.Collectors.joining;
 
-public class SchemaExpression extends Node {
-    private final Node instance;
+public class SchemaExpression extends DALNode {
+    private final DALNode instance;
     private final List<SchemaNode> schemaNodes = new ArrayList<>();
     private final ObjectRef objectRef = new ObjectRef();
     private final int dimension;
 
-    public SchemaExpression(Node previous, List<SchemaNode> schemaNodes, int dimension) {
+    public SchemaExpression(DALNode previous, List<SchemaNode> schemaNodes, int dimension) {
         instance = previous;
         this.schemaNodes.addAll(schemaNodes);
         this.dimension = dimension;
@@ -76,16 +76,16 @@ public class SchemaExpression extends Node {
         return (instance instanceof InputNode ? "" : instance.inspect() + " ") + inspectClause();
     }
 
-    private SchemaWhichExpression which(Node whichClause, boolean omitWhich) {
+    private SchemaWhichExpression which(DALNode whichClause, boolean omitWhich) {
         return (SchemaWhichExpression) new SchemaWhichExpression(this, whichClause, omitWhich)
                 .setPositionBegin(getPositionBegin());
     }
 
-    public SchemaWhichExpression omitWhich(Node n) {
+    public SchemaWhichExpression omitWhich(DALNode n) {
         return which(n, true);
     }
 
-    public SchemaWhichExpression which(Node n) {
+    public SchemaWhichExpression which(DALNode n) {
         return which(n, false);
     }
 

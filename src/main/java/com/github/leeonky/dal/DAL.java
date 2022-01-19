@@ -1,6 +1,6 @@
 package com.github.leeonky.dal;
 
-import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.compiler.Compiler;
 import com.github.leeonky.dal.runtime.AssertResult;
 import com.github.leeonky.dal.runtime.Extension;
@@ -52,7 +52,7 @@ public class DAL {
     @SuppressWarnings("unchecked")
     public <T> T evaluate(Object input, String expression) {
         RuntimeContextBuilder.RuntimeContext runtimeContext = runtimeContextBuilder.build(input);
-        List<Node> nodes = compiler.compile(new SourceCode(expression), runtimeContext);
+        List<DALNode> nodes = compiler.compile(new SourceCode(expression), runtimeContext);
         if (nodes.size() > 1)
             throw new SyntaxException("more than one expression", nodes.get(1).getPositionBegin());
         return (T) nodes.get(0).evaluate(runtimeContext);
