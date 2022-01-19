@@ -19,6 +19,7 @@ public class InterpreterException extends RuntimeException {
         positions.add(new Position(type, position));
     }
 
+    @SuppressWarnings("unchecked")
     public <E extends InterpreterException> E multiPosition(int positionBegin, Position.Type type) {
         positions.add(new Position(type, positionBegin));
         return (E) this;

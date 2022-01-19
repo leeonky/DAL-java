@@ -1,6 +1,7 @@
 package com.github.leeonky.interpreter;
 
 import com.github.leeonky.dal.compiler.EscapeChars;
+import com.github.leeonky.dal.compiler.Token;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -109,6 +110,99 @@ class SourceCodeTest {
             sourceCode.escapedPop(NO_ESCAPE);
             sourceCode.escapedPop(NO_ESCAPE);
             assertThat(sourceCode.isBeginning()).isTrue();
+        }
+    }
+
+    @Nested
+    class ThrowSyntaxException {
+
+        @Test
+        void throw_exception_with_position_info() {
+            SourceCode sourceCode = new SourceCode("abc");
+            sourceCode.escapedPop(NO_ESCAPE);
+            assertThat(sourceCode.syntaxError("test", 1).show("abc")).isEqualTo("abc\n  ^");
+        }
+    }
+
+    @Nested
+    class PopWord {
+
+        @Test
+        void pop_matched_word() {
+            SourceCode code = new SourceCode("ab");
+            code.escapedPop(NO_ESCAPE);
+            Token token = code.popWord("b").get();
+            assertThat(token.getContent()).isEqualTo("b");
+            assertThat(token.getPosition()).isEqualTo(1);
+        }
+
+        @Test
+        void pop_not_matched_word() {
+            SourceCode code = new SourceCode("ab");
+            assertThat(code.popWord("b")).isEmpty();
+            assertThat(code.escapedPop(NO_ESCAPE)).isEqualTo('a');
+        }
+
+        @Test
+        void trim_before_pop_word() {
+            SourceCode code = new SourceCode(" \n\t\rb");
+
+            assertThat(code.popWord("b").get().getContent()).isEqualTo("b");
+        }
+
+        @Nested
+        class ConditionalPop {
+
+            @Test
+            void non_matched_word() {
+                SourceCode code = new SourceCode("ab");
+                assertThat(code.popWord("a", () -> false)).isEmpty();
+            }
+
+            @Test
+            void predicate_should_not_called_when_word_not_matched() {
+                SourceCode code = new SourceCode("ab");
+                assertThat(code.popWord("b", () -> {
+                    throw new RuntimeException();
+                })).isEmpty();
+            }
+        }
+    }
+
+    //    TODO
+    @Nested
+    class FetchElementNode {
+
+    }
+
+    //    TODO
+    @Nested
+    class TryFetch {
+
+    }
+
+    @Nested
+    class RepeatWords {
+
+        @Test
+        void pop_same_word() {
+            assertThat(new SourceCode("aaa").repeatWords("a", i -> i).get()).isEqualTo(3);
+            assertThat(new SourceCode(" \r\n\taaa").repeatWords("a", i -> i).get()).isEqualTo(3);
+            assertThat(new SourceCode("aa").repeatWords("a", i -> i).get()).isEqualTo(2);
+        }
+
+        @Test
+        void allow_blank_between_word() {
+            assertThat(new SourceCode("a \n\r\ta").repeatWords("a", i -> i).get()).isEqualTo(2);
+        }
+    }
+
+    @Nested
+    class NextPosition {
+
+        @Test
+        void should_skip_blank_return_position() {
+            assertThat(new SourceCode(" \n\r\ta").nextPosition()).isEqualTo(4);
         }
     }
 
