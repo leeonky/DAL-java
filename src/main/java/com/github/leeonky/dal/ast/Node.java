@@ -17,4 +17,13 @@ public class Node<N extends Node<N>> {
         this.positionBegin = positionBegin;
         return (N) this;
     }
+
+    public int getOperandPosition() {
+        return positionBegin;
+    }
+
+    //TODO move to expression
+    public N adjustOperatorOrder() {
+        return (N) this;
+    }
 }

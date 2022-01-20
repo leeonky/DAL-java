@@ -4,30 +4,32 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.Objects;
 
+//TODO to be generic
 public class Expression extends DALNode {
     private final DALNode node1;
-    private final Operator operator;
+    private final Operator<DALNode> operator;
     private final DALNode node2;
 
-    public Expression(DALNode node1, Operator operator, DALNode node2) {
+    public Expression(DALNode node1, Operator<DALNode> operator, DALNode node2) {
         this.node1 = node1;
         this.node2 = node2;
         this.operator = operator;
         setPositionBegin(operator.getPosition());
     }
 
-    public Node getLeftOperand() {
+    public DALNode getLeftOperand() {
         return node1;
     }
 
-    public Node getRightOperand() {
+    public DALNode getRightOperand() {
         return node2;
     }
 
-    public Operator getOperator() {
+    public Operator<DALNode> getOperator() {
         return operator;
     }
 
+    @Override
     public Expression adjustOperatorOrder() {
         if (node1 instanceof Expression) {
             Expression expression1 = (Expression) node1;

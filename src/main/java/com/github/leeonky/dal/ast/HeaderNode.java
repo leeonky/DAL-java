@@ -9,9 +9,9 @@ import java.util.Optional;
 public class HeaderNode extends DALNode {
     private final SequenceNode sequence;
     private final DALNode property;
-    private final Optional<Operator> operator;
+    private final Optional<Operator<DALNode>> operator;
 
-    public HeaderNode(SequenceNode sequence, DALNode property, Optional<Operator> operator) {
+    public HeaderNode(SequenceNode sequence, DALNode property, Optional<Operator<DALNode>> operator) {
         this.sequence = sequence;
         this.property = property;
         this.operator = operator;

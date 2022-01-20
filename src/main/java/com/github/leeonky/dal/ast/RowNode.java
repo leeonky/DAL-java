@@ -15,10 +15,10 @@ import static java.util.stream.Collectors.toList;
 public class RowNode extends DALNode {
     private final List<DALNode> cells;
     private final Optional<Integer> index;
-    private final Optional<Operator> operator;
+    private final Optional<Operator<DALNode>> operator;
     private final Optional<ExpressionClause<DALNode>> schemaClause;
 
-    public RowNode(Optional<Integer> index, Optional<ExpressionClause<DALNode>> schemaClause, Optional<Operator> operator,
+    public RowNode(Optional<Integer> index, Optional<ExpressionClause<DALNode>> schemaClause, Optional<Operator<DALNode>> operator,
                    List<DALNode> cells) {
         this.cells = cells;
         this.operator = operator;
@@ -55,12 +55,12 @@ public class RowNode extends DALNode {
         return cells.size() >= 1 && cells.get(0) instanceof ListEllipsisNode;
     }
 
-    public ExpressionClause<DALNode> toExpressionClause(Operator operator) {
+    public ExpressionClause<DALNode> toExpressionClause(Operator<DALNode> operator) {
         return input -> isEllipsis() ? cells.get(0) : transformRowToExpression(operator,
                 index.<DALNode>map(i -> new PropertyNode(InputNode.INSTANCE, i, BRACKET)).orElse(input));
     }
 
-    private Expression transformRowToExpression(Operator operator, DALNode inputElement) {
+    private Expression transformRowToExpression(Operator<DALNode> operator, DALNode inputElement) {
         return new Expression(schemaClause.map(c -> c.makeExpression(inputElement)).orElse(inputElement),
                 this.operator.orElse(operator), isRowWildcard() ? cells.get(0)
                 : new ObjectNode(cells).setPositionBegin(cells.get(0).getOperandPosition()));

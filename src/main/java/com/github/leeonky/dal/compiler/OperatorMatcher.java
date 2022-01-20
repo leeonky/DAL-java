@@ -6,7 +6,7 @@ import com.github.leeonky.dal.ast.Operator;
 import java.util.Optional;
 
 public interface OperatorMatcher<N extends Node<N>> {
-    Optional<Operator> fetch(TokenParser<N> tokenParser);
+    Optional<Operator<N>> fetch(TokenParser<N> tokenParser);
 
     default OperatorFactory<N> or(OperatorFactory<N> compiler) {
         return tokenParser -> fetch(tokenParser).orElseGet(() -> compiler.fetch(tokenParser));

@@ -1,7 +1,11 @@
 package com.github.leeonky.dal.compiler;
 
-import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.ast.DALNode;
+import com.github.leeonky.dal.ast.Node;
+import com.github.leeonky.dal.ast.Operator;
+import com.github.leeonky.dal.ast.SequenceNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.interpreter.ExpressionConstructor;
 import com.github.leeonky.interpreter.SourceCode;
 
 import java.util.*;
@@ -33,12 +37,14 @@ public class TokenParser<N extends Node<N>> {
 
     private final SourceCode sourceCode;
     private final RuntimeContextBuilder.RuntimeContext runtimeContext;
-    private final LinkedList<Operator> operators = new LinkedList<>();
+    private final LinkedList<Operator<N>> operators = new LinkedList<>();
     private final LinkedList<Boolean> enableAndComma = new LinkedList<>(singleton(true));
+    private final ExpressionConstructor<N> expressionConstructor;
 
-    public TokenParser(SourceCode sourceCode, RuntimeContextBuilder.RuntimeContext runtimeContext) {
+    public TokenParser(SourceCode sourceCode, RuntimeContextBuilder.RuntimeContext runtimeContext, ExpressionConstructor<N> expressionConstructor) {
         this.sourceCode = sourceCode;
         this.runtimeContext = runtimeContext;
+        this.expressionConstructor = expressionConstructor;
     }
 
     public SourceCode getSourceCode() {
@@ -103,11 +109,6 @@ public class TokenParser<N extends Node<N>> {
         }
     }
 
-    public Optional<N> fetchInput() {
-//            TODO to be generic
-        return when(sourceCode.isBeginning()).optional(() -> (N) InputNode.INSTANCE);
-    }
-
     @SuppressWarnings("unchecked")
     public <T> List<T> fetchNodes(String delimiter, NodeFactory<N> factory) {
         return new ArrayList<T>() {{
@@ -128,16 +129,14 @@ public class TokenParser<N extends Node<N>> {
 
     public Optional<N> fetchExpression(N left, OperatorMatcher<N> operatorMatcher, NodeFactory<N> rightCompiler) {
         return operatorMatcher.fetch(this).map(opt -> (OperatorFactory<N>) _ignore -> opt)
-//            TODO to be generic
-                .map(operatorFactory -> (N) fetchExpression(left, operatorFactory, rightCompiler));
+                .map(operatorFactory -> fetchExpression(left, operatorFactory, rightCompiler));
     }
 
-    public Expression fetchExpression(N left, OperatorFactory<N> operatorFactory, NodeFactory<N> rightCompiler) {
-        Operator operator = operatorFactory.fetch(this);
+    public N fetchExpression(N left, OperatorFactory<N> operatorFactory, NodeFactory<N> rightCompiler) {
+        Operator<N> operator = operatorFactory.fetch(this);
         operators.push(operator);
         try {
-//            TODO to be generic
-            return new Expression((DALNode) left, operator, (DALNode) rightCompiler.fetch(this)).adjustOperatorOrder();
+            return expressionConstructor.newInstance(left, operator, rightCompiler.fetch(this)).adjustOperatorOrder();
         } finally {
             operators.pop();
         }
@@ -147,16 +146,15 @@ public class TokenParser<N extends Node<N>> {
         return fetchExpressionClause(operatorFactory.fetch(this), rightCompiler);
     }
 
-    private ExpressionClause<N> fetchExpressionClause(Operator operator, NodeFactory<N> rightCompiler) {
+    private ExpressionClause<N> fetchExpressionClause(Operator<N> operator, NodeFactory<N> rightCompiler) {
         operators.push(operator);
-        N fetch;
+        N right;
         try {
-            fetch = rightCompiler.fetch(this);
+            right = rightCompiler.fetch(this);
         } finally {
             operators.pop();
         }
-//        TODO to generic
-        return input -> (N) new Expression((DALNode) input, operator, (DALNode) fetch).adjustOperatorOrder();
+        return input -> expressionConstructor.newInstance(input, operator, right).adjustOperatorOrder();
     }
 
     public Optional<ExpressionClause<N>> fetchExpressionClause(OperatorMatcher<N> operatorMatcher, NodeFactory<N> rightCompiler) {
@@ -167,7 +165,7 @@ public class TokenParser<N extends Node<N>> {
         return enableAndComma.getFirst();
     }
 
-    public <N extends Node<N>> Optional<N> wordToken(String word, Function<Token, N> factory) {
+    public Optional<N> wordToken(String word, Function<Token, N> factory) {
         return sourceCode.popWord(word).map(t -> factory.apply(t).setPositionBegin(t.getPosition()));
     }
 
@@ -184,13 +182,13 @@ public class TokenParser<N extends Node<N>> {
     public static final OperatorFactory<DALNode> DEFAULT_JUDGEMENT_OPERATOR = tokenParser -> tokenParser.operators.isEmpty() ?
             new Operator.Matcher() : tokenParser.operators.getFirst();
 
-    public static OperatorMatcher<DALNode> operatorMatcher(String symbol, Supplier<Operator> factory,
+    public static OperatorMatcher<DALNode> operatorMatcher(String symbol, Supplier<Operator<DALNode>> factory,
                                                            Predicate<TokenParser<DALNode>> matcher) {
         return tokenParser -> tokenParser.getSourceCode().popWord(symbol, () -> matcher.test(tokenParser))
                 .map(token -> factory.get().setPosition(token.getPosition()));
     }
 
-    public static OperatorMatcher<DALNode> operatorMatcher(String symbol, Supplier<Operator> factory) {
+    public static OperatorMatcher<DALNode> operatorMatcher(String symbol, Supplier<Operator<DALNode>> factory) {
         return operatorMatcher(symbol, factory, s -> true);
     }
 

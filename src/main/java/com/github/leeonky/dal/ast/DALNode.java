@@ -59,8 +59,4 @@ public abstract class DALNode extends Node<DALNode> {
     public String inspectClause() {
         return inspect();
     }
-
-    public int getOperandPosition() {
-        return positionBegin;
-    }
 }

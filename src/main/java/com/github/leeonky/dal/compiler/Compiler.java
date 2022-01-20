@@ -56,7 +56,7 @@ public class Compiler {
                     .escape("\\\"", '"'),
             REGEX_ESCAPES = new EscapeChars().escape("\\/", '/');
 
-    NodeMatcher<DALNode> INPUT = TokenParser::fetchInput,
+    NodeMatcher<DALNode> INPUT = tokenParser -> when(tokenParser.getSourceCode().isBeginning()).optional(() -> InputNode.INSTANCE),
             NUMBER = TokenParser.NUMBER.map(token -> new ConstNode(token.getNumber())),
             INTEGER = TokenParser.INTEGER.map(token -> new ConstNode(token.getInteger())),
             SINGLE_QUOTED_STRING = parser -> parser.fetchString('\'', '\'', ConstNode::new, SINGLE_QUOTED_ESCAPES),
@@ -152,7 +152,7 @@ public class Compiler {
 
     public List<DALNode> compile(SourceCode sourceCode, RuntimeContextBuilder.RuntimeContext runtimeContext) {
         return new ArrayList<DALNode>() {{
-            TokenParser<DALNode> parser = new TokenParser<>(sourceCode, runtimeContext);
+            TokenParser<DALNode> parser = new TokenParser<>(sourceCode, runtimeContext, Expression::new);
             add(EXPRESSION.fetch(parser));
             if (sourceCode.isBeginning() && sourceCode.hasCode())
                 throw sourceCode.syntaxError("unexpected token", 0);
@@ -162,7 +162,7 @@ public class Compiler {
     }
 
     public List<Object> toChainNodes(String sourceCode) {
-        return ((PropertyNode) PROPERTY_CHAIN.fetch(new TokenParser<>(new SourceCode(sourceCode), null))).getChain();
+        return ((PropertyNode) PROPERTY_CHAIN.fetch(new TokenParser<>(new SourceCode(sourceCode), null, Expression::new))).getChain();
     }
 
     private static <N extends Node<N>> NodeMatcher<N> oneOf(NodeMatcher<N> matcher, NodeMatcher<N>... matchers) {
@@ -210,7 +210,7 @@ public class Compiler {
             return allOptional(() -> {
                 Optional<Integer> index = getRowIndex(parser);
                 Optional<ExpressionClause<DALNode>> rowSchemaClause = parser.fetchNodeAfter(IS, SCHEMA_CLAUSE);
-                Optional<Operator> rowOperator = JUDGEMENT_OPERATORS.fetch(parser);
+                Optional<Operator<DALNode>> rowOperator = JUDGEMENT_OPERATORS.fetch(parser);
                 return FunctionUtil.oneOf(
                         () -> parser.fetchBetween("|", "|", ELEMENT_ELLIPSIS).map(Collections::singletonList),
                         () -> parser.fetchBetween("|", "|", ROW_WILDCARD).map(Collections::singletonList),
@@ -227,7 +227,7 @@ public class Compiler {
         }
     }
 
-    private DALNode getRowCell(TokenParser<DALNode> parser, Optional<Operator> rowOperator, HeaderNode headerNode) {
+    private DALNode getRowCell(TokenParser<DALNode> parser, Optional<Operator<DALNode>> rowOperator, HeaderNode headerNode) {
         int cellPosition = parser.getSourceCode().nextPosition();
         return oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL).or(ROW_WILDCARD.or(
                 shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(), parser1 -> rowOperator)
@@ -266,7 +266,7 @@ public class Compiler {
                     && parser.getSourceCode().popWord(">>").isPresent()).optional(() -> {
                 List<Optional<Integer>> rowIndexes = new ArrayList<>();
                 List<Optional<ExpressionClause<DALNode>>> rowSchemaClauses = new ArrayList<>();
-                List<Optional<Operator>> rowOperators = parser.fetchRow(row -> {
+                List<Optional<Operator<DALNode>>> rowOperators = parser.fetchRow(row -> {
                     rowIndexes.add(getRowIndex(parser));
                     rowSchemaClauses.add(parser.fetchNodeAfter(IS, SCHEMA_CLAUSE));
                     return JUDGEMENT_OPERATORS.fetch(parser);
@@ -279,13 +279,13 @@ public class Compiler {
 
         private List<RowNode> getRowNodes(TokenParser<DALNode> parser, List<HeaderNode> headerNodes,
                                           List<Optional<ExpressionClause<DALNode>>> rowSchemaClauses,
-                                          List<Optional<Operator>> rowOperators, List<Optional<Integer>> rowIndexes) {
+                                          List<Optional<Operator<DALNode>>> rowOperators, List<Optional<Integer>> rowIndexes) {
             return FunctionUtil.mapWithIndex(getCells(parser, headerNodes, rowOperators), (i, row) ->
                     new RowNode(rowIndexes.get(i), rowSchemaClauses.get(i), rowOperators.get(i), row)).collect(toList());
         }
 
         private Stream<List<DALNode>> getCells(TokenParser<DALNode> parser, List<HeaderNode> headerNodes,
-                                               List<Optional<Operator>> rowOperators) {
+                                               List<Optional<Operator<DALNode>>> rowOperators) {
             return transpose(allOptional(() -> parser.fetchNodeAfter("|", TABLE_HEADER).map(HeaderNode.class::cast)
                     .map(headerNode -> {
                         headerNodes.add(headerNode);
