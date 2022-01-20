@@ -105,7 +105,7 @@ class CalculatorTest {
 
     @Nested
     class Equal {
-        private final RuntimeContextBuilder.RuntimeContext runtimeContext = new DAL().getRuntimeContextBuilder()
+        private final RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new DAL().getRuntimeContextBuilder()
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
                 .build(null);
 
@@ -146,11 +146,11 @@ class CalculatorTest {
         }
 
         private void assertNotEqual(Object v1, Object v2) {
-            assertFalse(Calculator.equals(runtimeContext.wrap(v1), runtimeContext.wrap(v2)));
+            assertFalse(Calculator.equals(DALRuntimeContext.wrap(v1), DALRuntimeContext.wrap(v2)));
         }
 
         private void assertEqual(Object value1, Object value2) {
-            assertTrue(Calculator.equals(runtimeContext.wrap(value1), runtimeContext.wrap(value2)));
+            assertTrue(Calculator.equals(DALRuntimeContext.wrap(value1), DALRuntimeContext.wrap(value2)));
         }
     }
 

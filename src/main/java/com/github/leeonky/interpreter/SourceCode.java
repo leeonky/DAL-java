@@ -1,14 +1,10 @@
 package com.github.leeonky.interpreter;
 
-import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.dal.compiler.Token;
-import com.github.leeonky.dal.compiler.TokenMatcher;
-
 import java.util.*;
 import java.util.function.*;
 
-import static com.github.leeonky.dal.runtime.FunctionUtil.allOptional;
-import static com.github.leeonky.dal.runtime.IfThenFactory.when;
+import static com.github.leeonky.interpreter.FunctionUtil.allOptional;
+import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -101,8 +97,8 @@ public class SourceCode {
         return when(startsWith(word) && predicate.get()).optional(() -> new Token(seek(word.length())).append(word));
     }
 
-    public <T, N extends Node<N>> Optional<N> fetchElementNode(FetchBy fetchBy, Character opening, char closing,
-                                                               Supplier<T> element, Function<List<T>, N> nodeFactory) {
+    public <T, N extends Node<N, C>, C extends RuntimeContext<C>> Optional<N> fetchElementNode(FetchBy fetchBy, Character opening, char closing,
+                                                                                               Supplier<T> element, Function<List<T>, N> nodeFactory) {
         return when(whenFirstChar(opening::equals)).optional(() -> {
             int startPosition = seek(1);
             List<T> elements = new ArrayList<>();
@@ -117,7 +113,7 @@ public class SourceCode {
         });
     }
 
-    public <N extends Node<N>> Optional<N> tryFetch(Supplier<Optional<N>> supplier) {
+    public <N extends Node<N, C>, C extends RuntimeContext<C>> Optional<N> tryFetch(Supplier<Optional<N>> supplier) {
         int position = this.position;
         Optional<N> optionalNode = supplier.get();
         if (!optionalNode.isPresent())

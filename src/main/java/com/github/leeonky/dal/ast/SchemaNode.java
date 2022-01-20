@@ -10,7 +10,7 @@ public class SchemaNode extends DALNode {
         this.schema = schema;
     }
 
-    public ConstructorViaSchema getConstructorViaSchema(RuntimeContextBuilder.RuntimeContext context) {
+    public ConstructorViaSchema getConstructorViaSchema(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.searchConstructor(schema).orElseThrow(() ->
                 new RuntimeException("Schema '" + schema + "' not registered", getPositionBegin()));
     }

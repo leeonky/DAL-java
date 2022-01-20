@@ -1,9 +1,8 @@
 package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.*;
-import com.github.leeonky.dal.runtime.FunctionUtil;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.interpreter.SourceCode;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.interpreter.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,17 +17,17 @@ import static com.github.leeonky.dal.ast.PropertyNode.Type.IDENTIFIER;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.IS;
 import static com.github.leeonky.dal.compiler.Constants.KeyWords.WHICH;
 import static com.github.leeonky.dal.compiler.Constants.*;
-import static com.github.leeonky.dal.compiler.TokenParser.operatorMatcher;
-import static com.github.leeonky.dal.runtime.FunctionUtil.allOptional;
-import static com.github.leeonky.dal.runtime.FunctionUtil.transpose;
-import static com.github.leeonky.dal.runtime.IfThenFactory.when;
+import static com.github.leeonky.interpreter.FunctionUtil.allOptional;
+import static com.github.leeonky.interpreter.FunctionUtil.transpose;
+import static com.github.leeonky.interpreter.IfThenFactory.when;
+import static com.github.leeonky.interpreter.TokenParser.operatorMatcher;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 
 public class Compiler {
 
-    private static final OperatorMatcher<DALNode> AND = operatorMatcher("&&", () -> new Operator.And("&&")),
+    private static final OperatorMatcher<DALNode, DALRuntimeContext> AND = operatorMatcher("&&", () -> new Operator.And("&&")),
             OR = operatorMatcher("||", () -> new Operator.Or("||")),
             AND_IN_KEY_WORD = operatorMatcher("and", () -> new Operator.And("and")),
             COMMA_AND = operatorMatcher(",", () -> new Operator.And(","), TokenParser::isEnableCommaAnd),
@@ -56,7 +55,7 @@ public class Compiler {
                     .escape("\\\"", '"'),
             REGEX_ESCAPES = new EscapeChars().escape("\\/", '/');
 
-    NodeMatcher<DALNode> INPUT = tokenParser -> when(tokenParser.getSourceCode().isBeginning()).optional(() -> InputNode.INSTANCE),
+    NodeMatcher<DALNode, DALRuntimeContext> INPUT = tokenParser -> when(tokenParser.getSourceCode().isBeginning()).optional(() -> InputNode.INSTANCE),
             NUMBER = TokenParser.NUMBER.map(token -> new ConstNode(token.getNumber())),
             INTEGER = TokenParser.INTEGER.map(token -> new ConstNode(token.getInteger())),
             SINGLE_QUOTED_STRING = parser -> parser.fetchString('\'', '\'', ConstNode::new, SINGLE_QUOTED_ESCAPES),
@@ -75,27 +74,27 @@ public class Compiler {
             EMPTY_CELL = parser -> when(parser.getSourceCode().startsWith("|")).optional(EmptyCellNode::new),
             TABLE = oneOf(new TransposedTableWithRowOperator(), new TableMatcher(), new TransposedTable());
 
-    public NodeFactory<DALNode> PROPERTY_CHAIN, OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION,
+    public NodeFactory<DALNode, DALRuntimeContext> PROPERTY_CHAIN, OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION,
             JUDGEMENT_EXPRESSION_OPERAND;
 
-    ExpressionMatcher<DALNode> DOT_PROPERTY = (parser, previous) -> TokenParser.DOT_PROPERTY.
+    ExpressionMatcher<DALNode, DALRuntimeContext> DOT_PROPERTY = (parser, previous) -> TokenParser.DOT_PROPERTY.
             map(token -> token.toDotProperty(previous)).fetch(parser),
             BRACKET_PROPERTY, EXPLICIT_PROPERTY, BINARY_ARITHMETIC_EXPRESSION, BINARY_JUDGEMENT_EXPRESSION,
             BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION;
 
-    private ExpressionClauseFactory<DALNode> shortJudgementClause(OperatorFactory<DALNode> operatorFactory) {
-        return ((ExpressionClauseMatcher<DALNode>) parser -> parser.fetchNodeAfter(IS, (ExpressionClauseFactory<DALNode>) parser1 ->
+    private ExpressionClauseFactory<DALNode, DALRuntimeContext> shortJudgementClause(OperatorFactory<DALNode, DALRuntimeContext> operatorFactory) {
+        return ((ExpressionClauseMatcher<DALNode, DALRuntimeContext>) parser -> parser.fetchNodeAfter(IS, (ExpressionClauseFactory<DALNode, DALRuntimeContext>) parser1 ->
                 schemaJudgement(parser, SCHEMA_CLAUSE.fetch(parser))))
                 .or(parser -> parser.fetchExpressionClause(operatorFactory, JUDGEMENT_EXPRESSION_OPERAND));
     }
 
-    private ExpressionClause<DALNode> schemaJudgement(TokenParser<DALNode> parser, ExpressionClause<DALNode> expressionClause) {
+    private ExpressionClause<DALNode, DALRuntimeContext> schemaJudgement(TokenParser<DALNode, DALRuntimeContext> parser, ExpressionClause<DALNode, DALRuntimeContext> expressionClause) {
         return parser.fetchExpressionClause(JUDGEMENT_OPERATORS, JUDGEMENT_EXPRESSION_OPERAND)
-                .<ExpressionClause<DALNode>>map(clause -> previous ->
+                .<ExpressionClause<DALNode, DALRuntimeContext>>map(clause -> previous ->
                         clause.makeExpression(expressionClause.makeExpression(previous))).orElse(expressionClause);
     }
 
-    private static final ExpressionClauseFactory<DALNode> SCHEMA_CLAUSE = new SchemaExpressionClauseFactory();
+    private static final ExpressionClauseFactory<DALNode, DALRuntimeContext> SCHEMA_CLAUSE = new SchemaExpressionClauseFactory();
 
     public Compiler() {
         CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
@@ -114,7 +113,7 @@ public class Compiler {
                 () -> PROPERTY_CHAIN.withClause(shortJudgementClause(JUDGEMENT_OPERATORS.or("expect operator `:` or `=`"))).fetch(parser)));
         ELEMENT_ELLIPSIS = parser -> parser.wordToken(Constants.ELEMENT_ELLIPSIS, token -> new ListEllipsisNode());
         LIST = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('[', ']', ListNode::new,
-                () -> ELEMENT_ELLIPSIS.fetch(parser).<ExpressionClause<DALNode>>map(node -> p -> node).orElseGet(() ->
+                () -> ELEMENT_ELLIPSIS.fetch(parser).<ExpressionClause<DALNode, DALRuntimeContext>>map(node -> p -> node).orElseGet(() ->
                         shortJudgementClause(JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR)).fetch(parser))));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         UNARY_OPERATOR_EXPRESSION = parser -> parser.fetchExpression(null, UNARY_OPERATORS, OPERAND);
@@ -136,8 +135,8 @@ public class Compiler {
         EXPRESSION = OPERAND.recursive(oneOf(BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION));
     }
 
-    private ExpressionFactory<DALNode> compileSchemaExpression(Function<SchemaExpression, NodeMatcher<DALNode>> whichClause1,
-                                                               Function<SchemaExpression, NodeMatcher<DALNode>> whichClause2) {
+    private ExpressionFactory<DALNode, DALRuntimeContext> compileSchemaExpression(Function<SchemaExpression, NodeMatcher<DALNode, DALRuntimeContext>> whichClause1,
+                                                                                  Function<SchemaExpression, NodeMatcher<DALNode, DALRuntimeContext>> whichClause2) {
         return (parser, previous) -> {
             SchemaExpression schemaExpression = (SchemaExpression) SCHEMA_CLAUSE.fetch(parser).makeExpression(previous);
             return oneOf(whichClause1.apply(schemaExpression), whichClause2.apply(schemaExpression))
@@ -145,14 +144,14 @@ public class Compiler {
         };
     }
 
-    private Function<SchemaExpression, NodeMatcher<DALNode>> whichClause(
-            NodeMatcher<DALNode> clauseNodeMatcher, BiFunction<SchemaExpression, DALNode, SchemaWhichExpression> appendWay) {
+    private Function<SchemaExpression, NodeMatcher<DALNode, DALRuntimeContext>> whichClause(
+            NodeMatcher<DALNode, DALRuntimeContext> clauseNodeMatcher, BiFunction<SchemaExpression, DALNode, SchemaWhichExpression> appendWay) {
         return schemaExpression -> clauseNodeMatcher.map(node -> appendWay.apply(schemaExpression, node));
     }
 
-    public List<DALNode> compile(SourceCode sourceCode, RuntimeContextBuilder.RuntimeContext runtimeContext) {
+    public List<DALNode> compile(SourceCode sourceCode, DALRuntimeContext DALRuntimeContext) {
         return new ArrayList<DALNode>() {{
-            TokenParser<DALNode> parser = new TokenParser<>(sourceCode, runtimeContext, Expression::new);
+            TokenParser<DALNode, DALRuntimeContext> parser = new TokenParser<>(sourceCode, DALRuntimeContext, Expression::new);
             add(EXPRESSION.fetch(parser));
             if (sourceCode.isBeginning() && sourceCode.hasCode())
                 throw sourceCode.syntaxError("unexpected token", 0);
@@ -165,29 +164,29 @@ public class Compiler {
         return ((PropertyNode) PROPERTY_CHAIN.fetch(new TokenParser<>(new SourceCode(sourceCode), null, Expression::new))).getChain();
     }
 
-    private static <N extends Node<N>> NodeMatcher<N> oneOf(NodeMatcher<N> matcher, NodeMatcher<N>... matchers) {
+    private static <N extends Node<N, C>, C extends RuntimeContext<C>> NodeMatcher<N, C> oneOf(NodeMatcher<N, C> matcher, NodeMatcher<N, C>... matchers) {
         return parser -> Stream.concat(Stream.of(matcher), Stream.of(matchers))
                 .map(p -> p.fetch(parser)).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 
-    private static <N extends Node<N>> ExpressionMatcher<N> oneOf(ExpressionMatcher<N> matcher, ExpressionMatcher<N>... matchers) {
+    private static <N extends Node<N, C>, C extends RuntimeContext<C>> ExpressionMatcher<N, C> oneOf(ExpressionMatcher<N, C> matcher, ExpressionMatcher<N, C>... matchers) {
         return (parser, previous) -> Stream.concat(Stream.of(matcher), Stream.of(matchers))
                 .map(p -> p.fetch(parser, previous)).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 
-    private static <N extends Node<N>> OperatorMatcher<N> oneOf(OperatorMatcher<N> matcher, OperatorMatcher<N>... matchers) {
+    private static <N extends Node<N, C>, C extends RuntimeContext<C>> OperatorMatcher<N, C> oneOf(OperatorMatcher<N, C> matcher, OperatorMatcher<N, C>... matchers) {
         return parser -> Stream.concat(Stream.of(matcher), Stream.of(matchers))
                 .map(p -> p.fetch(parser)).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 
-    private final NodeFactory<DALNode> SEQUENCE = parser -> FunctionUtil.oneOf(
+    private final NodeFactory<DALNode, DALRuntimeContext> SEQUENCE = parser -> FunctionUtil.oneOf(
             parser.sequenceOf(SEQUENCE_AZ, SequenceNode.Type.AZ),
             parser.sequenceOf(SEQUENCE_ZA, SequenceNode.Type.ZA),
             parser.sequenceOf(SEQUENCE_AZ_2, SequenceNode.Type.AZ),
             parser.sequenceOf(SEQUENCE_ZA_2, SequenceNode.Type.ZA))
             .orElse(SequenceNode.noSequence());
 
-    private final NodeFactory<DALNode> TABLE_HEADER = parser -> {
+    private final NodeFactory<DALNode, DALRuntimeContext> TABLE_HEADER = parser -> {
         SequenceNode sequence = (SequenceNode) SEQUENCE.fetch(parser);
         DALNode property = PROPERTY_CHAIN.fetch(parser);
         return new HeaderNode(sequence, parser.fetchNodeAfter(IS, SCHEMA_CLAUSE)
@@ -195,9 +194,9 @@ public class Compiler {
                 JUDGEMENT_OPERATORS.fetch(parser));
     };
 
-    public class TableMatcher implements NodeMatcher<DALNode> {
+    public class TableMatcher implements NodeMatcher<DALNode, DALRuntimeContext> {
         @Override
-        public Optional<DALNode> fetch(TokenParser<DALNode> parser) {
+        public Optional<DALNode> fetch(TokenParser<DALNode, DALRuntimeContext> parser) {
             try {
                 return parser.fetchRow(columnIndex -> (HeaderNode) TABLE_HEADER.fetch(parser))
                         .map(headers -> new TableNode(headers, getRowNodes(parser, headers)));
@@ -206,11 +205,11 @@ public class Compiler {
             }
         }
 
-        protected List<RowNode> getRowNodes(TokenParser<DALNode> parser, List<HeaderNode> headers) {
+        protected List<RowNode> getRowNodes(TokenParser<DALNode, DALRuntimeContext> parser, List<HeaderNode> headers) {
             return allOptional(() -> {
                 Optional<Integer> index = getRowIndex(parser);
-                Optional<ExpressionClause<DALNode>> rowSchemaClause = parser.fetchNodeAfter(IS, SCHEMA_CLAUSE);
-                Optional<Operator<DALNode>> rowOperator = JUDGEMENT_OPERATORS.fetch(parser);
+                Optional<ExpressionClause<DALNode, DALRuntimeContext>> rowSchemaClause = parser.fetchNodeAfter(IS, SCHEMA_CLAUSE);
+                Optional<Operator<DALNode, DALRuntimeContext>> rowOperator = JUDGEMENT_OPERATORS.fetch(parser);
                 return FunctionUtil.oneOf(
                         () -> parser.fetchBetween("|", "|", ELEMENT_ELLIPSIS).map(Collections::singletonList),
                         () -> parser.fetchBetween("|", "|", ROW_WILDCARD).map(Collections::singletonList),
@@ -220,14 +219,14 @@ public class Compiler {
             });
         }
 
-        private List<DALNode> checkCellSize(TokenParser<DALNode> parser, List<HeaderNode> headers, List<DALNode> cellClauses) {
+        private List<DALNode> checkCellSize(TokenParser<DALNode, DALRuntimeContext> parser, List<HeaderNode> headers, List<DALNode> cellClauses) {
             if (cellClauses.size() != headers.size())
                 throw parser.getSourceCode().syntaxError("Different cell size", 0);
             return cellClauses;
         }
     }
 
-    private DALNode getRowCell(TokenParser<DALNode> parser, Optional<Operator<DALNode>> rowOperator, HeaderNode headerNode) {
+    private DALNode getRowCell(TokenParser<DALNode, DALRuntimeContext> parser, Optional<Operator<DALNode, DALRuntimeContext>> rowOperator, HeaderNode headerNode) {
         int cellPosition = parser.getSourceCode().nextPosition();
         return oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL).or(ROW_WILDCARD.or(
                 shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(), parser1 -> rowOperator)
@@ -235,16 +234,16 @@ public class Compiler {
                 .setPositionBegin(cellPosition);
     }
 
-    public class TransposedTable implements NodeMatcher<DALNode> {
+    public class TransposedTable implements NodeMatcher<DALNode, DALRuntimeContext> {
         @Override
-        public Optional<DALNode> fetch(TokenParser<DALNode> parser) {
+        public Optional<DALNode> fetch(TokenParser<DALNode, DALRuntimeContext> parser) {
             return parser.getSourceCode().popWord(">>").map(x -> {
                 List<HeaderNode> headerNodes = new ArrayList<>();
                 return new TableNode(headerNodes, getRowNodes(parser, headerNodes), TableNode.Type.TRANSPOSED);
             });
         }
 
-        private List<RowNode> getRowNodes(TokenParser<DALNode> parser, List<HeaderNode> headerNodes) {
+        private List<RowNode> getRowNodes(TokenParser<DALNode, DALRuntimeContext> parser, List<HeaderNode> headerNodes) {
             return transpose(allOptional(() -> parser.fetchNodeAfter("|", TABLE_HEADER)
                     .map(HeaderNode.class::cast).map(headerNode -> {
                         headerNodes.add(headerNode);
@@ -254,19 +253,19 @@ public class Compiler {
         }
     }
 
-    private Optional<Integer> getRowIndex(TokenParser<DALNode> parser) {
+    private Optional<Integer> getRowIndex(TokenParser<DALNode, DALRuntimeContext> parser) {
         return INTEGER.fetch(parser).map(node -> (Integer) ((ConstNode) node).getValue());
     }
 
-    public class TransposedTableWithRowOperator implements NodeMatcher<DALNode> {
+    public class TransposedTableWithRowOperator implements NodeMatcher<DALNode, DALRuntimeContext> {
 
         @Override
-        public Optional<DALNode> fetch(TokenParser<DALNode> parser) {
+        public Optional<DALNode> fetch(TokenParser<DALNode, DALRuntimeContext> parser) {
             return parser.getSourceCode().tryFetch(() -> when(parser.getSourceCode().popWord("|").isPresent()
                     && parser.getSourceCode().popWord(">>").isPresent()).optional(() -> {
                 List<Optional<Integer>> rowIndexes = new ArrayList<>();
-                List<Optional<ExpressionClause<DALNode>>> rowSchemaClauses = new ArrayList<>();
-                List<Optional<Operator<DALNode>>> rowOperators = parser.fetchRow(row -> {
+                List<Optional<ExpressionClause<DALNode, DALRuntimeContext>>> rowSchemaClauses = new ArrayList<>();
+                List<Optional<Operator<DALNode, DALRuntimeContext>>> rowOperators = parser.fetchRow(row -> {
                     rowIndexes.add(getRowIndex(parser));
                     rowSchemaClauses.add(parser.fetchNodeAfter(IS, SCHEMA_CLAUSE));
                     return JUDGEMENT_OPERATORS.fetch(parser);
@@ -277,15 +276,15 @@ public class Compiler {
             }));
         }
 
-        private List<RowNode> getRowNodes(TokenParser<DALNode> parser, List<HeaderNode> headerNodes,
-                                          List<Optional<ExpressionClause<DALNode>>> rowSchemaClauses,
-                                          List<Optional<Operator<DALNode>>> rowOperators, List<Optional<Integer>> rowIndexes) {
+        private List<RowNode> getRowNodes(TokenParser<DALNode, DALRuntimeContext> parser, List<HeaderNode> headerNodes,
+                                          List<Optional<ExpressionClause<DALNode, DALRuntimeContext>>> rowSchemaClauses,
+                                          List<Optional<Operator<DALNode, DALRuntimeContext>>> rowOperators, List<Optional<Integer>> rowIndexes) {
             return FunctionUtil.mapWithIndex(getCells(parser, headerNodes, rowOperators), (i, row) ->
                     new RowNode(rowIndexes.get(i), rowSchemaClauses.get(i), rowOperators.get(i), row)).collect(toList());
         }
 
-        private Stream<List<DALNode>> getCells(TokenParser<DALNode> parser, List<HeaderNode> headerNodes,
-                                               List<Optional<Operator<DALNode>>> rowOperators) {
+        private Stream<List<DALNode>> getCells(TokenParser<DALNode, DALRuntimeContext> parser, List<HeaderNode> headerNodes,
+                                               List<Optional<Operator<DALNode, DALRuntimeContext>>> rowOperators) {
             return transpose(allOptional(() -> parser.fetchNodeAfter("|", TABLE_HEADER).map(HeaderNode.class::cast)
                     .map(headerNode -> {
                         headerNodes.add(headerNode);
@@ -295,8 +294,8 @@ public class Compiler {
         }
     }
 
-    private Optional<DALNode> compileUserDefinedLiteral(TokenParser<DALNode> parser) {
-        return parser.getSourceCode().<DALNode>tryFetch(() -> TokenParser.IDENTITY_PROPERTY.fetch(parser.getSourceCode())
+    private Optional<DALNode> compileUserDefinedLiteral(TokenParser<DALNode, DALRuntimeContext> parser) {
+        return parser.getSourceCode().<DALNode, DALRuntimeContext>tryFetch(() -> TokenParser.IDENTITY_PROPERTY.fetch(parser.getSourceCode())
                 .flatMap(token -> parser.getRuntimeContext().takeUserDefinedLiteral(token.getContent())
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }

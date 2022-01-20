@@ -1,7 +1,8 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.compiler.OperatorMatcher;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.interpreter.Operator;
+import com.github.leeonky.interpreter.OperatorMatcher;
 
 import java.util.Comparator;
 import java.util.Optional;
@@ -9,9 +10,9 @@ import java.util.Optional;
 public class HeaderNode extends DALNode {
     private final SequenceNode sequence;
     private final DALNode property;
-    private final Optional<Operator<DALNode>> operator;
+    private final Optional<Operator<DALNode, DALRuntimeContext>> operator;
 
-    public HeaderNode(SequenceNode sequence, DALNode property, Optional<Operator<DALNode>> operator) {
+    public HeaderNode(SequenceNode sequence, DALNode property, Optional<Operator<DALNode, DALRuntimeContext>> operator) {
         this.sequence = sequence;
         this.property = property;
         this.operator = operator;
@@ -27,11 +28,11 @@ public class HeaderNode extends DALNode {
         return property;
     }
 
-    public OperatorMatcher<DALNode> headerOperator() {
+    public OperatorMatcher<DALNode, DALRuntimeContext> headerOperator() {
         return tokenParser -> operator;
     }
 
-    public Comparator<Object> getListComparator(RuntimeContextBuilder.RuntimeContext context) {
+    public Comparator<Object> getListComparator(DALRuntimeContext context) {
         return sequence.getComparator(o -> context.newThisScope(context.wrap(o), () -> property.evaluate(context)));
     }
 

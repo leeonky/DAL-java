@@ -1,8 +1,7 @@
-package com.github.leeonky.dal.compiler;
+package com.github.leeonky.interpreter;
 
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.PropertyNode;
-import com.github.leeonky.interpreter.SyntaxException;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -12,9 +11,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
-import static com.github.leeonky.dal.runtime.FunctionUtil.getValue;
-import static com.github.leeonky.dal.runtime.FunctionUtil.oneOf;
-import static com.github.leeonky.dal.runtime.IfThenFactory.when;
+import static com.github.leeonky.interpreter.FunctionUtil.getValue;
+import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
+import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static java.lang.String.format;
 
 public class Token {

@@ -19,7 +19,7 @@ public class SchemaWhichExpression extends DALNode {
     }
 
     @Override
-    public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
+    public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
         try {
             return context.newThisScope(schemaExpression.evaluateDataObject(context), () -> clause.evaluate(context));
         } catch (IllegalStateException e) {

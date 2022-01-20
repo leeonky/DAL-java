@@ -239,7 +239,7 @@ public class VerifyValueInSchema extends Base {
     public static class ToIntegerAndIncrease extends Value<Integer> {
 
         @Override
-        public Integer convertAs(RuntimeContextBuilder.RuntimeContext runtimeContext, Object instance, BeanClass<?> type) {
+        public Integer convertAs(RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext, Object instance, BeanClass<?> type) {
             return (int) instance + 1;
         }
 

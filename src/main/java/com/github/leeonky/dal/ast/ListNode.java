@@ -1,10 +1,11 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.compiler.ExpressionClause;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.interpreter.ExpressionClause;
+import com.github.leeonky.interpreter.Operator;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
@@ -14,8 +15,8 @@ import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.assertListSize;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
-import static com.github.leeonky.dal.runtime.FunctionUtil.eachWithIndex;
-import static com.github.leeonky.dal.runtime.FunctionUtil.mapWithIndex;
+import static com.github.leeonky.interpreter.FunctionUtil.eachWithIndex;
+import static com.github.leeonky.interpreter.FunctionUtil.mapWithIndex;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -23,11 +24,11 @@ import static java.util.stream.Collectors.toList;
 public class ListNode extends DALNode {
     private List<DALNode> expressions__;
     private List<DALNode> inputExpressions;
-    private List<ExpressionClause<DALNode>> expressionFactories;
+    private List<ExpressionClause<DALNode, DALRuntimeContext>> expressionFactories;
     private final Type type;
     private final boolean multiLineList;
 
-    public ListNode(List<ExpressionClause<DALNode>> expressionFactories, boolean multiLineList) {
+    public ListNode(List<ExpressionClause<DALNode, DALRuntimeContext>> expressionFactories, boolean multiLineList) {
         type = guessType(expressionFactories);
         this.expressionFactories = expressionFactories;
         this.multiLineList = multiLineList;
@@ -53,14 +54,14 @@ public class ListNode extends DALNode {
         this.type = type;
     }
 
-    public ListNode(List<ExpressionClause<DALNode>> expressionFactories) {
+    public ListNode(List<ExpressionClause<DALNode, DALRuntimeContext>> expressionFactories) {
         this(expressionFactories, false);
     }
 
-    private Type guessType(List<ExpressionClause<DALNode>> expressionFactories) {
-        if (expressionFactories.size() > 0 && expressionFactories.get(expressionFactories.size() - 1).isListEllipsis())
+    private Type guessType(List<ExpressionClause<DALNode, DALRuntimeContext>> expressionFactories) {
+        if (expressionFactories.size() > 0 && isListEllipsis(expressionFactories.get(expressionFactories.size() - 1)))
             return Type.FIRST_N_ITEMS;
-        else if (expressionFactories.size() > 0 && expressionFactories.get(0).isListEllipsis())
+        else if (expressionFactories.size() > 0 && isListEllipsis(expressionFactories.get(0)))
             return Type.LAST_N_ITEMS;
         return Type.ALL_ITEMS;
     }
@@ -80,16 +81,16 @@ public class ListNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Operator.Equal operator, DALRuntimeContext context) {
         return judgeAll(context, actualNode.evaluateDataObject(context));
     }
 
     @Override
-    public boolean judge(DALNode actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Operator.Matcher operator, DALRuntimeContext context) {
         return judgeAll(context, actualNode.evaluateDataObject(context));
     }
 
-    public boolean judgeAll(RuntimeContextBuilder.RuntimeContext context, Data data) {
+    public boolean judgeAll(DALRuntimeContext context, Data data) {
         if (!data.isList())
             throw new RuntimeException(format("Cannot compare%sand list", data.inspect()), getPositionBegin());
         List<DALNode> expressions = getExpressions(data.getListFirstIndex());
@@ -98,7 +99,7 @@ public class ListNode extends DALNode {
         return context.newThisScope(data, () -> assertElementExpressions(context, expressions));
     }
 
-    private boolean assertElementExpressions(RuntimeContextBuilder.RuntimeContext context, List<DALNode> expressions) {
+    private boolean assertElementExpressions(DALRuntimeContext context, List<DALNode> expressions) {
         if (multiLineList)
             eachWithIndex(expressions.stream(), (i, expression) -> {
                 try {
@@ -110,6 +111,10 @@ public class ListNode extends DALNode {
         else
             expressions.forEach(expression -> expression.evaluate(context));
         return true;
+    }
+
+    private boolean isListEllipsis(ExpressionClause<DALNode, DALRuntimeContext> expressionClause) {
+        return expressionClause.makeExpression(null) instanceof ListEllipsisNode;
     }
 
     public enum Type {

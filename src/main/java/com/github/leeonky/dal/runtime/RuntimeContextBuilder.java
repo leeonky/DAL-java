@@ -2,6 +2,8 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
+import com.github.leeonky.interpreter.FunctionUtil;
+import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
 
@@ -60,8 +62,8 @@ public class RuntimeContextBuilder {
                 });
     }
 
-    public RuntimeContext build(Object inputValue) {
-        return new RuntimeContext(inputValue);
+    public DALRuntimeContext build(Object inputValue) {
+        return new DALRuntimeContext(inputValue);
     }
 
     public RuntimeContextBuilder registerValueFormat(Formatter<?, ?> formatter) {
@@ -129,12 +131,12 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public class RuntimeContext {
+    public class DALRuntimeContext implements RuntimeContext<DALRuntimeContext> {
         private final LinkedList<Data> thisStack = new LinkedList<>();
         private final Set<Class<?>> schemaSet;
         private boolean listMapping = false;
 
-        public RuntimeContext(Object inputValue) {
+        public DALRuntimeContext(Object inputValue) {
             schemaSet = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
             thisStack.push(wrap(inputValue));
         }
@@ -220,7 +222,7 @@ public class RuntimeContextBuilder {
             return new Data(instance, this, SchemaType.create(schemaBeanClass));
         }
 
-        public <T> RuntimeContext registerPropertyAccessor(T instance) {
+        public <T> DALRuntimeContext registerPropertyAccessor(T instance) {
             if (!Objects.equals(instance, null) && !propertyAccessors.containsType(instance))
                 propertyAccessors.put(BeanClass.getClass(instance),
                         new JavaClassPropertyAccessor<>(RuntimeContextBuilder.this, BeanClass.createFrom(instance)));

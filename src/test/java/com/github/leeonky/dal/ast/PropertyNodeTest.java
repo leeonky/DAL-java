@@ -18,7 +18,7 @@ class PropertyNodeTest {
 
     @Test
     void support_first_index_of_list() {
-        RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
+        RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
                 .registerListAccessor(ArrayList.class, new ListAccessor<ArrayList<?>>() {
                     @Override
                     public Iterable<?> toIterable(ArrayList<?> instance) {
@@ -31,8 +31,8 @@ class PropertyNodeTest {
                     }
                 }).build(new ArrayList<>(Arrays.asList(1, 2)));
 
-        assertThat(new PropertyNode(INSTANCE, 1, BRACKET).evaluate(runtimeContext)).isEqualTo(1);
-        assertThat(new PropertyNode(INSTANCE, -1, BRACKET).evaluate(runtimeContext)).isEqualTo(2);
+        assertThat(new PropertyNode(INSTANCE, 1, BRACKET).evaluate(DALRuntimeContext)).isEqualTo(1);
+        assertThat(new PropertyNode(INSTANCE, -1, BRACKET).evaluate(DALRuntimeContext)).isEqualTo(2);
     }
 
     public static class CustomizedList {
@@ -51,30 +51,30 @@ class PropertyNodeTest {
 
     @Test
     void access_customized_list_property() {
-        RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
+        RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
                 .registerListAccessor(CustomizedList.class, instance -> emptyList())
                 .build(new CustomizedList());
 
-        assertThat(new PropertyNode(INSTANCE, "value", BRACKET).evaluate(runtimeContext)).isEqualTo(100);
+        assertThat(new PropertyNode(INSTANCE, "value", BRACKET).evaluate(DALRuntimeContext)).isEqualTo(100);
     }
 
     @Test
     void access_customized_list_method() {
-        RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
+        RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
                 .registerListAccessor(CustomizedList.class, instance -> emptyList())
                 .build(new CustomizedList());
 
-        assertThat(new PropertyNode(INSTANCE, "isEmpty", BRACKET).evaluate(runtimeContext)).isEqualTo(true);
+        assertThat(new PropertyNode(INSTANCE, "isEmpty", BRACKET).evaluate(DALRuntimeContext)).isEqualTo(true);
     }
 
     @Test
     void access_customized_list_static_extension_method() {
-        RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
+        RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
                 .registerListAccessor(CustomizedList.class, instance -> emptyList())
                 .registerStaticMethodExtension(CustomizedListStaticExtensionMethod.class)
                 .build(new CustomizedList());
 
-        assertThat(new PropertyNode(INSTANCE, "method", BRACKET).evaluate(runtimeContext)).isEqualTo("extension");
+        assertThat(new PropertyNode(INSTANCE, "method", BRACKET).evaluate(DALRuntimeContext)).isEqualTo("extension");
     }
 
     public static class BaseBean {
@@ -109,35 +109,35 @@ class PropertyNodeTest {
 
     @Nested
     class StaticMethodExtension {
-        RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
+        RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
                 .registerStaticMethodExtension(BeanMethods.class)
                 .build(new Bean());
 
         @Test
         void support_static_method_extension() {
-            assertThat(new PropertyNode(INSTANCE, "getIntFromBean", BRACKET).evaluate(runtimeContext)).isEqualTo(100);
+            assertThat(new PropertyNode(INSTANCE, "getIntFromBean", BRACKET).evaluate(DALRuntimeContext)).isEqualTo(100);
         }
 
         @Test
         void invoke_from_base_instance() {
 
-            assertThat(new PropertyNode(INSTANCE, "getIntFromBase", BRACKET).evaluate(runtimeContext)).isEqualTo(200);
+            assertThat(new PropertyNode(INSTANCE, "getIntFromBase", BRACKET).evaluate(DALRuntimeContext)).isEqualTo(200);
         }
 
         @Test
         void should_invoke_by_instance_type() {
-            assertThat(new PropertyNode(INSTANCE, "getInt", BRACKET).evaluate(runtimeContext)).isEqualTo(300);
+            assertThat(new PropertyNode(INSTANCE, "getInt", BRACKET).evaluate(DALRuntimeContext)).isEqualTo(300);
         }
 
         @Test
         void raise_error_when_more_than_one_method() {
-            RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder()
+            RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
                     .registerStaticMethodExtension(BeanMethods.class)
                     .registerStaticMethodExtension(SameStaticBeanMethods.class)
                     .build(new Bean());
 
             assertThrows(RuntimeException.class, () -> new PropertyNode(INSTANCE, "getInt", BRACKET)
-                    .evaluate(runtimeContext));
+                    .evaluate(DALRuntimeContext));
         }
     }
 }

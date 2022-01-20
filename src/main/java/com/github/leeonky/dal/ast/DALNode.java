@@ -1,24 +1,26 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.ast.Operator.Matcher;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.interpreter.Node;
+import com.github.leeonky.interpreter.Operator;
+import com.github.leeonky.interpreter.Operator.Matcher;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.*;
 import static java.lang.String.format;
 
-public abstract class DALNode extends Node<DALNode> {
+public abstract class DALNode extends Node<DALNode, RuntimeContextBuilder.DALRuntimeContext> {
 
-    public Data evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
+    public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.wrap(evaluate(context));
     }
 
-    public boolean judge(DALNode actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Operator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
         return assertEquals(evaluateDataObject(context), evaluateAndWrapperFailureMessage(actualNode, context),
                 getPositionBegin());
     }
 
-    public boolean judge(DALNode actualNode, Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
         Data expected = evaluateDataObject(context);
         Data actual = evaluateAndWrapperFailureMessage(actualNode, context);
         if (expected.isNull())
@@ -32,7 +34,7 @@ public abstract class DALNode extends Node<DALNode> {
         return assertMatch(expected, actual, getPositionBegin(), context.getConverter());
     }
 
-    private Data evaluateAndWrapperFailureMessage(DALNode actualNode, RuntimeContextBuilder.RuntimeContext context) {
+    private Data evaluateAndWrapperFailureMessage(DALNode actualNode, RuntimeContextBuilder.DALRuntimeContext context) {
         try {
             return actualNode.evaluateDataObject(context);
         } catch (AssertionFailure assertionFailure) {

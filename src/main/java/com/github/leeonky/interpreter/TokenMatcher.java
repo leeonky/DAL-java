@@ -1,7 +1,4 @@
-package com.github.leeonky.dal.compiler;
-
-import com.github.leeonky.dal.ast.Node;
-import com.github.leeonky.interpreter.SourceCode;
+package com.github.leeonky.interpreter;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -13,7 +10,7 @@ public interface TokenMatcher {
         return sourceCode -> fetch(sourceCode).orElseThrow(() -> sourceCode.syntaxError(message, 0));
     }
 
-    default <N extends Node<N>> NodeMatcher<N> map(Function<Token, N> mapper) {
+    default <N extends Node<N, C>, C extends RuntimeContext<C>> NodeMatcher<N, C> map(Function<Token, N> mapper) {
         return parser -> fetch(parser.getSourceCode()).map(token ->
                 mapper.apply(token).setPositionBegin(token.getPosition()));
     }

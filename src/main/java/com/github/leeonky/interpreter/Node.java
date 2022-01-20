@@ -1,11 +1,11 @@
-package com.github.leeonky.dal.ast;
+package com.github.leeonky.interpreter;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
-public class Node<N extends Node<N>> {
+public class Node<N extends Node<N, C>, C extends RuntimeContext<C>> {
     protected int positionBegin;
 
-    public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
+    public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
         throw new IllegalStateException();
     }
 

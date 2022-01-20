@@ -8,8 +8,8 @@ import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.ListAccessor;
 import com.github.leeonky.dal.runtime.Result;
-import com.github.leeonky.interpreter.InterpreterException;
-import com.github.leeonky.interpreter.SourceCode;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.interpreter.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CucumberContext {
     private static final Compiler compiler = new Compiler();
-    private static final Map<String, NodeMatcher<DALNode>> matcherMap = new HashMap<String, NodeMatcher<DALNode>>() {{
+    private static final Map<String, NodeMatcher<DALNode, DALRuntimeContext>> matcherMap = new HashMap<String, NodeMatcher<DALNode, DALRuntimeContext>>() {{
         put("number", compiler.NUMBER);
         put("integer", compiler.INTEGER);
         put("single-quoted-string", compiler.SINGLE_QUOTED_STRING);
@@ -51,7 +51,7 @@ public class CucumberContext {
         put("schema", optional(SchemaExpressionClauseFactory.SCHEMA));
     }};
 
-    private static NodeMatcher<DALNode> optional(NodeFactory<DALNode> nodeFactory) {
+    private static NodeMatcher<DALNode, DALRuntimeContext> optional(NodeFactory<DALNode, DALRuntimeContext> nodeFactory) {
         return parser -> Optional.ofNullable(nodeFactory.fetch(parser));
     }
 
@@ -59,7 +59,7 @@ public class CucumberContext {
     DAL dal = new DAL();
 
     Object inputObject = null;
-    TokenParser<DALNode> tokenParser = null;
+    TokenParser<DALNode, DALRuntimeContext> tokenParser = null;
     String sourceCodeString = null;
     InterpreterException interpreterException;
     DALNode node = null;

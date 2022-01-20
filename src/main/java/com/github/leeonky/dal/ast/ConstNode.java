@@ -17,7 +17,7 @@ public class ConstNode extends DALNode {
     }
 
     @Override
-    public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
+    public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
         return value;
     }
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.github.leeonky.dal.runtime.FunctionUtil.notAllowParallelReduce;
+import static com.github.leeonky.interpreter.FunctionUtil.notAllowParallelReduce;
 import static java.util.Collections.nCopies;
 
 public class InterpreterException extends RuntimeException {

@@ -1,16 +1,17 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.interpreter.Operator;
 
 import java.util.Objects;
 
 //TODO to be generic
 public class Expression extends DALNode {
     private final DALNode node1;
-    private final Operator<DALNode> operator;
+    private final Operator<DALNode, DALRuntimeContext> operator;
     private final DALNode node2;
 
-    public Expression(DALNode node1, Operator<DALNode> operator, DALNode node2) {
+    public Expression(DALNode node1, Operator<DALNode, DALRuntimeContext> operator, DALNode node2) {
         this.node1 = node1;
         this.node2 = node2;
         this.operator = operator;
@@ -25,7 +26,7 @@ public class Expression extends DALNode {
         return node2;
     }
 
-    public Operator<DALNode> getOperator() {
+    public Operator<DALNode, DALRuntimeContext> getOperator() {
         return operator;
     }
 
@@ -41,7 +42,7 @@ public class Expression extends DALNode {
     }
 
     @Override
-    public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
+    public Object evaluate(DALRuntimeContext context) {
         try {
             Object result = operator.calculate(node1, node2, context);
             if (operator.isNeedInspect() && (result instanceof Boolean) && !(boolean) result)

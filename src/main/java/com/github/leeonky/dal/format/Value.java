@@ -94,10 +94,10 @@ public abstract class Value<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public T convertAs(RuntimeContextBuilder.RuntimeContext runtimeContext, Object instance, BeanClass<?> type) {
+    public T convertAs(RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext, Object instance, BeanClass<?> type) {
         if (type == null)
             throw new IllegalFieldException();
-        return (T) runtimeContext.getConverter().tryConvert(type.getType(), instance);
+        return (T) DALRuntimeContext.getConverter().tryConvert(type.getType(), instance);
     }
 
     public abstract boolean verify(T actual);

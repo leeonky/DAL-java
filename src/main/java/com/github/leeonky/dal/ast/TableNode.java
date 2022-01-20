@@ -1,9 +1,10 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.compiler.ExpressionClause;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.interpreter.ExpressionClause;
+import com.github.leeonky.interpreter.Operator;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
@@ -14,8 +15,8 @@ import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.HeaderNode.bySequence;
 import static com.github.leeonky.dal.ast.RowNode.printTableRow;
-import static com.github.leeonky.dal.runtime.FunctionUtil.transpose;
-import static com.github.leeonky.dal.runtime.FunctionUtil.zip;
+import static com.github.leeonky.interpreter.FunctionUtil.transpose;
+import static com.github.leeonky.interpreter.FunctionUtil.zip;
 import static com.github.leeonky.interpreter.InterpreterException.Position.Type.CHAR;
 import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
 import static java.util.Collections.emptyList;
@@ -59,16 +60,16 @@ public class TableNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, Operator.Equal operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Operator.Equal operator, DALRuntimeContext context) {
         return judgeRows(actualNode, operator, context);
     }
 
     @Override
-    public boolean judge(DALNode actualNode, Operator.Matcher operator, RuntimeContextBuilder.RuntimeContext context) {
+    public boolean judge(DALNode actualNode, Operator.Matcher operator, DALRuntimeContext context) {
         return judgeRows(actualNode, operator, context);
     }
 
-    private boolean judgeRows(DALNode actualNode, Operator operator, RuntimeContextBuilder.RuntimeContext context) {
+    private boolean judgeRows(DALNode actualNode, Operator operator, DALRuntimeContext context) {
         try {
             return transformToListNode(operator).judgeAll(context, actualNode.evaluateDataObject(context)
                     .setListComparator(collectComparator(context)));
@@ -78,13 +79,13 @@ public class TableNode extends DALNode {
     }
 
     private ListNode transformToListNode(Operator operator) {
-        Stream<ExpressionClause<DALNode>> rowExpressionClauses = rows.stream().map(rowNode -> rowNode.toExpressionClause(operator));
+        Stream<ExpressionClause<DALNode, DALRuntimeContext>> rowExpressionClauses = rows.stream().map(rowNode -> rowNode.toExpressionClause(operator));
         return hasRowIndex ? new ListNode(rowExpressionClauses.map(rowNode -> rowNode.makeExpression(null))
                 .collect(toList()), true, ListNode.Type.FIRST_N_ITEMS)
                 : new ListNode(rowExpressionClauses.collect(toList()), true);
     }
 
-    private Comparator<Object> collectComparator(RuntimeContextBuilder.RuntimeContext context) {
+    private Comparator<Object> collectComparator(DALRuntimeContext context) {
         return headers.stream().sorted(bySequence())
                 .map(headerNode -> headerNode.getListComparator(context))
                 .reduce(Comparator::thenComparing)

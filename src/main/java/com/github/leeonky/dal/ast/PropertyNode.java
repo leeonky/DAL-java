@@ -22,7 +22,7 @@ public class PropertyNode extends DALNode {
     }
 
     @Override
-    public Data evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
+    public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
         try {
             return instanceNode.evaluateDataObject(context).getValue(name);
         } catch (IndexOutOfBoundsException ex) {
@@ -35,7 +35,7 @@ public class PropertyNode extends DALNode {
     }
 
     @Override
-    public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
+    public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
         return evaluateDataObject(context).getInstance();
     }
 

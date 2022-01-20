@@ -3,6 +3,8 @@ package com.github.leeonky.dal;
 import com.github.leeonky.dal.ast.*;
 import com.github.leeonky.dal.compiler.Compiler;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.interpreter.Node;
+import com.github.leeonky.interpreter.Operator;
 import com.github.leeonky.interpreter.SourceCode;
 import com.github.leeonky.interpreter.SyntaxException;
 import org.junit.jupiter.api.Nested;
@@ -16,18 +18,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class CompilerTest {
 
     private final Compiler compiler = new Compiler();
-    private final RuntimeContextBuilder.RuntimeContext runtimeContext = new DAL().getRuntimeContextBuilder().build(null);
+    private final RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new DAL().getRuntimeContextBuilder().build(null);
 
     private void assertSyntaxException(String sourceCode, int position, String message) {
         SyntaxException syntaxException = assertThrows(SyntaxException.class,
-                () -> compiler.compile(new SourceCode(sourceCode), runtimeContext));
+                () -> compiler.compile(new SourceCode(sourceCode), DALRuntimeContext));
         assertThat(syntaxException)
                 .hasFieldOrPropertyWithValue("position", position)
                 .hasMessage(message);
     }
 
     private void assertCompileNode(String sourceCode, Node... expected) {
-        assertThat(compiler.compile(new SourceCode(sourceCode), runtimeContext)).isEqualTo(asList(expected));
+        assertThat(compiler.compile(new SourceCode(sourceCode), DALRuntimeContext)).isEqualTo(asList(expected));
     }
 
     @Nested

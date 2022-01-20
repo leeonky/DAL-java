@@ -21,11 +21,11 @@ import static java.util.stream.IntStream.range;
 
 public class SchemaVerifier {
     private final Data object;
-    private final RuntimeContextBuilder.RuntimeContext runtimeContext;
+    private final RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext;
     private static final Compiler compiler = new Compiler();
 
-    public SchemaVerifier(RuntimeContextBuilder.RuntimeContext runtimeContext, Data object) {
-        this.runtimeContext = runtimeContext;
+    public SchemaVerifier(RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext, Data object) {
+        this.DALRuntimeContext = DALRuntimeContext;
         this.object = object;
     }
 
@@ -112,7 +112,7 @@ public class SchemaVerifier {
         Class<?> fieldType = type.getType();
         if (Formatter.class.isAssignableFrom(fieldType)) {
             return verifyFormatterValue(subPrefix, getOrCreateFormatter(schemaProperty, type));
-        } else if (runtimeContext.isSchemaRegistered(fieldType))
+        } else if (DALRuntimeContext.isSchemaRegistered(fieldType))
             return object.createSchemaVerifier().verify(fieldType, schemaProperty, subPrefix);
         else if (type.isCollection())
             return verifyCollection(subPrefix, type.getElementType(), schemaProperty);
@@ -140,7 +140,7 @@ public class SchemaVerifier {
             if (object.isNull())
                 return errorLog("Can not convert null field `%s` to type [%s], use @AllowNull to verify nullable field",
                         subPrefix, rawType.getName());
-            runtimeContext.getConverter().convert(rawType, object.getInstance());
+            DALRuntimeContext.getConverter().convert(rawType, object.getInstance());
             return true;
         } catch (Exception ignore) {
             return errorLog("Can not convert field `%s` (%s: %s) to type [%s]", subPrefix,
@@ -150,7 +150,7 @@ public class SchemaVerifier {
 
     private boolean verifyByValue(String subPrefix, Value<Object> schemaProperty, BeanClass<?> type) {
         try {
-            return schemaProperty.verify(schemaProperty.convertAs(runtimeContext, object.getInstance(), type))
+            return schemaProperty.verify(schemaProperty.convertAs(DALRuntimeContext, object.getInstance(), type))
                     || errorLog(schemaProperty.errorMessage(subPrefix, object.getInstance()));
         } catch (IllegalFieldException ignore) {
             throw illegalStateException(subPrefix);

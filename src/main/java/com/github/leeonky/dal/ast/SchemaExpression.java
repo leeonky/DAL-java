@@ -33,7 +33,7 @@ public class SchemaExpression extends DALNode {
     }
 
     @Override
-    public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
+    public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
         try {
             schemaNodes.forEach(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
             return objectRef.instance;
@@ -43,11 +43,11 @@ public class SchemaExpression extends DALNode {
     }
 
     @Override
-    public Data evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
+    public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.wrap(evaluate(context), getSchemaName(), dimension > 0);
     }
 
-    private void verifyAndConvertAsSchemaType(RuntimeContextBuilder.RuntimeContext context,
+    private void verifyAndConvertAsSchemaType(RuntimeContextBuilder.DALRuntimeContext context,
                                               SchemaNode schemaNode, ObjectRef objectRef) {
         Data input = instance.evaluateDataObject(context);
         if (dimension == 1) {
@@ -61,7 +61,7 @@ public class SchemaExpression extends DALNode {
             objectRef.instance = convertViaSchema(context, schemaNode, input, instance.inspect());
     }
 
-    private Object convertViaSchema(RuntimeContextBuilder.RuntimeContext context, SchemaNode schemaNode,
+    private Object convertViaSchema(RuntimeContextBuilder.DALRuntimeContext context, SchemaNode schemaNode,
                                     Data element, String input) {
         try {
             return schemaNode.getConstructorViaSchema(context).apply(element);

@@ -1,6 +1,8 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.compiler.ExpressionClause;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.interpreter.ExpressionClause;
+import com.github.leeonky.interpreter.Operator;
 
 import java.util.Collection;
 import java.util.List;
@@ -15,10 +17,10 @@ import static java.util.stream.Collectors.toList;
 public class RowNode extends DALNode {
     private final List<DALNode> cells;
     private final Optional<Integer> index;
-    private final Optional<Operator<DALNode>> operator;
-    private final Optional<ExpressionClause<DALNode>> schemaClause;
+    private final Optional<Operator<DALNode, DALRuntimeContext>> operator;
+    private final Optional<ExpressionClause<DALNode, DALRuntimeContext>> schemaClause;
 
-    public RowNode(Optional<Integer> index, Optional<ExpressionClause<DALNode>> schemaClause, Optional<Operator<DALNode>> operator,
+    public RowNode(Optional<Integer> index, Optional<ExpressionClause<DALNode, DALRuntimeContext>> schemaClause, Optional<Operator<DALNode, DALRuntimeContext>> operator,
                    List<DALNode> cells) {
         this.cells = cells;
         this.operator = operator;
@@ -55,12 +57,12 @@ public class RowNode extends DALNode {
         return cells.size() >= 1 && cells.get(0) instanceof ListEllipsisNode;
     }
 
-    public ExpressionClause<DALNode> toExpressionClause(Operator<DALNode> operator) {
+    public ExpressionClause<DALNode, DALRuntimeContext> toExpressionClause(Operator<DALNode, DALRuntimeContext> operator) {
         return input -> isEllipsis() ? cells.get(0) : transformRowToExpression(operator,
                 index.<DALNode>map(i -> new PropertyNode(InputNode.INSTANCE, i, BRACKET)).orElse(input));
     }
 
-    private Expression transformRowToExpression(Operator<DALNode> operator, DALNode inputElement) {
+    private Expression transformRowToExpression(Operator<DALNode, DALRuntimeContext> operator, DALNode inputElement) {
         return new Expression(schemaClause.map(c -> c.makeExpression(inputElement)).orElse(inputElement),
                 this.operator.orElse(operator), isRowWildcard() ? cells.get(0)
                 : new ObjectNode(cells).setPositionBegin(cells.get(0).getOperandPosition()));

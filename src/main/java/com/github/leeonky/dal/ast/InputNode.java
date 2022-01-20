@@ -10,12 +10,12 @@ public class InputNode extends DALNode {
     }
 
     @Override
-    public Object evaluate(RuntimeContextBuilder.RuntimeContext context) {
+    public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
         return evaluateDataObject(context).getInstance();
     }
 
     @Override
-    public Data evaluateDataObject(RuntimeContextBuilder.RuntimeContext context) {
+    public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.getInputValue();
     }
 

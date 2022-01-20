@@ -1,7 +1,8 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.ast.Operator.Equal;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.interpreter.Operator;
+import com.github.leeonky.interpreter.Operator.Equal;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -17,12 +18,12 @@ class ObjectNodeTest {
 
     @Nested
     class EqualTo {
-        RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder().build(null);
+        RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder().build(null);
         ObjectNode objectNode = new ObjectNode();
 
         @Test
         void empty_data_equal_to_empty_object() {
-            assertThat(objectNode.judge(new ConstNode(new HashMap<>()), EQUAL, runtimeContext)).isTrue();
+            assertThat(objectNode.judge(new ConstNode(new HashMap<>()), EQUAL, DALRuntimeContext)).isTrue();
         }
 
         @Test
@@ -30,26 +31,26 @@ class ObjectNodeTest {
             assertThrows(AssertionFailure.class, () ->
                     objectNode.judge(new ConstNode(new HashMap<String, Object>() {{
                         put("unexpected", "field");
-                    }}), EQUAL, runtimeContext));
+                    }}), EQUAL, DALRuntimeContext));
         }
     }
 
     @Nested
     class Matches {
-        RuntimeContextBuilder.RuntimeContext runtimeContext = new RuntimeContextBuilder().build(null);
+        RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder().build(null);
         ObjectNode objectNode = new ObjectNode();
 
         @Test
         void any_data_matches_empty_object() {
             assertThat(objectNode.judge(new ConstNode(new HashMap<String, Object>() {{
                 put("any fields", "any value");
-            }}), MATCHER, runtimeContext)).isTrue();
+            }}), MATCHER, DALRuntimeContext)).isTrue();
         }
 
         @Test
         void null_does_not_match_empty_object() {
             assertThrows(AssertionFailure.class, () ->
-                    objectNode.judge(new ConstNode(null), MATCHER, runtimeContext)
+                    objectNode.judge(new ConstNode(null), MATCHER, DALRuntimeContext)
             );
         }
     }

@@ -1,7 +1,6 @@
 package com.github.leeonky.interpreter;
 
 import com.github.leeonky.dal.compiler.EscapeChars;
-import com.github.leeonky.dal.compiler.Token;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
