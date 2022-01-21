@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
-import com.github.leeonky.dal.ast.Expression;
 import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
@@ -79,7 +79,7 @@ public class CucumberContext {
 
     public void giveDalSourceCode(String code) {
         tokenParser = new TokenParser<>(new SourceCode(sourceCodeString = parseTabAndSpace(code)),
-                dal.getRuntimeContextBuilder().build(null), Expression::new);
+                dal.getRuntimeContextBuilder().build(null), DALExpression::new);
     }
 
     private String parseTabAndSpace(String code) {
@@ -92,7 +92,7 @@ public class CucumberContext {
 
     public void assertNodeValue(String assertion, String factory) {
         dal.evaluate(matcherMap.get(factory).fetch(new TokenParser<>(new SourceCode(sourceCodeString),
-                dal.getRuntimeContextBuilder().build(null), Expression::new)).orElse(null)
+                dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
     }
 

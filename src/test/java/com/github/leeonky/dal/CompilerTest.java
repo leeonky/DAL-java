@@ -85,7 +85,7 @@ class CompilerTest {
     class SimpleExpression {
 
         private void assertCompileOperator(String sourceCode, Operator operator) {
-            assertCompileNode(sourceCode + " 1", new Expression(InputNode.INSTANCE, operator, new ConstNode(1)));
+            assertCompileNode(sourceCode + " 1", new DALExpression(InputNode.INSTANCE, operator, new ConstNode(1)));
         }
 
         @Test
@@ -116,7 +116,7 @@ class CompilerTest {
         @Test
         void simple_expression() {
             assertCompileNode("+1=2",
-                    new Expression(new Expression(InputNode.INSTANCE, new Operator.Plus(), new ConstNode(1)),
+                    new DALExpression(new DALExpression(InputNode.INSTANCE, new Operator.Plus(), new ConstNode(1)),
                             new Operator.Equal(), new ConstNode(2)));
         }
     }
@@ -126,19 +126,19 @@ class CompilerTest {
 
         @Test
         void plus_has_higher_precedence_then_equal() {
-            assertCompileNode("=1+1", new Expression(InputNode.INSTANCE,
-                    new Operator.Equal(), new Expression(new ConstNode(1), new Operator.Plus(), new ConstNode(1))
+            assertCompileNode("=1+1", new DALExpression(InputNode.INSTANCE,
+                    new Operator.Equal(), new DALExpression(new ConstNode(1), new Operator.Plus(), new ConstNode(1))
             ));
         }
 
         @Test
         void mul_has_higher_precedence_then_plus() {
-            assertCompileNode("=1+1*1", new Expression(InputNode.INSTANCE,
+            assertCompileNode("=1+1*1", new DALExpression(InputNode.INSTANCE,
                     new Operator.Equal(),
-                    new Expression(
+                    new DALExpression(
                             new ConstNode(1)
                             , new Operator.Plus(),
-                            new Expression(new ConstNode(1), new Operator.Multiplication(), new ConstNode(1))
+                            new DALExpression(new ConstNode(1), new Operator.Multiplication(), new ConstNode(1))
                     )
             ));
         }
@@ -149,8 +149,8 @@ class CompilerTest {
 
         @Test
         void minus_should_after_an_operator() {
-            assertCompileNode("-1=0", new Expression(
-                    new Expression(
+            assertCompileNode("-1=0", new DALExpression(
+                    new DALExpression(
                             InputNode.INSTANCE
                             , new Operator.Subtraction(),
                             new ConstNode(1)
@@ -159,11 +159,11 @@ class CompilerTest {
                     new ConstNode(0)
             ));
 
-            assertCompileNode("1+ -1=0", new Expression(
-                    new Expression(
+            assertCompileNode("1+ -1=0", new DALExpression(
+                    new DALExpression(
                             new ConstNode(1)
                             , new Operator.Plus(),
-                            new Expression(
+                            new DALExpression(
                                     null
                                     , new Operator.Minus(),
                                     new ConstNode(1)
@@ -200,13 +200,13 @@ class CompilerTest {
         @Test
         void compile_match_regex() {
             assertCompileNode(" : /1/",
-                    new Expression(InputNode.INSTANCE, new Operator.Matcher(), new RegexNode("1")));
+                    new DALExpression(InputNode.INSTANCE, new Operator.Matcher(), new RegexNode("1")));
         }
 
         @Test
         void compile_eq_regex() {
             assertCompileNode(" = /1/",
-                    new Expression(InputNode.INSTANCE, new Operator.Equal(), new RegexNode("1")));
+                    new DALExpression(InputNode.INSTANCE, new Operator.Equal(), new RegexNode("1")));
         }
     }
 
@@ -215,34 +215,34 @@ class CompilerTest {
 
         @Test
         void simple_logic_and() {
-            assertCompileNode("&& true", new Expression(InputNode.INSTANCE, new Operator.And("&&"), new ConstNode(true)));
-            assertCompileNode("and true", new Expression(InputNode.INSTANCE, new Operator.And("&&"), new ConstNode(true)));
+            assertCompileNode("&& true", new DALExpression(InputNode.INSTANCE, new Operator.And("&&"), new ConstNode(true)));
+            assertCompileNode("and true", new DALExpression(InputNode.INSTANCE, new Operator.And("&&"), new ConstNode(true)));
         }
 
         @Test
         void simple_logic_or() {
-            assertCompileNode("|| true", new Expression(InputNode.INSTANCE, new Operator.Or("||"), new ConstNode(true)));
-            assertCompileNode("or true", new Expression(InputNode.INSTANCE, new Operator.Or("||"), new ConstNode(true)));
+            assertCompileNode("|| true", new DALExpression(InputNode.INSTANCE, new Operator.Or("||"), new ConstNode(true)));
+            assertCompileNode("or true", new DALExpression(InputNode.INSTANCE, new Operator.Or("||"), new ConstNode(true)));
         }
 
         @Test
         void lower_precedence_then_others() {
-            assertCompileNode("=1 || 2>1", new Expression(
-                    new Expression(InputNode.INSTANCE, new Operator.Equal(), new ConstNode(1))
+            assertCompileNode("=1 || 2>1", new DALExpression(
+                    new DALExpression(InputNode.INSTANCE, new Operator.Equal(), new ConstNode(1))
                     , new Operator.Or("||"),
-                    new Expression(new ConstNode(2), new Operator.Greater(), new ConstNode(1))
+                    new DALExpression(new ConstNode(2), new Operator.Greater(), new ConstNode(1))
             ));
         }
 
         @Test
         void logical_not() {
-            assertCompileNode("!true", new Expression(null, new Operator.Not(), new ConstNode(true)));
+            assertCompileNode("!true", new DALExpression(null, new Operator.Not(), new ConstNode(true)));
         }
 
         @Test
         void logical_not_should_has_highest_precedence() {
-            assertCompileNode("!true=false", new Expression(
-                    new Expression(null, new Operator.Not(), new ConstNode(true))
+            assertCompileNode("!true=false", new DALExpression(
+                    new DALExpression(null, new Operator.Not(), new ConstNode(true))
                     , new Operator.Equal(),
                     new ConstNode(false)
             ));

@@ -178,7 +178,7 @@ Feature: object node
     """
     inspect: "{key1 is String: 'hello'}"
     expressions[0]: {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       leftOperand: {
         class.simpleName: 'SchemaExpression'
         inspect: 'key1 is String'

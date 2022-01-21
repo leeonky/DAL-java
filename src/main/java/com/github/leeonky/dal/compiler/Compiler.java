@@ -151,7 +151,7 @@ public class Compiler {
 
     public List<DALNode> compile(SourceCode sourceCode, DALRuntimeContext DALRuntimeContext) {
         return new ArrayList<DALNode>() {{
-            TokenParser<DALNode, DALRuntimeContext> parser = new TokenParser<>(sourceCode, DALRuntimeContext, Expression::new);
+            TokenParser<DALNode, DALRuntimeContext> parser = new TokenParser<>(sourceCode, DALRuntimeContext, DALExpression::new);
             add(EXPRESSION.fetch(parser));
             if (sourceCode.isBeginning() && sourceCode.hasCode())
                 throw sourceCode.syntaxError("unexpected token", 0);
@@ -161,7 +161,7 @@ public class Compiler {
     }
 
     public List<Object> toChainNodes(String sourceCode) {
-        return ((PropertyNode) PROPERTY_CHAIN.fetch(new TokenParser<>(new SourceCode(sourceCode), null, Expression::new))).getChain();
+        return ((PropertyNode) PROPERTY_CHAIN.fetch(new TokenParser<>(new SourceCode(sourceCode), null, DALExpression::new))).getChain();
     }
 
     private static <N extends Node<N, C>, C extends RuntimeContext<C>> NodeMatcher<N, C> oneOf(NodeMatcher<N, C> matcher, NodeMatcher<N, C>... matchers) {

@@ -51,7 +51,7 @@ Feature: expression
     Then got the following "expression" node:
     """
     : {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       inspect: '+ 1'
       positionBegin: 2
     }
@@ -65,7 +65,7 @@ Feature: expression
     Then got the following "expression" node:
     """
     : {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       inspect: 'a + b'
     }
     """
@@ -91,7 +91,7 @@ Feature: expression
     Then got the following "expression" node:
     """
     : {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       inspect: 'is Integer || true'
     }
     """
@@ -117,7 +117,7 @@ Feature: expression
     Then got the following "expression" node:
     """
     : {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       inspect: '+ 2 * 3 * 4'
       positionBegin: 0
       leftOperand.class.simpleName: 'InputNode'

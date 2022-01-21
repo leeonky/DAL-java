@@ -42,7 +42,7 @@ Feature: schema in table
     : {
       inspect: ">>| time is String | is Instant: {year: 2000} |"
       rows.cells: [[{
-        class.simpleName: 'Expression'
+        class.simpleName: 'DALExpression'
         operator.class.simpleName: 'Matcher'
         leftOperand: {
           class.simpleName: 'SchemaExpression'

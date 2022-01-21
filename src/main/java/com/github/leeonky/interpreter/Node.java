@@ -1,29 +1,20 @@
 package com.github.leeonky.interpreter;
 
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+public interface Node<N extends Node<N, C>, C extends RuntimeContext<C>> {
 
-public class Node<N extends Node<N, C>, C extends RuntimeContext<C>> {
-    protected int positionBegin;
-
-    public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
+    default Object evaluate(C context) {
         throw new IllegalStateException();
     }
 
-    public int getPositionBegin() {
-        return positionBegin;
-    }
+    int getPositionBegin();
 
-    public N setPositionBegin(int positionBegin) {
-        this.positionBegin = positionBegin;
-        return (N) this;
-    }
+    N setPositionBegin(int positionBegin);
 
-    public int getOperandPosition() {
-        return positionBegin;
-    }
+    int getOperandPosition();
 
     //TODO move to expression
-    public N adjustOperatorOrder() {
+    @SuppressWarnings("unchecked")
+    default N adjustOperatorOrder(ExpressionConstructor<N, C> expressionConstructor) {
         return (N) this;
     }
 }

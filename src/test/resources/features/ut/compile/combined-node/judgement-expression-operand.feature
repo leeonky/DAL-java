@@ -39,7 +39,7 @@ Feature: compile judgement expression operand
     Then got the following "judgement-expression-operand" node:
     """
     : {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       inspect: 'a <operator> b'
       positionBegin: 2
       leftOperand.inspect: 'a'
@@ -87,7 +87,7 @@ Feature: compile judgement expression operand
     Then got the following "judgement-expression-operand" node:
     """
     : {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       inspect: 'a + b * c'
       positionBegin: 2
       leftOperand.inspect: 'a'

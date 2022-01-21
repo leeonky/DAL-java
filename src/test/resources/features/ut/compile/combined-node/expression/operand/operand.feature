@@ -69,7 +69,7 @@ Feature: operand node
     Then got the following "operand" node:
     """
     : {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       inspect: '-1'
       positionBegin: 2
     }
@@ -101,7 +101,7 @@ Feature: operand node
     """
     : {
       leftOperand: null
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       inspect: '!false'
     }
     """
@@ -118,7 +118,7 @@ Feature: operand node
     Then got the following "expression" node:
     """
     : {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       inspect: '!= 1'
       leftOperand.class.simpleName: 'InputNode'
     }
@@ -167,7 +167,7 @@ Feature: operand node
     """
     rightOperand: {
       inspect: '<operator>false.xxx'
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       rightOperand: {
         class.simpleName: 'PropertyNode'
         inspect: 'false.xxx'

@@ -2,14 +2,14 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.interpreter.Node;
+import com.github.leeonky.interpreter.NodeBase;
 import com.github.leeonky.interpreter.Operator;
 import com.github.leeonky.interpreter.Operator.Matcher;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.*;
 import static java.lang.String.format;
 
-public abstract class DALNode extends Node<DALNode, RuntimeContextBuilder.DALRuntimeContext> {
+public abstract class DALNode extends NodeBase<DALNode, RuntimeContextBuilder.DALRuntimeContext> {
 
     public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.wrap(evaluate(context));

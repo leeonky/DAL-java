@@ -18,7 +18,7 @@ Feature: binary operator expression
     Then got the following "binary-operator-expression" node:
     """
     : {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       inspect: '<operator> b'
       positionBegin: 1
       operator.class.simpleName: '<type>'
@@ -51,7 +51,7 @@ Feature: binary operator expression
     Then got the following "binary-operator-expression" node:
     """
     : {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       inspect: '<operator> <operand>'
     }
     """
@@ -87,7 +87,7 @@ Feature: binary operator expression
     Then got the following "binary-operator-expression" node:
     """
     : {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       inspect: '+ [0]'
       rightOperand.class.simpleName: 'PropertyNode'
     }
@@ -101,7 +101,7 @@ Feature: binary operator expression
     Then got the following "binary-operator-expression" node:
     """
     : {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       inspect: '<operator> *'
     }
     """

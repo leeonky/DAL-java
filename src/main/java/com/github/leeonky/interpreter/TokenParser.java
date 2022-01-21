@@ -132,7 +132,7 @@ public class TokenParser<N extends Node<N, C>, C extends RuntimeContext<C>> {
         Operator<N, C> operator = operatorFactory.fetch(this);
         operators.push(operator);
         try {
-            return expressionConstructor.newInstance(left, operator, rightCompiler.fetch(this)).adjustOperatorOrder();
+            return expressionConstructor.newInstance(left, operator, rightCompiler.fetch(this)).adjustOperatorOrder(expressionConstructor);
         } finally {
             operators.pop();
         }
@@ -150,7 +150,7 @@ public class TokenParser<N extends Node<N, C>, C extends RuntimeContext<C>> {
         } finally {
             operators.pop();
         }
-        return input -> expressionConstructor.newInstance(input, operator, right).adjustOperatorOrder();
+        return input -> expressionConstructor.newInstance(input, operator, right).adjustOperatorOrder(expressionConstructor);
     }
 
     public Optional<ExpressionClause<N, C>> fetchExpressionClause(OperatorMatcher<N, C> operatorMatcher, NodeFactory<N, C> rightCompiler) {

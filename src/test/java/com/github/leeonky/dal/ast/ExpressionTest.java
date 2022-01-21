@@ -55,18 +55,18 @@ class ExpressionTest {
 
     @Test
     void should_support_short_circuit_expression() {
-        assertTrue((boolean) new Expression(new ConstNode(true), new Operator.Or("||"), new ConstNode(null)).evaluate(new RuntimeContextBuilder().build(null)));
-        assertFalse((boolean) new Expression(new ConstNode(false), new Operator.And("&&"), new ConstNode(null)).evaluate(new RuntimeContextBuilder().build(null)));
+        assertTrue((boolean) new DALExpression(new ConstNode(true), new Operator.Or("||"), new ConstNode(null)).evaluate(new RuntimeContextBuilder().build(null)));
+        assertFalse((boolean) new DALExpression(new ConstNode(false), new Operator.And("&&"), new ConstNode(null)).evaluate(new RuntimeContextBuilder().build(null)));
     }
 
     private void assertCalculate(Object v1, Operator operator, Object v2, Object expected) {
-        Object evaluate = new Expression(new ConstNode(v1), operator, new ConstNode(v2)).evaluate(new RuntimeContextBuilder().build(null));
+        Object evaluate = new DALExpression(new ConstNode(v1), operator, new ConstNode(v2)).evaluate(new RuntimeContextBuilder().build(null));
 
         assertThat(evaluate).isEqualTo(expected);
     }
 
     private void assertPassed(Object s1, Object s2, Operator operator) {
-        Object evaluate = new Expression(new ConstNode(s1), operator, new ConstNode(s2)).evaluate(new RuntimeContextBuilder().build(null));
+        Object evaluate = new DALExpression(new ConstNode(s1), operator, new ConstNode(s2)).evaluate(new RuntimeContextBuilder().build(null));
 
         assertThat(evaluate).isEqualTo(true);
     }

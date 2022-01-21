@@ -63,7 +63,7 @@ public class RowNode extends DALNode {
     }
 
     private Expression transformRowToExpression(Operator<DALNode, DALRuntimeContext> operator, DALNode inputElement) {
-        return new Expression(schemaClause.map(c -> c.makeExpression(inputElement)).orElse(inputElement),
+        return new DALExpression(schemaClause.map(c -> c.makeExpression(inputElement)).orElse(inputElement),
                 this.operator.orElse(operator), isRowWildcard() ? cells.get(0)
                 : new ObjectNode(cells).setPositionBegin(cells.get(0).getOperandPosition()));
     }

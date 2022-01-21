@@ -278,7 +278,7 @@ Feature: list node
     """
     inspect: "[is String: 'hello']"
     expressions[0]: {
-      class.simpleName: 'Expression'
+      class.simpleName: 'DALExpression'
       leftOperand: {
         class.simpleName: 'SchemaExpression'
         inspect: '[0] is String'
