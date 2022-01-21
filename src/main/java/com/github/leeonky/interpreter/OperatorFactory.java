@@ -1,5 +1,5 @@
 package com.github.leeonky.interpreter;
 
-public interface OperatorFactory<N extends Node<N, C>, C extends RuntimeContext<C>> {
-    Operator<N, C> fetch(TokenParser<N, C> tokenParser);
+public interface OperatorFactory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E>> {
+    Operator<C, N> fetch(TokenParser<E, N, C> tokenParser);
 }

@@ -3,11 +3,11 @@ package com.github.leeonky.interpreter;
 import java.util.Optional;
 import java.util.function.Function;
 
-public interface NodeFactory<N extends Node<N, C>, C extends RuntimeContext<C>> {
+public interface NodeFactory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E>> {
 
-    N fetch(TokenParser<N, C> parser);
+    N fetch(TokenParser<E, N, C> parser);
 
-    default NodeFactory<N, C> recursive(ExpressionMatcher<N, C> expressionMatcher) {
+    default NodeFactory<C, N, E> recursive(ExpressionMatcher<C, N, E> expressionMatcher) {
         return parser -> {
             N node = fetch(parser);
             Optional<N> optionalNode = expressionMatcher.fetch(parser, node);
@@ -17,11 +17,11 @@ public interface NodeFactory<N extends Node<N, C>, C extends RuntimeContext<C>> 
         };
     }
 
-    default NodeFactory<N, C> map(Function<N, N> mapping) {
+    default NodeFactory<C, N, E> map(Function<N, N> mapping) {
         return parser -> mapping.apply(fetch(parser));
     }
 
-    default NodeFactory<N, C> withClause(ExpressionClauseFactory<N, C> expressionClauseFactory) {
+    default NodeFactory<C, N, E> withClause(ExpressionClauseFactory<C, N, E> expressionClauseFactory) {
         return parser -> {
             N node = fetch(parser);
             return expressionClauseFactory.fetch(parser).makeExpression(node);

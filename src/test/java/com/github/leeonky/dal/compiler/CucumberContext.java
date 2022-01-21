@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CucumberContext {
     private static final Compiler compiler = new Compiler();
-    private static final Map<String, NodeMatcher<DALNode, DALRuntimeContext>> matcherMap = new HashMap<String, NodeMatcher<DALNode, DALRuntimeContext>>() {{
+    private static final Map<String, NodeMatcher<DALRuntimeContext, DALNode, DALExpression>> matcherMap = new HashMap<String, NodeMatcher<DALRuntimeContext, DALNode, DALExpression>>() {{
         put("number", compiler.NUMBER);
         put("integer", compiler.INTEGER);
         put("single-quoted-string", compiler.SINGLE_QUOTED_STRING);
@@ -51,7 +51,7 @@ public class CucumberContext {
         put("schema", optional(SchemaExpressionClauseFactory.SCHEMA));
     }};
 
-    private static NodeMatcher<DALNode, DALRuntimeContext> optional(NodeFactory<DALNode, DALRuntimeContext> nodeFactory) {
+    private static NodeMatcher<DALRuntimeContext, DALNode, DALExpression> optional(NodeFactory<DALRuntimeContext, DALNode, DALExpression> nodeFactory) {
         return parser -> Optional.ofNullable(nodeFactory.fetch(parser));
     }
 
@@ -59,7 +59,7 @@ public class CucumberContext {
     DAL dal = new DAL();
 
     Object inputObject = null;
-    TokenParser<DALNode, DALRuntimeContext> tokenParser = null;
+    TokenParser<DALExpression, DALNode, DALRuntimeContext> tokenParser = null;
     String sourceCodeString = null;
     InterpreterException interpreterException;
     DALNode node = null;

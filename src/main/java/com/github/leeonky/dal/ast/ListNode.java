@@ -24,11 +24,11 @@ import static java.util.stream.Collectors.toList;
 public class ListNode extends DALNode {
     private List<DALNode> expressions__;
     private List<DALNode> inputExpressions;
-    private List<ExpressionClause<DALNode, DALRuntimeContext>> expressionFactories;
+    private List<ExpressionClause<DALRuntimeContext, DALNode>> expressionFactories;
     private final Type type;
     private final boolean multiLineList;
 
-    public ListNode(List<ExpressionClause<DALNode, DALRuntimeContext>> expressionFactories, boolean multiLineList) {
+    public ListNode(List<ExpressionClause<DALRuntimeContext, DALNode>> expressionFactories, boolean multiLineList) {
         type = guessType(expressionFactories);
         this.expressionFactories = expressionFactories;
         this.multiLineList = multiLineList;
@@ -54,11 +54,11 @@ public class ListNode extends DALNode {
         this.type = type;
     }
 
-    public ListNode(List<ExpressionClause<DALNode, DALRuntimeContext>> expressionFactories) {
+    public ListNode(List<ExpressionClause<DALRuntimeContext, DALNode>> expressionFactories) {
         this(expressionFactories, false);
     }
 
-    private Type guessType(List<ExpressionClause<DALNode, DALRuntimeContext>> expressionFactories) {
+    private Type guessType(List<ExpressionClause<DALRuntimeContext, DALNode>> expressionFactories) {
         if (expressionFactories.size() > 0 && isListEllipsis(expressionFactories.get(expressionFactories.size() - 1)))
             return Type.FIRST_N_ITEMS;
         else if (expressionFactories.size() > 0 && isListEllipsis(expressionFactories.get(0)))
@@ -113,7 +113,7 @@ public class ListNode extends DALNode {
         return true;
     }
 
-    private boolean isListEllipsis(ExpressionClause<DALNode, DALRuntimeContext> expressionClause) {
+    private boolean isListEllipsis(ExpressionClause<DALRuntimeContext, DALNode> expressionClause) {
         return expressionClause.makeExpression(null) instanceof ListEllipsisNode;
     }
 

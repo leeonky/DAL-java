@@ -79,7 +79,7 @@ public class TableNode extends DALNode {
     }
 
     private ListNode transformToListNode(Operator operator) {
-        Stream<ExpressionClause<DALNode, DALRuntimeContext>> rowExpressionClauses = rows.stream().map(rowNode -> rowNode.toExpressionClause(operator));
+        Stream<ExpressionClause<DALRuntimeContext, DALNode>> rowExpressionClauses = rows.stream().map(rowNode -> rowNode.toExpressionClause(operator));
         return hasRowIndex ? new ListNode(rowExpressionClauses.map(rowNode -> rowNode.makeExpression(null))
                 .collect(toList()), true, ListNode.Type.FIRST_N_ITEMS)
                 : new ListNode(rowExpressionClauses.collect(toList()), true);

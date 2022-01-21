@@ -1,6 +1,6 @@
 package com.github.leeonky.interpreter;
 
-public abstract class NodeBase<N extends NodeBase<N, C>, C extends RuntimeContext<C>> implements Node<N, C> {
+public abstract class NodeBase<C extends RuntimeContext<C>, N extends NodeBase<C, N>> implements Node<C, N> {
     protected int positionBegin;
 
     @Override

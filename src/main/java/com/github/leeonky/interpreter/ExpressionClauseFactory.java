@@ -1,9 +1,9 @@
 package com.github.leeonky.interpreter;
 
-public interface ExpressionClauseFactory<N extends Node<N, C>, C extends RuntimeContext<C>> {
-    ExpressionClause<N, C> fetch(TokenParser<N, C> tokenParser);
+public interface ExpressionClauseFactory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E>> {
+    ExpressionClause<C, N> fetch(TokenParser<E, N, C> tokenParser);
 
-    default NodeFactory<N, C> input(N node) {
+    default NodeFactory<C, N, E> input(N node) {
         return parser -> fetch(parser).makeExpression(node);
     }
 }

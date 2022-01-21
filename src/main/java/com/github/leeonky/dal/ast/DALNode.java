@@ -9,7 +9,7 @@ import com.github.leeonky.interpreter.Operator.Matcher;
 import static com.github.leeonky.dal.ast.AssertionFailure.*;
 import static java.lang.String.format;
 
-public abstract class DALNode extends NodeBase<DALNode, RuntimeContextBuilder.DALRuntimeContext> {
+public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeContext, DALNode> {
 
     public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.wrap(evaluate(context));

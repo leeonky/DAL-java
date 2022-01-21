@@ -10,9 +10,9 @@ import java.util.Optional;
 public class HeaderNode extends DALNode {
     private final SequenceNode sequence;
     private final DALNode property;
-    private final Optional<Operator<DALNode, DALRuntimeContext>> operator;
+    private final Optional<Operator<DALRuntimeContext, DALNode>> operator;
 
-    public HeaderNode(SequenceNode sequence, DALNode property, Optional<Operator<DALNode, DALRuntimeContext>> operator) {
+    public HeaderNode(SequenceNode sequence, DALNode property, Optional<Operator<DALRuntimeContext, DALNode>> operator) {
         this.sequence = sequence;
         this.property = property;
         this.operator = operator;
@@ -28,7 +28,7 @@ public class HeaderNode extends DALNode {
         return property;
     }
 
-    public OperatorMatcher<DALNode, DALRuntimeContext> headerOperator() {
+    public OperatorMatcher<DALRuntimeContext, DALNode, DALExpression> headerOperator() {
         return tokenParser -> operator;
     }
 

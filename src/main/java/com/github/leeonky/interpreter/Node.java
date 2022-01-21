@@ -1,6 +1,6 @@
 package com.github.leeonky.interpreter;
 
-public interface Node<N extends Node<N, C>, C extends RuntimeContext<C>> {
+public interface Node<C extends RuntimeContext<C>, N extends Node<C, N>> {
 
     default Object evaluate(C context) {
         throw new IllegalStateException();
@@ -12,9 +12,4 @@ public interface Node<N extends Node<N, C>, C extends RuntimeContext<C>> {
 
     int getOperandPosition();
 
-    //TODO move to expression
-    @SuppressWarnings("unchecked")
-    default N adjustOperatorOrder(ExpressionConstructor<N, C> expressionConstructor) {
-        return (N) this;
-    }
 }

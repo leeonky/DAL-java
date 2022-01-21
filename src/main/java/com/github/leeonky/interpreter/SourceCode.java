@@ -12,13 +12,13 @@ public class SourceCode {
     private final String code;
     private int position = 0;
 
-    public static TokenMatcher tokenMatcher(Predicate<Character> startsWith, Set<String> excluded, boolean trim,
-                                            Set<Character> delimiters, Predicate<Token> validator) {
+    public static <E extends Expression<C, N, E>, N extends Node<C, N>, C extends RuntimeContext<C>> TokenMatcher<C, N, E> tokenMatcher(Predicate<Character> startsWith, Set<String> excluded, boolean trim,
+                                                                                                                                        Set<Character> delimiters, Predicate<Token> validator) {
         return tokenMatcher(startsWith, excluded, trim, (c1, c2) -> delimiters.contains(c2), validator);
     }
 
-    public static TokenMatcher tokenMatcher(Predicate<Character> startsWith, Set<String> excluded, boolean trim,
-                                            BiPredicate<Character, Character> endsWith, Predicate<Token> validator) {
+    public static <E extends Expression<C, N, E>, N extends Node<C, N>, C extends RuntimeContext<C>> TokenMatcher<C, N, E> tokenMatcher(Predicate<Character> startsWith, Set<String> excluded, boolean trim,
+                                                                                                                                        BiPredicate<Character, Character> endsWith, Predicate<Token> validator) {
         return sourceCode -> {
             if (sourceCode.whenFirstChar(startsWith) && sourceCode.hasCode()) {
                 Token token = new Token(sourceCode.position);
@@ -97,7 +97,7 @@ public class SourceCode {
         return when(startsWith(word) && predicate.get()).optional(() -> new Token(seek(word.length())).append(word));
     }
 
-    public <T, N extends Node<N, C>, C extends RuntimeContext<C>> Optional<N> fetchElementNode(FetchBy fetchBy, Character opening, char closing,
+    public <T, N extends Node<C, N>, C extends RuntimeContext<C>> Optional<N> fetchElementNode(FetchBy fetchBy, Character opening, char closing,
                                                                                                Supplier<T> element, Function<List<T>, N> nodeFactory) {
         return when(whenFirstChar(opening::equals)).optional(() -> {
             int startPosition = seek(1);
@@ -113,7 +113,7 @@ public class SourceCode {
         });
     }
 
-    public <N extends Node<N, C>, C extends RuntimeContext<C>> Optional<N> tryFetch(Supplier<Optional<N>> supplier) {
+    public <N extends Node<C, N>, C extends RuntimeContext<C>> Optional<N> tryFetch(Supplier<Optional<N>> supplier) {
         int position = this.position;
         Optional<N> optionalNode = supplier.get();
         if (!optionalNode.isPresent())

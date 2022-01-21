@@ -5,7 +5,7 @@ import com.github.leeonky.dal.compiler.Constants;
 import com.github.leeonky.dal.runtime.Calculator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
-public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>> {
+public abstract class Operator<C extends RuntimeContext<C>, N extends Node<C, N>> {
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
     private static final int PRECEDENCE_LOGIC_COMPARE_OPT = 210;
     private static final int PRECEDENCE_PLUS_SUB_OPT = 300;
@@ -27,7 +27,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         return needInspect;
     }
 
-    public boolean isPrecedentThan(Operator<N, C> operator) {
+    public boolean isPrecedentThan(Operator<C, N> operator) {
         return precedence > operator.precedence;
     }
 
@@ -43,7 +43,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         return position;
     }
 
-    public Operator<N, C> setPosition(int position) {
+    public Operator<C, N> setPosition(int position) {
         this.position = position;
         return this;
     }
@@ -54,7 +54,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         return String.format("%s %s %s", node1, inspect, node2);
     }
 
-    public static class Equal extends Operator<DALNode, DALRuntimeContext> {
+    public static class Equal extends Operator<DALRuntimeContext, DALNode> {
         public Equal() {
             super(PRECEDENCE_LOGIC_COMPARE_OPT, "=", true);
         }
@@ -70,7 +70,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class Less extends Operator<DALNode, DALRuntimeContext> {
+    public static class Less extends Operator<DALRuntimeContext, DALNode> {
         public Less() {
             super(PRECEDENCE_LOGIC_COMPARE_OPT, "<", true);
         }
@@ -81,7 +81,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class GreaterOrEqual extends Operator<DALNode, DALRuntimeContext> {
+    public static class GreaterOrEqual extends Operator<DALRuntimeContext, DALNode> {
         public GreaterOrEqual() {
             super(PRECEDENCE_LOGIC_COMPARE_OPT, ">=", true);
         }
@@ -92,7 +92,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class LessOrEqual extends Operator<DALNode, DALRuntimeContext> {
+    public static class LessOrEqual extends Operator<DALRuntimeContext, DALNode> {
         public LessOrEqual() {
             super(PRECEDENCE_LOGIC_COMPARE_OPT, "<=", true);
         }
@@ -103,7 +103,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class NotEqual extends Operator<DALNode, DALRuntimeContext> {
+    public static class NotEqual extends Operator<DALRuntimeContext, DALNode> {
         public NotEqual() {
             super(PRECEDENCE_LOGIC_COMPARE_OPT, "!=", true);
         }
@@ -114,7 +114,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class Plus extends Operator<DALNode, DALRuntimeContext> {
+    public static class Plus extends Operator<DALRuntimeContext, DALNode> {
         public Plus() {
             super(PRECEDENCE_PLUS_SUB_OPT, "+", false);
         }
@@ -125,7 +125,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class Greater extends Operator<DALNode, DALRuntimeContext> {
+    public static class Greater extends Operator<DALRuntimeContext, DALNode> {
         public Greater() {
             super(PRECEDENCE_LOGIC_COMPARE_OPT, ">", true);
         }
@@ -136,7 +136,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class Subtraction extends Operator<DALNode, DALRuntimeContext> {
+    public static class Subtraction extends Operator<DALRuntimeContext, DALNode> {
         public Subtraction() {
             super(PRECEDENCE_PLUS_SUB_OPT, "-", false);
         }
@@ -147,7 +147,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class Multiplication extends Operator<DALNode, DALRuntimeContext> {
+    public static class Multiplication extends Operator<DALRuntimeContext, DALNode> {
         public Multiplication() {
             super(PRECEDENCE_MUL_DIV, "*", false);
         }
@@ -158,7 +158,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class Division extends Operator<DALNode, DALRuntimeContext> {
+    public static class Division extends Operator<DALRuntimeContext, DALNode> {
         public Division() {
             super(PRECEDENCE_MUL_DIV, "/", false);
         }
@@ -169,7 +169,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class And extends Operator<DALNode, DALRuntimeContext> {
+    public static class And extends Operator<DALRuntimeContext, DALNode> {
         public And(String inspect) {
             super(PRECEDENCE_LOGIC_COMBINATION_OPT, inspect, true);
         }
@@ -180,7 +180,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class Or extends Operator<DALNode, DALRuntimeContext> {
+    public static class Or extends Operator<DALRuntimeContext, DALNode> {
         public Or(String inspect) {
             super(PRECEDENCE_LOGIC_COMBINATION_OPT, inspect, true);
         }
@@ -191,7 +191,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class Not extends Operator<DALNode, DALRuntimeContext> {
+    public static class Not extends Operator<DALRuntimeContext, DALNode> {
         public Not() {
             super(PRECEDENCE_UNARY_OPERATION, "!", true);
         }
@@ -207,7 +207,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class Minus extends Operator<DALNode, DALRuntimeContext> {
+    public static class Minus extends Operator<DALRuntimeContext, DALNode> {
 
         public Minus() {
             super(PRECEDENCE_UNARY_OPERATION, "-", false);
@@ -224,7 +224,7 @@ public abstract class Operator<N extends Node<N, C>, C extends RuntimeContext<C>
         }
     }
 
-    public static class Matcher extends Operator<DALNode, DALRuntimeContext> {
+    public static class Matcher extends Operator<DALRuntimeContext, DALNode> {
 
         public Matcher() {
             super(PRECEDENCE_LOGIC_COMPARE_OPT, Constants.Operators.MATCH, true);

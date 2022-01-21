@@ -17,10 +17,10 @@ import static java.util.stream.Collectors.toList;
 public class RowNode extends DALNode {
     private final List<DALNode> cells;
     private final Optional<Integer> index;
-    private final Optional<Operator<DALNode, DALRuntimeContext>> operator;
-    private final Optional<ExpressionClause<DALNode, DALRuntimeContext>> schemaClause;
+    private final Optional<Operator<DALRuntimeContext, DALNode>> operator;
+    private final Optional<ExpressionClause<DALRuntimeContext, DALNode>> schemaClause;
 
-    public RowNode(Optional<Integer> index, Optional<ExpressionClause<DALNode, DALRuntimeContext>> schemaClause, Optional<Operator<DALNode, DALRuntimeContext>> operator,
+    public RowNode(Optional<Integer> index, Optional<ExpressionClause<DALRuntimeContext, DALNode>> schemaClause, Optional<Operator<DALRuntimeContext, DALNode>> operator,
                    List<DALNode> cells) {
         this.cells = cells;
         this.operator = operator;
@@ -57,12 +57,12 @@ public class RowNode extends DALNode {
         return cells.size() >= 1 && cells.get(0) instanceof ListEllipsisNode;
     }
 
-    public ExpressionClause<DALNode, DALRuntimeContext> toExpressionClause(Operator<DALNode, DALRuntimeContext> operator) {
+    public ExpressionClause<DALRuntimeContext, DALNode> toExpressionClause(Operator<DALRuntimeContext, DALNode> operator) {
         return input -> isEllipsis() ? cells.get(0) : transformRowToExpression(operator,
                 index.<DALNode>map(i -> new PropertyNode(InputNode.INSTANCE, i, BRACKET)).orElse(input));
     }
 
-    private Expression transformRowToExpression(Operator<DALNode, DALRuntimeContext> operator, DALNode inputElement) {
+    private DALExpression transformRowToExpression(Operator<DALRuntimeContext, DALNode> operator, DALNode inputElement) {
         return new DALExpression(schemaClause.map(c -> c.makeExpression(inputElement)).orElse(inputElement),
                 this.operator.orElse(operator), isRowWildcard() ? cells.get(0)
                 : new ObjectNode(cells).setPositionBegin(cells.get(0).getOperandPosition()));
