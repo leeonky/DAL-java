@@ -12,13 +12,13 @@ public class SourceCode {
     private final String code;
     private int position = 0;
 
-    public static <E extends Expression<C, N, E>, N extends Node<C, N>, C extends RuntimeContext<C>> TokenMatcher<C, N, E> tokenMatcher(Predicate<Character> startsWith, Set<String> excluded, boolean trim,
-                                                                                                                                        Set<Character> delimiters, Predicate<Token> validator) {
+    public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>, O extends Operator<C, N, O>> TokenMatcher<C, N, E, O> tokenMatcher(Predicate<Character> startsWith, Set<String> excluded, boolean trim,
+                                                                                                                                                                           Set<Character> delimiters, Predicate<Token> validator) {
         return tokenMatcher(startsWith, excluded, trim, (c1, c2) -> delimiters.contains(c2), validator);
     }
 
-    public static <E extends Expression<C, N, E>, N extends Node<C, N>, C extends RuntimeContext<C>> TokenMatcher<C, N, E> tokenMatcher(Predicate<Character> startsWith, Set<String> excluded, boolean trim,
-                                                                                                                                        BiPredicate<Character, Character> endsWith, Predicate<Token> validator) {
+    public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>, O extends Operator<C, N, O>> TokenMatcher<C, N, E, O> tokenMatcher(Predicate<Character> startsWith, Set<String> excluded, boolean trim,
+                                                                                                                                                                           BiPredicate<Character, Character> endsWith, Predicate<Token> validator) {
         return sourceCode -> {
             if (sourceCode.whenFirstChar(startsWith) && sourceCode.hasCode()) {
                 Token token = new Token(sourceCode.position);

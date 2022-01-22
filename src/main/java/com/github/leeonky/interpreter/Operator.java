@@ -1,8 +1,6 @@
 package com.github.leeonky.interpreter;
 
-import com.github.leeonky.dal.ast.DALOperator;
-
-public abstract class Operator<C extends RuntimeContext<C>, N extends Node<C, N>> {
+public abstract class Operator<C extends RuntimeContext<C>, N extends Node<C, N>, O extends Operator<C, N, O>> {
     protected final int precedence;
     protected final String label;
     private int position;
@@ -12,7 +10,7 @@ public abstract class Operator<C extends RuntimeContext<C>, N extends Node<C, N>
         this.label = label;
     }
 
-    public boolean isPrecedentThan(DALOperator operator) {
+    public boolean isPrecedentThan(O operator) {
         return precedence > operator.precedence;
     }
 
@@ -22,8 +20,8 @@ public abstract class Operator<C extends RuntimeContext<C>, N extends Node<C, N>
         return position;
     }
 
-    public DALOperator setPosition(int position) {
+    public O setPosition(int position) {
         this.position = position;
-        return (DALOperator) this;
+        return (O) this;
     }
 }

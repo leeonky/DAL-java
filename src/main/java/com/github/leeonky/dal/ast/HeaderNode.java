@@ -27,7 +27,7 @@ public class HeaderNode extends DALNode {
         return property;
     }
 
-    public OperatorMatcher<DALRuntimeContext, DALNode, DALExpression> headerOperator() {
+    public OperatorMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator> headerOperator() {
         return tokenParser -> operator;
     }
 

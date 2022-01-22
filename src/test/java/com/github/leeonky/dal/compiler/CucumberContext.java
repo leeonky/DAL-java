@@ -3,6 +3,7 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
+import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CucumberContext {
     private static final Compiler compiler = new Compiler();
-    private static final Map<String, NodeMatcher<DALRuntimeContext, DALNode, DALExpression>> matcherMap = new HashMap<String, NodeMatcher<DALRuntimeContext, DALNode, DALExpression>>() {{
+    private static final Map<String, NodeMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator>> matcherMap = new HashMap<String, NodeMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator>>() {{
         put("number", compiler.NUMBER);
         put("integer", compiler.INTEGER);
         put("single-quoted-string", compiler.SINGLE_QUOTED_STRING);
@@ -51,7 +52,7 @@ public class CucumberContext {
         put("schema", optional(SchemaExpressionClauseFactory.SCHEMA));
     }};
 
-    private static NodeMatcher<DALRuntimeContext, DALNode, DALExpression> optional(NodeFactory<DALRuntimeContext, DALNode, DALExpression> nodeFactory) {
+    private static NodeMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator> optional(NodeFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator> nodeFactory) {
         return parser -> Optional.ofNullable(nodeFactory.fetch(parser));
     }
 
@@ -59,7 +60,7 @@ public class CucumberContext {
     DAL dal = new DAL();
 
     Object inputObject = null;
-    TokenParser<DALExpression, DALNode, DALRuntimeContext> tokenParser = null;
+    TokenParser<DALRuntimeContext, DALNode, DALExpression, DALOperator> tokenParser = null;
     String sourceCodeString = null;
     InterpreterException interpreterException;
     DALNode node = null;

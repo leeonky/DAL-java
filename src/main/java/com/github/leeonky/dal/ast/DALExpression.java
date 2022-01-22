@@ -6,7 +6,7 @@ import com.github.leeonky.interpreter.ExpressionConstructor;
 
 import java.util.Objects;
 
-public class DALExpression extends DALNode implements Expression<DALRuntimeContext, DALNode, DALExpression> {
+public class DALExpression extends DALNode implements Expression<DALRuntimeContext, DALNode, DALExpression, DALOperator> {
     private final DALNode node1;
     private final DALOperator operator;
     private final DALNode node2;
@@ -34,7 +34,7 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     }
 
     @Override
-    public DALExpression adjustOperatorOrder(ExpressionConstructor<DALRuntimeContext, DALNode, DALExpression> expressionConstructor) {
+    public DALExpression adjustOperatorOrder(ExpressionConstructor<DALRuntimeContext, DALNode, DALExpression, DALOperator> expressionConstructor) {
         if (getLeftOperand() instanceof DALExpression) {
             DALExpression leftExpression = (DALExpression) getLeftOperand();
             if (getOperator().isPrecedentThan(leftExpression.getOperator()))

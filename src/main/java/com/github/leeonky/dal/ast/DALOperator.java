@@ -5,7 +5,7 @@ import com.github.leeonky.dal.runtime.Calculator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Operator;
 
-public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode> {
+public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, DALOperator> {
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
     private static final int PRECEDENCE_LOGIC_COMPARE_OPT = 210;
     private static final int PRECEDENCE_PLUS_SUB_OPT = 300;
