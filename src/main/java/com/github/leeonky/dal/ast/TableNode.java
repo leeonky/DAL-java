@@ -4,7 +4,6 @@ import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.ExpressionClause;
-import com.github.leeonky.interpreter.Operator;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
@@ -60,16 +59,16 @@ public class TableNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, Operator.Equal operator, DALRuntimeContext context) {
+    public boolean judge(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
         return judgeRows(actualNode, operator, context);
     }
 
     @Override
-    public boolean judge(DALNode actualNode, Operator.Matcher operator, DALRuntimeContext context) {
+    public boolean judge(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
         return judgeRows(actualNode, operator, context);
     }
 
-    private boolean judgeRows(DALNode actualNode, Operator operator, DALRuntimeContext context) {
+    private boolean judgeRows(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
         try {
             return transformToListNode(operator).judgeAll(context, actualNode.evaluateDataObject(context)
                     .setListComparator(collectComparator(context)));
@@ -78,7 +77,7 @@ public class TableNode extends DALNode {
         }
     }
 
-    private ListNode transformToListNode(Operator operator) {
+    private ListNode transformToListNode(DALOperator operator) {
         Stream<ExpressionClause<DALRuntimeContext, DALNode>> rowExpressionClauses = rows.stream().map(rowNode -> rowNode.toExpressionClause(operator));
         return hasRowIndex ? new ListNode(rowExpressionClauses.map(rowNode -> rowNode.makeExpression(null))
                 .collect(toList()), true, ListNode.Type.FIRST_N_ITEMS)

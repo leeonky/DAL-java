@@ -5,7 +5,6 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.ExpressionClause;
-import com.github.leeonky.interpreter.Operator;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
@@ -81,12 +80,12 @@ public class ListNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, Operator.Equal operator, DALRuntimeContext context) {
+    public boolean judge(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
         return judgeAll(context, actualNode.evaluateDataObject(context));
     }
 
     @Override
-    public boolean judge(DALNode actualNode, Operator.Matcher operator, DALRuntimeContext context) {
+    public boolean judge(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
         return judgeAll(context, actualNode.evaluateDataObject(context));
     }
 

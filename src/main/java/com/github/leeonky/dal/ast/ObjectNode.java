@@ -2,7 +2,6 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.interpreter.Operator;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -33,7 +32,7 @@ public class ObjectNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, Operator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
+    public boolean judge(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
         Data data = actualNode.evaluateDataObject(context);
         checkNull(data);
         if (data.isList()) {
@@ -59,7 +58,7 @@ public class ObjectNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, Operator.Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
+    public boolean judge(DALNode actualNode, DALOperator.Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
         Data data = actualNode.evaluateDataObject(context);
         checkNull(data);
         return judgeAll(context, data);

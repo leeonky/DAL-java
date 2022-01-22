@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.interpreter.Operator;
 import com.github.leeonky.interpreter.OperatorMatcher;
 
 import java.util.Comparator;
@@ -10,9 +9,9 @@ import java.util.Optional;
 public class HeaderNode extends DALNode {
     private final SequenceNode sequence;
     private final DALNode property;
-    private final Optional<Operator<DALRuntimeContext, DALNode>> operator;
+    private final Optional<DALOperator> operator;
 
-    public HeaderNode(SequenceNode sequence, DALNode property, Optional<Operator<DALRuntimeContext, DALNode>> operator) {
+    public HeaderNode(SequenceNode sequence, DALNode property, Optional<DALOperator> operator) {
         this.sequence = sequence;
         this.property = property;
         this.operator = operator;

@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.interpreter.Operator;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -10,8 +9,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ListNodeTest {
 
-    public static final Operator.Equal EQUAL = new Operator.Equal();
-    public static final Operator.Matcher MATCHER = new Operator.Matcher();
+    public static final DALOperator.Equal EQUAL = new DALOperator.Equal();
+    public static final DALOperator.Matcher MATCHER = new DALOperator.Matcher();
     RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder().build(null);
     ListNode listNode = new ListNode();
 

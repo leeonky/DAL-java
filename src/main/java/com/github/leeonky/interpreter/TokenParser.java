@@ -2,6 +2,7 @@ package com.github.leeonky.interpreter;
 
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
+import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.ast.SequenceNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
@@ -35,7 +36,7 @@ public class TokenParser<E extends Expression<C, N, E>, N extends Node<C, N>, C 
 
     private final SourceCode sourceCode;
     private final C runtimeContext;
-    private final LinkedList<Operator<C, N>> operators = new LinkedList<>();
+    private final LinkedList<DALOperator> operators = new LinkedList<>();
     private final LinkedList<Boolean> enableAndComma = new LinkedList<>(singleton(true));
     private final ExpressionConstructor<C, N, E> expressionConstructor;
 
@@ -131,7 +132,7 @@ public class TokenParser<E extends Expression<C, N, E>, N extends Node<C, N>, C 
     }
 
     public N fetchExpression(N left, OperatorFactory<C, N, E> operatorFactory, NodeFactory<C, N, E> rightCompiler) {
-        Operator<C, N> operator = operatorFactory.fetch(this);
+        DALOperator operator = operatorFactory.fetch(this);
         operators.push(operator);
         try {
             return expressionConstructor.newInstance(left, operator, rightCompiler.fetch(this)).adjustOperatorOrder(expressionConstructor);
@@ -144,7 +145,7 @@ public class TokenParser<E extends Expression<C, N, E>, N extends Node<C, N>, C 
         return fetchExpressionClause(operatorFactory.fetch(this), rightCompiler);
     }
 
-    private ExpressionClause<C, N> fetchExpressionClause(Operator<C, N> operator, NodeFactory<C, N, E> rightCompiler) {
+    private ExpressionClause<C, N> fetchExpressionClause(DALOperator operator, NodeFactory<C, N, E> rightCompiler) {
         operators.push(operator);
         N right;
         try {
@@ -178,17 +179,17 @@ public class TokenParser<E extends Expression<C, N, E>, N extends Node<C, N>, C 
     }
 
     public static final OperatorFactory<DALRuntimeContext, DALNode, DALExpression> DEFAULT_JUDGEMENT_OPERATOR
-            = tokenParser -> tokenParser.operators.isEmpty() ? new Operator.Matcher() : tokenParser.operators.getFirst();
+            = tokenParser -> tokenParser.operators.isEmpty() ? new DALOperator.Matcher() : tokenParser.operators.getFirst();
 
     public static OperatorMatcher<DALRuntimeContext, DALNode, DALExpression> operatorMatcher(
-            String symbol, Supplier<Operator<DALRuntimeContext, DALNode>> factory,
+            String symbol, Supplier<DALOperator> factory,
             Predicate<TokenParser<DALExpression, DALNode, DALRuntimeContext>> matcher) {
         return tokenParser -> tokenParser.getSourceCode().popWord(symbol, () -> matcher.test(tokenParser))
                 .map(token -> factory.get().setPosition(token.getPosition()));
     }
 
     public static OperatorMatcher<DALRuntimeContext, DALNode, DALExpression> operatorMatcher(
-            String symbol, Supplier<Operator<DALRuntimeContext, DALNode>> factory) {
+            String symbol, Supplier<DALOperator> factory) {
         return operatorMatcher(symbol, factory, s -> true);
     }
 

@@ -2,7 +2,6 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.interpreter.Operator;
 
 import java.util.regex.Pattern;
 
@@ -25,7 +24,7 @@ public class RegexNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, Operator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
+    public boolean judge(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
         Data actual = actualNode.evaluateDataObject(context);
         if (actual.getInstance() instanceof String)
             return matches((String) actual.getInstance(), actual);
@@ -33,7 +32,7 @@ public class RegexNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, Operator.Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
+    public boolean judge(DALNode actualNode, DALOperator.Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
         Data actual = actualNode.evaluateDataObject(context);
         return matches((String) actual.convert(String.class).getInstance(), actual);
     }

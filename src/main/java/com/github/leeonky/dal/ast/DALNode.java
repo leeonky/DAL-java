@@ -1,10 +1,9 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.ast.DALOperator.Matcher;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.NodeBase;
-import com.github.leeonky.interpreter.Operator;
-import com.github.leeonky.interpreter.Operator.Matcher;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.*;
 import static java.lang.String.format;
@@ -15,7 +14,7 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return context.wrap(evaluate(context));
     }
 
-    public boolean judge(DALNode actualNode, Operator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
+    public boolean judge(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
         return assertEquals(evaluateDataObject(context), evaluateAndWrapperFailureMessage(actualNode, context),
                 getPositionBegin());
     }

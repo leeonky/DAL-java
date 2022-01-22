@@ -3,16 +3,15 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Expression;
 import com.github.leeonky.interpreter.ExpressionConstructor;
-import com.github.leeonky.interpreter.Operator;
 
 import java.util.Objects;
 
 public class DALExpression extends DALNode implements Expression<DALRuntimeContext, DALNode, DALExpression> {
     private final DALNode node1;
-    private final Operator<DALRuntimeContext, DALNode> operator;
+    private final DALOperator operator;
     private final DALNode node2;
 
-    public DALExpression(DALNode node1, Operator<DALRuntimeContext, DALNode> operator, DALNode node2) {
+    public DALExpression(DALNode node1, DALOperator operator, DALNode node2) {
         this.node1 = node1;
         this.node2 = node2;
         this.operator = operator;
@@ -30,7 +29,7 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     }
 
     @Override
-    public Operator<DALRuntimeContext, DALNode> getOperator() {
+    public DALOperator getOperator() {
         return operator;
     }
 

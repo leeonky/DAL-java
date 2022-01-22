@@ -1,14 +1,14 @@
 package com.github.leeonky.interpreter;
 
-import com.github.leeonky.dal.ast.DALNode;
+import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 public interface Expression<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E>> extends Node<C, N> {
-    DALNode getLeftOperand();
+    N getLeftOperand();
 
-    DALNode getRightOperand();
+    N getRightOperand();
 
-    Operator<C, N> getOperator();
+    DALOperator getOperator();
 
     @SuppressWarnings("unchecked")
     default N adjustOperatorOrder(ExpressionConstructor<C, N, E> expressionConstructor) {

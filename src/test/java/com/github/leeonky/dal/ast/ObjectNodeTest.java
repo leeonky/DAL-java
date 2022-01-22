@@ -1,8 +1,7 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.ast.DALOperator.Equal;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.interpreter.Operator;
-import com.github.leeonky.interpreter.Operator.Equal;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class ObjectNodeTest {
 
     public static final Equal EQUAL = new Equal();
-    public static final Operator.Matcher MATCHER = new Operator.Matcher();
+    public static final DALOperator.Matcher MATCHER = new DALOperator.Matcher();
 
     @Nested
     class EqualTo {

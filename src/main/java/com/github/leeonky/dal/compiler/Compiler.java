@@ -27,24 +27,24 @@ import static java.util.stream.Collectors.toList;
 
 public class Compiler {
 
-    private static final OperatorMatcher<DALRuntimeContext, DALNode, DALExpression> AND = operatorMatcher("&&", () -> new Operator.And("&&")),
-            OR = operatorMatcher("||", () -> new Operator.Or("||")),
-            AND_IN_KEY_WORD = operatorMatcher("and", () -> new Operator.And("and")),
-            COMMA_AND = operatorMatcher(",", () -> new Operator.And(","), TokenParser::isEnableCommaAnd),
-            OR_IN_KEY_WORD = operatorMatcher("or", () -> new Operator.Or("or")),
-            GREATER_OR_EQUAL = operatorMatcher(">=", Operator.GreaterOrEqual::new),
-            LESS_OR_EQUAL = operatorMatcher("<=", Operator.LessOrEqual::new),
-            GREATER = operatorMatcher(">", Operator.Greater::new),
-            LESS = operatorMatcher("<", Operator.Less::new),
-            PLUS = operatorMatcher("+", Operator.Plus::new),
-            SUBTRACTION = operatorMatcher("-", Operator.Subtraction::new),
-            MULTIPLICATION = operatorMatcher("*", Operator.Multiplication::new),
-            DIVISION = operatorMatcher("/", Operator.Division::new),
-            NOT_EQUAL = operatorMatcher("!=", Operator.NotEqual::new),
-            MINUS = operatorMatcher("-", Operator.Minus::new, tokenParser -> !tokenParser.getSourceCode().isBeginning()),
-            NOT = operatorMatcher("!", Operator.Not::new, tokenParser -> !tokenParser.getSourceCode().startsWith("!=")),
-            MATCHER = operatorMatcher(":", Operator.Matcher::new),
-            EQUAL = operatorMatcher("=", Operator.Equal::new),
+    private static final OperatorMatcher<DALRuntimeContext, DALNode, DALExpression> AND = operatorMatcher("&&", () -> new DALOperator.And("&&")),
+            OR = operatorMatcher("||", () -> new DALOperator.Or("||")),
+            AND_IN_KEY_WORD = operatorMatcher("and", () -> new DALOperator.And("and")),
+            COMMA_AND = operatorMatcher(",", () -> new DALOperator.And(","), TokenParser::isEnableCommaAnd),
+            OR_IN_KEY_WORD = operatorMatcher("or", () -> new DALOperator.Or("or")),
+            GREATER_OR_EQUAL = operatorMatcher(">=", DALOperator.GreaterOrEqual::new),
+            LESS_OR_EQUAL = operatorMatcher("<=", DALOperator.LessOrEqual::new),
+            GREATER = operatorMatcher(">", DALOperator.Greater::new),
+            LESS = operatorMatcher("<", DALOperator.Less::new),
+            PLUS = operatorMatcher("+", DALOperator.Plus::new),
+            SUBTRACTION = operatorMatcher("-", DALOperator.Subtraction::new),
+            MULTIPLICATION = operatorMatcher("*", DALOperator.Multiplication::new),
+            DIVISION = operatorMatcher("/", DALOperator.Division::new),
+            NOT_EQUAL = operatorMatcher("!=", DALOperator.NotEqual::new),
+            MINUS = operatorMatcher("-", DALOperator.Minus::new, tokenParser -> !tokenParser.getSourceCode().isBeginning()),
+            NOT = operatorMatcher("!", DALOperator.Not::new, tokenParser -> !tokenParser.getSourceCode().startsWith("!=")),
+            MATCHER = operatorMatcher(":", DALOperator.Matcher::new),
+            EQUAL = operatorMatcher("=", DALOperator.Equal::new),
             BINARY_ARITHMETIC_OPERATORS = oneOf(AND, OR, AND_IN_KEY_WORD, COMMA_AND, NOT_EQUAL, OR_IN_KEY_WORD,
                     GREATER_OR_EQUAL, LESS_OR_EQUAL, GREATER, LESS, PLUS, SUBTRACTION, MULTIPLICATION, DIVISION),
             UNARY_OPERATORS = oneOf(MINUS, NOT),
@@ -209,7 +209,7 @@ public class Compiler {
             return allOptional(() -> {
                 Optional<Integer> index = getRowIndex(parser);
                 Optional<ExpressionClause<DALRuntimeContext, DALNode>> rowSchemaClause = parser.fetchNodeAfter(IS, SCHEMA_CLAUSE);
-                Optional<Operator<DALRuntimeContext, DALNode>> rowOperator = JUDGEMENT_OPERATORS.fetch(parser);
+                Optional<DALOperator> rowOperator = JUDGEMENT_OPERATORS.fetch(parser);
                 return FunctionUtil.oneOf(
                         () -> parser.fetchBetween("|", "|", ELEMENT_ELLIPSIS).map(Collections::singletonList),
                         () -> parser.fetchBetween("|", "|", ROW_WILDCARD).map(Collections::singletonList),
@@ -226,7 +226,7 @@ public class Compiler {
         }
     }
 
-    private DALNode getRowCell(TokenParser<DALExpression, DALNode, DALRuntimeContext> parser, Optional<Operator<DALRuntimeContext, DALNode>> rowOperator, HeaderNode headerNode) {
+    private DALNode getRowCell(TokenParser<DALExpression, DALNode, DALRuntimeContext> parser, Optional<DALOperator> rowOperator, HeaderNode headerNode) {
         int cellPosition = parser.getSourceCode().nextPosition();
         return oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL).or(ROW_WILDCARD.or(
                 shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(), parser1 -> rowOperator)
@@ -265,7 +265,7 @@ public class Compiler {
                     && parser.getSourceCode().popWord(">>").isPresent()).optional(() -> {
                 List<Optional<Integer>> rowIndexes = new ArrayList<>();
                 List<Optional<ExpressionClause<DALRuntimeContext, DALNode>>> rowSchemaClauses = new ArrayList<>();
-                List<Optional<Operator<DALRuntimeContext, DALNode>>> rowOperators = parser.fetchRow(row -> {
+                List<Optional<DALOperator>> rowOperators = parser.fetchRow(row -> {
                     rowIndexes.add(getRowIndex(parser));
                     rowSchemaClauses.add(parser.fetchNodeAfter(IS, SCHEMA_CLAUSE));
                     return JUDGEMENT_OPERATORS.fetch(parser);
@@ -278,13 +278,13 @@ public class Compiler {
 
         private List<RowNode> getRowNodes(TokenParser<DALExpression, DALNode, DALRuntimeContext> parser, List<HeaderNode> headerNodes,
                                           List<Optional<ExpressionClause<DALRuntimeContext, DALNode>>> rowSchemaClauses,
-                                          List<Optional<Operator<DALRuntimeContext, DALNode>>> rowOperators, List<Optional<Integer>> rowIndexes) {
+                                          List<Optional<DALOperator>> rowOperators, List<Optional<Integer>> rowIndexes) {
             return FunctionUtil.mapWithIndex(getCells(parser, headerNodes, rowOperators), (i, row) ->
                     new RowNode(rowIndexes.get(i), rowSchemaClauses.get(i), rowOperators.get(i), row)).collect(toList());
         }
 
         private Stream<List<DALNode>> getCells(TokenParser<DALExpression, DALNode, DALRuntimeContext> parser, List<HeaderNode> headerNodes,
-                                               List<Optional<Operator<DALRuntimeContext, DALNode>>> rowOperators) {
+                                               List<Optional<DALOperator>> rowOperators) {
             return transpose(allOptional(() -> parser.fetchNodeAfter("|", TABLE_HEADER).map(HeaderNode.class::cast)
                     .map(headerNode -> {
                         headerNodes.add(headerNode);
