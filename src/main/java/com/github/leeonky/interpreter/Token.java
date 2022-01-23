@@ -1,20 +1,11 @@
 package com.github.leeonky.interpreter;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static com.github.leeonky.interpreter.FunctionUtil.getValue;
-import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
-import static com.github.leeonky.interpreter.IfThenFactory.when;
-import static java.lang.String.format;
 
 public class Token {
     private final StringBuilder contentBuilder;
     private final int position;
+    private static final NumberParser NUMBER_PARSER = new NumberParser();
 
     public int getPosition() {
         return position;
@@ -27,41 +18,19 @@ public class Token {
 
     public Number getInteger() {
         String content = getContent();
-        return getValue(() -> Integer.decode(content),
-                () -> Long.decode(content),
-                () -> decodeBigInteger(content),
-                () -> oneOf(() -> parseNumber(content, "y", Byte::decode),
-                        () -> parseNumber(content, "s", Short::decode),
-                        () -> parseNumber(content, "l", Long::decode),
-                        () -> parseNumber(content, "bi", this::decodeBigInteger))
-                        .orElseThrow(() -> new SyntaxException("expect an integer", position)));
-    }
-
-    private BigInteger decodeBigInteger(String str) {
-        Matcher matcher = Pattern.compile("0[xX](.*)").matcher(str);
-        if (matcher.matches())
-            return new BigInteger(matcher.group(1), 16);
-        return new BigInteger(str);
+        Number number = NUMBER_PARSER.parse(content);
+        if (number != null) {
+            Class<? extends Number> type = number.getClass();
+            if (type.equals(Integer.class) || type.equals(Long.class) || type.equals(Short.class)
+                    || type.equals(Byte.class) || type.equals(BigInteger.class)) {
+                return number;
+            }
+        }
+        throw new SyntaxException("expect an integer", position);
     }
 
     public Number getNumber() {
-        String content = getContent();
-        return getValue(this::getInteger, () -> oneOf(() -> parseNumber(content, "f", Float::valueOf),
-                () -> parseNumber(content, "bd", BigDecimal::new),
-                () -> parseNumber(content, "d", Double::valueOf))
-                .orElseGet(() -> {
-                    double value = Double.parseDouble(content);
-                    if (Double.isInfinite(value))
-                        return new BigDecimal(content);
-                    return value;
-                }));
-    }
-
-    private <T extends Number> Optional<T> parseNumber(String content, String postfix,
-                                                       Function<String, T> factory) {
-        Pattern pattern = Pattern.compile(format("([^_]*)(%s|%s)$", postfix, postfix.toUpperCase()));
-        Matcher matcher = pattern.matcher(content);
-        return when(matcher.matches()).optional(() -> factory.apply(matcher.group(1)));
+        return NUMBER_PARSER.parse(getContent());
     }
 
     public String getContent() {
