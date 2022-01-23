@@ -1,7 +1,5 @@
 package com.github.leeonky.interpreter;
 
-import com.github.leeonky.dal.ast.SequenceNode;
-
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -9,16 +7,14 @@ import java.util.function.Supplier;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_CHAR;
 import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_NODE;
-import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 
 public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>> {
+        O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> {
 
     private final SourceCode sourceCode;
     private final C runtimeContext;
     private final LinkedList<O> operators = new LinkedList<>();
-    private final LinkedList<Boolean> enableAndComma = new LinkedList<>(singleton(true));
     private final ExpressionConstructor<C, N, E, O> expressionConstructor;
 
     public TokenParser(SourceCode sourceCode, C runtimeContext, ExpressionConstructor<C, N, E, O> expressionConstructor) {
@@ -32,12 +28,12 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
     }
 
     public Optional<N> fetchNode(char opening, char closing, Function<N, N> nodeFactory,
-                                 NodeFactory<C, N, E, O> nodeMatcher, String message) {
+                                 NodeFactory<C, N, E, O, T> nodeMatcher, String message) {
         return fetchNodes(opening, closing, args -> {
             if (args.size() != 1)
                 throw sourceCode.syntaxError(message, -1);
             return nodeFactory.apply(args.get(0));
-        }, () -> nodeMatcher.fetch(this));
+        }, () -> nodeMatcher.fetch(getInstance()));
     }
 
     public <T> Optional<N> fetchNodes(Character opening, char closing, Function<List<T>, N> nodeFactory,
@@ -60,11 +56,11 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         });
     }
 
-    public Optional<N> fetchBetween(String opening, String closing, NodeMatcher<C, N, E, O> nodeMatcher) {
+    public Optional<N> fetchBetween(String opening, String closing, NodeMatcher<C, N, E, O, T> nodeMatcher) {
         return sourceCode.tryFetch(() -> {
             Optional<N> optionalNode = Optional.empty();
             if (sourceCode.popWord(opening).isPresent()) {
-                optionalNode = nodeMatcher.fetch(this);
+                optionalNode = nodeMatcher.fetch(getInstance());
                 if (optionalNode.isPresent())
                     sourceCode.popWord(closing).orElseThrow(() ->
                             sourceCode.syntaxError("should end with `" + closing + "`", 0));
@@ -73,100 +69,81 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         });
     }
 
-    public Optional<N> disableCommaAnd(Supplier<Optional<N>> nodeFactory) {
-        return commaAnd(false, nodeFactory);
-    }
-
-    public Optional<N> enableCommaAnd(Supplier<Optional<N>> nodeFactory) {
-        return commaAnd(true, nodeFactory);
-    }
-
-    private Optional<N> commaAnd(boolean b, Supplier<Optional<N>> nodeFactory) {
-        enableAndComma.push(b);
-        try {
-            return nodeFactory.get();
-        } finally {
-            enableAndComma.pop();
-        }
-    }
-
     @SuppressWarnings("unchecked")
-    public <T> List<T> fetchNodes(String delimiter, NodeFactory<C, N, E, O> factory) {
-        return new ArrayList<T>() {{
-            add((T) factory.fetch(TokenParser.this));
+    public <LE> List<LE> fetchNodes(String delimiter, NodeFactory<C, N, E, O, T> factory) {
+        return new ArrayList<LE>() {{
+            add((LE) factory.fetch(getInstance()));
             while (sourceCode.popWord(delimiter).isPresent())
-                add((T) factory.fetch(TokenParser.this));
+                add((LE) factory.fetch(getInstance()));
         }};
     }
 
-    public Optional<N> fetchNodeAfter(String token, NodeFactory<C, N, E, O> nodeFactory) {
-        return sourceCode.popWord(token).map(t -> nodeFactory.fetch(this).setPositionBegin(t.getPosition()));
+    public Optional<N> fetchNodeAfter(String token, NodeFactory<C, N, E, O, T> nodeFactory) {
+        return sourceCode.popWord(token).map(t -> nodeFactory.fetch(getInstance()).setPositionBegin(t.getPosition()));
+    }
+
+    @SuppressWarnings("unchecked")
+    private T getInstance() {
+        return (T) this;
     }
 
     public Optional<ExpressionClause<C, N>> fetchNodeAfter(
-            String token, ExpressionClauseFactory<C, N, E, O> clauseFactory) {
-        return sourceCode.popWord(token).map(t -> clauseFactory.fetch(this).map(node ->
+            String token, ExpressionClauseFactory<C, N, E, O, T> clauseFactory) {
+        return sourceCode.popWord(token).map(t -> clauseFactory.fetch(getInstance()).map(node ->
                 node.setPositionBegin(t.getPosition())));
     }
 
-    public Optional<N> fetchExpression(N left, OperatorMatcher<C, N, E, O> operatorMatcher,
-                                       NodeFactory<C, N, E, O> rightCompiler) {
-        return operatorMatcher.fetch(this).map(opt -> (OperatorFactory<C, N, E, O>) _ignore -> opt)
+    public Optional<N> fetchExpression(N left, OperatorMatcher<C, N, E, O, T> operatorMatcher,
+                                       NodeFactory<C, N, E, O, T> rightCompiler) {
+        return operatorMatcher.fetch(getInstance()).map(opt -> (OperatorFactory<C, N, E, O, T>) _ignore -> opt)
                 .map(operatorFactory -> fetchExpression(left, operatorFactory, rightCompiler));
     }
 
-    public N fetchExpression(N left, OperatorFactory<C, N, E, O> operatorFactory, NodeFactory<C, N, E, O> rightCompiler) {
-        O operator = operatorFactory.fetch(this);
+    public N fetchExpression(N left, OperatorFactory<C, N, E, O, T> operatorFactory,
+                             NodeFactory<C, N, E, O, T> rightCompiler) {
+        O operator = operatorFactory.fetch(getInstance());
         operators.push(operator);
         try {
-            return expressionConstructor.newInstance(left, operator, rightCompiler.fetch(this))
+            return expressionConstructor.newInstance(left, operator, rightCompiler.fetch(getInstance()))
                     .adjustOperatorOrder(expressionConstructor);
         } finally {
             operators.pop();
         }
     }
 
-    public ExpressionClause<C, N> fetchExpressionClause(OperatorFactory<C, N, E, O> operatorFactory,
-                                                        NodeFactory<C, N, E, O> rightCompiler) {
-        return fetchExpressionClause(operatorFactory.fetch(this), rightCompiler);
+    public ExpressionClause<C, N> fetchExpressionClause(OperatorFactory<C, N, E, O, T> operatorFactory,
+                                                        NodeFactory<C, N, E, O, T> rightCompiler) {
+        return fetchExpressionClause(operatorFactory.fetch(getInstance()), rightCompiler);
     }
 
-    private ExpressionClause<C, N> fetchExpressionClause(O operator, NodeFactory<C, N, E, O> rightCompiler) {
+    private ExpressionClause<C, N> fetchExpressionClause(O operator, NodeFactory<C, N, E, O, T> rightCompiler) {
         operators.push(operator);
         N right;
         try {
-            right = rightCompiler.fetch(this);
+            right = rightCompiler.fetch(getInstance());
         } finally {
             operators.pop();
         }
         return input -> expressionConstructor.newInstance(input, operator, right).adjustOperatorOrder(expressionConstructor);
     }
 
-    public Optional<ExpressionClause<C, N>> fetchExpressionClause(OperatorMatcher<C, N, E, O> operatorMatcher,
-                                                                  NodeFactory<C, N, E, O> rightCompiler) {
-        return operatorMatcher.fetch(this).map(operator -> fetchExpressionClause(operator, rightCompiler));
-    }
-
-    public boolean isEnableCommaAnd() {
-        return enableAndComma.getFirst();
+    public Optional<ExpressionClause<C, N>> fetchExpressionClause(OperatorMatcher<C, N, E, O, T> operatorMatcher,
+                                                                  NodeFactory<C, N, E, O, T> rightCompiler) {
+        return operatorMatcher.fetch(getInstance()).map(operator -> fetchExpressionClause(operator, rightCompiler));
     }
 
     public Optional<N> wordToken(String word, Function<Token, N> factory) {
         return sourceCode.popWord(word).map(t -> factory.apply(t).setPositionBegin(t.getPosition()));
     }
 
-    public <T> Optional<List<T>> fetchRow(Function<Integer, T> factory) {
-        return when(sourceCode.popWord("|").isPresent()).optional(() -> new ArrayList<T>() {{
+    public <LE> Optional<List<LE>> fetchRow(Function<Integer, LE> factory) {
+        return when(sourceCode.popWord("|").isPresent()).optional(() -> new ArrayList<LE>() {{
             int col = 0;
             while (!sourceCode.isEndOfLine()) {
                 add(factory.apply(col++));
                 sourceCode.popWord("|").orElseThrow(() -> sourceCode.syntaxError("Should end with `|`", 0));
             }
         }});
-    }
-
-    public Supplier<Optional<? extends SequenceNode>> sequenceOf(String sequenceChar, SequenceNode.Type type) {
-        return () -> getSourceCode().repeatWords(sequenceChar, count -> new SequenceNode(count, type, sequenceChar));
     }
 
     public C getRuntimeContext() {

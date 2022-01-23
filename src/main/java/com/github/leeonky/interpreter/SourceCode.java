@@ -13,20 +13,20 @@ public class SourceCode {
     private int position = 0;
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>> TokenMatcher<C, N, E, O> tokenMatcher(
+            O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> TokenMatcher<C, N, E, O, T> tokenMatcher(
             Predicate<Character> startsWith, Set<String> excluded, boolean trim, Set<Character> delimiters) {
         return tokenMatcher(startsWith, excluded, trim, delimiters, token -> true);
     }
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>> TokenMatcher<C, N, E, O> tokenMatcher(
+            O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> TokenMatcher<C, N, E, O, T> tokenMatcher(
             Predicate<Character> startsWith, Set<String> excluded, boolean trim, Set<Character> delimiters,
             Predicate<Token> validator) {
         return tokenMatcher(startsWith, excluded, trim, (c1, c2) -> delimiters.contains(c2), validator);
     }
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>> TokenMatcher<C, N, E, O> tokenMatcher(
+            O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> TokenMatcher<C, N, E, O, T> tokenMatcher(
             Predicate<Character> startsWith, Set<String> excluded, boolean trim,
             BiPredicate<Character, Character> endsWith, Predicate<Token> validator) {
         return sourceCode -> {
@@ -52,14 +52,14 @@ public class SourceCode {
     }
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>> OperatorMatcher<C, N, E, O> operatorMatcher(
-            String symbol, Supplier<O> factory, Predicate<TokenParser<C, N, E, O>> matcher) {
+            O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> OperatorMatcher<C, N, E, O, T> operatorMatcher(
+            String symbol, Supplier<O> factory, Predicate<T> matcher) {
         return tokenParser -> tokenParser.getSourceCode().popWord(symbol, () -> matcher.test(tokenParser))
                 .map(token -> factory.get().setPosition(token.getPosition()));
     }
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>> OperatorMatcher<C, N, E, O> operatorMatcher(
+            O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> OperatorMatcher<C, N, E, O, T> operatorMatcher(
             String symbol, Supplier<O> factory) {
         return operatorMatcher(symbol, factory, s -> true);
     }

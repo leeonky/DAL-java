@@ -3,14 +3,14 @@ package com.github.leeonky.interpreter;
 import java.util.Optional;
 
 public interface OperatorMatcher<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>> {
-    Optional<O> fetch(TokenParser<C, N, E, O> tokenParser);
+        O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> {
+    Optional<O> fetch(T tokenParser);
 
-    default OperatorFactory<C, N, E, O> or(OperatorFactory<C, N, E, O> compiler) {
+    default OperatorFactory<C, N, E, O, T> or(OperatorFactory<C, N, E, O, T> compiler) {
         return tokenParser -> fetch(tokenParser).orElseGet(() -> compiler.fetch(tokenParser));
     }
 
-    default OperatorFactory<C, N, E, O> or(String message) {
+    default OperatorFactory<C, N, E, O, T> or(String message) {
         return tokenParser -> fetch(tokenParser).orElseThrow(() -> tokenParser.getSourceCode().syntaxError(message, 0));
     }
 }

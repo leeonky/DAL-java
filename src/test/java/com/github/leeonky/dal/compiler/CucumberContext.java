@@ -10,7 +10,10 @@ import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.ListAccessor;
 import com.github.leeonky.dal.runtime.Result;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.interpreter.*;
+import com.github.leeonky.interpreter.InterpreterException;
+import com.github.leeonky.interpreter.NodeFactory;
+import com.github.leeonky.interpreter.NodeMatcher;
+import com.github.leeonky.interpreter.SourceCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -25,7 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CucumberContext {
     private static final Compiler compiler = new Compiler();
-    private static final Map<String, NodeMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator>> matcherMap = new HashMap<String, NodeMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator>>() {{
+    private static final Map<String, NodeMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator,
+            DALTokenParser>> matcherMap = new HashMap<String, NodeMatcher<DALRuntimeContext, DALNode, DALExpression,
+            DALOperator, DALTokenParser>>() {{
         put("number", compiler.NUMBER);
         put("integer", compiler.INTEGER);
         put("single-quoted-string", compiler.SINGLE_QUOTED_STRING);
@@ -52,7 +57,8 @@ public class CucumberContext {
         put("schema", optional(SchemaExpressionClauseFactory.SCHEMA));
     }};
 
-    private static NodeMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator> optional(NodeFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator> nodeFactory) {
+    private static NodeMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALTokenParser> optional(
+            NodeFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALTokenParser> nodeFactory) {
         return parser -> Optional.ofNullable(nodeFactory.fetch(parser));
     }
 
@@ -60,7 +66,7 @@ public class CucumberContext {
     DAL dal = new DAL();
 
     Object inputObject = null;
-    TokenParser<DALRuntimeContext, DALNode, DALExpression, DALOperator> tokenParser = null;
+    DALTokenParser tokenParser = null;
     String sourceCodeString = null;
     InterpreterException interpreterException;
     DALNode node = null;
@@ -79,7 +85,7 @@ public class CucumberContext {
     }
 
     public void giveDalSourceCode(String code) {
-        tokenParser = new TokenParser<>(new SourceCode(sourceCodeString = parseTabAndSpace(code)),
+        tokenParser = new DALTokenParser(new SourceCode(sourceCodeString = parseTabAndSpace(code)),
                 dal.getRuntimeContextBuilder().build(null), DALExpression::new);
     }
 
@@ -92,7 +98,7 @@ public class CucumberContext {
     }
 
     public void assertNodeValue(String assertion, String factory) {
-        dal.evaluate(matcherMap.get(factory).fetch(new TokenParser<>(new SourceCode(sourceCodeString),
+        dal.evaluate(matcherMap.get(factory).fetch(new DALTokenParser(new SourceCode(sourceCodeString),
                 dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
     }

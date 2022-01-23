@@ -18,7 +18,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 
 public class Tokens {
-    public static final TokenMatcher<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator>
+    public static final TokenMatcher<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator,
+            DALTokenParser>
             NUMBER = tokenMatcher(DIGITAL::contains, emptySet(), false, (lastChar, nextChar) ->
             ((lastChar != 'e' && lastChar != 'E') || (nextChar != '-' && nextChar != '+')) && DELIMITER.contains(nextChar), Token::isNumber),
             INTEGER = tokenMatcher(DIGITAL_OR_MINUS::contains, emptySet(), false, DELIMITER, Token::isNumber),
@@ -26,6 +27,7 @@ public class Tokens {
             DOT_PROPERTY = tokenMatcher(DOT::equals, new HashSet<>(asList(ELEMENT_ELLIPSIS, DOT.toString())), true, DELIMITER_OR_DOT);
     public static final TokenFactory SCHEMA = tokenMatcher(not(DELIMITER::contains), ALL_KEY_WORDS,
             false, DELIMITER, not(Token::isNumber)).or("expect a schema");
-    public static final OperatorFactory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator>
+    public static final OperatorFactory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator,
+            DALTokenParser>
             DEFAULT_JUDGEMENT_OPERATOR = tokenParser -> tokenParser.currentOperator().orElseGet(DALOperator.Matcher::new);
 }
