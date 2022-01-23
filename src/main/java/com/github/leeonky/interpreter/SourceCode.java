@@ -14,6 +14,12 @@ public class SourceCode {
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>> TokenMatcher<C, N, E, O> tokenMatcher(
+            Predicate<Character> startsWith, Set<String> excluded, boolean trim, Set<Character> delimiters) {
+        return tokenMatcher(startsWith, excluded, trim, delimiters, token -> true);
+    }
+
+    public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
+            O extends Operator<C, N, O>> TokenMatcher<C, N, E, O> tokenMatcher(
             Predicate<Character> startsWith, Set<String> excluded, boolean trim, Set<Character> delimiters,
             Predicate<Token> validator) {
         return tokenMatcher(startsWith, excluded, trim, (c1, c2) -> delimiters.contains(c2), validator);
@@ -43,6 +49,19 @@ public class SourceCode {
 
     public SourceCode(String code) {
         this.code = code;
+    }
+
+    public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
+            O extends Operator<C, N, O>> OperatorMatcher<C, N, E, O> operatorMatcher(
+            String symbol, Supplier<O> factory, Predicate<TokenParser<C, N, E, O>> matcher) {
+        return tokenParser -> tokenParser.getSourceCode().popWord(symbol, () -> matcher.test(tokenParser))
+                .map(token -> factory.get().setPosition(token.getPosition()));
+    }
+
+    public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
+            O extends Operator<C, N, O>> OperatorMatcher<C, N, E, O> operatorMatcher(
+            String symbol, Supplier<O> factory) {
+        return operatorMatcher(symbol, factory, s -> true);
     }
 
     private int seek(int seek) {

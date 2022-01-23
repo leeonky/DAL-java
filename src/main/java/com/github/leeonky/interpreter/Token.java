@@ -51,15 +51,7 @@ public class Token {
     }
 
     public boolean isNumber() {
-        try {
-            return getNumber() != null;
-        } catch (Exception ignore) {
-            return false;
-        }
-    }
-
-    public boolean all() {
-        return true;
+        return getNumber() != null;
     }
 
     public String getContentOrThrow(String message) {

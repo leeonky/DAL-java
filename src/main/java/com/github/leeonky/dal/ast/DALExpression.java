@@ -2,7 +2,6 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Expression;
-import com.github.leeonky.interpreter.ExpressionConstructor;
 
 import java.util.Objects;
 
@@ -31,17 +30,6 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     @Override
     public DALOperator getOperator() {
         return operator;
-    }
-
-    @Override
-    public DALExpression adjustOperatorOrder(ExpressionConstructor<DALRuntimeContext, DALNode, DALExpression, DALOperator> expressionConstructor) {
-        if (getLeftOperand() instanceof DALExpression) {
-            DALExpression leftExpression = (DALExpression) getLeftOperand();
-            if (getOperator().isPrecedentThan(leftExpression.getOperator()))
-                return new DALExpression(leftExpression.getLeftOperand(), leftExpression.getOperator(),
-                        new DALExpression(leftExpression.getRightOperand(), getOperator(), getRightOperand()).adjustOperatorOrder(expressionConstructor));
-        }
-        return this;
     }
 
     @Override

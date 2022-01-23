@@ -1,38 +1,19 @@
 package com.github.leeonky.interpreter;
 
-import com.github.leeonky.dal.ast.DALExpression;
-import com.github.leeonky.dal.ast.DALNode;
-import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.ast.SequenceNode;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.github.leeonky.dal.compiler.Constants.*;
-import static com.github.leeonky.interpreter.FunctionUtil.not;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_CHAR;
 import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_NODE;
-import static com.github.leeonky.interpreter.SourceCode.tokenMatcher;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
 
-public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends Operator<C, N, O>> {
-    //    TODO to move to DAL
-    public static final TokenMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator>
-            NUMBER = tokenMatcher(DIGITAL::contains, emptySet(), false, (lastChar, nextChar) ->
-            ((lastChar != 'e' && lastChar != 'E') || (nextChar != '-' && nextChar != '+')) && DELIMITER.contains(nextChar), Token::isNumber),
-            INTEGER = tokenMatcher(DIGITAL_OR_MINUS::contains, emptySet(), false, DELIMITER, Token::isNumber),
-            IDENTITY_PROPERTY = tokenMatcher(not(DELIMITER::contains), ALL_KEY_WORDS, false, DELIMITER_OR_DOT, not(Token::isNumber)),
-            DOT_PROPERTY = tokenMatcher(DOT::equals, new HashSet<>(asList(ELEMENT_ELLIPSIS, DOT.toString())), true, DELIMITER_OR_DOT, Token::all);
-
-    public static final TokenFactory SCHEMA = tokenMatcher(not(DELIMITER::contains), ALL_KEY_WORDS,
-            false, DELIMITER, not(Token::isNumber)).or("expect a schema");
+public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+        O extends Operator<C, N, O>> {
 
     private final SourceCode sourceCode;
     private final C runtimeContext;
@@ -59,7 +40,8 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         }, () -> nodeMatcher.fetch(this));
     }
 
-    public <T> Optional<N> fetchNodes(Character opening, char closing, Function<List<T>, N> nodeFactory, Supplier<T> element) {
+    public <T> Optional<N> fetchNodes(Character opening, char closing, Function<List<T>, N> nodeFactory,
+                                      Supplier<T> element) {
         return sourceCode.fetchElementNode(BY_NODE, opening, closing, element, nodeFactory);
     }
 
@@ -121,12 +103,14 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         return sourceCode.popWord(token).map(t -> nodeFactory.fetch(this).setPositionBegin(t.getPosition()));
     }
 
-    public Optional<ExpressionClause<C, N>> fetchNodeAfter(String token, ExpressionClauseFactory<C, N, E, O> expressionClauseFactory) {
-        return sourceCode.popWord(token).map(t -> expressionClauseFactory.fetch(this)
-                .map(node -> node.setPositionBegin(t.getPosition())));
+    public Optional<ExpressionClause<C, N>> fetchNodeAfter(
+            String token, ExpressionClauseFactory<C, N, E, O> clauseFactory) {
+        return sourceCode.popWord(token).map(t -> clauseFactory.fetch(this).map(node ->
+                node.setPositionBegin(t.getPosition())));
     }
 
-    public Optional<N> fetchExpression(N left, OperatorMatcher<C, N, E, O> operatorMatcher, NodeFactory<C, N, E, O> rightCompiler) {
+    public Optional<N> fetchExpression(N left, OperatorMatcher<C, N, E, O> operatorMatcher,
+                                       NodeFactory<C, N, E, O> rightCompiler) {
         return operatorMatcher.fetch(this).map(opt -> (OperatorFactory<C, N, E, O>) _ignore -> opt)
                 .map(operatorFactory -> fetchExpression(left, operatorFactory, rightCompiler));
     }
@@ -135,13 +119,15 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         O operator = operatorFactory.fetch(this);
         operators.push(operator);
         try {
-            return expressionConstructor.newInstance(left, operator, rightCompiler.fetch(this)).adjustOperatorOrder(expressionConstructor);
+            return expressionConstructor.newInstance(left, operator, rightCompiler.fetch(this))
+                    .adjustOperatorOrder(expressionConstructor);
         } finally {
             operators.pop();
         }
     }
 
-    public ExpressionClause<C, N> fetchExpressionClause(OperatorFactory<C, N, E, O> operatorFactory, NodeFactory<C, N, E, O> rightCompiler) {
+    public ExpressionClause<C, N> fetchExpressionClause(OperatorFactory<C, N, E, O> operatorFactory,
+                                                        NodeFactory<C, N, E, O> rightCompiler) {
         return fetchExpressionClause(operatorFactory.fetch(this), rightCompiler);
     }
 
@@ -156,7 +142,8 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         return input -> expressionConstructor.newInstance(input, operator, right).adjustOperatorOrder(expressionConstructor);
     }
 
-    public Optional<ExpressionClause<C, N>> fetchExpressionClause(OperatorMatcher<C, N, E, O> operatorMatcher, NodeFactory<C, N, E, O> rightCompiler) {
+    public Optional<ExpressionClause<C, N>> fetchExpressionClause(OperatorMatcher<C, N, E, O> operatorMatcher,
+                                                                  NodeFactory<C, N, E, O> rightCompiler) {
         return operatorMatcher.fetch(this).map(operator -> fetchExpressionClause(operator, rightCompiler));
     }
 
@@ -178,26 +165,15 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         }});
     }
 
-    public static final OperatorFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator> DEFAULT_JUDGEMENT_OPERATOR
-            = tokenParser -> tokenParser.operators.isEmpty() ? new DALOperator.Matcher() : tokenParser.operators.getFirst();
-
-    public static OperatorMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator> operatorMatcher(
-            String symbol, Supplier<DALOperator> factory,
-            Predicate<TokenParser<DALRuntimeContext, DALNode, DALExpression, DALOperator>> matcher) {
-        return tokenParser -> tokenParser.getSourceCode().popWord(symbol, () -> matcher.test(tokenParser))
-                .map(token -> factory.get().setPosition(token.getPosition()));
-    }
-
-    public static OperatorMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator> operatorMatcher(
-            String symbol, Supplier<DALOperator> factory) {
-        return operatorMatcher(symbol, factory, s -> true);
-    }
-
     public Supplier<Optional<? extends SequenceNode>> sequenceOf(String sequenceChar, SequenceNode.Type type) {
         return () -> getSourceCode().repeatWords(sequenceChar, count -> new SequenceNode(count, type, sequenceChar));
     }
 
     public C getRuntimeContext() {
         return runtimeContext;
+    }
+
+    public Optional<O> currentOperator() {
+        return operators.stream().findFirst();
     }
 }

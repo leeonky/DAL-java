@@ -20,7 +20,7 @@ import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.interpreter.FunctionUtil.allOptional;
 import static com.github.leeonky.interpreter.FunctionUtil.transpose;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
-import static com.github.leeonky.interpreter.TokenParser.operatorMatcher;
+import static com.github.leeonky.interpreter.SourceCode.operatorMatcher;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
@@ -58,8 +58,8 @@ public class Compiler {
 
     NodeMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator>
             INPUT = tokenParser -> when(tokenParser.getSourceCode().isBeginning()).optional(() -> InputNode.INSTANCE),
-            NUMBER = TokenParser.NUMBER.map(token -> new ConstNode(token.getNumber())),
-            INTEGER = TokenParser.INTEGER.map(token -> new ConstNode(token.getInteger())),
+            NUMBER = Tokens.NUMBER.map(token -> new ConstNode(token.getNumber())),
+            INTEGER = Tokens.INTEGER.map(token -> new ConstNode(token.getInteger())),
             SINGLE_QUOTED_STRING = parser -> parser.fetchString('\'', '\'', ConstNode::new, SINGLE_QUOTED_ESCAPES),
             DOUBLE_QUOTED_STRING = parser -> parser.fetchString('"', '"', ConstNode::new, DOUBLE_QUOTED_ESCAPES),
             CONST_TRUE = parser -> parser.wordToken(Constants.KeyWords.TRUE, token -> new ConstNode(true)),
@@ -67,7 +67,7 @@ public class Compiler {
             CONST_NULL = parser -> parser.wordToken(Constants.KeyWords.NULL, token -> new ConstNode(null)),
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
             REGEX = parser -> parser.fetchString('/', '/', RegexNode::new, REGEX_ESCAPES),
-            IDENTITY_PROPERTY = TokenParser.IDENTITY_PROPERTY.map(token ->
+            IDENTITY_PROPERTY = Tokens.IDENTITY_PROPERTY.map(token ->
                     new PropertyNode(InputNode.INSTANCE, token.getContent(), IDENTIFIER)),
             WILDCARD = parser -> parser.wordToken("*", token -> new WildcardNode("*")),
             ROW_WILDCARD = parser -> parser.wordToken("***", token -> new WildcardNode("***")),
@@ -80,7 +80,7 @@ public class Compiler {
             LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION, JUDGEMENT_EXPRESSION_OPERAND;
 
     ExpressionMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator> DOT_PROPERTY = (parser, previous) ->
-            TokenParser.DOT_PROPERTY.map(token -> new PropertyNode(previous,
+            Tokens.DOT_PROPERTY.map(token -> new PropertyNode(previous,
                     token.getContentOrThrow("property is not finished"), DOT)).fetch(parser),
             BRACKET_PROPERTY, EXPLICIT_PROPERTY, BINARY_ARITHMETIC_EXPRESSION, BINARY_JUDGEMENT_EXPRESSION,
             BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION;
@@ -122,7 +122,7 @@ public class Compiler {
         ELEMENT_ELLIPSIS = parser -> parser.wordToken(Constants.ELEMENT_ELLIPSIS, token -> new ListEllipsisNode());
         LIST = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('[', ']', ListNode::new,
                 () -> ELEMENT_ELLIPSIS.fetch(parser).<ExpressionClause<DALRuntimeContext, DALNode>>map(node -> p -> node).orElseGet(() ->
-                        shortJudgementClause(JUDGEMENT_OPERATORS.or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR)).fetch(parser))));
+                        shortJudgementClause(JUDGEMENT_OPERATORS.or(Tokens.DEFAULT_JUDGEMENT_OPERATOR)).fetch(parser))));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         UNARY_OPERATOR_EXPRESSION = parser -> parser.fetchExpression(null, UNARY_OPERATORS, OPERAND);
         OPERAND = UNARY_OPERATOR_EXPRESSION.or(oneOf(CONST, PROPERTY, PARENTHESES, INPUT)
@@ -251,7 +251,7 @@ public class Compiler {
         int cellPosition = parser.getSourceCode().nextPosition();
         return oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL).or(ROW_WILDCARD.or(
                 shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(), parser1 -> rowOperator)
-                        .or(TokenParser.DEFAULT_JUDGEMENT_OPERATOR)).input(headerNode.getProperty()))).fetch(parser)
+                        .or(Tokens.DEFAULT_JUDGEMENT_OPERATOR)).input(headerNode.getProperty()))).fetch(parser)
                 .setPositionBegin(cellPosition);
     }
 
@@ -318,7 +318,7 @@ public class Compiler {
 
     private Optional<DALNode> compileUserDefinedLiteral(TokenParser<DALRuntimeContext, DALNode, DALExpression,
             DALOperator> parser) {
-        return parser.getSourceCode().<DALNode, DALRuntimeContext>tryFetch(() -> TokenParser.IDENTITY_PROPERTY.fetch(parser.getSourceCode())
+        return parser.getSourceCode().<DALNode, DALRuntimeContext>tryFetch(() -> Tokens.IDENTITY_PROPERTY.fetch(parser.getSourceCode())
                 .flatMap(token -> parser.getRuntimeContext().takeUserDefinedLiteral(token.getContent())
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }

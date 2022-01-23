@@ -13,7 +13,7 @@ public class SchemaExpressionClauseFactory implements ExpressionClauseFactory<DA
     public static final NodeFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator> SCHEMA;
 
     static {
-        SCHEMA = TokenParser.SCHEMA.map(token -> new SchemaNode(token.getContent()));
+        SCHEMA = Tokens.SCHEMA.map(token -> new SchemaNode(token.getContent()));
     }
 
     @Override

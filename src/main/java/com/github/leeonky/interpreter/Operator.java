@@ -20,6 +20,7 @@ public abstract class Operator<C extends RuntimeContext<C>, N extends Node<C, N>
         return position;
     }
 
+    @SuppressWarnings("unchecked")
     public O setPosition(int position) {
         this.position = position;
         return (O) this;
