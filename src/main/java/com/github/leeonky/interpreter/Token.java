@@ -1,8 +1,5 @@
 package com.github.leeonky.interpreter;
 
-import com.github.leeonky.dal.ast.DALNode;
-import com.github.leeonky.dal.ast.PropertyNode;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Optional;
@@ -10,7 +7,6 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 import static com.github.leeonky.interpreter.FunctionUtil.getValue;
 import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
@@ -85,12 +81,6 @@ public class Token {
         return this;
     }
 
-    public DALNode toDotProperty(DALNode instanceNode) {
-        if (contentBuilder.length() == 0)
-            throw new SyntaxException("property is not finished", position);
-        return new PropertyNode(instanceNode, getContent(), DOT);
-    }
-
     public boolean isNumber() {
         try {
             return getNumber() != null;
@@ -101,5 +91,11 @@ public class Token {
 
     public boolean all() {
         return true;
+    }
+
+    public String getContentOrThrow(String message) {
+        if (contentBuilder.length() == 0)
+            throw new SyntaxException(message, getPosition());
+        return getContent();
     }
 }
