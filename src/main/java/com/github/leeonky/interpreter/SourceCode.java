@@ -136,7 +136,7 @@ public class SourceCode {
         });
     }
 
-    public <N extends Node<C, N>, C extends RuntimeContext<C>> Optional<N> tryFetch(Supplier<Optional<N>> supplier) {
+    public <N> Optional<N> tryFetch(Supplier<Optional<N>> supplier) {
         int position = this.position;
         Optional<N> optionalNode = supplier.get();
         if (!optionalNode.isPresent())
@@ -146,9 +146,7 @@ public class SourceCode {
 
     public <T> Optional<T> repeatWords(String word, IntFunction<T> intFunction) {
         List<Token> tokens = allOptional(() -> popWord(word));
-        if (!tokens.isEmpty())
-            return of(intFunction.apply(tokens.size()));
-        return empty();
+        return when(!tokens.isEmpty()).optional(() -> intFunction.apply(tokens.size()));
     }
 
     public boolean isEndOfLine() {

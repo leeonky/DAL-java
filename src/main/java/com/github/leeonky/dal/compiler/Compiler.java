@@ -314,7 +314,7 @@ public class Compiler {
     }
 
     private Optional<DALNode> compileUserDefinedLiteral(DALTokenParser parser) {
-        return parser.getSourceCode().<DALNode, DALRuntimeContext>tryFetch(() -> Tokens.IDENTITY_PROPERTY.fetch(parser.getSourceCode())
+        return parser.getSourceCode().tryFetch(() -> Tokens.IDENTITY_PROPERTY.fetch(parser.getSourceCode())
                 .flatMap(token -> parser.getRuntimeContext().takeUserDefinedLiteral(token.getContent())
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }

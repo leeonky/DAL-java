@@ -5,8 +5,13 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
+import java.util.Optional;
 
+import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_CHAR;
+import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_NODE;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SourceCodeTest {
 
@@ -168,16 +173,106 @@ class SourceCodeTest {
         }
     }
 
-    //    TODO
     @Nested
     class FetchElementNode {
 
+        @Nested
+        class ByChar {
+            @Test
+            void return_empty_when_not_start_with_char() {
+                SourceCode code = new SourceCode("ab");
+                Optional<TestNode> optionalTestNode = code.fetchElementNode(BY_CHAR, 'b', 'b',
+                        () -> code.escapedPop(NO_ESCAPE), TestNode::new);
+                assertThat(optionalTestNode).isEmpty();
+                assertThat(code.nextPosition()).isEqualTo(0);
+            }
+
+            @Test
+            void return_node_match_start_and_end_node_with_correct_position() {
+                SourceCode code = new SourceCode("  a12345b");
+
+                TestNode testNode = code.fetchElementNode(BY_CHAR, 'a', 'b',
+                        () -> code.escapedPop(NO_ESCAPE), TestNode::new).get();
+
+                assertThat(testNode.getContent()).isEqualTo(asList('1', '2', '3', '4', '5'));
+                assertThat(testNode.getPositionBegin()).isEqualTo(2);
+            }
+
+            @Test
+            void raise_error_when_node_not_finish() {
+                SourceCode code = new SourceCode("  a12345");
+
+                assertThat(assertThrows(SyntaxException.class, () -> code.fetchElementNode(BY_CHAR, 'a', 'b',
+                        () -> code.escapedPop(NO_ESCAPE), TestNode::new))).hasMessageContaining("should end with `b`");
+            }
+        }
+
+        @Nested
+        class ByNode {
+            @Test
+            void return_empty_when_not_start_with_char() {
+                SourceCode code = new SourceCode("ab");
+                Optional<TestNode> optionalTestNode = code.fetchElementNode(BY_NODE, 'b', 'b',
+                        () -> code.escapedPop(NO_ESCAPE), TestNode::new);
+                assertThat(optionalTestNode).isEmpty();
+                assertThat(code.nextPosition()).isEqualTo(0);
+            }
+
+            @Test
+            void return_node_match_start_and_end_node_with_correct_position() {
+                SourceCode code = new SourceCode("  a1, 2, 3, 4, 5b");
+
+                TestNode testNode = code.fetchElementNode(BY_NODE, 'a', 'b',
+                        () -> new TestNode(code.escapedPop(NO_ESCAPE)), TestNode::new).get();
+
+                assertThat(testNode.getPositionBegin()).isEqualTo(2);
+                assertThat(testNode.getContent()).isEqualTo(
+                        asList(new TestNode('1'),
+                                new TestNode('2'),
+                                new TestNode('3'),
+                                new TestNode('4'),
+                                new TestNode('5')));
+            }
+
+            @Test
+            void raise_error_when_node_not_finish() {
+                SourceCode code = new SourceCode("  a1, 2, 3, 4, 5");
+
+                assertThat(assertThrows(SyntaxException.class, () -> code.fetchElementNode(BY_NODE, 'a', 'b',
+                        () -> new TestNode(code.escapedPop(NO_ESCAPE)), TestNode::new))).hasMessageContaining("should end with `b`");
+            }
+
+            @Test
+            void support_tail_comma() {
+                SourceCode code = new SourceCode("  a1, b");
+
+                TestNode testNode = code.fetchElementNode(BY_NODE, 'a', 'b',
+                        () -> new TestNode(code.escapedPop(NO_ESCAPE)), TestNode::new).get();
+
+                assertThat(testNode.getPositionBegin()).isEqualTo(2);
+                assertThat(testNode.getContent()).isEqualTo(asList(new TestNode('1')));
+            }
+        }
     }
 
-    //    TODO
     @Nested
     class TryFetch {
 
+        @Test
+        void fetch_result_and_move_to_next() {
+            SourceCode code = new SourceCode("ab");
+            assertThat(code.tryFetch(() -> code.popWord("a")).get().getContent()).isEqualTo("a");
+
+            assertThat(code.escapedPop(NO_ESCAPE)).isEqualTo('b');
+        }
+
+        @Test
+        void should_not_move_position_when_fetch_empty() {
+            SourceCode code = new SourceCode("ab");
+            assertThat(code.tryFetch(() -> code.popWord("b"))).isEmpty();
+
+            assertThat(code.escapedPop(NO_ESCAPE)).isEqualTo('a');
+        }
     }
 
     @Nested
@@ -220,5 +315,10 @@ class SourceCodeTest {
             assertThat(new SourceCode("\t\n").isEndOfLine()).isTrue();
             assertThat(new SourceCode(" \t\r\n").isEndOfLine()).isTrue();
         }
+    }
+
+    @Nested
+    class TokenMatcher {
+       
     }
 }
