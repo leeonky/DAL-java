@@ -43,7 +43,7 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
 
     public Optional<N> fetchString(Character opening, char closing, Function<String, N> nodeFactory,
                                    Map<String, Character> escapeChars) {
-        return sourceCode.fetchElementNode(BY_CHAR, opening, closing, () -> sourceCode.escapedPop(escapeChars),
+        return sourceCode.fetchElementNode(BY_CHAR, opening, closing, () -> sourceCode.popChar(escapeChars),
                 chars -> nodeFactory.apply(chars.stream().map(String::valueOf).collect(joining())));
     }
 

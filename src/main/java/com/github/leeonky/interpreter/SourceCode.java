@@ -14,25 +14,25 @@ public class SourceCode {
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> TokenMatcher<C, N, E, O, T> tokenMatcher(
-            Predicate<Character> startsWith, Set<String> excluded, boolean trim, Set<Character> delimiters) {
-        return tokenMatcher(startsWith, excluded, trim, delimiters, token -> true);
+            Predicate<Character> startsWith, Set<String> excluded, boolean trimStart, Set<Character> delimiters) {
+        return tokenMatcher(startsWith, excluded, trimStart, delimiters, token -> true);
     }
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> TokenMatcher<C, N, E, O, T> tokenMatcher(
-            Predicate<Character> startsWith, Set<String> excluded, boolean trim, Set<Character> delimiters,
+            Predicate<Character> startsWith, Set<String> excluded, boolean trimStart, Set<Character> delimiters,
             Predicate<Token> validator) {
-        return tokenMatcher(startsWith, excluded, trim, (c1, c2) -> delimiters.contains(c2), validator);
+        return tokenMatcher(startsWith, excluded, trimStart, (c1, c2) -> delimiters.contains(c2), validator);
     }
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> TokenMatcher<C, N, E, O, T> tokenMatcher(
-            Predicate<Character> startsWith, Set<String> excluded, boolean trim,
+            Predicate<Character> startsWith, Set<String> excluded, boolean trimStart,
             BiPredicate<Character, Character> endsWith, Predicate<Token> validator) {
         return sourceCode -> {
             if (sourceCode.whenFirstChar(startsWith) && sourceCode.hasCode()) {
                 Token token = new Token(sourceCode.position);
-                if (trim) {
+                if (trimStart) {
                     sourceCode.popChar();
                     sourceCode.leftTrim();
                 }
@@ -97,7 +97,7 @@ public class SourceCode {
         return (code.startsWith(word, position));
     }
 
-    public char escapedPop(Map<String, Character> escapeChars) {
+    public char popChar(Map<String, Character> escapeChars) {
         return escapeChars.entrySet().stream().filter(e -> code.startsWith(e.getKey(), position)).map(e -> {
             seek(e.getKey().length());
             return e.getValue();
