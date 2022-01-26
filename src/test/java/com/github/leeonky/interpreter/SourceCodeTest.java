@@ -19,6 +19,7 @@ class SourceCodeTest {
 
     public static final HashMap<String, Character> NO_ESCAPE = new HashMap<>();
     public static final BiPredicate<Character, Character> ONE_CHAR_TOKEN = (c1, c2) -> true;
+    public static final BiPredicate<Character, Character> UNLIMITED_ENDING = (c1, c2) -> false;
 
     @Nested
     class HasCode {
@@ -324,23 +325,13 @@ class SourceCodeTest {
     class TokenMatcherS {
 
         @Test
-        void return_empty_when_not_match() {
+        void return_empty_when_not_match_opening_char() {
             SourceCode sourceCode = new SourceCode(" notStartsWithA");
             Optional<Token> optionalToken = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
                     false, ONE_CHAR_TOKEN, token -> true).fetch(sourceCode);
 
             assertThat(optionalToken).isEmpty();
             assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('n');
-        }
-
-        @Test
-        void return_empty_when_excluded() {
-            SourceCode sourceCode = new SourceCode(" abc");
-            Optional<Token> optionalToken = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(asList("a")),
-                    false, ONE_CHAR_TOKEN, token -> true).fetch(sourceCode);
-
-            assertThat(optionalToken).isEmpty();
-            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('a');
         }
 
         @Test
@@ -389,6 +380,79 @@ class SourceCodeTest {
             assertThat(token.getContent()).isEqualTo("");
             assertThat(token.getPosition()).isEqualTo(1);
             assertThat(sourceCode.hasCode()).isFalse();
+        }
+
+        @Test
+        void should_return_all_content_when_got_the_end_of_code() {
+            SourceCode sourceCode = new SourceCode(" abc");
+
+            Token token = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
+                    false, UNLIMITED_ENDING, token1 -> true).fetch(sourceCode).get();
+
+            assertThat(token.getContent()).isEqualTo("abc");
+            assertThat(token.getPosition()).isEqualTo(1);
+            assertThat(sourceCode.hasCode()).isFalse();
+        }
+
+        @Test
+        void should_return_content_when_before_closing_char() {
+            SourceCode sourceCode = new SourceCode(" abc");
+
+            Token token = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
+                    false, (c1, c2) -> c2.equals('c'), token1 -> true).fetch(sourceCode).get();
+
+            assertThat(token.getContent()).isEqualTo("ab");
+            assertThat(token.getPosition()).isEqualTo(1);
+            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('c');
+        }
+
+        @Test
+        void should_compare_current_and_last_char() {
+            SourceCode sourceCode = new SourceCode(" ab");
+
+            SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
+                    false, (c1, c2) -> {
+                        assertThat(c1).isEqualTo('a');
+                        assertThat(c2).isEqualTo('b');
+                        return false;
+                    }, token1 -> true).fetch(sourceCode);
+        }
+
+        @Test
+        void return_empty_when_excluded() {
+            SourceCode sourceCode = new SourceCode(" abc");
+            Optional<Token> optionalToken = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(asList("a")),
+                    false, ONE_CHAR_TOKEN, token -> true).fetch(sourceCode);
+
+            assertThat(optionalToken).isEmpty();
+            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('a');
+        }
+
+        @Test
+        void return_empty_when_predicate_false() {
+            SourceCode sourceCode = new SourceCode(" abc");
+
+            Optional<Token> optionalToken = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
+                    false, (c1, c2) -> c2.equals('c'), token -> {
+                        assertThat(token.getContent()).isEqualTo("ab");
+                        assertThat(token.getPosition()).isEqualTo(1);
+                        return false;
+                    }).fetch(sourceCode);
+
+            assertThat(optionalToken).isEmpty();
+            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('a');
+        }
+
+        @Test
+        void return_by_delimiters() {
+            SourceCode sourceCode = new SourceCode(" abc");
+
+            Token token = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
+                    false, new HashSet<>(asList('c'))).fetch(sourceCode).get();
+
+            assertThat(token.getContent()).isEqualTo("ab");
+            assertThat(token.getPosition()).isEqualTo(1);
+            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('c');
         }
     }
 }

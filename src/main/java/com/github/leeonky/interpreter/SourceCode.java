@@ -28,9 +28,9 @@ public class SourceCode {
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> TokenMatcher<C, N, E, O, T> tokenMatcher(
             Predicate<Character> startsWith, Set<String> excluded, boolean trimStart,
-            BiPredicate<Character, Character> endsWith, Predicate<Token> validator) {
+            BiPredicate<Character, Character> endsWith, Predicate<Token> predicate) {
         return sourceCode -> {
-            if (sourceCode.whenFirstChar(startsWith) && sourceCode.hasCode()) {
+            if (sourceCode.whenFirstChar(startsWith)) {
                 Token token = new Token(sourceCode.position);
                 if (trimStart) {
                     sourceCode.popChar();
@@ -39,7 +39,7 @@ public class SourceCode {
                 if (sourceCode.hasCode())
                     do token.append(sourceCode.popChar());
                     while (sourceCode.hasCode() && !endsWith.test(token.lastChar(), sourceCode.currentChar()));
-                if (!excluded.contains(token.getContent()) && validator.test(token))
+                if (!excluded.contains(token.getContent()) && predicate.test(token))
                     return of(token);
                 sourceCode.position = token.getPosition();
             }
