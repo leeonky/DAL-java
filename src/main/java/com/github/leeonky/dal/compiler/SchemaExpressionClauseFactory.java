@@ -7,6 +7,7 @@ import com.github.leeonky.interpreter.ExpressionClauseFactory;
 import com.github.leeonky.interpreter.NodeFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SchemaExpressionClauseFactory implements ExpressionClauseFactory<DALRuntimeContext, DALNode, DALExpression,
         DALOperator, DALTokenParser> {
@@ -25,7 +26,8 @@ public class SchemaExpressionClauseFactory implements ExpressionClauseFactory<DA
         if (dimension > 1)
             throw tokenParser.getSourceCode().syntaxError("Not support multidimensional schema", 0);
         return tokenParser.fetchBetween("[", "]", () -> fetchSchemaClause(tokenParser, dimension + 1)).orElseGet(() -> {
-            List<SchemaNode> schemaNodes = tokenParser.fetchNodes("/", SCHEMA);
+            List<SchemaNode> schemaNodes = tokenParser.fetchNodesSplitBy("/", SCHEMA).stream()
+                    .map(SchemaNode.class::cast).collect(Collectors.toList());
             return input -> new SchemaExpression(input, schemaNodes, dimension);
         });
     }

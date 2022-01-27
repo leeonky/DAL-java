@@ -27,17 +27,17 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         return sourceCode;
     }
 
-    public Optional<N> fetchNode(char opening, char closing, Function<N, N> nodeFactory,
-                                 NodeFactory<C, N, E, O, T> nodeMatcher, String message) {
-        return fetchNodes(opening, closing, args -> {
+    public Optional<N> fetchNodeWithOneChildNodeBetween(char opening, char closing, Function<N, N> nodeFactory,
+                                                        NodeFactory<C, N, E, O, T> childNodeFactory, String message) {
+        return fetchNodeWithElementsBetween(opening, closing, args -> {
             if (args.size() != 1)
                 throw sourceCode.syntaxError(message, -1);
             return nodeFactory.apply(args.get(0));
-        }, () -> nodeMatcher.fetch(getInstance()));
+        }, () -> childNodeFactory.fetch(getInstance()));
     }
 
-    public <T> Optional<N> fetchNodes(Character opening, char closing, Function<List<T>, N> nodeFactory,
-                                      Supplier<T> element) {
+    public <T> Optional<N> fetchNodeWithElementsBetween(Character opening, char closing, Function<List<T>, N> nodeFactory,
+                                                        Supplier<T> element) {
         return sourceCode.fetchElementNode(BY_NODE, opening, closing, element, nodeFactory);
     }
 
@@ -56,7 +56,7 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         });
     }
 
-    public Optional<N> fetchBetween(String opening, String closing, NodeMatcher<C, N, E, O, T> nodeMatcher) {
+    public Optional<N> fetchNodeBetween(String opening, String closing, NodeMatcher<C, N, E, O, T> nodeMatcher) {
         return sourceCode.tryFetch(() -> {
             Optional<N> optionalNode = Optional.empty();
             if (sourceCode.popWord(opening).isPresent()) {
@@ -69,12 +69,11 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         });
     }
 
-    @SuppressWarnings("unchecked")
-    public <LE> List<LE> fetchNodes(String delimiter, NodeFactory<C, N, E, O, T> factory) {
-        return new ArrayList<LE>() {{
-            add((LE) factory.fetch(getInstance()));
+    public List<N> fetchNodesSplitBy(String delimiter, NodeFactory<C, N, E, O, T> factory) {
+        return new ArrayList<N>() {{
+            add(factory.fetch(getInstance()));
             while (sourceCode.popWord(delimiter).isPresent())
-                add((LE) factory.fetch(getInstance()));
+                add(factory.fetch(getInstance()));
         }};
     }
 

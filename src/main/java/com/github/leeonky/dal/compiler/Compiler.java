@@ -109,18 +109,18 @@ public class Compiler {
                 CONST_USER_DEFINED_LITERAL);
         LIST_INDEX_OR_MAP_KEY = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING)
                 .or("should given one property or array index in `[]`");
-        PARENTHESES = parser -> parser.enableCommaAnd(() -> parser.fetchNode('(', ')',
+        PARENTHESES = parser -> parser.enableCommaAnd(() -> parser.fetchNodeWithOneChildNodeBetween('(', ')',
                 ParenthesesNode::new, EXPRESSION, "expect a value or expression"));
-        BRACKET_PROPERTY = (parser, previous) -> parser.fetchNode('[', ']', node ->
+        BRACKET_PROPERTY = (parser, previous) -> parser.fetchNodeWithOneChildNodeBetween('[', ']', node ->
                         new PropertyNode(previous, ((ConstNode) node).getValue(), BRACKET),
                 LIST_INDEX_OR_MAP_KEY, "should given one property or array index in `[]`");
         EXPLICIT_PROPERTY = oneOf(DOT_PROPERTY, BRACKET_PROPERTY);
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IDENTITY_PROPERTY);
         PROPERTY_CHAIN = parser -> PROPERTY.or("expect a object property").recursive(EXPLICIT_PROPERTY).fetch(parser);
-        OBJECT = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('{', '}', ObjectNode::new,
+        OBJECT = parser -> parser.disableCommaAnd(() -> parser.fetchNodeWithElementsBetween('{', '}', ObjectNode::new,
                 () -> PROPERTY_CHAIN.withClause(shortJudgementClause(JUDGEMENT_OPERATORS.or("expect operator `:` or `=`"))).fetch(parser)));
         ELEMENT_ELLIPSIS = parser -> parser.wordToken(Constants.ELEMENT_ELLIPSIS, token -> new ListEllipsisNode());
-        LIST = parser -> parser.disableCommaAnd(() -> parser.fetchNodes('[', ']', ListNode::new,
+        LIST = parser -> parser.disableCommaAnd(() -> parser.fetchNodeWithElementsBetween('[', ']', ListNode::new,
                 () -> ELEMENT_ELLIPSIS.fetch(parser).<ExpressionClause<DALRuntimeContext, DALNode>>map(node -> p -> node).orElseGet(() ->
                         shortJudgementClause(JUDGEMENT_OPERATORS.or(Tokens.DEFAULT_JUDGEMENT_OPERATOR)).fetch(parser))));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
@@ -229,8 +229,8 @@ public class Compiler {
                 Optional<ExpressionClause<DALRuntimeContext, DALNode>> rowSchemaClause = parser.fetchNodeAfter(IS, SCHEMA_CLAUSE);
                 Optional<DALOperator> rowOperator = JUDGEMENT_OPERATORS.fetch(parser);
                 return FunctionUtil.oneOf(
-                        () -> parser.fetchBetween("|", "|", ELEMENT_ELLIPSIS).map(Collections::singletonList),
-                        () -> parser.fetchBetween("|", "|", ROW_WILDCARD).map(Collections::singletonList),
+                        () -> parser.fetchNodeBetween("|", "|", ELEMENT_ELLIPSIS).map(Collections::singletonList),
+                        () -> parser.fetchNodeBetween("|", "|", ROW_WILDCARD).map(Collections::singletonList),
                         () -> parser.fetchRow(column -> getRowCell(parser, rowOperator, headers.get(column)))
                                 .map(cellClauses -> checkCellSize(parser, headers, cellClauses))
                 ).map(nodes -> new RowNode(index, rowSchemaClause, rowOperator, nodes));

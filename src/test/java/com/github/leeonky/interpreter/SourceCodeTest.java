@@ -242,8 +242,11 @@ class SourceCodeTest {
             void raise_error_when_node_not_finish() {
                 SourceCode code = new SourceCode("  a1, 2, 3, 4, 5");
 
-                assertThat(assertThrows(SyntaxException.class, () -> code.fetchElementNode(BY_NODE, 'a', 'b',
-                        () -> new TestNode(code.popChar(NO_ESCAPE)), TestNode::new))).hasMessageContaining("should end with `b`");
+                SyntaxException exception = assertThrows(SyntaxException.class, () -> code.fetchElementNode(BY_NODE, 'a', 'b',
+                        () -> new TestNode(code.popChar(NO_ESCAPE)), TestNode::new));
+                assertThat(exception).hasMessageContaining("should end with `b`");
+
+                assertThat(exception.show("  a1, 2, 3, 4, 5")).isEqualTo("  a1, 2, 3, 4, 5\n                ^");
             }
 
             @Test
