@@ -86,10 +86,10 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         return (T) this;
     }
 
-    public Optional<ExpressionClause<C, N>> fetchNodeAfter(
+    public Optional<ExpressionClause<C, N>> fetchClauseAfter(
             String token, ExpressionClauseFactory<C, N, E, O, T> clauseFactory) {
-        return sourceCode.popWord(token).map(t -> clauseFactory.fetch(getInstance()).map(node ->
-                node.setPositionBegin(t.getPosition())));
+        return sourceCode.popWord(token).map(t -> clauseFactory.fetch(getInstance())
+                .map(node -> node.setPositionBegin(t.getPosition())));
     }
 
     public Optional<N> fetchExpression(N left, OperatorMatcher<C, N, E, O, T> operatorMatcher,

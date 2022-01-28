@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.interpreter.SourceCodeTest.NO_ESCAPE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -190,7 +191,16 @@ class TokenParserTest {
 
         @Test
         void return_one_node_list() {
+            TestTokenParser tokenParser = givenTokenParserWithCode("a");
+            assertThat(tokenParser.fetchNodesSplitBy(",", parser -> new TestNode(tokenParser.getSourceCode().popChar(NO_ESCAPE))).stream()
+                    .map(TestNode::getContent).collect(Collectors.toList())).containsExactly('a');
+        }
 
+        @Test
+        void return_node_list() {
+            TestTokenParser tokenParser = givenTokenParserWithCode("a,b,c");
+            assertThat(tokenParser.fetchNodesSplitBy(",", parser -> new TestNode(tokenParser.getSourceCode().popChar(NO_ESCAPE))).stream()
+                    .map(TestNode::getContent).collect(Collectors.toList())).containsExactly('a', 'b', 'c');
         }
     }
 
