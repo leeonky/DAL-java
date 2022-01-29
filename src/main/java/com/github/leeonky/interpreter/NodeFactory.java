@@ -8,16 +8,6 @@ public interface NodeFactory<C extends RuntimeContext<C>, N extends Node<C, N>, 
 
     N fetch(T parser);
 
-    default NodeFactory<C, N, E, O, T> recursive(ExpressionMatcher<C, N, E, O, T> expressionMatcher) {
-        return parser -> {
-            N node = fetch(parser);
-            Optional<N> optionalNode = expressionMatcher.fetch(parser, node);
-            while (optionalNode.isPresent())
-                optionalNode = expressionMatcher.fetch(parser, node = optionalNode.get());
-            return node;
-        };
-    }
-
     default NodeFactory<C, N, E, O, T> map(Function<N, N> mapping) {
         return parser -> mapping.apply(fetch(parser));
     }
@@ -26,6 +16,18 @@ public interface NodeFactory<C extends RuntimeContext<C>, N extends Node<C, N>, 
         return parser -> {
             N node = fetch(parser);
             return expressionClauseFactory.fetch(parser).makeExpression(node);
+        };
+    }
+
+    default NodeFactory<C, N, E, O, T> recursive(ExpressionClauseMatcher<C, N, E, O, T> expressionClauseMatcher) {
+        return parser -> {
+            N node = fetch(parser);
+            Optional<ExpressionClause<C, N>> optionalNode = expressionClauseMatcher.fetch(parser);
+            while (optionalNode.isPresent()) {
+                node = optionalNode.get().makeExpression(node);
+                optionalNode = expressionClauseMatcher.fetch(parser);
+            }
+            return node;
         };
     }
 }

@@ -70,7 +70,7 @@ public class Compiler {
                     new PropertyNode(InputNode.INSTANCE, token.getContent(), IDENTIFIER)),
             WILDCARD = parser -> parser.wordToken("*", token -> new WildcardNode("*")),
             ROW_WILDCARD = parser -> parser.wordToken("***", token -> new WildcardNode("***")),
-            PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_WHICH_CLAUSE, SCHEMA_JUDGEMENT_CLAUSE,
+            PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_JUDGEMENT_CLAUSE,
             ELEMENT_ELLIPSIS, UNARY_OPERATOR_EXPRESSION,
             EMPTY_CELL = parser -> when(parser.getSourceCode().startsWith("|")).optional(EmptyCellNode::new),
             TABLE = oneOf(new TransposedTableWithRowOperator(), new TableMatcher(), new TransposedTable());
@@ -87,15 +87,8 @@ public class Compiler {
             EXPLICIT_PROPERTY_C = oneOf(DOT_PROPERTY_C, BRACKET_PROPERTY_C),
             BINARY_ARITHMETIC_EXPRESSION_C,
             BINARY_JUDGEMENT_EXPRESSION_C,
-            BINARY_OPERATOR_EXPRESSION_C;
-
-
-    ExpressionMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALTokenParser>
-            DOT_PROPERTY = DOT_PROPERTY_C.toExpressionMatcher(),
-            BRACKET_PROPERTY = BRACKET_PROPERTY_C.toExpressionMatcher(),
-            EXPLICIT_PROPERTY = EXPLICIT_PROPERTY_C.toExpressionMatcher(),
-            BINARY_ARITHMETIC_EXPRESSION, BINARY_JUDGEMENT_EXPRESSION,
-            BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION;
+            BINARY_OPERATOR_EXPRESSION_C,
+            SCHEMA_EXPRESSION_C;
 
     private ExpressionClauseFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALTokenParser> shortJudgementClause(
             OperatorFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALTokenParser> operatorFactory) {
@@ -122,8 +115,8 @@ public class Compiler {
                 .or("should given one property or array index in `[]`");
         PARENTHESES = parser -> parser.enableCommaAnd(() -> parser.fetchNodeWithOneChildNodeBetween('(', ')',
                 ParenthesesNode::new, EXPRESSION, "expect a value or expression"));
-        PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IDENTITY_PROPERTY);
-        PROPERTY_CHAIN = parser -> PROPERTY.or("expect a object property").recursive(EXPLICIT_PROPERTY).fetch(parser);
+        PROPERTY = oneOf(EXPLICIT_PROPERTY_C.defaultInputNode(InputNode.INSTANCE), IDENTITY_PROPERTY);
+        PROPERTY_CHAIN = parser -> PROPERTY.or("expect a object property").recursive(EXPLICIT_PROPERTY_C).fetch(parser);
         OBJECT = parser -> parser.disableCommaAnd(() -> parser.fetchNodeWithElementsBetween('{', '}', ObjectNode::new,
                 () -> PROPERTY_CHAIN.withClause(shortJudgementClause(JUDGEMENT_OPERATORS.or("expect operator `:` or `=`"))).fetch(parser)));
         ELEMENT_ELLIPSIS = parser -> parser.wordToken(Constants.ELEMENT_ELLIPSIS, token -> new ListEllipsisNode());
@@ -133,24 +126,21 @@ public class Compiler {
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         UNARY_OPERATOR_EXPRESSION = parser -> parser.fetchExpression(null, UNARY_OPERATORS, OPERAND);
         OPERAND = UNARY_OPERATOR_EXPRESSION.or(oneOf(CONST, PROPERTY, PARENTHESES, INPUT)
-                .or("expect a value or expression").recursive(EXPLICIT_PROPERTY).map(DALNode::avoidListMapping));
+                .or("expect a value or expression").recursive(EXPLICIT_PROPERTY_C).map(DALNode::avoidListMapping));
 
         BINARY_ARITHMETIC_EXPRESSION_C = BINARY_ARITHMETIC_OPERATORS.toClause(OPERAND);
-        BINARY_ARITHMETIC_EXPRESSION = BINARY_ARITHMETIC_EXPRESSION_C.toExpressionMatcher();
         BINARY_JUDGEMENT_EXPRESSION_C = JUDGEMENT_OPERATORS.toClause(JUDGEMENT.or(OPERAND));
-        BINARY_JUDGEMENT_EXPRESSION = BINARY_JUDGEMENT_EXPRESSION_C.toExpressionMatcher();
         BINARY_OPERATOR_EXPRESSION_C = oneOf(BINARY_ARITHMETIC_EXPRESSION_C, BINARY_JUDGEMENT_EXPRESSION_C);
-        BINARY_OPERATOR_EXPRESSION = BINARY_OPERATOR_EXPRESSION_C.toExpressionMatcher();
-        ARITHMETIC_EXPRESSION = OPERAND.recursive(BINARY_ARITHMETIC_EXPRESSION);
+        ARITHMETIC_EXPRESSION = OPERAND.recursive(BINARY_ARITHMETIC_EXPRESSION_C);
         JUDGEMENT_EXPRESSION_OPERAND = JUDGEMENT.or(ARITHMETIC_EXPRESSION);
+
         SCHEMA_JUDGEMENT_CLAUSE = parser -> parser.fetchExpression(
                 InputNode.INSTANCE, JUDGEMENT_OPERATORS, JUDGEMENT_EXPRESSION_OPERAND);
 
-        SCHEMA_WHICH_CLAUSE = parser -> parser.fetchNodeAfter2(WHICH, SCHEMA_JUDGEMENT_CLAUSE.or(EXPRESSION));
-        SCHEMA_EXPRESSION = after(IS, SCHEMA_CLAUSE).concat(
-                omitWhich(SCHEMA_JUDGEMENT_CLAUSE),
-                after(WHICH, which(SCHEMA_JUDGEMENT_CLAUSE.or(EXPRESSION)))).toExpressionMatcher();
-        EXPRESSION = OPERAND.recursive(oneOf(BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION));
+        SCHEMA_EXPRESSION_C = parser -> after(IS, SCHEMA_CLAUSE).concat(omitWhich(SCHEMA_JUDGEMENT_CLAUSE),
+                after(WHICH, which(SCHEMA_JUDGEMENT_CLAUSE.or(EXPRESSION)))).fetch(parser);
+
+        EXPRESSION = OPERAND.recursive(oneOf(BINARY_OPERATOR_EXPRESSION_C, SCHEMA_EXPRESSION_C));
     }
 
     private ExpressionClauseFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALTokenParser> which(
@@ -185,13 +175,6 @@ public class Compiler {
             NodeMatcher<C, N, E, O, T> matcher, NodeMatcher<C, N, E, O, T>... matchers) {
         return parser -> Stream.concat(Stream.of(matcher), Stream.of(matchers))
                 .map(p -> p.fetch(parser)).filter(Optional::isPresent).findFirst().orElse(empty());
-    }
-
-    private static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> ExpressionMatcher<C, N, E, O, T> oneOf(
-            ExpressionMatcher<C, N, E, O, T> matcher, ExpressionMatcher<C, N, E, O, T>... matchers) {
-        return (parser, previous) -> Stream.concat(Stream.of(matcher), Stream.of(matchers))
-                .map(p -> p.fetch(parser, previous)).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 
     private static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,

@@ -12,11 +12,7 @@ public interface ExpressionClauseMatcher<C extends RuntimeContext<C>, N extends 
         return parser -> fetch(parser).orElseGet(() -> expressionClauseFactory.fetch(parser));
     }
 
-    @Deprecated
-    default ExpressionMatcher<C, N, E, O, T> toExpressionMatcher() {
-        return (parser, previous) -> fetch(parser).map(clause -> clause.makeExpression(previous));
-    }
-
+    @SuppressWarnings("unchecked")
     default ExpressionClauseMatcher<C, N, E, O, T> concat(ExpressionClauseMatcher<C, N, E, O, T>... clauses) {
         return parser -> {
             Optional<ExpressionClause<C, N>> optionalExpressionClause = fetch(parser);
@@ -31,5 +27,9 @@ public interface ExpressionClauseMatcher<C extends RuntimeContext<C>, N extends 
             }
             return optionalExpressionClause;
         };
+    }
+
+    default NodeMatcher<C, N, E, O, T> defaultInputNode(N input) {
+        return parser -> fetch(parser).map(clause -> clause.makeExpression(input));
     }
 }
