@@ -3,7 +3,7 @@ package com.github.leeonky.dal.compiler;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.github.leeonky.dal.compiler.Constants.KeyWords.*;
+import static com.github.leeonky.dal.compiler.Notations.*;
 import static java.util.Arrays.asList;
 
 public class Constants {
@@ -21,22 +21,15 @@ public class Constants {
     }};
     public static final String SCHEMA_DELIMITER = "/";
     public static final String ELEMENT_ELLIPSIS = "...";
-    public static final Set<String> ALL_KEY_WORDS = new HashSet<>(asList(IS, WHICH, TRUE, FALSE, NULL, AND, OR));
+
+
+    public static final Set<String> ALL_KEY_WORDS = new HashSet<>(asList(IS_s,
+            WHICH.getLabel(), TRUE.getLabel(), FALSE.getLabel(), NULL.getLabel(), AND_s, OR_s));
     public static final String SEQUENCE_AZ = "+";
     public static final String SEQUENCE_ZA = "-";
 
     public static final String SEQUENCE_AZ_2 = "￪";
     public static final String SEQUENCE_ZA_2 = "￬";
-
-    public static class KeyWords {
-        public static final String WHICH = "which";
-        public static final String IS = "is";
-        public static final String NULL = "null";
-        public static final String TRUE = "true";
-        public static final String FALSE = "false";
-        public static final String AND = "and";
-        public static final String OR = "or";
-    }
 
     public static class Operators {
         public static final String MATCH = ":";

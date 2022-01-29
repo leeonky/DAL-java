@@ -89,10 +89,6 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         return sourceCode.popWord(token).map(t -> nodeFactory.fetch(getInstance()));
     }
 
-    public Optional<N> fetchNodeAfter(String token, NodeFactory<C, N, E, O, T> nodeFactory) {
-        return sourceCode.popWord(token).map(t -> nodeFactory.fetch(getInstance()).setPositionBegin(t.getPosition()));
-    }
-
     @SuppressWarnings("unchecked")
     private T getInstance() {
         return (T) this;
@@ -143,8 +139,10 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         return operatorMatcher.fetch(getInstance()).map(operator -> fetchExpressionClause(operator, rightCompiler));
     }
 
-    public Optional<N> wordToken(String word, Function<Token, N> factory) {
-        return sourceCode.popWord(word).map(t -> factory.apply(t).setPositionBegin(t.getPosition()));
+    public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> NodeMatcher<C, N, E, O, T> wordNode(
+            String word, Function<Token, N> factory) {
+        return parser -> parser.getSourceCode().popWord(word).map(t -> factory.apply(t).setPositionBegin(t.getPosition()));
     }
 
     public <LE> Optional<List<LE>> fetchRow(Function<Integer, LE> factory) {

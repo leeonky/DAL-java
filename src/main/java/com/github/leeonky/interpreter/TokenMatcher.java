@@ -12,7 +12,7 @@ public interface TokenMatcher<C extends RuntimeContext<C>, N extends Node<C, N>,
         return sourceCode -> fetch(sourceCode).orElseThrow(() -> sourceCode.syntaxError(message, 0));
     }
 
-    default NodeMatcher<C, N, E, O, T> map(Function<Token, N> mapper) {
+    default NodeMatcher<C, N, E, O, T> asNode(Function<Token, N> mapper) {
         return parser -> fetch(parser.getSourceCode()).map(token ->
                 mapper.apply(token).setPositionBegin(token.getPosition()));
     }
