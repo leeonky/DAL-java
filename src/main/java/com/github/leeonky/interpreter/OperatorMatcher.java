@@ -13,4 +13,8 @@ public interface OperatorMatcher<C extends RuntimeContext<C>, N extends Node<C, 
     default OperatorFactory<C, N, E, O, T> or(String message) {
         return tokenParser -> fetch(tokenParser).orElseThrow(() -> tokenParser.getSourceCode().syntaxError(message, 0));
     }
+
+    default ExpressionClauseMatcher<C, N, E, O, T> toClause(NodeFactory<C, N, E, O, T> nodeFactory) {
+        return parser -> parser.fetchExpressionClause(this, nodeFactory);
+    }
 }

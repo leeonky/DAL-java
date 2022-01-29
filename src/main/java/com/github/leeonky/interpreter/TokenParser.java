@@ -1,6 +1,7 @@
 package com.github.leeonky.interpreter;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -34,6 +35,13 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
                 throw sourceCode.syntaxError(message, -1);
             return nodeFactory.apply(args.get(0));
         }, () -> childNodeFactory.fetch(getInstance()));
+    }
+
+    public Optional<ExpressionClause<C, N>> fetchExpressionClauseBetween(
+            char opening, char closing, BiFunction<N, N, N> biNodeFactory,
+            NodeFactory<C, N, E, O, T> childNodeFactory, String message) {
+        return fetchNodeWithOneChildNodeBetween(opening, closing, n -> n, childNodeFactory, message).map(
+                n -> previous -> biNodeFactory.apply(previous, n).setPositionBegin(n.getPositionBegin()));
     }
 
     public <T> Optional<N> fetchNodeWithElementsBetween(Character opening, char closing, Function<List<T>, N> nodeFactory,
@@ -75,6 +83,10 @@ public class TokenParser<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
             while (sourceCode.popWord(delimiter).isPresent())
                 add(factory.fetch(getInstance()));
         }};
+    }
+
+    public Optional<N> fetchNodeAfter2(String token, NodeFactory<C, N, E, O, T> nodeFactory) {
+        return sourceCode.popWord(token).map(t -> nodeFactory.fetch(getInstance()));
     }
 
     public Optional<N> fetchNodeAfter(String token, NodeFactory<C, N, E, O, T> nodeFactory) {

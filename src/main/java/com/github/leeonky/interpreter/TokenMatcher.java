@@ -1,6 +1,7 @@
 package com.github.leeonky.interpreter;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public interface TokenMatcher<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
@@ -14,5 +15,10 @@ public interface TokenMatcher<C extends RuntimeContext<C>, N extends Node<C, N>,
     default NodeMatcher<C, N, E, O, T> map(Function<Token, N> mapper) {
         return parser -> fetch(parser.getSourceCode()).map(token ->
                 mapper.apply(token).setPositionBegin(token.getPosition()));
+    }
+
+    default ExpressionClauseMatcher<C, N, E, O, T> toClauseMatcher(BiFunction<Token, N, N> mapper) {
+        return parser -> fetch(parser.getSourceCode()).map(token -> previous ->
+                mapper.apply(token, previous).setPositionBegin(token.getPosition()));
     }
 }
