@@ -6,7 +6,7 @@ import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.ast.SequenceNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.ExpressionConstructor;
-import com.github.leeonky.interpreter.Scanner;
+import com.github.leeonky.interpreter.Parser;
 import com.github.leeonky.interpreter.SourceCode;
 
 import java.util.LinkedList;
@@ -15,12 +15,12 @@ import java.util.function.Supplier;
 
 import static java.util.Collections.singleton;
 
-public class DALScanner extends Scanner<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALScanner> {
+public class DALParser extends Parser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALParser> {
 
     private final LinkedList<Boolean> enableAndComma = new LinkedList<>(singleton(true));
 
-    public DALScanner(SourceCode sourceCode, DALRuntimeContext runtimeContext,
-                      ExpressionConstructor<DALRuntimeContext, DALNode, DALExpression, DALOperator> expressionConstructor) {
+    public DALParser(SourceCode sourceCode, DALRuntimeContext runtimeContext,
+                     ExpressionConstructor<DALRuntimeContext, DALNode, DALExpression, DALOperator> expressionConstructor) {
         super(sourceCode, runtimeContext, expressionConstructor);
     }
 
@@ -47,5 +47,17 @@ public class DALScanner extends Scanner<DALRuntimeContext, DALNode, DALExpressio
 
     public Supplier<Optional<? extends SequenceNode>> sequenceOf(String sequenceChar, SequenceNode.Type type) {
         return () -> getSourceCode().repeatWords(sequenceChar, count -> new SequenceNode(count, type, sequenceChar));
+    }
+
+    public boolean notCodeBeginning() {
+        return !isCodeBeginning();
+    }
+
+    public boolean isCodeBeginning() {
+        return getSourceCode().isBeginning();
+    }
+
+    public boolean mayBeUnEqual() {
+        return getSourceCode().startsWith("!=");
     }
 }

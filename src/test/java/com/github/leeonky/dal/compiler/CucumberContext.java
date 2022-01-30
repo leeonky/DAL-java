@@ -11,8 +11,7 @@ import com.github.leeonky.dal.runtime.ListAccessor;
 import com.github.leeonky.dal.runtime.Result;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.InterpreterException;
-import com.github.leeonky.interpreter.NodeFactory;
-import com.github.leeonky.interpreter.NodeMatcher;
+import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.SourceCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,9 +27,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CucumberContext {
     private static final Compiler compiler = new Compiler();
-    private static final Map<String, NodeMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator,
-            DALScanner>> matcherMap = new HashMap<String, NodeMatcher<DALRuntimeContext, DALNode, DALExpression,
-            DALOperator, DALScanner>>() {{
+    private static final Map<String, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
+            DALParser>> matcherMap = new HashMap<String, NodeParser<DALRuntimeContext, DALNode, DALExpression,
+            DALOperator, DALParser>>() {{
         put("number", compiler.NUMBER);
         put("integer", compiler.INTEGER);
         put("single-quoted-string", compiler.SINGLE_QUOTED_STRING);
@@ -57,16 +56,16 @@ public class CucumberContext {
         put("schema", optional(SchemaExpressionClauseFactory.SCHEMA));
     }};
 
-    private static NodeMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALScanner> optional(
-            NodeFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALScanner> nodeFactory) {
-        return scanner -> Optional.ofNullable(nodeFactory.fetch(scanner));
+    private static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALParser> optional(
+            NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALParser> nodeFactory) {
+        return scanner -> Optional.ofNullable(nodeFactory.parse(scanner));
     }
 
     public static CucumberContext INSTANCE = new CucumberContext();
     DAL dal = new DAL();
 
     Object inputObject = null;
-    DALScanner scanner = null;
+    DALParser scanner = null;
     String sourceCodeString = null;
     InterpreterException interpreterException;
     DALNode node = null;
@@ -85,7 +84,7 @@ public class CucumberContext {
     }
 
     public void giveDalSourceCode(String code) {
-        scanner = new DALScanner(new SourceCode(sourceCodeString = parseTabAndSpace(code)),
+        scanner = new DALParser(new SourceCode(sourceCodeString = parseTabAndSpace(code)),
                 dal.getRuntimeContextBuilder().build(null), DALExpression::new);
     }
 
@@ -98,7 +97,7 @@ public class CucumberContext {
     }
 
     public void assertNodeValue(String assertion, String factory) {
-        dal.evaluate(matcherMap.get(factory).fetch(new DALScanner(new SourceCode(sourceCodeString),
+        dal.evaluate(matcherMap.get(factory).parse(new DALParser(new SourceCode(sourceCodeString),
                 dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
     }
@@ -108,7 +107,7 @@ public class CucumberContext {
     }
 
     public void failedToGetNodeWithMessage(String factory, String message) {
-        interpreterException = assertThrows(InterpreterException.class, () -> matcherMap.get(factory).fetch(scanner));
+        interpreterException = assertThrows(InterpreterException.class, () -> matcherMap.get(factory).parse(scanner));
         shouldHasDalMessage(message);
     }
 
@@ -118,7 +117,7 @@ public class CucumberContext {
 
     public void compileAndAssertNode(String factory, String assertion) {
         try {
-            node = matcherMap.get(factory).fetch(scanner).orElse(null);
+            node = matcherMap.get(factory).parse(scanner).orElse(null);
         } catch (InterpreterException e) {
             System.err.println(e.show(sourceCodeString));
             throw e;
@@ -161,7 +160,7 @@ public class CucumberContext {
     }
 
     public void ignoreNodeBy(String factory) {
-        matcherMap.get(factory).fetch(scanner);
+        matcherMap.get(factory).parse(scanner);
     }
 
     public void registerSchema(String schemaCode) {

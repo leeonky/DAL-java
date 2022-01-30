@@ -330,8 +330,8 @@ class SourceCodeTest {
         @Test
         void return_empty_when_not_match_opening_char() {
             SourceCode sourceCode = new SourceCode(" notStartsWithA");
-            Optional<Token> optionalToken = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
-                    false, ONE_CHAR_TOKEN, token -> true).fetch(sourceCode);
+            Optional<Token> optionalToken = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
+                    false, ONE_CHAR_TOKEN, token -> true).scan(sourceCode);
 
             assertThat(optionalToken).isEmpty();
             assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('n');
@@ -341,8 +341,8 @@ class SourceCodeTest {
         void return_token_with_content_and_position() {
             SourceCode sourceCode = new SourceCode(" abc");
 
-            Token token = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
-                    false, ONE_CHAR_TOKEN, token1 -> true).fetch(sourceCode).get();
+            Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
+                    false, ONE_CHAR_TOKEN, token1 -> true).scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("a");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -353,8 +353,8 @@ class SourceCodeTest {
         void should_append_a_char_when_no_matter_end_with_when_trim() {
             SourceCode sourceCode = new SourceCode(" abc");
 
-            Token token = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
-                    true, ONE_CHAR_TOKEN, token1 -> true).fetch(sourceCode).get();
+            Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
+                    true, ONE_CHAR_TOKEN, token1 -> true).scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("b");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -365,8 +365,8 @@ class SourceCodeTest {
         void trim_start_blank() {
             SourceCode sourceCode = new SourceCode(" a bc");
 
-            Token token = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
-                    true, ONE_CHAR_TOKEN, token1 -> true).fetch(sourceCode).get();
+            Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
+                    true, ONE_CHAR_TOKEN, token1 -> true).scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("b");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -377,8 +377,8 @@ class SourceCodeTest {
         void should_return_empty_content_token_when_start_char_is_at_the_end_of_code() {
             SourceCode sourceCode = new SourceCode(" a ");
 
-            Token token = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
-                    true, ONE_CHAR_TOKEN, token1 -> true).fetch(sourceCode).get();
+            Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
+                    true, ONE_CHAR_TOKEN, token1 -> true).scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -389,8 +389,8 @@ class SourceCodeTest {
         void should_return_all_content_when_got_the_end_of_code() {
             SourceCode sourceCode = new SourceCode(" abc");
 
-            Token token = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
-                    false, UNLIMITED_ENDING, token1 -> true).fetch(sourceCode).get();
+            Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
+                    false, UNLIMITED_ENDING, token1 -> true).scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("abc");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -401,8 +401,8 @@ class SourceCodeTest {
         void should_return_content_when_before_closing_char() {
             SourceCode sourceCode = new SourceCode(" abc");
 
-            Token token = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
-                    false, (c1, c2) -> c2.equals('c'), token1 -> true).fetch(sourceCode).get();
+            Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
+                    false, (c1, c2) -> c2.equals('c'), token1 -> true).scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("ab");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -413,19 +413,19 @@ class SourceCodeTest {
         void should_compare_current_and_last_char() {
             SourceCode sourceCode = new SourceCode(" ab");
 
-            SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
+            SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
                     false, (c1, c2) -> {
                         assertThat(c1).isEqualTo('a');
                         assertThat(c2).isEqualTo('b');
                         return false;
-                    }, token1 -> true).fetch(sourceCode);
+                    }, token1 -> true).scan(sourceCode);
         }
 
         @Test
         void return_empty_when_excluded() {
             SourceCode sourceCode = new SourceCode(" abc");
-            Optional<Token> optionalToken = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(asList("a")),
-                    false, ONE_CHAR_TOKEN, token -> true).fetch(sourceCode);
+            Optional<Token> optionalToken = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(asList("a")),
+                    false, ONE_CHAR_TOKEN, token -> true).scan(sourceCode);
 
             assertThat(optionalToken).isEmpty();
             assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('a');
@@ -435,12 +435,12 @@ class SourceCodeTest {
         void return_empty_when_predicate_false() {
             SourceCode sourceCode = new SourceCode(" abc");
 
-            Optional<Token> optionalToken = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
+            Optional<Token> optionalToken = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
                     false, (c1, c2) -> c2.equals('c'), token -> {
                         assertThat(token.getContent()).isEqualTo("ab");
                         assertThat(token.getPosition()).isEqualTo(1);
                         return false;
-                    }).fetch(sourceCode);
+                    }).scan(sourceCode);
 
             assertThat(optionalToken).isEmpty();
             assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('a');
@@ -450,8 +450,8 @@ class SourceCodeTest {
         void return_by_delimiters() {
             SourceCode sourceCode = new SourceCode(" abc");
 
-            Token token = SourceCode.tokenMatcher(c -> c.equals('a'), new HashSet<>(),
-                    false, new HashSet<>(asList('c'))).fetch(sourceCode).get();
+            Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
+                    false, new HashSet<>(asList('c'))).scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("ab");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -466,10 +466,10 @@ class SourceCodeTest {
         void return_when_match_symbol() {
             TestOperator testOperator = new TestOperator();
             SourceCode sourceCode = new SourceCode(" +=");
-            OperatorMatcher<TestContext, TestNode, TestExpression, TestOperator, TestScanner> operatorMatcher =
+            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestParser> operatorParser =
                     SourceCode.operatorMatcher("+=", () -> testOperator);
 
-            TestOperator testOperator2 = operatorMatcher.fetch(new TestScanner(sourceCode)).get();
+            TestOperator testOperator2 = operatorParser.parse(new TestParser(sourceCode)).get();
 
             assertThat(testOperator2).isSameAs(testOperator);
             assertThat(testOperator2.getPosition()).isEqualTo(1);
@@ -478,25 +478,25 @@ class SourceCodeTest {
         @Test
         void return_empty_when_not_match() {
             SourceCode sourceCode = new SourceCode(" +=");
-            OperatorMatcher<TestContext, TestNode, TestExpression, TestOperator, TestScanner> operatorMatcher =
+            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestParser> operatorParser =
                     SourceCode.operatorMatcher("++", TestOperator::new);
 
-            assertThat(operatorMatcher.fetch(new TestScanner(sourceCode))).isEmpty();
+            assertThat(operatorParser.parse(new TestParser(sourceCode))).isEmpty();
         }
 
         @Test
         void return_empty_when_predicate_false() {
             TestOperator testOperator = new TestOperator();
             SourceCode sourceCode = new SourceCode(" +=");
-            TestScanner scanner = new TestScanner(sourceCode);
+            TestParser scanner = new TestParser(sourceCode);
 
-            OperatorMatcher<TestContext, TestNode, TestExpression, TestOperator, TestScanner> operatorMatcher =
+            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestParser> operatorParser =
                     SourceCode.operatorMatcher("+=", () -> testOperator, scanner1 -> {
                         assertThat(scanner1).isSameAs(scanner);
                         return false;
                     });
 
-            assertThat(operatorMatcher.fetch(scanner)).isEmpty();
+            assertThat(operatorParser.parse(scanner)).isEmpty();
         }
     }
 }

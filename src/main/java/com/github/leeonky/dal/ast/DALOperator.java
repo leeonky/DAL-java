@@ -19,6 +19,26 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         this.needInspect = needInspect;
     }
 
+    public static And operatorAnd() {
+        return new And(Notations.Operators.AND.getLabel());
+    }
+
+    public static Or operatorOr() {
+        return new Or(Notations.Operators.OR.getLabel());
+    }
+
+    public static And keywordAnd() {
+        return new And(Notations.Keywords.AND.getLabel());
+    }
+
+    public static And commaAnd() {
+        return new And(",");
+    }
+
+    public static Or keywordOr() {
+        return new Or(Notations.Keywords.OR.getLabel());
+    }
+
     public boolean isNeedInspect() {
         return needInspect;
     }
