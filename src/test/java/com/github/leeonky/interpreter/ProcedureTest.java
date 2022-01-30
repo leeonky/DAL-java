@@ -61,7 +61,7 @@ class ProcedureTest {
         void return_empty_when_not_match_opening_char() {
             TestProcedure testProcedure = givenProcedureWithCode("[1,2]");
 
-            assertThat(testProcedure.fetchNodeWithElementsBetween('(', ')', n -> fail(), () -> fail())).isEmpty();
+            assertThat(testProcedure.fetchNodeWithElementsBetween('(', () -> fail(), ')', n -> fail())).isEmpty();
             assertThat(testProcedure.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('[');
         }
 
@@ -69,8 +69,8 @@ class ProcedureTest {
         void parse_node() {
             TestProcedure testProcedure = givenProcedureWithCode("(1, 2)");
 
-            TestNode testNode = testProcedure.fetchNodeWithElementsBetween('(', ')', TestNode::new,
-                    () -> testProcedure.getSourceCode().popChar(NO_ESCAPE)).get();
+            TestNode testNode = testProcedure.fetchNodeWithElementsBetween('(', () -> testProcedure.getSourceCode().popChar(NO_ESCAPE), ')', TestNode::new
+            ).get();
 
             assertThat((List<Character>) testNode.getContent()).containsExactly('1', '2');
         }

@@ -4,7 +4,7 @@ import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.interpreter.ExpressionClause;
+import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
@@ -23,11 +23,11 @@ import static java.util.stream.Collectors.toList;
 public class ListNode extends DALNode {
     private List<DALNode> expressions__;
     private List<DALNode> inputExpressions;
-    private List<ExpressionClause<DALRuntimeContext, DALNode>> expressionFactories;
+    private List<Clause<DALRuntimeContext, DALNode>> expressionFactories;
     private final Type type;
     private final boolean multiLineList;
 
-    public ListNode(List<ExpressionClause<DALRuntimeContext, DALNode>> expressionFactories, boolean multiLineList) {
+    public ListNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories, boolean multiLineList) {
         type = guessType(expressionFactories);
         this.expressionFactories = expressionFactories;
         this.multiLineList = multiLineList;
@@ -53,11 +53,11 @@ public class ListNode extends DALNode {
         this.type = type;
     }
 
-    public ListNode(List<ExpressionClause<DALRuntimeContext, DALNode>> expressionFactories) {
+    public ListNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories) {
         this(expressionFactories, false);
     }
 
-    private Type guessType(List<ExpressionClause<DALRuntimeContext, DALNode>> expressionFactories) {
+    private Type guessType(List<Clause<DALRuntimeContext, DALNode>> expressionFactories) {
         if (expressionFactories.size() > 0 && isListEllipsis(expressionFactories.get(expressionFactories.size() - 1)))
             return Type.FIRST_N_ITEMS;
         else if (expressionFactories.size() > 0 && isListEllipsis(expressionFactories.get(0)))
@@ -112,8 +112,8 @@ public class ListNode extends DALNode {
         return true;
     }
 
-    private boolean isListEllipsis(ExpressionClause<DALRuntimeContext, DALNode> expressionClause) {
-        return expressionClause.makeExpression(null) instanceof ListEllipsisNode;
+    private boolean isListEllipsis(Clause<DALRuntimeContext, DALNode> clause) {
+        return clause.makeExpression(null) instanceof ListEllipsisNode;
     }
 
     public enum Type {

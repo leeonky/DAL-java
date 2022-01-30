@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 
+import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_CHAR;
 import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_NODE;
 import static java.util.Arrays.asList;
@@ -185,8 +186,8 @@ class SourceCodeTest {
             @Test
             void return_empty_when_not_start_with_char() {
                 SourceCode code = new SourceCode("ab");
-                Optional<TestNode> optionalTestNode = code.fetchElementNode(BY_CHAR, 'b', 'b',
-                        () -> code.popChar(NO_ESCAPE), TestNode::new);
+                Optional<TestNode> optionalTestNode = code.fetchElementNode(BY_CHAR, 'b', () -> code.popChar(NO_ESCAPE), 'b',
+                        TestNode::new);
                 assertThat(optionalTestNode).isEmpty();
                 assertThat(code.nextPosition()).isEqualTo(0);
             }
@@ -195,8 +196,8 @@ class SourceCodeTest {
             void return_node_match_start_and_end_node_with_correct_position() {
                 SourceCode code = new SourceCode("  a12345b");
 
-                TestNode testNode = code.fetchElementNode(BY_CHAR, 'a', 'b',
-                        () -> code.popChar(NO_ESCAPE), TestNode::new).get();
+                TestNode testNode = code.fetchElementNode(BY_CHAR, 'a', () -> code.popChar(NO_ESCAPE), 'b',
+                        TestNode::new).get();
 
                 assertThat(testNode.getContent()).isEqualTo(asList('1', '2', '3', '4', '5'));
                 assertThat(testNode.getPositionBegin()).isEqualTo(2);
@@ -206,8 +207,8 @@ class SourceCodeTest {
             void raise_error_when_node_not_finish() {
                 SourceCode code = new SourceCode("  a12345");
 
-                assertThat(assertThrows(SyntaxException.class, () -> code.fetchElementNode(BY_CHAR, 'a', 'b',
-                        () -> code.popChar(NO_ESCAPE), TestNode::new))).hasMessageContaining("should end with `b`");
+                assertThat(assertThrows(SyntaxException.class, () -> code.fetchElementNode(BY_CHAR, 'a', () -> code.popChar(NO_ESCAPE), 'b',
+                        TestNode::new))).hasMessageContaining("should end with `b`");
             }
         }
 
@@ -216,8 +217,8 @@ class SourceCodeTest {
             @Test
             void return_empty_when_not_start_with_char() {
                 SourceCode code = new SourceCode("ab");
-                Optional<TestNode> optionalTestNode = code.fetchElementNode(BY_NODE, 'b', 'b',
-                        () -> code.popChar(NO_ESCAPE), TestNode::new);
+                Optional<TestNode> optionalTestNode = code.fetchElementNode(BY_NODE, 'b', () -> code.popChar(NO_ESCAPE), 'b',
+                        TestNode::new);
                 assertThat(optionalTestNode).isEmpty();
                 assertThat(code.nextPosition()).isEqualTo(0);
             }
@@ -226,8 +227,8 @@ class SourceCodeTest {
             void return_node_match_start_and_end_node_with_correct_position() {
                 SourceCode code = new SourceCode("  a1, 2, 3, 4, 5b");
 
-                TestNode testNode = code.fetchElementNode(BY_NODE, 'a', 'b',
-                        () -> new TestNode(code.popChar(NO_ESCAPE)), TestNode::new).get();
+                TestNode testNode = code.fetchElementNode(BY_NODE, 'a', () -> new TestNode(code.popChar(NO_ESCAPE)), 'b',
+                        TestNode::new).get();
 
                 assertThat(testNode.getPositionBegin()).isEqualTo(2);
                 assertThat(testNode.getContent()).isEqualTo(
@@ -242,8 +243,8 @@ class SourceCodeTest {
             void raise_error_when_node_not_finish() {
                 SourceCode code = new SourceCode("  a1, 2, 3, 4, 5");
 
-                SyntaxException exception = assertThrows(SyntaxException.class, () -> code.fetchElementNode(BY_NODE, 'a', 'b',
-                        () -> new TestNode(code.popChar(NO_ESCAPE)), TestNode::new));
+                SyntaxException exception = assertThrows(SyntaxException.class, () -> code.fetchElementNode(BY_NODE, 'a', () -> new TestNode(code.popChar(NO_ESCAPE)), 'b',
+                        TestNode::new));
                 assertThat(exception).hasMessageContaining("should end with `b`");
 
                 assertThat(exception.show("  a1, 2, 3, 4, 5")).isEqualTo("  a1, 2, 3, 4, 5\n                ^");
@@ -253,8 +254,8 @@ class SourceCodeTest {
             void support_tail_comma() {
                 SourceCode code = new SourceCode("  a1, b");
 
-                TestNode testNode = code.fetchElementNode(BY_NODE, 'a', 'b',
-                        () -> new TestNode(code.popChar(NO_ESCAPE)), TestNode::new).get();
+                TestNode testNode = code.fetchElementNode(BY_NODE, 'a', () -> new TestNode(code.popChar(NO_ESCAPE)), 'b',
+                        TestNode::new).get();
 
                 assertThat(testNode.getPositionBegin()).isEqualTo(2);
                 assertThat(testNode.getContent()).isEqualTo(asList(new TestNode('1')));
@@ -467,7 +468,7 @@ class SourceCodeTest {
             TestOperator testOperator = new TestOperator();
             SourceCode sourceCode = new SourceCode(" +=");
             OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
-                    SourceCode.operatorMatcher("+=", () -> testOperator);
+                    notation("+=").operatorParser(() -> testOperator);
 
             TestOperator testOperator2 = operatorParser.parse(new TestProcedure(sourceCode)).get();
 
@@ -479,7 +480,7 @@ class SourceCodeTest {
         void return_empty_when_not_match() {
             SourceCode sourceCode = new SourceCode(" +=");
             OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
-                    SourceCode.operatorMatcher("++", TestOperator::new);
+                    notation("++").operatorParser(TestOperator::new);
 
             assertThat(operatorParser.parse(new TestProcedure(sourceCode))).isEmpty();
         }
@@ -491,7 +492,7 @@ class SourceCodeTest {
             TestProcedure testProcedure = new TestProcedure(sourceCode);
 
             OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
-                    SourceCode.operatorMatcher("+=", () -> testOperator, scanner1 -> {
+                    notation("+=").operatorParser(() -> testOperator, scanner1 -> {
                         assertThat(scanner1).isSameAs(testProcedure);
                         return false;
                     });

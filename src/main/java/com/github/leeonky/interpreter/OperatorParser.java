@@ -24,12 +24,16 @@ public interface OperatorParser<C extends RuntimeContext<C>, N extends Node<C, N
         return procedure -> parse(procedure).orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0));
     }
 
-    default ExpressionClauseParser<C, N, E, O, P> toClause(NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
-        return procedure -> procedure.fetchExpressionClause(this, nodeFactory);
+    default ClauseParser<C, N, E, O, P> clause(NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
+        return procedure -> parse(procedure).map(operator -> procedure.fetchClause(operator, nodeFactory));
     }
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> {
         O parse(P procedure);
+
+        default ClauseParser.Mandatory<C, N, E, O, P> mandatoryClause(NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
+            return procedure -> procedure.fetchClause(parse(procedure), nodeFactory);
+        }
     }
 }

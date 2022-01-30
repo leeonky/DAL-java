@@ -31,28 +31,29 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
     public Optional<N> fetchNodeWithOneChildNodeBetween(
             char opening, NodeParser.Mandatory<C, N, E, O, P> childNodeMandatory, char closing,
             Function<N, N> nodeFactory, String message) {
-        return fetchNodeWithElementsBetween(opening, closing, args -> {
+        return fetchNodeWithElementsBetween(opening, () -> childNodeMandatory.parse(getInstance()), closing, args -> {
             if (args.size() != 1)
                 throw sourceCode.syntaxError(message, -1);
             return nodeFactory.apply(args.get(0));
-        }, () -> childNodeMandatory.parse(getInstance()));
+        });
     }
 
-    public Optional<ExpressionClause<C, N>> fetchExpressionClauseBetween(
+    public Optional<Clause<C, N>> fetchClauseBetween(
             char opening, NodeParser.Mandatory<C, N, E, O, P> childNodeMandatory, char closing,
             BiFunction<N, N, N> biNodeFactory, String message) {
         return fetchNodeWithOneChildNodeBetween(opening, childNodeMandatory, closing, n -> n, message).map(
                 n -> previous -> biNodeFactory.apply(previous, n).setPositionBegin(n.getPositionBegin()));
     }
 
-    public <T> Optional<N> fetchNodeWithElementsBetween(Character opening, char closing, Function<List<T>, N> nodeFactory,
-                                                        Supplier<T> element) {
-        return sourceCode.fetchElementNode(BY_NODE, opening, closing, element, nodeFactory);
+    @Deprecated
+    public <T> Optional<N> fetchNodeWithElementsBetween(Character opening, Supplier<T> element, char closing,
+                                                        Function<List<T>, N> nodeFactory) {
+        return sourceCode.fetchElementNode(BY_NODE, opening, element, closing, nodeFactory);
     }
 
     public Optional<N> fetchString(Character opening, char closing, Function<String, N> nodeFactory,
                                    Map<String, Character> escapeChars) {
-        return sourceCode.fetchElementNode(BY_CHAR, opening, closing, () -> sourceCode.popChar(escapeChars),
+        return sourceCode.fetchElementNode(BY_CHAR, opening, () -> sourceCode.popChar(escapeChars), closing,
                 chars -> nodeFactory.apply(chars.stream().map(String::valueOf).collect(joining())));
     }
 
@@ -95,18 +96,21 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
         return (P) this;
     }
 
-    public Optional<ExpressionClause<C, N>> fetchClauseAfter(
-            String token, ExpressionClauseParser.Mandatory<C, N, E, O, P> clauseFactory) {
+    @Deprecated
+    public Optional<Clause<C, N>> fetchClauseAfter(
+            String token, ClauseParser.Mandatory<C, N, E, O, P> clauseFactory) {
         return sourceCode.popWord(token).map(t -> clauseFactory.parse(getInstance())
                 .map(node -> node.setPositionBegin(t.getPosition())));
     }
 
+    @Deprecated
     public Optional<N> fetchExpression(N left, OperatorParser<C, N, E, O, P> operatorParser,
                                        NodeParser.Mandatory<C, N, E, O, P> rightCompiler) {
         return operatorParser.parse(getInstance()).map(opt -> (OperatorParser.Mandatory<C, N, E, O, P>) _ignore -> opt)
                 .map(mandatoryParser -> fetchExpression(left, mandatoryParser, rightCompiler));
     }
 
+    @Deprecated
     public N fetchExpression(N left, OperatorParser.Mandatory<C, N, E, O, P> mandatoryParser,
                              NodeParser.Mandatory<C, N, E, O, P> rightCompiler) {
         O operator = mandatoryParser.parse(getInstance());
@@ -119,25 +123,26 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
         }
     }
 
-    public ExpressionClause<C, N> fetchExpressionClause(OperatorParser.Mandatory<C, N, E, O, P> mandatoryParser,
-                                                        NodeParser.Mandatory<C, N, E, O, P> rightCompiler) {
-        return fetchExpressionClause(mandatoryParser.parse(getInstance()), rightCompiler);
+    @Deprecated
+    public Clause<C, N> fetchClause(OperatorParser.Mandatory<C, N, E, O, P> mandatoryParser,
+                                    NodeParser.Mandatory<C, N, E, O, P> rightCompiler) {
+        return fetchClause(mandatoryParser.parse(getInstance()), rightCompiler);
     }
 
-    private ExpressionClause<C, N> fetchExpressionClause(O operator, NodeParser.Mandatory<C, N, E, O, P> rightCompiler) {
+    public Clause<C, N> fetchClause(O operator, NodeParser.Mandatory<C, N, E, O, P> rightMandatory) {
         operators.push(operator);
-        N right;
         try {
-            right = rightCompiler.parse(getInstance());
+            N right = rightMandatory.parse(getInstance());
+            return input -> expressionConstructor.newInstance(input, operator, right).adjustOperatorOrder(expressionConstructor);
         } finally {
             operators.pop();
         }
-        return input -> expressionConstructor.newInstance(input, operator, right).adjustOperatorOrder(expressionConstructor);
     }
 
-    public Optional<ExpressionClause<C, N>> fetchExpressionClause(OperatorParser<C, N, E, O, P> operatorParser,
-                                                                  NodeParser.Mandatory<C, N, E, O, P> rightCompiler) {
-        return operatorParser.parse(getInstance()).map(operator -> fetchExpressionClause(operator, rightCompiler));
+    @Deprecated
+    public Optional<Clause<C, N>> fetchClause(OperatorParser<C, N, E, O, P> operatorParser,
+                                              NodeParser.Mandatory<C, N, E, O, P> rightCompiler) {
+        return operatorParser.parse(getInstance()).map(operator -> fetchClause(operator, rightCompiler));
     }
 
     public <LE> Optional<List<LE>> fetchRow(Function<Integer, LE> factory) {

@@ -3,7 +3,7 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.interpreter.ExpressionClause;
+import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
@@ -78,7 +78,7 @@ public class TableNode extends DALNode {
     }
 
     private ListNode transformToListNode(DALOperator operator) {
-        Stream<ExpressionClause<DALRuntimeContext, DALNode>> rowExpressionClauses = rows.stream().map(rowNode -> rowNode.toExpressionClause(operator));
+        Stream<Clause<DALRuntimeContext, DALNode>> rowExpressionClauses = rows.stream().map(rowNode -> rowNode.toExpressionClause(operator));
         return hasRowIndex ? new ListNode(rowExpressionClauses.map(rowNode -> rowNode.makeExpression(null))
                 .collect(toList()), true, ListNode.Type.FIRST_N_ITEMS)
                 : new ListNode(rowExpressionClauses.collect(toList()), true);

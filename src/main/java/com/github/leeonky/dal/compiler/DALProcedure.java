@@ -6,6 +6,7 @@ import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.ast.SequenceNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.ExpressionConstructor;
+import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.Procedure;
 import com.github.leeonky.interpreter.SourceCode;
 
@@ -26,6 +27,16 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
 
     public Optional<DALNode> disableCommaAnd(Supplier<Optional<DALNode>> nodeFactory) {
         return commaAnd(false, nodeFactory);
+    }
+
+    public static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> disableCommaAnd(
+            NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
+        return procedure -> procedure.commaAnd(false, () -> nodeParser.parse(procedure));
+    }
+
+    public static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> enableCommaAnd(
+            NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
+        return procedure -> procedure.commaAnd(true, () -> nodeParser.parse(procedure));
     }
 
     public Optional<DALNode> enableCommaAnd(Supplier<Optional<DALNode>> nodeFactory) {

@@ -1,9 +1,12 @@
 package com.github.leeonky.interpreter;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_NODE;
 import static java.util.Optional.empty;
 
 public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
@@ -16,11 +19,13 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
                 .map(p -> p.parse(procedure)).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 
-    Optional<N> parse(P procedure);
-
-    default NodeParser<C, N, E, O, P> map(Function<N, N> mapping) {
-        return procedure -> parse(procedure).map(mapping);
+    static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> lazy(
+            Supplier<NodeParser<C, N, E, O, P>> parser) {
+        return procedure -> parser.get().parse(procedure);
     }
+
+    Optional<N> parse(P procedure);
 
     default Mandatory<C, N, E, O, P> or(Mandatory<C, N, E, O, P> nodeFactory) {
         return procedure -> parse(procedure).orElseGet(() -> nodeFactory.parse(procedure));
@@ -35,27 +40,32 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
 
         N parse(P procedure);
 
+        @Deprecated
         default Mandatory<C, N, E, O, P> map(Function<N, N> mapping) {
             return procedure -> mapping.apply(parse(procedure));
         }
 
-        default Mandatory<C, N, E, O, P> withClause(ExpressionClauseParser.Mandatory<C, N, E, O, P> expressionClauseMandatory) {
+        default Mandatory<C, N, E, O, P> mandatoryNode(ClauseParser.Mandatory<C, N, E, O, P> expressionClauseMandatory) {
             return procedure -> {
                 N node = parse(procedure);
                 return expressionClauseMandatory.parse(procedure).makeExpression(node);
             };
         }
 
-        default Mandatory<C, N, E, O, P> recursive(ExpressionClauseParser<C, N, E, O, P> expressionClauseParser) {
+        default Mandatory<C, N, E, O, P> recursive(ClauseParser<C, N, E, O, P> clauseParser) {
             return procedure -> {
                 N node = parse(procedure);
-                Optional<ExpressionClause<C, N>> optionalNode = expressionClauseParser.parse(procedure);
+                Optional<Clause<C, N>> optionalNode = clauseParser.parse(procedure);
                 while (optionalNode.isPresent()) {
                     node = optionalNode.get().makeExpression(node);
-                    optionalNode = expressionClauseParser.parse(procedure);
+                    optionalNode = clauseParser.parse(procedure);
                 }
                 return node;
             };
+        }
+
+        default NodeParser<C, N, E, O, P> multiplBetween(char opening, char closing, Function<List<N>, N> nodeFactory) {
+            return procedure -> procedure.getSourceCode().fetchElementNode(BY_NODE, opening, () -> parse(procedure), closing, nodeFactory);
         }
     }
 }

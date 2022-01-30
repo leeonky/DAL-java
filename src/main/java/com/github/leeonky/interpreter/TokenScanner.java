@@ -17,7 +17,7 @@ public interface TokenScanner<C extends RuntimeContext<C>, N extends Node<C, N>,
                 mapper.apply(token).setPositionBegin(token.getPosition()));
     }
 
-    default ExpressionClauseParser<C, N, E, O, P> toClauseMatcher(BiFunction<Token, N, N> mapper) {
+    default ClauseParser<C, N, E, O, P> clauseParser(BiFunction<Token, N, N> mapper) {
         return procedure -> scan(procedure.getSourceCode()).map(token -> previous ->
                 mapper.apply(token, previous).setPositionBegin(token.getPosition()));
     }

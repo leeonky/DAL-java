@@ -15,10 +15,11 @@ import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.*;
 import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.Notations.Operators;
-import static com.github.leeonky.interpreter.ExpressionClauseParser.Mandatory.after;
-import static com.github.leeonky.interpreter.ExpressionClauseParser.oneOf;
+import static com.github.leeonky.interpreter.ClauseParser.Mandatory.after;
+import static com.github.leeonky.interpreter.ClauseParser.oneOf;
 import static com.github.leeonky.interpreter.FunctionUtil.*;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
+import static com.github.leeonky.interpreter.NodeParser.lazy;
 import static com.github.leeonky.interpreter.NodeParser.oneOf;
 import static com.github.leeonky.interpreter.OperatorParser.oneOf;
 import static java.util.Collections.emptyList;
@@ -93,10 +94,10 @@ public class Compiler {
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> PROPERTY_CHAIN,
             OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION, JUDGEMENT_EXPRESSION_OPERAND;
 
-    ExpressionClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            DOT_PROPERTY = Tokens.DOT_PROPERTY.toClauseMatcher((token, previous) -> new PropertyNode(previous,
+    ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+            DOT_PROPERTY = Tokens.DOT_PROPERTY.clauseParser((token, previous) -> new PropertyNode(previous,
             token.getContentOrThrow("property is not finished"), DOT)),
-            BRACKET_PROPERTY = procedure -> procedure.fetchExpressionClauseBetween('[', LIST_INDEX_OR_MAP_KEY, ']',
+            BRACKET_PROPERTY = procedure -> procedure.fetchClauseBetween('[', LIST_INDEX_OR_MAP_KEY, ']',
                     (previous, node) -> new PropertyNode(previous, ((ConstNode) node).getValue(), BRACKET),
                     "should given one property or array index in `[]`"),
             EXPLICIT_PROPERTY = oneOf(DOT_PROPERTY, BRACKET_PROPERTY),
@@ -105,23 +106,14 @@ public class Compiler {
             BINARY_OPERATOR_EXPRESSION,
             SCHEMA_EXPRESSION;
 
-    private ExpressionClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
-            DALProcedure> shortJudgementClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
-            DALOperator, DALProcedure> mandatoryParser) {
-        return ((ExpressionClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>) procedure ->
-                procedure.fetchClauseAfter(Notations.IS_s, procedure1 -> schemaJudgement(procedure, SCHEMA_CLAUSE.parse(procedure))))
-                .or(procedure -> procedure.fetchExpressionClause(mandatoryParser, JUDGEMENT_EXPRESSION_OPERAND));
+    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
+            DALProcedure> judgementClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
+            DALOperator, DALProcedure> operatorMandatory) {
+        return after(Notations.IS_s, SCHEMA_CLAUSE).concat(JUDGEMENT_OPERATORS.clause(JUDGEMENT_EXPRESSION_OPERAND))
+                .or(operatorMandatory.mandatoryClause(JUDGEMENT_EXPRESSION_OPERAND));
     }
 
-    private ExpressionClause<DALRuntimeContext, DALNode> schemaJudgement(
-            Procedure<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> procedure,
-            ExpressionClause<DALRuntimeContext, DALNode> expressionClause) {
-        return procedure.fetchExpressionClause(JUDGEMENT_OPERATORS, JUDGEMENT_EXPRESSION_OPERAND)
-                .<ExpressionClause<DALRuntimeContext, DALNode>>map(clause -> previous ->
-                        clause.makeExpression(expressionClause.makeExpression(previous))).orElse(expressionClause);
-    }
-
-    private static final ExpressionClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+    private static final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SCHEMA_CLAUSE = new SchemaClauseMandatory();
 
     public Compiler() {
@@ -133,18 +125,20 @@ public class Compiler {
                 ParenthesesNode::new, "expect a value or expression"));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IDENTITY_PROPERTY);
         PROPERTY_CHAIN = procedure -> PROPERTY.or("expect a object property").recursive(EXPLICIT_PROPERTY).parse(procedure);
-        OBJECT = procedure -> procedure.disableCommaAnd(() -> procedure.fetchNodeWithElementsBetween('{', '}', ObjectNode::new,
-                () -> PROPERTY_CHAIN.withClause(shortJudgementClause(JUDGEMENT_OPERATORS.or("expect operator `:` or `=`"))).parse(procedure)));
+        OBJECT = lazy(() -> DALProcedure.disableCommaAnd(
+                PROPERTY_CHAIN.mandatoryNode(judgementClause(JUDGEMENT_OPERATORS.or("expect operator `:` or `=`")))
+                        .multiplBetween('{', '}', ObjectNode::new)));
         ELEMENT_ELLIPSIS = Notations.Operators.ELEMENT_ELLIPSIS.nodeMatcher(token -> new ListEllipsisNode());
-        LIST = procedure -> procedure.disableCommaAnd(() -> procedure.fetchNodeWithElementsBetween('[', ']', ListNode::new,
-                () -> ELEMENT_ELLIPSIS.parse(procedure).<ExpressionClause<DALRuntimeContext, DALNode>>map(node -> p -> node).orElseGet(() ->
-                        shortJudgementClause(JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR)).parse(procedure))));
+        LIST = procedure -> procedure.disableCommaAnd(() -> procedure.fetchNodeWithElementsBetween('[',
+                () -> ELEMENT_ELLIPSIS.parse(procedure).<Clause<DALRuntimeContext, DALNode>>map(node -> p -> node).orElseGet(() ->
+                        judgementClause(JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR)).parse(procedure)), ']', ListNode::new
+        ));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         UNARY_OPERATOR_EXPRESSION = procedure -> procedure.fetchExpression(null, UNARY_OPERATORS, OPERAND);
         OPERAND = UNARY_OPERATOR_EXPRESSION.or(oneOf(CONST, PROPERTY, PARENTHESES, INPUT)
                 .or("expect a value or expression").recursive(EXPLICIT_PROPERTY).map(DALNode::avoidListMapping));
-        BINARY_ARITHMETIC_EXPRESSION = BINARY_ARITHMETIC_OPERATORS.toClause(OPERAND);
-        BINARY_JUDGEMENT_EXPRESSION = JUDGEMENT_OPERATORS.toClause(JUDGEMENT.or(OPERAND));
+        BINARY_ARITHMETIC_EXPRESSION = BINARY_ARITHMETIC_OPERATORS.clause(OPERAND);
+        BINARY_JUDGEMENT_EXPRESSION = JUDGEMENT_OPERATORS.clause(JUDGEMENT.or(OPERAND));
         BINARY_OPERATOR_EXPRESSION = oneOf(BINARY_ARITHMETIC_EXPRESSION, BINARY_JUDGEMENT_EXPRESSION);
         ARITHMETIC_EXPRESSION = OPERAND.recursive(BINARY_ARITHMETIC_EXPRESSION);
         JUDGEMENT_EXPRESSION_OPERAND = JUDGEMENT.or(ARITHMETIC_EXPRESSION);
@@ -155,12 +149,12 @@ public class Compiler {
         EXPRESSION = OPERAND.recursive(oneOf(BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION));
     }
 
-    private ExpressionClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> which(
+    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> which(
             NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeFactory) {
         return procedure -> previous -> ((SchemaExpression) previous).which(nodeFactory.parse(procedure));
     }
 
-    private ExpressionClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> omitWhich(
+    private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> omitWhich(
             NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
         return procedure -> nodeParser.parse(procedure).map(node -> previous ->
                 ((SchemaExpression) previous).omitWhich(node));
@@ -212,7 +206,7 @@ public class Compiler {
         protected List<RowNode> getRowNodes(DALProcedure procedure, List<HeaderNode> headers) {
             return allOptional(() -> {
                 Optional<Integer> index = getRowIndex(procedure);
-                Optional<ExpressionClause<DALRuntimeContext, DALNode>> rowSchemaClause = procedure.fetchClauseAfter(Notations.IS_s, SCHEMA_CLAUSE);
+                Optional<Clause<DALRuntimeContext, DALNode>> rowSchemaClause = procedure.fetchClauseAfter(Notations.IS_s, SCHEMA_CLAUSE);
                 Optional<DALOperator> rowOperator = JUDGEMENT_OPERATORS.parse(procedure);
                 return FunctionUtil.oneOf(
                         () -> procedure.fetchNodeBetween("|", "|", ELEMENT_ELLIPSIS).map(Collections::singletonList),
@@ -233,7 +227,7 @@ public class Compiler {
     private DALNode getRowCell(DALProcedure dalProcedure, Optional<DALOperator> rowOperator, HeaderNode headerNode) {
         int cellPosition = dalProcedure.getSourceCode().nextPosition();
         return oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL).or(ROW_WILDCARD.or(
-                shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(), procedure -> rowOperator)
+                judgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(), procedure -> rowOperator)
                         .or(DEFAULT_JUDGEMENT_OPERATOR)).input(headerNode.getProperty()))).parse(dalProcedure)
                 .setPositionBegin(cellPosition);
     }
@@ -269,7 +263,7 @@ public class Compiler {
             return procedure.getSourceCode().tryFetch(() -> when(procedure.getSourceCode().popWord("|").isPresent()
                     && procedure.getSourceCode().popWord(">>").isPresent()).optional(() -> {
                 List<Optional<Integer>> rowIndexes = new ArrayList<>();
-                List<Optional<ExpressionClause<DALRuntimeContext, DALNode>>> rowSchemaClauses = new ArrayList<>();
+                List<Optional<Clause<DALRuntimeContext, DALNode>>> rowSchemaClauses = new ArrayList<>();
                 List<Optional<DALOperator>> rowOperators = procedure.fetchRow(row -> {
                     rowIndexes.add(getRowIndex(procedure));
                     rowSchemaClauses.add(procedure.fetchClauseAfter(Notations.IS_s, SCHEMA_CLAUSE));
@@ -282,7 +276,7 @@ public class Compiler {
         }
 
         private List<RowNode> getRowNodes(DALProcedure dalProcedure, List<HeaderNode> headerNodes,
-                                          List<Optional<ExpressionClause<DALRuntimeContext, DALNode>>> rowSchemaClauses,
+                                          List<Optional<Clause<DALRuntimeContext, DALNode>>> rowSchemaClauses,
                                           List<Optional<DALOperator>> rowOperators, List<Optional<Integer>> rowIndexes) {
             return FunctionUtil.mapWithIndex(getCells(dalProcedure, headerNodes, rowOperators), (i, row) ->
                     new RowNode(rowIndexes.get(i), rowSchemaClauses.get(i), rowOperators.get(i), row)).collect(toList());

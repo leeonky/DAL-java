@@ -51,21 +51,6 @@ public class SourceCode {
         this.code = code;
     }
 
-    @Deprecated
-    public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> OperatorParser<C, N, E, O, S> operatorMatcher(
-            String symbol, Supplier<O> factory, Predicate<S> matcher) {
-        return procedure -> procedure.getSourceCode().popWord(symbol, () -> matcher.test(procedure))
-                .map(token -> factory.get().setPosition(token.getPosition()));
-    }
-
-    @Deprecated
-    public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> OperatorParser<C, N, E, O, S> operatorMatcher(
-            String symbol, Supplier<O> factory) {
-        return operatorMatcher(symbol, factory, s -> true);
-    }
-
     private int seek(int seek) {
         int position = this.position;
         this.position += seek;
@@ -123,7 +108,7 @@ public class SourceCode {
     }
 
     public <T, N extends Node<C, N>, C extends RuntimeContext<C>> Optional<N> fetchElementNode(
-            FetchBy fetchBy, Character opening, char closing, Supplier<T> element, Function<List<T>, N> nodeFactory) {
+            FetchBy fetchBy, Character opening, Supplier<T> element, char closing, Function<List<T>, N> nodeFactory) {
         return when(whenFirstChar(opening::equals)).optional(() -> {
             int startPosition = seek(1);
             List<T> elements = new ArrayList<>();
