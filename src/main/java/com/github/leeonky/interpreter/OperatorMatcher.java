@@ -8,8 +8,8 @@ import static java.util.Optional.empty;
 public interface OperatorMatcher<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
         O extends Operator<C, N, O>, S extends Scanner<C, N, E, O, S>> {
     static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, T extends Scanner<C, N, E, O, T>> OperatorMatcher<C, N, E, O, T> oneOf(
-            OperatorMatcher<C, N, E, O, T>... matchers) {
+            O extends Operator<C, N, O>, S extends Scanner<C, N, E, O, S>> OperatorMatcher<C, N, E, O, S> oneOf(
+            OperatorMatcher<C, N, E, O, S>... matchers) {
         return scanner -> Stream.of(matchers)
                 .map(p -> p.fetch(scanner)).filter(Optional::isPresent).findFirst().orElse(empty());
     }

@@ -7,26 +7,26 @@ import java.util.stream.Stream;
 import static java.util.Optional.empty;
 
 public interface NodeMatcher<C extends RuntimeContext<C>, N extends Node<C, N>,
-        E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, T extends Scanner<C, N, E, O, T>> {
+        E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, S extends Scanner<C, N, E, O, S>> {
 
     static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, T extends Scanner<C, N, E, O, T>> NodeMatcher<C, N, E, O, T> oneOf(
-            NodeMatcher<C, N, E, O, T> matcher, NodeMatcher<C, N, E, O, T>... matchers) {
-        return parser -> Stream.concat(Stream.of(matcher), Stream.of(matchers))
-                .map(p -> p.fetch(parser)).filter(Optional::isPresent).findFirst().orElse(empty());
+            O extends Operator<C, N, O>, S extends Scanner<C, N, E, O, S>> NodeMatcher<C, N, E, O, S> oneOf(
+            NodeMatcher<C, N, E, O, S> matcher, NodeMatcher<C, N, E, O, S>... matchers) {
+        return scanner -> Stream.concat(Stream.of(matcher), Stream.of(matchers))
+                .map(p -> p.fetch(scanner)).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 
-    Optional<N> fetch(T scanner);
+    Optional<N> fetch(S scanner);
 
-    default NodeMatcher<C, N, E, O, T> map(Function<N, N> mapping) {
-        return parser -> fetch(parser).map(mapping);
+    default NodeMatcher<C, N, E, O, S> map(Function<N, N> mapping) {
+        return scanner -> fetch(scanner).map(mapping);
     }
 
-    default NodeFactory<C, N, E, O, T> or(NodeFactory<C, N, E, O, T> nodeFactory) {
+    default NodeFactory<C, N, E, O, S> or(NodeFactory<C, N, E, O, S> nodeFactory) {
         return scanner -> fetch(scanner).orElseGet(() -> nodeFactory.fetch(scanner));
     }
 
-    default NodeFactory<C, N, E, O, T> or(String message) {
+    default NodeFactory<C, N, E, O, S> or(String message) {
         return scanner -> fetch(scanner).orElseThrow(() -> scanner.getSourceCode().syntaxError(message, 0));
     }
 }
