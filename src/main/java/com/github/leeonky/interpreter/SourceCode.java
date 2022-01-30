@@ -55,7 +55,7 @@ public class SourceCode {
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, T extends Scanner<C, N, E, O, T>> OperatorMatcher<C, N, E, O, T> operatorMatcher(
             String symbol, Supplier<O> factory, Predicate<T> matcher) {
-        return tokenParser -> tokenParser.getSourceCode().popWord(symbol, () -> matcher.test(tokenParser))
+        return scanner -> scanner.getSourceCode().popWord(symbol, () -> matcher.test(scanner))
                 .map(token -> factory.get().setPosition(token.getPosition()));
     }
 
@@ -178,7 +178,7 @@ public class SourceCode {
             }
         };
 
-        protected void afterFetchElement(SourceCode tokenParser) {
+        protected void afterFetchElement(SourceCode sourceCode) {
         }
 
         protected boolean isClosing(char closing, SourceCode sourceCode) {

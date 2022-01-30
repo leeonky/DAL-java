@@ -8,8 +8,8 @@ public interface TokenFactory {
     default <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, T extends Scanner<C, N, E, O, T>> NodeFactory<C, N, E, O, T> map(
             Function<Token, N> mapper) {
-        return parser -> {
-            Token token = fetch(parser.getSourceCode());
+        return scanner -> {
+            Token token = fetch(scanner.getSourceCode());
             return mapper.apply(token).setPositionBegin(token.getPosition());
         };
     }

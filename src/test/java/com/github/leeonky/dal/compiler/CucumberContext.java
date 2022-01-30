@@ -59,14 +59,14 @@ public class CucumberContext {
 
     private static NodeMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALScanner> optional(
             NodeFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALScanner> nodeFactory) {
-        return parser -> Optional.ofNullable(nodeFactory.fetch(parser));
+        return scanner -> Optional.ofNullable(nodeFactory.fetch(scanner));
     }
 
     public static CucumberContext INSTANCE = new CucumberContext();
     DAL dal = new DAL();
 
     Object inputObject = null;
-    DALScanner tokenParser = null;
+    DALScanner scanner = null;
     String sourceCodeString = null;
     InterpreterException interpreterException;
     DALNode node = null;
@@ -85,7 +85,7 @@ public class CucumberContext {
     }
 
     public void giveDalSourceCode(String code) {
-        tokenParser = new DALScanner(new SourceCode(sourceCodeString = parseTabAndSpace(code)),
+        scanner = new DALScanner(new SourceCode(sourceCodeString = parseTabAndSpace(code)),
                 dal.getRuntimeContextBuilder().build(null), DALExpression::new);
     }
 
@@ -108,7 +108,7 @@ public class CucumberContext {
     }
 
     public void failedToGetNodeWithMessage(String factory, String message) {
-        interpreterException = assertThrows(InterpreterException.class, () -> matcherMap.get(factory).fetch(tokenParser));
+        interpreterException = assertThrows(InterpreterException.class, () -> matcherMap.get(factory).fetch(scanner));
         shouldHasDalMessage(message);
     }
 
@@ -118,7 +118,7 @@ public class CucumberContext {
 
     public void compileAndAssertNode(String factory, String assertion) {
         try {
-            node = matcherMap.get(factory).fetch(tokenParser).orElse(null);
+            node = matcherMap.get(factory).fetch(scanner).orElse(null);
         } catch (InterpreterException e) {
             System.err.println(e.show(sourceCodeString));
             throw e;
@@ -161,7 +161,7 @@ public class CucumberContext {
     }
 
     public void ignoreNodeBy(String factory) {
-        matcherMap.get(factory).fetch(tokenParser);
+        matcherMap.get(factory).fetch(scanner);
     }
 
     public void registerSchema(String schemaCode) {

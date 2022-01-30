@@ -13,12 +13,12 @@ public interface TokenMatcher<C extends RuntimeContext<C>, N extends Node<C, N>,
     }
 
     default NodeMatcher<C, N, E, O, T> nodeMatcher(Function<Token, N> mapper) {
-        return parser -> fetch(parser.getSourceCode()).map(token ->
+        return scanner -> fetch(scanner.getSourceCode()).map(token ->
                 mapper.apply(token).setPositionBegin(token.getPosition()));
     }
 
     default ExpressionClauseMatcher<C, N, E, O, T> toClauseMatcher(BiFunction<Token, N, N> mapper) {
-        return parser -> fetch(parser.getSourceCode()).map(token -> previous ->
+        return scanner -> fetch(scanner.getSourceCode()).map(token -> previous ->
                 mapper.apply(token, previous).setPositionBegin(token.getPosition()));
     }
 }

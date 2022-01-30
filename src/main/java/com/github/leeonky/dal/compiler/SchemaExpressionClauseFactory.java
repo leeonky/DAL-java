@@ -22,11 +22,11 @@ public class SchemaExpressionClauseFactory implements ExpressionClauseFactory<DA
         return fetchSchemaClause(scanner, 0);
     }
 
-    private ExpressionClause<DALRuntimeContext, DALNode> fetchSchemaClause(DALScanner tokenParser, int dimension) {
+    private ExpressionClause<DALRuntimeContext, DALNode> fetchSchemaClause(DALScanner scanner, int dimension) {
         if (dimension > 1)
-            throw tokenParser.getSourceCode().syntaxError("Not support multidimensional schema", 0);
-        return tokenParser.fetchBetween("[", "]", () -> fetchSchemaClause(tokenParser, dimension + 1)).orElseGet(() -> {
-            List<SchemaNode> schemaNodes = tokenParser.fetchNodesSplitBy("/", SCHEMA).stream()
+            throw scanner.getSourceCode().syntaxError("Not support multidimensional schema", 0);
+        return scanner.fetchBetween("[", "]", () -> fetchSchemaClause(scanner, dimension + 1)).orElseGet(() -> {
+            List<SchemaNode> schemaNodes = scanner.fetchNodesSplitBy("/", SCHEMA).stream()
                     .map(SchemaNode.class::cast).collect(Collectors.toList());
             return input -> new SchemaExpression(input, schemaNodes, dimension);
         });

@@ -29,7 +29,7 @@ public class HeaderNode extends DALNode {
     }
 
     public OperatorMatcher<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALScanner> headerOperator() {
-        return tokenParser -> operator;
+        return scanner -> operator;
     }
 
     public Comparator<Object> getListComparator(DALRuntimeContext context) {

@@ -20,34 +20,34 @@ class ScannerTest {
 
         @Test
         void return_empty_when_not_match_opening_char() {
-            TestScanner tokenParser = givenTokenParserWithCode("[1]");
+            TestScanner scanner = givenScannerWithCode("[1]");
 
-            assertThat(tokenParser.fetchNodeWithOneChildNodeBetween('(', ')', n -> fail(), n -> fail(), "")).isEmpty();
-            assertThat(tokenParser.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('[');
+            assertThat(scanner.fetchNodeWithOneChildNodeBetween('(', ')', n -> fail(), n -> fail(), "")).isEmpty();
+            assertThat(scanner.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('[');
         }
 
         @Test
         void throw_error_when_more_than_one_child() {
-            TestScanner tokenParser = givenTokenParserWithCode("(1, 2)");
+            TestScanner testScanner = givenScannerWithCode("(1, 2)");
 
-            assertThat(assertThrows(SyntaxException.class, () -> tokenParser.fetchNodeWithOneChildNodeBetween('(', ')', n -> fail(),
-                    parser -> {
-                        parser.getSourceCode().popChar(NO_ESCAPE);
+            assertThat(assertThrows(SyntaxException.class, () -> testScanner.fetchNodeWithOneChildNodeBetween('(', ')', n -> fail(),
+                    scanner -> {
+                        scanner.getSourceCode().popChar(NO_ESCAPE);
                         return new TestNode(null);
                     }, "error"))).hasMessageContaining("error");
         }
 
         @Test
         void parse_node() {
-            TestScanner tokenParser = givenTokenParserWithCode("(1)");
+            TestScanner testScanner = givenScannerWithCode("(1)");
             TestNode child = new TestNode(null);
             TestNode parent = new TestNode(null);
 
-            assertThat(tokenParser.fetchNodeWithOneChildNodeBetween('(', ')', n -> {
+            assertThat(testScanner.fetchNodeWithOneChildNodeBetween('(', ')', n -> {
                 assertThat(n).isSameAs(child);
                 return parent;
-            }, parser -> {
-                assertThat(parser.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('1');
+            }, scanner -> {
+                assertThat(scanner.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('1');
                 return child;
             }, "")).hasValue(parent);
 
@@ -59,18 +59,18 @@ class ScannerTest {
 
         @Test
         void return_empty_when_not_match_opening_char() {
-            TestScanner tokenParser = givenTokenParserWithCode("[1,2]");
+            TestScanner testScanner = givenScannerWithCode("[1,2]");
 
-            assertThat(tokenParser.fetchNodeWithElementsBetween('(', ')', n -> fail(), () -> fail())).isEmpty();
-            assertThat(tokenParser.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('[');
+            assertThat(testScanner.fetchNodeWithElementsBetween('(', ')', n -> fail(), () -> fail())).isEmpty();
+            assertThat(testScanner.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('[');
         }
 
         @Test
         void parse_node() {
-            TestScanner tokenParser = givenTokenParserWithCode("(1, 2)");
+            TestScanner testScanner = givenScannerWithCode("(1, 2)");
 
-            TestNode testNode = tokenParser.fetchNodeWithElementsBetween('(', ')', TestNode::new,
-                    () -> tokenParser.getSourceCode().popChar(NO_ESCAPE)).get();
+            TestNode testNode = testScanner.fetchNodeWithElementsBetween('(', ')', TestNode::new,
+                    () -> testScanner.getSourceCode().popChar(NO_ESCAPE)).get();
 
             assertThat((List<Character>) testNode.getContent()).containsExactly('1', '2');
         }
@@ -81,24 +81,24 @@ class ScannerTest {
 
         @Test
         void return_empty_when_not_match_opening_char() {
-            TestScanner tokenParser = givenTokenParserWithCode("'a'");
+            TestScanner scanner = givenScannerWithCode("'a'");
 
-            assertThat(tokenParser.fetchString('"', '"', s -> fail(), new HashMap<>())).isEmpty();
-            assertThat(tokenParser.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('\'');
+            assertThat(scanner.fetchString('"', '"', s -> fail(), new HashMap<>())).isEmpty();
+            assertThat(scanner.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('\'');
         }
 
         @Test
         void return_empty_string() {
-            TestScanner tokenParser = givenTokenParserWithCode(" '\"");
-            TestNode actual = tokenParser.fetchString('\'', '"', TestNode::new, new HashMap<>()).get();
+            TestScanner scanner = givenScannerWithCode(" '\"");
+            TestNode actual = scanner.fetchString('\'', '"', TestNode::new, new HashMap<>()).get();
             assertThat(actual.getContent()).isEqualTo("");
             assertThat(actual.getPositionBegin()).isEqualTo(1);
         }
 
         @Test
         void escape_char() {
-            TestScanner tokenParser = givenTokenParserWithCode(" 'a\\x'");
-            TestNode actual = tokenParser.fetchString('\'', '\'', TestNode::new, new HashMap<String, Character>() {{
+            TestScanner scanner = givenScannerWithCode(" 'a\\x'");
+            TestNode actual = scanner.fetchString('\'', '\'', TestNode::new, new HashMap<String, Character>() {{
                 put("\\x", 'y');
             }}).get();
             assertThat(actual.getContent()).isEqualTo("ay");
@@ -107,9 +107,9 @@ class ScannerTest {
 
         @Test
         void raise_error_when_not_finish() {
-            TestScanner tokenParser = givenTokenParserWithCode(" 'a");
+            TestScanner scanner = givenScannerWithCode(" 'a");
             SyntaxException syntaxException = assertThrows(SyntaxException.class, () ->
-                    tokenParser.fetchString('\'', '\'', TestNode::new, new HashMap<>()));
+                    scanner.fetchString('\'', '\'', TestNode::new, new HashMap<>()));
             assertThat(syntaxException).hasMessageContaining("should end with `'`");
 
             assertThat(syntaxException.show(" 'a")).isEqualTo(" 'a\n   ^");
@@ -121,68 +121,68 @@ class ScannerTest {
 
         @Test
         void return_empty_when_not_match_opening_char() {
-            TestScanner tokenParser = givenTokenParserWithCode("'a'");
+            TestScanner scanner = givenScannerWithCode("'a'");
 
-            assertThat(tokenParser.fetchBetween("(", ")", () -> fail())).isEmpty();
-            assertThat(tokenParser.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('\'');
+            assertThat(scanner.fetchBetween("(", ")", () -> fail())).isEmpty();
+            assertThat(scanner.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('\'');
         }
 
         @Test
         void return_object_between_opening_and_closing() {
-            TestScanner tokenParser = givenTokenParserWithCode("(a)");
+            TestScanner scanner = givenScannerWithCode("(a)");
 
-            assertThat(tokenParser.fetchBetween("(", ")", () ->
-                    tokenParser.getSourceCode().popChar(NO_ESCAPE))).hasValue('a');
-            assertThat(tokenParser.getSourceCode().isEndOfLine()).isTrue();
+            assertThat(scanner.fetchBetween("(", ")", () ->
+                    scanner.getSourceCode().popChar(NO_ESCAPE))).hasValue('a');
+            assertThat(scanner.getSourceCode().isEndOfLine()).isTrue();
         }
 
         @Test
         void raise_error_when_no_closing() {
-            TestScanner tokenParser = givenTokenParserWithCode("(a");
+            TestScanner scanner = givenScannerWithCode("(a");
 
-            assertThat(assertThrows(SyntaxException.class, () -> tokenParser.fetchBetween("(", ")", () ->
-                    tokenParser.getSourceCode().popChar(NO_ESCAPE)))).hasMessageContaining("should end with `)`");
+            assertThat(assertThrows(SyntaxException.class, () -> scanner.fetchBetween("(", ")", () ->
+                    scanner.getSourceCode().popChar(NO_ESCAPE)))).hasMessageContaining("should end with `)`");
         }
     }
 
     @Nested
     class FetchNodeBetween {
 
-        public Optional<TestNode> oneCharNode(TestScanner parser) {
-            return Optional.of(new TestNode(parser.getSourceCode().popChar(NO_ESCAPE)));
+        public Optional<TestNode> oneCharNode(TestScanner scanner) {
+            return Optional.of(new TestNode(scanner.getSourceCode().popChar(NO_ESCAPE)));
         }
 
         @Test
         void return_empty_when_not_match_opening_char() {
-            TestScanner tokenParser = givenTokenParserWithCode("'a'");
+            TestScanner testScanner = givenScannerWithCode("'a'");
 
-            assertThat(tokenParser.fetchNodeBetween("(", ")", this::oneCharNode)).isEmpty();
-            assertThat(tokenParser.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('\'');
+            assertThat(testScanner.fetchNodeBetween("(", ")", this::oneCharNode)).isEmpty();
+            assertThat(testScanner.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('\'');
         }
 
         @Test
         void return_object_between_opening_and_closing() {
-            TestScanner tokenParser = givenTokenParserWithCode("(a)");
+            TestScanner testScanner = givenScannerWithCode("(a)");
 
-            TestNode testNode = tokenParser.fetchNodeBetween("(", ")", this::oneCharNode).get();
+            TestNode testNode = testScanner.fetchNodeBetween("(", ")", this::oneCharNode).get();
             assertThat(testNode.getContent()).isEqualTo('a');
-            assertThat(tokenParser.getSourceCode().isEndOfLine()).isTrue();
+            assertThat(testScanner.getSourceCode().isEndOfLine()).isTrue();
         }
 
         @Test
         void raise_error_when_no_closing() {
-            TestScanner tokenParser = givenTokenParserWithCode("(a");
+            TestScanner testScanner = givenScannerWithCode("(a");
 
-            assertThat(assertThrows(SyntaxException.class, () -> tokenParser.fetchNodeBetween("(", ")", this::oneCharNode)))
+            assertThat(assertThrows(SyntaxException.class, () -> testScanner.fetchNodeBetween("(", ")", this::oneCharNode)))
                     .hasMessageContaining("should end with `)`");
         }
 
         @Test
         void return_empty_when_fetch_empty_between_opening_and_closing() {
-            TestScanner tokenParser = givenTokenParserWithCode("'a'");
+            TestScanner testScanner = givenScannerWithCode("'a'");
 
-            assertThat(tokenParser.fetchNodeBetween("'", "'", parser -> Optional.empty())).isEmpty();
-            assertThat(tokenParser.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('\'');
+            assertThat(testScanner.fetchNodeBetween("'", "'", scanner -> Optional.empty())).isEmpty();
+            assertThat(testScanner.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('\'');
         }
     }
 
@@ -191,20 +191,20 @@ class ScannerTest {
 
         @Test
         void return_one_node_list() {
-            TestScanner tokenParser = givenTokenParserWithCode("a");
-            assertThat(tokenParser.fetchNodesSplitBy(",", parser -> new TestNode(tokenParser.getSourceCode().popChar(NO_ESCAPE))).stream()
+            TestScanner testScanner = givenScannerWithCode("a");
+            assertThat(testScanner.fetchNodesSplitBy(",", scanner -> new TestNode(testScanner.getSourceCode().popChar(NO_ESCAPE))).stream()
                     .map(TestNode::getContent).collect(Collectors.toList())).containsExactly('a');
         }
 
         @Test
         void return_node_list() {
-            TestScanner tokenParser = givenTokenParserWithCode("a,b,c");
-            assertThat(tokenParser.fetchNodesSplitBy(",", parser -> new TestNode(tokenParser.getSourceCode().popChar(NO_ESCAPE))).stream()
+            TestScanner testScanner = givenScannerWithCode("a,b,c");
+            assertThat(testScanner.fetchNodesSplitBy(",", scanner -> new TestNode(testScanner.getSourceCode().popChar(NO_ESCAPE))).stream()
                     .map(TestNode::getContent).collect(Collectors.toList())).containsExactly('a', 'b', 'c');
         }
     }
 
-    private TestScanner givenTokenParserWithCode(String s) {
+    private TestScanner givenScannerWithCode(String s) {
         SourceCode sourceCode = new SourceCode(s);
         return new TestScanner(sourceCode);
     }

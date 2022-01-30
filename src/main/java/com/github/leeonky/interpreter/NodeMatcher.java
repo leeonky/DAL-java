@@ -16,17 +16,17 @@ public interface NodeMatcher<C extends RuntimeContext<C>, N extends Node<C, N>,
                 .map(p -> p.fetch(parser)).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 
-    Optional<N> fetch(T parser);
+    Optional<N> fetch(T scanner);
 
     default NodeMatcher<C, N, E, O, T> map(Function<N, N> mapping) {
         return parser -> fetch(parser).map(mapping);
     }
 
     default NodeFactory<C, N, E, O, T> or(NodeFactory<C, N, E, O, T> nodeFactory) {
-        return parser -> fetch(parser).orElseGet(() -> nodeFactory.fetch(parser));
+        return scanner -> fetch(scanner).orElseGet(() -> nodeFactory.fetch(scanner));
     }
 
     default NodeFactory<C, N, E, O, T> or(String message) {
-        return parser -> fetch(parser).orElseThrow(() -> parser.getSourceCode().syntaxError(message, 0));
+        return scanner -> fetch(scanner).orElseThrow(() -> scanner.getSourceCode().syntaxError(message, 0));
     }
 }

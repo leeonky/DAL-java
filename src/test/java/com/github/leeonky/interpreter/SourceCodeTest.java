@@ -488,15 +488,15 @@ class SourceCodeTest {
         void return_empty_when_predicate_false() {
             TestOperator testOperator = new TestOperator();
             SourceCode sourceCode = new SourceCode(" +=");
-            TestScanner tokenParser = new TestScanner(sourceCode);
+            TestScanner scanner = new TestScanner(sourceCode);
 
             OperatorMatcher<TestContext, TestNode, TestExpression, TestOperator, TestScanner> operatorMatcher =
-                    SourceCode.operatorMatcher("+=", () -> testOperator, parser -> {
-                        assertThat(parser).isSameAs(tokenParser);
+                    SourceCode.operatorMatcher("+=", () -> testOperator, scanner1 -> {
+                        assertThat(scanner1).isSameAs(scanner);
                         return false;
                     });
 
-            assertThat(operatorMatcher.fetch(tokenParser)).isEmpty();
+            assertThat(operatorMatcher.fetch(scanner)).isEmpty();
         }
     }
 }

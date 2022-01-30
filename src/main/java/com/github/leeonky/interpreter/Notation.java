@@ -22,20 +22,20 @@ public class Notation {
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, T extends Scanner<C, N, E, O, T>> NodeMatcher<C, N, E, O, T> nodeMatcher(
             Function<Token, N> factory) {
-        return parser -> parser.getSourceCode().popWord(label)
+        return scanner -> scanner.getSourceCode().popWord(label)
                 .map(t -> factory.apply(t).setPositionBegin(t.getPosition()));
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, T extends Scanner<C, N, E, O, T>> OperatorMatcher<C, N, E, O, T> operatorMatcher(
             Supplier<O> factory, Predicate<T> predicate) {
-        return tokenParser -> tokenParser.getSourceCode().popWord(label, () -> predicate.test(tokenParser))
+        return scanner -> scanner.getSourceCode().popWord(label, () -> predicate.test(scanner))
                 .map(token -> factory.get().setPosition(token.getPosition()));
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, T extends Scanner<C, N, E, O, T>> OperatorMatcher<C, N, E, O, T> operatorMatcher(
             Supplier<O> factory) {
-        return operatorMatcher(factory, parser -> true);
+        return operatorMatcher(factory, scanner -> true);
     }
 }
