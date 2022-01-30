@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public interface NodeFactory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>, T extends TokenParser<C, N, E, O, T>> {
+        O extends Operator<C, N, O>, T extends Scanner<C, N, E, O, T>> {
 
     N fetch(T parser);
 

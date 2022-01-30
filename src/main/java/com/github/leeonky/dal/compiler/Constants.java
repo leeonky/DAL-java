@@ -24,15 +24,11 @@ public class Constants {
 
 
     public static final Set<String> ALL_KEY_WORDS = new HashSet<>(asList(IS_s,
-            WHICH.getLabel(), TRUE.getLabel(), FALSE.getLabel(), NULL.getLabel(), AND_s, OR_s));
+            Keywords.WHICH.getLabel(), Keywords.TRUE.getLabel(), Keywords.FALSE.getLabel(), Keywords.NULL.getLabel(), AND_s, OR_s));
     public static final String SEQUENCE_AZ = "+";
     public static final String SEQUENCE_ZA = "-";
 
     public static final String SEQUENCE_AZ_2 = "￪";
     public static final String SEQUENCE_ZA_2 = "￬";
 
-    public static class Operators {
-        public static final String MATCH = ":";
-        public static final String EQ = "=";
-    }
 }

@@ -6,8 +6,8 @@ import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.ast.SequenceNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.ExpressionConstructor;
+import com.github.leeonky.interpreter.Scanner;
 import com.github.leeonky.interpreter.SourceCode;
-import com.github.leeonky.interpreter.TokenParser;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -15,12 +15,12 @@ import java.util.function.Supplier;
 
 import static java.util.Collections.singleton;
 
-public class DALTokenParser extends TokenParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALTokenParser> {
+public class DALScanner extends Scanner<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALScanner> {
 
     private final LinkedList<Boolean> enableAndComma = new LinkedList<>(singleton(true));
 
-    public DALTokenParser(SourceCode sourceCode, DALRuntimeContext runtimeContext,
-                          ExpressionConstructor<DALRuntimeContext, DALNode, DALExpression, DALOperator> expressionConstructor) {
+    public DALScanner(SourceCode sourceCode, DALRuntimeContext runtimeContext,
+                      ExpressionConstructor<DALRuntimeContext, DALNode, DALExpression, DALOperator> expressionConstructor) {
         super(sourceCode, runtimeContext, expressionConstructor);
     }
 

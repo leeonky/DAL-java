@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.compiler.Constants;
+import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.Calculator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Operator;
@@ -208,7 +208,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     public static class Matcher extends DALOperator {
 
         public Matcher() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, Constants.Operators.MATCH, true);
+            super(PRECEDENCE_LOGIC_COMPARE_OPT, Notations.Operators.MATCHER.getLabel(), true);
         }
 
         @Override
