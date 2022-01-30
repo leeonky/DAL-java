@@ -466,10 +466,10 @@ class SourceCodeTest {
         void return_when_match_symbol() {
             TestOperator testOperator = new TestOperator();
             SourceCode sourceCode = new SourceCode(" +=");
-            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestParser> operatorParser =
+            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
                     SourceCode.operatorMatcher("+=", () -> testOperator);
 
-            TestOperator testOperator2 = operatorParser.parse(new TestParser(sourceCode)).get();
+            TestOperator testOperator2 = operatorParser.parse(new TestProcedure(sourceCode)).get();
 
             assertThat(testOperator2).isSameAs(testOperator);
             assertThat(testOperator2.getPosition()).isEqualTo(1);
@@ -478,25 +478,25 @@ class SourceCodeTest {
         @Test
         void return_empty_when_not_match() {
             SourceCode sourceCode = new SourceCode(" +=");
-            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestParser> operatorParser =
+            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
                     SourceCode.operatorMatcher("++", TestOperator::new);
 
-            assertThat(operatorParser.parse(new TestParser(sourceCode))).isEmpty();
+            assertThat(operatorParser.parse(new TestProcedure(sourceCode))).isEmpty();
         }
 
         @Test
         void return_empty_when_predicate_false() {
             TestOperator testOperator = new TestOperator();
             SourceCode sourceCode = new SourceCode(" +=");
-            TestParser scanner = new TestParser(sourceCode);
+            TestProcedure testProcedure = new TestProcedure(sourceCode);
 
-            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestParser> operatorParser =
+            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
                     SourceCode.operatorMatcher("+=", () -> testOperator, scanner1 -> {
-                        assertThat(scanner1).isSameAs(scanner);
+                        assertThat(scanner1).isSameAs(testProcedure);
                         return false;
                     });
 
-            assertThat(operatorParser.parse(scanner)).isEmpty();
+            assertThat(operatorParser.parse(testProcedure)).isEmpty();
         }
     }
 }

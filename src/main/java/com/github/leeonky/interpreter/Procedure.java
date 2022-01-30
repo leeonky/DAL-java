@@ -10,15 +10,15 @@ import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_CHAR;
 import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_NODE;
 import static java.util.stream.Collectors.joining;
 
-public class Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>, P extends Parser<C, N, E, O, P>> {
+public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+        O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> {
 
     private final SourceCode sourceCode;
     private final C runtimeContext;
     private final LinkedList<O> operators = new LinkedList<>();
     private final ExpressionConstructor<C, N, E, O> expressionConstructor;
 
-    public Parser(SourceCode sourceCode, C runtimeContext, ExpressionConstructor<C, N, E, O> expressionConstructor) {
+    public Procedure(SourceCode sourceCode, C runtimeContext, ExpressionConstructor<C, N, E, O> expressionConstructor) {
         this.sourceCode = sourceCode;
         this.runtimeContext = runtimeContext;
         this.expressionConstructor = expressionConstructor;
@@ -28,19 +28,20 @@ public class Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E extends
         return sourceCode;
     }
 
-    public Optional<N> fetchNodeWithOneChildNodeBetween(char opening, char closing, Function<N, N> nodeFactory,
-                                                        NodeParser.Mandatory<C, N, E, O, P> childNodeFactory, String message) {
+    public Optional<N> fetchNodeWithOneChildNodeBetween(
+            char opening, NodeParser.Mandatory<C, N, E, O, P> childNodeMandatory, char closing,
+            Function<N, N> nodeFactory, String message) {
         return fetchNodeWithElementsBetween(opening, closing, args -> {
             if (args.size() != 1)
                 throw sourceCode.syntaxError(message, -1);
             return nodeFactory.apply(args.get(0));
-        }, () -> childNodeFactory.parse(getInstance()));
+        }, () -> childNodeMandatory.parse(getInstance()));
     }
 
     public Optional<ExpressionClause<C, N>> fetchExpressionClauseBetween(
-            char opening, char closing, BiFunction<N, N, N> biNodeFactory,
-            NodeParser.Mandatory<C, N, E, O, P> childNodeFactory, String message) {
-        return fetchNodeWithOneChildNodeBetween(opening, closing, n -> n, childNodeFactory, message).map(
+            char opening, NodeParser.Mandatory<C, N, E, O, P> childNodeMandatory, char closing,
+            BiFunction<N, N, N> biNodeFactory, String message) {
+        return fetchNodeWithOneChildNodeBetween(opening, childNodeMandatory, closing, n -> n, message).map(
                 n -> previous -> biNodeFactory.apply(previous, n).setPositionBegin(n.getPositionBegin()));
     }
 
@@ -95,7 +96,7 @@ public class Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E extends
     }
 
     public Optional<ExpressionClause<C, N>> fetchClauseAfter(
-            String token, ExpressionClauseParser.ExpressionClauseFactory<C, N, E, O, P> clauseFactory) {
+            String token, ExpressionClauseParser.Mandatory<C, N, E, O, P> clauseFactory) {
         return sourceCode.popWord(token).map(t -> clauseFactory.parse(getInstance())
                 .map(node -> node.setPositionBegin(t.getPosition())));
     }

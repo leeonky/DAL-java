@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.compiler.DALParser;
+import com.github.leeonky.dal.compiler.DALProcedure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.OperatorParser;
 
@@ -28,8 +28,8 @@ public class HeaderNode extends DALNode {
         return property;
     }
 
-    public OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALParser> headerOperator() {
-        return parser -> operator;
+    public OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> headerOperator() {
+        return procedure -> operator;
     }
 
     public Comparator<Object> getListComparator(DALRuntimeContext context) {

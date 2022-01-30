@@ -28,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class CucumberContext {
     private static final Compiler compiler = new Compiler();
     private static final Map<String, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
-            DALParser>> matcherMap = new HashMap<String, NodeParser<DALRuntimeContext, DALNode, DALExpression,
-            DALOperator, DALParser>>() {{
+            DALProcedure>> matcherMap = new HashMap<String, NodeParser<DALRuntimeContext, DALNode, DALExpression,
+            DALOperator, DALProcedure>>() {{
         put("number", compiler.NUMBER);
         put("integer", compiler.INTEGER);
         put("single-quoted-string", compiler.SINGLE_QUOTED_STRING);
@@ -53,19 +53,19 @@ public class CucumberContext {
         put("list", compiler.LIST);
         put("judgement-expression-operand", optional(compiler.JUDGEMENT_EXPRESSION_OPERAND));
         put("table", compiler.TABLE);
-        put("schema", optional(SchemaExpressionClauseFactory.SCHEMA));
+        put("schema", optional(SchemaClauseMandatory.SCHEMA));
     }};
 
-    private static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALParser> optional(
-            NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALParser> nodeFactory) {
-        return scanner -> Optional.ofNullable(nodeFactory.parse(scanner));
+    private static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> optional(
+            NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeFactory) {
+        return procedure -> Optional.ofNullable(nodeFactory.parse(procedure));
     }
 
     public static CucumberContext INSTANCE = new CucumberContext();
     DAL dal = new DAL();
 
     Object inputObject = null;
-    DALParser scanner = null;
+    DALProcedure dalProcedure = null;
     String sourceCodeString = null;
     InterpreterException interpreterException;
     DALNode node = null;
@@ -84,7 +84,7 @@ public class CucumberContext {
     }
 
     public void giveDalSourceCode(String code) {
-        scanner = new DALParser(new SourceCode(sourceCodeString = parseTabAndSpace(code)),
+        dalProcedure = new DALProcedure(new SourceCode(sourceCodeString = parseTabAndSpace(code)),
                 dal.getRuntimeContextBuilder().build(null), DALExpression::new);
     }
 
@@ -97,7 +97,7 @@ public class CucumberContext {
     }
 
     public void assertNodeValue(String assertion, String factory) {
-        dal.evaluate(matcherMap.get(factory).parse(new DALParser(new SourceCode(sourceCodeString),
+        dal.evaluate(matcherMap.get(factory).parse(new DALProcedure(new SourceCode(sourceCodeString),
                 dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
     }
@@ -107,7 +107,7 @@ public class CucumberContext {
     }
 
     public void failedToGetNodeWithMessage(String factory, String message) {
-        interpreterException = assertThrows(InterpreterException.class, () -> matcherMap.get(factory).parse(scanner));
+        interpreterException = assertThrows(InterpreterException.class, () -> matcherMap.get(factory).parse(dalProcedure));
         shouldHasDalMessage(message);
     }
 
@@ -117,7 +117,7 @@ public class CucumberContext {
 
     public void compileAndAssertNode(String factory, String assertion) {
         try {
-            node = matcherMap.get(factory).parse(scanner).orElse(null);
+            node = matcherMap.get(factory).parse(dalProcedure).orElse(null);
         } catch (InterpreterException e) {
             System.err.println(e.show(sourceCodeString));
             throw e;
@@ -160,7 +160,7 @@ public class CucumberContext {
     }
 
     public void ignoreNodeBy(String factory) {
-        matcherMap.get(factory).parse(scanner);
+        matcherMap.get(factory).parse(dalProcedure);
     }
 
     public void registerSchema(String schemaCode) {
