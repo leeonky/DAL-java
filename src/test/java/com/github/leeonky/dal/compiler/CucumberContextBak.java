@@ -8,7 +8,6 @@ import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.ListAccessor;
-import com.github.leeonky.dal.runtime.Result;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
@@ -22,10 +21,11 @@ import org.json.JSONObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class CucumberContext {
+public class CucumberContextBak {
     private static final Compiler compiler = new Compiler();
     private static final Map<String, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure>> matcherMap = new HashMap<String, NodeParser<DALRuntimeContext, DALNode, DALExpression,
@@ -61,7 +61,7 @@ public class CucumberContext {
         return procedure -> Optional.ofNullable(nodeFactory.parse(procedure));
     }
 
-    public static CucumberContext INSTANCE = new CucumberContext();
+    public static CucumberContextBak INSTANCE = new CucumberContextBak();
     DAL dal = new DAL();
 
     Object inputObject = null;
@@ -73,7 +73,7 @@ public class CucumberContext {
     private final List<String> javaClasses = new ArrayList<>();
 
     public static void reset() {
-        INSTANCE = new CucumberContext();
+        INSTANCE = new CucumberContextBak();
         INSTANCE.initDataAssert();
     }
 
@@ -93,13 +93,14 @@ public class CucumberContext {
     }
 
     public void assertLastNodeValue(String assertion) {
-        dal.evaluate(node.evaluate(dal.getRuntimeContextBuilder().build(inputObject)), assertion);
+        expect(node.evaluate(dal.getRuntimeContextBuilder().build(inputObject))).should(assertion);
     }
 
     public void assertNodeValue(String assertion, String factory) {
-        dal.evaluate(matcherMap.get(factory).parse(new DALProcedure(new SourceCode(sourceCodeString),
+        Object evaluate = matcherMap.get(factory).parse(new DALProcedure(new SourceCode(sourceCodeString),
                 dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null)
-                .evaluate(dal.getRuntimeContextBuilder().build(null)), assertion);
+                .evaluate(dal.getRuntimeContextBuilder().build(null));
+        expect(evaluate).should(assertion);
     }
 
     public void shouldShowSourceCodePosition(String sourceCodePosition) {
@@ -122,12 +123,7 @@ public class CucumberContext {
             System.err.println(e.show(sourceCodeString));
             throw e;
         }
-        try {
-            dal.evaluateAll(node, assertion);
-        } catch (InterpreterException e) {
-            System.err.println(e.show(assertion));
-            throw e;
-        }
+        expect(node).should(assertion);
     }
 
     public void assertInputData(String assertion) {
@@ -176,12 +172,7 @@ public class CucumberContext {
             throw dalException;
         }
 
-        try {
-            dal.evaluateAll(evaluate, assertionCode);
-        } catch (InterpreterException dalException) {
-            System.out.println(dalException.show(assertionCode));
-            throw dalException;
-        }
+        expect(evaluate).should(assertionCode);
     }
 
     public void assertEvaluateValues(String assertionCode) {
@@ -192,13 +183,7 @@ public class CucumberContext {
             System.out.println(dalException.show(sourceCodeString));
             throw dalException;
         }
-
-        try {
-            dal.evaluateAll(evaluate, assertionCode);
-        } catch (InterpreterException dalException) {
-            System.out.println(dalException.show(assertionCode));
-            throw dalException;
-        }
+        expect(evaluate).should(assertionCode);
     }
 
     public void addInputJavaClass(String sourceCode) {
@@ -233,11 +218,6 @@ public class CucumberContext {
         } catch (InterpreterException e) {
             interpreterException = e;
         }
-    }
-
-    public void registerUSMoney(String regex) {
-        dal.getRuntimeContextBuilder().registerUserDefinedLiterals(token -> token.matches(regex) ?
-                Result.of(new USDollar(Integer.parseInt(token.replace("$", "")))) : Result.empty());
     }
 
     public void setArrayFirstIndex(String type, int index) {

@@ -1,7 +1,22 @@
-Feature: number calculator
+Feature: basic data and type
+
+  Scenario Outline: const value
+    When evaluate by:
+    """
+    <code>
+    """
+    Then the result should:
+    """
+    = <value>
+    """
+    Examples:
+      | code  | value |
+      | true  | true  |
+      | false | false |
+      | null  | null  |
 
   Scenario: supported number type
-    Given the following input java class data:
+    Given the following java class:
     """
     public class Numbers {
       public byte byteValue = 0;
@@ -22,7 +37,7 @@ Feature: number calculator
       public Boolean boxedBooleanValue = false;
     }
     """
-    Then the following assertion for "Numbers" should pass:
+    Then the following verification for the instance of java class "Numbers" should pass:
     """
     : {
       byteValue = 0y
@@ -45,7 +60,7 @@ Feature: number calculator
       boxedBooleanValue = false
     }
     """
-    Then the following assertion for "Numbers" should pass:
+    Then the following verification for the instance of java class "Numbers" should pass:
     """
     : {
       intValue = 0x2
@@ -53,7 +68,7 @@ Feature: number calculator
     """
 
   Scenario: use integer with proper type
-    Given the following input java class data:
+    Given the following java class:
     """
     public class Numbers {
       public byte byteValue = 16;
@@ -67,7 +82,7 @@ Feature: number calculator
       public BigInteger bigInteger = new BigInteger("20");
     }
     """
-    Then the following assertion for "Numbers" should pass:
+    Then the following verification for the instance of java class "Numbers" should pass:
     """
     : {
       byteValue = 0x10y
@@ -79,7 +94,7 @@ Feature: number calculator
     """
 
   Scenario: use proper type (int, long, biginteger) to take int value
-    * the following assertion should pass:
+    * the following verification should pass:
     """
     0x80000000 = 0x80000000L,
     0x7fffffffffffffff = 0x7fffffffffffffffL,
@@ -87,9 +102,46 @@ Feature: number calculator
     """
 
   Scenario: use proper type (double, big decimal) to take float value
-    * the following assertion should pass:
+    * the following verification should pass:
     """
     0.1 = 0.1D,
     2.7976931348623157e308 = 2.7976931348623157e308bd,
     -2.7976931348623157e10308 = -2.7976931348623157e10308bd
+    """
+
+  Scenario: define and use user defined literal
+    Given defined US dollar money object with the following regex
+    """
+    ^\$\d+
+    """
+    When evaluate by:
+    """
+    $1
+    """
+    Then the result should:
+    """
+      class.simpleName: 'USDollar'
+    """
+
+  Scenario: define and not match user literal
+    Given the following json:
+    """
+    {
+      "$a": 1
+    }
+    """
+    And defined US dollar money object with the following regex
+    """
+    ^\$\d+
+    """
+    When evaluate by:
+    """
+    $a
+    """
+    Then the result should:
+    """
+    : {
+      class.simpleName: 'Integer'
+      toString: '1'
+    }
     """

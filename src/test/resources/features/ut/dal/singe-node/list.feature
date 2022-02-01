@@ -262,10 +262,12 @@ Feature: list node
     """
     Then got the following "list" node:
     """
-    inspect: '[is Schema]'
-    expressions[0]: {
-      class.simpleName: 'SchemaExpression'
-      inspect: '[0] is Schema'
+    : {
+      inspect: '[is Schema]'
+      expressions[0]: {
+        class.simpleName: 'SchemaExpression'
+        inspect: '[0] is Schema'
+      }
     }
     """
 
@@ -276,17 +278,19 @@ Feature: list node
     """
     Then got the following "list" node:
     """
-    inspect: "[is String: 'hello']"
-    expressions[0]: {
-      class.simpleName: 'DALExpression'
-      leftOperand: {
-        class.simpleName: 'SchemaExpression'
-        inspect: '[0] is String'
-      }
-      operator.class.simpleName: 'Matcher'
-      rightOperand: {
-        class.simpleName: 'ConstNode'
-        inspect: "'hello'"
+    : {
+      inspect: "[is String: 'hello']"
+      expressions[0]: {
+        class.simpleName: 'DALExpression'
+        leftOperand: {
+          class.simpleName: 'SchemaExpression'
+          inspect: '[0] is String'
+        }
+        operator.class.simpleName: 'Matcher'
+        rightOperand: {
+          class.simpleName: 'ConstNode'
+          inspect: "'hello'"
+        }
       }
     }
     """

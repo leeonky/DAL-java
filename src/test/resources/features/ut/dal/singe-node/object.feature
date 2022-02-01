@@ -160,10 +160,12 @@ Feature: object node
     """
     Then got the following "object" node:
     """
-    inspect: '{key1 is Schema}'
-    expressions[0]: {
-      class.simpleName: 'SchemaExpression'
-      inspect: 'key1 is Schema'
+    : {
+      inspect: '{key1 is Schema}'
+      expressions[0]: {
+        class.simpleName: 'SchemaExpression'
+        inspect: 'key1 is Schema'
+      }
     }
     """
 
@@ -176,17 +178,19 @@ Feature: object node
     """
     Then got the following "object" node:
     """
-    inspect: "{key1 is String: 'hello'}"
-    expressions[0]: {
-      class.simpleName: 'DALExpression'
-      leftOperand: {
-        class.simpleName: 'SchemaExpression'
-        inspect: 'key1 is String'
-      }
-      operator.class.simpleName: 'Matcher'
-      rightOperand: {
-        class.simpleName: 'ConstNode'
-        inspect: "'hello'"
+    : {
+      inspect: "{key1 is String: 'hello'}"
+      expressions[0]: {
+        class.simpleName: 'DALExpression'
+        leftOperand: {
+          class.simpleName: 'SchemaExpression'
+          inspect: 'key1 is String'
+        }
+        operator.class.simpleName: 'Matcher'
+        rightOperand: {
+          class.simpleName: 'ConstNode'
+          inspect: "'hello'"
+        }
       }
     }
     """

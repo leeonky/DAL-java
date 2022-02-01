@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.spec;
 
-import com.github.leeonky.dal.runtime.AssertResult;
 import com.github.leeonky.dal.runtime.PropertyAccessor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -40,51 +39,12 @@ class BasicVerify extends Base {
 
     @Nested
     class Basic {
-        @Test
-        void should_use_root_value_as_assertion_expression_when_source_code_is_empty() {
-            AssertResult assertResult = dal.assertTrue(false, "");
-            assertThat(assertResult.isPassed()).isFalse();
-            assertThat(assertResult.getMessage()).contains("Expected root value to be [true] but was <false>");
-        }
-
 
         @Test
         void verify_expression_return_type_should_be_boolean() {
             IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
                     () -> dal.assertTrue(1, ""));
             assertThat(illegalStateException).hasMessage("Verification result should be boolean but 'java.lang.Integer'");
-        }
-
-        @Test
-        void verify_calculation() {
-            assertPass(null, "1=1");
-            assertPass(1, "=1");
-
-            assertPass(17, "=2+3*4+4/2+1");
-            assertPass(null, "2+3*4+4/2+1=2+3*4+4/2+1");
-
-            assertPass(5, "=(2+3)*(4+4)/(2+6)");
-        }
-
-        @Test
-        void first_operand_should_be_root_value_when_no_specified() {
-            assertPass(2, "-1=1");
-        }
-
-        @Test
-        void verify_logical_combinations() {
-            assertTrue(null, "!false");
-
-            assertTrue(null, "true and true");
-            assertTrue(null, "true or false");
-        }
-
-        @Test
-        void alias_of_operator_and() {
-            assertTrue(null, "true , true");
-            assertFalse(null, "true , false");
-            assertFalse(null, "false , true");
-            assertFalse(null, "false , false");
         }
 
         @Test
