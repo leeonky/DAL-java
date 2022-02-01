@@ -14,9 +14,12 @@ import java.util.stream.Stream;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.*;
 import static com.github.leeonky.dal.compiler.Constants.*;
+import static com.github.leeonky.dal.compiler.DALProcedure.enableCommaAnd;
 import static com.github.leeonky.dal.compiler.Notations.Operators;
 import static com.github.leeonky.interpreter.ClauseParser.Mandatory.after;
 import static com.github.leeonky.interpreter.ClauseParser.oneOf;
+import static com.github.leeonky.interpreter.ComplexNode.multiple;
+import static com.github.leeonky.interpreter.ComplexNode.single;
 import static com.github.leeonky.interpreter.FunctionUtil.*;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.NodeParser.lazy;
@@ -120,23 +123,23 @@ public class Compiler {
         CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
                 CONST_USER_DEFINED_LITERAL);
         LIST_INDEX_OR_MAP_KEY = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING)
-                .or("should given one property or array index in `[]`");
-        PARENTHESES = procedure -> procedure.enableCommaAnd(() -> procedure.fetchNodeWithOneChildNodeBetween('(', EXPRESSION, ')',
-                ParenthesesNode::new, "expect a value or expression"));
+                .mandatory("should given one property or array index in `[]`");
+        PARENTHESES = lazy(() -> enableCommaAnd(single(EXPRESSION, "expect a value or expression").between('(', ')')
+                .nodeParser(ParenthesesNode::new)));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IDENTITY_PROPERTY);
-        PROPERTY_CHAIN = procedure -> PROPERTY.or("expect a object property").recursive(EXPLICIT_PROPERTY).parse(procedure);
-        OBJECT = lazy(() -> DALProcedure.disableCommaAnd(
-                PROPERTY_CHAIN.mandatoryNode(judgementClause(JUDGEMENT_OPERATORS.or("expect operator `:` or `=`")))
-                        .multiplBetween('{', '}', ObjectNode::new)));
+        PROPERTY_CHAIN = procedure -> PROPERTY.mandatory("expect a object property").recursive(EXPLICIT_PROPERTY).parse(procedure);
+        OBJECT = lazy(() -> DALProcedure.disableCommaAnd(multiple(PROPERTY_CHAIN.mandatoryNode(
+                judgementClause(JUDGEMENT_OPERATORS.or("expect operator `:` or `=`"))))
+                .between('{', '}').nodeParser(ObjectNode::new)));
         ELEMENT_ELLIPSIS = Notations.Operators.ELEMENT_ELLIPSIS.nodeMatcher(token -> new ListEllipsisNode());
-        LIST = procedure -> procedure.disableCommaAnd(() -> procedure.fetchNodeWithElementsBetween('[',
-                () -> ELEMENT_ELLIPSIS.parse(procedure).<Clause<DALRuntimeContext, DALNode>>map(node -> p -> node).orElseGet(() ->
-                        judgementClause(JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR)).parse(procedure)), ']', ListNode::new
-        ));
+        LIST = lazy(() -> DALProcedure.disableCommaAnd(multiple(ELEMENT_ELLIPSIS.castToClause().or(
+                judgementClause(JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR))))
+                .between('[', ']').nodeParser(ListNode::new)));
+
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         UNARY_OPERATOR_EXPRESSION = procedure -> procedure.fetchExpression(null, UNARY_OPERATORS, OPERAND);
         OPERAND = UNARY_OPERATOR_EXPRESSION.or(oneOf(CONST, PROPERTY, PARENTHESES, INPUT)
-                .or("expect a value or expression").recursive(EXPLICIT_PROPERTY).map(DALNode::avoidListMapping));
+                .mandatory("expect a value or expression").recursive(EXPLICIT_PROPERTY).map(DALNode::avoidListMapping));
         BINARY_ARITHMETIC_EXPRESSION = BINARY_ARITHMETIC_OPERATORS.clause(OPERAND);
         BINARY_JUDGEMENT_EXPRESSION = JUDGEMENT_OPERATORS.clause(JUDGEMENT.or(OPERAND));
         BINARY_OPERATOR_EXPRESSION = oneOf(BINARY_ARITHMETIC_EXPRESSION, BINARY_JUDGEMENT_EXPRESSION);

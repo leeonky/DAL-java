@@ -1,17 +1,15 @@
 package com.github.leeonky.interpreter;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_NODE;
 import static java.util.Optional.empty;
 
 public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
-        E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> {
-
+        E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
+        extends Parser<C, N, E, O, P, N> {
     static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> oneOf(
             NodeParser<C, N, E, O, P> matcher, NodeParser<C, N, E, O, P>... matchers) {
@@ -25,19 +23,25 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return procedure -> parser.get().parse(procedure);
     }
 
+    @Override
     Optional<N> parse(P procedure);
 
     default Mandatory<C, N, E, O, P> or(Mandatory<C, N, E, O, P> nodeFactory) {
         return procedure -> parse(procedure).orElseGet(() -> nodeFactory.parse(procedure));
     }
 
-    default Mandatory<C, N, E, O, P> or(String message) {
+    default Mandatory<C, N, E, O, P> mandatory(String message) {
         return procedure -> parse(procedure).orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0));
     }
 
-    interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> {
+    default ClauseParser<C, N, E, O, P> castToClause() {
+        return procedure -> parse(procedure).map(node -> p -> node);
+    }
 
+    interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser.Mandatory<C, N, E, O, P, N> {
+
+        @Override
         N parse(P procedure);
 
         @Deprecated
@@ -62,10 +66,6 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
                 }
                 return node;
             };
-        }
-
-        default NodeParser<C, N, E, O, P> multiplBetween(char opening, char closing, Function<List<N>, N> nodeFactory) {
-            return procedure -> procedure.getSourceCode().fetchElementNode(BY_NODE, opening, () -> parse(procedure), closing, nodeFactory);
         }
     }
 }

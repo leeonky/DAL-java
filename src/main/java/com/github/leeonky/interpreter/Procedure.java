@@ -28,6 +28,7 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
         return sourceCode;
     }
 
+    @Deprecated
     public Optional<N> fetchNodeWithOneChildNodeBetween(
             char opening, NodeParser.Mandatory<C, N, E, O, P> childNodeMandatory, char closing,
             Function<N, N> nodeFactory, String message) {
@@ -38,6 +39,7 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
         });
     }
 
+    @Deprecated
     public Optional<Clause<C, N>> fetchClauseBetween(
             char opening, NodeParser.Mandatory<C, N, E, O, P> childNodeMandatory, char closing,
             BiFunction<N, N, N> biNodeFactory, String message) {

@@ -25,10 +25,6 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
         super(sourceCode, runtimeContext, expressionConstructor);
     }
 
-    public Optional<DALNode> disableCommaAnd(Supplier<Optional<DALNode>> nodeFactory) {
-        return commaAnd(false, nodeFactory);
-    }
-
     public static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> disableCommaAnd(
             NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
         return procedure -> procedure.commaAnd(false, () -> nodeParser.parse(procedure));
@@ -39,11 +35,7 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
         return procedure -> procedure.commaAnd(true, () -> nodeParser.parse(procedure));
     }
 
-    public Optional<DALNode> enableCommaAnd(Supplier<Optional<DALNode>> nodeFactory) {
-        return commaAnd(true, nodeFactory);
-    }
-
-    private Optional<DALNode> commaAnd(boolean b, Supplier<Optional<DALNode>> nodeFactory) {
+    private <T> Optional<T> commaAnd(boolean b, Supplier<Optional<T>> nodeFactory) {
         enableAndComma.push(b);
         try {
             return nodeFactory.get();
@@ -58,10 +50,6 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
 
     public Supplier<Optional<? extends SequenceNode>> sequenceOf(String sequenceChar, SequenceNode.Type type) {
         return () -> getSourceCode().repeatWords(sequenceChar, count -> new SequenceNode(count, type, sequenceChar));
-    }
-
-    public boolean notCodeBeginning() {
-        return !isCodeBeginning();
     }
 
     public boolean isCodeBeginning() {

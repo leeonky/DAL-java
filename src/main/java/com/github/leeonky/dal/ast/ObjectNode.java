@@ -11,6 +11,7 @@ import static com.github.leeonky.dal.ast.AssertionFailure.assertUnexpectedFields
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
+//TODO rename
 public class ObjectNode extends DALNode {
     private final List<DALNode> expressions = new ArrayList<>();
 

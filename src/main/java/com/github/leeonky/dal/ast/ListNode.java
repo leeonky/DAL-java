@@ -20,6 +20,7 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
+//TODO rename
 public class ListNode extends DALNode {
     private List<DALNode> expressions__;
     private List<DALNode> inputExpressions;
