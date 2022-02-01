@@ -39,6 +39,12 @@ public class IntegrationSteps {
         integrationTestContext.evaluateAll(expression);
     }
 
+    @When("use a instance of java class {string} to evaluate:")
+    public void use_a_instance_of_java_class_to_evaluate(String className, String expression) {
+        integrationTestContext.givenJavaDataByClassName(className);
+        integrationTestContext.evaluate(expression);
+    }
+
     @Then("the result should:")
     public void the_result_is(String verification) {
         integrationTestContext.verifyLastEvaluated(verification);

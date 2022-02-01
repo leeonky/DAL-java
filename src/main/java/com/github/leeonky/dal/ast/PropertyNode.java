@@ -23,14 +23,22 @@ public class PropertyNode extends DALNode {
 
     @Override
     public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
+        Data data = instanceNode.evaluateDataObject(context);
+        if (data.isNull())
+            throw new RuntimeException("Instance is null", getPositionBegin());
         try {
-            return instanceNode.evaluateDataObject(context).getValue(name);
+            return data.getValue(name);
         } catch (IndexOutOfBoundsException ex) {
             throw new RuntimeException("Index out of bounds (" + ex.getMessage() + ")", getPositionBegin());
         } catch (Exception e) {
-            throw new RuntimeException(format(
-                    "Get property via `%s` failed, property can be public field, getter or customer type getter:\n\t"
-                            + e.getMessage(), inspect()), getPositionBegin());
+            throw new RuntimeException(format("Get property `%s` failed, property can be:\n" +
+                    "  1. public field\n" +
+                    "  2. public getter\n" +
+                    "  3. public no args method\n" +
+                    "  4. Map key value\n" +
+                    "  5. customized type getter\n" +
+                    "  6. static method extension\n" +
+                    e.getMessage(), inspect()), getPositionBegin());
         }
     }
 

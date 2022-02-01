@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,36 +45,10 @@ class BasicVerify extends Base {
                     () -> dal.assertTrue(1, ""));
             assertThat(illegalStateException).hasMessage("Verification result should be boolean but 'java.lang.Integer'");
         }
-
-        @Test
-        void expression_operand_type_should_be_matched() {
-            assertRuntimeException(null, " + 1", 1, "Can not plus 'null' and 'java.lang.Integer'");
-            assertRuntimeException(null, " > 1", 1, "Can not compare [null] and [1]");
-        }
     }
 
     @Nested
     class AccessProperty {
-
-        @Test
-        void should_access_root_value_property_when_no_instance_specified() {
-            assertTrue("", ".empty");
-        }
-
-        @Test
-        void should_support_ignore_begin_dot() {
-            assertTrue("", "empty");
-        }
-
-        @Test
-        void should_support_access_property_through_public_field() {
-            assertTrue(new Bean().setField(true), ".field");
-        }
-
-        @Test
-        void should_support_access_property_through_getter() {
-            assertTrue(null, "''.empty");
-        }
 
         @Test
         void should_support_register_customer_getter() throws JSONException {
@@ -100,19 +73,6 @@ class BasicVerify extends Base {
                 }
             });
             assertTrue(new JSONObject("{\"field\": true}"), ".field");
-        }
-
-        @Test
-        void should_support_access_property_via_bracket() {
-            assertPass(new HashMap<String, String>() {{
-                put(" a key ", "value");
-            }}, "[' a key '] = 'value'");
-        }
-
-        @Test
-        void should_raise_error_when_access_invalid_property() {
-            assertRuntimeException("", " = .fun", 3, "Get property via `.fun` failed, property can be public field, getter or customer type getter:\n\t"
-                    + "Method or property `fun` does not exist in `java.lang.String`");
         }
     }
 

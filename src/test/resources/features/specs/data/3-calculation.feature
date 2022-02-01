@@ -79,17 +79,21 @@ Feature: calculation
       | 1<=2 | true  |
       | 2<=1 | false |
 
-  Scenario: raise error when calculation with null
+  Scenario Outline: raise error when calculation with null
     When evaluate by:
     """
-    null + 1
+    null <operator> 1
     """
     Then failed with the message:
     """
-    Can not plus 'null' and 'java.lang.Integer'
+    <message>
     """
     And got the following notation:
     """
-    null + 1
+    null <operator> 1
          ^
     """
+    Examples:
+      | operator | message                                     |
+      | +        | Can not plus 'null' and 'java.lang.Integer' |
+      | >        | Can not compare [null] and [1]              |
