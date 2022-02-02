@@ -29,6 +29,11 @@ public class IntegrationSteps {
         integrationTestContext.registerUSMoney(regex);
     }
 
+    @Given("the following dal expression:")
+    public void the_following_dal_expression(String expression) {
+        integrationTestContext.givenDALExpression(expression);
+    }
+
     @When("evaluate by:")
     public void evaluate_by_the_following_expression(String expression) {
         integrationTestContext.evaluate(expression);
@@ -71,5 +76,10 @@ public class IntegrationSteps {
     @Then("got the following notation:")
     public void got_the_following_notation(String notation) {
         integrationTestContext.shouldHaveNotation(notation);
+    }
+
+    @Then("parse the following {string} node:")
+    public void parse_the_following_node(String nodeType, String verification) {
+        integrationTestContext.verifyNode(nodeType, verification);
     }
 }

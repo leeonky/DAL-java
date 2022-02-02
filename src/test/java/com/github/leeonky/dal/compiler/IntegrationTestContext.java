@@ -2,12 +2,20 @@ package com.github.leeonky.dal.compiler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.ast.DALExpression;
+import com.github.leeonky.dal.ast.DALNode;
+import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.runtime.Result;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.InterpreterException;
+import com.github.leeonky.interpreter.NodeParser;
+import com.github.leeonky.interpreter.SourceCode;
 import lombok.SneakyThrows;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
@@ -22,8 +30,15 @@ public class IntegrationTestContext {
     private String expression;
     private final List<String> javaClasses = new ArrayList<>();
 
+    private static final Compiler compiler = new Compiler();
+    private static final Map<String, NodeParser<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator,
+            DALProcedure>> parserMap = new HashMap<String, NodeParser<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression,
+            DALOperator, DALProcedure>>() {{
+        put("symbol", Compiler.SYMBOL);
+    }};
+
     public void evaluate(String expression) {
-        this.expression = expression;
+        givenDALExpression(expression);
         try {
             result = dal.evaluate(input, expression);
         } catch (InterpreterException e) {
@@ -67,7 +82,7 @@ public class IntegrationTestContext {
     }
 
     public void evaluateAll(String expression) {
-        this.expression = expression;
+        givenDALExpression(expression);
         try {
             result = dal.evaluateAll(input, expression);
         } catch (InterpreterException e) {
@@ -81,5 +96,15 @@ public class IntegrationTestContext {
 
     public void shouldHaveNotation(String notation) {
         assertThat("\n" + exception.show(expression)).isEqualTo("\n" + notation);
+    }
+
+    public void givenDALExpression(String expression) {
+        this.expression = expression.replace("`TAB", "\t").replace("`SPACE", " ");
+    }
+
+    public void verifyNode(String factory, String verification) {
+        DALNode dalNode = parserMap.get(factory).parse(new DALProcedure(new SourceCode(expression),
+                dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null);
+        expect(dalNode).should(verification);
     }
 }

@@ -31,6 +31,9 @@ import static java.util.stream.Collectors.toList;
 
 public class Compiler {
 
+    public static final NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+            SYMBOL = Tokens.IDENTITY_PROPERTY.nodeParser(SymbolNode::symbolNode);
+
     private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             BINARY_ARITHMETIC_OPERATORS = oneOf(
             Operators.AND.operatorParser(DALOperator::operatorAnd),
