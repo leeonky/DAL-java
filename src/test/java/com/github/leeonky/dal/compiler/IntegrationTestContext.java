@@ -37,6 +37,7 @@ public class IntegrationTestContext {
         put("symbol", compiler.SYMBOL);
         put("bracket-symbol", compiler.BRACKET_SYMBOL);
     }};
+    private DALNode dalNode = null;
 
     public void evaluate(String expression) {
         givenDALExpression(expression);
@@ -109,7 +110,7 @@ public class IntegrationTestContext {
 
     public DALNode parseNode(String factory) {
         try {
-            return parserMap.get(factory).parse(new DALProcedure(new SourceCode(expression),
+            return dalNode = parserMap.get(factory).parse(new DALProcedure(new SourceCode(expression),
                     dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null);
         } catch (InterpreterException e) {
             exception = e;
@@ -121,6 +122,14 @@ public class IntegrationTestContext {
         givenDALExpression(expression);
         try {
             result = parseNode(nodeType).evaluate(dal.getRuntimeContextBuilder().build(input));
+        } catch (InterpreterException e) {
+            exception = e;
+        }
+    }
+
+    public void evaluateLast() {
+        try {
+            result = dalNode.evaluate(dal.getRuntimeContextBuilder().build(input));
         } catch (InterpreterException e) {
             exception = e;
         }

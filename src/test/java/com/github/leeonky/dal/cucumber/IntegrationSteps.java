@@ -93,4 +93,10 @@ public class IntegrationSteps {
         integrationTestContext.parseNode(nodeType);
         integrationTestContext.shouldFailedWith(message);
     }
+
+    @Then("last evaluated node result is:")
+    public void last_evaluated_node_result_is(String verification) {
+        integrationTestContext.evaluateLast();
+        integrationTestContext.verifyLastEvaluated(verification);
+    }
 }
