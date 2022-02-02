@@ -31,9 +31,6 @@ import static java.util.stream.Collectors.toList;
 
 public class Compiler {
 
-    public static final NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SYMBOL = Tokens.IDENTITY_PROPERTY.nodeParser(SymbolNode::symbolNode);
-
     private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             BINARY_ARITHMETIC_OPERATORS = oneOf(
             Operators.AND.operatorParser(DALOperator::operatorAnd),
@@ -98,7 +95,8 @@ public class Compiler {
             TABLE = oneOf(new TransposedTableWithRowOperator(), new TableParser(), new TransposedTable());
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> PROPERTY_CHAIN,
-            OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY, ARITHMETIC_EXPRESSION, JUDGEMENT_EXPRESSION_OPERAND;
+            OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING)
+            .mandatory("should given one property or array index in `[]`"), ARITHMETIC_EXPRESSION, JUDGEMENT_EXPRESSION_OPERAND;
 
     ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             DOT_PROPERTY = Tokens.DOT_PROPERTY.clauseParser((token, previous) -> new PropertyNode(previous,
@@ -111,6 +109,11 @@ public class Compiler {
             BINARY_JUDGEMENT_EXPRESSION,
             BINARY_OPERATOR_EXPRESSION,
             SCHEMA_EXPRESSION;
+
+
+    public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+            SYMBOL = Tokens.IDENTITY_PROPERTY.nodeParser(SymbolNode::symbolNode),
+            BRACKET_SYMBOL;
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> judgementClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
@@ -125,8 +128,8 @@ public class Compiler {
     public Compiler() {
         CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
                 CONST_USER_DEFINED_LITERAL);
-        LIST_INDEX_OR_MAP_KEY = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING)
-                .mandatory("should given one property or array index in `[]`");
+        BRACKET_SYMBOL = single(LIST_INDEX_OR_MAP_KEY, "should given one property or array index in `[]`")
+                .between('[', ']').nodeParser(SymbolNode::bracketSymbolNode);
         PARENTHESES = lazy(() -> enableCommaAnd(single(EXPRESSION, "expect a value or expression").between('(', ')')
                 .nodeParser(ParenthesesNode::new)));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IDENTITY_PROPERTY);

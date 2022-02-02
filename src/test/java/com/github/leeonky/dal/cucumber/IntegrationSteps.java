@@ -50,6 +50,11 @@ public class IntegrationSteps {
         integrationTestContext.evaluate(expression);
     }
 
+    @When("evaluate follow expression as {string} node:")
+    public void evaluate_follow_expression_as_node(String nodeType, String expression) {
+        integrationTestContext.parseAndEvaluate(expression, nodeType);
+    }
+
     @Then("the result should:")
     public void the_result_is(String verification) {
         integrationTestContext.verifyLastEvaluated(verification);
@@ -81,5 +86,11 @@ public class IntegrationSteps {
     @Then("parse the following {string} node:")
     public void parse_the_following_node(String nodeType, String verification) {
         integrationTestContext.verifyNode(nodeType, verification);
+    }
+
+    @Then("failed to parse {string} with the following message:")
+    public void failed_to_parse_with_the_following_message(String nodeType, String message) {
+        integrationTestContext.parseNode(nodeType);
+        integrationTestContext.shouldFailedWith(message);
     }
 }

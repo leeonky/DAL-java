@@ -34,7 +34,8 @@ public class IntegrationTestContext {
     private static final Map<String, NodeParser<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure>> parserMap = new HashMap<String, NodeParser<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression,
             DALOperator, DALProcedure>>() {{
-        put("symbol", Compiler.SYMBOL);
+        put("symbol", compiler.SYMBOL);
+        put("bracket-symbol", compiler.BRACKET_SYMBOL);
     }};
 
     public void evaluate(String expression) {
@@ -103,8 +104,25 @@ public class IntegrationTestContext {
     }
 
     public void verifyNode(String factory, String verification) {
-        DALNode dalNode = parserMap.get(factory).parse(new DALProcedure(new SourceCode(expression),
-                dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null);
-        expect(dalNode).should(verification);
+        expect(parseNode(factory)).should(verification);
+    }
+
+    public DALNode parseNode(String factory) {
+        try {
+            return parserMap.get(factory).parse(new DALProcedure(new SourceCode(expression),
+                    dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null);
+        } catch (InterpreterException e) {
+            exception = e;
+            return null;
+        }
+    }
+
+    public void parseAndEvaluate(String expression, String nodeType) {
+        givenDALExpression(expression);
+        try {
+            result = parseNode(nodeType).evaluate(dal.getRuntimeContextBuilder().build(input));
+        } catch (InterpreterException e) {
+            exception = e;
+        }
     }
 }
