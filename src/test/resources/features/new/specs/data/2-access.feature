@@ -13,41 +13,23 @@ Feature: access data
     = 1
     """
 
-  Scenario: evaluate all as a list
-    Given the following json:
-    """
-      [1, 2, 3]
-    """
-    When evaluate all by:
-    """
-      [0] ([1]) ([2])
-    """
-    Then the result should:
-    """
-    : [1 2 3]
-    """
-
-  Scenario Outline: access property of root input object
+  Scenario: property chain
     Given the following json:
     """
       {
-        "name": "Tom"
+        "items": [{
+          "id": 100
+        }]
       }
     """
     When evaluate by:
     """
-    <code>
+      items[0].id
     """
     Then the result should:
     """
-    = 'Tom'
+    : 100
     """
-    Examples:
-      | code     |
-      | name     |
-      | .name    |
-      | ['name'] |
-      | ["name"] |
 
   Scenario: cann access public field, public getter, public no arg method by property
     Given the following java class:
@@ -84,38 +66,6 @@ Feature: access data
     : 300
     """
 
-  Scenario: access input list
-    Given the following json:
-    """
-      [1, 2, 3]
-    """
-    When evaluate by:
-    """
-      [0]
-    """
-    Then the result should:
-    """
-    : 1
-    """
-
-  Scenario: property chain
-    Given the following json:
-    """
-      {
-        "items": [{
-          "id": 100
-        }]
-      }
-    """
-    When evaluate by:
-    """
-      items[0].id
-    """
-    Then the result should:
-    """
-    : 100
-    """
-
   Scenario: raise error when access invalid property
     Given the following java class:
     """
@@ -149,4 +99,14 @@ Feature: access data
     """
     null.any
         ^
+    """
+
+  Scenario: evaluate all as a list
+    When evaluate all by:
+    """
+      1 2 3
+    """
+    Then the result should:
+    """
+    : [1 2 3]
     """

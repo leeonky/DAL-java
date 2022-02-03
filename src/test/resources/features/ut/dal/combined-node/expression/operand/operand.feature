@@ -156,28 +156,6 @@ Feature: operand node
      ^
     """
 
-  Scenario Outline:
-  dot operator has higher precedence over unary operator(property chain after unary operator)
-  unary operator has higher precedence over other operators
-    Given the following dal code:
-    """
-    1 + <operator>false.xxx
-    """
-    Then got the following "expression" node:
-    """
-    rightOperand: {
-      inspect: '<operator>false.xxx'
-      class.simpleName: 'DALExpression'
-      rightOperand: {
-        class.simpleName: 'PropertyNode'
-        inspect: 'false.xxx'
-      }
-    }
-    """
-    Examples:
-      | operator |
-      | !        |
-      | -        |
 
   Scenario: end with .@ is invalid
     Given the following dal code:
