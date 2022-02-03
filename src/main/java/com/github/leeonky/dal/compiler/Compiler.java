@@ -49,6 +49,10 @@ public class Compiler {
             Operators.DIVISION.operatorParser(DALOperator.Division::new));
 
     private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+            PROPERTY_DOT = Operators.DOT.operatorParser(DALOperator.PropertyDot::new),
+            PROPERTY_BRACKET = procedure -> when(procedure.getSourceCode().startsWith("[")).optional(DALOperator.PropertyBracket::new);
+
+    private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             UNARY_OPERATORS = oneOf(
             Operators.MINUS.operatorParser(DALOperator.Minus::new, not(DALProcedure::isCodeBeginning)),
             Operators.NOT.operatorParser(DALOperator.Not::new, not(DALProcedure::mayBeUnEqual)));
@@ -113,7 +117,8 @@ public class Compiler {
 
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SYMBOL = Tokens.IDENTITY_PROPERTY.nodeParser(SymbolNode::symbolNode),
-            BRACKET_SYMBOL;
+            BRACKET_SYMBOL = single(LIST_INDEX_OR_MAP_KEY, "should given one property or array index in `[]`")
+                    .between('[', ']').nodeParser(SymbolNode::bracketSymbolNode);
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> judgementClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
@@ -128,8 +133,6 @@ public class Compiler {
     public Compiler() {
         CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
                 CONST_USER_DEFINED_LITERAL);
-        BRACKET_SYMBOL = single(LIST_INDEX_OR_MAP_KEY, "should given one property or array index in `[]`")
-                .between('[', ']').nodeParser(SymbolNode::bracketSymbolNode);
         PARENTHESES = lazy(() -> enableCommaAnd(single(EXPRESSION, "expect a value or expression").between('(', ')')
                 .nodeParser(ParenthesesNode::new)));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IDENTITY_PROPERTY);

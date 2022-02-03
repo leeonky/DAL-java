@@ -11,7 +11,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     private static final int PRECEDENCE_PLUS_SUB_OPT = 300;
     private static final int PRECEDENCE_MUL_DIV = 400;
     private static final int PRECEDENCE_UNARY_OPERATION = 500;
-    private static final int PRECEDENCE_INDEX = 501;
+    private static final int PRECEDENCE_PROPERTY = 501;
     private final boolean needInspect;
 
     protected DALOperator(int precedence, String label, boolean needInspect) {
@@ -239,6 +239,30 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         @Override
         public String inspect(String node1, String node2) {
             return String.format("%s%s %s", node1, label, node2);
+        }
+    }
+
+    public static class PropertyDot extends DALOperator {
+
+        public PropertyDot() {
+            super(PRECEDENCE_PROPERTY, ".", false);
+        }
+
+        @Override
+        public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
+            return null;
+        }
+    }
+
+    public static class PropertyBracket extends DALOperator {
+
+        public PropertyBracket() {
+            super(PRECEDENCE_PROPERTY, "", false);
+        }
+
+        @Override
+        public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
+            return null;
         }
     }
 }

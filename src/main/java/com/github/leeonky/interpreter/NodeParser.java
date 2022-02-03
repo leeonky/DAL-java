@@ -12,8 +12,8 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         extends Parser<C, N, E, O, P, N> {
     static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> oneOf(
-            NodeParser<C, N, E, O, P> matcher, NodeParser<C, N, E, O, P>... matchers) {
-        return procedure -> Stream.concat(Stream.of(matcher), Stream.of(matchers))
+            NodeParser<C, N, E, O, P>... matchers) {
+        return procedure -> Stream.of(matchers)
                 .map(p -> p.parse(procedure)).filter(Optional::isPresent).findFirst().orElse(empty());
     }
 

@@ -40,6 +40,7 @@ public class Notations {
                 MINUS = notation("-"),
                 NOT = notation("!"),
                 MATCHER = notation(":"),
-                EQUAL = notation("=");
+                EQUAL = notation("="),
+                DOT = notation(".");
     }
 }
