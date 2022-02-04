@@ -17,7 +17,7 @@ Feature: compile dot or bracket notation property
     """
     Then got the following "explicit-property" node:
     """
-    class.simpleName: 'PropertyNode'
+    class.simpleName: 'DALExpression'
     """
     When the following input data:
     """
@@ -31,3 +31,4 @@ Feature: compile dot or bracket notation property
       | code  |
       | .a    |
       | ['a'] |
+#    TODO

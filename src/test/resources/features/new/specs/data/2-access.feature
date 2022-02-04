@@ -78,7 +78,7 @@ Feature: access data
     """
     Then failed with the message:
     """
-    Get property `.invalid` failed, property can be:
+    Get property `invalid` failed, property can be:
       1. public field
       2. public getter
       3. public no args method
@@ -98,7 +98,26 @@ Feature: access data
     And got the following notation:
     """
     null.any
-        ^
+         ^
+    """
+
+  Scenario: raise error when index out of bound
+    Given the following json:
+    """
+      [1, 2]
+    """
+    When evaluate by:
+    """
+      [3]
+    """
+    Then failed with the message:
+    """
+    Index out of bounds (Index: 3, Size: 2)
+    """
+    And got the following notation:
+    """
+      [3]
+      ^
     """
 
   Scenario: evaluate all as a list
@@ -110,3 +129,5 @@ Feature: access data
     """
     : [1 2 3]
     """
+
+# TODO invalid element mapping .@ (.@) .@+1 1+.@; valid: a.@b; a@[0]; a.@.b

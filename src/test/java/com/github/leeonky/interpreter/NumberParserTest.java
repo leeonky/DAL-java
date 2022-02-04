@@ -894,4 +894,9 @@ class NumberParserTest {
         } else
             assertThat(new NumberParser().parse(inputCode)).isEqualTo(expected);
     }
+
+    @Test
+    void bug_for_parse_number() {
+        assertParse(":;<=>?@", null);
+    }
 }

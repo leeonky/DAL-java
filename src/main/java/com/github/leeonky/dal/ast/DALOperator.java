@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.Calculator;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Operator;
 
@@ -17,6 +18,10 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     protected DALOperator(int precedence, String label, boolean needInspect) {
         super(precedence, label);
         this.needInspect = needInspect;
+    }
+
+    public Data calculateData(DALNode node1, DALNode node2, DALRuntimeContext context) {
+        return context.wrap(calculate(node1, node2, context));
     }
 
     public static And operatorAnd() {
@@ -242,27 +247,43 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         }
     }
 
-    public static class PropertyDot extends DALOperator {
+    public abstract static class Property extends DALOperator {
+        public Property(int precedence, String label, boolean needInspect) {
+            super(precedence, label, needInspect);
+        }
+
+        @Override
+        public Data calculateData(DALNode node1, DALNode node2, DALRuntimeContext context) {
+            return ((SymbolNode) node2).getPropertyValue(node1, context);
+        }
+
+        @Override
+        public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
+            return calculateData(node1, node2, context).getInstance();
+        }
+    }
+
+    public static class PropertyDot extends Property {
 
         public PropertyDot() {
             super(PRECEDENCE_PROPERTY, ".", false);
         }
 
         @Override
-        public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return null;
+        public String inspect(String node1, String node2) {
+            return String.format("%s%s%s", node1, label, node2);
         }
     }
 
-    public static class PropertyBracket extends DALOperator {
+    public static class PropertyBracket extends Property {
 
         public PropertyBracket() {
             super(PRECEDENCE_PROPERTY, "", false);
         }
 
         @Override
-        public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return null;
+        public String inspect(String node1, String node2) {
+            return String.format("%s%s", node1, node2);
         }
     }
 }

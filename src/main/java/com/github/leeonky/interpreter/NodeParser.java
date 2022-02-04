@@ -34,6 +34,7 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return procedure -> parse(procedure).orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0));
     }
 
+    //TODO rename
     default ClauseParser<C, N, E, O, P> castToClause() {
         return procedure -> parse(procedure).map(node -> p -> node);
     }

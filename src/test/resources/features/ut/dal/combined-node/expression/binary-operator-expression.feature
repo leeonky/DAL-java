@@ -89,9 +89,10 @@ Feature: binary operator expression
     : {
       class.simpleName: 'DALExpression'
       inspect: '+ [0]'
-      rightOperand.class.simpleName: 'PropertyNode'
+      rightOperand.class.simpleName: 'DALExpression'
     }
     """
+#    TODO
 
   Scenario Outline: force positive judgement
     Given the following dal code:

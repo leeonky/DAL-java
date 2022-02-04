@@ -110,19 +110,3 @@ Feature: symbol
       | identity-property |
       | orderCount        |
       | isOk              |
-
-  Scenario: evaluate symbol under current scope
-    Given the following json:
-    """
-    {
-      "name": "Tom"
-    }
-    """
-    When evaluate follow expression as "symbol" node:
-    """
-      name
-    """
-    Then the result should:
-    """
-    : 'Tom'
-    """

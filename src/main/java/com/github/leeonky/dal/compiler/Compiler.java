@@ -49,7 +49,7 @@ public class Compiler {
             Operators.DIVISION.operatorParser(DALOperator.Division::new));
 
     private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            PROPERTY_DOT = Operators.DOT.operatorParser(DALOperator.PropertyDot::new),
+            PROPERTY_DOT = Operators.DOT.operatorParser(DALOperator.PropertyDot::new, not(DALProcedure::mayBeElementEllipsis)),
             PROPERTY_BRACKET = procedure -> when(procedure.getSourceCode().startsWith("[")).optional(DALOperator.PropertyBracket::new);
 
     private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
@@ -131,6 +131,9 @@ public class Compiler {
             SCHEMA_CLAUSE = new SchemaClauseMandatory();
 
     public Compiler() {
+        EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(SYMBOL.mandatory("todo1")), PROPERTY_BRACKET.clause(BRACKET_SYMBOL.mandatory("todo2")));
+        IDENTITY_PROPERTY = SYMBOL;
+
         CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
                 CONST_USER_DEFINED_LITERAL);
         PARENTHESES = lazy(() -> enableCommaAnd(single(EXPRESSION, "expect a value or expression").between('(', ')')
@@ -184,8 +187,8 @@ public class Compiler {
     }
 
     public List<Object> toChainNodes(String sourceCode) {
-        return ((PropertyNode) PROPERTY_CHAIN.parse(new DALProcedure(new SourceCode(sourceCode),
-                null, DALExpression::new))).getChain();
+        return PROPERTY_CHAIN.parse(new DALProcedure(new SourceCode(sourceCode),
+                null, DALExpression::new)).propertyChain();
     }
 
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>

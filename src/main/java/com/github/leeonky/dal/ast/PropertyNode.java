@@ -43,11 +43,6 @@ public class PropertyNode extends DALNode {
     }
 
     @Override
-    public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
-        return evaluateDataObject(context).getInstance();
-    }
-
-    @Override
     public boolean equals(Object obj) {
         return obj instanceof PropertyNode
                 && Objects.equals(instanceNode, ((PropertyNode) obj).instanceNode)

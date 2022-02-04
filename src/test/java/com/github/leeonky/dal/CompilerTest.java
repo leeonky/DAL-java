@@ -40,26 +40,12 @@ class CompilerTest {
         }
 
         @Test
-        void access_property_of_root_value() {
-            assertCompileNode(".result", new PropertyNode(InputNode.INSTANCE, "result", DOT));
-        }
-
-        @Test
-        void access_property_list_of_root_value() {
-            assertCompileNode(".sub .result", new PropertyNode(new PropertyNode(InputNode.INSTANCE, "sub", DOT), "result", DOT));
-        }
-
-        @Test
         void access_one_const_value_ignore_root_value() {
             assertCompileNode("1", new ConstNode(1));
         }
 
-        @Test
-        void access_one_const_value_property_ignore_root_value() {
-            assertCompileNode("''.empty", new PropertyNode(new ConstNode(""), "empty", DOT));
-        }
-
-        @Test
+        //        @Test
+//        TODO need test
         void access_property_after_parentheses() {
             ParenthesesNode parenthesesNode = new ParenthesesNode(new ConstNode(""));
             assertCompileNode("('').empty", new PropertyNode(parenthesesNode, "empty", DOT));
@@ -68,11 +54,6 @@ class CompilerTest {
 
     @Nested
     class AccessElementExpression {
-
-        @Test
-        void support_access_array_by_const_index() {
-            assertCompileNode("[0]", new PropertyNode(InputNode.INSTANCE, 0, DOT));
-        }
 
         @Test
         void miss_opening_bracket() {

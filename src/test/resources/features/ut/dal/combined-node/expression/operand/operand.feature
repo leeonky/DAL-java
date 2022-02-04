@@ -33,10 +33,11 @@ Feature: operand node
     Examples:
       | code  | type            | inspect |
       | 100   | ConstNode       | 100     |
-      | name  | PropertyNode    | name    |
-      | .name | PropertyNode    | .name   |
-      | [0]   | PropertyNode    | [0]     |
+      | name  | SymbolNode      | name    |
+      | .name | DALExpression   | .name   |
+      | [0]   | DALExpression   | [0]     |
       | (1+1) | ParenthesesNode | (1 + 1) |
+#    TODO
 
   Scenario: recursive property node
     Given the following dal code:
@@ -46,7 +47,7 @@ Feature: operand node
     Then got the following "operand" node:
     """
     : {
-      class.simpleName: 'PropertyNode'
+      class.simpleName: 'DALExpression'
       inspect: '.order.lines[0].name'
       positionBegin: 15
     }
@@ -59,6 +60,7 @@ Feature: operand node
     """
     : 'book'
     """
+#    TODO
 
   Scenario: support minus before node
     Given the following dal code:
@@ -155,19 +157,18 @@ Feature: operand node
     1
      ^
     """
-
-
-  Scenario: end with .@ is invalid
-    Given the following dal code:
-    """
-      .@
-    """
-    Then failed to get "operand" node with the following message:
-    """
-    element property needed
-    """
-    And got the following source code information:
-    """
-      .@
-      ^
-    """
+#TODO
+#  Scenario: end with .@ is invalid
+#    Given the following dal code:
+#    """
+#      .@ + 0
+#    """
+#    Then failed to get "expression" node with the following message:
+#    """
+#    element property needed
+#    """
+#    And got the following source code information:
+#    """
+#      .@
+#      ^
+#    """

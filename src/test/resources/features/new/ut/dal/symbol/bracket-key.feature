@@ -23,14 +23,6 @@ Feature: bracket symbol node
       inspect: '[1]'
     }
     """
-    When the following json:
-    """
-      [0, 1]
-    """
-    Then last evaluated node result is:
-    """
-    : 1
-    """
 
   Scenario Outline: access object property
     Given the following dal expression:
@@ -44,14 +36,6 @@ Feature: bracket symbol node
       positionBegin: 2
       inspect: "['first name']"
     }
-    """
-    When the following json:
-    """
-      { "first name": "Tom" }
-    """
-    Then last evaluated node result is:
-    """
-    : 'Tom'
     """
     Examples:
       | name         |
@@ -69,14 +53,6 @@ Feature: bracket symbol node
       class.simpleName: 'SymbolNode'
       inspect: '[-1]'
     }
-    """
-    When the following json:
-    """
-      [0, 1]
-    """
-    Then last evaluated node result is:
-    """
-    : 1
     """
 
   Scenario: white space in bracket

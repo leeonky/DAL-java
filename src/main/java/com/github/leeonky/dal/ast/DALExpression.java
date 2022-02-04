@@ -1,8 +1,11 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Expression;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class DALExpression extends DALNode implements Expression<DALRuntimeContext, DALNode, DALExpression, DALOperator> {
@@ -33,10 +36,10 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     }
 
     @Override
-    public Object evaluate(DALRuntimeContext context) {
+    public Data evaluateDataObject(DALRuntimeContext context) {
         try {
-            Object result = operator.calculate(node1, node2, context);
-            if (operator.isNeedInspect() && (result instanceof Boolean) && !(boolean) result)
+            Data result = operator.calculateData(node1, node2, context);
+            if (operator.isNeedInspect() && (result.getInstance() instanceof Boolean) && !(boolean) result.getInstance())
                 System.err.println("Warning: Expression `" + inspect() + "` got false.");
             return result;
         } catch (IllegalArgumentException ex) {
@@ -59,7 +62,7 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
 
     @Override
     public Object getRootName() {
-        return node1.getRootName();
+        return node1 instanceof InputNode ? node2.getRootName() : node1.getRootName();
     }
 
     @Override
@@ -73,4 +76,17 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     public int getOperandPosition() {
         return node2.getPositionBegin();
     }
+
+    @Override
+    public List<Object> propertyChain() {
+        return new ArrayList<Object>() {{
+            addAll(node1.propertyChain());
+            addAll(node2.propertyChain());
+        }};
+    }
+
+//    @Override
+//    public DALNode avoidListMapping() {
+//        return node2.avoidListMapping();
+//    }
 }

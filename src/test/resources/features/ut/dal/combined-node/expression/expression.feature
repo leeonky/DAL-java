@@ -33,15 +33,16 @@ Feature: expression
     Then got the following "expression" node:
     """
     : {
-      class.simpleName: 'PropertyNode'
+      class.simpleName: 'SymbolNode'
       inspect: '<code>'
     }
     """
     Examples:
       | code |
       | a    |
-      | .a   |
-      | .a.b |
+#    TODO
+#      | .a   |
+#      | .a.b |
 
   Scenario: default use 'this' object as left operand
     Given the following dal code:

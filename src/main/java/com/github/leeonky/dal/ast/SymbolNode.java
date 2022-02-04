@@ -4,6 +4,11 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.Token;
 
+import java.util.Collections;
+import java.util.List;
+
+import static java.lang.String.format;
+
 public class SymbolNode extends DALNode {
     private final Object symbol;
     private final Type type;
@@ -18,14 +23,33 @@ public class SymbolNode extends DALNode {
         return type.inspect(symbol);
     }
 
+    //    TODO to be remove, use expression
     @Override
     public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
-        return context.getInputValue().getValue(symbol);
+        return getPropertyValue(context.getInputValue());
     }
 
-    @Override
-    public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
-        return evaluateDataObject(context).getInstance();
+    public Data getPropertyValue(DALNode node1, RuntimeContextBuilder.DALRuntimeContext context) {
+        return getPropertyValue(node1.evaluateDataObject(context));
+    }
+
+    private Data getPropertyValue(Data data) {
+        if (data.isNull())
+            throw new RuntimeException("Instance is null", getPositionBegin());
+        try {
+            return data.getValue(symbol);
+        } catch (IndexOutOfBoundsException ex) {
+            throw new RuntimeException("Index out of bounds (" + ex.getMessage() + ")", getPositionBegin());
+        } catch (Exception e) {
+            throw new RuntimeException(format("Get property `%s` failed, property can be:\n" +
+                    "  1. public field\n" +
+                    "  2. public getter\n" +
+                    "  3. public no args method\n" +
+                    "  4. Map key value\n" +
+                    "  5. customized type getter\n" +
+                    "  6. static method extension\n" +
+                    e.getMessage(), inspect()), getPositionBegin());
+        }
     }
 
     public enum Type {
@@ -50,5 +74,16 @@ public class SymbolNode extends DALNode {
 
     public static SymbolNode bracketSymbolNode(DALNode node) {
         return new SymbolNode(((ConstNode) node).getValue(), Type.BRACKET);
+    }
+
+    @Override
+    public List<Object> propertyChain() {
+        return Collections.singletonList(symbol);
+    }
+
+    //    TODO  to be remove
+    @Override
+    public Object getRootName() {
+        return symbol;
     }
 }

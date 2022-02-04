@@ -57,7 +57,7 @@ Feature: compile all nodes with delimiter
     And got the following "identity-property" node:
     """
     : {
-      class.simpleName: 'PropertyNode'
+      class.simpleName: 'SymbolNode'
       inspect: 'identityProperty'
     }
     """
@@ -71,7 +71,7 @@ Feature: compile all nodes with delimiter
     And got the following "identity-property" node:
     """
     : {
-      class.simpleName: 'PropertyNode'
+      class.simpleName: 'SymbolNode'
       inspect: '1a'
     }
     """

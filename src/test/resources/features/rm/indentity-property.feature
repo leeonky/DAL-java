@@ -47,7 +47,7 @@ Feature: compile identity property
     Then got the following "identity-property" node:
     """
     : {
-      class.simpleName: 'PropertyNode'
+      class.simpleName: 'SymbolNode'
       positionBegin: 2
       inspect: '<code>'
     }
@@ -67,7 +67,7 @@ Feature: compile identity property
     Then got the following "identity-property" node:
     """
     : {
-      class.simpleName: 'PropertyNode'
+      class.simpleName: 'SymbolNode'
       inspect: 'name'
     }
     """
@@ -102,7 +102,7 @@ Feature: compile identity property
     Then got the following "identity-property" node:
     """
     : {
-      class.simpleName: 'PropertyNode'
+      class.simpleName: 'SymbolNode'
       inspect: '<identity-property>'
     }
     """

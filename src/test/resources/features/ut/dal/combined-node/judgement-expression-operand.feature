@@ -21,15 +21,17 @@ Feature: compile judgement expression operand
     Then got the following "judgement-expression-operand" node:
     """
     : {
-      class.simpleName: 'PropertyNode'
+      class.simpleName: 'SymbolNode'
       inspect: '<code>'
     }
     """
     Examples:
       | code |
       | a    |
-      | .a   |
-      | .a.b |
+
+#    TODO
+#      | .a   |
+#      | .a.b |
 
   Scenario Outline: operator expressions
     Given the following dal code:
@@ -104,8 +106,9 @@ Feature: compile judgement expression operand
     """
     Then got the following "judgement-expression-operand" node:
     """
-    rightOperand.class.simpleName: 'PropertyNode'
+    rightOperand.class.simpleName: 'DALExpression'
     """
+#    TODO
 
   Scenario: regex node
     Given the following dal code:

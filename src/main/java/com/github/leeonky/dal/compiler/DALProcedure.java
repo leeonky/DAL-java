@@ -59,4 +59,8 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
     public boolean mayBeUnEqual() {
         return getSourceCode().startsWith("!=");
     }
+
+    public boolean mayBeElementEllipsis() {
+        return getSourceCode().startsWith("..");
+    }
 }

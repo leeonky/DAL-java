@@ -5,6 +5,8 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.NodeBase;
 
+import java.util.List;
+
 import static com.github.leeonky.dal.ast.AssertionFailure.*;
 import static java.lang.String.format;
 
@@ -12,6 +14,11 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
 
     public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.wrap(evaluate(context));
+    }
+
+    @Override
+    public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
+        return evaluateDataObject(context).getInstance();
     }
 
     public boolean judge(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
@@ -53,11 +60,16 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return this;
     }
 
+    //    TODO refactor
     public Object getRootName() {
         return null;
     }
 
     public String inspectClause() {
         return inspect();
+    }
+
+    public List<Object> propertyChain() {
+        throw new IllegalStateException();
     }
 }

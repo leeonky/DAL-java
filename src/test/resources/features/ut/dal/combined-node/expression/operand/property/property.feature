@@ -17,7 +17,7 @@ Feature: compile property node
     """
     Then got the following "property" node:
     """
-    class.simpleName: 'PropertyNode'
+    class.simpleName: 'SymbolNode'
     """
     When the following input data:
     """
@@ -28,7 +28,8 @@ Feature: compile property node
     : 1
     """
     Examples:
-      | code  |
-      | a     |
-      | .a    |
-      | ['a'] |
+      | code |
+      | a    |
+#      TODO
+#      | .a    |
+#      | ['a'] |

@@ -363,12 +363,12 @@ public class NumberParser {
     }
 
     private int getDigit(int radix, char c) {
-        int value;
+        int value = -1;
         if (c <= '9')
             value = c - '0';
         else if (c >= 'a')
             value = c - 'a' + 10;
-        else
+        else if (c >= 'A')
             value = c - 'A' + 10;
         if (value >= 0 && value < radix)
             return value;
