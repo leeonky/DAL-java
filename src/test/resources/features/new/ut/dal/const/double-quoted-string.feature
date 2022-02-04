@@ -15,7 +15,7 @@ Feature: "string"
     """
      "<str>"
     """
-    Then parse the following "double-quoted-string" node:
+    Then parse the following "expression" node:
     """
     : {
       class.simpleName: 'ConstNode'
@@ -29,7 +29,7 @@ Feature: "string"
       | hello world | \'hello world\' |
 
   Scenario: escape char
-    When evaluate follow expression as "double-quoted-string" node:
+    When evaluate follow expression as "expression" node:
     """
     "\\\n\t\""
     """
@@ -40,7 +40,7 @@ Feature: "string"
     """
 
   Scenario: keep original char when not valid escape char
-    When evaluate follow expression as "double-quoted-string" node:
+    When evaluate follow expression as "expression" node:
     """
     "\h"
     """
@@ -54,7 +54,7 @@ Feature: "string"
     """
     <code>
     """
-    Then failed to parse "double-quoted-string" with the following message:
+    Then failed to parse "expression" with the following message:
     """
     should end with `"`
     """

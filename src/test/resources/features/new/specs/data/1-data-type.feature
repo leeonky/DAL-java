@@ -126,7 +126,6 @@ Feature: basic data and type
     }
     """
 
-
   Scenario: define and use user defined literal
     Given defined US dollar money object with the following regex
     """

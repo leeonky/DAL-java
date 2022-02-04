@@ -12,10 +12,7 @@ import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.SourceCode;
 import lombok.SneakyThrows;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
@@ -38,8 +35,16 @@ public class IntegrationTestContext {
         put("bracket-symbol", compiler.BRACKET_SYMBOL);
         put("single-quoted-string", compiler.SINGLE_QUOTED_STRING);
         put("double-quoted-string", compiler.DOUBLE_QUOTED_STRING);
+        put("number", compiler.NUMBER);
+        put("expression", optional(compiler.EXPRESSION));
+        put("integer", compiler.INTEGER);
     }};
     private DALNode dalNode = null;
+
+    private static NodeParser<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> optional(
+            NodeParser.Mandatory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeFactory) {
+        return procedure -> Optional.ofNullable(nodeFactory.parse(procedure));
+    }
 
     public void evaluate(String expression) {
         givenDALExpression(expression);

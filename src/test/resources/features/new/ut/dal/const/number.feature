@@ -1,21 +1,21 @@
 Feature: const number node
 
   Scenario: null when does not match
-    Given the following dal code:
+    Given the following dal expression:
     """
     not starts with digital
     """
-    Then got the following "number" node:
+    Then parse the following "number" node:
     """
     : null
     """
 
   Scenario Outline: supported format for number parsing
-    Given the following dal code:
+    Given the following dal expression:
     """
      <code>
     """
-    Then got the following "number" node:
+    Then parse the following "number" node:
     """
     : {
       class.simpleName: 'ConstNode'
@@ -23,7 +23,7 @@ Feature: const number node
       positionBegin: 1
     }
     """
-    And node evaluate result is:
+    And last evaluated node result is:
     """
     : <evaluate>
     """
@@ -35,11 +35,11 @@ Feature: const number node
       | 1.1            | 1.1            | 1.1            |
 
   Scenario Outline: delimiter between numbers
-    Given the following dal code:
+    When evaluate follow expression as "number" node:
     """
      1<delimiter>
     """
-    Then node evaluate as "number" result is:
+    Then the result should:
     """
     : 1
     """
@@ -66,15 +66,15 @@ Feature: const number node
       | `SPACE    |
 
   Scenario: return empty when invalid number, and source code offset should rollback to beginning
-    Given the following dal code:
+    Given the following dal expression:
     """
     12Invalid
     """
-    Then got the following "number" node:
+    Then parse the following "number" node:
     """
     : null
     """
-    Then got the following "identity-property" node:
+    Then parse the following "symbol" node:
     """
     : {
       inspect: '12Invalid'
@@ -82,13 +82,13 @@ Feature: const number node
     """
 
   Scenario: supported hex integer in any case
-    Given the following input java class data:
+    Given the following java class:
     """
     public class Numbers {
       public long value = 15;
     }
     """
-    Then the following assertion for "Numbers" should pass:
+    Then the following verification for the instance of java class "Numbers" should pass:
     """
     : {
       value = 0xfl
@@ -103,7 +103,7 @@ Feature: const number node
     """
 
   Scenario: parse float number
-    * the following assertion should pass:
+    * the following verification should pass:
     """
       1e1: 10.0,
       1e+1: 10.0,

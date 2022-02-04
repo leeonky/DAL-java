@@ -3,7 +3,7 @@ Feature: 'string'
   Scenario: null when does not match
     Given the following dal expression:
     """
-    not starts with quote
+    not starts with '
     """
     Then parse the following "single-quoted-string" node:
     """
@@ -15,7 +15,7 @@ Feature: 'string'
     """
      '<str>'
     """
-    Then parse the following "single-quoted-string" node:
+    Then parse the following "expression" node:
     """
     : {
       class.simpleName: 'ConstNode'
@@ -29,7 +29,7 @@ Feature: 'string'
       | hello world | \'hello world\' |
 
   Scenario: escape char
-    When evaluate follow expression as "single-quoted-string" node:
+    When evaluate follow expression as "expression" node:
     """
     '\\\''
     """
@@ -39,7 +39,7 @@ Feature: 'string'
     """
 
   Scenario: keep original char when not valid escape char
-    When evaluate follow expression as "single-quoted-string" node:
+    When evaluate follow expression as "expression" node:
     """
     '\h'
     """
@@ -53,7 +53,7 @@ Feature: 'string'
     """
     <code>
     """
-    Then failed to parse "single-quoted-string" with the following message:
+    Then failed to parse "expression" with the following message:
     """
     should end with `'`
     """
