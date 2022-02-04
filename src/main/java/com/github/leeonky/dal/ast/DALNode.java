@@ -4,6 +4,7 @@ import com.github.leeonky.dal.ast.DALOperator.Matcher;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.NodeBase;
+import com.github.leeonky.interpreter.Token;
 
 import java.util.List;
 
@@ -11,6 +12,18 @@ import static com.github.leeonky.dal.ast.AssertionFailure.*;
 import static java.lang.String.format;
 
 public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeContext, DALNode> {
+
+    public static SymbolNode symbolNode(Token token) {
+        return new SymbolNode(token.getContent(), SymbolNode.Type.SYMBOL);
+    }
+
+    public static SymbolNode bracketSymbolNode(DALNode node) {
+        return new SymbolNode(((ConstNode) node).getValue(), SymbolNode.Type.BRACKET);
+    }
+
+    public static DALExpression parenthesesNode(DALNode node) {
+        return new DALExpression(null, new DALOperator.Parentheses(), node);
+    }
 
     public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.wrap(evaluate(context));

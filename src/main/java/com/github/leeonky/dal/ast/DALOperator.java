@@ -13,6 +13,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     private static final int PRECEDENCE_MUL_DIV = 400;
     private static final int PRECEDENCE_UNARY_OPERATION = 500;
     private static final int PRECEDENCE_PROPERTY = 501;
+    private static final int PRECEDENCE_PARENTHESES = Integer.MAX_VALUE;
     private final boolean needInspect;
 
     protected DALOperator(int precedence, String label, boolean needInspect) {
@@ -22,6 +23,11 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
     public Data calculateData(DALNode node1, DALNode node2, DALRuntimeContext context) {
         return context.wrap(calculate(node1, node2, context));
+    }
+
+    @Override
+    public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
+        return calculateData(node1, node2, context).getInstance();
     }
 
     public static And operatorAnd() {
@@ -244,6 +250,22 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         @Override
         public String inspect(String node1, String node2) {
             return String.format("%s%s %s", node1, label, node2);
+        }
+    }
+
+    public static class Parentheses extends DALOperator {
+        public Parentheses() {
+            super(PRECEDENCE_PARENTHESES, "", false);
+        }
+
+        @Override
+        public Data calculateData(DALNode node1, DALNode node2, DALRuntimeContext context) {
+            return node2.evaluateDataObject(context);
+        }
+
+        @Override
+        public String inspect(String node1, String node2) {
+            return String.format("(%s)", node2);
         }
     }
 

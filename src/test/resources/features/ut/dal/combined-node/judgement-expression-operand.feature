@@ -148,7 +148,7 @@ Feature: compile judgement expression operand
     Then got the following "judgement-expression-operand" node:
     """
     : {
-      class.simpleName: 'ParenthesesNode'
+      class.simpleName: 'DALExpression'
       inspect: '(1)'
     }
     """

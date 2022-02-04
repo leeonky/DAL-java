@@ -18,7 +18,7 @@ Feature: parentheses node
     Then got the following "parentheses" node:
     """
     : {
-      class.simpleName: 'ParenthesesNode'
+      class.simpleName: 'DALExpression'
       inspect: '(1)'
       positionBegin: 1
     }
@@ -36,7 +36,7 @@ Feature: parentheses node
     Then got the following "parentheses" node:
     """
     : {
-      class.simpleName: 'ParenthesesNode'
+      class.simpleName: 'DALExpression'
       inspect: '(1 + 1)'
       positionBegin: 1
     }

@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
-import static com.github.leeonky.dal.ast.PropertyNode.Type.*;
 import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.DALProcedure.enableCommaAnd;
 import static com.github.leeonky.dal.compiler.Notations.Operators;
@@ -89,8 +89,7 @@ public class Compiler {
             CONST_NULL = Keywords.NULL.nodeMatcher(token -> new ConstNode(null)),
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
             REGEX = procedure -> procedure.fetchString('/', '/', RegexNode::new, REGEX_ESCAPES),
-            IMPLICIT_PROPERTY = Tokens.IDENTITY_PROPERTY.nodeParser(token ->
-                    new PropertyNode(InputNode.INSTANCE, token.getContent(), IDENTIFIER)),
+            IMPLICIT_PROPERTY,
             WILDCARD = Notations.Operators.WILDCARD.nodeMatcher(token -> new WildcardNode(token.getContent())),
             ROW_WILDCARD = Notations.Operators.ROW_WILDCARD.nodeMatcher(token -> new WildcardNode(token.getContent())),
             PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_JUDGEMENT_CLAUSE,
@@ -116,9 +115,9 @@ public class Compiler {
 
 
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SYMBOL = Tokens.IDENTITY_PROPERTY.nodeParser(SymbolNode::symbolNode),
+            SYMBOL = Tokens.IDENTITY_PROPERTY.nodeParser(DALNode::symbolNode),
             BRACKET_SYMBOL = single(LIST_INDEX_OR_MAP_KEY, "should given one property or array index in `[]`")
-                    .between('[', ']').nodeParser(SymbolNode::bracketSymbolNode);
+                    .between('[', ']').nodeParser(DALNode::bracketSymbolNode);
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> judgementClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
@@ -143,7 +142,7 @@ public class Compiler {
         CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
                 CONST_USER_DEFINED_LITERAL);
         PARENTHESES = lazy(() -> enableCommaAnd(single(EXPRESSION, "expect a value or expression").between('(', ')')
-                .nodeParser(ParenthesesNode::new)));
+                .nodeParser(DALNode::parenthesesNode)));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IMPLICIT_PROPERTY);
         PROPERTY_CHAIN = procedure -> PROPERTY.mandatory("expect a object property").recursive(EXPLICIT_PROPERTY).parse(procedure);
         OBJECT = lazy(() -> DALProcedure.disableCommaAnd(multiple(PROPERTY_CHAIN.mandatoryNode(

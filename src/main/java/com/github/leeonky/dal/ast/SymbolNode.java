@@ -2,7 +2,6 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.interpreter.Token;
 
 import java.util.Collections;
 import java.util.List;
@@ -60,14 +59,6 @@ public class SymbolNode extends DALNode {
         };
 
         abstract public String inspect(Object symbol);
-    }
-
-    public static SymbolNode symbolNode(Token token) {
-        return new SymbolNode(token.getContent(), Type.SYMBOL);
-    }
-
-    public static SymbolNode bracketSymbolNode(DALNode node) {
-        return new SymbolNode(((ConstNode) node).getValue(), Type.BRACKET);
     }
 
     @Override

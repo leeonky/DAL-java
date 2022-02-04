@@ -31,12 +31,12 @@ Feature: operand node
     }
     """
     Examples:
-      | code  | type            | inspect |
-      | 100   | ConstNode       | 100     |
-      | name  | DALExpression   | name    |
-      | .name | DALExpression   | .name   |
-      | [0]   | DALExpression   | [0]     |
-      | (1+1) | ParenthesesNode | (1 + 1) |
+      | code  | type          | inspect |
+      | 100   | ConstNode     | 100     |
+      | name  | DALExpression | name    |
+      | .name | DALExpression | .name   |
+      | [0]   | DALExpression | [0]     |
+      | (1+1) | DALExpression | (1 + 1) |
 #    TODO rtest
 
 #  Scenario: recursive property node

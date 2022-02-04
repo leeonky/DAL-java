@@ -159,16 +159,6 @@ class CompilerTest {
     class ParenthesesInExpression {
 
         @Test
-        void compile_simple_parentheses() {
-            assertCompileNode("(1)", new ParenthesesNode(new ConstNode(1)));
-        }
-
-        @Test
-        void miss_closing_parenthesis_should_raise_error() {
-            assertSyntaxException("(1", 2, "should end with `)`");
-        }
-
-        @Test
         void miss_opening_parenthesis_should_raise_error() {
             assertSyntaxException("1)", 1, "expect a value or expression");
         }
