@@ -147,6 +147,36 @@ Feature: invoke
       : false
     """
 
+  Scenario: do not allow empty property
+    When evaluate by:
+    """
+    .
+    """
+    Then failed with the message:
+    """
+    expect a symbol
+    """
+    And got the following notation:
+    """
+    .
+     ^
+    """
+
+  Scenario: do not allow empty property(has white space)
+    When evaluate by:
+    """
+    . 
+    """
+    Then failed with the message:
+    """
+    expect a symbol
+    """
+    And got the following notation:
+    """
+    . 
+      ^
+    """
+
 #  TODO opt is
 #  TODO = ['value'], : ['value']
 #  TODO access list last index

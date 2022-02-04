@@ -40,7 +40,7 @@ public class CucumberContextBak {
         put("const", compiler.CONST);
         put("regex", compiler.REGEX);
         put("dot-property", compiler.DOT_PROPERTY.defaultInputNode(InputNode.INSTANCE));
-        put("identity-property", compiler.IDENTITY_PROPERTY);
+        put("identity-property", compiler.IMPLICIT_PROPERTY);
         put("bracket-property", compiler.BRACKET_PROPERTY.defaultInputNode(InputNode.INSTANCE));
         put("explicit-property", compiler.EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE));
         put("property", compiler.PROPERTY);

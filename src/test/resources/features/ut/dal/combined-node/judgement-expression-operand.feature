@@ -21,7 +21,7 @@ Feature: compile judgement expression operand
     Then got the following "judgement-expression-operand" node:
     """
     : {
-      class.simpleName: 'SymbolNode'
+      class.simpleName: 'DALExpression'
       inspect: '<code>'
     }
     """
@@ -29,7 +29,7 @@ Feature: compile judgement expression operand
       | code |
       | a    |
 
-#    TODO
+#    TODO rtest
 #      | .a   |
 #      | .a.b |
 

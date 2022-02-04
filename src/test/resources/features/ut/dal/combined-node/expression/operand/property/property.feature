@@ -17,7 +17,7 @@ Feature: compile property node
     """
     Then got the following "property" node:
     """
-    class.simpleName: 'SymbolNode'
+    class.simpleName: 'DALExpression'
     """
     When the following input data:
     """
@@ -30,6 +30,6 @@ Feature: compile property node
     Examples:
       | code |
       | a    |
-#      TODO
+#      TODO rtest
 #      | .a    |
 #      | ['a'] |

@@ -23,12 +23,6 @@ public class SymbolNode extends DALNode {
         return type.inspect(symbol);
     }
 
-    //    TODO to be remove, use expression
-    @Override
-    public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
-        return getPropertyValue(context.getInputValue());
-    }
-
     public Data getPropertyValue(DALNode node1, RuntimeContextBuilder.DALRuntimeContext context) {
         return getPropertyValue(node1.evaluateDataObject(context));
     }

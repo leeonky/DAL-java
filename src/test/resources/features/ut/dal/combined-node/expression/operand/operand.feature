@@ -33,34 +33,34 @@ Feature: operand node
     Examples:
       | code  | type            | inspect |
       | 100   | ConstNode       | 100     |
-      | name  | SymbolNode      | name    |
+      | name  | DALExpression   | name    |
       | .name | DALExpression   | .name   |
       | [0]   | DALExpression   | [0]     |
       | (1+1) | ParenthesesNode | (1 + 1) |
-#    TODO
+#    TODO rtest
 
-  Scenario: recursive property node
-    Given the following dal code:
-    """
-    .order.lines[0].name
-    """
-    Then got the following "operand" node:
-    """
-    : {
-      class.simpleName: 'DALExpression'
-      inspect: '.order.lines[0].name'
-      positionBegin: 15
-    }
-    """
-    When the following input data:
-    """
-      { "order": { "lines": [{ "name": "book" }] } }
-    """
-    Then node evaluate result is:
-    """
-    : 'book'
-    """
-#    TODO
+#  Scenario: recursive property node
+#    Given the following dal code:
+#    """
+#    .order.lines[0].name
+#    """
+#    Then got the following "operand" node:
+#    """
+#    : {
+#      class.simpleName: 'DALExpression'
+#      inspect: '.order.lines[0].name'
+#      positionBegin: 15
+#    }
+#    """
+#    When the following input data:
+#    """
+#      { "order": { "lines": [{ "name": "book" }] } }
+#    """
+#    Then node evaluate result is:
+#    """
+#    : 'book'
+#    """
+#    TODO rtest
 
   Scenario: support minus before node
     Given the following dal code:

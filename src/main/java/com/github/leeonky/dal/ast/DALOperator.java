@@ -247,7 +247,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         }
     }
 
-    public abstract static class Property extends DALOperator {
+    public static class Property extends DALOperator {
         public Property(int precedence, String label, boolean needInspect) {
             super(precedence, label, needInspect);
         }
@@ -275,9 +275,9 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         }
     }
 
-    public static class PropertyBracket extends Property {
+    public static class PropertyImplicit extends Property {
 
-        public PropertyBracket() {
+        public PropertyImplicit() {
             super(PRECEDENCE_PROPERTY, "", false);
         }
 

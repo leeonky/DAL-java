@@ -36,6 +36,8 @@ public class IntegrationTestContext {
             DALOperator, DALProcedure>>() {{
         put("symbol", compiler.SYMBOL);
         put("bracket-symbol", compiler.BRACKET_SYMBOL);
+        put("single-quoted-string", compiler.SINGLE_QUOTED_STRING);
+        put("double-quoted-string", compiler.DOUBLE_QUOTED_STRING);
     }};
     private DALNode dalNode = null;
 

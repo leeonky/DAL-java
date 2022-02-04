@@ -54,10 +54,11 @@ Feature: compile all nodes with delimiter
       inspect: 'null'
     }
     """
+#    TODO rtest
     And got the following "identity-property" node:
     """
     : {
-      class.simpleName: 'SymbolNode'
+      class.simpleName: 'DALExpression'
       inspect: 'identityProperty'
     }
     """
@@ -68,10 +69,11 @@ Feature: compile all nodes with delimiter
       inspect: '[1]'
     }
     """
+#    TODO rtest
     And got the following "identity-property" node:
     """
     : {
-      class.simpleName: 'SymbolNode'
+      class.simpleName: 'DALExpression'
       inspect: '1a'
     }
     """

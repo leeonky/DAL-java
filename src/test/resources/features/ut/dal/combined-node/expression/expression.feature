@@ -33,14 +33,14 @@ Feature: expression
     Then got the following "expression" node:
     """
     : {
-      class.simpleName: 'SymbolNode'
+      class.simpleName: 'DALExpression'
       inspect: '<code>'
     }
     """
     Examples:
       | code |
       | a    |
-#    TODO
+#    TODO rtest
 #      | .a   |
 #      | .a.b |
 

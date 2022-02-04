@@ -109,6 +109,24 @@ Feature: basic data and type
     -2.7976931348623157e10308 = -2.7976931348623157e10308bd
     """
 
+  Scenario: String values
+    Given the following java class:
+    """
+    public class Strings {
+      public String value1="abc\n\tA'\"";
+      public String value2="abc\n\r\tA'\"";
+    }
+    """
+    Then the following verification for the instance of java class "Strings" should pass:
+    """
+    : {
+      value1= 'abc
+    	A\'"'
+      value2= "abc\n\r\tA'\""
+    }
+    """
+
+
   Scenario: define and use user defined literal
     Given defined US dollar money object with the following regex
     """
