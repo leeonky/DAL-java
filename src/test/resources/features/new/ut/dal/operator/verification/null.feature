@@ -1,4 +1,4 @@
-Feature: basic assertion
+Feature: compare null
 
   Scenario Outline: non null equals to null
     Given the following input data:

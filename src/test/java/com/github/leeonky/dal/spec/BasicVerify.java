@@ -1,8 +1,6 @@
 package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.runtime.PropertyAccessor;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Nested;
@@ -14,26 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class BasicVerify extends Base {
-
-    @Setter
-    @Accessors(chain = true)
-    public static class Bean {
-        public boolean field;
-
-        public int value;
-    }
-
-    @Setter
-    @Accessors(chain = true)
-    public static class ObjectA {
-        public String f1, f2;
-    }
-
-    @Setter
-    @Accessors(chain = true)
-    public static class ObjectB {
-        public String f1;
-    }
 
     @Nested
     class Basic {
@@ -72,39 +50,6 @@ class BasicVerify extends Base {
                 }
             });
             assertTrue(new JSONObject("{\"field\": true}"), ".field");
-        }
-    }
-
-    @Nested
-    class Matches {
-
-        @Test
-        void boolean_value() {
-            assertPass(true, ": true");
-            assertPass(false, ": false");
-            assertFailed(true, ": false");
-            assertFailed(false, ": true");
-        }
-
-        @Test
-        void do_not_allow_auto_convert_to_boolean() {
-            assertRuntimeException("true", ": true", 0, "Cannot compare between java.lang.String\n<true>\nand java.lang.Boolean\n<true>\n");
-        }
-
-        @Test
-        void null_value_matching() {
-            assertPass(null, ": null");
-            assertFailed(1, ": null");
-            assertFailed(0, ": null");
-            assertFailed(true, ": null");
-            assertFailed(false, ": null");
-            assertFailed("", ": null");
-            assertFailed(null, ": 1");
-            assertFailed(null, ": 0");
-            assertFailed(null, ": true");
-            assertFailed(null, ": false");
-            assertFailed(null, ": ''");
-            assertFailed(null, ": 'any string'");
         }
     }
 }
