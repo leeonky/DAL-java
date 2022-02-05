@@ -5,7 +5,7 @@ import com.github.leeonky.dal.ast.TableNode;
 
 import java.util.List;
 
-public class ElementAssertionFailure extends RuntimeException {
+public class ElementAssertionFailure extends java.lang.RuntimeException {
     private final int row;
     private final DalException dalException;
     private final List<DALNode> expressions;

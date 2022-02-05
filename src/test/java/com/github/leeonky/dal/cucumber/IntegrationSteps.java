@@ -60,6 +60,13 @@ public class IntegrationSteps {
         integrationTestContext.verifyLastEvaluated(verification);
     }
 
+    @Then("the following verification for the instance of java class {string} should failed:")
+    public void the_following_verification_for_the_instance_of_java_class_should_failed(String className, String expression) {
+        integrationTestContext.givenJavaDataByClassName(className);
+        integrationTestContext.evaluate(expression);
+        integrationTestContext.shouldFailed();
+    }
+
     @Then("the following verification for the instance of java class {string} should pass:")
     public void the_following_assertion_for_java_class_should_pass(String className, String expression) {
         integrationTestContext.givenJavaDataByClassName(className);
@@ -71,6 +78,12 @@ public class IntegrationSteps {
     public void the_following_verification_should_pass(String expression) {
         integrationTestContext.evaluate(expression);
         integrationTestContext.shouldPass();
+    }
+
+    @Then("the following verification should failed:")
+    public void the_following_verification_should_failed(String expression) {
+        integrationTestContext.evaluate(expression);
+        integrationTestContext.shouldFailed();
     }
 
     @Then("failed with the message:")

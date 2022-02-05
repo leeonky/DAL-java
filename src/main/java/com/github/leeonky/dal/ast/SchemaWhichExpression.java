@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeException;
 
 public class SchemaWhichExpression extends DALNode {
     private final SchemaExpression schemaExpression;

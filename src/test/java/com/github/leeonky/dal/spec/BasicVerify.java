@@ -8,7 +8,6 @@ import org.json.JSONObject;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.time.Instant;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,35 +76,7 @@ class BasicVerify extends Base {
     }
 
     @Nested
-    class Regex {
-
-        @Nested
-        class WithOptMatcher {
-        }
-
-        @Nested
-        class WithOptEq {
-
-            @Test
-            void support_matching_regex_without_type_convert() {
-                assertPass("abc", "= /abc/");
-                assertFailed("non match", "= /abc/");
-            }
-        }
-    }
-
-    @Nested
     class Matches {
-
-        @Test
-        void number_value() {
-            assertPass(1, ": 1.0");
-            assertPass(1, ": 1");
-            assertPass(1.0, ": 1");
-            assertPass(1L, ": 1");
-
-            assertFailed(1, ": 2");
-        }
 
         @Test
         void boolean_value() {
@@ -116,35 +87,8 @@ class BasicVerify extends Base {
         }
 
         @Test
-        void string_value() {
-            assertPass("abc", ": 'abc'");
-            assertFailed("abc", ": 'xyz'");
-        }
-
-        @Test
-        void object_to_string() {
-            assertPass(Instant.parse("2000-10-10T00:00:01Z"), ": '2000-10-10T00:00:01Z'");
-            assertFailed(Instant.parse("2010-10-10T00:00:01Z"), ": '2000-10-10T00:00:01Z'");
-        }
-
-        @Test
-        void do_not_allow_auto_convert_to_number() {
-            assertRuntimeException("1", ": 1", 0, "Cannot compare between java.lang.String\n<1>\nand java.lang.Integer\n<1>\n");
-        }
-
-        @Test
         void do_not_allow_auto_convert_to_boolean() {
             assertRuntimeException("true", ": true", 0, "Cannot compare between java.lang.String\n<true>\nand java.lang.Boolean\n<true>\n");
-        }
-
-        @Test
-        void do_not_allow_number_auto_convert_to_string() {
-            assertRuntimeException(1, ": '1'", 0, "Cannot compare between java.lang.Integer\n<1>\nand java.lang.String\n<1>\n");
-        }
-
-        @Test
-        void do_not_allow_boolean_auto_convert_to_string() {
-            assertRuntimeException(true, ": 'true'", 0, "Cannot compare between java.lang.Boolean\n<true>\nand java.lang.String\n<true>\n");
         }
 
         @Test

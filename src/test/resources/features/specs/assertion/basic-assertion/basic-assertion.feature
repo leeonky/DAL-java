@@ -134,14 +134,3 @@ Feature: basic assertion
       | operator |
       | =        |
       | :        |
-
-  Scenario Outline: always pass
-    Then the following assertion should pass:
-    """
-      <operand> : * and <operand> = *
-    """
-    Examples:
-      | operand |
-      | 1       |
-      | ''      |
-      | null    |

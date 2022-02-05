@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeException;
 
 import java.util.regex.Pattern;
 

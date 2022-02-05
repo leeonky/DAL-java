@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.Expression;
 
 import java.util.ArrayList;

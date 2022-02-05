@@ -5,6 +5,7 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
+import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Result;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.InterpreterException;
@@ -49,6 +50,7 @@ public class IntegrationTestContext {
 
     public void evaluate(String expression) {
         givenDALExpression(expression);
+        exception = null;
         try {
             result = dal.evaluate(input, expression);
         } catch (InterpreterException e) {
@@ -141,5 +143,9 @@ public class IntegrationTestContext {
         } catch (InterpreterException e) {
             exception = e;
         }
+    }
+
+    public void shouldFailed() {
+        assertThat(exception).isInstanceOf(DalException.class);
     }
 }

@@ -4,6 +4,7 @@ import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.SyntaxException;
 

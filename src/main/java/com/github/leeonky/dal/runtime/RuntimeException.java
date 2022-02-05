@@ -1,6 +1,4 @@
-package com.github.leeonky.dal.ast;
-
-import com.github.leeonky.dal.runtime.DalException;
+package com.github.leeonky.dal.runtime;
 
 public class RuntimeException extends DalException {
 
