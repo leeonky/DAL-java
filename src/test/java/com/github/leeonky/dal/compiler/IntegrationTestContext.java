@@ -38,6 +38,7 @@ public class IntegrationTestContext {
         put("number", compiler.NUMBER);
         put("expression", optional(compiler.EXPRESSION));
         put("integer", compiler.INTEGER);
+        put("regex", compiler.REGEX);
     }};
     private DALNode dalNode = null;
 

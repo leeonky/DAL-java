@@ -81,18 +81,6 @@ class BasicVerify extends Base {
 
         @Nested
         class WithOptMatcher {
-
-            @Test
-            void support_matching_regex_without_type_convert() {
-                assertPass("abc", ": /abc/");
-                assertFailed("non match", ": /abc/");
-            }
-
-            @Test
-            void support_convert_to_string_before_matching() {
-                assertPass(1, ": /1/");
-                assertFailed(10, ": /1/");
-            }
         }
 
         @Nested
@@ -102,11 +90,6 @@ class BasicVerify extends Base {
             void support_matching_regex_without_type_convert() {
                 assertPass("abc", "= /abc/");
                 assertFailed("non match", "= /abc/");
-            }
-
-            @Test
-            void raise_error_when_type_is_not_string() {
-                assertRuntimeException(1, "= /1/", 0, "Operator = before regex need a string input value");
             }
         }
     }

@@ -9,7 +9,6 @@ import com.github.leeonky.interpreter.SyntaxException;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -47,8 +46,8 @@ class CompilerTest {
         //        @Test
 //        TODO need test
         void access_property_after_parentheses() {
-            ParenthesesNode parenthesesNode = new ParenthesesNode(new ConstNode(""));
-            assertCompileNode("('').empty", new PropertyNode(parenthesesNode, "empty", DOT));
+//            ParenthesesNode parenthesesNode = new ParenthesesNode(new ConstNode(""));
+//            assertCompileNode("('').empty", new PropertyNode(parenthesesNode, "empty", DOT));
         }
     }
 

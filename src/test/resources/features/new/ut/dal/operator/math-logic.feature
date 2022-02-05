@@ -1,15 +1,9 @@
 Feature: operators
 
   Scenario Outline: arithmetic
-    Given the following json:
-    """
-      {
-        "value": <value>
-      }
-    """
     When evaluate by:
     """
-      <input> <operator> .value
+      <input> <operator> <value>
     """
     Then the result should:
     """
@@ -23,15 +17,9 @@ Feature: operators
       | 10    | /        | 2     | 5      |
 
   Scenario Outline: logic
-    Given the following json:
-    """
-      {
-        "value": <value>
-      }
-    """
     When evaluate by:
     """
-      <input> <operator> .value
+      <input> <operator> <value>
     """
     Then the result should:
     """
@@ -67,23 +55,3 @@ Feature: operators
       | 5     | <=       | 4     | false  |
       | 5     | !=       | 3     | true   |
       | 5     | !=       | 5     | false  |
-
-  Scenario Outline: verification
-    Given the following json:
-    """
-      {
-        "value": <value>
-      }
-    """
-    When evaluate by:
-    """
-      <input> <operator> .value
-    """
-    Then the result should:
-    """
-    : <result>
-    """
-    Examples:
-      | input | operator | value | result |
-      | 5     | =        | 5     | true   |
-      | 3     | :        | 3.0   | true   |
