@@ -70,7 +70,7 @@ public class TableNode extends DALNode {
 
     private boolean judgeRows(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
         try {
-            return transformToListNode(operator).judgeAll(context, actualNode.evaluateDataObject(context)
+            return transformToListNode(operator).judgeAll(context, actualNode.evaluateData(context)
                     .setListComparator(collectComparator(context)));
         } catch (ElementAssertionFailure elementAssertionFailure) {
             throw type.toDalException(elementAssertionFailure, this);

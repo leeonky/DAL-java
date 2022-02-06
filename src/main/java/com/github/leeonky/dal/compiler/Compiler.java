@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
-import static com.github.leeonky.dal.ast.PropertyNode.Type.DOT;
 import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.DALProcedure.enableCommaAnd;
 import static com.github.leeonky.dal.compiler.Notations.Operators;
@@ -97,16 +95,13 @@ public class Compiler {
             EMPTY_CELL = procedure -> when(procedure.getSourceCode().startsWith("|")).optional(EmptyCellNode::new),
             TABLE = oneOf(new TransposedTableWithRowOperator(), new TableParser(), new TransposedTable());
 
-    public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> PROPERTY_CHAIN,
-            OPERAND, EXPRESSION, LIST_INDEX_OR_MAP_KEY = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING)
-            .mandatory("should given one property or array index in `[]`"), ARITHMETIC_EXPRESSION, JUDGEMENT_EXPRESSION_OPERAND;
+    public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+            LIST_INDEX_OR_MAP_KEY = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING)
+            .mandatory("should given one property or array index in `[]`"),
+            PROPERTY_CHAIN, OPERAND, EXPRESSION, ARITHMETIC_EXPRESSION, JUDGEMENT_EXPRESSION_OPERAND,
+            SCHEMA;
 
     ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            DOT_PROPERTY = Tokens.DOT_PROPERTY.clauseParser((token, previous) -> new PropertyNode(previous,
-            token.getContentOrThrow("property is not finished"), DOT)),
-            BRACKET_PROPERTY = procedure -> procedure.fetchClauseBetween('[', LIST_INDEX_OR_MAP_KEY, ']',
-                    (previous, node) -> new PropertyNode(previous, ((ConstNode) node).getValue(), BRACKET),
-                    "should given one property or array index in `[]`"),
             EXPLICIT_PROPERTY,
             BINARY_ARITHMETIC_EXPRESSION,
             BINARY_JUDGEMENT_EXPRESSION,

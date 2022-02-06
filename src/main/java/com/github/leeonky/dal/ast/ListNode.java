@@ -83,12 +83,12 @@ public class ListNode extends DALNode {
 
     @Override
     public boolean judge(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
-        return judgeAll(context, actualNode.evaluateDataObject(context));
+        return judgeAll(context, actualNode.evaluateData(context));
     }
 
     @Override
     public boolean judge(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
-        return judgeAll(context, actualNode.evaluateDataObject(context));
+        return judgeAll(context, actualNode.evaluateData(context));
     }
 
     public boolean judgeAll(DALRuntimeContext context, Data data) {

@@ -26,22 +26,24 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return new DALExpression(null, new DALOperator.Parentheses(), node);
     }
 
-    public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
+//    public static SchemasNode
+
+    public Data evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.wrap(evaluate(context));
     }
 
     @Override
     public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
-        return evaluateDataObject(context).getInstance();
+        return evaluateData(context).getInstance();
     }
 
     public boolean judge(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
-        return assertEquals(evaluateDataObject(context), evaluateAndWrapperFailureMessage(actualNode, context),
+        return assertEquals(evaluateData(context), evaluateAndWrapperFailureMessage(actualNode, context),
                 getPositionBegin());
     }
 
     public boolean judge(DALNode actualNode, Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
-        Data expected = evaluateDataObject(context);
+        Data expected = evaluateData(context);
         Data actual = evaluateAndWrapperFailureMessage(actualNode, context);
         if (expected.isNull())
             return assertMatchNull(actual, actualNode.getPositionBegin());
@@ -56,7 +58,7 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
 
     private Data evaluateAndWrapperFailureMessage(DALNode actualNode, RuntimeContextBuilder.DALRuntimeContext context) {
         try {
-            return actualNode.evaluateDataObject(context);
+            return actualNode.evaluateData(context);
         } catch (AssertionFailure assertionFailure) {
             throw assertionFailure.multiPosition(getPositionBegin(), Position.Type.CHAR);
         }

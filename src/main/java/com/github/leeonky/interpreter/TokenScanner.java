@@ -22,6 +22,7 @@ public interface TokenScanner<C extends RuntimeContext<C>, N extends Node<C, N>,
                 mapper.apply(token, previous).setPositionBegin(token.getPosition()));
     }
 
+    @Deprecated
     interface Mandatory {
         Token scan(SourceCode sourceCode);
 

@@ -24,7 +24,7 @@ public class SymbolNode extends DALNode {
     }
 
     public Data getPropertyValue(DALNode node1, RuntimeContextBuilder.DALRuntimeContext context) {
-        return getPropertyValue(node1.evaluateDataObject(context));
+        return getPropertyValue(node1.evaluateData(context));
     }
 
     private Data getPropertyValue(Data data) {

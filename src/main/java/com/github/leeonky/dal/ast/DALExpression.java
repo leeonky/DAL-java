@@ -37,7 +37,7 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     }
 
     @Override
-    public Data evaluateDataObject(DALRuntimeContext context) {
+    public Data evaluateData(DALRuntimeContext context) {
         try {
             Data result = operator.calculateData(node1, node2, context);
             if (operator.isNeedInspect() && (result.getInstance() instanceof Boolean) && !(boolean) result.getInstance())

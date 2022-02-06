@@ -44,13 +44,13 @@ public class SchemaExpression extends DALNode {
     }
 
     @Override
-    public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
+    public Data evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.wrap(evaluate(context), getSchemaName(), dimension > 0);
     }
 
     private void verifyAndConvertAsSchemaType(RuntimeContextBuilder.DALRuntimeContext context,
                                               SchemaNode schemaNode, ObjectRef objectRef) {
-        Data input = instance.evaluateDataObject(context);
+        Data input = instance.evaluateData(context);
         if (dimension == 1) {
             if (!input.isList())
                 throw new SyntaxException("Expecting a list but was" + input.inspect(), instance.getPositionBegin());

@@ -122,7 +122,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return !Calculator.equals(node1.evaluateDataObject(context), node2.evaluateDataObject(context));
+            return !Calculator.equals(node1.evaluateData(context), node2.evaluateData(context));
         }
     }
 
@@ -260,7 +260,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Data calculateData(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return node2.evaluateDataObject(context);
+            return node2.evaluateData(context);
         }
 
         @Override

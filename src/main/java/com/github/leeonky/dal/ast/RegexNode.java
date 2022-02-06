@@ -26,7 +26,7 @@ public class RegexNode extends DALNode {
 
     @Override
     public boolean judge(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
-        Data actual = actualNode.evaluateDataObject(context);
+        Data actual = actualNode.evaluateData(context);
         if (actual.getInstance() instanceof String)
             return matches((String) actual.getInstance(), actual);
         throw new RuntimeException("Operator = before regex need a string input value", operator.getPosition());
@@ -34,7 +34,7 @@ public class RegexNode extends DALNode {
 
     @Override
     public boolean judge(DALNode actualNode, DALOperator.Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
-        Data actual = actualNode.evaluateDataObject(context);
+        Data actual = actualNode.evaluateData(context);
         return matches((String) actual.convert(String.class).getInstance(), actual);
     }
 

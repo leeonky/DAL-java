@@ -39,9 +39,7 @@ public class CucumberContextBak {
         put("const-null", compiler.CONST_NULL);
         put("const", compiler.CONST);
         put("regex", compiler.REGEX);
-        put("dot-property", compiler.DOT_PROPERTY.defaultInputNode(InputNode.INSTANCE));
         put("identity-property", compiler.IMPLICIT_PROPERTY);
-        put("bracket-property", compiler.BRACKET_PROPERTY.defaultInputNode(InputNode.INSTANCE));
         put("explicit-property", compiler.EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE));
         put("property", compiler.PROPERTY);
         put("operand", optional(compiler.OPERAND));
@@ -54,6 +52,8 @@ public class CucumberContextBak {
         put("judgement-expression-operand", optional(compiler.JUDGEMENT_EXPRESSION_OPERAND));
         put("table", compiler.TABLE);
         put("schema", optional(SchemaClauseMandatory.SCHEMA));
+        put("symbol", compiler.SYMBOL);
+        put("bracket-symbol", compiler.BRACKET_SYMBOL);
     }};
 
     private static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> optional(

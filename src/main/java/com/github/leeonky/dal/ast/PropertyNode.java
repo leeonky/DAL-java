@@ -23,8 +23,8 @@ public class PropertyNode extends DALNode {
     }
 
     @Override
-    public Data evaluateDataObject(RuntimeContextBuilder.DALRuntimeContext context) {
-        Data data = instanceNode.evaluateDataObject(context);
+    public Data evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {
+        Data data = instanceNode.evaluateData(context);
         if (data.isNull())
             throw new RuntimeException("Instance is null", getPositionBegin());
         try {

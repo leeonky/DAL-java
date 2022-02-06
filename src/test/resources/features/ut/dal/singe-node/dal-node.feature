@@ -62,18 +62,18 @@ Feature: compile all nodes with delimiter
       inspect: 'identityProperty'
     }
     """
-    And got the following "bracket-property" node:
+    And got the following "bracket-symbol" node:
     """
     : {
-      class.simpleName: 'PropertyNode'
+      class.simpleName: 'SymbolNode'
       inspect: '[1]'
     }
     """
 #    TODO rtest
-    And got the following "identity-property" node:
+    And got the following "symbol" node:
     """
     : {
-      class.simpleName: 'DALExpression'
+      class.simpleName: 'SymbolNode'
       inspect: '1a'
     }
     """

@@ -34,7 +34,7 @@ public class ObjectNode extends DALNode {
 
     @Override
     public boolean judge(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
-        Data data = actualNode.evaluateDataObject(context);
+        Data data = actualNode.evaluateData(context);
         checkNull(data);
         if (data.isList()) {
             AtomicInteger integer = new AtomicInteger(0);
@@ -60,7 +60,7 @@ public class ObjectNode extends DALNode {
 
     @Override
     public boolean judge(DALNode actualNode, DALOperator.Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
-        Data data = actualNode.evaluateDataObject(context);
+        Data data = actualNode.evaluateData(context);
         checkNull(data);
         return judgeAll(context, data);
     }
