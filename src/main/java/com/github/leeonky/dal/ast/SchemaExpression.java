@@ -19,24 +19,24 @@ import static java.util.stream.Collectors.joining;
 
 public class SchemaExpression extends DALNode {
     private final DALNode instance;
-    private final List<SchemaNode> schemaNodes = new ArrayList<>();
+    private final List<SchemaNodeBak> schemaNodeBaks = new ArrayList<>();
     private final ObjectRef objectRef = new ObjectRef();
     private final int dimension;
 
-    public SchemaExpression(DALNode previous, List<SchemaNode> schemaNodes, int dimension) {
+    public SchemaExpression(DALNode previous, List<SchemaNodeBak> schemaNodeBaks, int dimension) {
         instance = previous;
-        this.schemaNodes.addAll(schemaNodes);
+        this.schemaNodeBaks.addAll(schemaNodeBaks);
         this.dimension = dimension;
     }
 
     public String getSchemaName() {
-        return schemaNodes.get(schemaNodes.size() - 1).getSchema();
+        return schemaNodeBaks.get(schemaNodeBaks.size() - 1).getSchema();
     }
 
     @Override
     public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
         try {
-            schemaNodes.forEach(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
+            schemaNodeBaks.forEach(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef));
             return objectRef.instance;
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), getPositionBegin());
@@ -49,26 +49,26 @@ public class SchemaExpression extends DALNode {
     }
 
     private void verifyAndConvertAsSchemaType(RuntimeContextBuilder.DALRuntimeContext context,
-                                              SchemaNode schemaNode, ObjectRef objectRef) {
+                                              SchemaNodeBak schemaNodeBak, ObjectRef objectRef) {
         Data input = instance.evaluateData(context);
         if (dimension == 1) {
             if (!input.isList())
                 throw new SyntaxException("Expecting a list but was" + input.inspect(), instance.getPositionBegin());
             AtomicInteger index = new AtomicInteger(0);
-            objectRef.instance = input.getListObjects().stream().map(element -> convertViaSchema(context, schemaNode,
+            objectRef.instance = input.getListObjects().stream().map(element -> convertViaSchema(context, schemaNodeBak,
                     element, format("%s[%d]", instance.inspect(), index.getAndIncrement())))
                     .collect(Collectors.toList());
         } else
-            objectRef.instance = convertViaSchema(context, schemaNode, input, instance.inspect());
+            objectRef.instance = convertViaSchema(context, schemaNodeBak, input, instance.inspect());
     }
 
-    private Object convertViaSchema(RuntimeContextBuilder.DALRuntimeContext context, SchemaNode schemaNode,
+    private Object convertViaSchema(RuntimeContextBuilder.DALRuntimeContext context, SchemaNodeBak schemaNodeBak,
                                     Data element, String input) {
         try {
-            return schemaNode.getConstructorViaSchema(context).apply(element);
+            return schemaNodeBak.getConstructorViaSchema(context).apply(element);
         } catch (IllegalTypeException exception) {
             throw new AssertionFailure(exception.assertionFailureMessage(input.isEmpty() ? input : input + " ",
-                    schemaNode), schemaNode.getPositionBegin());
+                    schemaNodeBak), schemaNodeBak.getPositionBegin());
         }
     }
 
@@ -97,7 +97,7 @@ public class SchemaExpression extends DALNode {
     @Override
     public String inspectClause() {
         return format("is %s%s%s", join("", nCopies(dimension, "[")),
-                schemaNodes.stream().map(SchemaNode::inspect).collect(joining(format(" %s ", SCHEMA_DELIMITER))),
+                schemaNodeBaks.stream().map(SchemaNodeBak::inspect).collect(joining(format(" %s ", SCHEMA_DELIMITER))),
                 join("", nCopies(dimension, "]")));
     }
 

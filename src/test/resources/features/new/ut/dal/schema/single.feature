@@ -1,11 +1,11 @@
-Feature: compile schema node
+Feature: single schema
 
   Scenario Outline: raise error when no code
-    Given the following dal code:
+    Given the following dal expression:
     """
     <code>
     """
-    Then failed to get "schema" node with the following message:
+    Then failed to parse "schema" with the following message:
     """
     expect a schema
     """
@@ -16,11 +16,11 @@ Feature: compile schema node
       | `SPACE |
 
   Scenario Outline: raise error when not valid identity
-    Given the following dal code:
+    Given the following dal expression:
     """
     <code>
     """
-    Then failed to get "schema" node with the following message:
+    Then failed to parse "schema" with the following message:
     """
     expect a schema
     """
@@ -52,14 +52,14 @@ Feature: compile schema node
       | 100   |
 
   Scenario Outline: valid schema
-    Given the following dal code:
+    Given the following dal expression:
     """
       <code>
     """
-    Then got the following "schema" node:
+    Then parse the following "schema" node:
     """
     : {
-      class.simpleName: 'SchemaNode'
+      class.simpleName: 'SchemaComposeNode'
       positionBegin: 2
       inspect: '<code>'
     }
@@ -72,14 +72,14 @@ Feature: compile schema node
       | _1a  |
 
   Scenario Outline: schema should end with delimiter
-    Given the following dal code:
+    Given the following dal expression:
     """
     name<delimiter>xxx
     """
-    Then got the following "schema" node:
+    Then parse the following "schema" node:
     """
     : {
-      class.simpleName: 'SchemaNode'
+      class.simpleName: 'SchemaComposeNode'
       inspect: 'name'
     }
     """
@@ -93,7 +93,6 @@ Feature: compile schema node
       | +         |
       | -         |
       | *         |
-      | /         |
       | &         |
       | !         |
       | ,         |

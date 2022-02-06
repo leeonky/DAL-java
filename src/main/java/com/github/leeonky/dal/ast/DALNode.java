@@ -8,6 +8,7 @@ import com.github.leeonky.interpreter.NodeBase;
 import com.github.leeonky.interpreter.Token;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.*;
 import static java.lang.String.format;
@@ -18,6 +19,14 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return new SymbolNode(token.getContent(), SymbolNode.Type.SYMBOL);
     }
 
+    public static SchemaComposeNode schemas(List<DALNode> nodes) {
+        return new SchemaComposeNode(nodes.stream().map(SchemaNode.class::cast).collect(Collectors.toList()), false);
+    }
+
+    public static SchemaNode schema(Token token) {
+        return (SchemaNode) new SchemaNode(token.getContent()).setPositionBegin(token.getPosition());
+    }
+
     public static SymbolNode bracketSymbolNode(DALNode node) {
         return new SymbolNode(((ConstNode) node).getValue(), SymbolNode.Type.BRACKET);
     }
@@ -25,8 +34,6 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
     public static DALExpression parenthesesNode(DALNode node) {
         return new DALExpression(null, new DALOperator.Parentheses(), node);
     }
-
-//    public static SchemasNode
 
     public Data evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {
         return context.wrap(evaluate(context));

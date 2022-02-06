@@ -1,5 +1,6 @@
 package com.github.leeonky.interpreter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -9,8 +10,10 @@ public class ComplexNode<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, M extends Parser.Mandatory<C, N, E, O, P, T>,
         T, A> {
     private final Type type;
+
+    //    TODO use nodeParser
     private final M mandatory;
-    private String message;
+    private final String message;
 
     public ComplexNode(Type type, M mandatory, String message) {
         this.type = type;
@@ -32,6 +35,10 @@ public class ComplexNode<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
 
     public OpeningClosing between(char opening, char closing) {
         return new OpeningClosing(opening, closing);
+    }
+
+    public Split splitBy(String split) {
+        return new Split(split);
     }
 
     public enum Type {
@@ -58,5 +65,22 @@ public class ComplexNode<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
                     });
         }
 
+    }
+
+    public class Split {
+        private final String split;
+
+        public Split(String split) {
+            this.split = split;
+        }
+
+        public NodeParser.Mandatory<C, N, E, O, P> nodeParserMandatory(Function<List<T>, N> nodeFactory) {
+            return procedure -> nodeFactory.apply(new ArrayList<T>() {{
+                T node = mandatory.parse(procedure);
+                add(node);
+                while (procedure.getSourceCode().popWord(split).isPresent())
+                    add(mandatory.parse(procedure));
+            }});
+        }
     }
 }

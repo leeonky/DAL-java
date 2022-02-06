@@ -94,7 +94,7 @@ Feature: compile all nodes with delimiter
     And got the following "schema" node:
     """
     : {
-      class.simpleName: 'SchemaNode'
+      class.simpleName: 'SchemaNodeBak'
       inspect: 'a.b'
     }
     """

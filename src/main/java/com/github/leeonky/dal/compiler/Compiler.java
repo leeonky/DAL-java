@@ -93,13 +93,14 @@ public class Compiler {
             PROPERTY, OBJECT, LIST, CONST, PARENTHESES, JUDGEMENT, SCHEMA_JUDGEMENT_CLAUSE,
             ELEMENT_ELLIPSIS, UNARY_OPERATOR_EXPRESSION,
             EMPTY_CELL = procedure -> when(procedure.getSourceCode().startsWith("|")).optional(EmptyCellNode::new),
-            TABLE = oneOf(new TransposedTableWithRowOperator(), new TableParser(), new TransposedTable());
+            TABLE = oneOf(new TransposedTableWithRowOperator(), new TableParser(), new TransposedTable()),
+            SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema);
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             LIST_INDEX_OR_MAP_KEY = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING)
             .mandatory("should given one property or array index in `[]`"),
             PROPERTY_CHAIN, OPERAND, EXPRESSION, ARITHMETIC_EXPRESSION, JUDGEMENT_EXPRESSION_OPERAND,
-            SCHEMA;
+            SCHEMA_COMPOSE = multiple(SCHEMA.mandatory("expect a schema")).splitBy("/").nodeParserMandatory(DALNode::schemas);
 
     ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             EXPLICIT_PROPERTY,

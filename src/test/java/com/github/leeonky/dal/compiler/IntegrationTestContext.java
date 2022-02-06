@@ -40,7 +40,7 @@ public class IntegrationTestContext {
         put("expression", optional(compiler.EXPRESSION));
         put("integer", compiler.INTEGER);
         put("regex", compiler.REGEX);
-        put("schema", optional(compiler.SCHEMA));
+        put("schema", optional(compiler.SCHEMA_COMPOSE));
     }};
     private DALNode dalNode = null;
 
