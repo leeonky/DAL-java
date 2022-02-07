@@ -1,19 +1,11 @@
 Feature: compile key word const value (true false null)
 
   Scenario Outline: key word const
-    Given the following dal expression:
+    When evaluate by:
     """
      <code>
     """
-    Then parse the following "expression" node:
-    """
-    : {
-      class.simpleName: 'ConstNode'
-      inspect: '<inspect>'
-      positionBegin: 1
-    }
-    """
-    And last evaluated node result is:
+    Then the result should:
     """
     = <value>
     """
@@ -22,3 +14,14 @@ Feature: compile key word const value (true false null)
       | true  | true    | true  |
       | false | false   | false |
       | null  | null    | null  |
+
+  Scenario: key word const position
+    When evaluate by:
+    """
+    null= true
+    """
+    Then got the following notation:
+    """
+    null= true
+          ^
+    """
