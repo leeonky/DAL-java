@@ -1,7 +1,7 @@
 Feature: define field alias in schema
 
   Scenario: define field alias in schema
-    Given the following schema:
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -10,19 +10,19 @@ Feature: define field alias in schema
     public class Order {
     }
     """
-    When the following input data:
+    And the following json:
     """
       {
         "id": 0
       }
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
       is Order which .aliasOfId = 0
     """
 
   Scenario: recursive alias
-    Given the following schema:
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -32,19 +32,19 @@ Feature: define field alias in schema
     public class Order {
     }
     """
-    When the following input data:
+    And the following json:
     """
       {
         "id": 0
       }
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
       is Order which .aliasOfAliasId = 0
     """
 
   Scenario: alias of list element accessing
-    Given the following schema:
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -53,7 +53,7 @@ Feature: define field alias in schema
     public class Order {
     }
     """
-    When the following input data:
+    And the following json:
     """
       {
         "lines": [{
@@ -61,13 +61,13 @@ Feature: define field alias in schema
         }]
       }
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
       is Order which .firstLine.amount = 100
     """
 
   Scenario: alias of field chain
-    Given the following schema:
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -76,7 +76,7 @@ Feature: define field alias in schema
     public class Order {
     }
     """
-    When the following input data:
+    And the following json:
     """
       {
         "user": {
@@ -84,13 +84,13 @@ Feature: define field alias in schema
         }
       }
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
       is Order which .userName = 'Tom'
     """
 
   Scenario: alias in sub schema
-    Given the following schema:
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -99,14 +99,14 @@ Feature: define field alias in schema
     public class User {
     }
     """
-    And the following schema:
+    And the following schema class:
     """
     @Partial
     public class Order {
         public User user;
     }
     """
-    When the following input data:
+    And the following json:
     """
       {
         "user": {
@@ -114,13 +114,13 @@ Feature: define field alias in schema
         }
       }
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
       is Order which .user.aliasOfAge = 18
     """
 
   Scenario: provide schema via is and use alias in object judgement
-    Given the following schema:
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -129,19 +129,19 @@ Feature: define field alias in schema
     public class Order {
     }
     """
-    When the following input data:
+    And the following json:
     """
       {
         "id": 1
       }
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
       is Order which :{
         aliasOfId: 1
       }
     """
-    And the following assertion should pass:
+    Then the following verification should pass:
     """
       is Order which ={
         aliasOfId: 1
@@ -149,7 +149,7 @@ Feature: define field alias in schema
     """
 
   Scenario: provide schema via is and use alias alias in nested object judgement
-    Given the following schema:
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -158,13 +158,13 @@ Feature: define field alias in schema
     public class User {
     }
     """
-    And the following schema:
+    And the following schema class:
     """
     public class Order {
         public User user;
     }
     """
-    When the following input data:
+    And the following json:
     """
       {
         "user": {
@@ -172,7 +172,7 @@ Feature: define field alias in schema
         }
       }
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
       is Order which :{
         user: {
@@ -180,7 +180,7 @@ Feature: define field alias in schema
         }
       }
     """
-    And the following assertion should pass:
+    Then the following verification should pass:
     """
       is Order which :{
         user= {
@@ -190,13 +190,13 @@ Feature: define field alias in schema
     """
 
   Scenario: provide schema via is and use alias in list judgement
-    Given the following schema:
+    Given the following schema class:
     """
     public class Order {
       public List<Product> products;
     }
     """
-    And the following schema:
+    And the following schema class:
     """
     @FieldAliases({
             @FieldAlias(alias = "aliasOfName", field = "name"),
@@ -205,7 +205,7 @@ Feature: define field alias in schema
         public String name;
     }
     """
-    When the following input data:
+    And the following json:
     """
       {
         "products": [{
@@ -215,7 +215,7 @@ Feature: define field alias in schema
         }]
       }
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
       is Order which :{
         products: [
@@ -226,13 +226,13 @@ Feature: define field alias in schema
     """
 
   Scenario: provide schema via is and use alias in nested list judgement
-    Given the following schema:
+    Given the following schema class:
     """
     public class Image {
       public List<List<Pixel>> pixels;
     }
     """
-    And the following schema:
+    And the following schema class:
     """
     @FieldAliases({
             @FieldAlias(alias = "aliasOfColor", field = "color"),
@@ -241,7 +241,7 @@ Feature: define field alias in schema
       public String color;
     }
     """
-    When the following input data:
+    And the following json:
     """
       {
         "pixels": [
@@ -250,7 +250,7 @@ Feature: define field alias in schema
         ]
       }
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
       is Image which :{
         pixels: [
@@ -261,19 +261,19 @@ Feature: define field alias in schema
     """
 
   Scenario: provide schema via is and use alias in list mapping
-    Given the following schema:
+    Given the following schema class:
     """
     public class Order {
       public List<Product> products;
     }
     """
-    And the following schema:
+    And the following schema class:
     """
     public class Product {
         public Catalog catalog;
     }
     """
-    And the following schema:
+    And the following schema class:
     """
     @FieldAliases({
             @FieldAlias(alias = "aliasOfName", field = "name"),
@@ -283,7 +283,7 @@ Feature: define field alias in schema
     public class Catalog {
     }
     """
-    When the following input data:
+    And the following json:
     """
       {
         "products": [{
@@ -299,7 +299,7 @@ Feature: define field alias in schema
         }]
       }
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
       is Order which :{
         products.catalog: [
@@ -314,7 +314,7 @@ Feature: define field alias in schema
     """
 
   Scenario: alias in super class and interface
-    Given the following schema:
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -323,7 +323,7 @@ Feature: define field alias in schema
     public class Super {
     }
     """
-    And the following schema:
+    And the following schema class:
     """
     @FieldAliases({
             @FieldAlias(alias = "nameInInterface", field = "name")
@@ -331,17 +331,17 @@ Feature: define field alias in schema
     public interface Interface {
     }
     """
-    And the following schema:
+    And the following schema class:
     """
     @Partial
     public class Schema extends Super implements Interface {
     }
     """
-    When the following input data:
+    And the following json:
     """
       { "name": "hello" }
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
       is Schema which :{
         nameInInterface: 'hello'
@@ -350,7 +350,7 @@ Feature: define field alias in schema
     """
 
   Scenario: provide schema via object judgement key
-    Given the following schema:
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -359,15 +359,15 @@ Feature: define field alias in schema
     public class Order {
     }
     """
-    When the following input data:
+    And the following json:
     """
       {
-        data: {
+        "data": {
           "id": 0
         }
       }
     """
-    Then assert by the following code:
+    Then the following verification should pass:
     """
     : {
       data is Order: {
@@ -377,7 +377,7 @@ Feature: define field alias in schema
     """
 
   Scenario: provide schema via list judgement element
-    Given the following schema:
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -386,13 +386,13 @@ Feature: define field alias in schema
     public class Order {
     }
     """
-    When the following input data:
+    And the following json:
     """
       [{
           "id": 0
       }]
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
     : [
         is Order: {
@@ -402,7 +402,7 @@ Feature: define field alias in schema
     """
 
   Scenario: provide element schema via is and use alias in which clause
-    Given the following schema:
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -411,19 +411,19 @@ Feature: define field alias in schema
     public class Order {
     }
     """
-    When the following input data:
+    And the following json:
     """
       [{
           "id": 0
       }]
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
     is [Order] which [0].aliasOfId: 0
     """
 
   Scenario: provide element schema via object judgement key
-    Given the following schema:
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -432,15 +432,15 @@ Feature: define field alias in schema
     public class Order {
     }
     """
-    When the following input data:
+    And the following json:
     """
       {
-        data: [{
+        "data": [{
           "id": 0
         }]
       }
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
       : {
         data is [Order]: [{aliasOfId: 0}]
@@ -448,7 +448,7 @@ Feature: define field alias in schema
     """
 
   Scenario: provide element schema via list judgement key
-    Given the following schema:
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -457,7 +457,7 @@ Feature: define field alias in schema
     public class Order {
     }
     """
-    When the following input data:
+    And the following json:
     """
       [
         [{
@@ -465,7 +465,7 @@ Feature: define field alias in schema
         }]
       ]
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
       : [
         is [Order]: [{aliasOfId: 0}]

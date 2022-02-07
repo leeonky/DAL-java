@@ -110,7 +110,6 @@ public class Compiler {
             BINARY_OPERATOR_EXPRESSION,
             SCHEMA_EXPRESSION;
 
-
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SYMBOL = Tokens.IDENTITY_PROPERTY.nodeParser(DALNode::symbolNode),
             BRACKET_SYMBOL = single(LIST_INDEX_OR_MAP_KEY, "should given one property or array index in `[]`")

@@ -8,7 +8,7 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class SchemaWhichExpressionTest {
-    private static final SchemaExpression MATCHES_TYPE_EXPRESSION = new SchemaExpression(new ConstNode(1), singletonList(new SchemaNodeBak("Integer")), false ? 1 : 0);
+    private static final SchemaExpression MATCHES_TYPE_EXPRESSION = new SchemaExpression(new ConstNode(1), singletonList(new SchemaNodeBak("Integer")), 0);
     RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
 
     @Test
