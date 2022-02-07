@@ -320,4 +320,15 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
             }
         }
     }
+
+    public static class Is extends DALOperator {
+        public Is() {
+            super(PRECEDENCE_LOGIC_COMPARE_OPT, Notations.Operators.IS.getLabel(), true);
+        }
+
+        @Override
+        public Data calculateData(DALNode node1, DALNode node2, DALRuntimeContext context) {
+            return ((SchemaComposeNode) node2).verify(node1, context);
+        }
+    }
 }
