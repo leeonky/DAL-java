@@ -1,6 +1,6 @@
 Feature: basic data and type
 
-  Scenario Outline: const value
+  Scenario Outline: value with keyword
     When evaluate by:
     """
     <code>
@@ -15,7 +15,7 @@ Feature: basic data and type
       | false | false |
       | null  | null  |
 
-  Scenario: supported number type
+  Scenario: number types
     Given the following java class:
     """
     public class Numbers {
@@ -60,14 +60,8 @@ Feature: basic data and type
       boxedBooleanValue = false
     }
     """
-    Then the following verification for the instance of java class "Numbers" should pass:
-    """
-    : {
-      intValue = 0x2
-    }
-    """
 
-  Scenario: use integer with proper type
+  Scenario: number postfixes
     Given the following java class:
     """
     public class Numbers {
@@ -93,7 +87,7 @@ Feature: basic data and type
     }
     """
 
-  Scenario: use proper type (int, long, biginteger) to take int value
+  Scenario: use proper type (int, long, biginteger) to hold int value
     * the following verification should pass:
     """
     0x80000000 = 0x80000000L,
@@ -101,7 +95,7 @@ Feature: basic data and type
     0x80000000000000000 = 0x80000000000000000BI
     """
 
-  Scenario: use proper type (double, big decimal) to take float value
+  Scenario: use proper type (double, big decimal) to hold float value
     * the following verification should pass:
     """
     0.1 = 0.1D,
@@ -138,27 +132,4 @@ Feature: basic data and type
     Then the result should:
     """
       class.simpleName: 'USDollar'
-    """
-
-  Scenario: define and not match user literal
-    Given the following json:
-    """
-    {
-      "$a": 1
-    }
-    """
-    And defined US dollar money object with the following regex
-    """
-    ^\$\d+
-    """
-    When evaluate by:
-    """
-    $a
-    """
-    Then the result should:
-    """
-    : {
-      class.simpleName: 'Integer'
-      toString: '1'
-    }
     """

@@ -1,59 +1,5 @@
 Feature: invoke
 
-  Scenario Outline: access property of root input object
-    Given the following json:
-    """
-      {
-        "name": "Tom"
-      }
-    """
-    When evaluate by:
-    """
-    <code>
-    """
-    Then the result should:
-    """
-    = 'Tom'
-    """
-    Examples:
-      | code     |
-      | name     |
-      | .name    |
-      | ['name'] |
-      | ["name"] |
-
-  Scenario: access input list
-    Given the following json:
-    """
-      [1, 2, 3]
-    """
-    When evaluate by:
-    """
-      [0]
-    """
-    Then the result should:
-    """
-    : 1
-    """
-
-  Scenario: property chain
-    Given the following json:
-    """
-      {
-        "items": [{
-          "id": 100
-        }]
-      }
-    """
-    When evaluate by:
-    """
-      items[0].id
-    """
-    Then the result should:
-    """
-    : 100
-    """
-
   Scenario Outline: dot property precedence
     Given the following json:
     """
@@ -145,36 +91,6 @@ Feature: invoke
     Then the result should:
     """
       : false
-    """
-
-  Scenario: do not allow empty property
-    When evaluate by:
-    """
-    .
-    """
-    Then failed with the message:
-    """
-    expect a symbol
-    """
-    And got the following notation:
-    """
-    .
-     ^
-    """
-
-  Scenario: do not allow empty property(has white space)
-    When evaluate by:
-    """
-    . 
-    """
-    Then failed with the message:
-    """
-    expect a symbol
-    """
-    And got the following notation:
-    """
-    . 
-      ^
     """
 
 #  TODO opt is

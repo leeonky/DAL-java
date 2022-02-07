@@ -66,60 +66,6 @@ Feature: access data
     : 300
     """
 
-  Scenario: raise error when access invalid property
-    Given the following java class:
-    """
-    public class Data {
-    }
-    """
-    When use a instance of java class "Data" to evaluate:
-    """
-      .invalid
-    """
-    Then failed with the message:
-    """
-    Get property `invalid` failed, property can be:
-      1. public field
-      2. public getter
-      3. public no args method
-      4. Map key value
-      5. customized type getter
-      6. static method extension
-    Method or property `invalid` does not exist in `Data`
-    """
-    When use a instance of java class "Data" to evaluate:
-    """
-    null.any
-    """
-    Then failed with the message:
-    """
-    Instance is null
-    """
-    And got the following notation:
-    """
-    null.any
-         ^
-    """
-
-  Scenario: raise error when index out of bound
-    Given the following json:
-    """
-      [1, 2]
-    """
-    When evaluate by:
-    """
-      [3]
-    """
-    Then failed with the message:
-    """
-    Index out of bounds (Index: 3, Size: 2)
-    """
-    And got the following notation:
-    """
-      [3]
-      ^
-    """
-
   Scenario: evaluate all as a list
     When evaluate all by:
     """
@@ -131,3 +77,4 @@ Feature: access data
     """
 
 # TODO invalid element mapping .@ (.@) .@+1 1+.@; valid: a.@b; a@[0]; a.@.b
+# TODO list mapping

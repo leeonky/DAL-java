@@ -42,7 +42,7 @@ public class SymbolNode extends DALNode {
                     "  4. Map key value\n" +
                     "  5. customized type getter\n" +
                     "  6. static method extension\n" +
-                    e.getMessage(), inspect()), getPositionBegin());
+                    e.getMessage(), symbol), getPositionBegin());
         }
     }
 
