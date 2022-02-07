@@ -100,9 +100,8 @@ public class Compiler {
             LIST_INDEX_OR_MAP_KEY = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING)
             .mandatory("should given one property or array index in `[]`"),
             PROPERTY_CHAIN, OPERAND, EXPRESSION, ARITHMETIC_EXPRESSION, JUDGEMENT_EXPRESSION_OPERAND,
-            SCHEMA_COMPOSE =
-                    multiple(SCHEMA.mandatory("expect a schema")).between('[', ']').splitBy("/").nodeParser(DALNode::elementSchemas).or(
-                            multiple(SCHEMA.mandatory("expect a schema")).splitBy("/").mandatory(DALNode::schemas));
+            SCHEMA_COMPOSE = multiple(SCHEMA.mandatory("expect a schema")).between('[', ']').splitBy("/").nodeParser(DALNode::elementSchemas)
+                    .or(multiple(SCHEMA.mandatory("expect a schema")).splitBy("/").mandatory(DALNode::schemas));
 
     ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             EXPLICIT_PROPERTY,

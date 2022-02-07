@@ -3,6 +3,7 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.runtime.ListAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.RuntimeException;
+import com.github.leeonky.dal.spec.Base;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static com.github.leeonky.dal.ast.InputNode.INSTANCE;
-import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -32,8 +32,8 @@ class PropertyNodeTest {
                     }
                 }).build(new ArrayList<>(Arrays.asList(1, 2)));
 
-        assertThat(new PropertyNode(INSTANCE, 1, BRACKET).evaluate(DALRuntimeContext)).isEqualTo(1);
-        assertThat(new PropertyNode(INSTANCE, -1, BRACKET).evaluate(DALRuntimeContext)).isEqualTo(2);
+        assertThat(Base.createPropertyNode(INSTANCE, 1).evaluate(DALRuntimeContext)).isEqualTo(1);
+        assertThat(Base.createPropertyNode(INSTANCE, -1).evaluate(DALRuntimeContext)).isEqualTo(2);
     }
 
     public static class CustomizedList {
@@ -56,7 +56,7 @@ class PropertyNodeTest {
                 .registerListAccessor(CustomizedList.class, instance -> emptyList())
                 .build(new CustomizedList());
 
-        assertThat(new PropertyNode(INSTANCE, "value", BRACKET).evaluate(DALRuntimeContext)).isEqualTo(100);
+        assertThat(Base.createPropertyNode(INSTANCE, "value").evaluate(DALRuntimeContext)).isEqualTo(100);
     }
 
     @Test
@@ -65,7 +65,7 @@ class PropertyNodeTest {
                 .registerListAccessor(CustomizedList.class, instance -> emptyList())
                 .build(new CustomizedList());
 
-        assertThat(new PropertyNode(INSTANCE, "isEmpty", BRACKET).evaluate(DALRuntimeContext)).isEqualTo(true);
+        assertThat(Base.createPropertyNode(INSTANCE, "isEmpty").evaluate(DALRuntimeContext)).isEqualTo(true);
     }
 
     @Test
@@ -75,7 +75,7 @@ class PropertyNodeTest {
                 .registerStaticMethodExtension(CustomizedListStaticExtensionMethod.class)
                 .build(new CustomizedList());
 
-        assertThat(new PropertyNode(INSTANCE, "method", BRACKET).evaluate(DALRuntimeContext)).isEqualTo("extension");
+        assertThat(Base.createPropertyNode(INSTANCE, "method").evaluate(DALRuntimeContext)).isEqualTo("extension");
     }
 
     public static class BaseBean {
@@ -116,18 +116,18 @@ class PropertyNodeTest {
 
         @Test
         void support_static_method_extension() {
-            assertThat(new PropertyNode(INSTANCE, "getIntFromBean", BRACKET).evaluate(DALRuntimeContext)).isEqualTo(100);
+            assertThat(Base.createPropertyNode(INSTANCE, "getIntFromBean").evaluate(DALRuntimeContext)).isEqualTo(100);
         }
 
         @Test
         void invoke_from_base_instance() {
 
-            assertThat(new PropertyNode(INSTANCE, "getIntFromBase", BRACKET).evaluate(DALRuntimeContext)).isEqualTo(200);
+            assertThat(Base.createPropertyNode(INSTANCE, "getIntFromBase").evaluate(DALRuntimeContext)).isEqualTo(200);
         }
 
         @Test
         void should_invoke_by_instance_type() {
-            assertThat(new PropertyNode(INSTANCE, "getInt", BRACKET).evaluate(DALRuntimeContext)).isEqualTo(300);
+            assertThat(Base.createPropertyNode(INSTANCE, "getInt").evaluate(DALRuntimeContext)).isEqualTo(300);
         }
 
         @Test
@@ -137,7 +137,7 @@ class PropertyNodeTest {
                     .registerStaticMethodExtension(SameStaticBeanMethods.class)
                     .build(new Bean());
 
-            assertThrows(RuntimeException.class, () -> new PropertyNode(INSTANCE, "getInt", BRACKET)
+            assertThrows(RuntimeException.class, () -> Base.createPropertyNode(INSTANCE, "getInt")
                     .evaluate(DALRuntimeContext));
         }
     }

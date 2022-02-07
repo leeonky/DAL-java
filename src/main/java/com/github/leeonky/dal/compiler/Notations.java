@@ -41,6 +41,7 @@ public class Notations {
                 NOT = notation("!"),
                 MATCHER = notation(":"),
                 EQUAL = notation("="),
-                DOT = notation(".");
+                DOT = notation("."),
+                IS = notation("is");
     }
 }

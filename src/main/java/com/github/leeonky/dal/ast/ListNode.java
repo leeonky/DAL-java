@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.ast.DALOperator.PropertyImplicit;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.assertListSize;
-import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
+import static com.github.leeonky.dal.ast.SymbolNode.Type.BRACKET;
 import static com.github.leeonky.interpreter.FunctionUtil.eachWithIndex;
 import static com.github.leeonky.interpreter.FunctionUtil.mapWithIndex;
 import static java.lang.String.format;
@@ -45,8 +46,9 @@ public class ListNode extends DALNode {
 
     private List<DALNode> getInputExpressions(int firstIndex) {
         return inputExpressions != null ? inputExpressions : mapWithIndex(expressionFactories.stream(),
-                (i, clause) -> clause.makeExpression(new PropertyNode(InputNode.INSTANCE,
-                        type.indexOfNode(firstIndex, i, expressionFactories.size()), BRACKET))).collect(toList());
+                (i, clause) -> clause.makeExpression(new DALExpression(InputNode.INSTANCE, new PropertyImplicit(),
+                        new SymbolNode(type.indexOfNode(firstIndex, i, expressionFactories.size()), BRACKET))))
+                .collect(toList());
     }
 
     public ListNode(List<DALNode> inputExpressions, boolean multiLineList, Type type) {
@@ -72,6 +74,7 @@ public class ListNode extends DALNode {
     }
 
     // Only for test
+//    TODO remove
     public List<DALNode> getExpressions() {
         return getExpressions(0);
     }

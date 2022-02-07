@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.dal.ast.PropertyNode.Type.BRACKET;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -58,7 +57,8 @@ public class RowNode extends DALNode {
 
     public Clause<DALRuntimeContext, DALNode> toExpressionClause(DALOperator operator) {
         return input -> isEllipsis() ? cells.get(0) : transformRowToExpression(operator,
-                index.<DALNode>map(i -> new PropertyNode(InputNode.INSTANCE, i, BRACKET)).orElse(input));
+                index.<DALNode>map(i -> new DALExpression(InputNode.INSTANCE, new DALOperator.PropertyImplicit(),
+                        new SymbolNode(i, SymbolNode.Type.BRACKET))).orElse(input));
     }
 
     private DALExpression transformRowToExpression(DALOperator operator, DALNode inputElement) {
