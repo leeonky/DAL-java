@@ -73,6 +73,7 @@ public class IntegrationTestContext {
                 = new com.github.leeonky.dal.cucumber.Compiler();
         List<Class<?>> classes = compiler.compileToClasses(javaClasses.stream().map(s ->
                 "import java.math.*;\n" + s).collect(Collectors.toList()));
+        classes.forEach(dal.getRuntimeContextBuilder()::registerStaticMethodExtension);
         Class type = classes.stream().filter(clazz -> clazz.getName().equals(className))
                 .findFirst().orElseThrow(() -> new IllegalArgumentException
                         ("cannot find bean class: " + className + "\nclasses: " + classes));

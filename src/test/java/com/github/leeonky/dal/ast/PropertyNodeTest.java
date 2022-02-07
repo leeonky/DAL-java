@@ -115,11 +115,6 @@ class PropertyNodeTest {
                 .build(new Bean());
 
         @Test
-        void support_static_method_extension() {
-            assertThat(Base.createPropertyNode(INSTANCE, "getIntFromBean").evaluate(DALRuntimeContext)).isEqualTo(100);
-        }
-
-        @Test
         void invoke_from_base_instance() {
 
             assertThat(Base.createPropertyNode(INSTANCE, "getIntFromBase").evaluate(DALRuntimeContext)).isEqualTo(200);

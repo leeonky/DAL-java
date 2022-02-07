@@ -9,7 +9,6 @@ import com.github.leeonky.util.Converter;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -18,6 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static java.lang.reflect.Modifier.PUBLIC;
+import static java.lang.reflect.Modifier.STATIC;
 
 public class RuntimeContextBuilder {
     private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
@@ -271,6 +272,10 @@ public class RuntimeContextBuilder {
     }
 
     private boolean maybeExtensionMethods(Method method) {
-        return method.getParameterCount() == 1 && (((Modifier.STATIC | Modifier.PUBLIC) & method.getModifiers()) != 0);
+        return method.getParameterCount() == 1 && isMethod(method, STATIC) && isMethod(method, PUBLIC);
+    }
+
+    private boolean isMethod(Method method, int modifier) {
+        return (modifier & method.getModifiers()) != 0;
     }
 }

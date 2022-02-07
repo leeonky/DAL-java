@@ -1,24 +1,6 @@
-Feature: property
+Feature: field-method
 
-  Scenario: property chain
-    Given the following json:
-    """
-      {
-        "items": [{
-          "id": 100
-        }]
-      }
-    """
-    When evaluate by:
-    """
-      items[0].id
-    """
-    Then the result should:
-    """
-    : 100
-    """
-
-  Scenario: cann access public field, public getter, public no arg method by property
+  Scenario: can access public field, public getter, public no arg method by property
     Given the following java class:
     """
     public class Data {
@@ -69,5 +51,3 @@ Feature: property
       6. static method extension
     Method or property `privateField` does not exist in `Data`
     """
-
-#    TODO list mapping; static methed extension
