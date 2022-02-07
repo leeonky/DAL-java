@@ -122,7 +122,7 @@ public class Compiler {
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> judgementClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
             DALOperator, DALProcedure> operatorMandatory) {
-        return after(Notations.IS_s, SCHEMA_BK).concat(JUDGEMENT_OPERATORS.clause(JUDGEMENT_EXPRESSION_OPERAND))
+        return SCHEMA_CLAUSE.concat(JUDGEMENT_OPERATORS.clause(JUDGEMENT_EXPRESSION_OPERAND))
                 .or(operatorMandatory.mandatoryClause(JUDGEMENT_EXPRESSION_OPERAND));
     }
 
@@ -165,20 +165,21 @@ public class Compiler {
         JUDGEMENT_EXPRESSION_OPERAND = JUDGEMENT.or(ARITHMETIC_EXPRESSION);
         SCHEMA_JUDGEMENT_CLAUSE = procedure -> procedure.fetchExpression(
                 InputNode.INSTANCE, JUDGEMENT_OPERATORS, JUDGEMENT_EXPRESSION_OPERAND);
-        SCHEMA_EXPRESSION = procedure -> after(Notations.IS_s, SCHEMA_BK).concat(omitWhich(SCHEMA_JUDGEMENT_CLAUSE),
+        SCHEMA_EXPRESSION = procedure -> SCHEMA_CLAUSE.concat(omitWhich(SCHEMA_JUDGEMENT_CLAUSE),
                 after(Notations.WHICH_S, which(SCHEMA_JUDGEMENT_CLAUSE.or(EXPRESSION)))).parse(procedure);
         EXPRESSION = OPERAND.recursive(oneOf(BINARY_OPERATOR_EXPRESSION, SCHEMA_EXPRESSION));
     }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> which(
             NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeFactory) {
-        return procedure -> previous -> ((SchemaExpression) previous).which(nodeFactory.parse(procedure));
+        return procedure -> previous ->
+                new DALExpression(previous, new DALOperator.Which(), nodeFactory.parse(procedure));
     }
 
     private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> omitWhich(
             NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
         return procedure -> nodeParser.parse(procedure).map(node -> previous ->
-                ((SchemaExpression) previous).omitWhich(node));
+                new DALExpression(previous, new DALOperator.Which(), node));
     }
 
     public List<DALNode> compile(SourceCode sourceCode, DALRuntimeContext DALRuntimeContext) {
@@ -208,7 +209,7 @@ public class Compiler {
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> TABLE_HEADER = procedure -> {
         SequenceNode sequence = (SequenceNode) SEQUENCE.parse(procedure);
         DALNode property = PROPERTY_CHAIN.parse(procedure);
-        return new HeaderNode(sequence, procedure.fetchClauseAfter(Notations.IS_s, SCHEMA_BK)
+        return new HeaderNode(sequence, SCHEMA_CLAUSE.parse(procedure)
                 .map(expressionClause -> expressionClause.makeExpression(property)).orElse(property),
                 JUDGEMENT_OPERATORS.parse(procedure));
     };
@@ -227,7 +228,7 @@ public class Compiler {
         protected List<RowNode> getRowNodes(DALProcedure procedure, List<HeaderNode> headers) {
             return allOptional(() -> {
                 Optional<Integer> index = getRowIndex(procedure);
-                Optional<Clause<DALRuntimeContext, DALNode>> rowSchemaClause = procedure.fetchClauseAfter(Notations.IS_s, SCHEMA_BK);
+                Optional<Clause<DALRuntimeContext, DALNode>> rowSchemaClause = SCHEMA_CLAUSE.parse(procedure);
                 Optional<DALOperator> rowOperator = JUDGEMENT_OPERATORS.parse(procedure);
                 return FunctionUtil.oneOf(
                         () -> procedure.fetchNodeBetween("|", "|", ELEMENT_ELLIPSIS).map(Collections::singletonList),
@@ -287,7 +288,7 @@ public class Compiler {
                 List<Optional<Clause<DALRuntimeContext, DALNode>>> rowSchemaClauses = new ArrayList<>();
                 List<Optional<DALOperator>> rowOperators = procedure.fetchRow(row -> {
                     rowIndexes.add(getRowIndex(procedure));
-                    rowSchemaClauses.add(procedure.fetchClauseAfter(Notations.IS_s, SCHEMA_BK));
+                    rowSchemaClauses.add(SCHEMA_CLAUSE.parse(procedure));
                     return JUDGEMENT_OPERATORS.parse(procedure);
                 }).orElse(emptyList());
                 List<HeaderNode> headerNodes = new ArrayList<>();

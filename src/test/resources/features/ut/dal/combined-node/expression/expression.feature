@@ -79,7 +79,7 @@ Feature: expression
     Then got the following "expression" node:
     """
     : {
-      class.simpleName: 'SchemaExpression'
+      class.simpleName: 'DALExpression'
       inspect: 'is Number'
     }
     """
@@ -105,7 +105,7 @@ Feature: expression
     Then got the following "expression" node:
     """
     : {
-      class.simpleName: 'SchemaExpression'
+      class.simpleName: 'DALExpression'
       inspect: '+ 1 is Number'
     }
     """

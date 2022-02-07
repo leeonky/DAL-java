@@ -67,12 +67,12 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    Not support multidimensional schema
+    expect a schema
     """
     And got the following notation:
     """
       is [[Integer]]
-           ^
+          ^
     """
 
   Scenario: available schema syntax
