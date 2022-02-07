@@ -77,16 +77,15 @@ public class SchemaExpression extends DALNode {
         return (instance instanceof InputNode ? "" : instance.inspect() + " ") + inspectClause();
     }
 
-    private SchemaWhichExpression which(DALNode whichClause, boolean omitWhich) {
-        return (SchemaWhichExpression) new SchemaWhichExpression(this, whichClause, omitWhich)
-                .setPositionBegin(getPositionBegin());
+    private DALNode which(DALNode whichClause, boolean omitWhich) {
+        return new DALExpression(this, new DALOperator.Which(), whichClause).setPositionBegin(getPositionBegin());
     }
 
-    public SchemaWhichExpression omitWhich(DALNode n) {
+    public DALNode omitWhich(DALNode n) {
         return which(n, true);
     }
 
-    public SchemaWhichExpression which(DALNode n) {
+    public DALNode which(DALNode n) {
         return which(n, false);
     }
 

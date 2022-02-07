@@ -33,7 +33,7 @@ public class HeaderNode extends DALNode {
     }
 
     public Comparator<Object> getListComparator(DALRuntimeContext context) {
-        return sequence.getComparator(o -> context.newThisScope(context.wrap(o), () -> property.evaluate(context)));
+        return sequence.getComparator(o -> context.newBlockScope(context.wrap(o), () -> property.evaluate(context)));
     }
 
     public static Comparator<HeaderNode> bySequence() {

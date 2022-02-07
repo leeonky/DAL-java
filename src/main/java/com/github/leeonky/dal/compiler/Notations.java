@@ -13,6 +13,7 @@ public class Notations {
     public static class Keywords {
         public static final Notation
                 WHICH = notation("which"),
+                IS = notation("is"),
                 TRUE = notation("true"),
                 FALSE = notation("false"),
                 NULL = notation("null"),
@@ -42,6 +43,7 @@ public class Notations {
                 MATCHER = notation(":"),
                 EQUAL = notation("="),
                 DOT = notation("."),
-                IS = notation("is");
+                IS = Keywords.IS,
+                WHICH = Keywords.WHICH;
     }
 }

@@ -100,7 +100,7 @@ public class ListNode extends DALNode {
         List<DALNode> expressions = getExpressions(data.getListFirstIndex());
         if (type == Type.ALL_ITEMS)
             assertListSize(expressions.size(), data.getListSize(), getPositionBegin());
-        return context.newThisScope(data, () -> assertElementExpressions(context, expressions));
+        return context.newBlockScope(data, () -> assertElementExpressions(context, expressions));
     }
 
     private boolean assertElementExpressions(DALRuntimeContext context, List<DALNode> expressions) {

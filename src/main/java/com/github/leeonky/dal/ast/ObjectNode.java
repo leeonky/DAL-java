@@ -66,7 +66,7 @@ public class ObjectNode extends DALNode {
     }
 
     private boolean judgeAll(RuntimeContextBuilder.DALRuntimeContext context, Data data) {
-        return context.newThisScope(data, () -> {
+        return context.newBlockScope(data, () -> {
             expressions.forEach(expression -> expression.evaluate(context));
             return true;
         });

@@ -4,9 +4,11 @@ import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.Calculator;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.Operator;
 
 public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, DALOperator> {
+    private static final int PRECEDENCE_WHICH = 100;
     private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
     private static final int PRECEDENCE_LOGIC_COMPARE_OPT = 210;
     private static final int PRECEDENCE_PLUS_SUB_OPT = 300;
@@ -278,11 +280,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         public Data calculateData(DALNode node1, DALNode node2, DALRuntimeContext context) {
             return ((SymbolNode) node2).getPropertyValue(node1, context);
         }
-
-        @Override
-        public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return calculateData(node1, node2, context).getInstance();
-        }
     }
 
     public static class PropertyDot extends Property {
@@ -306,6 +303,21 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         @Override
         public String inspect(String node1, String node2) {
             return String.format("%s%s", node1, node2);
+        }
+    }
+
+    public static class Which extends DALOperator {
+        public Which() {
+            super(PRECEDENCE_WHICH, Notations.Operators.WHICH.getLabel(), true);
+        }
+
+        @Override
+        public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
+            try {
+                return context.newBlockScope(node1.evaluateData(context), () -> node2.evaluate(context));
+            } catch (IllegalStateException e) {
+                throw new RuntimeException(e.getMessage(), getPosition());
+            }
         }
     }
 }

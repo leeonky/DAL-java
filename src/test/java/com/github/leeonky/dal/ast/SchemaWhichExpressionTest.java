@@ -25,7 +25,7 @@ class SchemaWhichExpressionTest {
 
     @Test
     void should_wrapper_object_as_target_type() {
-        SchemaWhichExpression schemaWhichExpression = new SchemaExpression(new ConstNode("http://www.baidu.com"),
+        DALNode schemaWhichExpression = new SchemaExpression(new ConstNode("http://www.baidu.com"),
                 singletonList(new SchemaNodeBak("URL")), 0).omitWhich(Base.createPropertyNode(InputNode.INSTANCE, "protocol"));
 
         assertThat(schemaWhichExpression.evaluate(runtimeContextBuilder.build(null))).isEqualTo("http");

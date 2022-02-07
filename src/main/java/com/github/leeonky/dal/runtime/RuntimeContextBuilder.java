@@ -146,7 +146,7 @@ public class RuntimeContextBuilder {
             return thisStack.getFirst();
         }
 
-        public <T> T newThisScope(Data data, Supplier<T> supplier) {
+        public <T> T newBlockScope(Data data, Supplier<T> supplier) {
             try {
                 thisStack.push(data);
                 return supplier.get();
