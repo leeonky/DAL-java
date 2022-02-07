@@ -31,19 +31,21 @@ public class Compiler {
     }
 
     private String guessClassName(String schemaCode) {
-        Matcher matcher = Pattern.compile(".* class\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(schemaCode);
+        String s = Stream.of(schemaCode.split("\n")).filter(l -> l.contains("class") || l.contains("interface"))
+                .findFirst().orElse(null);
+        Matcher matcher = Pattern.compile(".* class\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
-        matcher = Pattern.compile(".* class\\s(.*)\\simplements.*", Pattern.DOTALL).matcher(schemaCode);
+        matcher = Pattern.compile(".* class\\s(.*)\\simplements.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
-        matcher = Pattern.compile(".* class\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(schemaCode);
+        matcher = Pattern.compile(".* class\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
-        matcher = Pattern.compile(".* interface\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(schemaCode);
+        matcher = Pattern.compile(".* interface\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
-        matcher = Pattern.compile(".* interface\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(schemaCode);
+        matcher = Pattern.compile(".* interface\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
         throw new IllegalStateException("Can not guess class name");

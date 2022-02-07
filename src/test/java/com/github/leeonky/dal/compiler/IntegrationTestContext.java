@@ -6,6 +6,7 @@ import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.runtime.DalException;
+import com.github.leeonky.dal.runtime.NameStrategy;
 import com.github.leeonky.dal.runtime.Result;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.InterpreterException;
@@ -26,6 +27,7 @@ public class IntegrationTestContext {
     private Object result;
     private InterpreterException exception;
     private String expression;
+    private final List<String> schemas = new ArrayList<>();
     private final List<String> javaClasses = new ArrayList<>();
 
     private static final Compiler compiler = new Compiler();
@@ -53,6 +55,18 @@ public class IntegrationTestContext {
         givenDALExpression(expression);
         exception = null;
         try {
+            com.github.leeonky.dal.cucumber.Compiler compiler
+                    = new com.github.leeonky.dal.cucumber.Compiler();
+            compiler.compileToClasses(schemas.stream().map(s ->
+                    "import com.github.leeonky.dal.type.*;\n" +
+                            "import com.github.leeonky.dal.runtime.*;\n" +
+                            "import java.util.*;\n" + s)
+                    .collect(Collectors.toList()))
+                    .forEach(schema -> {
+                        dal.getRuntimeContextBuilder().registerSchema(NameStrategy.SIMPLE_NAME_WITH_PARENT, schema);
+                        Arrays.stream(schema.getDeclaredClasses()).forEach(c ->
+                                dal.getRuntimeContextBuilder().registerSchema(NameStrategy.SIMPLE_NAME_WITH_PARENT, c));
+                    });
             result = dal.evaluate(input, expression);
         } catch (InterpreterException e) {
             exception = e;
@@ -149,5 +163,9 @@ public class IntegrationTestContext {
 
     public void shouldFailed() {
         assertThat(exception).isInstanceOf(DalException.class);
+    }
+
+    public void givenSchemaClass(String schema) {
+        schemas.add(schema);
     }
 }

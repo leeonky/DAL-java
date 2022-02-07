@@ -34,6 +34,11 @@ public class IntegrationSteps {
         integrationTestContext.givenDALExpression(expression);
     }
 
+    @Given("the following schema class:")
+    public void the_following_schema_class(String schema) {
+        integrationTestContext.givenSchemaClass(schema);
+    }
+
     @When("evaluate by:")
     public void evaluate_by_the_following_expression(String expression) {
         integrationTestContext.evaluate(expression);
