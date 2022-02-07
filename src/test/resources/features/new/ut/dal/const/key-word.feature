@@ -10,10 +10,10 @@ Feature: compile key word const value (true false null)
     = <value>
     """
     Examples:
-      | code  | inspect | value |
-      | true  | true    | true  |
-      | false | false   | false |
-      | null  | null    | null  |
+      | code  | value |
+      | true  | true  |
+      | false | false |
+      | null  | null  |
 
   Scenario: key word const position
     When evaluate by:

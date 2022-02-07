@@ -67,13 +67,6 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     }
 
     @Override
-    public String inspectClause() {
-        if (node1 instanceof SchemaExpression)
-            return operator.inspect(node1.inspectClause(), node2.inspect());
-        return operator.inspect("", node2.inspect());
-    }
-
-    @Override
     public int getOperandPosition() {
         return node2.getPositionBegin();
     }

@@ -21,7 +21,7 @@ Feature: compile table with judgement
     rightOperand: {
       class.simpleName: 'TableNode'
       inspect: "| name |
-    | = 'Tom' |"
+    | name= 'Tom' |"
     }
     """
 
@@ -34,7 +34,7 @@ Feature: compile table with judgement
     Then got the following "expression" node:
     """
     rightOperand.inspect: "| name |
-    = | = 'Tom' |"
+    = | name= 'Tom' |"
     """
 
   Scenario: compile table and specified header judgement operator which has higher priority than row judgement operator
@@ -46,7 +46,7 @@ Feature: compile table with judgement
     Then got the following "table" node:
     """
     inspect: "| name: |
-    = | : 'Tom' |"
+    = | name: 'Tom' |"
     """
 
   Scenario: compile table and specified cell judgement operator which has higher priority than header judgement operator
@@ -58,7 +58,7 @@ Feature: compile table with judgement
     Then got the following "table" node:
     """
     inspect: "| name= |
-    | : 'Tom' |"
+    | name: 'Tom' |"
     """
 
   Scenario: judgement table with empty list

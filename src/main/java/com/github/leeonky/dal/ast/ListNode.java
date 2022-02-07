@@ -81,7 +81,7 @@ public class ListNode extends DALNode {
 
     @Override
     public String inspect() {
-        return getInputExpressions(0).stream().map(DALNode::inspectClause).collect(joining(", ", "[", "]"));
+        return getInputExpressions(0).stream().map(DALNode::inspect).collect(joining(", ", "[", "]"));
     }
 
     @Override

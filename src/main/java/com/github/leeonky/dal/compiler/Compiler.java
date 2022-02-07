@@ -65,6 +65,7 @@ public class Compiler {
 
     public static final OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure>
+//    TODO remove default matcher logic
             DEFAULT_JUDGEMENT_OPERATOR = procedure -> procedure.currentOperator().orElseGet(DALOperator.Matcher::new);
 
     private static final EscapeChars SINGLE_QUOTED_ESCAPES = new EscapeChars()

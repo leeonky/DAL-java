@@ -33,7 +33,7 @@ Feature: list node
     """
     : {
       class.simpleName: 'ListNode'
-      inspect: '[: 1]'
+      inspect: '[[0]: 1]'
       positionBegin: 1
       expressions.inspect: ['[0]: 1']
     }
@@ -48,7 +48,7 @@ Feature: list node
     """
     : {
       class.simpleName: 'ListNode'
-      inspect: '[: 1, : 2]'
+      inspect: '[[0]: 1, [1]: 2]'
       positionBegin: 1
       expressions.inspect: [
         '[0]: 1'
@@ -96,7 +96,7 @@ Feature: list node
     """
     : {
       class.simpleName: 'ListNode'
-      inspect: '[: 1, ...]'
+      inspect: '[[0]: 1, ...]'
       positionBegin: 1
       expressions.inspect: [
         '[0]: 1'
@@ -113,7 +113,7 @@ Feature: list node
     """
     : {
       class.simpleName: 'ListNode'
-      inspect: '[..., : 1]'
+      inspect: '[..., [-1]: 1]'
       positionBegin: 1
       expressions.inspect: [
         '[-1]: 1'
@@ -222,7 +222,7 @@ Feature: list node
     """
     Then got the following "list" node:
     """
-    inspect: '[: true, : false]'
+    inspect: '[[0]: true, [1]: false]'
     """
 
   Scenario: comma as and in parentheses
@@ -232,7 +232,7 @@ Feature: list node
     """
     Then got the following "list" node:
     """
-    inspect: '[: (a , b), : c]'
+    inspect: '[[0]: (a , b), [1]: c]'
     """
 
   Scenario: support optional comma before bracket
@@ -242,7 +242,7 @@ Feature: list node
     """
     Then got the following "list" node:
     """
-    inspect: '[: true]'
+    inspect: '[[0]: true]'
     """
 
   Scenario: blank before bracket
@@ -252,7 +252,7 @@ Feature: list node
     """
     Then got the following "list" node:
     """
-    inspect: '[: true]'
+    inspect: '[[0]: true]'
     """
 
   Scenario: support schema expression
@@ -263,9 +263,9 @@ Feature: list node
     Then got the following "list" node:
     """
     : {
-      inspect: '[is Schema]'
+      inspect: '[[0] is Schema]'
       expressions[0]: {
-        class.simpleName: 'SchemaExpression'
+        class.simpleName: 'DALExpression'
         inspect: '[0] is Schema'
       }
     }
@@ -279,11 +279,11 @@ Feature: list node
     Then got the following "list" node:
     """
     : {
-      inspect: "[is String: 'hello']"
+      inspect: "[[0] is String: 'hello']"
       expressions[0]: {
         class.simpleName: 'DALExpression'
         leftOperand: {
-          class.simpleName: 'SchemaExpression'
+          class.simpleName: 'DALExpression'
           inspect: '[0] is String'
         }
         operator.class.simpleName: 'Matcher'

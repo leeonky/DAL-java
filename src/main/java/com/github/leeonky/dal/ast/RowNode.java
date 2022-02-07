@@ -37,13 +37,13 @@ public class RowNode extends DALNode {
 
     @Override
     public String inspect() {
-        return inspectSchemaAndOperator() + cells.stream().map(DALNode::inspectClause)
+        return inspectSchemaAndOperator() + cells.stream().map(DALNode::inspect)
                 .collect(Collectors.joining(" | ", "| ", " |"));
     }
 
     public String inspectSchemaAndOperator() {
         return index.map(i -> i + " ").orElse("")
-                + schemaClause.map(clause -> clause.makeExpression(null).inspectClause() + " ").orElse("")
+                + schemaClause.map(clause -> clause.makeExpression(null).inspect() + " ").orElse("")
                 + operator.map(o -> o.inspect("", "")).orElse("");
     }
 
@@ -76,7 +76,7 @@ public class RowNode extends DALNode {
     }
 
     public List<String> inspectCells() {
-        return cells.stream().map(DALNode::inspectClause).collect(toList());
+        return cells.stream().map(DALNode::inspect).collect(toList());
     }
 
     public boolean hasIndex() {

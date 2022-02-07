@@ -50,7 +50,7 @@ Feature: ignore some rows
     """
     :{
       inspect: "| >> | 0 | 1 |
-    | name | : 'Tom' | : 'John' |"
+    | name | name: 'Tom' | name: 'John' |"
     }
     """
 

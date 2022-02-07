@@ -10,8 +10,8 @@ Feature: schema in table
     Then got the following "table" node:
     """
     inspect: "| name |
-    is Person | : 'Tom' |
-    | : 'John' |"
+    is Person | name: 'Tom' |
+    | name: 'John' |"
     """
 
   Scenario: compile schema in header
@@ -23,7 +23,7 @@ Feature: schema in table
     Then got the following "table" node:
     """
     inspect: "| name is String |
-    | is String: 'Tom' |"
+    | name is String: 'Tom' |"
     """
 
   Scenario: compile schema in cell
@@ -35,7 +35,7 @@ Feature: schema in table
     Then got the following "table" node:
     """
     inspect: "| name |
-    | is String |"
+    | name is String |"
     """
 
   Scenario: compile schema in header and cell
@@ -48,12 +48,12 @@ Feature: schema in table
     """
     : {
       inspect: "| time is String |
-    | is Instant: {year: 2000} |"
+    | time is String is Instant: {year: 2000} |"
       rows.cells: [[{
         class.simpleName: 'DALExpression'
         operator.class.simpleName: 'Matcher'
         leftOperand: {
-          class.simpleName: 'SchemaExpression'
+          class.simpleName: 'DALExpression'
           inspect: 'time is String is Instant'
         }
         rightOperand: {

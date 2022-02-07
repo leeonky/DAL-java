@@ -81,7 +81,7 @@ Feature: compile all nodes with delimiter
     """
     : {
       class.simpleName: 'ListNode'
-      inspect: '[: 1]'
+      inspect: '[[0]: 1]'
     }
     """
     And got the following "object" node:

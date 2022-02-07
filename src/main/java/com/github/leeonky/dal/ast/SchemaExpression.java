@@ -89,7 +89,6 @@ public class SchemaExpression extends DALNode {
         return which(n, false);
     }
 
-    @Override
     public String inspectClause() {
         return format("is %s%s%s", join("", nCopies(dimension, "[")),
                 schemaNodeBaks.stream().map(SchemaNodeBak::inspect).collect(joining(format(" %s ", SCHEMA_DELIMITER))),

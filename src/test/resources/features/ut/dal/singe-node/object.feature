@@ -163,7 +163,7 @@ Feature: object node
     : {
       inspect: '{key1 is Schema}'
       expressions[0]: {
-        class.simpleName: 'SchemaExpression'
+        class.simpleName: 'DALExpression'
         inspect: 'key1 is Schema'
       }
     }
@@ -183,7 +183,7 @@ Feature: object node
       expressions[0]: {
         class.simpleName: 'DALExpression'
         leftOperand: {
-          class.simpleName: 'SchemaExpression'
+          class.simpleName: 'DALExpression'
           inspect: 'key1 is String'
         }
         operator.class.simpleName: 'Matcher'

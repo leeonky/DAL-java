@@ -92,10 +92,6 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return null;
     }
 
-    public String inspectClause() {
-        return inspect();
-    }
-
     public List<Object> propertyChain() {
         throw new IllegalStateException();
     }
