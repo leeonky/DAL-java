@@ -23,6 +23,10 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return new SchemaComposeNode(nodes.stream().map(SchemaNode.class::cast).collect(Collectors.toList()), false);
     }
 
+    public static SchemaComposeNode elementSchemas(List<DALNode> nodes) {
+        return new SchemaComposeNode(nodes.stream().map(SchemaNode.class::cast).collect(Collectors.toList()), true);
+    }
+
     public static SchemaNode schema(Token token) {
         return (SchemaNode) new SchemaNode(token.getContent()).setPositionBegin(token.getPosition());
     }

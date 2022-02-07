@@ -1,30 +1,30 @@
-Feature: multiple
+Feature: list schema
 
-  Scenario: multiple schema split by /
+  Scenario: support element schema expression
     Given the following dal expression:
     """
-      a/b / c
+      [Number / Integer]
     """
     Then parse the following "schema" node:
     """
     : {
       class.simpleName: 'SchemaComposeNode'
+      inspect: '[Number / Integer]'
       positionBegin: 2
-      inspect: 'a / b / c'
     }
     """
 
-  Scenario: raise error when schema list not finished
+  Scenario: raise error when no closing ]
     Given the following dal expression:
     """
-    Integer /
+      [Integer
     """
     Then failed to parse "schema" with the following message:
     """
-    expect a schema
+    should end with `]`
     """
     And got the following notation:
     """
-    Integer /
-             ^
+      [Integer
+              ^
     """

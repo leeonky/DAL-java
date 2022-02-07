@@ -10,8 +10,6 @@ public class ComplexNode<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, M extends Parser.Mandatory<C, N, E, O, P, T>,
         T, A> {
     private final Type type;
-
-    //    TODO use nodeParser
     private final M mandatory;
     private final String message;
 
@@ -22,14 +20,14 @@ public class ComplexNode<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
     }
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>,
-            M extends Parser.Mandatory<C, N, E, O, P, T>, T> ComplexNode<C, N, E, O, P, M, T, T> single(M mandatory, String message) {
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, M extends Parser.Mandatory<C, N, E, O, P, T>,
+            T> ComplexNode<C, N, E, O, P, M, T, T> single(M mandatory, String message) {
         return new ComplexNode<>(Type.SINGLE, mandatory, message);
     }
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>,
-            M extends Parser.Mandatory<C, N, E, O, P, T>, T> ComplexNode<C, N, E, O, P, M, T, List<T>> multiple(M mandatory) {
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, M extends Parser.Mandatory<C, N, E, O, P, T>,
+            T> ComplexNode<C, N, E, O, P, M, T, List<T>> multiple(M mandatory) {
         return new ComplexNode<>(Type.MULTIPLE, mandatory, null);
     }
 
@@ -65,6 +63,30 @@ public class ComplexNode<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
                     });
         }
 
+        public OpeningClosingSplit splitBy(String split) {
+            return new OpeningClosingSplit(split);
+        }
+
+        public class OpeningClosingSplit {
+            private final String split;
+
+            public OpeningClosingSplit(String split) {
+                this.split = split;
+            }
+
+            @SuppressWarnings("unchecked")
+            public NodeParser<C, N, E, O, P> nodeParser(Function<A, N> nodeFactory) {
+                return procedure -> procedure.getSourceCode().popWord(String.valueOf(opening)).map(openingToken -> {
+                    return nodeFactory.apply((A) new ArrayList<T>() {{
+                        add(mandatory.parse(procedure));
+                        while (procedure.getSourceCode().popWord(split).isPresent())
+                            add(mandatory.parse(procedure));
+                        procedure.getSourceCode().popWord(String.valueOf(closing)).orElseThrow(() ->
+                                procedure.getSourceCode().syntaxError(String.format("should end with `%s`", closing), 0));
+                    }}).setPositionBegin(openingToken.getPosition());
+                });
+            }
+        }
     }
 
     public class Split {
@@ -74,13 +96,12 @@ public class ComplexNode<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
             this.split = split;
         }
 
-        public NodeParser.Mandatory<C, N, E, O, P> nodeParserMandatory(Function<List<T>, N> nodeFactory) {
-            return procedure -> nodeFactory.apply(new ArrayList<T>() {{
-                T node = mandatory.parse(procedure);
-                add(node);
+        public NodeParser.Mandatory<C, N, E, O, P> mandatory(Function<List<T>, N> nodeFactory) {
+            return procedure -> procedure.atPosition(position -> nodeFactory.apply(new ArrayList<T>() {{
+                add(mandatory.parse(procedure));
                 while (procedure.getSourceCode().popWord(split).isPresent())
                     add(mandatory.parse(procedure));
-            }});
+            }}).setPositionBegin(position));
         }
     }
 }

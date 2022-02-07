@@ -75,21 +75,6 @@ Feature: schema expression
     }
     """
 
-  Scenario: raise error when schema list not finished
-    Given the following dal code:
-    """
-    is Integer /
-    """
-    Then failed to get "schema-expression" node with the following message:
-    """
-    expect a schema
-    """
-    And got the following source code information:
-    """
-    is Integer /
-                ^
-    """
-
   Scenario: support element schema expression
     Given the following dal code:
     """
