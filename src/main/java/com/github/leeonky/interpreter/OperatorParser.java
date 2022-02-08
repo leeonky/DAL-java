@@ -25,7 +25,15 @@ public interface OperatorParser<C extends RuntimeContext<C>, N extends Node<C, N
     }
 
     default ClauseParser<C, N, E, O, P> clause(NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
-        return procedure -> parse(procedure).map(operator -> procedure.fetchClause(operator, nodeFactory));
+        return procedure -> parse(procedure).map(operator -> procedure.underOperator(operator, () -> {
+            N parse = nodeFactory.parse(procedure);
+            return previous -> procedure.createExpression(previous, operator, parse);
+        }));
+    }
+
+    default NodeParser<C, N, E, O, P> unary(NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
+        return procedure -> parse(procedure).map(operator -> procedure.underOperator(operator, () ->
+                procedure.createExpression(null, operator, nodeFactory.parse(procedure))));
     }
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,

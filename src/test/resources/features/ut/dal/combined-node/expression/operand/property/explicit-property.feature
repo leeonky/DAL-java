@@ -31,4 +31,3 @@ Feature: compile dot or bracket notation property
       | code  |
       | .a    |
       | ['a'] |
-#    TODO

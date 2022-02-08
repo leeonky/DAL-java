@@ -126,11 +126,6 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
     }
 
     @Deprecated
-    public Clause<C, N> fetchClause(OperatorParser.Mandatory<C, N, E, O, P> mandatoryParser,
-                                    NodeParser.Mandatory<C, N, E, O, P> rightCompiler) {
-        return fetchClause(mandatoryParser.parse(getInstance()), rightCompiler);
-    }
-
     public Clause<C, N> fetchClause(O operator, NodeParser.Mandatory<C, N, E, O, P> rightMandatory) {
         operators.push(operator);
         try {
@@ -141,10 +136,17 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
         }
     }
 
-    @Deprecated
-    public Optional<Clause<C, N>> fetchClause(OperatorParser<C, N, E, O, P> operatorParser,
-                                              NodeParser.Mandatory<C, N, E, O, P> rightCompiler) {
-        return operatorParser.parse(getInstance()).map(operator -> fetchClause(operator, rightCompiler));
+    public <T> T underOperator(O operator, Supplier<T> action) {
+        operators.push(operator);
+        try {
+            return action.get();
+        } finally {
+            operators.pop();
+        }
+    }
+
+    public N createExpression(N node1, O operator, N node2) {
+        return expressionConstructor.newInstance(node1, operator, node2).adjustOperatorOrder(expressionConstructor);
     }
 
     public <LE> Optional<List<LE>> fetchRow(Function<Integer, LE> factory) {

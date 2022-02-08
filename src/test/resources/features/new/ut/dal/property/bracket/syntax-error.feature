@@ -1,11 +1,11 @@
 Feature: syntax-error
 
   Scenario Outline: raise error when got invalid value in bracket
-    Given the following dal expression:
+    Given evaluate by:
     """
     [<code>]
     """
-    Then failed to parse "bracket-symbol" with the following message:
+    Then failed with the message:
     """
     should given one property or array index in `[]`
     """
@@ -20,11 +20,11 @@ Feature: syntax-error
       |      |
 
   Scenario: raise error when more than one token in brackets
-    Given the following dal expression:
+    Given evaluate by:
     """
     [1 2]
     """
-    Then failed to parse "bracket-symbol" with the following message:
+    Then failed with the message:
     """
     should given one property or array index in `[]`
     """
@@ -35,11 +35,11 @@ Feature: syntax-error
     """
 
   Scenario: raise error when missed closing ']'
-    Given the following dal expression:
+    Given evaluate by:
     """
     [100
     """
-    Then failed to parse "bracket-symbol" with the following message:
+    Then failed with the message:
     """
     should end with `]`
     """
@@ -50,11 +50,11 @@ Feature: syntax-error
     """
 
   Scenario: raise error when missed token and closing ']'
-    Given the following dal expression:
+    Given evaluate by:
     """
     [
     """
-    Then failed to parse "bracket-symbol" with the following message:
+    Then failed with the message:
     """
     should end with `]`
     """

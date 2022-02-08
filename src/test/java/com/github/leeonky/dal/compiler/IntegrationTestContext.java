@@ -35,11 +35,7 @@ public class IntegrationTestContext {
             DALProcedure>> parserMap = new HashMap<String, NodeParser<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression,
             DALOperator, DALProcedure>>() {{
         put("symbol", compiler.SYMBOL);
-        put("bracket-symbol", compiler.BRACKET_SYMBOL);
-        put("single-quoted-string", compiler.SINGLE_QUOTED_STRING);
-        put("double-quoted-string", compiler.DOUBLE_QUOTED_STRING);
         put("number", compiler.NUMBER);
-        put("expression", optional(compiler.EXPRESSION));
         put("integer", compiler.INTEGER);
         put("regex", compiler.REGEX);
         put("schema", optional(compiler.SCHEMA_COMPOSE));

@@ -61,7 +61,8 @@ public class Compiler {
             Operators.EQUAL.operatorParser(DALOperator.Equal::new));
 
     public static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
-            DALProcedure> IS = Operators.IS.operatorParser(DALOperator.Is::new);
+            DALProcedure> IS = Operators.IS.operatorParser(DALOperator.Is::new),
+            WHICH = Operators.WHICH.operatorParser(DALOperator.Is::new);
 
     public static final OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure>
@@ -152,7 +153,7 @@ public class Compiler {
                 .between('[', ']').nodeParser(ListNode::new)));
 
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
-        UNARY_OPERATOR_EXPRESSION = procedure -> procedure.fetchExpression(null, UNARY_OPERATORS, OPERAND);
+        UNARY_OPERATOR_EXPRESSION = lazy(() -> UNARY_OPERATORS.unary(OPERAND));
         OPERAND = UNARY_OPERATOR_EXPRESSION.or(oneOf(CONST, PROPERTY, PARENTHESES, INPUT)
                 .mandatory("expect a value or expression").map(DALNode::avoidListMapping));
         BINARY_ARITHMETIC_EXPRESSION = BINARY_ARITHMETIC_OPERATORS.clause(OPERAND);

@@ -44,7 +44,6 @@ public class CucumberContextBak {
         put("property", compiler.PROPERTY);
         put("operand", optional(compiler.OPERAND));
         put("binary-operator-expression", compiler.BINARY_OPERATOR_EXPRESSION.defaultInputNode(InputNode.INSTANCE));
-        put("schema-expression", compiler.SCHEMA_EXPRESSION.defaultInputNode(InputNode.INSTANCE));
         put("expression", optional(compiler.EXPRESSION));
         put("parentheses", compiler.PARENTHESES);
         put("object", compiler.OBJECT);

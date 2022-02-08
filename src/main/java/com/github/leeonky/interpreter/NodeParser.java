@@ -39,10 +39,6 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return procedure -> parse(procedure).map(node -> p -> node);
     }
 
-    default NodeParser<C, N, E, O, P> map(Function<N, N> mapping) {
-        return procedure -> parse(procedure).map(mapping);
-    }
-
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser.Mandatory<C, N, E, O, P, N> {
 

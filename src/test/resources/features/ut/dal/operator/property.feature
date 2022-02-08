@@ -93,6 +93,4 @@ Feature: invoke
       : false
     """
 
-#  TODO opt is
 #  TODO (list match)= ['value'], : ['value'], (property value)= (['value'])
-#  TODO access list last index
