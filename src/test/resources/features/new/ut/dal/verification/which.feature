@@ -27,7 +27,26 @@ Feature: schema which expression
       | which =  |
       | which :  |
 
-  Scenario: verify data matches schema and which clause
+  Scenario: use previous value as current code scope in which clause
+    * the following verification should pass:
+    """
+    'http://www.baidu.com' is URL which .host='www.baidu.com'
+    """
+    And the inspect should:
+    """
+    'http://www.baidu.com' is URL which .host= 'www.baidu.com'
+    """
+    But the following verification should failed:
+    """
+    'http://www.baidu.com' is URL which .host='www.google.com'
+    """
+    And got the following notation:
+    """
+    'http://www.baidu.com' is URL which .host='www.google.com'
+                                              ^
+    """
+
+  Scenario: verify data use which clause by different styles
     Given the following schema class:
     """
     public class IdZero {

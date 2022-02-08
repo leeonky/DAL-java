@@ -127,10 +127,6 @@ public class Compiler {
                 .or(operatorMandatory.mandatoryClause(JUDGEMENT_EXPRESSION_OPERAND));
     }
 
-    private static final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SCHEMA_BK = new SchemaClauseMandatory();
-
-
     private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> implicitProperty(
             NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
         return procedure -> nodeParser.parse(procedure).map(node -> previous -> new DALExpression(previous,
