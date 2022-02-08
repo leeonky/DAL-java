@@ -13,11 +13,15 @@ Feature: access list element by [n]
     """
     : <value>
     """
+    And the inspect should:
+    """
+    <inspect>
+    """
     Examples:
-      | code    | value |
-      | [0]     | 1     |
-      | [ 1 ]   | 2     |
-      | [\n2\n] | 3     |
+      | code    | value | inspect |
+      | [0]     | 1     | [0]     |
+      | [ 1 ]   | 2     | [1]     |
+      | [\n2\n] | 3     | [2]     |
 
   Scenario Outline: access from the end of list
 
@@ -33,11 +37,15 @@ Feature: access list element by [n]
     """
     : <value>
     """
+    And the inspect should:
+    """
+    <inspect>
+    """
     Examples:
-      | code     | value |
-      | [-1]     | 3     |
-      | [-2]     | 2     |
-      | [\n-3\n] | 1     |
+      | code     | value | inspect |
+      | [-1]     | 3     | [-1]    |
+      | [ -2 ]   | 2     | [-2]    |
+      | [\n-3\n] | 1     | [-3]    |
 
   Scenario: raise error when index out of bound
     Given the following json:

@@ -52,3 +52,5 @@ Feature: regex node
       | code |
       | /str |
       | /st\ |
+
+#    TODO remove regex node use e2e test

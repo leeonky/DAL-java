@@ -17,12 +17,15 @@ Feature: symbol
     """
     : <value>
     """
+    Then the inspect should:
+    """
+    <inspect>
+    """
     Examples:
-      | code  | value               |
-      | id    | 100                 |
-      | _name | 'Tom'               |
-      | 1a    | 'start with number' |
-
+      | code  | value               | inspect |
+      | id    | 100                 | id      |
+      | _name | 'Tom'               | _name   |
+      | 1a    | 'start with number' | 1a      |
 
   Scenario Outline: identity start with match key word
     Given the following json:

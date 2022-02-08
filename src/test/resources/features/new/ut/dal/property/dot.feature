@@ -16,10 +16,14 @@ Feature: access object property by .xxx
     """
     : <value>
     """
+    Then the inspect should:
+    """
+    <inspect>
+    """
     Examples:
-      | code  | value |
-      | .id   | 100   |
-      | .name | 'Tom' |
+      | code  | value | inspect |
+      | .id   | 100   | .id     |
+      | .name | 'Tom' | .name   |
 
   Scenario: do not allow empty property
     When evaluate by:

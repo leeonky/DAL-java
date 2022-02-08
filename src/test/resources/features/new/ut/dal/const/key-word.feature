@@ -9,11 +9,15 @@ Feature: compile key word const value (true false null)
     """
     = <value>
     """
+    And the inspect should:
+    """
+    <inspect>
+    """
     Examples:
-      | code  | value |
-      | true  | true  |
-      | false | false |
-      | null  | null  |
+      | code  | value | inspect |
+      | true  | true  | true    |
+      | false | false | false   |
+      | null  | null  | null    |
 
   Scenario: key word const position
     When evaluate by:

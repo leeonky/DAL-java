@@ -16,10 +16,14 @@ Feature: access object property by ['xxx']
     """
     : <value>
     """
+    And the inspect should:
+    """
+    <inspect>
+    """
     Examples:
-      | code             | value |
-      | [ "id" ]         | 100   |
-      | [ 'first name' ] | 'Li'  |
+      | code             | value | inspect        |
+      | [ "id" ]         | 100   | ['id']         |
+      | [ 'first name' ] | 'Li'  | ['first name'] |
 
   Scenario: raise error when access invalid property
     Given the following java class:

@@ -25,6 +25,10 @@ Feature: multiple schema and list schema
     """
       is IdZero / IdZero/IdZero
     """
+    And the inspect should:
+    """
+    is IdZero / IdZero / IdZero
+    """
 
   Scenario: raise error when any schema failed
     When the following json:
@@ -78,6 +82,10 @@ Feature: multiple schema and list schema
     And the following verification should pass:
     """
       is [IdZero/ IdZero]
+    """
+    And the inspect should:
+    """
+    is [IdZero / IdZero]
     """
 
   Scenario: raise error when one element is not matched schema

@@ -9,10 +9,14 @@ Feature: 'string'
     """
     : <value>
     """
+    And the inspect should:
+    """
+    <inspect>
+    """
     Examples:
-      | str         | value         |
-      |             | ''            |
-      | hello world | 'hello world' |
+      | str         | value         | inspect       |
+      |             | ''            | ''            |
+      | hello world | 'hello world' | 'hello world' |
 
   Scenario: escape char
     When evaluate by:

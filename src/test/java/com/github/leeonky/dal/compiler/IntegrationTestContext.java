@@ -168,4 +168,9 @@ public class IntegrationTestContext {
     public void givenSchemaClass(String schema) {
         schemas.add(schema);
     }
+
+    public void verifyInspect(String inspect) {
+        assertThat(compiler.compile(new SourceCode(expression), dal.getRuntimeContextBuilder().build(null)).get(0).inspect())
+                .isEqualTo(inspect);
+    }
 }

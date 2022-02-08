@@ -17,5 +17,9 @@ Feature: property
     """
     : 100
     """
+    And the inspect should:
+    """
+    items[0].id
+    """
 
 #    TODO list mapping; static methed extension

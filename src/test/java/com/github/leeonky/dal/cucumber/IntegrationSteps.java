@@ -117,4 +117,9 @@ public class IntegrationSteps {
         integrationTestContext.evaluateLast();
         integrationTestContext.verifyLastEvaluated(verification);
     }
+
+    @Then("the inspect should:")
+    public void the_inspect_should(String inspect) {
+        integrationTestContext.verifyInspect(inspect);
+    }
 }
