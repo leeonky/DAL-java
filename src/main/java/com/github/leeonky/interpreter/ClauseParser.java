@@ -1,6 +1,7 @@
 package com.github.leeonky.interpreter;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.interpreter.ClauseParser.oneOf;
@@ -14,6 +15,12 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             ClauseParser<C, N, E, O, P>... matchers) {
         return procedure -> Stream.of(matchers).map(p -> p.parse(procedure))
                 .filter(Optional::isPresent).findFirst().orElse(empty());
+    }
+
+    static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> lazy(
+            Supplier<ClauseParser<C, N, E, O, P>> parser) {
+        return procedure -> parser.get().parse(procedure);
     }
 
     @Override

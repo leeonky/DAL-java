@@ -10,6 +10,7 @@ import static java.util.Optional.empty;
 public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
         extends Parser<C, N, E, O, P, N> {
+
     static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> oneOf(
             NodeParser<C, N, E, O, P>... matchers) {

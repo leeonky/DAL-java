@@ -8,6 +8,7 @@ import com.github.leeonky.interpreter.NodeBase;
 import com.github.leeonky.interpreter.Token;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.*;
@@ -37,6 +38,26 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
 
     public static DALExpression parenthesesNode(DALNode node) {
         return new DALExpression(null, new DALOperator.Parentheses(), node);
+    }
+
+    public static DALNode constTrue(Token token) {
+        return new ConstNode(true);
+    }
+
+    public static DALNode constFalse(Token token) {
+        return new ConstNode(false);
+    }
+
+    public static DALNode constNull(Token token) {
+        return new ConstNode(null);
+    }
+
+    public static WildcardNode wildcardNode(Token token) {
+        return new WildcardNode(token.getContent());
+    }
+
+    public static Function<Token, DALNode> constNode(Function<Token, ?> function) {
+        return token -> new ConstNode(function.apply(token));
     }
 
     public Data evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {

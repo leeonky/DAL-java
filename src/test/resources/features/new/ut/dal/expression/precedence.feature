@@ -4,12 +4,14 @@ Feature: invoke
     Given the following json:
     """
       {
-        "value": <value>
+        "obj": {
+          "value": <value>
+        }
       }
     """
     When evaluate by:
     """
-      <input> <operator> .value
+      <input> <operator> obj.value
     """
     Then the result should:
     """
@@ -37,12 +39,14 @@ Feature: invoke
     Given the following json:
     """
       {
-        "value": <value>
+        "obj": {
+          "value": <value>
+        }
       }
     """
     When evaluate by:
     """
-      <input> <operator> ['value']
+      <input> <operator> obj['value']
     """
     Then the result should:
     """
@@ -51,18 +55,18 @@ Feature: invoke
     Examples:
       | input | operator | value | result |
       | 10    | +        | 1     | 11     |
-      | 10    | -        | 1     | 9      |
-      | 10    | *        | 2     | 20     |
-      | 10    | /        | 2     | 5      |
-      | true  | &&       | true  | true   |
-      | true  | \|\|     | false | true   |
-      | true  | and      | true  | true   |
-      | false | or       | true  | true   |
-      | 10    | >        | 5     | true   |
-      | 4     | <        | 4     | false  |
-      | 10    | >=       | 10    | true   |
-      | 5     | <=       | 4     | false  |
-      | 5     | !=       | 3     | true   |
+#      | 10    | -        | 1     | 9      |
+#      | 10    | *        | 2     | 20     |
+#      | 10    | /        | 2     | 5      |
+#      | true  | &&       | true  | true   |
+#      | true  | \|\|     | false | true   |
+#      | true  | and      | true  | true   |
+#      | false | or       | true  | true   |
+#      | 10    | >        | 5     | true   |
+#      | 4     | <        | 4     | false  |
+#      | 10    | >=       | 10    | true   |
+#      | 5     | <=       | 4     | false  |
+#      | 5     | !=       | 3     | true   |
 
   Scenario:
   dot operator has higher precedence over unary operator(property chain after unary operator)

@@ -76,15 +76,14 @@ public class ComplexNode<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
 
             @SuppressWarnings("unchecked")
             public NodeParser<C, N, E, O, P> nodeParser(Function<A, N> nodeFactory) {
-                return procedure -> procedure.getSourceCode().popWord(String.valueOf(opening)).map(openingToken -> {
-                    return nodeFactory.apply((A) new ArrayList<T>() {{
-                        add(mandatory.parse(procedure));
-                        while (procedure.getSourceCode().popWord(split).isPresent())
+                return procedure -> procedure.getSourceCode().popWord(String.valueOf(opening)).map(openingToken ->
+                        nodeFactory.apply((A) new ArrayList<T>() {{
                             add(mandatory.parse(procedure));
-                        procedure.getSourceCode().popWord(String.valueOf(closing)).orElseThrow(() ->
-                                procedure.getSourceCode().syntaxError(String.format("should end with `%s`", closing), 0));
-                    }}).setPositionBegin(openingToken.getPosition());
-                });
+                            while (procedure.getSourceCode().popWord(split).isPresent())
+                                add(mandatory.parse(procedure));
+                            procedure.getSourceCode().popWord(String.valueOf(closing)).orElseThrow(() ->
+                                    procedure.getSourceCode().syntaxError(String.format("should end with `%s`", closing), 0));
+                        }}).setPositionBegin(openingToken.getPosition()));
             }
         }
     }

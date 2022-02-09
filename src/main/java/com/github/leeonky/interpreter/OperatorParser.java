@@ -20,7 +20,7 @@ public interface OperatorParser<C extends RuntimeContext<C>, N extends Node<C, N
         return procedure -> parse(procedure).orElseGet(() -> compiler.parse(procedure));
     }
 
-    default Mandatory<C, N, E, O, P> or(String message) {
+    default Mandatory<C, N, E, O, P> mandatory(String message) {
         return procedure -> parse(procedure).orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0));
     }
 
