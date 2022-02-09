@@ -12,6 +12,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.SourceCode;
+import com.github.leeonky.interpreter.SyntaxException;
 import lombok.SneakyThrows;
 
 import java.util.*;
@@ -50,6 +51,7 @@ public class IntegrationTestContext {
     public void evaluate(String expression) {
         givenDALExpression(expression);
         exception = null;
+        result = null;
         try {
             com.github.leeonky.dal.cucumber.Compiler compiler
                     = new com.github.leeonky.dal.cucumber.Compiler();
@@ -159,6 +161,10 @@ public class IntegrationTestContext {
 
     public void shouldFailed() {
         assertThat(exception).isInstanceOf(DalException.class);
+    }
+
+    public void shouldSyntaxError() {
+        assertThat(exception).isInstanceOf(SyntaxException.class);
     }
 
     public void givenSchemaClass(String schema) {

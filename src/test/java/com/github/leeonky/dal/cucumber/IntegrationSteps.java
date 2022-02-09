@@ -91,6 +91,12 @@ public class IntegrationSteps {
         integrationTestContext.shouldFailed();
     }
 
+    @Then("the following verification should syntax error:")
+    public void the_following_verification_should_syntax_error(String expression) {
+        integrationTestContext.evaluate(expression);
+        integrationTestContext.shouldSyntaxError();
+    }
+
     @Then("failed with the message:")
     public void failed_with_the_message(String message) {
         integrationTestContext.shouldFailedWith(message);

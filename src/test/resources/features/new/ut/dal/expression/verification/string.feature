@@ -15,7 +15,7 @@ Feature: string
       | :   |
 
   Scenario: different string with =
-    Given evaluate by:
+    When evaluate by:
     """
       'abc'= 'efg'
     """
@@ -34,7 +34,7 @@ Feature: string
     """
 
   Scenario: different string with :
-    Given evaluate by:
+    When evaluate by:
     """
       'abc': 'efg'
     """
@@ -53,7 +53,7 @@ Feature: string
     """
 
   Scenario: not string type with =
-    Given the following java class:
+    When the following java class:
     """
     public class Data {
       public java.time.Instant instant = java.time.Instant.parse("2000-10-10T00:00:00Z");
@@ -78,7 +78,7 @@ Feature: string
     """
 
   Scenario: implicitly to string with :
-    Given the following java class:
+    When the following java class:
     """
     public class Data {
       public java.time.Instant instant = java.time.Instant.parse("2000-10-10T00:00:00Z");
@@ -90,7 +90,7 @@ Feature: string
     """
 
   Scenario: not allow convert number to string implicitly
-    Given evaluate by:
+    When evaluate by:
     """
       5: '5'
     """
@@ -109,7 +109,7 @@ Feature: string
     """
 
   Scenario: not allow convert boolean to string implicitly
-    Given evaluate by:
+    When evaluate by:
     """
       true: 'true'
     """

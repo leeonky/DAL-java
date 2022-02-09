@@ -1,9 +1,9 @@
 Feature: syntax-error
 
-  Scenario: raise error when right operand is not schema
+  Scenario Outline: raise error when right operand is not schema
     When evaluate by:
     """
-    is +
+    is <schema>
     """
     Then failed with the message:
     """
@@ -11,9 +11,13 @@ Feature: syntax-error
     """
     And got the following notation:
     """
-    is +
+    is <schema>
        ^
     """
+    Examples:
+      | schema   |
+      | +        |
+      | (Schema) |
 
   Scenario: raise error when missing schema at the end of code
     When evaluate by:

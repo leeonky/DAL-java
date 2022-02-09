@@ -63,7 +63,7 @@ public class Compiler {
 
     public static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> IS = Operators.IS.operatorParser(DALOperator.Is::new),
-            WHICH = Operators.WHICH.operatorParser(DALOperator.Is::new);
+            WHICH = Operators.WHICH.operatorParser(DALOperator.Which::new);
 
     public static final OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure>
@@ -115,7 +115,8 @@ public class Compiler {
             BINARY_JUDGEMENT_EXPRESSION,
             BINARY_OPERATOR_EXPRESSION,
             SCHEMA_EXPRESSION,
-            SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE);
+            SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE),
+            WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION));
 
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SYMBOL = Tokens.IDENTITY_PROPERTY.nodeParser(DALNode::symbolNode),
@@ -156,7 +157,7 @@ public class Compiler {
                 .mandatory("expect a value or expression").map(DALNode::avoidListMapping);
         BINARY_ARITHMETIC_EXPRESSION = BINARY_ARITHMETIC_OPERATORS.clause(OPERAND);
         BINARY_JUDGEMENT_EXPRESSION = JUDGEMENT_OPERATORS.clause(JUDGEMENT.or(OPERAND));
-        BINARY_OPERATOR_EXPRESSION = oneOf(BINARY_ARITHMETIC_EXPRESSION, BINARY_JUDGEMENT_EXPRESSION, EXPLICIT_PROPERTY);
+        BINARY_OPERATOR_EXPRESSION = oneOf(BINARY_ARITHMETIC_EXPRESSION, BINARY_JUDGEMENT_EXPRESSION, EXPLICIT_PROPERTY, WHICH_CLAUSE);
         ARITHMETIC_EXPRESSION = OPERAND.recursive(oneOf(BINARY_ARITHMETIC_EXPRESSION, /*need test*/EXPLICIT_PROPERTY));
         JUDGEMENT_EXPRESSION_OPERAND = JUDGEMENT.or(ARITHMETIC_EXPRESSION);
         SCHEMA_JUDGEMENT_CLAUSE = procedure -> procedure.fetchExpression(

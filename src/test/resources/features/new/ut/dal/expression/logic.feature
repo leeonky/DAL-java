@@ -1,20 +1,4 @@
-Feature: operators
-
-  Scenario Outline: arithmetic
-    When evaluate by:
-    """
-      <input> <operator> <value>
-    """
-    Then the result should:
-    """
-    : <result>
-    """
-    Examples:
-      | input | operator | value | result |
-      | 10    | +        | 1     | 11     |
-      | 10    | -        | 1     | 9      |
-      | 10    | *        | 2     | 20     |
-      | 10    | /        | 2     | 5      |
+Feature: logic
 
   Scenario Outline: logic
     When evaluate by:

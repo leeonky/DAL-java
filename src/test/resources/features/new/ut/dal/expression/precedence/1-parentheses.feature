@@ -1,6 +1,6 @@
-Feature: invoke
+Feature: parentheses
 
-  Scenario Outline: dot property precedence
+  Scenario Outline: parentheses precedence
     Given the following json:
     """
       {
@@ -11,11 +11,15 @@ Feature: invoke
     """
     When evaluate by:
     """
-      <input> <operator> obj.value
+      <input> <operator> (obj which value)
     """
     Then the result should:
     """
     : <result>
+    """
+    And the inspect should:
+    """
+    <input> <operator> (obj which value)
     """
     Examples:
       | input | operator | value | result |
@@ -32,10 +36,8 @@ Feature: invoke
       | 10    | >=       | 10    | true   |
       | 5     | <=       | 4     | false  |
       | 5     | !=       | 3     | true   |
-      | 5     | =        | 5     | true   |
-      | 3     | :        | 3.0   | true   |
 
-  Scenario Outline: bracket precedence
+  Scenario Outline: judgement before parentheses precedence
     Given the following json:
     """
       {
@@ -46,55 +48,57 @@ Feature: invoke
     """
     When evaluate by:
     """
-      <input> <operator> obj['value']
+      <input> <operator> (obj which value)
     """
     Then the result should:
     """
     : <result>
     """
+    And the inspect should:
+    """
+    <input><operator> (obj which value)
+    """
     Examples:
       | input | operator | value | result |
-      | 10    | +        | 1     | 11     |
-#      | 10    | -        | 1     | 9      |
-#      | 10    | *        | 2     | 20     |
-#      | 10    | /        | 2     | 5      |
-#      | true  | &&       | true  | true   |
-#      | true  | \|\|     | false | true   |
-#      | true  | and      | true  | true   |
-#      | false | or       | true  | true   |
-#      | 10    | >        | 5     | true   |
-#      | 4     | <        | 4     | false  |
-#      | 10    | >=       | 10    | true   |
-#      | 5     | <=       | 4     | false  |
-#      | 5     | !=       | 3     | true   |
+      | 5     | =        | 5     | true   |
+      | 3     | :        | 3.0   | true   |
 
-  Scenario:
-  dot operator has higher precedence over unary operator(property chain after unary operator)
-  unary operator has higher precedence over other operators
+  Scenario: parentheses and which precedence
     Given the following json:
     """
       {
-        "result": {
-          "integer": 100,
-          "boolean": true
+        "obj": {
+          "value": {
+            "number": 100
+          }
         }
       }
     """
-    When evaluate by:
+    Then the following verification should pass:
     """
-    1 + -result.integer
-    """
-    Then the result should:
-    """
-      : -99
-    """
-    When evaluate by:
-    """
-    true && !result.boolean
-    """
-    Then the result should:
-    """
-      : false
+    (obj which (value which number)) = ((obj which value) which number)
     """
 
-#  TODO (list match)= ['value'], : ['value'], (property value)= (['value'])
+  Scenario: parentheses and unary precedence
+    When evaluate by:
+    """
+    (-(1+1))
+    """
+    Then the result should:
+    """
+    : -2
+    """
+    When evaluate by:
+    """
+    !(true || true)
+    """
+    Then the result should:
+    """
+    : false
+    """
+
+  Scenario: parentheses and is
+    * the following verification should syntax error:
+    """
+    is (Schema)
+    """

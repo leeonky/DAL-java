@@ -1,9 +1,21 @@
-Feature: schema which expression
+Feature: which expression
+
+  Scenario: which opt should given clause new block scope
+    Given the following java class:
+    """
+    public class Data {
+      public java.time.LocalDateTime time = java.time.LocalDateTime.parse("2000-12-11T10:00:00");
+    }
+    """
+    When use a instance of java class "Data" to evaluate:
+    """
+    time which year= 2000
+    """
 
   Scenario: should raise error when no clause
     When evaluate by:
     """
-      1 is Integer which
+      which
     """
     Then failed with the message:
     """
@@ -11,10 +23,31 @@ Feature: schema which expression
     """
     And got the following notation:
     """
-      1 is Integer which
-                        ^
+      which
+           ^
     """
 
+  Scenario Outline: should raise error when unexpected token
+    When evaluate by:
+    """
+      which <code>
+    """
+    Then failed with the message:
+    """
+    expect a value or expression
+    """
+    And got the following notation:
+    """
+      which <code>
+            ^
+    """
+    Examples:
+      | code |
+      | +    |
+      | :    |
+      | =    |
+
+#      TODO to be removed
   Scenario Outline: can omit which when clause start with = or :
     * the following verification should pass:
     """
@@ -24,9 +57,11 @@ Feature: schema which expression
       | operator |
       | :        |
       | =        |
+#      TODO to be removed
       | which =  |
       | which :  |
 
+#      TODO to be removed
   Scenario: use previous value as current code scope in which clause
     * the following verification should pass:
     """
@@ -46,6 +81,7 @@ Feature: schema which expression
                                               ^
     """
 
+#      TODO to be removed
   Scenario: verify data use which clause by different styles
     Given the following schema class:
     """
