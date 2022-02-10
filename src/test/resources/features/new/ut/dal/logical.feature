@@ -39,3 +39,13 @@ Feature: logic
       | 5     | <=       | 4     | false  |
       | 5     | !=       | 3     | true   |
       | 5     | !=       | 5     | false  |
+
+  Scenario: support logic not
+    When evaluate by:
+    """
+    !false
+    """
+    Then the result should:
+    """
+    =true
+    """
