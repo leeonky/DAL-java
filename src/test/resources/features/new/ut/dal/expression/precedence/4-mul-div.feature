@@ -41,27 +41,6 @@ Feature: mul-div
       | false | \|\| |
       | false | or   |
 
-  Scenario: mul with which
-    Given the following json:
-    """
-    {
-      "number": 10,
-      "operand": 5,
-      "obj": {
-        "number": 10,
-        "operand": 2
-      }
-    }
-    """
-    Then the following verification should pass:
-    """
-    obj which number*operand
-    """
-    Then the result should:
-    """
-    : 20
-    """
-
   Scenario Outline: mul with judgement
     * the following verification should pass:
     """
@@ -113,7 +92,17 @@ Feature: mul-div
       | false | \|\| |
       | false | or   |
 
-  Scenario: div with which
+  Scenario Outline: div with judgement
+    * the following verification should pass:
+    """
+    2 <opt> 4/2
+    """
+    Examples:
+      | opt |
+      | :   |
+      | =   |
+
+  Scenario Outline: with which
     Given the following json:
     """
     {
@@ -125,21 +114,15 @@ Feature: mul-div
       }
     }
     """
-    Then the following verification should pass:
+    When evaluate by:
     """
-    obj which number/operand
+    obj which number<opt>operand
     """
     Then the result should:
     """
-    : 5
-    """
-
-  Scenario Outline: div with judgement
-    * the following verification should pass:
-    """
-    2 <opt> 4/2
+    : <result>
     """
     Examples:
-      | opt |
-      | :   |
-      | =   |
+      | opt | result |
+      | *   | 20     |
+      | /   | 5      |

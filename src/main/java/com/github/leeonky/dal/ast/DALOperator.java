@@ -9,9 +9,9 @@ import com.github.leeonky.interpreter.Operator;
 
 public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, DALOperator> {
     private static final int PRECEDENCE_WHICH = 100;
-    private static final int PRECEDENCE_LOGIC_COMBINATION_OPT = 200;
-    private static final int PRECEDENCE_LOGIC_COMPARE_OPT = 210;
-    private static final int PRECEDENCE_PLUS_SUB_OPT = 300;
+    private static final int PRECEDENCE_LOGICAL = 200;
+    private static final int PRECEDENCE_COMPARISON = 210;
+    private static final int PRECEDENCE_PLUS_SUB = 300;
     private static final int PRECEDENCE_MUL_DIV = 400;
     private static final int PRECEDENCE_UNARY_OPERATION = 500;
     private static final int PRECEDENCE_PROPERTY = 501;
@@ -70,7 +70,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
     public static class Equal extends DALOperator {
         public Equal() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, "=", true);
+            super(PRECEDENCE_COMPARISON, "=", true);
         }
 
         @Override
@@ -86,7 +86,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
     public static class Less extends DALOperator {
         public Less() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, "<", true);
+            super(PRECEDENCE_COMPARISON, "<", true);
         }
 
         @Override
@@ -97,7 +97,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
     public static class GreaterOrEqual extends DALOperator {
         public GreaterOrEqual() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, ">=", true);
+            super(PRECEDENCE_COMPARISON, ">=", true);
         }
 
         @Override
@@ -108,7 +108,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
     public static class LessOrEqual extends DALOperator {
         public LessOrEqual() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, "<=", true);
+            super(PRECEDENCE_COMPARISON, "<=", true);
         }
 
         @Override
@@ -119,7 +119,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
     public static class NotEqual extends DALOperator {
         public NotEqual() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, "!=", true);
+            super(PRECEDENCE_COMPARISON, "!=", true);
         }
 
         @Override
@@ -130,7 +130,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
     public static class Plus extends DALOperator {
         public Plus() {
-            super(PRECEDENCE_PLUS_SUB_OPT, "+", false);
+            super(PRECEDENCE_PLUS_SUB, "+", false);
         }
 
         @Override
@@ -141,7 +141,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
     public static class Greater extends DALOperator {
         public Greater() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, ">", true);
+            super(PRECEDENCE_COMPARISON, ">", true);
         }
 
         @Override
@@ -152,7 +152,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
     public static class Subtraction extends DALOperator {
         public Subtraction() {
-            super(PRECEDENCE_PLUS_SUB_OPT, "-", false);
+            super(PRECEDENCE_PLUS_SUB, "-", false);
         }
 
         @Override
@@ -185,7 +185,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
     public static class And extends DALOperator {
         public And(String inspect) {
-            super(PRECEDENCE_LOGIC_COMBINATION_OPT, inspect, true);
+            super(PRECEDENCE_LOGICAL, inspect, true);
         }
 
         @Override
@@ -196,7 +196,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
     public static class Or extends DALOperator {
         public Or(String inspect) {
-            super(PRECEDENCE_LOGIC_COMBINATION_OPT, inspect, true);
+            super(PRECEDENCE_LOGICAL, inspect, true);
         }
 
         @Override
@@ -241,7 +241,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     public static class Matcher extends DALOperator {
 
         public Matcher() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, Notations.Operators.MATCHER.getLabel(), true);
+            super(PRECEDENCE_COMPARISON, Notations.Operators.MATCHER.getLabel(), true);
         }
 
         @Override
@@ -323,7 +323,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
     public static class Is extends DALOperator {
         public Is() {
-            super(PRECEDENCE_LOGIC_COMPARE_OPT, Notations.Operators.IS.getLabel(), true);
+            super(PRECEDENCE_COMPARISON, Notations.Operators.IS.getLabel(), true);
         }
 
         @Override

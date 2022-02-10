@@ -37,27 +37,6 @@ Feature: plus-sub
       | false | \|\| |
       | false | or   |
 
-  Scenario: plus with which
-    Given the following json:
-    """
-    {
-      "number": 10,
-      "operand": 5,
-      "obj": {
-        "number": 10,
-        "operand": 2
-      }
-    }
-    """
-    Then the following verification should pass:
-    """
-    obj which number+operand
-    """
-    Then the result should:
-    """
-    : 12
-    """
-
   Scenario Outline: plus with judgement
     * the following verification should pass:
     """
@@ -105,7 +84,17 @@ Feature: plus-sub
       | false | \|\| |
       | false | or   |
 
-  Scenario: sub with which
+  Scenario Outline: sub with judgement
+    * the following verification should pass:
+    """
+    3 <opt> 4-1
+    """
+    Examples:
+      | opt |
+      | :   |
+      | =   |
+
+  Scenario Outline: with which
     Given the following json:
     """
     {
@@ -117,21 +106,15 @@ Feature: plus-sub
       }
     }
     """
-    Then the following verification should pass:
+    When evaluate by:
     """
-    obj which number-operand
+    obj which number<opt>operand
     """
     Then the result should:
     """
-    : 8
-    """
-
-  Scenario Outline: sub with judgement
-    * the following verification should pass:
-    """
-    3 <opt> 4-1
+    : <result>
     """
     Examples:
-      | opt |
-      | :   |
-      | =   |
+      | opt | result |
+      | +   | 12     |
+      | -   | 8      |
