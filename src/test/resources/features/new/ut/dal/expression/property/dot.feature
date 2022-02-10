@@ -4,8 +4,7 @@ Feature: access object property by .xxx
     Given the following json:
     """
       {
-        "id": 100,
-        "name": "Tom"
+        "<prop>": 100
       }
     """
     When evaluate by:
@@ -14,16 +13,44 @@ Feature: access object property by .xxx
     """
     Then the result should:
     """
-    : <value>
+    : 100
     """
     Then the inspect should:
     """
     <inspect>
     """
     Examples:
-      | code  | value | inspect |
-      | .id   | 100   | .id     |
-      | .name | 'Tom' | .name   |
+      | prop | code  | inspect |
+      | id   | .id   | .id     |
+      | name | .name | .name   |
+
+
+  Scenario Outline: dot property same with keyword
+    Given the following json:
+    """
+      {
+        "<prop>": 100
+      }
+    """
+    When evaluate by:
+    """
+    <code>
+    """
+    Then the result should:
+    """
+    : 100
+    """
+    Then the inspect should:
+    """
+    <inspect>
+    """
+    Examples:
+      | prop  | code   | inspect |
+      | is    | .is    | .is     |
+      | which | .which | .which  |
+      | true  | .true  | .true   |
+      | false | .false | .false  |
+      | null  | .null  | .null   |
 
   Scenario: do not allow empty property
     When evaluate by:

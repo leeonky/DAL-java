@@ -39,7 +39,6 @@ public class CucumberContextBak {
         put("const-null", compiler.CONST_NULL);
         put("const", compiler.CONST);
         put("regex", compiler.REGEX);
-        put("identity-property", compiler.IMPLICIT_PROPERTY);
         put("explicit-property", compiler.EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE));
         put("property", compiler.PROPERTY);
         put("operand", optional(compiler.OPERAND));

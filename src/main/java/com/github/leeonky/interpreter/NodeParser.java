@@ -35,9 +35,13 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return procedure -> parse(procedure).orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0));
     }
 
-    //TODO rename
-    default ClauseParser<C, N, E, O, P> castToClause() {
+    default ClauseParser<C, N, E, O, P> clause() {
         return procedure -> parse(procedure).map(node -> p -> node);
+    }
+
+    default ClauseParser<C, N, E, O, P> clause(Supplier<O> operator) {
+        return procedure -> parse(procedure).map(node -> p -> procedure.createExpression(p, operator.get()
+                .setPosition(node.getPositionBegin()), node));
     }
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,

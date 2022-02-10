@@ -119,7 +119,8 @@ public class Compiler {
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION));
 
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SYMBOL = Tokens.IDENTITY_PROPERTY.nodeParser(DALNode::symbolNode),
+            SYMBOL = Tokens.SYMBOL.nodeParser(DALNode::symbolNode),
+            DOT_SYMBOL = Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode),
             BRACKET_SYMBOL = single(LIST_INDEX_OR_MAP_KEY, "should given one property or array index in `[]`")
                     .between('[', ']').nodeParser(DALNode::bracketSymbolNode);
 
@@ -130,15 +131,10 @@ public class Compiler {
                 .or(operatorMandatory.mandatoryClause(JUDGEMENT_EXPRESSION_OPERAND));
     }
 
-    private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> implicitProperty(
-            NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
-        return procedure -> nodeParser.parse(procedure).map(node -> previous -> procedure.createExpression(previous,
-                new DALOperator.PropertyImplicit().setPosition(node.getOperandPosition()), node));
-    }
-
     public Compiler() {
-        EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(SYMBOL.mandatory("expect a symbol")), implicitProperty(BRACKET_SYMBOL));
-        IMPLICIT_PROPERTY = implicitProperty(SYMBOL).defaultInputNode(InputNode.INSTANCE);
+        EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(DOT_SYMBOL.mandatory("expect a symbol")),
+                BRACKET_SYMBOL.clause(DALOperator.PropertyImplicit::new));
+        IMPLICIT_PROPERTY = SYMBOL.clause(DALOperator.PropertyImplicit::new).defaultInputNode(InputNode.INSTANCE);
         CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
                 CONST_USER_DEFINED_LITERAL);
         PARENTHESES = lazy(() -> enableCommaAnd(single(EXPRESSION, "expect a value or expression").between('(', ')')
@@ -149,7 +145,7 @@ public class Compiler {
                 judgementClause(JUDGEMENT_OPERATORS.mandatory("expect operator `:` or `=`"))))
                 .between('{', '}').nodeParser(ObjectNode::new)));
         ELEMENT_ELLIPSIS = Notations.Operators.ELEMENT_ELLIPSIS.nodeMatcher(token -> new ListEllipsisNode());
-        LIST = lazy(() -> DALProcedure.disableCommaAnd(multiple(ELEMENT_ELLIPSIS.castToClause().or(
+        LIST = lazy(() -> DALProcedure.disableCommaAnd(multiple(ELEMENT_ELLIPSIS.clause().or(
                 judgementClause(JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR))))
                 .between('[', ']').nodeParser(ListNode::new)));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
@@ -313,7 +309,7 @@ public class Compiler {
     }
 
     private Optional<DALNode> compileUserDefinedLiteral(DALProcedure dalProcedure) {
-        return dalProcedure.getSourceCode().tryFetch(() -> Tokens.IDENTITY_PROPERTY.scan(dalProcedure.getSourceCode())
+        return dalProcedure.getSourceCode().tryFetch(() -> Tokens.SYMBOL.scan(dalProcedure.getSourceCode())
                 .flatMap(token -> dalProcedure.getRuntimeContext().takeUserDefinedLiteral(token.getContent())
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }

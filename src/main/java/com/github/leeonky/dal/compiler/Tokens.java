@@ -17,7 +17,8 @@ public class Tokens {
     public static final TokenScanner<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             NUMBER = tokenScanner(DIGITAL::contains, emptySet(), false, Tokens::supportDecimalWithPower, Token::isNumber),
             INTEGER = SourceCode.tokenScanner(DIGITAL_OR_MINUS::contains, emptySet(), false, DELIMITER, Token::isNumber),
-            IDENTITY_PROPERTY = SourceCode.tokenScanner(not(DELIMITER::contains), ALL_KEY_WORDS, false, DELIMITER_OR_DOT, not(Token::isNumber)),
+            SYMBOL = SourceCode.tokenScanner(not(DELIMITER::contains), ALL_KEY_WORDS, false, DELIMITER_OR_DOT, not(Token::isNumber)),
+            DOT_SYMBOL = SourceCode.tokenScanner(not(DELIMITER::contains), emptySet(), false, DELIMITER_OR_DOT, not(Token::isNumber)),
             SCHEMA = SourceCode.tokenScanner(not(DELIMITER::contains), ALL_KEY_WORDS, false, DELIMITER, not(Token::isNumber));
 
     private static boolean supportDecimalWithPower(Character lastChar, Character nextChar) {
