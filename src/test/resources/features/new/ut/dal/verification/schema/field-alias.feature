@@ -137,13 +137,13 @@ Feature: define field alias in schema
     """
     Then the following verification should pass:
     """
-      is Order which :{
+      is Order: {
         aliasOfId: 1
       }
     """
     Then the following verification should pass:
     """
-      is Order which ={
+      is Order= {
         aliasOfId: 1
       }
     """
@@ -174,7 +174,7 @@ Feature: define field alias in schema
     """
     Then the following verification should pass:
     """
-      is Order which :{
+      is Order: {
         user: {
           aliasOfAge: 10
         }
@@ -182,7 +182,7 @@ Feature: define field alias in schema
     """
     Then the following verification should pass:
     """
-      is Order which :{
+      is Order: {
         user= {
           aliasOfAge: 10
         }
@@ -217,7 +217,7 @@ Feature: define field alias in schema
     """
     Then the following verification should pass:
     """
-      is Order which :{
+      is Order: {
         products: [
           {aliasOfName: 'ipad'}
           {aliasOfName: 'iphone'}
@@ -252,7 +252,7 @@ Feature: define field alias in schema
     """
     Then the following verification should pass:
     """
-      is Image which :{
+      is Image: {
         pixels: [
           [{aliasOfColor: 'red'}],
           [{aliasOfColor: 'black'}]
@@ -301,7 +301,7 @@ Feature: define field alias in schema
     """
     Then the following verification should pass:
     """
-      is Order which :{
+      is Order: {
         products.catalog: [
           {aliasOfName: 'c1'}
           {aliasOfName: 'c2'}
@@ -343,7 +343,7 @@ Feature: define field alias in schema
     """
     Then the following verification should pass:
     """
-      is Schema which :{
+      is Schema: {
         nameInInterface: 'hello'
         nameInSuper: 'hello'
       }

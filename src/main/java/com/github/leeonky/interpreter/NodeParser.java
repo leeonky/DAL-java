@@ -55,7 +55,7 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             return procedure -> mapping.apply(parse(procedure));
         }
 
-        default Mandatory<C, N, E, O, P> mandatoryNode(ClauseParser.Mandatory<C, N, E, O, P> expressionClauseMandatory) {
+        default Mandatory<C, N, E, O, P> node(ClauseParser.Mandatory<C, N, E, O, P> expressionClauseMandatory) {
             return procedure -> {
                 N node = parse(procedure);
                 return expressionClauseMandatory.parse(procedure).makeExpression(node);

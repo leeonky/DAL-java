@@ -56,7 +56,7 @@ Feature: syntax error expression
       | =    | expect a value or expression |
       | :    | expect a value or expression |
 
-#  TODO *******************
+#  TODO ******************
 #  Scenario: unexpected token after schema
 #    * the following verification should failed:
 #    """

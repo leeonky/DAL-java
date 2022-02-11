@@ -47,11 +47,10 @@ public class CucumberContextBak {
         put("parentheses", compiler.PARENTHESES);
         put("object", compiler.OBJECT);
         put("list", compiler.LIST);
-        put("judgement-expression-operand", optional(compiler.JUDGEMENT_EXPRESSION_OPERAND));
+        put("judgement-expression-operand", optional(compiler.SHORT_JUDGEMENT_OPERAND));
         put("table", compiler.TABLE);
         put("schema", compiler.SCHEMA);
         put("symbol", compiler.SYMBOL);
-        put("bracket-symbol", compiler.BRACKET_SYMBOL);
     }};
 
     private static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> optional(

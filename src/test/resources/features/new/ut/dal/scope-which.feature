@@ -57,9 +57,6 @@ Feature: which expression
       | operator |
       | :        |
       | =        |
-#      TODO to be removed
-      | which =  |
-      | which :  |
 
 #      TODO to be removed
   Scenario: use previous value as current code scope in which clause
@@ -102,12 +99,6 @@ Feature: which expression
     Then the following verification should pass:
     """
       is IdZero which id=0
-    """
-    Then the following verification should pass:
-    """
-      is IdZero which = {
-        id: 0
-      }
     """
     Then the following verification should pass:
     """
