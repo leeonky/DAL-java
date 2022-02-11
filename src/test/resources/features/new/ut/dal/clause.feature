@@ -1,6 +1,5 @@
 Feature: chain
 
-#  TODO *******************
   Scenario: return root object when no code
     Given the following json:
     """
@@ -54,9 +53,8 @@ Feature: chain
     Examples:
       | code                | value  | inspect             |
       | 4: 2+2              | true   | 4: 2 + 2            |
-#      TODO
-#      | 4: 4: true      | true  | 4: 4: true      |
-#      | '4': 4.toString | true  | '4': 4.toString |
+      | 4: 4: true          | true   | 4: 4: true          |
+      | '4': '4'.toString   | true   | '4': '4'.toString   |
       | 4: 4 which toString | 'true' | 4: 4 which toString |
       | 4: 4 is Boolean     | true   | 4: 4 is Boolean     |
 
@@ -117,8 +115,8 @@ Feature: chain
     """
     Examples:
       | code                  | value | inspect               |
-#      | 1 is Number +1 | 2     | 1 is Number + 1 |
-#      | 1 is Number :1 | true  | 1 is Number: 1 |
+#      | 1 is Number +1        | 2     | 1 is Number + 1       |
+#      | 1 is Number :1        | true  | 1 is Number: 1        |
       | 1 is Number which 1   | 1     | 1 is Number which 1   |
       | 1 is Number is Number | 1     | 1 is Number is Number |
 

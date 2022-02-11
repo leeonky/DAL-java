@@ -84,3 +84,22 @@ Feature: const number node
       | \n        |
       | `TAB      |
       | `SPACE    |
+
+  Scenario: get number before dot when whole token is not number
+    * the following verification should pass:
+    """
+    '1': 1.toString
+    """
+    When evaluate by:
+    """
+    1.
+    """
+    Then failed with the message:
+    """
+    expect a symbol
+    """
+    And got the following notation:
+    """
+    1.
+      ^
+    """

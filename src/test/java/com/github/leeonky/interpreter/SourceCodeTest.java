@@ -1,6 +1,5 @@
 package com.github.leeonky.interpreter;
 
-import com.github.leeonky.dal.compiler.EscapeChars;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -19,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class SourceCodeTest {
 
     public static final HashMap<String, Character> NO_ESCAPE = new HashMap<>();
-    public static final BiPredicate<Character, Character> ONE_CHAR_TOKEN = (c1, c2) -> true;
-    public static final BiPredicate<Character, Character> UNLIMITED_ENDING = (c1, c2) -> false;
+    public static final BiPredicate<String, Integer> ONE_CHAR_TOKEN = (c1, c2) -> true;
+    public static final BiPredicate<String, Integer> UNLIMITED_ENDING = (c1, c2) -> false;
 
     @Nested
     class HasCode {
@@ -403,23 +402,11 @@ class SourceCodeTest {
             SourceCode sourceCode = new SourceCode(" abc");
 
             Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
-                    false, (c1, c2) -> c2.equals('c'), token1 -> true).scan(sourceCode).get();
+                    false, (code, position) -> code.charAt(position) == 'c', token1 -> true).scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("ab");
             assertThat(token.getPosition()).isEqualTo(1);
             assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('c');
-        }
-
-        @Test
-        void should_compare_current_and_last_char() {
-            SourceCode sourceCode = new SourceCode(" ab");
-
-            SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
-                    false, (c1, c2) -> {
-                        assertThat(c1).isEqualTo('a');
-                        assertThat(c2).isEqualTo('b');
-                        return false;
-                    }, token1 -> true).scan(sourceCode);
         }
 
         @Test
@@ -437,7 +424,7 @@ class SourceCodeTest {
             SourceCode sourceCode = new SourceCode(" abc");
 
             Optional<Token> optionalToken = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
-                    false, (c1, c2) -> c2.equals('c'), token -> {
+                    false, (code, position) -> code.charAt(position) == 'c', token -> {
                         assertThat(token.getContent()).isEqualTo("ab");
                         assertThat(token.getPosition()).isEqualTo(1);
                         return false;

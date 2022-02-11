@@ -22,13 +22,13 @@ public class SourceCode {
             O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> tokenScanner(
             Predicate<Character> startsWith, Set<String> excluded, boolean trimStart, Set<Character> delimiters,
             Predicate<Token> validator) {
-        return tokenScanner(startsWith, excluded, trimStart, (c1, c2) -> delimiters.contains(c2), validator);
+        return tokenScanner(startsWith, excluded, trimStart, (code, position) -> delimiters.contains(code.charAt(position)), validator);
     }
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> tokenScanner(
             Predicate<Character> startsWith, Set<String> excluded, boolean trimStart,
-            BiPredicate<Character, Character> endsWith, Predicate<Token> predicate) {
+            BiPredicate<String, Integer> endsWith, Predicate<Token> predicate) {
         return sourceCode -> {
             if (sourceCode.whenFirstChar(startsWith)) {
                 Token token = new Token(sourceCode.position);
@@ -38,7 +38,7 @@ public class SourceCode {
                 }
                 if (sourceCode.hasCode())
                     do token.append(sourceCode.popChar());
-                    while (sourceCode.hasCode() && !endsWith.test(token.lastChar(), sourceCode.currentChar()));
+                    while (sourceCode.hasCode() && !endsWith.test(sourceCode.code, sourceCode.position));
                 if (!excluded.contains(token.getContent()) && predicate.test(token))
                     return of(token);
                 sourceCode.position = token.getPosition();

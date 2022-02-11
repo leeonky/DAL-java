@@ -1,7 +1,6 @@
 package com.github.leeonky.interpreter;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public interface TokenScanner<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
@@ -15,11 +14,6 @@ public interface TokenScanner<C extends RuntimeContext<C>, N extends Node<C, N>,
     default NodeParser<C, N, E, O, P> nodeParser(Function<Token, N> mapper) {
         return procedure -> scan(procedure.getSourceCode()).map(token ->
                 mapper.apply(token).setPositionBegin(token.getPosition()));
-    }
-
-    default ClauseParser<C, N, E, O, P> clauseParser(BiFunction<Token, N, N> mapper) {
-        return procedure -> scan(procedure.getSourceCode()).map(token -> previous ->
-                mapper.apply(token, previous).setPositionBegin(token.getPosition()));
     }
 
     @Deprecated
