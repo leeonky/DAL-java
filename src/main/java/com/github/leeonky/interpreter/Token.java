@@ -41,10 +41,6 @@ public class Token {
         contentBuilder.append(c);
     }
 
-    public char lastChar() {
-        return contentBuilder.charAt(contentBuilder.length() - 1);
-    }
-
     public Token append(String str) {
         contentBuilder.append(str);
         return this;
@@ -52,11 +48,5 @@ public class Token {
 
     public boolean isNumber() {
         return getNumber() != null;
-    }
-
-    public String getContentOrThrow(String message) {
-        if (contentBuilder.length() == 0)
-            throw new SyntaxException(message, getPosition());
-        return getContent();
     }
 }

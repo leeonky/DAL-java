@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+@Deprecated
 public class AssertResult {
     private final boolean passed;
     private final String message;

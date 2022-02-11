@@ -1,7 +1,6 @@
 package com.github.leeonky.interpreter;
 
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -37,14 +36,6 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
                 throw sourceCode.syntaxError(message, -1);
             return nodeFactory.apply(args.get(0));
         });
-    }
-
-    @Deprecated
-    public Optional<Clause<C, N>> fetchClauseBetween(
-            char opening, NodeParser.Mandatory<C, N, E, O, P> childNodeMandatory, char closing,
-            BiFunction<N, N, N> biNodeFactory, String message) {
-        return fetchNodeWithOneChildNodeBetween(opening, childNodeMandatory, closing, n -> n, message).map(
-                n -> previous -> biNodeFactory.apply(previous, n).setPositionBegin(n.getPositionBegin()));
     }
 
     @Deprecated
@@ -96,44 +87,6 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
     @SuppressWarnings("unchecked")
     private P getInstance() {
         return (P) this;
-    }
-
-    @Deprecated
-    public Optional<Clause<C, N>> fetchClauseAfter(
-            String token, ClauseParser.Mandatory<C, N, E, O, P> clauseFactory) {
-        return sourceCode.popWord(token).map(t -> clauseFactory.parse(getInstance())
-                .map(node -> node.setPositionBegin(t.getPosition())));
-    }
-
-    @Deprecated
-    public Optional<N> fetchExpression(N left, OperatorParser<C, N, E, O, P> operatorParser,
-                                       NodeParser.Mandatory<C, N, E, O, P> rightCompiler) {
-        return operatorParser.parse(getInstance()).map(opt -> (OperatorParser.Mandatory<C, N, E, O, P>) _ignore -> opt)
-                .map(mandatoryParser -> fetchExpression(left, mandatoryParser, rightCompiler));
-    }
-
-    @Deprecated
-    public N fetchExpression(N left, OperatorParser.Mandatory<C, N, E, O, P> mandatoryParser,
-                             NodeParser.Mandatory<C, N, E, O, P> rightCompiler) {
-        O operator = mandatoryParser.parse(getInstance());
-        operators.push(operator);
-        try {
-            return expressionConstructor.newInstance(left, operator, rightCompiler.parse(getInstance()))
-                    .adjustOperatorOrder(expressionConstructor);
-        } finally {
-            operators.pop();
-        }
-    }
-
-    @Deprecated
-    public Clause<C, N> fetchClause(O operator, NodeParser.Mandatory<C, N, E, O, P> rightMandatory) {
-        operators.push(operator);
-        try {
-            N right = rightMandatory.parse(getInstance());
-            return input -> expressionConstructor.newInstance(input, operator, right).adjustOperatorOrder(expressionConstructor);
-        } finally {
-            operators.pop();
-        }
     }
 
     public <T> T underOperator(O operator, Supplier<T> action) {

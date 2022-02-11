@@ -69,7 +69,7 @@ public class SymbolNode extends DALNode {
 
     //    TODO  to be remove
     @Override
-    public Object getRootName() {
+    public Object getRootSymbolName() {
         return symbol;
     }
 }

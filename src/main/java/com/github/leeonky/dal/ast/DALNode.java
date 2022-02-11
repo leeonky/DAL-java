@@ -108,8 +108,7 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return this;
     }
 
-    //    TODO refactor
-    public Object getRootName() {
+    public Object getRootSymbolName() {
         return null;
     }
 

@@ -53,7 +53,7 @@ public class ObjectNode extends DALNode {
     private Set<String> collectUnexpectedFields(Data data) {
         return new LinkedHashSet<String>(data.getFieldNames()) {{
             removeAll(expressions.stream().map(expression ->
-                    data.firstFieldFromAlias(expression.getRootName()))
+                    data.firstFieldFromAlias(expression.getRootSymbolName()))
                     .collect(Collectors.toSet()));
         }};
     }

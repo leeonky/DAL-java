@@ -61,13 +61,5 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         default NodeParser.Mandatory<C, N, E, O, P> input(N node) {
             return procedure -> parse(procedure).makeExpression(node);
         }
-
-        //    TODO token => to class like operaterMatcher::clause
-        @Deprecated
-        static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends Operator<C, N, O>,
-                S extends Procedure<C, N, E, O, S>> ClauseParser<C, N, E, O, S> after(
-                String token, Mandatory<C, N, E, O, S> expressionClauseMandatory) {
-            return procedure -> procedure.fetchClauseAfter(token, expressionClauseMandatory);
-        }
     }
 }

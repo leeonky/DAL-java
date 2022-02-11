@@ -62,8 +62,8 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     }
 
     @Override
-    public Object getRootName() {
-        return node1 instanceof InputNode ? node2.getRootName() : node1.getRootName();
+    public Object getRootSymbolName() {
+        return node1 instanceof InputNode ? node2.getRootSymbolName() : node1.getRootSymbolName();
     }
 
     @Override
