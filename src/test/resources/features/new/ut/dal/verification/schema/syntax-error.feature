@@ -167,3 +167,18 @@ Feature: syntax-error
       | \n        |
       | `TAB      |
       | `SPACE    |
+
+  Scenario: not allow parentheses
+    When evaluate by:
+    """
+    is (String)
+    """
+    Then failed with the message:
+    """
+    expect a schema
+    """
+    And got the following notation:
+    """
+    is (String)
+       ^
+    """

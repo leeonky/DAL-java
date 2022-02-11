@@ -62,7 +62,14 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             };
         }
 
-        default Mandatory<C, N, E, O, P> recursive(ClauseParser<C, N, E, O, P> clauseParser) {
+        default Mandatory<C, N, E, O, P> concat(ClauseParser<C, N, E, O, P> clauseParser) {
+            return procedure -> {
+                N node = parse(procedure);
+                return clauseParser.parse(procedure).map(right -> right.makeExpression(node)).orElse(node);
+            };
+        }
+
+        default Mandatory<C, N, E, O, P> recursiveConcat(ClauseParser<C, N, E, O, P> clauseParser) {
             return procedure -> {
                 N node = parse(procedure);
                 Optional<Clause<C, N>> optionalNode = clauseParser.parse(procedure);

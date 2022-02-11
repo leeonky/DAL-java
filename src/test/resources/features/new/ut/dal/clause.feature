@@ -115,8 +115,7 @@ Feature: chain
     """
     Examples:
       | code                  | value | inspect               |
-#      | 1 is Number +1        | 2     | 1 is Number + 1       |
-#      | 1 is Number :1        | true  | 1 is Number: 1        |
+      | 1 is Number :1        | true  | 1 is Number: 1        |
       | 1 is Number which 1   | 1     | 1 is Number which 1   |
       | 1 is Number is Number | 1     | 1 is Number is Number |
 

@@ -60,11 +60,11 @@ public class Compiler {
                     operatorParser(DALOperator.Matcher::new),
             Operators.EQUAL.operatorParser(DALOperator.Equal::new));
 
-    public static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
+    private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> IS = Operators.IS.operatorParser(DALOperator.Is::new),
             WHICH = Operators.WHICH.operatorParser(DALOperator.Which::new);
 
-    public static final OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+    private static final OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
 //    TODO remove default matcher logic
             DEFAULT_JUDGEMENT_OPERATOR = procedure -> procedure.currentOperator().orElseGet(DALOperator.Matcher::new);
 
@@ -131,11 +131,14 @@ public class Compiler {
                 .or(operatorMandatory.clause(SHORT_JUDGEMENT_OPERAND)).parse(procedure);
     }
 
+    private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> ARITHMETIC_CLAUSE_CHAIN,
+            JUDGEMENT_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN, WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN, EXPRESSION_CLAUSE;
+
     public Compiler() {
         PARENTHESES = lazy(() -> enableCommaAnd(single(EXPRESSION, "expect a value or expression").between('(', ')')
                 .nodeParser(DALNode::parenthesesNode)));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IMPLICIT_PROPERTY);
-        PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursive(EXPLICIT_PROPERTY);
+        PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursiveConcat(EXPLICIT_PROPERTY);
         OBJECT = DALProcedure.disableCommaAnd(multiple(PROPERTY_CHAIN.node(shortJudgementClause(JUDGEMENT_OPERATORS
                 .mandatory("expect operator `:` or `=`")))).between('{', '}').nodeParser(ObjectNode::new));
         LIST = DALProcedure.disableCommaAnd(multiple(ELEMENT_ELLIPSIS.clause().or(shortJudgementClause(
@@ -145,11 +148,20 @@ public class Compiler {
                 .mandatory("expect a value or expression").map(DALNode::avoidListMapping);
         ARITHMETIC_CLAUSE = BINARY_ARITHMETIC_OPERATORS.clause(OPERAND);
         JUDGEMENT_CLAUSE = JUDGEMENT_OPERATORS.clause(JUDGEMENT.or(OPERAND));
+        ARITHMETIC_CLAUSE_CHAIN = ClauseParser.lazy(() -> ARITHMETIC_CLAUSE.concat(EXPRESSION_CLAUSE));
+        JUDGEMENT_CLAUSE_CHAIN = ClauseParser.lazy(() -> JUDGEMENT_CLAUSE.concat(EXPRESSION_CLAUSE));
+        EXPLICIT_PROPERTY_CHAIN = ClauseParser.lazy(() -> EXPLICIT_PROPERTY.concat(EXPRESSION_CLAUSE));
+        WHICH_CLAUSE_CHAIN = ClauseParser.lazy(() -> WHICH_CLAUSE.concat(EXPRESSION_CLAUSE));
+        SCHEMA_CLAUSE_CHAIN = ClauseParser.lazy(() -> SCHEMA_CLAUSE.concat(oneOf(JUDGEMENT_CLAUSE_CHAIN,
+                WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN)));
+        EXPRESSION_CLAUSE = oneOf(ARITHMETIC_CLAUSE_CHAIN, JUDGEMENT_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN,
+                WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN);
+        EXPRESSION = OPERAND.concat(EXPRESSION_CLAUSE);
+        SHORT_JUDGEMENT_OPERAND = JUDGEMENT.or(OPERAND.recursiveConcat(oneOf(ARITHMETIC_CLAUSE, /*need test*/EXPLICIT_PROPERTY)));
+
+//        TODO remove
         BINARY_OPERATOR_EXPRESSION = oneOf(ARITHMETIC_CLAUSE, JUDGEMENT_CLAUSE, EXPLICIT_PROPERTY,
                 WHICH_CLAUSE, SCHEMA_CLAUSE);
-        EXPRESSION = OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE, JUDGEMENT_CLAUSE, EXPLICIT_PROPERTY, WHICH_CLAUSE,
-                SCHEMA_CLAUSE));
-        SHORT_JUDGEMENT_OPERAND = JUDGEMENT.or(OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE, /*need test*/EXPLICIT_PROPERTY)));
     }
 
     public List<DALNode> compile(SourceCode sourceCode, DALRuntimeContext DALRuntimeContext) {

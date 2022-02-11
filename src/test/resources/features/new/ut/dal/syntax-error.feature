@@ -56,14 +56,30 @@ Feature: syntax error expression
       | =    | expect a value or expression |
       | :    | expect a value or expression |
 
-#  TODO ******************
-#  Scenario: unexpected token after schema
-#    * the following verification should failed:
-#    """
-#    1 is Number .toString
-#    """
-#    And got the following notation:
-#    """
-#    1 is Number .toString
-#                ^
-#    """
+  Scenario: unexpected token after schema
+    When evaluate by:
+    """
+    1 is Number .toString
+    """
+    Then failed with the message:
+    """
+    more than one expression
+    """
+    And got the following notation:
+    """
+    1 is Number .toString
+                ^
+    """
+    When evaluate by:
+    """
+    1 is Number + 1
+    """
+    Then failed with the message:
+    """
+    expect a value or expression
+    """
+    And got the following notation:
+    """
+    1 is Number + 1
+                ^
+    """
