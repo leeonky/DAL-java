@@ -9,7 +9,6 @@ import java.util.Optional;
 import java.util.function.BiPredicate;
 
 import static com.github.leeonky.interpreter.Notation.notation;
-import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_CHAR;
 import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_NODE;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,11 +37,11 @@ class SourceCodeTest {
         @Test
         void check_has_code_after_pop() {
             SourceCode code = new SourceCode("ab ");
-            code.popChar(NO_ESCAPE);
+            code.popCharBk(NO_ESCAPE);
             assertThat(code.hasCode()).isTrue();
-            code.popChar(NO_ESCAPE);
+            code.popCharBk(NO_ESCAPE);
             assertThat(code.hasCode()).isTrue();
-            code.popChar(NO_ESCAPE);
+            code.popCharBk(NO_ESCAPE);
             assertThat(code.hasCode()).isFalse();
         }
     }
@@ -68,7 +67,7 @@ class SourceCodeTest {
         @Test
         void starts_with_after_pop() {
             SourceCode sourceCode = new SourceCode("x \n\r\tab");
-            sourceCode.popChar(NO_ESCAPE);
+            sourceCode.popCharBk(NO_ESCAPE);
             assertThat(sourceCode.startsWith("a")).isTrue();
         }
     }
@@ -79,14 +78,14 @@ class SourceCodeTest {
         @Test
         void pop_up_when_no_escape() {
             SourceCode sourceCode = new SourceCode("a");
-            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('a');
+            assertThat(sourceCode.popCharBk(NO_ESCAPE)).isEqualTo('a');
             assertThat(sourceCode.hasCode()).isFalse();
         }
 
         @Test
         void pop_up_when_escape_not_match() {
             SourceCode sourceCode = new SourceCode("a");
-            assertThat(sourceCode.popChar(new EscapeChars().escape("b", 'a'))).isEqualTo('a');
+            assertThat(sourceCode.popCharBk(new EscapeChars().escape("b", 'a'))).isEqualTo('a');
             assertThat(sourceCode.hasCode()).isFalse();
         }
 
@@ -94,9 +93,59 @@ class SourceCodeTest {
         void pop_up_when_escaped() {
             SourceCode sourceCode = new SourceCode("aabbx");
             EscapeChars escape = new EscapeChars().escape("bb", 'a').escape("aa", 'b');
-            assertThat(sourceCode.popChar(escape)).isEqualTo('b');
-            assertThat(sourceCode.popChar(escape)).isEqualTo('a');
-            assertThat(sourceCode.popChar(escape)).isEqualTo('x');
+            assertThat(sourceCode.popCharBk(escape)).isEqualTo('b');
+            assertThat(sourceCode.popCharBk(escape)).isEqualTo('a');
+            assertThat(sourceCode.popCharBk(escape)).isEqualTo('x');
+        }
+    }
+
+    @Nested
+    class EscapedPopChar {
+
+        @Test
+        void pop_up_when_no_escape() {
+            SourceCode sourceCode = new SourceCode("a");
+            Token token = sourceCode.popChar(NO_ESCAPE, 'x').get();
+            assertThat(token.getContent()).isEqualTo("a");
+            assertThat(token.getPosition()).isEqualTo(0);
+            assertThat(sourceCode.hasCode()).isFalse();
+        }
+
+        @Test
+        void pop_up_when_escape_not_match() {
+            SourceCode sourceCode = new SourceCode("a");
+            Token token = sourceCode.popChar(new EscapeChars().escape("b", 'a'), 'x').get();
+            assertThat(token.getContent()).isEqualTo("a");
+            assertThat(token.getPosition()).isEqualTo(0);
+            assertThat(sourceCode.hasCode()).isFalse();
+        }
+
+        @Test
+        void pop_up_when_escaped() {
+            SourceCode sourceCode = new SourceCode("aabbx");
+            EscapeChars escape = new EscapeChars().escape("bb", 'a').escape("aa", 'b');
+
+            Token token = sourceCode.popChar(escape, 'x').get();
+            assertThat(token.getContent()).isEqualTo("b");
+            assertThat(token.getPosition()).isEqualTo(0);
+
+            token = sourceCode.popChar(escape, 'x').get();
+            assertThat(token.getContent()).isEqualTo("a");
+            assertThat(token.getPosition()).isEqualTo(2);
+        }
+
+        @Test
+        void return_empty_when_no_code() {
+            SourceCode sourceCode = new SourceCode("");
+
+            assertThat(sourceCode.popChar(NO_ESCAPE, 'x')).isEmpty();
+        }
+
+        @Test
+        void return_empty_when_same_with_given_char() {
+            SourceCode sourceCode = new SourceCode("a");
+            assertThat(sourceCode.popChar(NO_ESCAPE, 'a')).isEmpty();
+            assertThat(sourceCode.nextPosition()).isEqualTo(0);
         }
     }
 
@@ -113,10 +162,10 @@ class SourceCodeTest {
         @Test
         void also_is_beginning_even_pop_blanks() {
             SourceCode sourceCode = new SourceCode(" \n\r\t");
-            sourceCode.popChar(NO_ESCAPE);
-            sourceCode.popChar(NO_ESCAPE);
-            sourceCode.popChar(NO_ESCAPE);
-            sourceCode.popChar(NO_ESCAPE);
+            sourceCode.popCharBk(NO_ESCAPE);
+            sourceCode.popCharBk(NO_ESCAPE);
+            sourceCode.popCharBk(NO_ESCAPE);
+            sourceCode.popCharBk(NO_ESCAPE);
             assertThat(sourceCode.isBeginning()).isTrue();
         }
     }
@@ -127,7 +176,7 @@ class SourceCodeTest {
         @Test
         void throw_exception_with_position_info() {
             SourceCode sourceCode = new SourceCode("abc");
-            sourceCode.popChar(NO_ESCAPE);
+            sourceCode.popCharBk(NO_ESCAPE);
             assertThat(sourceCode.syntaxError("test", 1).show("abc")).isEqualTo("abc\n  ^");
         }
     }
@@ -138,7 +187,7 @@ class SourceCodeTest {
         @Test
         void pop_matched_word() {
             SourceCode code = new SourceCode("ab");
-            code.popChar(NO_ESCAPE);
+            code.popCharBk(NO_ESCAPE);
             Token token = code.popWord("b").get();
             assertThat(token.getContent()).isEqualTo("b");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -148,7 +197,7 @@ class SourceCodeTest {
         void pop_not_matched_word() {
             SourceCode code = new SourceCode("ab");
             assertThat(code.popWord("b")).isEmpty();
-            assertThat(code.popChar(NO_ESCAPE)).isEqualTo('a');
+            assertThat(code.popCharBk(NO_ESCAPE)).isEqualTo('a');
         }
 
         @Test
@@ -179,44 +228,12 @@ class SourceCodeTest {
 
     @Nested
     class FetchElementNode {
-
-        @Nested
-        class ByChar {
-            @Test
-            void return_empty_when_not_start_with_char() {
-                SourceCode code = new SourceCode("ab");
-                Optional<TestNode> optionalTestNode = code.fetchElementNode(BY_CHAR, 'b', () -> code.popChar(NO_ESCAPE), 'b',
-                        TestNode::new);
-                assertThat(optionalTestNode).isEmpty();
-                assertThat(code.nextPosition()).isEqualTo(0);
-            }
-
-            @Test
-            void return_node_match_start_and_end_node_with_correct_position() {
-                SourceCode code = new SourceCode("  a12345b");
-
-                TestNode testNode = code.fetchElementNode(BY_CHAR, 'a', () -> code.popChar(NO_ESCAPE), 'b',
-                        TestNode::new).get();
-
-                assertThat(testNode.getContent()).isEqualTo(asList('1', '2', '3', '4', '5'));
-                assertThat(testNode.getPositionBegin()).isEqualTo(2);
-            }
-
-            @Test
-            void raise_error_when_node_not_finish() {
-                SourceCode code = new SourceCode("  a12345");
-
-                assertThat(assertThrows(SyntaxException.class, () -> code.fetchElementNode(BY_CHAR, 'a', () -> code.popChar(NO_ESCAPE), 'b',
-                        TestNode::new))).hasMessageContaining("should end with `b`");
-            }
-        }
-
         @Nested
         class ByNode {
             @Test
             void return_empty_when_not_start_with_char() {
                 SourceCode code = new SourceCode("ab");
-                Optional<TestNode> optionalTestNode = code.fetchElementNode(BY_NODE, 'b', () -> code.popChar(NO_ESCAPE), 'b',
+                Optional<TestNode> optionalTestNode = code.fetchElementNode(BY_NODE, 'b', () -> code.popCharBk(NO_ESCAPE), 'b',
                         TestNode::new);
                 assertThat(optionalTestNode).isEmpty();
                 assertThat(code.nextPosition()).isEqualTo(0);
@@ -226,7 +243,7 @@ class SourceCodeTest {
             void return_node_match_start_and_end_node_with_correct_position() {
                 SourceCode code = new SourceCode("  a1, 2, 3, 4, 5b");
 
-                TestNode testNode = code.fetchElementNode(BY_NODE, 'a', () -> new TestNode(code.popChar(NO_ESCAPE)), 'b',
+                TestNode testNode = code.fetchElementNode(BY_NODE, 'a', () -> new TestNode(code.popCharBk(NO_ESCAPE)), 'b',
                         TestNode::new).get();
 
                 assertThat(testNode.getPositionBegin()).isEqualTo(2);
@@ -242,7 +259,7 @@ class SourceCodeTest {
             void raise_error_when_node_not_finish() {
                 SourceCode code = new SourceCode("  a1, 2, 3, 4, 5");
 
-                SyntaxException exception = assertThrows(SyntaxException.class, () -> code.fetchElementNode(BY_NODE, 'a', () -> new TestNode(code.popChar(NO_ESCAPE)), 'b',
+                SyntaxException exception = assertThrows(SyntaxException.class, () -> code.fetchElementNode(BY_NODE, 'a', () -> new TestNode(code.popCharBk(NO_ESCAPE)), 'b',
                         TestNode::new));
                 assertThat(exception).hasMessageContaining("should end with `b`");
 
@@ -253,7 +270,7 @@ class SourceCodeTest {
             void support_tail_comma() {
                 SourceCode code = new SourceCode("  a1, b");
 
-                TestNode testNode = code.fetchElementNode(BY_NODE, 'a', () -> new TestNode(code.popChar(NO_ESCAPE)), 'b',
+                TestNode testNode = code.fetchElementNode(BY_NODE, 'a', () -> new TestNode(code.popCharBk(NO_ESCAPE)), 'b',
                         TestNode::new).get();
 
                 assertThat(testNode.getPositionBegin()).isEqualTo(2);
@@ -270,7 +287,7 @@ class SourceCodeTest {
             SourceCode code = new SourceCode("ab");
             assertThat(code.tryFetch(() -> code.popWord("a")).get().getContent()).isEqualTo("a");
 
-            assertThat(code.popChar(NO_ESCAPE)).isEqualTo('b');
+            assertThat(code.popCharBk(NO_ESCAPE)).isEqualTo('b');
         }
 
         @Test
@@ -278,7 +295,7 @@ class SourceCodeTest {
             SourceCode code = new SourceCode("ab");
             assertThat(code.tryFetch(() -> code.popWord("b"))).isEmpty();
 
-            assertThat(code.popChar(NO_ESCAPE)).isEqualTo('a');
+            assertThat(code.popCharBk(NO_ESCAPE)).isEqualTo('a');
         }
     }
 
@@ -334,7 +351,7 @@ class SourceCodeTest {
                     false, ONE_CHAR_TOKEN, token -> true).scan(sourceCode);
 
             assertThat(optionalToken).isEmpty();
-            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('n');
+            assertThat(sourceCode.popCharBk(NO_ESCAPE)).isEqualTo('n');
         }
 
         @Test
@@ -346,7 +363,7 @@ class SourceCodeTest {
 
             assertThat(token.getContent()).isEqualTo("a");
             assertThat(token.getPosition()).isEqualTo(1);
-            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('b');
+            assertThat(sourceCode.popCharBk(NO_ESCAPE)).isEqualTo('b');
         }
 
         @Test
@@ -358,7 +375,7 @@ class SourceCodeTest {
 
             assertThat(token.getContent()).isEqualTo("b");
             assertThat(token.getPosition()).isEqualTo(1);
-            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('c');
+            assertThat(sourceCode.popCharBk(NO_ESCAPE)).isEqualTo('c');
         }
 
         @Test
@@ -370,7 +387,7 @@ class SourceCodeTest {
 
             assertThat(token.getContent()).isEqualTo("b");
             assertThat(token.getPosition()).isEqualTo(1);
-            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('c');
+            assertThat(sourceCode.popCharBk(NO_ESCAPE)).isEqualTo('c');
         }
 
         @Test
@@ -406,7 +423,7 @@ class SourceCodeTest {
 
             assertThat(token.getContent()).isEqualTo("ab");
             assertThat(token.getPosition()).isEqualTo(1);
-            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('c');
+            assertThat(sourceCode.popCharBk(NO_ESCAPE)).isEqualTo('c');
         }
 
         @Test
@@ -416,7 +433,7 @@ class SourceCodeTest {
                     false, ONE_CHAR_TOKEN, token -> true).scan(sourceCode);
 
             assertThat(optionalToken).isEmpty();
-            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('a');
+            assertThat(sourceCode.popCharBk(NO_ESCAPE)).isEqualTo('a');
         }
 
         @Test
@@ -431,7 +448,7 @@ class SourceCodeTest {
                     }).scan(sourceCode);
 
             assertThat(optionalToken).isEmpty();
-            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('a');
+            assertThat(sourceCode.popCharBk(NO_ESCAPE)).isEqualTo('a');
         }
 
         @Test
@@ -443,7 +460,7 @@ class SourceCodeTest {
 
             assertThat(token.getContent()).isEqualTo("ab");
             assertThat(token.getPosition()).isEqualTo(1);
-            assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('c');
+            assertThat(sourceCode.popCharBk(NO_ESCAPE)).isEqualTo('c');
         }
     }
 

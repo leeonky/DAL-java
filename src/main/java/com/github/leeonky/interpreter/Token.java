@@ -37,8 +37,9 @@ public class Token {
         return contentBuilder.toString();
     }
 
-    public void append(char c) {
+    public Token append(char c) {
         contentBuilder.append(c);
+        return this;
     }
 
     public Token append(String str) {
@@ -48,5 +49,9 @@ public class Token {
 
     public boolean isNumber() {
         return getNumber() != null;
+    }
+
+    public char getChar() {
+        return contentBuilder.charAt(0);
     }
 }

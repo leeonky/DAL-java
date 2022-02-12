@@ -85,13 +85,15 @@ public class Compiler {
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
             NUMBER = Tokens.NUMBER.nodeParser(constNode(Token::getNumber)),
             INTEGER = Tokens.INTEGER.nodeParser(constNode(Token::getInteger)),
-            SINGLE_QUOTED_STRING = procedure -> procedure.fetchString('\'', '\'', ConstNode::new, SINGLE_QUOTED_ESCAPES),
-            DOUBLE_QUOTED_STRING = procedure -> procedure.fetchString('"', '"', ConstNode::new, DOUBLE_QUOTED_ESCAPES),
+            SINGLE_QUOTED_STRING = charNode('\'', SINGLE_QUOTED_ESCAPES).repeatTo(NodeCollection::new)
+                    .between("'", "'", DALNode::constString),
+            DOUBLE_QUOTED_STRING = charNode('"', DOUBLE_QUOTED_ESCAPES).repeatTo(NodeCollection::new)
+                    .between("\"", "\"", DALNode::constString),
             CONST_TRUE = Keywords.TRUE.nodeMatcher(DALNode::constTrue),
             CONST_FALSE = Keywords.FALSE.nodeMatcher(DALNode::constFalse),
             CONST_NULL = Keywords.NULL.nodeMatcher(DALNode::constNull),
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
-            REGEX = procedure -> procedure.fetchString('/', '/', RegexNode::new, REGEX_ESCAPES),
+            REGEX = charNode('/', REGEX_ESCAPES).repeatTo(NodeCollection::new).between("/", "/", DALNode::regex),
             IMPLICIT_PROPERTY = Tokens.SYMBOL.nodeParser(DALNode::symbolNode).clause(DALOperator.PropertyImplicit::new)
                     .defaultInputNode(InputNode.INSTANCE),
             WILDCARD = Notations.Operators.WILDCARD.nodeMatcher(DALNode::wildcardNode),
@@ -173,6 +175,12 @@ public class Compiler {
             while (sourceCode.hasCode())
                 add(EXPRESSION.parse(dalParser));
         }};
+    }
+
+    private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> charNode(
+            char except, EscapeChars escapeChars) {
+        return procedure -> procedure.getSourceCode().popChar(escapeChars, except).map(token ->
+                new ConstNode(token.getChar()).setPositionBegin(token.getPosition()));
     }
 
     public List<Object> toChainNodes(String sourceCode) {

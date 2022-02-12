@@ -1,12 +1,13 @@
 package com.github.leeonky.interpreter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.interpreter.IfThenFactory.when;
-import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_CHAR;
-import static java.util.stream.Collectors.joining;
 
 public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
         O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> {
@@ -24,13 +25,6 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
 
     public SourceCode getSourceCode() {
         return sourceCode;
-    }
-
-    @Deprecated
-    public Optional<N> fetchString(Character opening, char closing, Function<String, N> nodeFactory,
-                                   Map<String, Character> escapeChars) {
-        return sourceCode.fetchElementNode(BY_CHAR, opening, () -> sourceCode.popChar(escapeChars), closing,
-                chars -> nodeFactory.apply(chars.stream().map(String::valueOf).collect(joining())));
     }
 
     @Deprecated

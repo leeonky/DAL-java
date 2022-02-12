@@ -7,7 +7,7 @@ import java.util.function.Function;
 import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_NODE;
 
 public class ComplexNode<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, M extends Parser.Mandatory<C, N, E, O, P, T>,
+        O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, M extends ParserPx.Mandatory<C, N, E, O, P, T>,
         T, A> {
     private final Type type;
     private final M mandatory;
@@ -20,13 +20,13 @@ public class ComplexNode<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
     }
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, M extends Parser.Mandatory<C, N, E, O, P, T>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, M extends ParserPx.Mandatory<C, N, E, O, P, T>,
             T> ComplexNode<C, N, E, O, P, M, T, T> single(M mandatory, String message) {
         return new ComplexNode<>(Type.SINGLE, mandatory, message);
     }
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, M extends Parser.Mandatory<C, N, E, O, P, T>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, M extends ParserPx.Mandatory<C, N, E, O, P, T>,
             T> ComplexNode<C, N, E, O, P, M, T, List<T>> multiple(M mandatory) {
         return new ComplexNode<>(Type.MULTIPLE, mandatory, null);
     }

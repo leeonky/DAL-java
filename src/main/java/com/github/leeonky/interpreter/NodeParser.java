@@ -9,7 +9,8 @@ import static java.util.Optional.empty;
 
 public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
-        extends Parser<C, N, E, O, P, N> {
+        extends ParserPx<C, N, E, O, P, N>, Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,
+        NodeParser.Mandatory<C, N, E, O, P>, N> {
 
     static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> oneOf(
@@ -31,6 +32,7 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return procedure -> parse(procedure).orElseGet(() -> nodeFactory.parse(procedure));
     }
 
+    @Override
     default Mandatory<C, N, E, O, P> mandatory(String message) {
         return procedure -> parse(procedure).orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0));
     }
@@ -44,8 +46,15 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
                 .setPosition(node.getPositionBegin()), node));
     }
 
+    @Override
+    default Mandatory<C, N, E, O, P> cast(Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>,
+            NodeParser.Mandatory<C, N, E, O, P>, N> mandatory) {
+        return mandatory::parse;
+    }
+
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser.Mandatory<C, N, E, O, P, N> {
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends ParserPx.Mandatory<C, N, E, O, P, N>,
+            Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {
 
         @Override
         N parse(P procedure);
@@ -79,6 +88,11 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
                 }
                 return node;
             };
+        }
+
+        @Override
+        default NodeParser<C, N, E, O, P> cast(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>, Mandatory<C, N, E, O, P>, N> parser) {
+            return parser::parse;
         }
     }
 }

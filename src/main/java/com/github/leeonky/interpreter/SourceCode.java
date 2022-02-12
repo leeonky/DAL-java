@@ -84,11 +84,21 @@ public class SourceCode {
         return (code.startsWith(word, position));
     }
 
-    public char popChar(Map<String, Character> escapeChars) {
+    @Deprecated
+    public char popCharBk(Map<String, Character> escapeChars) {
         return escapeChars.entrySet().stream().filter(e -> code.startsWith(e.getKey(), position)).map(e -> {
             seek(e.getKey().length());
             return e.getValue();
         }).findFirst().orElseGet(this::popChar);
+    }
+
+    public Optional<Token> popChar(Map<String, Character> escapeChars, char except) {
+        int p = position;
+        return when(hasCode() && currentChar() != except).optional(() -> escapeChars.entrySet().stream()
+                .filter(e -> code.startsWith(e.getKey(), position)).map(e -> {
+                    seek(e.getKey().length());
+                    return e.getValue();
+                }).findFirst().orElseGet(this::popChar)).map(c -> new Token(p).append(c));
     }
 
     public boolean isBeginning() {
@@ -150,6 +160,7 @@ public class SourceCode {
 
     public enum FetchBy {
         BY_CHAR,
+        @Deprecated
         BY_NODE {
             @Override
             protected void afterFetchElement(SourceCode sourceCode) {

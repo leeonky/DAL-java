@@ -1,0 +1,30 @@
+package com.github.leeonky.dal.ast;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class NodeCollection extends DALNode {
+    private final List<DALNode> dalNodes;
+
+    public NodeCollection(List<DALNode> dalNodes) {
+        this.dalNodes = dalNodes;
+    }
+
+    @Override
+    public String inspect() {
+        return null;
+    }
+
+    public DALNode toConstString(int position) {
+        return new ConstNode(getString()).setPositionBegin(position);
+    }
+
+    private String getString() {
+        return dalNodes.stream().map(ConstNode.class::cast).map(ConstNode::getValue)
+                .map(Object::toString).collect(Collectors.joining());
+    }
+
+    public RegexNode teRegexNode(int position) {
+        return (RegexNode) new RegexNode(getString()).setPositionBegin(position);
+    }
+}
