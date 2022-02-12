@@ -6,7 +6,6 @@ import java.util.function.Supplier;
 
 import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_CHAR;
-import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_NODE;
 import static java.util.stream.Collectors.joining;
 
 public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
@@ -28,37 +27,13 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
     }
 
     @Deprecated
-    public Optional<N> fetchNodeWithOneChildNodeBetween(
-            char opening, NodeParser.Mandatory<C, N, E, O, P> childNodeMandatory, char closing,
-            Function<N, N> nodeFactory, String message) {
-        return fetchNodeWithElementsBetween(opening, () -> childNodeMandatory.parse(getInstance()), closing, args -> {
-            if (args.size() != 1)
-                throw sourceCode.syntaxError(message, -1);
-            return nodeFactory.apply(args.get(0));
-        });
-    }
-
-    @Deprecated
-    public <T> Optional<N> fetchNodeWithElementsBetween(Character opening, Supplier<T> element, char closing,
-                                                        Function<List<T>, N> nodeFactory) {
-        return sourceCode.fetchElementNode(BY_NODE, opening, element, closing, nodeFactory);
-    }
-
     public Optional<N> fetchString(Character opening, char closing, Function<String, N> nodeFactory,
                                    Map<String, Character> escapeChars) {
         return sourceCode.fetchElementNode(BY_CHAR, opening, () -> sourceCode.popChar(escapeChars), closing,
                 chars -> nodeFactory.apply(chars.stream().map(String::valueOf).collect(joining())));
     }
 
-    public <T> Optional<T> fetchBetween(String opening, String closing, Supplier<T> supplier) {
-        return sourceCode.popWord(opening).map(token -> {
-            T result = supplier.get();
-            sourceCode.popWord(closing)
-                    .orElseThrow(() -> sourceCode.syntaxError("should end with `" + closing + "`", 0));
-            return result;
-        });
-    }
-
+    @Deprecated
     public Optional<N> fetchNodeBetween(String opening, String closing, NodeParser<C, N, E, O, P> nodeParser) {
         return sourceCode.tryFetch(() -> {
             Optional<N> optionalNode = Optional.empty();
@@ -72,15 +47,8 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
         });
     }
 
-    public List<N> fetchNodesSplitBy(String delimiter, NodeParser.Mandatory<C, N, E, O, P> factory) {
-        return new ArrayList<N>() {{
-            add(factory.parse(getInstance()));
-            while (sourceCode.popWord(delimiter).isPresent())
-                add(factory.parse(getInstance()));
-        }};
-    }
-
-    public Optional<N> fetchNodeAfter2(String token, NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
+    @Deprecated
+    public Optional<N> fetchNodeAfter(String token, NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
         return sourceCode.popWord(token).map(t -> nodeFactory.parse(getInstance()));
     }
 
@@ -102,6 +70,7 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
         return expressionConstructor.newInstance(node1, operator, node2).adjustOperatorOrder(expressionConstructor);
     }
 
+    @Deprecated
     public <LE> Optional<List<LE>> fetchRow(Function<Integer, LE> factory) {
         return when(sourceCode.popWord("|").isPresent()).optional(() -> new ArrayList<LE>() {{
             int col = 0;

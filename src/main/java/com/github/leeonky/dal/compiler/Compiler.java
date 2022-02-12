@@ -246,7 +246,7 @@ public class Compiler {
         }
 
         private List<RowNode> getRowNodes(DALProcedure procedure, List<HeaderNode> headerNodes) {
-            return transpose(allOptional(() -> procedure.fetchNodeAfter2("|", TABLE_HEADER)
+            return transpose(allOptional(() -> procedure.fetchNodeAfter("|", TABLE_HEADER)
                     .map(HeaderNode.class::cast).map(headerNode -> {
                         headerNodes.add(headerNode);
                         return procedure.fetchRow(row -> getRowCell(procedure, empty(), headerNode))
@@ -288,7 +288,7 @@ public class Compiler {
 
         private Stream<List<DALNode>> getCells(DALProcedure dalProcedure, List<HeaderNode> headerNodes,
                                                List<Optional<DALOperator>> rowOperators) {
-            return transpose(allOptional(() -> dalProcedure.fetchNodeAfter2("|", TABLE_HEADER).map(HeaderNode.class::cast)
+            return transpose(allOptional(() -> dalProcedure.fetchNodeAfter("|", TABLE_HEADER).map(HeaderNode.class::cast)
                     .map(headerNode -> {
                         headerNodes.add(headerNode);
                         return dalProcedure.fetchRow(row -> getRowCell(dalProcedure, rowOperators.get(row), headerNode))
