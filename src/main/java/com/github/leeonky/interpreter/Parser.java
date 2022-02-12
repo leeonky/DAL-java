@@ -11,6 +11,10 @@ public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E ext
 
     Optional<T> parse(P procedure);
 
+    default MA or(MA mandatory) {
+        return cast(procedure -> parse(procedure).orElseGet(() -> mandatory.parse(procedure)));
+    }
+
     default MA mandatory(String message) {
         return cast(procedure -> parse(procedure).orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0)));
     }

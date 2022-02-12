@@ -26,12 +26,12 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    should given one property or array index in `[]`
+    should end with `]`
     """
     And got the following notation:
     """
     [1 2]
-        ^
+       ^
     """
 
   Scenario: raise error when missed closing ']'
@@ -56,7 +56,7 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    should end with `]`
+    should given one property or array index in `[]`
     """
     And got the following notation:
     """

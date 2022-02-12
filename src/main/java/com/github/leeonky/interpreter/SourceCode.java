@@ -117,6 +117,7 @@ public class SourceCode {
         return when(startsWith(word) && predicate.get()).optional(() -> new Token(seek(word.length())).append(word));
     }
 
+    @Deprecated
     public <T, N extends Node<C, N>, C extends RuntimeContext<C>> Optional<N> fetchElementNode(
             FetchBy fetchBy, Character opening, Supplier<T> element, char closing, Function<List<T>, N> nodeFactory) {
         return when(whenFirstChar(opening::equals)).optional(() -> {

@@ -17,7 +17,6 @@ import static com.github.leeonky.dal.compiler.DALProcedure.enableCommaAnd;
 import static com.github.leeonky.dal.compiler.Notations.Operators;
 import static com.github.leeonky.interpreter.ClauseParser.oneOf;
 import static com.github.leeonky.interpreter.ComplexNode.multiple;
-import static com.github.leeonky.interpreter.ComplexNode.single;
 import static com.github.leeonky.interpreter.FunctionUtil.*;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.NodeParser.lazy;
@@ -103,14 +102,13 @@ public class Compiler {
             ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.nodeMatcher(token -> new ListEllipsisNode()),
             EMPTY_CELL = procedure -> when(procedure.emptyCell()).optional(EmptyCellNode::new),
             TABLE = oneOf(new TransposedTableWithRowOperator(), new TableParser(), new TransposedTable()),
-            SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema);
+            SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
+            INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            LIST_INDEX_OR_MAP_KEY = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING).mandatory(
-            "should given one property or array index in `[]`"),
             SCHEMA_COMPOSE = multiple(SCHEMA.mandatory("expect a schema")).between('[', ']').splitBy("/")
-                    .nodeParser(DALNode::elementSchemas).or(multiple(SCHEMA.mandatory("expect a schema")).splitBy("/")
-                            .mandatory(DALNode::schemas)),
+            .nodeParser(DALNode::elementSchemas).or(multiple(SCHEMA.mandatory("expect a schema")).splitBy("/")
+                    .mandatory(DALNode::schemas)),
             PROPERTY_CHAIN, OPERAND, EXPRESSION, SHORT_JUDGEMENT_OPERAND;
 
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
@@ -120,11 +118,9 @@ public class Compiler {
             ARITHMETIC_CLAUSE, JUDGEMENT_CLAUSE, BINARY_OPERATOR_EXPRESSION,
             SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE),
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
-            EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode)
-                            .mandatory("expect a symbol")),
-                    single(LIST_INDEX_OR_MAP_KEY, "should given one property or array index in `[]`")
-                            .between('[', ']').nodeParser(DALNode::bracketSymbolNode)
-                            .clause(DALOperator.PropertyImplicit::new));
+            EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).mandatory(
+                    "expect a symbol")), INTEGER_OR_STRING.mandatory("should given one property or array index in `[]`")
+                    .between("[", "]", DALNode::bracketSymbolNode).clause(DALOperator.PropertyImplicit::new));
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> shortJudgementClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
@@ -137,8 +133,7 @@ public class Compiler {
             JUDGEMENT_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN, WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN, EXPRESSION_CLAUSE;
 
     public Compiler() {
-        PARENTHESES = lazy(() -> enableCommaAnd(single(EXPRESSION, "expect a value or expression").between('(', ')')
-                .nodeParser(DALNode::parenthesesNode)));
+        PARENTHESES = lazy(() -> enableCommaAnd(EXPRESSION.between("(", ")", DALNode::parenthesesNode)));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IMPLICIT_PROPERTY);
         PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursiveConcat(EXPLICIT_PROPERTY);
         OBJECT = DALProcedure.disableCommaAnd(multiple(PROPERTY_CHAIN.node(shortJudgementClause(JUDGEMENT_OPERATORS

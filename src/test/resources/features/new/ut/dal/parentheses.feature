@@ -88,5 +88,5 @@ Feature: parentheses node
     And got the following notation:
     """
       (1 1
-          ^
+         ^
     """

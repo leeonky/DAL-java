@@ -9,7 +9,8 @@ import static java.util.Optional.empty;
 
 public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
-        extends ParserPx<C, N, E, O, P, Clause<C, N>> {
+        extends ParserPx<C, N, E, O, P, Clause<C, N>>, Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
+        ClauseParser.Mandatory<C, N, E, O, P>, Clause<C, N>> {
     static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> oneOf(
             ClauseParser<C, N, E, O, P>... matchers) {
@@ -24,10 +25,9 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
     }
 
     @Override
-    Optional<Clause<C, N>> parse(P procedure);
-
-    default Mandatory<C, N, E, O, P> or(Mandatory<C, N, E, O, P> expressionClauseMandatory) {
-        return procedure -> parse(procedure).orElseGet(() -> expressionClauseMandatory.parse(procedure));
+    default Mandatory<C, N, E, O, P> cast(Parser.Mandatory<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
+            Mandatory<C, N, E, O, P>, Clause<C, N>> mandatory) {
+        return mandatory::parse;
     }
 
     @SuppressWarnings("unchecked")
@@ -53,10 +53,14 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>,
             E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
-            extends ParserPx.Mandatory<C, N, E, O, P, Clause<C, N>> {
+            extends ParserPx.Mandatory<C, N, E, O, P, Clause<C, N>>,
+            Parser.Mandatory<C, N, E, O, P, ClauseParser<C, N, E, O, P>, ClauseParser.Mandatory<C, N, E, O, P>, Clause<C, N>> {
 
         @Override
-        Clause<C, N> parse(P procedure);
+        default ClauseParser<C, N, E, O, P> cast(Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
+                Mandatory<C, N, E, O, P>, Clause<C, N>> parser) {
+            return parser::parse;
+        }
 
         default NodeParser.Mandatory<C, N, E, O, P> input(N node) {
             return procedure -> parse(procedure).makeExpression(node);
