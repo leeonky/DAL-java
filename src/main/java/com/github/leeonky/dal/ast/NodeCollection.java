@@ -27,4 +27,9 @@ public class NodeCollection extends DALNode {
     public RegexNode teRegexNode(int position) {
         return (RegexNode) new RegexNode(getString()).setPositionBegin(position);
     }
+
+    public DALNode toSchemaComposeNode(int position) {
+        return new SchemaComposeNode(dalNodes.stream().map(SchemaNode.class::cast)
+                .collect(Collectors.toList()), true).setPositionBegin(position);
+    }
 }

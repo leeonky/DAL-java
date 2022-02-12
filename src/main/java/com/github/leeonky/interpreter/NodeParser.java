@@ -45,9 +45,15 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {
 
         @Override
-        default NodeParser<C, N, E, O, P> cast(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,
+        default NodeParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,
                 Mandatory<C, N, E, O, P>, N> parser) {
             return parser::parse;
+        }
+
+        @Override
+        default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>,
+                Mandatory<C, N, E, O, P>, N> mandatory) {
+            return mandatory::parse;
         }
 
         @Deprecated
