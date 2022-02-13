@@ -24,12 +24,16 @@ public class NodeCollection extends DALNode {
                 .map(Object::toString).collect(Collectors.joining());
     }
 
-    public RegexNode teRegexNode(int position) {
-        return (RegexNode) new RegexNode(getString()).setPositionBegin(position);
+    public DALNode teRegexNode(int position) {
+        return new RegexNode(getString()).setPositionBegin(position);
     }
 
     public DALNode toSchemaComposeNode(int position) {
         return new SchemaComposeNode(dalNodes.stream().map(SchemaNode.class::cast)
                 .collect(Collectors.toList()), true).setPositionBegin(position);
+    }
+
+    public DALNode objectScopeNode(int position) {
+        return new ObjectNode(dalNodes).setPositionBegin(position);
     }
 }

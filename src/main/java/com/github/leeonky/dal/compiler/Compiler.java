@@ -22,8 +22,7 @@ import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.NodeParser.lazy;
 import static com.github.leeonky.interpreter.NodeParser.oneOf;
 import static com.github.leeonky.interpreter.OperatorParser.oneOf;
-import static com.github.leeonky.interpreter.Parser.NO_SPLITTER;
-import static com.github.leeonky.interpreter.Parser.splitBy;
+import static com.github.leeonky.interpreter.Several.severalTimes;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
@@ -86,15 +85,15 @@ public class Compiler {
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
             NUMBER = Tokens.NUMBER.nodeParser(constNode(Token::getNumber)),
             INTEGER = Tokens.INTEGER.nodeParser(constNode(Token::getInteger)),
-            SINGLE_QUOTED_STRING = charNode('\'', SINGLE_QUOTED_ESCAPES).repeatTo(NO_SPLITTER, NodeCollection::new)
+            SINGLE_QUOTED_STRING = charNode('\'', SINGLE_QUOTED_ESCAPES).repeat(severalTimes(), NodeCollection::new)
                     .between("'", "'", DALNode::constString),
-            DOUBLE_QUOTED_STRING = charNode('"', DOUBLE_QUOTED_ESCAPES).repeatTo(NO_SPLITTER, NodeCollection::new)
+            DOUBLE_QUOTED_STRING = charNode('"', DOUBLE_QUOTED_ESCAPES).repeat(severalTimes(), NodeCollection::new)
                     .between("\"", "\"", DALNode::constString),
             CONST_TRUE = Keywords.TRUE.nodeMatcher(DALNode::constTrue),
             CONST_FALSE = Keywords.FALSE.nodeMatcher(DALNode::constFalse),
             CONST_NULL = Keywords.NULL.nodeMatcher(DALNode::constNull),
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
-            REGEX = charNode('/', REGEX_ESCAPES).repeatTo(NO_SPLITTER, NodeCollection::new).between("/", "/",
+            REGEX = charNode('/', REGEX_ESCAPES).repeat(severalTimes(), NodeCollection::new).between("/", "/",
                     DALNode::regex),
             IMPLICIT_PROPERTY = Tokens.SYMBOL.nodeParser(DALNode::symbolNode).clause(DALOperator.PropertyImplicit::new)
                     .defaultInputNode(InputNode.INSTANCE),
@@ -109,9 +108,9 @@ public class Compiler {
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SCHEMA_COMPOSE = SCHEMA.mandatory("expect a schema").repeatTo(splitBy("/"), NodeCollection::new)
+            SCHEMA_COMPOSE = SCHEMA.mandatory("expect a schema").repeat(severalTimes().splitBy("/"), NodeCollection::new)
             .between("[", "]", DALNode::elementSchemas)
-            .or(SCHEMA.mandatory("expect a schema").repeatTo(splitBy("/"), DALNode::schemas)),
+            .or(SCHEMA.mandatory("expect a schema").repeat(severalTimes().splitBy("/"), DALNode::schemas)),
             PROPERTY_CHAIN, OPERAND, EXPRESSION, SHORT_JUDGEMENT_OPERAND;
 
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>

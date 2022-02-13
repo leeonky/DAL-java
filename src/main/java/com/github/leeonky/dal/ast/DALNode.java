@@ -45,8 +45,12 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return ((NodeCollection) node).toConstString(token.getPosition());
     }
 
-    public static RegexNode regex(Token token, DALNode node) {
+    public static DALNode regex(Token token, DALNode node) {
         return ((NodeCollection) node).teRegexNode(token.getPosition());
+    }
+
+    public static DALNode objectScopeNode(Token token, DALNode node) {
+        return ((NodeCollection) node).objectScopeNode(token.getPosition());
     }
 
     public static DALNode constTrue(Token token) {
