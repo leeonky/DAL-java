@@ -5,6 +5,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.interpreter.FunctionUtil.allOptional;
 import static java.util.Optional.empty;
 
 public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
@@ -31,13 +32,13 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return mandatory::parse;
     }
 
-    default ClauseParser<C, N, E, O, P> clause() {
+    default ClauseParser<C, N, E, O, P> ignoreInput() {
         return procedure -> parse(procedure).map(node -> p -> node);
     }
 
-    default ClauseParser<C, N, E, O, P> clause(Supplier<O> operator) {
-        return procedure -> parse(procedure).map(node -> p -> procedure.createExpression(p, operator.get()
-                .setPosition(node.getPositionBegin()), node));
+    default NodeParser<C, N, E, O, P> recursive(ClauseParser<C, N, E, O, P> clauseParser) {
+        return procedure -> parse(procedure).map(node -> allOptional(() -> clauseParser.parse(procedure)).stream()
+                .reduce(node, (n, clause) -> clause.makeExpression(n), FunctionUtil.notAllowParallelReduce()));
     }
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,

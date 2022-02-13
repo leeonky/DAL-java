@@ -25,6 +25,7 @@ import static com.github.leeonky.interpreter.OperatorParser.oneOf;
 import static com.github.leeonky.interpreter.Several.severalTimes;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 
 public class Compiler {
@@ -60,9 +61,12 @@ public class Compiler {
                     operatorParser(DALOperator.Matcher::new),
             Operators.EQUAL.operatorParser(DALOperator.Equal::new));
 
-    private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
-            DALProcedure> IS = Operators.IS.operatorParser(DALOperator.Is::new),
+    private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+            IS = Operators.IS.operatorParser(DALOperator.Is::new),
             WHICH = Operators.WHICH.operatorParser(DALOperator.Which::new);
+
+    private static OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+            PROPERTY_IMPLICIT = procedure -> of(new DALOperator.PropertyImplicit());
 
     private static final OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
 //    TODO remove default matcher logic
@@ -95,7 +99,7 @@ public class Compiler {
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
             REGEX = charNode('/', REGEX_ESCAPES).repeat(severalTimes(), NodeCollection::new).between("/", "/",
                     DALNode::regex),
-            IMPLICIT_PROPERTY = Tokens.SYMBOL.nodeParser(DALNode::symbolNode).clause(DALOperator.PropertyImplicit::new)
+            IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(Tokens.SYMBOL.nodeParser(DALNode::symbolNode))
                     .defaultInputNode(InputNode.INSTANCE),
             WILDCARD = Notations.Operators.WILDCARD.nodeMatcher(DALNode::wildcardNode),
             ROW_WILDCARD = Notations.Operators.ROW_WILDCARD.nodeMatcher(DALNode::wildcardNode),
@@ -121,8 +125,8 @@ public class Compiler {
             SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE),
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
             EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).mandatory(
-                    "expect a symbol")), INTEGER_OR_STRING.mandatory("should given one property or array index in `[]`")
-                    .between("[", "]", DALNode::bracketSymbolNode).clause(DALOperator.PropertyImplicit::new));
+                    "expect a symbol")), PROPERTY_IMPLICIT.clause(INTEGER_OR_STRING.mandatory(
+                    "should given one property or array index in `[]`").between("[", "]", DALNode::bracketSymbolNode)));
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> shortJudgementClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
@@ -140,7 +144,7 @@ public class Compiler {
         PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursiveConcat(EXPLICIT_PROPERTY);
         OBJECT = DALProcedure.disableCommaAnd(multiple(PROPERTY_CHAIN.node(shortJudgementClause(JUDGEMENT_OPERATORS
                 .mandatory("expect operator `:` or `=`")))).between('{', '}').nodeParser(ObjectNode::new));
-        LIST = DALProcedure.disableCommaAnd(multiple(ELEMENT_ELLIPSIS.clause().or(shortJudgementClause(
+        LIST = DALProcedure.disableCommaAnd(multiple(ELEMENT_ELLIPSIS.ignoreInput().or(shortJudgementClause(
                 JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR)))).between('[', ']').nodeParser(ListNode::new));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         OPERAND = lazy(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))

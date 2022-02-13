@@ -31,6 +31,12 @@ public interface OperatorParser<C extends RuntimeContext<C>, N extends Node<C, N
         }));
     }
 
+    default ClauseParser<C, N, E, O, P> clause(NodeParser<C, N, E, O, P> nodeParser) {
+        return procedure -> procedure.getSourceCode().tryFetch(() -> parse(procedure).map(operator ->
+                procedure.underOperator(operator, () -> nodeParser.parse(procedure).<Clause<C, N>>map(n ->
+                        left -> procedure.createExpression(left, operator, n)).orElse(null))));
+    }
+
     default NodeParser<C, N, E, O, P> unary(NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
         return procedure -> parse(procedure).map(operator -> procedure.underOperator(operator, () ->
                 procedure.createExpression(null, operator, nodeFactory.parse(procedure))));
