@@ -2,6 +2,7 @@ package com.github.leeonky.interpreter;
 
 import java.util.List;
 
+import static com.github.leeonky.interpreter.Notation.notation;
 import static java.lang.String.format;
 
 public abstract class Sequence<P extends Procedure<?, ?, ?, ?, ?>> {
@@ -85,13 +86,19 @@ public abstract class Sequence<P extends Procedure<?, ?, ?, ?, ?>> {
 
             @Override
             public boolean isSplitter(P procedure) {
-                return procedure.getSourceCode().popWord(notation.getLabel()).isPresent();
+                return procedure.getSourceCode().popWord(notation).isPresent();
             }
         };
     }
 
     public Sequence<P> endWith(Notation notation) {
-        return new CompositeSequence<P>(endWith(notation.getLabel())) {
+        return new CompositeSequence<P>(this) {
+            @Override
+            public void close(P procedure) {
+                if (!procedure.getSourceCode().popWord(notation).isPresent())
+                    throw procedure.getSourceCode().syntaxError(format("should end with `%s`", notation.getLabel()), 0);
+            }
+
             @Override
             public boolean isClose(P procedure) {
                 return !procedure.getSourceCode().hasCode() || procedure.getSourceCode().startsWith(notation);
@@ -100,14 +107,7 @@ public abstract class Sequence<P extends Procedure<?, ?, ?, ?, ?>> {
     }
 
     public Sequence<P> endWith(String closing) {
-        return new CompositeSequence<P>(this) {
-
-            @Override
-            public void close(P procedure) {
-                if (!procedure.getSourceCode().popWord(closing).isPresent())
-                    throw procedure.getSourceCode().syntaxError(format("should end with `%s`", closing), 0);
-            }
-
+        return new CompositeSequence<P>(endWith(notation(closing))) {
             @Override
             public boolean isClose(P procedure) {
                 return !procedure.getSourceCode().hasCode() || procedure.getSourceCode().startsWith(closing);
@@ -120,7 +120,7 @@ public abstract class Sequence<P extends Procedure<?, ?, ?, ?, ?>> {
 
             @Override
             public boolean isSplitter(P procedure) {
-                procedure.getSourceCode().popWord(splitter.getLabel());
+                procedure.getSourceCode().popWord(splitter);
                 return true;
             }
         };

@@ -42,13 +42,6 @@ class CompilerTest {
         void access_one_const_value_ignore_root_value() {
             assertCompileNode("1", new ConstNode(1));
         }
-
-        //        @Test
-//        TODO need test
-        void access_property_after_parentheses() {
-//            ParenthesesNode parenthesesNode = new ParenthesesNode(new ConstNode(""));
-//            assertCompileNode("('').empty", new PropertyNode(parenthesesNode, "empty", DOT));
-        }
     }
 
     @Nested

@@ -110,14 +110,13 @@ public class SourceCode {
         return new SyntaxException(message, position + positionOffset);
     }
 
-    @Deprecated
-    public Optional<Token> popWord(String word) {
-        return popWord(word, () -> true);
+    public Optional<Token> popWord(Notation notation) {
+        return popWord(notation, () -> true);
     }
 
-    @Deprecated
-    public Optional<Token> popWord(String word, Supplier<Boolean> predicate) {
-        return when(startsWith(notation(word)) && predicate.get()).optional(() -> new Token(seek(word.length())).append(word));
+    public Optional<Token> popWord(Notation notation, Supplier<Boolean> predicate) {
+        return when(startsWith(notation) && predicate.get()).optional(() -> new Token(seek(notation.length()))
+                .append(notation.getLabel()));
     }
 
     public <N> Optional<N> tryFetch(Supplier<Optional<N>> supplier) {
@@ -128,8 +127,9 @@ public class SourceCode {
         return optionalNode;
     }
 
+    @Deprecated
     public <T> Optional<T> repeatWords(String word, IntFunction<T> intFunction) {
-        List<Token> tokens = allOptional(() -> popWord(word));
+        List<Token> tokens = allOptional(() -> popWord(notation(word)));
         return when(!tokens.isEmpty()).optional(() -> intFunction.apply(tokens.size()));
     }
 

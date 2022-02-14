@@ -7,7 +7,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.github.leeonky.dal.compiler.Notations.COLUMN_SPLITTER;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
+import static com.github.leeonky.interpreter.Notation.notation;
 
 public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
         O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> {
@@ -31,10 +33,10 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
     public Optional<N> fetchNodeBetween(String opening, String closing, NodeParser<C, N, E, O, P> nodeParser) {
         return sourceCode.tryFetch(() -> {
             Optional<N> optionalNode = Optional.empty();
-            if (sourceCode.popWord(opening).isPresent()) {
+            if (sourceCode.popWord(notation(opening)).isPresent()) {
                 optionalNode = nodeParser.parse(getInstance());
                 if (optionalNode.isPresent())
-                    sourceCode.popWord(closing).orElseThrow(() ->
+                    sourceCode.popWord(notation(closing)).orElseThrow(() ->
                             sourceCode.syntaxError("should end with `" + closing + "`", 0));
             }
             return optionalNode;
@@ -43,7 +45,7 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
 
     @Deprecated
     public Optional<N> fetchNodeAfter(String token, NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
-        return sourceCode.popWord(token).map(t -> nodeFactory.parse(getInstance()));
+        return sourceCode.popWord(notation(token)).map(t -> nodeFactory.parse(getInstance()));
     }
 
     @SuppressWarnings("unchecked")
@@ -66,11 +68,11 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
 
     @Deprecated
     public <LE> Optional<List<LE>> fetchRow(Function<Integer, LE> factory) {
-        return when(sourceCode.popWord("|").isPresent()).optional(() -> new ArrayList<LE>() {{
+        return when(sourceCode.popWord(COLUMN_SPLITTER).isPresent()).optional(() -> new ArrayList<LE>() {{
             int col = 0;
             while (!sourceCode.isEndOfLine()) {
                 add(factory.apply(col++));
-                sourceCode.popWord("|").orElseThrow(() -> sourceCode.syntaxError("Should end with `|`", 0));
+                sourceCode.popWord(COLUMN_SPLITTER).orElseThrow(() -> sourceCode.syntaxError("Should end with `|`", 0));
             }
         }});
     }

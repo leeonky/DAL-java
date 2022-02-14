@@ -136,7 +136,7 @@ class SourceCodeTest {
         void pop_matched_word() {
             SourceCode code = new SourceCode("ab");
             code.popChar(NO_ESCAPE);
-            Token token = code.popWord("b").get();
+            Token token = code.popWord(notation("b")).get();
             assertThat(token.getContent()).isEqualTo("b");
             assertThat(token.getPosition()).isEqualTo(1);
         }
@@ -144,7 +144,7 @@ class SourceCodeTest {
         @Test
         void pop_not_matched_word() {
             SourceCode code = new SourceCode("ab");
-            assertThat(code.popWord("b")).isEmpty();
+            assertThat(code.popWord(notation("b"))).isEmpty();
             assertThat(code.popChar(NO_ESCAPE)).isEqualTo('a');
         }
 
@@ -152,7 +152,7 @@ class SourceCodeTest {
         void trim_before_pop_word() {
             SourceCode code = new SourceCode(" \n\t\rb");
 
-            assertThat(code.popWord("b").get().getContent()).isEqualTo("b");
+            assertThat(code.popWord(notation("b")).get().getContent()).isEqualTo("b");
         }
 
         @Nested
@@ -161,13 +161,13 @@ class SourceCodeTest {
             @Test
             void non_matched_word() {
                 SourceCode code = new SourceCode("ab");
-                assertThat(code.popWord("a", () -> false)).isEmpty();
+                assertThat(code.popWord(notation("a"), () -> false)).isEmpty();
             }
 
             @Test
             void predicate_should_not_called_when_word_not_matched() {
                 SourceCode code = new SourceCode("ab");
-                assertThat(code.popWord("b", () -> {
+                assertThat(code.popWord(notation("b"), () -> {
                     throw new RuntimeException();
                 })).isEmpty();
             }
@@ -180,7 +180,7 @@ class SourceCodeTest {
         @Test
         void fetch_result_and_move_to_next() {
             SourceCode code = new SourceCode("ab");
-            assertThat(code.tryFetch(() -> code.popWord("a")).get().getContent()).isEqualTo("a");
+            assertThat(code.tryFetch(() -> code.popWord(notation("a"))).get().getContent()).isEqualTo("a");
 
             assertThat(code.popChar(NO_ESCAPE)).isEqualTo('b');
         }
@@ -188,7 +188,7 @@ class SourceCodeTest {
         @Test
         void should_not_move_position_when_fetch_empty() {
             SourceCode code = new SourceCode("ab");
-            assertThat(code.tryFetch(() -> code.popWord("b"))).isEmpty();
+            assertThat(code.tryFetch(() -> code.popWord(notation("b")))).isEmpty();
 
             assertThat(code.popChar(NO_ESCAPE)).isEqualTo('a');
         }

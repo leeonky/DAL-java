@@ -19,6 +19,7 @@ import static com.github.leeonky.interpreter.FunctionUtil.*;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.NodeParser.lazy;
 import static com.github.leeonky.interpreter.NodeParser.oneOf;
+import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.OperatorParser.oneOf;
 import static com.github.leeonky.interpreter.Parser.endWith;
 import static com.github.leeonky.interpreter.Sequence.atLeast;
@@ -64,6 +65,7 @@ public class Compiler {
     private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             IS = Operators.IS.operatorParser(DALOperator.Is::new),
             WHICH = Operators.WHICH.operatorParser(DALOperator.Which::new);
+    public static final Notation TRANSPOSE_MARK = notation(">>");
 
     private static OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             PROPERTY_IMPLICIT = procedure -> of(new DALOperator.PropertyImplicit());
@@ -97,8 +99,8 @@ public class Compiler {
             CONST_FALSE = Keywords.FALSE.nodeParser(DALNode::constFalse),
             CONST_NULL = Keywords.NULL.nodeParser(DALNode::constNull),
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
-            REGEX = REGEX_NOTATION.next(charNode(REGEX_ESCAPES).sequence(severalTimes().endWith(REGEX_NOTATION),
-                    DALNode::regex)),
+            REGEX = REGEX_NOTATION.next(charNode(REGEX_ESCAPES).sequence(severalTimes().endWith(
+                    REGEX_NOTATION.getLabel()), DALNode::regex)),
             IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(Tokens.SYMBOL.nodeParser(DALNode::symbolNode))
                     .defaultInputNode(InputNode.INSTANCE),
             WILDCARD = Notations.Operators.WILDCARD.nodeParser(DALNode::wildcardNode),
@@ -251,7 +253,7 @@ public class Compiler {
     public class TransposedTable implements NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> {
         @Override
         public Optional<DALNode> parse(DALProcedure procedure) {
-            return procedure.getSourceCode().popWord(">>").map(x -> {
+            return procedure.getSourceCode().popWord(TRANSPOSE_MARK).map(x -> {
                 List<HeaderNode> headerNodes = new ArrayList<>();
                 return new TableNode(headerNodes, getRowNodes(procedure, headerNodes), TableNode.Type.TRANSPOSED);
             });
@@ -276,8 +278,8 @@ public class Compiler {
 
         @Override
         public Optional<DALNode> parse(DALProcedure procedure) {
-            return procedure.getSourceCode().tryFetch(() -> when(procedure.getSourceCode().popWord("|").isPresent()
-                    && procedure.getSourceCode().popWord(">>").isPresent()).optional(() -> {
+            return procedure.getSourceCode().tryFetch(() -> when(procedure.getSourceCode().popWord(COLUMN_SPLITTER).isPresent()
+                    && procedure.getSourceCode().popWord(TRANSPOSE_MARK).isPresent()).optional(() -> {
                 List<Optional<Integer>> rowIndexes = new ArrayList<>();
                 List<Optional<Clause<DALRuntimeContext, DALNode>>> rowSchemaClauses = new ArrayList<>();
                 List<Optional<DALOperator>> rowOperators = procedure.fetchRow(row -> {
