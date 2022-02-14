@@ -36,8 +36,8 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return new SymbolNode(((ConstNode) node).getValue(), SymbolNode.Type.BRACKET);
     }
 
-    public static DALNode parenthesesNode(Token token, DALNode node) {
-        return new DALExpression(null, new DALOperator.Parentheses(), node).setPositionBegin(token.getPosition());
+    public static DALNode parenthesesNode(DALNode node) {
+        return new DALExpression(null, new DALOperator.Parentheses(), node);
     }
 
     public static DALNode constString(Token token, DALNode node) {

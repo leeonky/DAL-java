@@ -47,7 +47,9 @@ public class Notations {
             SINGLE_QUOTED = notation("'"),
             DOUBLE_QUOTED = notation("\""),
             OPENING_BRACKET = notation("["),
-            CLOSING_BRACKET = notation("]");
+            CLOSING_BRACKET = notation("]"),
+            OPENING_PARENTHESES = notation("("),
+            CLOSING_PARENTHESES = notation(")");
 
 
     @Deprecated

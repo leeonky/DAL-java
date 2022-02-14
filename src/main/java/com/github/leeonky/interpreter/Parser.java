@@ -1,6 +1,7 @@
 package com.github.leeonky.interpreter;
 
-import com.github.leeonky.interpreter.wip.Closing;
+import com.github.leeonky.interpreter.wip.Sequence;
+import com.github.leeonky.interpreter.wip.Several;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,12 +81,24 @@ public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E ext
             }}));
         }
 
-        default MA closeBy(Closing<? super P> closing) {
+        default MA closeBy(Sequence<? super P> sequence) {
             return castMandatory(procedure -> {
                 T element = parse(procedure);
-                closing.doClose(procedure);
+                sequence.close(procedure);
                 return element;
             });
+        }
+
+
+        default MA sequence(Sequence<? super P> sequence, Function<List<T>, T> factory) {
+            return castMandatory(procedure -> factory.apply(new ArrayList<T>() {{
+                while (!sequence.beforeClose(procedure)) {
+                    add(parse(procedure));
+                    if (!sequence.isSplitter(procedure))
+                        break;
+                }
+                sequence.close(procedure);
+            }}));
         }
     }
 }

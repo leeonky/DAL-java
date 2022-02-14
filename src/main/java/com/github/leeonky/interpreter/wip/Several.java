@@ -1,4 +1,7 @@
-package com.github.leeonky.interpreter;
+package com.github.leeonky.interpreter.wip;
+
+import com.github.leeonky.interpreter.Notation;
+import com.github.leeonky.interpreter.Procedure;
 
 import java.util.List;
 
@@ -64,25 +67,6 @@ public interface Several<P extends Procedure<?, ?, ?, ?, ?>> {
             @Override
             public boolean isSplitter(P procedure) {
                 return procedure.getSourceCode().popWord(s).isPresent();
-            }
-        };
-    }
-
-    default Several<P> splitByOptional(String s) {
-        return new CompositeSeveral<P>(Several.this) {
-            @Override
-            public boolean isSplitter(P procedure) {
-                procedure.getSourceCode().popWord(s);
-                return true;
-            }
-        };
-    }
-
-    default Several<P> beforeEnd(String closing) {
-        return new CompositeSeveral<P>(Several.this) {
-            @Override
-            public boolean isClosing(P procedure) {
-                return procedure.getSourceCode().startsWith(closing);
             }
         };
     }

@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.*;
-import com.github.leeonky.dal.compiler.Notations.Keywords;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.*;
 
@@ -14,8 +13,7 @@ import java.util.stream.Stream;
 import static com.github.leeonky.dal.ast.DALNode.constNode;
 import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.DALProcedure.enableCommaAnd;
-import static com.github.leeonky.dal.compiler.Notations.OPENING_BRACKET;
-import static com.github.leeonky.dal.compiler.Notations.Operators;
+import static com.github.leeonky.dal.compiler.Notations.*;
 import static com.github.leeonky.interpreter.ClauseParser.oneOf;
 import static com.github.leeonky.interpreter.ComplexNode.multiple;
 import static com.github.leeonky.interpreter.FunctionUtil.*;
@@ -23,8 +21,8 @@ import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.NodeParser.lazy;
 import static com.github.leeonky.interpreter.NodeParser.oneOf;
 import static com.github.leeonky.interpreter.OperatorParser.oneOf;
-import static com.github.leeonky.interpreter.Several.severalTimes;
-import static com.github.leeonky.interpreter.wip.Closing.endWith;
+import static com.github.leeonky.interpreter.wip.Sequence.DefaultSequence.endWith;
+import static com.github.leeonky.interpreter.wip.Several.severalTimes;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -126,10 +124,10 @@ public class Compiler {
             ARITHMETIC_CLAUSE, JUDGEMENT_CLAUSE, BINARY_OPERATOR_EXPRESSION,
             SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE),
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
-            EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).mandatory(
-                    "expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.then(INTEGER_OR_STRING.mandatory(
-                    "should given one property or array index in `[]`").map(DALNode::bracketSymbolNode)
-                    .closeBy(endWith(Notations.CLOSING_BRACKET)))));
+
+    EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).mandatory(
+            "expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.next(INTEGER_OR_STRING.mandatory(
+            "should given one property or array index in `[]`").map(DALNode::bracketSymbolNode).closeBy(endWith(CLOSING_BRACKET)))));
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> shortJudgementClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
@@ -142,7 +140,8 @@ public class Compiler {
             JUDGEMENT_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN, WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN, EXPRESSION_CLAUSE;
 
     public Compiler() {
-        PARENTHESES = lazy(() -> enableCommaAnd(EXPRESSION.between("(", ")", DALNode::parenthesesNode)));
+        PARENTHESES = lazy(() -> enableCommaAnd(OPENING_PARENTHESES.next(
+                EXPRESSION.closeBy(endWith(CLOSING_PARENTHESES)).map(DALNode::parenthesesNode))));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IMPLICIT_PROPERTY);
         PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursive(EXPLICIT_PROPERTY);
         OBJECT = DALProcedure.disableCommaAnd(multiple(PROPERTY_CHAIN.expression(shortJudgementClause(JUDGEMENT_OPERATORS

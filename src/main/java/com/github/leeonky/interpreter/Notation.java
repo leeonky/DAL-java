@@ -40,14 +40,14 @@ public class Notation {
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> then(
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> next(
             NodeParser.Mandatory<C, N, E, O, P> mandatory) {
         return procedure -> procedure.getSourceCode().popWord(label)
                 .map(t -> mandatory.parse(procedure).setPositionBegin(t.getPosition()));
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> then(
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> next(
             NodeParser<C, N, E, O, P> nodeParser) {
         return procedure -> procedure.getSourceCode().tryFetch(() -> procedure.getSourceCode().popWord(label)
                 .flatMap(token -> nodeParser.parse(procedure).map(node -> node.setPositionBegin(token.getPosition()))));
