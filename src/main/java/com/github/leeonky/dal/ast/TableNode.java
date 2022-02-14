@@ -77,11 +77,11 @@ public class TableNode extends DALNode {
         }
     }
 
-    private ListNode transformToListNode(DALOperator operator) {
+    private ListScopeNode transformToListNode(DALOperator operator) {
         Stream<Clause<DALRuntimeContext, DALNode>> rowExpressionClauses = rows.stream().map(rowNode -> rowNode.toExpressionClause(operator));
-        return hasRowIndex ? new ListNode(rowExpressionClauses.map(rowNode -> rowNode.makeExpression(null))
-                .collect(toList()), true, ListNode.Type.FIRST_N_ITEMS)
-                : new ListNode(rowExpressionClauses.collect(toList()), true);
+        return hasRowIndex ? new ListScopeNode(rowExpressionClauses.map(rowNode -> rowNode.makeExpression(null))
+                .collect(toList()), true, ListScopeNode.Type.FIRST_N_ITEMS)
+                : new ListScopeNode(rowExpressionClauses.collect(toList()), true);
     }
 
     private Comparator<Object> collectComparator(DALRuntimeContext context) {

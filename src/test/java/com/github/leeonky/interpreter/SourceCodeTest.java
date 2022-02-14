@@ -9,10 +9,8 @@ import java.util.Optional;
 import java.util.function.BiPredicate;
 
 import static com.github.leeonky.interpreter.Notation.notation;
-import static com.github.leeonky.interpreter.SourceCode.FetchBy.BY_NODE;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SourceCodeTest {
 
@@ -47,28 +45,28 @@ class SourceCodeTest {
     }
 
     @Nested
-    class StartsWith {
+    class StartsWithNotation {
 
         @Test
         void start_with_given_word() {
-            assertThat(new SourceCode("ab").startsWith("a")).isTrue();
+            assertThat(new SourceCode("ab").startsWith(notation("a"))).isTrue();
         }
 
         @Test
         void not_start_with_given_word() {
-            assertThat(new SourceCode("ab").startsWith("b")).isFalse();
+            assertThat(new SourceCode("ab").startsWith(notation("b"))).isFalse();
         }
 
         @Test
         void trim_blank_and_start_with_given_word() {
-            assertThat(new SourceCode(" \n\r\tab").startsWith("a")).isTrue();
+            assertThat(new SourceCode(" \n\r\tab").startsWith(notation("a"))).isTrue();
         }
 
         @Test
         void starts_with_after_pop() {
             SourceCode sourceCode = new SourceCode("x \n\r\tab");
             sourceCode.popChar(NO_ESCAPE);
-            assertThat(sourceCode.startsWith("a")).isTrue();
+            assertThat(sourceCode.startsWith(notation("a"))).isTrue();
         }
     }
 
@@ -172,59 +170,6 @@ class SourceCodeTest {
                 assertThat(code.popWord("b", () -> {
                     throw new RuntimeException();
                 })).isEmpty();
-            }
-        }
-    }
-
-    @Nested
-    class FetchElementNode {
-        @Nested
-        class ByNode {
-            @Test
-            void return_empty_when_not_start_with_char() {
-                SourceCode code = new SourceCode("ab");
-                Optional<TestNode> optionalTestNode = code.fetchElementNode(BY_NODE, 'b', () -> code.popChar(NO_ESCAPE), 'b',
-                        TestNode::new);
-                assertThat(optionalTestNode).isEmpty();
-                assertThat(code.nextPosition()).isEqualTo(0);
-            }
-
-            @Test
-            void return_node_match_start_and_end_node_with_correct_position() {
-                SourceCode code = new SourceCode("  a1, 2, 3, 4, 5b");
-
-                TestNode testNode = code.fetchElementNode(BY_NODE, 'a', () -> new TestNode(code.popChar(NO_ESCAPE)), 'b',
-                        TestNode::new).get();
-
-                assertThat(testNode.getPositionBegin()).isEqualTo(2);
-                assertThat(testNode.getContent()).isEqualTo(
-                        asList(new TestNode('1'),
-                                new TestNode('2'),
-                                new TestNode('3'),
-                                new TestNode('4'),
-                                new TestNode('5')));
-            }
-
-            @Test
-            void raise_error_when_node_not_finish() {
-                SourceCode code = new SourceCode("  a1, 2, 3, 4, 5");
-
-                SyntaxException exception = assertThrows(SyntaxException.class, () -> code.fetchElementNode(BY_NODE, 'a', () -> new TestNode(code.popChar(NO_ESCAPE)), 'b',
-                        TestNode::new));
-                assertThat(exception).hasMessageContaining("should end with `b`");
-
-                assertThat(exception.show("  a1, 2, 3, 4, 5")).isEqualTo("  a1, 2, 3, 4, 5\n                ^");
-            }
-
-            @Test
-            void support_tail_comma() {
-                SourceCode code = new SourceCode("  a1, b");
-
-                TestNode testNode = code.fetchElementNode(BY_NODE, 'a', () -> new TestNode(code.popChar(NO_ESCAPE)), 'b',
-                        TestNode::new).get();
-
-                assertThat(testNode.getPositionBegin()).isEqualTo(2);
-                assertThat(testNode.getContent()).isEqualTo(asList(new TestNode('1')));
             }
         }
     }

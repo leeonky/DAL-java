@@ -22,15 +22,14 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-//TODO rename
-public class ListNode extends DALNode {
+public class ListScopeNode extends DALNode {
     private List<DALNode> expressions__;
     private List<DALNode> inputExpressions;
     private List<Clause<DALRuntimeContext, DALNode>> expressionFactories;
     private final Type type;
     private final boolean multiLineList;
 
-    public ListNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories, boolean multiLineList) {
+    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories, boolean multiLineList) {
         type = guessType(expressionFactories);
         this.expressionFactories = expressionFactories;
         this.multiLineList = multiLineList;
@@ -51,13 +50,13 @@ public class ListNode extends DALNode {
                 .collect(toList());
     }
 
-    public ListNode(List<DALNode> inputExpressions, boolean multiLineList, Type type) {
+    public ListScopeNode(List<DALNode> inputExpressions, boolean multiLineList, Type type) {
         expressions__ = this.inputExpressions = new ArrayList<>(inputExpressions);
         this.multiLineList = multiLineList;
         this.type = type;
     }
 
-    public ListNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories) {
+    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories) {
         this(expressionFactories, false);
     }
 
@@ -69,7 +68,7 @@ public class ListNode extends DALNode {
         return Type.ALL_ITEMS;
     }
 
-    public ListNode() {
+    public ListScopeNode() {
         this(Collections.emptyList());
     }
 

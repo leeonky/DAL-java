@@ -34,6 +34,6 @@ public class NodeCollection extends DALNode {
     }
 
     public DALNode objectScopeNode(int position) {
-        return new ObjectNode(dalNodes).setPositionBegin(position);
+        return new ObjectScopeNode(dalNodes).setPositionBegin(position);
     }
 }

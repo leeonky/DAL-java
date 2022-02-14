@@ -18,7 +18,7 @@ Feature: list node
     Then got the following "list" node:
     """
     : {
-      class.simpleName: 'ListNode'
+      class.simpleName: 'ListScopeNode'
       inspect: '[]'
       positionBegin: 1
     }
@@ -32,7 +32,7 @@ Feature: list node
     Then got the following "list" node:
     """
     : {
-      class.simpleName: 'ListNode'
+      class.simpleName: 'ListScopeNode'
       inspect: '[[0]: 1]'
       positionBegin: 1
       expressions.inspect: ['[0]: 1']
@@ -47,7 +47,7 @@ Feature: list node
     Then got the following "list" node:
     """
     : {
-      class.simpleName: 'ListNode'
+      class.simpleName: 'ListScopeNode'
       inspect: '[[0]: 1, [1]: 2]'
       positionBegin: 1
       expressions.inspect: [
@@ -95,7 +95,7 @@ Feature: list node
     Then got the following "list" node:
     """
     : {
-      class.simpleName: 'ListNode'
+      class.simpleName: 'ListScopeNode'
       inspect: '[[0]: 1, ...]'
       positionBegin: 1
       expressions.inspect: [
@@ -112,7 +112,7 @@ Feature: list node
     Then got the following "list" node:
     """
     : {
-      class.simpleName: 'ListNode'
+      class.simpleName: 'ListScopeNode'
       inspect: '[..., [-1]: 1]'
       positionBegin: 1
       expressions.inspect: [

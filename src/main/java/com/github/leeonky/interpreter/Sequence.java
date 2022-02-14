@@ -94,7 +94,7 @@ public abstract class Sequence<P extends Procedure<?, ?, ?, ?, ?>> {
         return new CompositeSequence<P>(endWith(notation.getLabel())) {
             @Override
             public boolean isClose(P procedure) {
-                return !procedure.getSourceCode().hasCode() || procedure.getSourceCode().startsWith(notation.getLabel());
+                return !procedure.getSourceCode().hasCode() || procedure.getSourceCode().startsWith(notation);
             }
         };
     }
@@ -110,7 +110,7 @@ public abstract class Sequence<P extends Procedure<?, ?, ?, ?, ?>> {
 
             @Override
             public boolean isClose(P procedure) {
-                return !procedure.getSourceCode().hasCode() || procedure.getSourceCode().startsWithStr(closing);
+                return !procedure.getSourceCode().hasCode() || procedure.getSourceCode().startsWith(closing);
             }
         };
     }

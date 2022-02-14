@@ -18,7 +18,7 @@ Feature: object node
     Then got the following "object" node:
     """
     : {
-      class.simpleName: 'ObjectNode'
+      class.simpleName: 'ObjectScopeNode'
       inspect: '{}'
       positionBegin: 2
     }
@@ -32,7 +32,7 @@ Feature: object node
     Then got the following "object" node:
     """
     : {
-      class.simpleName: 'ObjectNode'
+      class.simpleName: 'ObjectScopeNode'
       inspect: "{name= 'Tom'}"
     }
     """
@@ -58,7 +58,7 @@ Feature: object node
     Then got the following "object" node:
     """
     : {
-      class.simpleName: 'ObjectNode'
+      class.simpleName: 'ObjectScopeNode'
       inspect: "{name= 'Tom', age= 30}"
     }
     """

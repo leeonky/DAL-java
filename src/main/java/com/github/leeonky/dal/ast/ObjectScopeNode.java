@@ -11,11 +11,10 @@ import static com.github.leeonky.dal.ast.AssertionFailure.assertUnexpectedFields
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
-//TODO rename
-public class ObjectNode extends DALNode {
+public class ObjectScopeNode extends DALNode {
     private final List<DALNode> expressions = new ArrayList<>();
 
-    public ObjectNode(List<DALNode> expressions) {
+    public ObjectScopeNode(List<DALNode> expressions) {
         this.expressions.addAll(expressions);
     }
 
@@ -23,7 +22,7 @@ public class ObjectNode extends DALNode {
         return expressions;
     }
 
-    public ObjectNode() {
+    public ObjectScopeNode() {
         this(Collections.emptyList());
     }
 

@@ -64,7 +64,7 @@ public class RowNode extends DALNode {
     private DALExpression transformRowToExpression(DALOperator operator, DALNode inputElement) {
         return new DALExpression(schemaClause.map(c -> c.makeExpression(inputElement)).orElse(inputElement),
                 this.operator.orElse(operator), isRowWildcard() ? cells.get(0)
-                : new ObjectNode(cells).setPositionBegin(cells.get(0).getOperandPosition()));
+                : new ObjectScopeNode(cells).setPositionBegin(cells.get(0).getOperandPosition()));
     }
 
     public boolean hasSchemaOrOperator() {

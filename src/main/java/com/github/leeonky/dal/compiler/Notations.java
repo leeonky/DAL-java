@@ -55,7 +55,8 @@ public class Notations {
             REGEX_NOTATION = notation("/"),
             OPENING_BRACES = notation("{"),
             CLOSING_BRACES = notation("}"),
-            COMMA = notation(",");
+            COMMA = notation(","),
+            COLUMN_SPLITTER = notation("|");
 
 
     @Deprecated

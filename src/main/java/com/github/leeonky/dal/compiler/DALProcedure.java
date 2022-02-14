@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static com.github.leeonky.dal.compiler.Notations.COLUMN_SPLITTER;
+import static com.github.leeonky.dal.compiler.Notations.Operators.NOT_EQUAL;
 import static java.util.Collections.singleton;
 
 public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> {
@@ -57,7 +59,7 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
     }
 
     public boolean mayBeUnEqual() {
-        return getSourceCode().startsWith("!=");
+        return getSourceCode().startsWith(NOT_EQUAL);
     }
 
     public boolean mayBeElementEllipsis() {
@@ -65,6 +67,6 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
     }
 
     public boolean emptyCell() {
-        return getSourceCode().startsWith("|");
+        return getSourceCode().startsWith(COLUMN_SPLITTER);
     }
 }

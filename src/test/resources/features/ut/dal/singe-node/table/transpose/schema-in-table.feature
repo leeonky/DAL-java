@@ -49,7 +49,7 @@ Feature: schema in table
           inspect: 'time is String is Instant'
         }
         rightOperand: {
-          class.simpleName: 'ObjectNode'
+          class.simpleName: 'ObjectScopeNode'
           inspect: "{year: 2000}"
         }
       }]]

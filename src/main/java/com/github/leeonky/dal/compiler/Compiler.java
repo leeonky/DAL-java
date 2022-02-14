@@ -146,10 +146,10 @@ public class Compiler {
         PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursive(EXPLICIT_PROPERTY);
         OBJECT = DALProcedure.disableCommaAnd(OPENING_BRACES.next(PROPERTY_CHAIN.expression(shortJudgementClause(
                 JUDGEMENT_OPERATORS.mandatory("expect operator `:` or `=`"))).sequence(severalTimes().
-                optionalSplitBy(Notations.COMMA).endWith(CLOSING_BRACES), ObjectNode::new)));
+                optionalSplitBy(Notations.COMMA).endWith(CLOSING_BRACES), ObjectScopeNode::new)));
         LIST = DALProcedure.disableCommaAnd(OPENING_BRACKET.next(ELEMENT_ELLIPSIS.ignoreInput().or(shortJudgementClause(
                 JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR))).sequence(severalTimes().optionalSplitBy(COMMA)
-                .endWith(CLOSING_BRACKET), ListNode::new)));
+                .endWith(CLOSING_BRACKET), ListScopeNode::new)));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         OPERAND = lazy(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
                 .mandatory("expect a value or expression").map(DALNode::avoidListMapping);

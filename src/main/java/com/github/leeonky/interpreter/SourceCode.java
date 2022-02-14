@@ -1,10 +1,17 @@
 package com.github.leeonky.interpreter;
 
-import java.util.*;
-import java.util.function.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiPredicate;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.github.leeonky.interpreter.FunctionUtil.allOptional;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
+import static com.github.leeonky.interpreter.Notation.notation;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -79,13 +86,12 @@ public class SourceCode {
         return this;
     }
 
-    public boolean startsWith(String word) {
+    public boolean startsWith(Notation notation) {
         leftTrim();
-        return (code.startsWith(word, position));
+        return (code.startsWith(notation.getLabel(), position));
     }
 
-    //TODO refactor
-    public boolean startsWithStr(String word) {
+    public boolean startsWith(String word) {
         return (code.startsWith(word, position));
     }
 
@@ -109,27 +115,9 @@ public class SourceCode {
         return popWord(word, () -> true);
     }
 
-    //TODO    use notation ********************, popUp string not trim
     @Deprecated
     public Optional<Token> popWord(String word, Supplier<Boolean> predicate) {
-        return when(startsWith(word) && predicate.get()).optional(() -> new Token(seek(word.length())).append(word));
-    }
-
-    @Deprecated
-    public <T, N extends Node<C, N>, C extends RuntimeContext<C>> Optional<N> fetchElementNode(
-            FetchBy fetchBy, Character opening, Supplier<T> element, char closing, Function<List<T>, N> nodeFactory) {
-        return when(whenFirstChar(opening::equals)).optional(() -> {
-            int startPosition = seek(1);
-            List<T> elements = new ArrayList<>();
-            while (hasCode() && !fetchBy.isClosing(closing, this)) {
-                elements.add(element.get());
-                fetchBy.afterFetchElement(this);
-            }
-            if (!hasCode())
-                throw syntaxError(String.format("should end with `%c`", closing), 0);
-            seek(1);
-            return nodeFactory.apply(elements).setPositionBegin(startPosition);
-        });
+        return when(startsWith(notation(word)) && predicate.get()).optional(() -> new Token(seek(word.length())).append(word));
     }
 
     public <N> Optional<N> tryFetch(Supplier<Optional<N>> supplier) {
@@ -155,29 +143,5 @@ public class SourceCode {
 
     public int nextPosition() {
         return leftTrim().position;
-    }
-
-    public enum FetchBy {
-        BY_CHAR,
-        @Deprecated
-        BY_NODE {
-            @Override
-            protected void afterFetchElement(SourceCode sourceCode) {
-                sourceCode.popWord(",");
-                sourceCode.leftTrim();
-            }
-
-            @Override
-            protected boolean isClosing(char closing, SourceCode sourceCode) {
-                return sourceCode.startsWith(String.valueOf(closing));
-            }
-        };
-
-        protected void afterFetchElement(SourceCode sourceCode) {
-        }
-
-        protected boolean isClosing(char closing, SourceCode sourceCode) {
-            return closing == sourceCode.currentChar();
-        }
     }
 }
