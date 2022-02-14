@@ -1,6 +1,5 @@
 package com.github.leeonky.interpreter;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -21,12 +20,6 @@ public class ComplexNode<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, M extends ParserPx.Mandatory<C, N, E, O, P, T>,
-            T> ComplexNode<C, N, E, O, P, M, T, T> single(M mandatory, String message) {
-        return new ComplexNode<>(Type.SINGLE, mandatory, message);
-    }
-
-    public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, M extends ParserPx.Mandatory<C, N, E, O, P, T>,
             T> ComplexNode<C, N, E, O, P, M, T, List<T>> multiple(M mandatory) {
         return new ComplexNode<>(Type.MULTIPLE, mandatory, null);
     }
@@ -35,12 +28,8 @@ public class ComplexNode<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
         return new OpeningClosing(opening, closing);
     }
 
-    public Split splitBy(String split) {
-        return new Split(split);
-    }
-
     public enum Type {
-        SINGLE, MULTIPLE
+        MULTIPLE
     }
 
     public class OpeningClosing {
@@ -63,44 +52,6 @@ public class ComplexNode<C extends RuntimeContext<C>, N extends Node<C, N>, E ex
                     });
         }
 
-        public OpeningClosingSplit splitBy(String split) {
-            return new OpeningClosingSplit(split);
-        }
-
-        public class OpeningClosingSplit {
-            private final String split;
-
-            public OpeningClosingSplit(String split) {
-                this.split = split;
-            }
-
-            @SuppressWarnings("unchecked")
-            public NodeParser<C, N, E, O, P> nodeParser(Function<A, N> nodeFactory) {
-                return procedure -> procedure.getSourceCode().popWord(String.valueOf(opening)).map(openingToken ->
-                        nodeFactory.apply((A) new ArrayList<T>() {{
-                            add(mandatory.parse(procedure));
-                            while (procedure.getSourceCode().popWord(split).isPresent())
-                                add(mandatory.parse(procedure));
-                            procedure.getSourceCode().popWord(String.valueOf(closing)).orElseThrow(() ->
-                                    procedure.getSourceCode().syntaxError(String.format("should end with `%s`", closing), 0));
-                        }}).setPositionBegin(openingToken.getPosition()));
-            }
-        }
     }
 
-    public class Split {
-        private final String split;
-
-        public Split(String split) {
-            this.split = split;
-        }
-
-        public NodeParser.Mandatory<C, N, E, O, P> mandatory(Function<List<T>, N> nodeFactory) {
-            return procedure -> procedure.atPosition(position -> nodeFactory.apply(new ArrayList<T>() {{
-                add(mandatory.parse(procedure));
-                while (procedure.getSourceCode().popWord(split).isPresent())
-                    add(mandatory.parse(procedure));
-            }}).setPositionBegin(position));
-        }
-    }
 }

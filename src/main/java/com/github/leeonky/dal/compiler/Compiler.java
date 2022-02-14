@@ -21,8 +21,9 @@ import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.NodeParser.lazy;
 import static com.github.leeonky.interpreter.NodeParser.oneOf;
 import static com.github.leeonky.interpreter.OperatorParser.oneOf;
-import static com.github.leeonky.interpreter.wip.Sequence.DefaultSequence.endWith;
-import static com.github.leeonky.interpreter.wip.Several.severalTimes;
+import static com.github.leeonky.interpreter.Parser.endWith;
+import static com.github.leeonky.interpreter.wip.Sequence.atLeast;
+import static com.github.leeonky.interpreter.wip.Sequence.severalTimes;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -89,16 +90,16 @@ public class Compiler {
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
             NUMBER = Tokens.NUMBER.nodeParser(constNode(Token::getNumber)),
             INTEGER = Tokens.INTEGER.nodeParser(constNode(Token::getInteger)),
-            SINGLE_QUOTED_STRING = charNode('\'', SINGLE_QUOTED_ESCAPES).repeat(severalTimes(), NodeCollection::new)
-                    .between("'", "'", DALNode::constString),
-            DOUBLE_QUOTED_STRING = charNode('"', DOUBLE_QUOTED_ESCAPES).repeat(severalTimes(), NodeCollection::new)
-                    .between("\"", "\"", DALNode::constString),
+            SINGLE_QUOTED_STRING = SINGLE_QUOTED.next(charNode(SINGLE_QUOTED_ESCAPES).sequence(severalTimes().endWith(
+                    SINGLE_QUOTED.getLabel()), DALNode::constString)),
+            DOUBLE_QUOTED_STRING = DOUBLE_QUOTED.next(charNode(DOUBLE_QUOTED_ESCAPES).sequence(severalTimes().endWith(
+                    DOUBLE_QUOTED.getLabel()), DALNode::constString)),
             CONST_TRUE = Keywords.TRUE.nodeParser(DALNode::constTrue),
             CONST_FALSE = Keywords.FALSE.nodeParser(DALNode::constFalse),
             CONST_NULL = Keywords.NULL.nodeParser(DALNode::constNull),
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
-            REGEX = charNode('/', REGEX_ESCAPES).repeat(severalTimes(), NodeCollection::new).between("/", "/",
-                    DALNode::regex),
+            REGEX = REGEX_NOTATION.next(charNode(REGEX_ESCAPES).sequence(severalTimes().endWith(REGEX_NOTATION),
+                    DALNode::regex)),
             IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(Tokens.SYMBOL.nodeParser(DALNode::symbolNode))
                     .defaultInputNode(InputNode.INSTANCE),
             WILDCARD = Notations.Operators.WILDCARD.nodeParser(DALNode::wildcardNode),
@@ -112,9 +113,9 @@ public class Compiler {
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SCHEMA_COMPOSE = SCHEMA.mandatory("expect a schema").repeat(severalTimes().splitBy("/"), NodeCollection::new)
-            .between("[", "]", DALNode::elementSchemas)
-            .or(SCHEMA.mandatory("expect a schema").repeat(severalTimes().splitBy("/"), DALNode::schemas)),
+            SCHEMA_COMPOSE = OPENING_BRACKET.next(SCHEMA.mandatory("expect a schema").sequence(atLeast(1,
+            "expect at least one schema").splitBy(SCHEMA_AND).endWith(CLOSING_BRACKET), DALNode::elementSchemas))
+            .or(SCHEMA.mandatory("expect a schema").sequence(severalTimes().splitBy(SCHEMA_AND), DALNode::schemas)),
             PROPERTY_CHAIN, OPERAND, EXPRESSION, SHORT_JUDGEMENT_OPERAND;
 
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
@@ -180,10 +181,15 @@ public class Compiler {
         }};
     }
 
-    private static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> charNode(
+    private static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> charNode1(
             char except, EscapeChars escapeChars) {
         return procedure -> procedure.getSourceCode().popChar(escapeChars, except).map(token ->
                 new ConstNode(token.getChar()).setPositionBegin(token.getPosition()));
+    }
+
+    private static NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> charNode(
+            EscapeChars escapeChars) {
+        return procedure -> new ConstNode(procedure.getSourceCode().popCharBk(escapeChars));
     }
 
     public List<Object> toChainNodes(String sourceCode) {

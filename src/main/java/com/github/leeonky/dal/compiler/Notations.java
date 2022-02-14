@@ -6,6 +6,7 @@ import static com.github.leeonky.interpreter.Notation.notation;
 
 public class Notations {
 
+
     public static class Keywords {
         public static final Notation
                 WHICH = notation("which"),
@@ -49,7 +50,9 @@ public class Notations {
             OPENING_BRACKET = notation("["),
             CLOSING_BRACKET = notation("]"),
             OPENING_PARENTHESES = notation("("),
-            CLOSING_PARENTHESES = notation(")");
+            CLOSING_PARENTHESES = notation(")"),
+            SCHEMA_AND = notation("/"),
+            REGEX_NOTATION = notation("/");
 
 
     @Deprecated

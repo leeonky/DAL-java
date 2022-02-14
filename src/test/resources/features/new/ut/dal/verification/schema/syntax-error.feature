@@ -64,6 +64,21 @@ Feature: syntax-error
                  ^
     """
 
+  Scenario: raise error when no schema
+    When evaluate by:
+    """
+      is []
+    """
+    Then failed with the message:
+    """
+    expect at least one schema
+    """
+    And got the following notation:
+    """
+      is []
+          ^
+    """
+
   Scenario: not support element schema expression in multidimensional list
     When evaluate by:
     """
@@ -122,7 +137,7 @@ Feature: syntax-error
       | &     |
       | !     |
       | ,     |
-      | [     |
+#      | [     |
       | ]     |
       | :     |
       | \|    |

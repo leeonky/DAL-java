@@ -24,6 +24,10 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return new SchemaComposeNode(nodes.stream().map(SchemaNode.class::cast).collect(Collectors.toList()), false);
     }
 
+    public static SchemaComposeNode elementSchemas(List<DALNode> nodes) {
+        return new SchemaComposeNode(nodes.stream().map(SchemaNode.class::cast).collect(Collectors.toList()), true);
+    }
+
     public static DALNode elementSchemas(Token token, DALNode node) {
         return ((NodeCollection) node).toSchemaComposeNode(token.getPosition());
     }
@@ -40,8 +44,12 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return new DALExpression(null, new DALOperator.Parentheses(), node);
     }
 
-    public static DALNode constString(Token token, DALNode node) {
-        return ((NodeCollection) node).toConstString(token.getPosition());
+    public static DALNode constString(List<DALNode> nodes) {
+        return new ConstNode(getString(nodes));
+    }
+
+    public static DALNode regex(List<DALNode> nodes) {
+        return new RegexNode(getString(nodes));
     }
 
     private static String getString(List<DALNode> nodes) {

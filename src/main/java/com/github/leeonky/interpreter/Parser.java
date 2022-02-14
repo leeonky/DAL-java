@@ -1,7 +1,6 @@
 package com.github.leeonky.interpreter;
 
 import com.github.leeonky.interpreter.wip.Sequence;
-import com.github.leeonky.interpreter.wip.Several;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +11,10 @@ import java.util.function.Function;
 public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
         O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
         MA extends Parser.Mandatory<C, N, E, O, P, OP, MA, T>, T> {
+
+    static <P extends Procedure<?, ?, ?, ?, ?>> Sequence<P> endWith(Notation notation) {
+        return new Sequence.DefaultSequence<P>().endWith(notation);
+    }
 
     Optional<T> parse(P procedure);
 
@@ -28,23 +31,7 @@ public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E ext
     }
 
     default MA mandatory(String message) {
-        return castMandatory(procedure -> parse(procedure).orElseThrow(() ->
-                procedure.getSourceCode().syntaxError(message, 0)));
-    }
-
-    @Deprecated
-    default MA repeat(Several<? super P> several, Function<List<T>, T> factory) {
-        return castMandatory(procedure -> factory.apply(several.validate(procedure, new ArrayList<T>() {{
-            while (!several.isClosing(procedure)) {
-                Optional<T> result = parse(procedure);
-                if (result.isPresent()) {
-                    add(result.get());
-                    if (!several.isSplitter(procedure))
-                        break;
-                } else
-                    break;
-            }
-        }})));
+        return castMandatory(procedure -> parse(procedure).orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0)));
     }
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
@@ -70,17 +57,6 @@ public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E ext
             }));
         }
 
-        @Deprecated
-        default MA repeat(Several<? super P> several, Function<List<T>, T> factory) {
-            return castMandatory(procedure -> factory.apply(new ArrayList<T>() {{
-                while (!several.isClosing(procedure)) {
-                    add(parse(procedure));
-                    if (!several.isSplitter(procedure))
-                        break;
-                }
-            }}));
-        }
-
         default MA closeBy(Sequence<? super P> sequence) {
             return castMandatory(procedure -> {
                 T element = parse(procedure);
@@ -89,16 +65,15 @@ public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E ext
             });
         }
 
-
         default MA sequence(Sequence<? super P> sequence, Function<List<T>, T> factory) {
-            return castMandatory(procedure -> factory.apply(new ArrayList<T>() {{
-                while (!sequence.beforeClose(procedure)) {
+            return castMandatory(procedure -> factory.apply(sequence.validate(procedure, new ArrayList<T>() {{
+                while (!sequence.isClose(procedure)) {
                     add(parse(procedure));
                     if (!sequence.isSplitter(procedure))
                         break;
                 }
                 sequence.close(procedure);
-            }}));
+            }})));
         }
     }
 }
