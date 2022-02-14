@@ -27,13 +27,27 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
     }
 
     @Override
-    default Mandatory<C, N, E, O, P> cast(Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>,
+    default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>,
             NodeParser.Mandatory<C, N, E, O, P>, N> mandatory) {
         return mandatory::parse;
     }
 
+    @Override
+    default NodeParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,
+            Mandatory<C, N, E, O, P>, N> parser) {
+        return parser::parse;
+    }
+
     default ClauseParser<C, N, E, O, P> ignoreInput() {
         return procedure -> parse(procedure).map(node -> p -> node);
+    }
+
+    default NodeParser<C, N, E, O, P> map(Function<N, N> mapping) {
+        return procedure -> parse(procedure).map(mapping::apply);
+    }
+
+    default NodeParser<C, N, E, O, P> expression(ClauseParser.Mandatory<C, N, E, O, P> mandatory) {
+        return procedure -> parse(procedure).map(node -> mandatory.parse(procedure).makeExpression(node));
     }
 
     default NodeParser<C, N, E, O, P> recursive(ClauseParser<C, N, E, O, P> clauseParser) {
@@ -57,12 +71,11 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             return mandatory::parse;
         }
 
-        @Deprecated
         default Mandatory<C, N, E, O, P> map(Function<N, N> mapping) {
             return procedure -> mapping.apply(parse(procedure));
         }
 
-        default Mandatory<C, N, E, O, P> node(ClauseParser.Mandatory<C, N, E, O, P> expressionClauseMandatory) {
+        default Mandatory<C, N, E, O, P> expression(ClauseParser.Mandatory<C, N, E, O, P> expressionClauseMandatory) {
             return procedure -> {
                 N node = parse(procedure);
                 return expressionClauseMandatory.parse(procedure).makeExpression(node);
@@ -76,7 +89,7 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             };
         }
 
-        default Mandatory<C, N, E, O, P> recursiveConcat(ClauseParser<C, N, E, O, P> clauseParser) {
+        default Mandatory<C, N, E, O, P> recursive(ClauseParser<C, N, E, O, P> clauseParser) {
             return procedure -> {
                 N node = parse(procedure);
                 Optional<Clause<C, N>> optionalNode = clauseParser.parse(procedure);

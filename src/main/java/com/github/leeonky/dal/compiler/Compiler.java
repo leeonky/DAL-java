@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import static com.github.leeonky.dal.ast.DALNode.constNode;
 import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.DALProcedure.enableCommaAnd;
+import static com.github.leeonky.dal.compiler.Notations.OPENING_BRACKET;
 import static com.github.leeonky.dal.compiler.Notations.Operators;
 import static com.github.leeonky.interpreter.ClauseParser.oneOf;
 import static com.github.leeonky.interpreter.ComplexNode.multiple;
@@ -23,6 +24,7 @@ import static com.github.leeonky.interpreter.NodeParser.lazy;
 import static com.github.leeonky.interpreter.NodeParser.oneOf;
 import static com.github.leeonky.interpreter.OperatorParser.oneOf;
 import static com.github.leeonky.interpreter.Several.severalTimes;
+import static com.github.leeonky.interpreter.wip.Closing.endWith;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -93,19 +95,19 @@ public class Compiler {
                     .between("'", "'", DALNode::constString),
             DOUBLE_QUOTED_STRING = charNode('"', DOUBLE_QUOTED_ESCAPES).repeat(severalTimes(), NodeCollection::new)
                     .between("\"", "\"", DALNode::constString),
-            CONST_TRUE = Keywords.TRUE.nodeMatcher(DALNode::constTrue),
-            CONST_FALSE = Keywords.FALSE.nodeMatcher(DALNode::constFalse),
-            CONST_NULL = Keywords.NULL.nodeMatcher(DALNode::constNull),
+            CONST_TRUE = Keywords.TRUE.nodeParser(DALNode::constTrue),
+            CONST_FALSE = Keywords.FALSE.nodeParser(DALNode::constFalse),
+            CONST_NULL = Keywords.NULL.nodeParser(DALNode::constNull),
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
             REGEX = charNode('/', REGEX_ESCAPES).repeat(severalTimes(), NodeCollection::new).between("/", "/",
                     DALNode::regex),
             IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(Tokens.SYMBOL.nodeParser(DALNode::symbolNode))
                     .defaultInputNode(InputNode.INSTANCE),
-            WILDCARD = Notations.Operators.WILDCARD.nodeMatcher(DALNode::wildcardNode),
-            ROW_WILDCARD = Notations.Operators.ROW_WILDCARD.nodeMatcher(DALNode::wildcardNode),
+            WILDCARD = Notations.Operators.WILDCARD.nodeParser(DALNode::wildcardNode),
+            ROW_WILDCARD = Notations.Operators.ROW_WILDCARD.nodeParser(DALNode::wildcardNode),
             CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
                     CONST_USER_DEFINED_LITERAL),
-            ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.nodeMatcher(token -> new ListEllipsisNode()),
+            ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.nodeParser(token -> new ListEllipsisNode()),
             EMPTY_CELL = procedure -> when(procedure.emptyCell()).optional(EmptyCellNode::new),
             TABLE = oneOf(new TransposedTableWithRowOperator(), new TableParser(), new TransposedTable()),
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
@@ -125,8 +127,9 @@ public class Compiler {
             SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE),
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
             EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).mandatory(
-                    "expect a symbol")), PROPERTY_IMPLICIT.clause(INTEGER_OR_STRING.mandatory(
-                    "should given one property or array index in `[]`").between("[", "]", DALNode::bracketSymbolNode)));
+                    "expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.then(INTEGER_OR_STRING.mandatory(
+                    "should given one property or array index in `[]`").map(DALNode::bracketSymbolNode)
+                    .closeBy(endWith(Notations.CLOSING_BRACKET)))));
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> shortJudgementClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
@@ -141,8 +144,8 @@ public class Compiler {
     public Compiler() {
         PARENTHESES = lazy(() -> enableCommaAnd(EXPRESSION.between("(", ")", DALNode::parenthesesNode)));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IMPLICIT_PROPERTY);
-        PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursiveConcat(EXPLICIT_PROPERTY);
-        OBJECT = DALProcedure.disableCommaAnd(multiple(PROPERTY_CHAIN.node(shortJudgementClause(JUDGEMENT_OPERATORS
+        PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursive(EXPLICIT_PROPERTY);
+        OBJECT = DALProcedure.disableCommaAnd(multiple(PROPERTY_CHAIN.expression(shortJudgementClause(JUDGEMENT_OPERATORS
                 .mandatory("expect operator `:` or `=`")))).between('{', '}').nodeParser(ObjectNode::new));
         LIST = DALProcedure.disableCommaAnd(multiple(ELEMENT_ELLIPSIS.ignoreInput().or(shortJudgementClause(
                 JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR)))).between('[', ']').nodeParser(ListNode::new));
@@ -160,7 +163,7 @@ public class Compiler {
         EXPRESSION_CLAUSE = oneOf(ARITHMETIC_CLAUSE_CHAIN, JUDGEMENT_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN,
                 WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN);
         EXPRESSION = OPERAND.concat(EXPRESSION_CLAUSE);
-        SHORT_JUDGEMENT_OPERAND = JUDGEMENT.or(OPERAND.recursiveConcat(oneOf(ARITHMETIC_CLAUSE, /*need test*/EXPLICIT_PROPERTY)));
+        SHORT_JUDGEMENT_OPERAND = JUDGEMENT.or(OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE, /*need test*/EXPLICIT_PROPERTY)));
 
 //        TODO remove
         BINARY_OPERATOR_EXPRESSION = oneOf(ARITHMETIC_CLAUSE, JUDGEMENT_CLAUSE, EXPLICIT_PROPERTY,

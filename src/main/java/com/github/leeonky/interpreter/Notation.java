@@ -20,7 +20,7 @@ public class Notation {
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> nodeMatcher(
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> nodeParser(
             Function<Token, N> factory) {
         return procedure -> procedure.getSourceCode().popWord(label)
                 .map(t -> factory.apply(t).setPositionBegin(t.getPosition()));
@@ -37,5 +37,19 @@ public class Notation {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> OperatorParser<C, N, E, O, P> operatorParser(
             Supplier<O> factory) {
         return operatorParser(factory, procedure -> true);
+    }
+
+    public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> then(
+            NodeParser.Mandatory<C, N, E, O, P> mandatory) {
+        return procedure -> procedure.getSourceCode().popWord(label)
+                .map(t -> mandatory.parse(procedure).setPositionBegin(t.getPosition()));
+    }
+
+    public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> then(
+            NodeParser<C, N, E, O, P> nodeParser) {
+        return procedure -> procedure.getSourceCode().tryFetch(() -> procedure.getSourceCode().popWord(label)
+                .flatMap(token -> nodeParser.parse(procedure).map(node -> node.setPositionBegin(token.getPosition()))));
     }
 }

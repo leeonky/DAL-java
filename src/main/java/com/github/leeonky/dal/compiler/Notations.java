@@ -5,10 +5,6 @@ import com.github.leeonky.interpreter.Notation;
 import static com.github.leeonky.interpreter.Notation.notation;
 
 public class Notations {
-    public static final String WHICH_S = "which";
-    public static final String IS_s = "is";
-    public static final String AND_s = "and";
-    public static final String OR_s = "or";
 
     public static class Keywords {
         public static final Notation
@@ -46,4 +42,18 @@ public class Notations {
                 IS = Keywords.IS,
                 WHICH = Keywords.WHICH;
     }
+
+    public static final Notation
+            SINGLE_QUOTED = notation("'"),
+            DOUBLE_QUOTED = notation("\""),
+            OPENING_BRACKET = notation("["),
+            CLOSING_BRACKET = notation("]");
+
+
+    @Deprecated
+    public static final String IS_s = "is";
+    @Deprecated
+    public static final String AND_s = "and";
+    @Deprecated
+    public static final String OR_s = "or";
 }

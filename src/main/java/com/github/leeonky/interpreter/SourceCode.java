@@ -84,6 +84,11 @@ public class SourceCode {
         return (code.startsWith(word, position));
     }
 
+    //TODO refactor
+    public boolean startsWithStr(String word) {
+        return (code.startsWith(word, position));
+    }
+
     @Deprecated
     public char popCharBk(Map<String, Character> escapeChars) {
         return escapeChars.entrySet().stream().filter(e -> code.startsWith(e.getKey(), position)).map(e -> {
@@ -109,10 +114,13 @@ public class SourceCode {
         return new SyntaxException(message, position + positionOffset);
     }
 
+    @Deprecated
     public Optional<Token> popWord(String word) {
         return popWord(word, () -> true);
     }
 
+    //TODO    use notation ********************, popUp string not trim
+    @Deprecated
     public Optional<Token> popWord(String word, Supplier<Boolean> predicate) {
         return when(startsWith(word) && predicate.get()).optional(() -> new Token(seek(word.length())).append(word));
     }

@@ -32,9 +32,8 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return (SchemaNode) new SchemaNode(token.getContent()).setPositionBegin(token.getPosition());
     }
 
-    public static DALNode bracketSymbolNode(Token token, DALNode node) {
-        return new SymbolNode(((ConstNode) node).getValue(), SymbolNode.Type.BRACKET)
-                .setPositionBegin(token.getPosition());
+    public static DALNode bracketSymbolNode(DALNode node) {
+        return new SymbolNode(((ConstNode) node).getValue(), SymbolNode.Type.BRACKET);
     }
 
     public static DALNode parenthesesNode(Token token, DALNode node) {
@@ -45,12 +44,13 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return ((NodeCollection) node).toConstString(token.getPosition());
     }
 
-    public static DALNode regex(Token token, DALNode node) {
-        return ((NodeCollection) node).teRegexNode(token.getPosition());
+    private static String getString(List<DALNode> nodes) {
+        return nodes.stream().map(ConstNode.class::cast).map(ConstNode::getValue)
+                .map(Object::toString).collect(Collectors.joining());
     }
 
-    public static DALNode objectScopeNode(Token token, DALNode node) {
-        return ((NodeCollection) node).objectScopeNode(token.getPosition());
+    public static DALNode regex(Token token, DALNode node) {
+        return ((NodeCollection) node).teRegexNode(token.getPosition());
     }
 
     public static DALNode constTrue(Token token) {
