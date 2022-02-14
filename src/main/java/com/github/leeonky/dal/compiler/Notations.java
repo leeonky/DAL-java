@@ -52,7 +52,10 @@ public class Notations {
             OPENING_PARENTHESES = notation("("),
             CLOSING_PARENTHESES = notation(")"),
             SCHEMA_AND = notation("/"),
-            REGEX_NOTATION = notation("/");
+            REGEX_NOTATION = notation("/"),
+            OPENING_BRACES = notation("{"),
+            CLOSING_BRACES = notation("}"),
+            COMMA = notation(",");
 
 
     @Deprecated

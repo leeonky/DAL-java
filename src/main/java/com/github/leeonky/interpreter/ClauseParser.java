@@ -9,7 +9,7 @@ import static java.util.Optional.empty;
 
 public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
-        extends ParserPx<C, N, E, O, P, Clause<C, N>>, Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
+        extends Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
         ClauseParser.Mandatory<C, N, E, O, P>, Clause<C, N>> {
     static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> oneOf(
@@ -53,8 +53,8 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>,
             E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
-            extends ParserPx.Mandatory<C, N, E, O, P, Clause<C, N>>,
-            Parser.Mandatory<C, N, E, O, P, ClauseParser<C, N, E, O, P>, ClauseParser.Mandatory<C, N, E, O, P>, Clause<C, N>> {
+            extends Parser.Mandatory<C, N, E, O, P, ClauseParser<C, N, E, O, P>, ClauseParser.Mandatory<C, N, E, O, P>,
+            Clause<C, N>> {
 
         @Override
         default Mandatory<C, N, E, O, P> cast(Parser.Mandatory<C, N, E, O, P, ClauseParser<C, N, E, O, P>,

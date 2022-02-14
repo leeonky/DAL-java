@@ -114,4 +114,15 @@ public abstract class Sequence<P extends Procedure<?, ?, ?, ?, ?>> {
             }
         };
     }
+
+    public Sequence<P> optionalSplitBy(Notation splitter) {
+        return new CompositeSequence<P>(this) {
+
+            @Override
+            public boolean isSplitter(P procedure) {
+                procedure.getSourceCode().popWord(splitter.getLabel());
+                return true;
+            }
+        };
+    }
 }

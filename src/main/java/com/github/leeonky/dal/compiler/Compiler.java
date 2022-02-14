@@ -15,7 +15,6 @@ import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.DALProcedure.enableCommaAnd;
 import static com.github.leeonky.dal.compiler.Notations.*;
 import static com.github.leeonky.interpreter.ClauseParser.oneOf;
-import static com.github.leeonky.interpreter.ComplexNode.multiple;
 import static com.github.leeonky.interpreter.FunctionUtil.*;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.NodeParser.lazy;
@@ -145,12 +144,12 @@ public class Compiler {
                 EXPRESSION.closeBy(endWith(CLOSING_PARENTHESES)).map(DALNode::parenthesesNode))));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IMPLICIT_PROPERTY);
         PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursive(EXPLICIT_PROPERTY);
-        OBJECT = DALProcedure.disableCommaAnd(multiple(PROPERTY_CHAIN.expression(shortJudgementClause(JUDGEMENT_OPERATORS
-                .mandatory("expect operator `:` or `=`")))).between('{', '}').nodeParser(ObjectNode::new));
-       
-
-        LIST = DALProcedure.disableCommaAnd(multiple(ELEMENT_ELLIPSIS.ignoreInput().or(shortJudgementClause(
-                JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR)))).between('[', ']').nodeParser(ListNode::new));
+        OBJECT = DALProcedure.disableCommaAnd(OPENING_BRACES.next(PROPERTY_CHAIN.expression(shortJudgementClause(
+                JUDGEMENT_OPERATORS.mandatory("expect operator `:` or `=`"))).sequence(severalTimes().
+                optionalSplitBy(Notations.COMMA).endWith(CLOSING_BRACES), ObjectNode::new)));
+        LIST = DALProcedure.disableCommaAnd(OPENING_BRACKET.next(ELEMENT_ELLIPSIS.ignoreInput().or(shortJudgementClause(
+                JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR))).sequence(severalTimes().optionalSplitBy(COMMA)
+                .endWith(CLOSING_BRACKET), ListNode::new)));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         OPERAND = lazy(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
                 .mandatory("expect a value or expression").map(DALNode::avoidListMapping);
@@ -183,15 +182,9 @@ public class Compiler {
         }};
     }
 
-    private static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> charNode1(
-            char except, EscapeChars escapeChars) {
-        return procedure -> procedure.getSourceCode().popChar(escapeChars, except).map(token ->
-                new ConstNode(token.getChar()).setPositionBegin(token.getPosition()));
-    }
-
     private static NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> charNode(
             EscapeChars escapeChars) {
-        return procedure -> new ConstNode(procedure.getSourceCode().popCharBk(escapeChars));
+        return procedure -> new ConstNode(procedure.getSourceCode().popChar(escapeChars));
     }
 
     public List<Object> toChainNodes(String sourceCode) {

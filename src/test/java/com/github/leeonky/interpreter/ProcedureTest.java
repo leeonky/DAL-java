@@ -15,7 +15,7 @@ class ProcedureTest {
     class FetchNodeBetween {
 
         public Optional<TestNode> oneCharNode(TestProcedure testProcedure) {
-            return Optional.of(new TestNode(testProcedure.getSourceCode().popCharBk(NO_ESCAPE)));
+            return Optional.of(new TestNode(testProcedure.getSourceCode().popChar(NO_ESCAPE)));
         }
 
         @Test
@@ -23,7 +23,7 @@ class ProcedureTest {
             TestProcedure testProcedure = givenProcedureWithCode("'a'");
 
             assertThat(testProcedure.fetchNodeBetween("(", ")", this::oneCharNode)).isEmpty();
-            assertThat(testProcedure.getSourceCode().popCharBk(NO_ESCAPE)).isEqualTo('\'');
+            assertThat(testProcedure.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('\'');
         }
 
         @Test
@@ -48,7 +48,7 @@ class ProcedureTest {
             TestProcedure procedure = givenProcedureWithCode("'a'");
 
             assertThat(procedure.fetchNodeBetween("'", "'", testProcedure -> Optional.empty())).isEmpty();
-            assertThat(procedure.getSourceCode().popCharBk(NO_ESCAPE)).isEqualTo('\'');
+            assertThat(procedure.getSourceCode().popChar(NO_ESCAPE)).isEqualTo('\'');
         }
     }
 

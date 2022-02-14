@@ -82,9 +82,4 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
     public Optional<O> currentOperator() {
         return operators.stream().findFirst();
     }
-
-    public <T> T atPosition(Function<Integer, T> function) {
-        return function.apply(sourceCode.nextPosition());
-    }
-
 }

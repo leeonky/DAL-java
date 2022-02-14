@@ -44,15 +44,15 @@ public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E ext
             });
         }
 
-        default MA sequence(Sequence<? super P> sequence, Function<List<T>, T> factory) {
-            return cast(procedure -> factory.apply(sequence.validate(procedure, new ArrayList<T>() {{
+        default NodeParser.Mandatory<C, N, E, O, P> sequence(Sequence<? super P> sequence, Function<List<T>, N> factory) {
+            return procedure -> factory.apply(sequence.validate(procedure, new ArrayList<T>() {{
                 while (!sequence.isClose(procedure)) {
                     add(parse(procedure));
                     if (!sequence.isSplitter(procedure))
                         break;
                 }
                 sequence.close(procedure);
-            }})));
+            }}));
         }
     }
 }
