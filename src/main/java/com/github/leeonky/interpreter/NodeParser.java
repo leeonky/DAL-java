@@ -5,7 +5,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.interpreter.FunctionUtil.allOptional;
 import static java.util.Optional.empty;
 
 public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
@@ -27,15 +26,9 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
     }
 
     @Override
-    default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>,
+    default Mandatory<C, N, E, O, P> cast(Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>,
             NodeParser.Mandatory<C, N, E, O, P>, N> mandatory) {
         return mandatory::parse;
-    }
-
-    @Override
-    default NodeParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,
-            Mandatory<C, N, E, O, P>, N> parser) {
-        return parser::parse;
     }
 
     default ClauseParser<C, N, E, O, P> ignoreInput() {
@@ -50,23 +43,12 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return procedure -> parse(procedure).map(node -> mandatory.parse(procedure).makeExpression(node));
     }
 
-    default NodeParser<C, N, E, O, P> recursive(ClauseParser<C, N, E, O, P> clauseParser) {
-        return procedure -> parse(procedure).map(node -> allOptional(() -> clauseParser.parse(procedure)).stream()
-                .reduce(node, (n, clause) -> clause.makeExpression(n), FunctionUtil.notAllowParallelReduce()));
-    }
-
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends ParserPx.Mandatory<C, N, E, O, P, N>,
             Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {
 
         @Override
-        default NodeParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,
-                Mandatory<C, N, E, O, P>, N> parser) {
-            return parser::parse;
-        }
-
-        @Override
-        default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>,
+        default Mandatory<C, N, E, O, P> cast(Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>,
                 Mandatory<C, N, E, O, P>, N> mandatory) {
             return mandatory::parse;
         }

@@ -22,8 +22,8 @@ import static com.github.leeonky.interpreter.NodeParser.lazy;
 import static com.github.leeonky.interpreter.NodeParser.oneOf;
 import static com.github.leeonky.interpreter.OperatorParser.oneOf;
 import static com.github.leeonky.interpreter.Parser.endWith;
-import static com.github.leeonky.interpreter.wip.Sequence.atLeast;
-import static com.github.leeonky.interpreter.wip.Sequence.severalTimes;
+import static com.github.leeonky.interpreter.Sequence.atLeast;
+import static com.github.leeonky.interpreter.Sequence.severalTimes;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -147,6 +147,8 @@ public class Compiler {
         PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursive(EXPLICIT_PROPERTY);
         OBJECT = DALProcedure.disableCommaAnd(multiple(PROPERTY_CHAIN.expression(shortJudgementClause(JUDGEMENT_OPERATORS
                 .mandatory("expect operator `:` or `=`")))).between('{', '}').nodeParser(ObjectNode::new));
+       
+
         LIST = DALProcedure.disableCommaAnd(multiple(ELEMENT_ELLIPSIS.ignoreInput().or(shortJudgementClause(
                 JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR)))).between('[', ']').nodeParser(ListNode::new));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
