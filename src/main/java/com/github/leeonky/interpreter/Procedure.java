@@ -9,7 +9,6 @@ import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.compiler.Notations.COLUMN_SPLITTER;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
-import static com.github.leeonky.interpreter.Notation.notation;
 
 public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
         O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> {
@@ -27,30 +26,6 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
 
     public SourceCode getSourceCode() {
         return sourceCode;
-    }
-
-    @Deprecated
-    public Optional<N> fetchNodeBetween(String opening, String closing, NodeParser<C, N, E, O, P> nodeParser) {
-        return sourceCode.tryFetch(() -> {
-            Optional<N> optionalNode = Optional.empty();
-            if (sourceCode.popWord(notation(opening)).isPresent()) {
-                optionalNode = nodeParser.parse(getInstance());
-                if (optionalNode.isPresent())
-                    sourceCode.popWord(notation(closing)).orElseThrow(() ->
-                            sourceCode.syntaxError("should end with `" + closing + "`", 0));
-            }
-            return optionalNode;
-        });
-    }
-
-    @Deprecated
-    public Optional<N> fetchNodeAfter(String token, NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
-        return sourceCode.popWord(notation(token)).map(t -> nodeFactory.parse(getInstance()));
-    }
-
-    @SuppressWarnings("unchecked")
-    private P getInstance() {
-        return (P) this;
     }
 
     public <T> T underOperator(O operator, Supplier<T> action) {

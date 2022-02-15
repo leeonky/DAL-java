@@ -17,16 +17,29 @@ public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E ext
 
     Optional<T> parse(P procedure);
 
-    default MA cast(Parser.Mandatory<C, N, E, O, P, OP, MA, T> mandatory) {
+    default MA castMandatory(Parser.Mandatory<C, N, E, O, P, OP, MA, T> mandatory) {
+        throw new IllegalStateException();
+    }
+
+    default OP castParser(Parser<C, N, E, O, P, OP, MA, T> parser) {
         throw new IllegalStateException();
     }
 
     default MA or(MA mandatory) {
-        return cast(procedure -> parse(procedure).orElseGet(() -> mandatory.parse(procedure)));
+        return castMandatory(procedure -> parse(procedure).orElseGet(() -> mandatory.parse(procedure)));
     }
 
     default MA mandatory(String message) {
-        return cast(procedure -> parse(procedure).orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0)));
+        return castMandatory(procedure -> parse(procedure).orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0)));
+    }
+
+    default OP closeBy(Sequence<? super P> sequence) {
+        return castParser(procedure -> {
+            Optional<T> optional = parse(procedure);
+            if (optional.isPresent())
+                sequence.close(procedure);
+            return optional;
+        });
     }
 
     default NodeParser<C, N, E, O, P> sequence(Sequence<? super P> sequence, Function<List<T>, N> factory) {

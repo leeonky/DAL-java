@@ -40,10 +40,24 @@ public class Notation {
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> next(
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> and(
             NodeParser.Mandatory<C, N, E, O, P> mandatory) {
         return procedure -> procedure.getSourceCode().popWord(this)
                 .map(t -> mandatory.parse(procedure).setPositionBegin(t.getPosition()));
+    }
+
+    public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> before(
+            NodeParser<C, N, E, O, P> nodeParser) {
+        return procedure -> procedure.getSourceCode().tryFetch(() -> procedure.getSourceCode().popWord(this)
+                .flatMap(t -> nodeParser.parse(procedure)));
+    }
+
+    public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> before(
+            NodeParser.Mandatory<C, N, E, O, P> mandatory) {
+        return procedure -> procedure.getSourceCode().popWord(this)
+                .map(t -> mandatory.parse(procedure));
     }
 
     public int length() {

@@ -90,15 +90,15 @@ public class Compiler {
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
             NUMBER = Tokens.NUMBER.nodeParser(constNode(Token::getNumber)),
             INTEGER = Tokens.INTEGER.nodeParser(constNode(Token::getInteger)),
-            SINGLE_QUOTED_STRING = SINGLE_QUOTED.next(charNode(SINGLE_QUOTED_ESCAPES).sequence(severalTimes().endWith(
+            SINGLE_QUOTED_STRING = SINGLE_QUOTED.and(charNode(SINGLE_QUOTED_ESCAPES).sequence(severalTimes().endWith(
                     SINGLE_QUOTED.getLabel()), DALNode::constString)),
-            DOUBLE_QUOTED_STRING = DOUBLE_QUOTED.next(charNode(DOUBLE_QUOTED_ESCAPES).sequence(severalTimes().endWith(
+            DOUBLE_QUOTED_STRING = DOUBLE_QUOTED.and(charNode(DOUBLE_QUOTED_ESCAPES).sequence(severalTimes().endWith(
                     DOUBLE_QUOTED.getLabel()), DALNode::constString)),
             CONST_TRUE = Keywords.TRUE.nodeParser(DALNode::constTrue),
             CONST_FALSE = Keywords.FALSE.nodeParser(DALNode::constFalse),
             CONST_NULL = Keywords.NULL.nodeParser(DALNode::constNull),
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
-            REGEX = REGEX_NOTATION.next(charNode(REGEX_ESCAPES).sequence(severalTimes().endWith(
+            REGEX = REGEX_NOTATION.and(charNode(REGEX_ESCAPES).sequence(severalTimes().endWith(
                     REGEX_NOTATION.getLabel()), DALNode::regex)),
             IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(Tokens.SYMBOL.nodeParser(DALNode::symbolNode))
                     .defaultInputNode(InputNode.INSTANCE),
@@ -113,7 +113,7 @@ public class Compiler {
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SCHEMA_COMPOSE = OPENING_BRACKET.next(SCHEMA.mandatory("expect a schema").sequence(atLeast(1,
+            SCHEMA_COMPOSE = OPENING_BRACKET.and(SCHEMA.mandatory("expect a schema").sequence(atLeast(1,
             "expect at least one schema").splitBy(SCHEMA_AND).endWith(CLOSING_BRACKET), DALNode::elementSchemas))
             .or(SCHEMA.mandatory("expect a schema").sequence(severalTimes().splitBy(SCHEMA_AND), DALNode::schemas)),
             PROPERTY_CHAIN, OPERAND, EXPRESSION, SHORT_JUDGEMENT_OPERAND;
@@ -127,7 +127,7 @@ public class Compiler {
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
 
     EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).mandatory(
-            "expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.next(INTEGER_OR_STRING.mandatory(
+            "expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.and(INTEGER_OR_STRING.mandatory(
             "should given one property or array index in `[]`").map(DALNode::bracketSymbolNode).closeBy(endWith(CLOSING_BRACKET)))));
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
@@ -141,14 +141,14 @@ public class Compiler {
             JUDGEMENT_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN, WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN, EXPRESSION_CLAUSE;
 
     public Compiler() {
-        PARENTHESES = lazy(() -> enableCommaAnd(OPENING_PARENTHESES.next(
+        PARENTHESES = lazy(() -> enableCommaAnd(OPENING_PARENTHESES.and(
                 EXPRESSION.closeBy(endWith(CLOSING_PARENTHESES)).map(DALNode::parenthesesNode))));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IMPLICIT_PROPERTY);
         PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursive(EXPLICIT_PROPERTY);
-        OBJECT = DALProcedure.disableCommaAnd(OPENING_BRACES.next(PROPERTY_CHAIN.expression(shortJudgementClause(
+        OBJECT = DALProcedure.disableCommaAnd(OPENING_BRACES.and(PROPERTY_CHAIN.expression(shortJudgementClause(
                 JUDGEMENT_OPERATORS.mandatory("expect operator `:` or `=`"))).sequence(severalTimes().
                 optionalSplitBy(Notations.COMMA).endWith(CLOSING_BRACES), ObjectScopeNode::new)));
-        LIST = DALProcedure.disableCommaAnd(OPENING_BRACKET.next(ELEMENT_ELLIPSIS.ignoreInput().or(shortJudgementClause(
+        LIST = DALProcedure.disableCommaAnd(OPENING_BRACKET.and(ELEMENT_ELLIPSIS.ignoreInput().or(shortJudgementClause(
                 JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR))).sequence(severalTimes().optionalSplitBy(COMMA)
                 .endWith(CLOSING_BRACKET), ListScopeNode::new)));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
@@ -214,7 +214,14 @@ public class Compiler {
                 JUDGEMENT_OPERATORS.parse(procedure));
     };
 
+    private final NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+            TRANSPOSED_TABLE_HEADER = COLUMN_SPLITTER.before(TABLE_HEADER);
+
     public class TableParser implements NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> {
+        private final NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+                ELLIPSIS_ROW = COLUMN_SPLITTER.before(ELEMENT_ELLIPSIS.closeBy(endWith(COLUMN_SPLITTER))),
+                WILDCARD_ROW = COLUMN_SPLITTER.before(ROW_WILDCARD.closeBy(endWith(COLUMN_SPLITTER)));
+
         @Override
         public Optional<DALNode> parse(DALProcedure procedure) {
             try {
@@ -231,8 +238,8 @@ public class Compiler {
                 Optional<Clause<DALRuntimeContext, DALNode>> rowSchemaClause = SCHEMA_CLAUSE.parse(procedure);
                 Optional<DALOperator> rowOperator = JUDGEMENT_OPERATORS.parse(procedure);
                 return FunctionUtil.oneOf(
-                        () -> procedure.fetchNodeBetween("|", "|", ELEMENT_ELLIPSIS).map(Collections::singletonList),
-                        () -> procedure.fetchNodeBetween("|", "|", ROW_WILDCARD).map(Collections::singletonList),
+                        () -> ELLIPSIS_ROW.parse(procedure).map(Collections::singletonList),
+                        () -> WILDCARD_ROW.parse(procedure).map(Collections::singletonList),
                         () -> procedure.fetchRow(column -> getRowCell(procedure, rowOperator, headers.get(column)))
                                 .map(cellClauses -> checkCellSize(procedure, headers, cellClauses))
                 ).map(nodes -> new RowNode(index, rowSchemaClause, rowOperator, nodes));
@@ -264,8 +271,8 @@ public class Compiler {
         }
 
         private List<RowNode> getRowNodes(DALProcedure procedure, List<HeaderNode> headerNodes) {
-            return transpose(allOptional(() -> procedure.fetchNodeAfter("|", TABLE_HEADER)
-                    .map(HeaderNode.class::cast).map(headerNode -> {
+            return transpose(allOptional(() -> TRANSPOSED_TABLE_HEADER.parse(procedure).map(HeaderNode.class::cast)
+                    .map(headerNode -> {
                         headerNodes.add(headerNode);
                         return procedure.fetchRow(row -> getRowCell(procedure, empty(), headerNode))
                                 .orElseThrow(() -> procedure.getSourceCode().syntaxError("should end with `|`", 0));
@@ -306,7 +313,7 @@ public class Compiler {
 
         private Stream<List<DALNode>> getCells(DALProcedure dalProcedure, List<HeaderNode> headerNodes,
                                                List<Optional<DALOperator>> rowOperators) {
-            return transpose(allOptional(() -> dalProcedure.fetchNodeAfter("|", TABLE_HEADER).map(HeaderNode.class::cast)
+            return transpose(allOptional(() -> TRANSPOSED_TABLE_HEADER.parse(dalProcedure).map(HeaderNode.class::cast)
                     .map(headerNode -> {
                         headerNodes.add(headerNode);
                         return dalProcedure.fetchRow(row -> getRowCell(dalProcedure, rowOperators.get(row), headerNode))
