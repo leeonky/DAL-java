@@ -8,6 +8,7 @@ import com.github.leeonky.interpreter.Token;
 import com.github.leeonky.interpreter.TokenScanner;
 
 import static com.github.leeonky.dal.compiler.Constants.*;
+import static com.github.leeonky.dal.compiler.Notations.Keywords;
 import static com.github.leeonky.interpreter.FunctionUtil.not;
 import static com.github.leeonky.interpreter.SourceCode.tokenScanner;
 import static java.util.Collections.emptySet;
@@ -16,9 +17,9 @@ public class Tokens {
     public static final TokenScanner<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             NUMBER = tokenScanner(DIGITAL::contains, emptySet(), false, Tokens::notNumber, Token::isNumber),
             INTEGER = tokenScanner(DIGITAL_OR_MINUS::contains, emptySet(), false, DELIMITER, Token::isNumber),
-            SYMBOL = tokenScanner(not(DELIMITER::contains), ALL_KEY_WORDS, false, DELIMITER_OR_DOT, not(Token::isNumber)),
+            SYMBOL = tokenScanner(not(DELIMITER::contains), Keywords.ALL_STRING, false, DELIMITER_OR_DOT, not(Token::isNumber)),
             DOT_SYMBOL = tokenScanner(not(DELIMITER::contains), emptySet(), false, DELIMITER_OR_DOT, not(Token::isNumber)),
-            SCHEMA = tokenScanner(not(DELIMITER::contains), ALL_KEY_WORDS, false, DELIMITER, not(Token::isNumber));
+            SCHEMA = tokenScanner(not(DELIMITER::contains), Keywords.ALL_STRING, false, DELIMITER, not(Token::isNumber));
 
     private static boolean notNumber(String code, int position) {
         return notSymbolAfterPower(code, position) || notNumberPoint(code, position);

@@ -2,7 +2,12 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.interpreter.Notation;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static com.github.leeonky.interpreter.Notation.notation;
+import static java.util.Arrays.asList;
 
 public class Notations {
 
@@ -16,6 +21,9 @@ public class Notations {
                 NULL = notation("null"),
                 AND = notation("and"),
                 OR = notation("or");
+
+        public static final Set<Notation> ALL = new HashSet<>(asList(WHICH, IS, TRUE, FALSE, NULL, AND, OR));
+        public static final Set<String> ALL_STRING = ALL.stream().map(Notation::getLabel).collect(Collectors.toSet());
     }
 
     public static class Operators {
@@ -61,12 +69,4 @@ public class Notations {
             SEQUENCE_ZA = notation("-"),
             SEQUENCE_AZ_2 = notation("￪"),
             SEQUENCE_ZA_2 = notation("￬");
-
-
-    @Deprecated
-    public static final String IS_s = "is";
-    @Deprecated
-    public static final String AND_s = "and";
-    @Deprecated
-    public static final String OR_s = "or";
 }
