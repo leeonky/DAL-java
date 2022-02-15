@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.DALNode.constNode;
-import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.DALProcedure.enableCommaAnd;
 import static com.github.leeonky.dal.compiler.Notations.*;
 import static com.github.leeonky.interpreter.ClauseParser.oneOf;
@@ -103,8 +102,8 @@ public class Compiler {
                     REGEX_NOTATION.getLabel()), DALNode::regex)),
             IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(Tokens.SYMBOL.nodeParser(DALNode::symbolNode))
                     .defaultInputNode(InputNode.INSTANCE),
-            WILDCARD = Notations.Operators.WILDCARD.nodeParser(DALNode::wildcardNode),
-            ROW_WILDCARD = Notations.Operators.ROW_WILDCARD.nodeParser(DALNode::wildcardNode),
+            WILDCARD = Notations.Operators.WILDCARD.nodeParser(WildcardNode::new),
+            ROW_WILDCARD = Notations.Operators.ROW_WILDCARD.nodeParser(WildcardNode::new),
             CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
                     CONST_USER_DEFINED_LITERAL),
             ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.nodeParser(token -> new ListEllipsisNode()),
@@ -194,16 +193,21 @@ public class Compiler {
                 null, DALExpression::new)).propertyChain();
     }
 
+    private final NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+            SEQUENCE_AZ = Notations.SEQUENCE_AZ.nodeParser(SortNode::new),
+            SEQUENCE_ZA = Notations.SEQUENCE_ZA.nodeParser(SortNode::new),
+            SEQUENCE_AZ_2 = Notations.SEQUENCE_AZ_2.nodeParser(SortNode::new),
+            SEQUENCE_ZA_2 = Notations.SEQUENCE_ZA_2.nodeParser(SortNode::new);
+
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SEQUENCE = procedure -> FunctionUtil.oneOf(
-            procedure.sequenceOf(SEQUENCE_AZ, SequenceNode.Type.AZ),
-            procedure.sequenceOf(SEQUENCE_ZA, SequenceNode.Type.ZA),
-            procedure.sequenceOf(SEQUENCE_AZ_2, SequenceNode.Type.AZ),
-            procedure.sequenceOf(SEQUENCE_ZA_2, SequenceNode.Type.ZA))
-            .orElse(SequenceNode.noSequence());
+            SEQUENCE = oneOf(SEQUENCE_AZ.sequence(severalTimes(), SortSequenceNode::new),
+            SEQUENCE_ZA.sequence(severalTimes(), SortSequenceNode::new),
+            SEQUENCE_AZ_2.sequence(severalTimes(), SortSequenceNode::new),
+            SEQUENCE_ZA_2.sequence(severalTimes(), SortSequenceNode::new))
+            .or(procedure -> SortSequenceNode.noSequence());
 
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> TABLE_HEADER = procedure -> {
-        SequenceNode sequence = (SequenceNode) SEQUENCE.parse(procedure);
+        SortSequenceNode sequence = (SortSequenceNode) SEQUENCE.parse(procedure);
         DALNode property = PROPERTY_CHAIN.parse(procedure);
         return new HeaderNode(sequence, SCHEMA_CLAUSE.parse(procedure)
                 .map(expressionClause -> expressionClause.makeExpression(property)).orElse(property),

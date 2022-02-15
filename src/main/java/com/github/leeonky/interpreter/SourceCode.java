@@ -1,17 +1,13 @@
 package com.github.leeonky.interpreter;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
-import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.github.leeonky.interpreter.FunctionUtil.allOptional;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
-import static com.github.leeonky.interpreter.Notation.notation;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -125,12 +121,6 @@ public class SourceCode {
         if (!optionalNode.isPresent())
             this.position = position;
         return optionalNode;
-    }
-
-    @Deprecated
-    public <T> Optional<T> repeatWords(String word, IntFunction<T> intFunction) {
-        List<Token> tokens = allOptional(() -> popWord(notation(word)));
-        return when(!tokens.isEmpty()).optional(() -> intFunction.apply(tokens.size()));
     }
 
     public boolean isEndOfLine() {

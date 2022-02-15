@@ -3,7 +3,6 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
-import com.github.leeonky.dal.ast.SequenceNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.ExpressionConstructor;
 import com.github.leeonky.interpreter.NodeParser;
@@ -48,10 +47,6 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
 
     public boolean isEnableCommaAnd() {
         return enableAndComma.getFirst();
-    }
-
-    public Supplier<Optional<? extends SequenceNode>> sequenceOf(String sequenceChar, SequenceNode.Type type) {
-        return () -> getSourceCode().repeatWords(sequenceChar, count -> new SequenceNode(count, type, sequenceChar));
     }
 
     public boolean isCodeBeginning() {

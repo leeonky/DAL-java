@@ -8,11 +8,11 @@ import java.util.Comparator;
 import java.util.Optional;
 
 public class HeaderNode extends DALNode {
-    private final SequenceNode sequence;
+    private final SortSequenceNode sequence;
     private final DALNode property;
     private final Optional<DALOperator> operator;
 
-    public HeaderNode(SequenceNode sequence, DALNode property, Optional<DALOperator> operator) {
+    public HeaderNode(SortSequenceNode sequence, DALNode property, Optional<DALOperator> operator) {
         this.sequence = sequence;
         this.property = property;
         this.operator = operator;
@@ -37,6 +37,6 @@ public class HeaderNode extends DALNode {
     }
 
     public static Comparator<HeaderNode> bySequence() {
-        return Comparator.comparing(headerNode -> headerNode.sequence, SequenceNode.comparator().reversed());
+        return Comparator.comparing(headerNode -> headerNode.sequence, SortSequenceNode.comparator().reversed());
     }
 }

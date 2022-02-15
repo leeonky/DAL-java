@@ -21,9 +21,9 @@ public class Notation {
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> nodeParser(
-            Function<Token, N> factory) {
-        return procedure -> procedure.getSourceCode().popWord(this)
-                .map(t -> factory.apply(t).setPositionBegin(t.getPosition()));
+            Function<String, N> factory) {
+        return procedure -> procedure.getSourceCode().popWord(this).map(token ->
+                factory.apply(token.getContent()).setPositionBegin(token.getPosition()));
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,

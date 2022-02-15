@@ -195,22 +195,6 @@ class SourceCodeTest {
     }
 
     @Nested
-    class RepeatWords {
-
-        @Test
-        void pop_same_word() {
-            assertThat(new SourceCode("aaa").repeatWords("a", i -> i).get()).isEqualTo(3);
-            assertThat(new SourceCode(" \r\n\taaa").repeatWords("a", i -> i).get()).isEqualTo(3);
-            assertThat(new SourceCode("aa").repeatWords("a", i -> i).get()).isEqualTo(2);
-        }
-
-        @Test
-        void allow_blank_between_word() {
-            assertThat(new SourceCode("a \n\r\ta").repeatWords("a", i -> i).get()).isEqualTo(2);
-        }
-    }
-
-    @Nested
     class NextPosition {
 
         @Test

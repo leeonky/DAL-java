@@ -56,7 +56,11 @@ public class Notations {
             OPENING_BRACES = notation("{"),
             CLOSING_BRACES = notation("}"),
             COMMA = notation(","),
-            COLUMN_SPLITTER = notation("|");
+            COLUMN_SPLITTER = notation("|"),
+            SEQUENCE_AZ = notation("+"),
+            SEQUENCE_ZA = notation("-"),
+            SEQUENCE_AZ_2 = notation("￪"),
+            SEQUENCE_ZA_2 = notation("￬");
 
 
     @Deprecated

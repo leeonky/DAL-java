@@ -88,7 +88,7 @@ public class TableNode extends DALNode {
         return headers.stream().sorted(bySequence())
                 .map(headerNode -> headerNode.getListComparator(context))
                 .reduce(Comparator::thenComparing)
-                .orElse(SequenceNode.NOP_COMPARATOR);
+                .orElse(SortSequenceNode.NOP_COMPARATOR);
     }
 
     public enum Type {

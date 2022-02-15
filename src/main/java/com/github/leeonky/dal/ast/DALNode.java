@@ -53,24 +53,16 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
                 .map(Object::toString).collect(Collectors.joining());
     }
 
-    public static DALNode regex(Token token, DALNode node) {
-        return ((NodeCollection) node).teRegexNode(token.getPosition());
-    }
-
-    public static DALNode constTrue(Token token) {
+    public static DALNode constTrue(String token) {
         return new ConstNode(true);
     }
 
-    public static DALNode constFalse(Token token) {
+    public static DALNode constFalse(String token) {
         return new ConstNode(false);
     }
 
-    public static DALNode constNull(Token token) {
+    public static DALNode constNull(String token) {
         return new ConstNode(null);
-    }
-
-    public static WildcardNode wildcardNode(Token token) {
-        return new WildcardNode(token.getContent());
     }
 
     public static Function<Token, DALNode> constNode(Function<Token, ?> function) {
