@@ -1,51 +1,51 @@
 Feature: object node
 
-  Scenario: return null when does not match
-    Given the following dal code:
-    """
-    +
-    """
-    Then got the following "object" node:
-    """
-    : null
-    """
+#  Scenario: return null when does not match
+#    Given the following dal code:
+#    """
+#    +
+#    """
+#    Then got the following "object" node:
+#    """
+#    : null
+#    """
+#
+#  Scenario: support empty object with no field
+#    Given the following dal code:
+#    """
+#      {}
+#    """
+#    Then got the following "object" node:
+#    """
+#    : {
+#      class.simpleName: 'ObjectScopeNode'
+#      inspect: '{}'
+#      positionBegin: 2
+#    }
+#    """
 
-  Scenario: support empty object with no field
-    Given the following dal code:
-    """
-      {}
-    """
-    Then got the following "object" node:
-    """
-    : {
-      class.simpleName: 'ObjectScopeNode'
-      inspect: '{}'
-      positionBegin: 2
-    }
-    """
+#  Scenario: support one judgement expression
+#    Given the following dal code:
+#    """
+#    { name = 'Tom' }
+#    """
+#    Then got the following "object" node:
+#    """
+#    : {
+#      class.simpleName: 'ObjectScopeNode'
+#      inspect: "{name= 'Tom'}"
+#    }
+#    """
 
-  Scenario: support one judgement expression
-    Given the following dal code:
-    """
-    { name = 'Tom' }
-    """
-    Then got the following "object" node:
-    """
-    : {
-      class.simpleName: 'ObjectScopeNode'
-      inspect: "{name= 'Tom'}"
-    }
-    """
-
-  Scenario: support property chain key
-    Given the following dal code:
-    """
-    { user.name.first = 'Tom' }
-    """
-    Then got the following "object" node:
-    """
-    inspect: "{user.name.first= 'Tom'}"
-    """
+#  Scenario: support property chain key
+#    Given the following dal code:
+#    """
+#    { user.name.first = 'Tom' }
+#    """
+#    Then got the following "object" node:
+#    """
+#    inspect: "{user.name.first= 'Tom'}"
+#    """
 
   Scenario: support two judgement expressions
     Given the following dal code:
