@@ -46,7 +46,7 @@ Feature: object
       ^
     """
 
-  Scenario: support one judgement expression
+  Scenario: one verification expression
     Given the following json:
     """
     {
@@ -174,5 +174,208 @@ Feature: object
     }
     """
 
+  Scenario: nested object verification
+    Given the following json:
+    """
+    {
+      "user": {
+        "name": "Tom"
+      }
+    }
+    """
+    Then the following verification should pass:
+    """
+    = {
+      user: {
+        name: 'Tom'
+      }
+    }
+    """
+
+  Scenario: two verification expressions
+    Given the following json:
+    """
+    {
+      "name": "Tom",
+      "id": "001"
+    }
+    """
+    And the following verification should pass:
+    """
+    : {
+      name: 'Tom'
+      id: '001'
+    }
+    """
+    When evaluate by:
+    """
+    = {
+      name: 'Tom'
+      id: '002'
+    }
+    """
+    Then failed with the message:
+    """
+    Expecting java.lang.String
+    <001>
+    to match java.lang.String
+    <002>
+    but was not
+    """
+    And got the following notation:
+    """
+    = {
+      name: 'Tom'
+      id: '002'
+          ^
+    }
+    """
+
+  Scenario: raise error when no closing brace
+    When evaluate by:
+    """
+    : {
+    """
+    Then failed with the message:
+    """
+    should end with `}`
+    """
+    And got the following notation:
+    """
+    : {
+       ^
+    """
+
+  Scenario: raise error when operand is invalid
+    When evaluate by:
+    """
+    : { name: + }
+    """
+    Then failed with the message:
+    """
+    expect a value or expression
+    """
+    And got the following notation:
+    """
+    : { name: + }
+              ^
+    """
+
+  Scenario: raise error when invalid verification expression
+    When evaluate by:
+    """
+    : { 1: 1 }
+    """
+    Then failed with the message:
+    """
+    expect a object property
+    """
+    And got the following notation:
+    """
+    : { 1: 1 }
+        ^
+    """
+
+  Scenario: raise error when not verification expression
+    When evaluate by:
+    """
+    : { a + 1 }
+    """
+    Then failed with the message:
+    """
+    expect operator `:` or `=`
+    """
+    And got the following notation:
+    """
+    : { a + 1 }
+          ^
+    """
+
+  Scenario: raise error when missing verification operator
+    When evaluate by:
+    """
+    : { a 1 }
+    """
+    Then failed with the message:
+    """
+    expect operator `:` or `=`
+    """
+    And got the following notation:
+    """
+    : { a 1 }
+          ^
+    """
+
+  Scenario: support optional comma between after sub expression
+    Given the following json:
+    """
+    {
+      "name": "Tom",
+      "id": "001"
+    }
+    """
+    And the following verification should pass:
+    """
+    : {
+      name: 'Tom'
+      id: '001'
+    }
+    """
+
+  Scenario: support schema expression
+    Given the following json:
+    """
+    {
+      "value": 100
+    }
+    """
+    Then the following verification should pass:
+    """
+     : {
+       value is Integer
+     }
+    """
+    And the following verification should failed:
+    """
+    : {
+      value is String
+    }
+    """
+    And got the following notation:
+    """
+    : {
+      value is String
+               ^
+    }
+    """
+
+  Scenario: support schema in verification expression
+    Given the following json:
+    """
+    {
+      "value": "hello"
+    }
+    """
+    Then the following verification should pass:
+    """
+    : {
+      value is String: 'hello'
+    }
+    """
+    And the following verification should failed:
+    """
+    : {
+      value is String: 'world'
+    }
+    """
+    And got the following notation:
+    """
+    : {
+      value is String: 'world'
+                       ^
+    }
+    """
 
 #    TODO support valid {a: 1,} invalid {,}
+
+
