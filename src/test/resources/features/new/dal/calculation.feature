@@ -1,11 +1,11 @@
 Feature: calculation
 
   Scenario Outline: calculation
-    When evaluate by the following code:
+    When evaluate by:
     """
     <code>
     """
-    Then single result is:
+    Then the result should:
     """
     = <value>
     """
@@ -19,15 +19,15 @@ Feature: calculation
       | 2+3*4+4/2+1       | 17    |
 
   Scenario Outline: calculation with input
-    Given the following input data:
+    Given the following json:
     """
     <input>
     """
-    When evaluate by the following code:
+    When evaluate by:
     """
     <code>
     """
-    Then single result is:
+    Then the result should:
     """
     = <value>
     """
@@ -41,11 +41,11 @@ Feature: calculation
       | 2     | *(3+4) | 14    |
 
   Scenario Outline: logic operator
-    When evaluate by the following code:
+    When evaluate by:
     """
     <code>
     """
-    Then single result is:
+    Then the result should:
     """
     = <value>
     """
@@ -62,11 +62,11 @@ Feature: calculation
       | true, true and false | false |
 
   Scenario Outline: comparation
-    When evaluate by the following code:
+    When evaluate by:
     """
     <code>
     """
-    Then single result is:
+    Then the result should:
     """
     = <value>
     """

@@ -42,7 +42,7 @@ public class CucumberContextBak {
         put("explicit-property", compiler.EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE));
         put("property", compiler.PROPERTY);
         put("operand", optional(compiler.OPERAND));
-        put("binary-operator-expression", compiler.BINARY_OPERATOR_EXPRESSION.defaultInputNode(InputNode.INSTANCE));
+//        put("binary-operator-expression", compiler.BINARY_OPERATOR_EXPRESSION.defaultInputNode(InputNode.INSTANCE));
         put("expression", optional(compiler.EXPRESSION));
         put("parentheses", compiler.PARENTHESES);
         put("object", compiler.OBJECT);

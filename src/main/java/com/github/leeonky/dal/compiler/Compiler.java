@@ -122,7 +122,7 @@ public class Compiler {
             SYMBOL = Tokens.SYMBOL.nodeParser(DALNode::symbolNode);
 
     public ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            ARITHMETIC_CLAUSE, JUDGEMENT_CLAUSE, BINARY_OPERATOR_EXPRESSION,
+            ARITHMETIC_CLAUSE, JUDGEMENT_CLAUSE,
             SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE),
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
 
@@ -166,10 +166,6 @@ public class Compiler {
                 WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN);
         EXPRESSION = OPERAND.concat(EXPRESSION_CLAUSE);
         SHORT_JUDGEMENT_OPERAND = JUDGEMENT.or(OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE, /*need test*/EXPLICIT_PROPERTY)));
-
-//        TODO remove
-        BINARY_OPERATOR_EXPRESSION = oneOf(ARITHMETIC_CLAUSE, JUDGEMENT_CLAUSE, EXPLICIT_PROPERTY,
-                WHICH_CLAUSE, SCHEMA_CLAUSE);
     }
 
     public List<DALNode> compile(SourceCode sourceCode, DALRuntimeContext DALRuntimeContext) {
