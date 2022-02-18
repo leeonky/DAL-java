@@ -5,10 +5,7 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
-import com.github.leeonky.dal.runtime.DalException;
-import com.github.leeonky.dal.runtime.NameStrategy;
-import com.github.leeonky.dal.runtime.Result;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.SourceCode;
@@ -42,6 +39,7 @@ public class IntegrationTestContext {
         put("schema", optional(compiler.SCHEMA_COMPOSE));
     }};
     private DALNode dalNode = null;
+    private Map<String, Integer> firstIndexes = new HashMap<>();
 
     private static NodeParser<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> optional(
             NodeParser.Mandatory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeFactory) {
@@ -89,6 +87,20 @@ public class IntegrationTestContext {
         Class type = classes.stream().filter(clazz -> clazz.getName().equals(className))
                 .findFirst().orElseThrow(() -> new IllegalArgumentException
                         ("cannot find bean class: " + className + "\nclasses: " + classes));
+
+        if (firstIndexes.containsKey(className)) {
+            dal.getRuntimeContextBuilder().registerListAccessor(type, new ListAccessor<Object>() {
+                @Override
+                public Iterable<?> toIterable(Object instance) {
+                    return (Iterable<?>) instance;
+                }
+
+                @Override
+                public int firstIndex() {
+                    return firstIndexes.get(className);
+                }
+            });
+        }
         input = type.newInstance();
     }
 
@@ -174,5 +186,9 @@ public class IntegrationTestContext {
     public void verifyInspect(String inspect) {
         assertThat(compiler.compile(new SourceCode(expression), dal.getRuntimeContextBuilder().build(null)).get(0).inspect())
                 .isEqualTo(inspect);
+    }
+
+    public void setArrayFirstIndex(String type, int index) {
+        firstIndexes.put(type, index);
     }
 }

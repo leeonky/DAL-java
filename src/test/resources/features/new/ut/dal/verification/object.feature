@@ -207,6 +207,10 @@ Feature: object
       id: '001'
     }
     """
+    And the inspect should:
+    """
+    : {name: 'Tom', id: '001'}
+    """
     When evaluate by:
     """
     = {
@@ -306,6 +310,18 @@ Feature: object
           ^
     """
 
+  Scenario: expression in operand
+    When the following json:
+    """
+    {"a": 2}
+    """
+    Then the following verification should pass:
+    """
+    : {
+      a: 1+1
+    }
+    """
+
   Scenario: support optional comma between after sub expression
     Given the following json:
     """
@@ -376,6 +392,20 @@ Feature: object
     }
     """
 
-#    TODO support valid {a: 1,} invalid {,}
-
-
+  Scenario: tail comma is valid
+    Given the following json:
+    """
+    {
+      "value": "hello"
+    }
+    """
+    Then the following verification should pass:
+    """
+    : {
+      value: 'hello',
+    }
+    """
+    But the following verification should syntax error:
+    """
+    : {,}
+    """

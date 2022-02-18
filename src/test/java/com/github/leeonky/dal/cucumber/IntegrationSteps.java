@@ -60,6 +60,11 @@ public class IntegrationSteps {
         integrationTestContext.parseAndEvaluate(expression, nodeType);
     }
 
+    @Given("set the first element index to {int} of list {string}")
+    public void set_the_first_element_index_to_of_list(int index, String type) {
+        integrationTestContext.setArrayFirstIndex(type, index);
+    }
+
     @Then("the result should:")
     public void the_result_is(String verification) {
         integrationTestContext.verifyLastEvaluated(verification);
