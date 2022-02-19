@@ -162,6 +162,8 @@ class SourceCodeTest {
             void non_matched_word() {
                 SourceCode code = new SourceCode("ab");
                 assertThat(code.popWord(notation("a"), () -> false)).isEmpty();
+
+                assertThat(code.nextPosition()).isEqualTo(0);
             }
 
             @Test

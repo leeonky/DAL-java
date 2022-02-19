@@ -5,7 +5,6 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -23,7 +22,7 @@ import static com.github.leeonky.interpreter.OperatorParser.oneOf;
 import static com.github.leeonky.interpreter.Parser.endWith;
 import static com.github.leeonky.interpreter.Sequence.atLeast;
 import static com.github.leeonky.interpreter.Sequence.severalTimes;
-import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
@@ -220,12 +219,21 @@ public class Compiler {
 
         @Override
         public Optional<DALNode> parse(DALProcedure procedure) {
-            try {
-                return procedure.fetchRow(columnIndex -> (HeaderNode) TABLE_HEADER.parse(procedure))
-                        .map(headers -> new TableNode(headers, getRowNodes(procedure, headers)));
-            } catch (IndexOutOfBoundsException ignore) {
-                throw procedure.getSourceCode().syntaxError("Different cell size", 0);
-            }
+            return COLUMN_SPLITTER.before(TABLE_HEADER.sequence(severalTimes().mandatoryTailSplitBy(COLUMN_SPLITTER).endWithLine(),
+                    nodes -> {
+                        List<HeaderNode> headers = nodes.stream().map(HeaderNode.class::cast).collect(toList());
+                        try {
+                            return new TableNode(headers, getRowNodes(procedure, headers));
+                        } catch (IndexOutOfBoundsException ignore) {
+                            throw procedure.getSourceCode().syntaxError("Different cell size", 0);
+                        }
+                    }
+            )).parse(procedure);
+        }
+
+        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> cell(
+                Optional<DALOperator> rowOperator, List<HeaderNode> headers) {
+            return procedure -> getRowCell(procedure, rowOperator, headers.get(procedure.getIndex()));
         }
 
         protected List<RowNode> getRowNodes(DALProcedure procedure, List<HeaderNode> headers) {
@@ -233,12 +241,18 @@ public class Compiler {
                 Optional<Integer> index = getRowIndex(procedure);
                 Optional<Clause<DALRuntimeContext, DALNode>> rowSchemaClause = SCHEMA_CLAUSE.parse(procedure);
                 Optional<DALOperator> rowOperator = JUDGEMENT_OPERATORS.parse(procedure);
+                COLUMN_SPLITTER.before(cell(rowOperator, headers).sequence(severalTimes()
+                        .mandatoryTailSplitBy(COLUMN_SPLITTER).endWithLine(), cells -> {
+                    checkCellSize(procedure, headers, cells);
+                    return new RowNode(index, rowSchemaClause, rowOperator, cells);
+                }));
                 return FunctionUtil.oneOf(
-                        () -> ELLIPSIS_ROW.parse(procedure).map(Collections::singletonList),
-                        () -> WILDCARD_ROW.parse(procedure).map(Collections::singletonList),
-                        () -> procedure.fetchRow(column -> getRowCell(procedure, rowOperator, headers.get(column)))
-                                .map(cellClauses -> checkCellSize(procedure, headers, cellClauses))
-                ).map(nodes -> new RowNode(index, rowSchemaClause, rowOperator, nodes));
+                        () -> ELLIPSIS_ROW.parse(procedure).map(cell -> new RowNode(index, rowSchemaClause, rowOperator, singletonList(cell))),
+                        () -> WILDCARD_ROW.parse(procedure).map(cell -> new RowNode(index, rowSchemaClause, rowOperator, singletonList(cell))),
+                        () -> COLUMN_SPLITTER.before(cell(rowOperator, headers).sequence(severalTimes()
+                                .mandatoryTailSplitBy(COLUMN_SPLITTER).endWithLine(), cells -> new RowNode(index,
+                                rowSchemaClause, rowOperator, checkCellSize(procedure, headers, cells)))).parse(procedure)
+                                .map(RowNode.class::cast));
             });
         }
 
@@ -266,11 +280,18 @@ public class Compiler {
             });
         }
 
+        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> cell(
+                HeaderNode headerNode) {
+            return procedure -> getRowCell(procedure, empty(), headerNode);
+        }
+
         private List<RowNode> getRowNodes(DALProcedure procedure, List<HeaderNode> headerNodes) {
             return transpose(allOptional(() -> TRANSPOSED_TABLE_HEADER.parse(procedure).map(HeaderNode.class::cast)
                     .map(headerNode -> {
                         headerNodes.add(headerNode);
-                        return procedure.fetchRow(row -> getRowCell(procedure, empty(), headerNode))
+                        return COLUMN_SPLITTER.before(cell(headerNode).sequence(severalTimes().mandatoryTailSplitBy(COLUMN_SPLITTER).endWithLine()
+                                , CellCollection::new)).parse(procedure).map(n -> ((CellCollection) n).getCells())
+//                                TODO need test
                                 .orElseThrow(() -> procedure.getSourceCode().syntaxError("should end with `|`", 0));
                     }))).stream().map(row -> new RowNode(empty(), empty(), empty(), row)).collect(toList());
         }
@@ -283,17 +304,26 @@ public class Compiler {
     public class TransposedTableWithRowOperator implements NodeParser<DALRuntimeContext, DALNode, DALExpression,
             DALOperator, DALProcedure> {
 
+        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> indexCell(
+                List<Optional<Integer>> rowIndexes, List<Optional<Clause<DALRuntimeContext, DALNode>>> rowSchemaClauses,
+                List<Optional<DALOperator>> rowOperators) {
+            return procedure -> {
+                rowIndexes.add(getRowIndex(procedure));
+                rowSchemaClauses.add(SCHEMA_CLAUSE.parse(procedure));
+                rowOperators.add(JUDGEMENT_OPERATORS.parse(procedure));
+                return new EmptyCellNode();
+            };
+        }
+
         @Override
         public Optional<DALNode> parse(DALProcedure procedure) {
             return procedure.getSourceCode().tryFetch(() -> when(procedure.getSourceCode().popWord(COLUMN_SPLITTER).isPresent()
                     && procedure.getSourceCode().popWord(TRANSPOSE_MARK).isPresent()).optional(() -> {
                 List<Optional<Integer>> rowIndexes = new ArrayList<>();
                 List<Optional<Clause<DALRuntimeContext, DALNode>>> rowSchemaClauses = new ArrayList<>();
-                List<Optional<DALOperator>> rowOperators = procedure.fetchRow(row -> {
-                    rowIndexes.add(getRowIndex(procedure));
-                    rowSchemaClauses.add(SCHEMA_CLAUSE.parse(procedure));
-                    return JUDGEMENT_OPERATORS.parse(procedure);
-                }).orElse(emptyList());
+                List<Optional<DALOperator>> rowOperators = new ArrayList<>();
+                COLUMN_SPLITTER.before(indexCell(rowIndexes, rowSchemaClauses, rowOperators).sequence(severalTimes()
+                        .mandatoryTailSplitBy(COLUMN_SPLITTER).endWithLine(), CellCollection::new)).parse(procedure);
                 List<HeaderNode> headerNodes = new ArrayList<>();
                 return new TableNode(headerNodes, getRowNodes(procedure, headerNodes, rowSchemaClauses, rowOperators,
                         rowIndexes), TableNode.Type.TRANSPOSED);
@@ -307,12 +337,20 @@ public class Compiler {
                     new RowNode(rowIndexes.get(i), rowSchemaClauses.get(i), rowOperators.get(i), row)).collect(toList());
         }
 
+        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> cell(
+                List<Optional<DALOperator>> rowOperators, HeaderNode headerNode) {
+            return procedure -> getRowCell(procedure, rowOperators.get(procedure.getIndex()), headerNode);
+        }
+
         private Stream<List<DALNode>> getCells(DALProcedure dalProcedure, List<HeaderNode> headerNodes,
                                                List<Optional<DALOperator>> rowOperators) {
             return transpose(allOptional(() -> TRANSPOSED_TABLE_HEADER.parse(dalProcedure).map(HeaderNode.class::cast)
                     .map(headerNode -> {
                         headerNodes.add(headerNode);
-                        return dalProcedure.fetchRow(row -> getRowCell(dalProcedure, rowOperators.get(row), headerNode))
+                        return COLUMN_SPLITTER.before(cell(rowOperators, headerNode).sequence(severalTimes()
+                                        .mandatoryTailSplitBy(COLUMN_SPLITTER).endWithLine()
+                                , CellCollection::new)).parse(dalProcedure).map(n -> ((CellCollection) n).getCells())
+//                                TODO need test
                                 .orElseThrow(() -> dalProcedure.getSourceCode().syntaxError("should end with `|`", 0));
                     }))).stream();
         }

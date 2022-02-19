@@ -44,18 +44,19 @@ public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E ext
 
     default NodeParser<C, N, E, O, P> sequence(Sequence<? super P> sequence, Function<List<T>, N> factory) {
         return procedure -> {
-            List<T> validate = sequence.validate(procedure, new ArrayList<T>() {{
+            List<T> validate = procedure.actionUnderIndex(() -> sequence.validate(procedure, new ArrayList<T>() {{
                 while (!sequence.isClose(procedure)) {
                     Optional<T> optional = parse(procedure);
                     if (optional.isPresent()) {
                         add(optional.get());
+                        procedure.incrementIndex();
                         if (!sequence.isSplitter(procedure))
                             break;
                     } else
                         break;
                 }
                 sequence.close(procedure);
-            }});
+            }}));
             return when(!validate.isEmpty()).optional(() -> factory.apply(validate));
         };
     }
@@ -78,14 +79,15 @@ public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E ext
         }
 
         default NodeParser.Mandatory<C, N, E, O, P> sequence(Sequence<? super P> sequence, Function<List<T>, N> factory) {
-            return procedure -> factory.apply(sequence.validate(procedure, new ArrayList<T>() {{
+            return procedure -> procedure.actionUnderIndex(() -> factory.apply(sequence.validate(procedure, new ArrayList<T>() {{
                 while (!sequence.isClose(procedure)) {
                     add(parse(procedure));
+                    procedure.incrementIndex();
                     if (!sequence.isSplitter(procedure))
                         break;
                 }
                 sequence.close(procedure);
-            }}));
+            }})));
         }
     }
 }

@@ -41,7 +41,7 @@ Feature: syntax error
     """
     Then failed to get "table" node with the following message:
     """
-    Should end with `|`
+    should end with `|`
     """
     And got the following source code information:
     """

@@ -80,17 +80,6 @@ public abstract class Sequence<P extends Procedure<?, ?, ?, ?, ?>> {
         };
     }
 
-
-    public Sequence<P> splitBy(Notation notation) {
-        return new CompositeSequence<P>(this) {
-
-            @Override
-            public boolean isSplitter(P procedure) {
-                return procedure.getSourceCode().popWord(notation).isPresent();
-            }
-        };
-    }
-
     public Sequence<P> endWith(Notation notation) {
         return new CompositeSequence<P>(this) {
             @Override
@@ -115,6 +104,35 @@ public abstract class Sequence<P extends Procedure<?, ?, ?, ?, ?>> {
         };
     }
 
+    public Sequence<P> endWithLine() {
+        return new CompositeSequence<P>(this) {
+            private boolean isClose = false;
+
+            @Override
+            public boolean isClose(P procedure) {
+                //                TODO need test
+                return isClose = procedure.getSourceCode().isEndOfLine();
+            }
+
+            @Override
+            public void close(P procedure) {
+                if (!isClose)
+//                TODO need test
+                    throw procedure.getSourceCode().syntaxError("unexpected token", 0);
+            }
+        };
+    }
+
+    public Sequence<P> splitBy(Notation notation) {
+        return new CompositeSequence<P>(this) {
+
+            @Override
+            public boolean isSplitter(P procedure) {
+                return procedure.getSourceCode().popWord(notation).isPresent();
+            }
+        };
+    }
+
     public Sequence<P> optionalSplitBy(Notation splitter) {
         return new CompositeSequence<P>(this) {
 
@@ -122,6 +140,18 @@ public abstract class Sequence<P extends Procedure<?, ?, ?, ?, ?>> {
             public boolean isSplitter(P procedure) {
                 procedure.getSourceCode().popWord(splitter);
                 return true;
+            }
+        };
+    }
+
+    public Sequence<P> mandatoryTailSplitBy(Notation notation) {
+        return new CompositeSequence<P>(this) {
+
+            @Override
+            public boolean isSplitter(P procedure) {
+                if (procedure.getSourceCode().popWord(notation).isPresent())
+                    return true;
+                throw procedure.getSourceCode().syntaxError(format("should end with `%s`", notation.getLabel()), 0);
             }
         };
     }
