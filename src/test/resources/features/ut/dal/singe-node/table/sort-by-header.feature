@@ -8,7 +8,7 @@ Feature: sort list in table
     Then got the following "table" node:
     """
     : {
-      class.simpleName: 'TableNode'
+      class.simpleName: 'TableNodeBk'
       inspect: '| ++ name | - age |'
     }
     """
@@ -21,7 +21,7 @@ Feature: sort list in table
     Then got the following "table" node:
     """
     : {
-      class.simpleName: 'TableNode'
+      class.simpleName: 'TableNodeBk'
       inspect: '| ￪￪ name | ￬ age |'
     }
     """

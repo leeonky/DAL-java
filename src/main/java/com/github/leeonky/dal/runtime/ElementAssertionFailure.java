@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.DALNode;
-import com.github.leeonky.dal.ast.TableNode;
+import com.github.leeonky.dal.ast.TableNodeBk;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class ElementAssertionFailure extends java.lang.RuntimeException {
         return dalException.multiPosition(expressions.get(row).getOperandPosition(), DalException.Position.Type.LINE);
     }
 
-    public DalException columnPositionException(TableNode tableNode) {
+    public DalException columnPositionException(TableNodeBk tableNode) {
         tableNode.getRows().get(row).getCells().forEach(cell ->
                 dalException.multiPosition(cell.getPositionBegin(), DalException.Position.Type.CHAR));
         return dalException;

@@ -19,7 +19,7 @@ Feature: compile table with judgement
     Then got the following "expression" node:
     """
     rightOperand: {
-      class.simpleName: 'TableNode'
+      class.simpleName: 'TableNodeBk'
       inspect: "| name |
     | name= 'Tom' |"
     }

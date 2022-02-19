@@ -223,7 +223,7 @@ public class Compiler {
                     nodes -> {
                         List<HeaderNode> headers = nodes.stream().map(HeaderNode.class::cast).collect(toList());
                         try {
-                            return new TableNode(headers, getRowNodes(procedure, headers));
+                            return new TableNodeBk(headers, getRowNodes(procedure, headers));
                         } catch (IndexOutOfBoundsException ignore) {
                             throw procedure.getSourceCode().syntaxError("Different cell size", 0);
                         }
@@ -276,7 +276,7 @@ public class Compiler {
         public Optional<DALNode> parse(DALProcedure procedure) {
             return procedure.getSourceCode().popWord(TRANSPOSE_MARK).map(x -> {
                 List<HeaderNode> headerNodes = new ArrayList<>();
-                return new TableNode(headerNodes, getRowNodes(procedure, headerNodes), TableNode.Type.TRANSPOSED);
+                return new TableNodeBk(headerNodes, getRowNodes(procedure, headerNodes), TableNodeBk.Type.TRANSPOSED);
             });
         }
 
@@ -325,8 +325,8 @@ public class Compiler {
                 COLUMN_SPLITTER.before(indexCell(rowIndexes, rowSchemaClauses, rowOperators).sequence(severalTimes()
                         .mandatoryTailSplitBy(COLUMN_SPLITTER).endWithLine(), CellCollection::new)).parse(procedure);
                 List<HeaderNode> headerNodes = new ArrayList<>();
-                return new TableNode(headerNodes, getRowNodes(procedure, headerNodes, rowSchemaClauses, rowOperators,
-                        rowIndexes), TableNode.Type.TRANSPOSED);
+                return new TableNodeBk(headerNodes, getRowNodes(procedure, headerNodes, rowSchemaClauses, rowOperators,
+                        rowIndexes), TableNodeBk.Type.TRANSPOSED);
             }));
         }
 

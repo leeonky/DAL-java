@@ -22,17 +22,18 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class TableNode extends DALNode {
+@Deprecated
+public class TableNodeBk extends DALNode {
     private final List<HeaderNode> headers;
     private final List<RowNode> rows;
     private final Type type;
     private final boolean hasRowIndex;
 
-    public TableNode(List<HeaderNode> headers, List<RowNode> row) {
+    public TableNodeBk(List<HeaderNode> headers, List<RowNode> row) {
         this(headers, row, Type.NORMAL);
     }
 
-    public TableNode(List<HeaderNode> headers, List<RowNode> rows, Type type) {
+    public TableNodeBk(List<HeaderNode> headers, List<RowNode> rows, Type type) {
         this.headers = new ArrayList<>(headers);
         this.rows = new ArrayList<>(rows);
         this.type = type;
@@ -94,7 +95,7 @@ public class TableNode extends DALNode {
     public enum Type {
         NORMAL, TRANSPOSED {
             @Override
-            public DalException toDalException(ElementAssertionFailure elementAssertionFailure, TableNode tableNode) {
+            public DalException toDalException(ElementAssertionFailure elementAssertionFailure, TableNodeBk tableNode) {
                 return elementAssertionFailure.columnPositionException(tableNode);
             }
 
@@ -132,7 +133,7 @@ public class TableNode extends DALNode {
             }
         };
 
-        public DalException toDalException(ElementAssertionFailure elementAssertionFailure, TableNode tableNode) {
+        public DalException toDalException(ElementAssertionFailure elementAssertionFailure, TableNodeBk tableNode) {
             return elementAssertionFailure.linePositionException();
         }
 
