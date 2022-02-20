@@ -394,10 +394,7 @@ public class Compiler {
 
         private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
                 TABLE_HEADER = procedure -> {
-            DALNode property = PROPERTY_CHAIN.parse(procedure);
-            Optional<DALOperator> operator = JUDGEMENT_OPERATORS.parse(procedure);
-
-            return new HeaderNode(property, operator);
+            return new HeaderNode(PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure));
         };
 
         private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> cell(
@@ -414,9 +411,10 @@ public class Compiler {
         public Optional<DALNode> parse(DALProcedure procedure) {
             return COLUMN_SPLITTER.before(TABLE_HEADER.sequence(byTableRow(), headers -> new TableNode(headers,
                     allOptional(() -> {
+                        Optional<Clause<DALRuntimeContext, DALNode>> rowSchemaClause = SCHEMA_CLAUSE.parse(procedure);
                         Optional<DALOperator> rowOperator = JUDGEMENT_OPERATORS.parse(procedure);
                         return COLUMN_SPLITTER.before(cell(headers, rowOperator).sequence(byTableRow(), cells ->
-                                new RowNode(rowOperator, cells))).parse(procedure);
+                                new RowNode(rowSchemaClause, rowOperator, cells))).parse(procedure);
                     })))).parse(procedure);
         }
     }

@@ -1,71 +1,8 @@
+@NewTable
 Feature: schema in table
 
-  Scenario: compile schema in row
-    Given the following dal code:
-    """
-              | name   |
-    is Person | 'Tom'  |
-              | 'John' |
-    """
-    Then got the following "table" node:
-    """
-    inspect: "| name |
-    is Person | name: 'Tom' |
-    | name: 'John' |"
-    """
-
-  Scenario: compile schema in header
-    Given the following dal code:
-    """
-    | name is String |
-    | 'Tom'          |
-    """
-    Then got the following "table" node:
-    """
-    inspect: "| name is String |
-    | name is String: 'Tom' |"
-    """
-
-  Scenario: compile schema in cell
-    Given the following dal code:
-    """
-    | name      |
-    | is String |
-    """
-    Then got the following "table" node:
-    """
-    inspect: "| name |
-    | name is String |"
-    """
-
-  Scenario: compile schema in header and cell
-    Given the following dal code:
-    """
-    | time is String           |
-    | is Instant: {year: 2000} |
-    """
-    Then got the following "table" node:
-    """
-    : {
-      inspect: "| time is String |
-    | time is String is Instant: {year: 2000} |"
-      rows.cells: [[{
-        class.simpleName: 'DALExpression'
-        operator.class.simpleName: 'Matcher'
-        leftOperand: {
-          class.simpleName: 'DALExpression'
-          inspect: 'time is String is Instant'
-        }
-        rightOperand: {
-          class.simpleName: 'ObjectScopeNode'
-          inspect: "{year: 2000}"
-        }
-      }]]
-    }
-    """
-
-  Scenario: judgement by element schema of table
-    Given the following schema:
+  Scenario: verification with element schema of table
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -75,44 +12,49 @@ Feature: schema in table
         public int id = 0;
     }
     """
-    Given the following input data:
+    Given the following json:
     """
     [{
       "id": 1,
-      "name": 'Tom'
+      "name": "Tom"
     }]
     """
-    When assert by the following code:
+    When evaluate by:
     """
     is [IdZero]: | aliasOfName |
                  | 'Tom'       |
     """
-    Then failed with the following message:
+    Then failed with the message:
     """
     Expecting [0] to match schema `IdZero` but was not
         Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
     """
-    And got the following source code information:
+    And got the following notation:
     """
     is [IdZero]: | aliasOfName |
         ^
                  | 'Tom'       |
     """
-    Given the following input data:
+    Given the following json:
     """
     [{
       "id": 0,
-      "name": 'Tom'
+      "name": "Tom"
     }]
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
     is [IdZero]: | aliasOfName |
                  | 'Tom'       |
     """
+    And the inspect should:
+    """
+    is [IdZero]: | aliasOfName |
+    | aliasOfName: 'Tom' |
+    """
 
-  Scenario: judgement by schema in row
-    Given the following schema:
+  Scenario: use schema in row
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -122,45 +64,50 @@ Feature: schema in table
         public int id = 0;
     }
     """
-    And the following input data:
+    And the following json:
     """
       [{
         "id": 1,
-        "name": 'Tom'
+        "name": "Tom"
       }]
     """
-    When assert by the following code:
+    When evaluate by:
     """
     :         | name  |
     is IdZero | 'Tom' |
     """
-    Then failed with the following message:
+    Then failed with the message:
     """
     Expecting [0] to match schema `IdZero` but was not
         Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
     """
-    And got the following source code information:
+    And got the following notation:
     """
     :         | name  |
     is IdZero | 'Tom' |
        ^
     ^^^^^^^^^^^^^^^^^^^
     """
-    When the following input data:
+    When the following json:
     """
       [{
         "id": 0,
-        "name": 'Tom'
+        "name": "Tom"
       }]
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
     :         | aliasOfName |
     is IdZero | 'Tom'       |
     """
+    And the inspect should:
+    """
+    : | aliasOfName |
+    is IdZero | aliasOfName: 'Tom' |
+    """
 
-  Scenario: judgement by schema in header
-    Given the following schema:
+  Scenario: use schema in header
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -170,49 +117,54 @@ Feature: schema in table
         public int id = 0;
     }
     """
-    Given the following input data:
+    Given the following json:
     """
     [{
       "obj": {
         "id": 1,
-        "name": 'Tom'
+        "name": "Tom"
       }
     }]
     """
-    When assert by the following code:
+    When evaluate by:
     """
     : | obj is IdZero        |
       | {aliasOfName: 'Tom'} |
     """
-    Then failed with the following message:
+    Then failed with the message:
     """
     Expecting obj to match schema `IdZero` but was not
         Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
     """
-    And got the following source code information:
+    And got the following notation:
     """
     : | obj is IdZero        |
                ^
       | {aliasOfName: 'Tom'} |
     ^^^^^^^^^^^^^^^^^^^^^^^^^^
     """
-    When the following input data:
+    When the following json:
     """
     [{
       "obj": {
         "id": 0,
-        "name": 'Tom'
+        "name": "Tom"
       }
     }]
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
     : | obj is IdZero        |
       | {aliasOfName: 'Tom'} |
     """
+    And the inspect should:
+    """
+    : | obj is IdZero |
+    | obj is IdZero: {aliasOfName: 'Tom'} |
+    """
 
-  Scenario: judgement by schema in cell
-    Given the following schema:
+  Scenario: use schema in cell
+    Given the following schema class:
     """
     @Partial
     @FieldAliases({
@@ -222,43 +174,66 @@ Feature: schema in table
         public int id = 0;
     }
     """
-    Given the following input data:
+    Given the following json:
     """
     [{
       "obj": {
         "id": 1,
-        "name": 'Tom'
+        "name": "Tom"
       }
     }]
     """
-    When assert by the following code:
+    When evaluate by:
     """
     : | obj                             |
       | is IdZero: {aliasOfName: 'Tom'} |
     """
-    Then failed with the following message:
+    Then failed with the message:
     """
     Expecting obj to match schema `IdZero` but was not
         Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
     """
-    And got the following source code information:
+    And got the following notation:
     """
     : | obj                             |
       | is IdZero: {aliasOfName: 'Tom'} |
            ^
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     """
-    When the following input data:
+    When the following json:
     """
     [{
       "obj": {
         "id": 0,
-        "name": 'Tom'
+        "name": "Tom"
       }
     }]
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
     """
     : | obj                             |
       | is IdZero: {aliasOfName: 'Tom'} |
+    """
+    And the inspect should:
+    """
+    : | obj |
+    | obj is IdZero: {aliasOfName: 'Tom'} |
+    """
+
+  Scenario: use schema in header and cell
+    When the following json:
+    """
+    [{
+      "time": "2000-10-10T00:00:00"
+    }]
+    """
+    Then the following verification should pass:
+    """
+    : | time is String                 |
+      | is LocalDateTime: {year: 2000} |
+    """
+    And the inspect should:
+    """
+    : | time is String |
+    | time is String is LocalDateTime: {year: 2000} |
     """
