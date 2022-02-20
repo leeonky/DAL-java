@@ -4,7 +4,7 @@ import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.ast.ListScopeNode;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 
 import java.util.ArrayList;
@@ -22,16 +22,16 @@ public class TableNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, DALOperator.Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
+    public boolean judge(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
         return judgeAsList(actualNode, operator, context);
     }
 
     @Override
-    public boolean judge(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
+    public boolean judge(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
         return judgeAsList(actualNode, operator, context);
     }
 
-    private boolean judgeAsList(DALNode actualNode, DALOperator operator, RuntimeContextBuilder.DALRuntimeContext context) {
+    private boolean judgeAsList(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
         try {
             return toListScope(operator).judgeAll(context, actualNode.evaluateData(context));
         } catch (ElementAssertionFailure elementAssertionFailure) {
@@ -40,7 +40,7 @@ public class TableNode extends DALNode {
     }
 
     private ListScopeNode toListScope(DALOperator operator) {
-        Stream<Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode>> rowExpressionClauses =
+        Stream<Clause<DALRuntimeContext, DALNode>> rowExpressionClauses =
                 rows.stream().map(rowNode -> rowNode.toExpressionClause(operator));
         return new ListScopeNode(rowExpressionClauses.collect(Collectors.toList()), true);
     }

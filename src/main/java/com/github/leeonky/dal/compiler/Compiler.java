@@ -375,7 +375,7 @@ public class Compiler {
 
         private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> TABLE_HEADER = procedure -> {
             DALNode property = PROPERTY_CHAIN.parse(procedure);
-            return new HeaderNode(property);
+            return new HeaderNode(property, empty());
         };
 
         @Override
@@ -395,21 +395,29 @@ public class Compiler {
         private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
                 TABLE_HEADER = procedure -> {
             DALNode property = PROPERTY_CHAIN.parse(procedure);
-            return new HeaderNode(property);
+            Optional<DALOperator> operator = JUDGEMENT_OPERATORS.parse(procedure);
+
+            return new HeaderNode(property, operator);
         };
 
         private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> cell(
-                List<DALNode> headers) {
-            return procedure -> shortJudgementClause(DEFAULT_JUDGEMENT_OPERATOR)
-                    .input(((HeaderNode) headers.get(procedure.getIndex())).getProperty()).parse(procedure);
+                List<DALNode> headers, Optional<DALOperator> rowOperator) {
+            return procedure -> {
+                HeaderNode headerNode = (HeaderNode) headers.get(procedure.getIndex());
+                return shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(), p -> rowOperator)
+                        .or(DEFAULT_JUDGEMENT_OPERATOR)).input(headerNode.getProperty()).parse(procedure);
+            };
         }
 
 
         @Override
         public Optional<DALNode> parse(DALProcedure procedure) {
             return COLUMN_SPLITTER.before(TABLE_HEADER.sequence(byTableRow(), headers -> new TableNode(headers,
-                    allOptional(() -> COLUMN_SPLITTER.before(cell(headers).sequence(byTableRow(), RowNode::new))
-                            .parse(procedure))))).parse(procedure);
+                    allOptional(() -> {
+                        Optional<DALOperator> rowOperator = JUDGEMENT_OPERATORS.parse(procedure);
+                        return COLUMN_SPLITTER.before(cell(headers, rowOperator).sequence(byTableRow(), cells ->
+                                new RowNode(rowOperator, cells))).parse(procedure);
+                    })))).parse(procedure);
         }
     }
 

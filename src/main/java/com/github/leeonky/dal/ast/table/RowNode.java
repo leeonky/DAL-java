@@ -9,21 +9,25 @@ import com.github.leeonky.interpreter.Clause;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class RowNode extends DALNode {
+    private final Optional<DALOperator> rowOperator;
     private final List<DALNode> cells;
 
-    public RowNode(List<DALNode> cells) {
+    public RowNode(Optional<DALOperator> rowOperator, List<DALNode> cells) {
+        this.rowOperator = rowOperator;
         this.cells = new ArrayList<>(cells);
     }
 
     @Override
     public String inspect() {
-        return TableNode.printLine(cells);
+        String row = TableNode.printLine(cells);
+        return rowOperator.map(dalOperator -> dalOperator.inspect("", row)).orElse(row);
     }
 
     public Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode> toExpressionClause(DALOperator operator) {
-        return input -> new DALExpression(input, operator, new ObjectScopeNode(cells)
+        return input -> new DALExpression(input, rowOperator.orElse(operator), new ObjectScopeNode(cells)
                 .setPositionBegin(cells.get(0).getOperandPosition()));
     }
 }

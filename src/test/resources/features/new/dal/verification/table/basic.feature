@@ -1,6 +1,6 @@
+@NewTable
 Feature: basic verification via table
 
-  @NewTable
   Scenario: table one header and no rows
     Given the following json:
     """
@@ -36,7 +36,6 @@ Feature: basic verification via table
     ^
     """
 
-  @NewTable
   Scenario: table two header and no rows
     Given the following json:
     """
@@ -72,7 +71,6 @@ Feature: basic verification via table
     ^
     """
 
-  @NewTable
   Scenario: table one header and one row
     Given the following json:
     """
