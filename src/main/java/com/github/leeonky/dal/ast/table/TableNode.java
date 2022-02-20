@@ -3,14 +3,18 @@ package com.github.leeonky.dal.ast.table;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.ast.ListScopeNode;
+import com.github.leeonky.dal.ast.SortSequenceNode;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.github.leeonky.dal.ast.table.HeaderNode.bySequence;
 
 public class TableNode extends DALNode {
     private final List<HeaderNode> headers;
@@ -33,7 +37,8 @@ public class TableNode extends DALNode {
 
     private boolean judgeAsList(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
         try {
-            return toListScope(operator).judgeAll(context, actualNode.evaluateData(context));
+            return toListScope(operator).judgeAll(context,
+                    actualNode.evaluateData(context).setListComparator(collectComparator(context)));
         } catch (ElementAssertionFailure elementAssertionFailure) {
             throw elementAssertionFailure.linePositionException();
         }
@@ -55,5 +60,12 @@ public class TableNode extends DALNode {
 
     static String printLine(List<? extends DALNode> nodes) {
         return nodes.stream().map(DALNode::inspect).collect(Collectors.joining(" | ", "| ", " |"));
+    }
+
+    private Comparator<Object> collectComparator(DALRuntimeContext context) {
+        return headers.stream().sorted(bySequence())
+                .map(headerNode -> headerNode.getListComparator(context))
+                .reduce(Comparator::thenComparing)
+                .orElse(SortSequenceNode.NOP_COMPARATOR);
     }
 }

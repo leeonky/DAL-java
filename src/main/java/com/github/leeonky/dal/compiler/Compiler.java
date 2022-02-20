@@ -375,7 +375,7 @@ public class Compiler {
 
         private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> TABLE_HEADER = procedure -> {
             DALNode property = PROPERTY_CHAIN.parse(procedure);
-            return new HeaderNode(property, empty());
+            return new HeaderNode(SortSequenceNode.noSequence(), property, empty());
         };
 
         @Override
@@ -393,9 +393,8 @@ public class Compiler {
     public class TableParser implements NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> {
 
         private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-                TABLE_HEADER = procedure -> {
-            return new HeaderNode(PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure));
-        };
+                TABLE_HEADER = procedure -> new HeaderNode((SortSequenceNode) SEQUENCE.parse(procedure),
+                PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure));
 
         private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> cell(
                 List<DALNode> headers, Optional<DALOperator> rowOperator) {
@@ -405,7 +404,6 @@ public class Compiler {
                         .or(DEFAULT_JUDGEMENT_OPERATOR)).input(headerNode.getProperty()).parse(procedure);
             };
         }
-
 
         @Override
         public Optional<DALNode> parse(DALProcedure procedure) {
