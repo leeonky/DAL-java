@@ -12,7 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.dal.ast.HeaderNode.bySequence;
+import static com.github.leeonky.dal.ast.HeaderNodeBk.bySequence;
 import static com.github.leeonky.dal.ast.RowNode.printTableRow;
 import static com.github.leeonky.interpreter.FunctionUtil.transpose;
 import static com.github.leeonky.interpreter.FunctionUtil.zip;
@@ -24,16 +24,16 @@ import static java.util.stream.Collectors.toList;
 
 @Deprecated
 public class TableNodeBk extends DALNode {
-    private final List<HeaderNode> headers;
+    private final List<HeaderNodeBk> headers;
     private final List<RowNode> rows;
     private final Type type;
     private final boolean hasRowIndex;
 
-    public TableNodeBk(List<HeaderNode> headers, List<RowNode> row) {
+    public TableNodeBk(List<HeaderNodeBk> headers, List<RowNode> row) {
         this(headers, row, Type.NORMAL);
     }
 
-    public TableNodeBk(List<HeaderNode> headers, List<RowNode> rows, Type type) {
+    public TableNodeBk(List<HeaderNodeBk> headers, List<RowNode> rows, Type type) {
         this.headers = new ArrayList<>(headers);
         this.rows = new ArrayList<>(rows);
         this.type = type;
@@ -46,7 +46,7 @@ public class TableNodeBk extends DALNode {
                 .ifPresent(row -> type.raiseInvalidRowIndex(rows.get(0), row));
     }
 
-    public List<HeaderNode> getHeaders() {
+    public List<HeaderNodeBk> getHeaders() {
         return headers;
     }
 
@@ -100,8 +100,8 @@ public class TableNodeBk extends DALNode {
             }
 
             @Override
-            public String inspect(List<HeaderNode> headers, List<RowNode> rows) {
-                String tableContent = zip(headers.stream().map(HeaderNode::inspect).collect(toList()).stream(),
+            public String inspect(List<HeaderNodeBk> headers, List<RowNode> rows) {
+                String tableContent = zip(headers.stream().map(HeaderNodeBk::inspect).collect(toList()).stream(),
                         inspectCells(rows, headers.size()).stream(), this::mergeHeaderAndCells)
                         .map(RowNode::printTableRow).collect(joining("\n"));
                 return rows.stream().anyMatch(RowNode::hasSchemaOrOperator) ?
@@ -137,9 +137,9 @@ public class TableNodeBk extends DALNode {
             return elementAssertionFailure.linePositionException();
         }
 
-        public String inspect(List<HeaderNode> headers, List<RowNode> rows) {
+        public String inspect(List<HeaderNodeBk> headers, List<RowNode> rows) {
             return String.join("\n", new ArrayList<String>() {{
-                add(printTableRow(headers.stream().map(HeaderNode::inspect)));
+                add(printTableRow(headers.stream().map(HeaderNodeBk::inspect)));
                 rows.stream().map(RowNode::inspect).forEach(this::add);
             }});
         }

@@ -7,12 +7,13 @@ import com.github.leeonky.interpreter.OperatorParser;
 import java.util.Comparator;
 import java.util.Optional;
 
-public class HeaderNode extends DALNode {
+@Deprecated
+public class HeaderNodeBk extends DALNode {
     private final SortSequenceNode sequence;
     private final DALNode property;
     private final Optional<DALOperator> operator;
 
-    public HeaderNode(SortSequenceNode sequence, DALNode property, Optional<DALOperator> operator) {
+    public HeaderNodeBk(SortSequenceNode sequence, DALNode property, Optional<DALOperator> operator) {
         this.sequence = sequence;
         this.property = property;
         this.operator = operator;
@@ -36,7 +37,7 @@ public class HeaderNode extends DALNode {
         return sequence.getComparator(o -> context.newBlockScope(context.wrap(o), () -> property.evaluate(context)));
     }
 
-    public static Comparator<HeaderNode> bySequence() {
+    public static Comparator<HeaderNodeBk> bySequence() {
         return Comparator.comparing(headerNode -> headerNode.sequence, SortSequenceNode.comparator().reversed());
     }
 }

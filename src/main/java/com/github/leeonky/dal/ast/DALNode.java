@@ -78,11 +78,13 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return evaluateData(context).getInstance();
     }
 
+    //    TODO rename
     public boolean judge(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
         return assertEquals(evaluateData(context), evaluateAndWrapperFailureMessage(actualNode, context),
                 getPositionBegin());
     }
 
+    //    TODO rename
     public boolean judge(DALNode actualNode, Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
         Data expected = evaluateData(context);
         Data actual = evaluateAndWrapperFailureMessage(actualNode, context);

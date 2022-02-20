@@ -1,5 +1,6 @@
 Feature: basic verification via table
 
+  @NewTable
   Scenario: table one header and no rows
     Given the following json:
     """
@@ -12,6 +13,10 @@ Feature: basic verification via table
     And the inspect should:
     """
     : | name |
+    """
+    And the following verification should pass:
+    """
+    = | name |
     """
     Given the following json:
     """
@@ -31,6 +36,43 @@ Feature: basic verification via table
     ^
     """
 
+  @NewTable
+  Scenario: table two header and no rows
+    Given the following json:
+    """
+    []
+    """
+    Then the following verification should pass:
+    """
+    : | name | age |
+    """
+    And the inspect should:
+    """
+    : | name | age |
+    """
+    And the following verification should pass:
+    """
+    = | name | age |
+    """
+    Given the following json:
+    """
+    [1]
+    """
+    When evaluate by:
+    """
+    : | name | age |
+    """
+    Then failed with the message:
+    """
+    Expecting list size to be <0> but was <1>
+    """
+    And got the following notation:
+    """
+    : | name | age |
+    ^
+    """
+
+  @NewTable
   Scenario: table one header and one row
     Given the following json:
     """
