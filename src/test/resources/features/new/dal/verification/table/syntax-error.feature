@@ -1,56 +1,57 @@
+@NewTable
 Feature: syntax error
 
-  Scenario: syntax error too many headers
-    Given the following dal code:
+  Scenario: too many headers
+    When evaluate by:
     """
-    | name  |
-    | 'Tom' | 30 |
+    : | name  |
+      | 'Tom' | 30 |
     """
-    Then failed to get "table" node with the following message:
+    Then failed with the message:
     """
     Different cell size
     """
-    And got the following source code information:
+    And got the following notation:
     """
-    | name  |
-    | 'Tom' | 30 |
-              ^
+    : | name  |
+      | 'Tom' | 30 |
+                ^
     """
 
   Scenario: syntax error too many cells
-    Given the following dal code:
+    When evaluate by:
     """
-    | name  | age |
-    | 'Tom' |
+    = | name  | age |
+      | 'Tom' |
     """
-    Then failed to get "table" node with the following message:
+    Then failed with the message:
     """
     Different cell size
     """
-    And got the following source code information:
+    And got the following notation:
     """
-    | name  | age |
-    | 'Tom' |
-             ^
+    = | name  | age |
+      | 'Tom' |
+               ^
     """
 
   Scenario: syntax error missing |
-    Given the following dal code:
+    When evaluate by:
     """
-    | name
+    = | name
     """
-    Then failed to get "table" node with the following message:
+    Then failed with the message:
     """
     should end with `|`
     """
-    And got the following source code information:
+    And got the following notation:
     """
-    | name
-          ^
+    = | name
+            ^
     """
 
   Scenario: should raise error when invalid table
-    When assert by the following code:
+    When evaluate by:
     """
     = | name   | age |
       | ...          |
@@ -58,11 +59,11 @@ Feature: syntax error
       | ...          |
       | 'Lily' | 20  |
     """
-    Then failed with the following message:
+    Then failed with the message:
     """
     unexpected token
     """
-    And got the following source code information:
+    And got the following notation:
     """
     = | name   | age |
       | ...          |
@@ -71,7 +72,7 @@ Feature: syntax error
         ^
       | 'Lily' | 20  |
     """
-    When assert by the following code:
+    When evaluate by:
     """
     = | name   | age |
       | 'Lily' | 20  |
@@ -79,11 +80,11 @@ Feature: syntax error
       | 'Tom'  | 10  |
       | ...          |
     """
-    Then failed with the following message:
+    Then failed with the message:
     """
     unexpected token
     """
-    And got the following source code information:
+    And got the following notation:
     """
     = | name   | age |
       | 'Lily' | 20  |
@@ -92,22 +93,40 @@ Feature: syntax error
       | 'Tom'  | 10  |
       | ...          |
     """
-    When assert by the following code:
+    When evaluate by:
     """
     = | name   | age |
       | 'Lily' | 20  |
       | ...          |
       | 'Tom'  | 10  |
     """
-    Then failed with the following message:
+    Then failed with the message:
     """
     unexpected token
     """
-    And got the following source code information:
+    And got the following notation:
     """
     = | name   | age |
       | 'Lily' | 20  |
       | ...          |
         ^
       | 'Tom'  | 10  |
+    """
+    When evaluate by:
+    """
+    = | name   |
+    0 | 'Tom'  |
+      | 'John' |
+    """
+    Then failed with the message:
+    """
+    Row index should be consistent
+    """
+    And got the following notation:
+    """
+    = | name   |
+    0 | 'Tom'  |
+    ^^^^^^^^^^^^
+      | 'John' |
+    ^^^^^^^^^^^^
     """
