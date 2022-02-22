@@ -60,6 +60,14 @@ public class Notation {
                 .map(t -> mandatory.parse(procedure));
     }
 
+    //    TODO refactor merge all before
+    public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> before(
+            ClauseParser.Mandatory<C, N, E, O, P> mandatory) {
+        return procedure -> procedure.getSourceCode().popWord(this)
+                .map(t -> mandatory.parse(procedure));
+    }
+
     public int length() {
         return label.length();
     }

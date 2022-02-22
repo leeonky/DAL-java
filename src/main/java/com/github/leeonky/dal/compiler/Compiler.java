@@ -24,7 +24,6 @@ import static com.github.leeonky.interpreter.OperatorParser.oneOf;
 import static com.github.leeonky.interpreter.Parser.endWith;
 import static com.github.leeonky.interpreter.Sequence.atLeast;
 import static com.github.leeonky.interpreter.Sequence.severalTimes;
-import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
@@ -113,7 +112,7 @@ public class Compiler {
                     CONST_USER_DEFINED_LITERAL),
             ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.nodeParser(token -> new ListEllipsisNode()),
             EMPTY_CELL = procedure -> when(procedure.emptyCell()).optional(EmptyCellNode::new),
-            TABLE = oneOf(new TransposedTableWithRowOperator(), new TableParserBk(), new TransposedTable()),
+            TABLE = oneOf(new TransposedTableWithRowOperator(), new TableParser(), new TransposedTable()),
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
@@ -217,53 +216,6 @@ public class Compiler {
 
     private final NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             TRANSPOSED_TABLE_HEADER = COLUMN_SPLITTER.before(TABLE_HEADER);
-
-    public class TableParserBk implements NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> {
-        private final NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-                ELLIPSIS_ROW = COLUMN_SPLITTER.before(ELEMENT_ELLIPSIS.closeBy(endWith(COLUMN_SPLITTER))),
-                WILDCARD_ROW = COLUMN_SPLITTER.before(ROW_WILDCARD.closeBy(endWith(COLUMN_SPLITTER)));
-
-        @Override
-        public Optional<DALNode> parse(DALProcedure procedure) {
-            if (NewTable)
-                return new TableParser().parse(procedure);
-            return COLUMN_SPLITTER.before(TABLE_HEADER.sequence(byTableRow(),
-                    nodes -> {
-                        List<HeaderNodeBk> headers = nodes.stream().map(HeaderNodeBk.class::cast).collect(toList());
-                        try {
-                            return new TableNodeBk(headers, getRowNodes(procedure, headers));
-                        } catch (IndexOutOfBoundsException ignore) {
-                            throw procedure.getSourceCode().syntaxError("Different cell size", 0);
-                        }
-                    }
-            )).parse(procedure);
-        }
-
-        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> cell(
-                Optional<DALOperator> rowOperator, List<HeaderNodeBk> headers) {
-            return procedure -> getRowCell(procedure, rowOperator, headers.get(procedure.getIndex()));
-        }
-
-        protected List<com.github.leeonky.dal.ast.RowNode> getRowNodes(DALProcedure procedure, List<HeaderNodeBk> headers) {
-            return allOptional(() -> {
-                Optional<Integer> index = getRowIndex(procedure);
-                Optional<Clause<DALRuntimeContext, DALNode>> rowSchemaClause = SCHEMA_CLAUSE.parse(procedure);
-                Optional<DALOperator> rowOperator = JUDGEMENT_OPERATORS.parse(procedure);
-                return FunctionUtil.oneOf(
-                        () -> ELLIPSIS_ROW.parse(procedure).map(cell -> new com.github.leeonky.dal.ast.RowNode(index, rowSchemaClause, rowOperator, singletonList(cell))),
-                        () -> WILDCARD_ROW.parse(procedure).map(cell -> new com.github.leeonky.dal.ast.RowNode(index, rowSchemaClause, rowOperator, singletonList(cell))),
-                        () -> COLUMN_SPLITTER.before(cell(rowOperator, headers).sequence(byTableRow(), cells -> new com.github.leeonky.dal.ast.RowNode(index,
-                                rowSchemaClause, rowOperator, checkCellSize(procedure, headers, cells)))).parse(procedure)
-                                .map(com.github.leeonky.dal.ast.RowNode.class::cast));
-            });
-        }
-
-        private List<DALNode> checkCellSize(DALProcedure procedure, List<HeaderNodeBk> headers, List<DALNode> cellClauses) {
-            if (cellClauses.size() != headers.size())
-                throw procedure.getSourceCode().syntaxError("Different cell size", 0);
-            return cellClauses;
-        }
-    }
 
     private DALNode getRowCell(DALProcedure dalProcedure, Optional<DALOperator> rowOperator, HeaderNodeBk headerNode) {
         int cellPosition = dalProcedure.getSourceCode().nextPosition();
@@ -387,53 +339,43 @@ public class Compiler {
     }
 
     public class TableParser implements NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> {
-
         private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
                 TABLE_HEADER = procedure -> new HeaderNode((SortSequenceNode) SEQUENCE.parse(procedure),
-                PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure));
+                PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
+                ROW_PREFIX = procedure -> new RowPrefixNode(INTEGER.parse(procedure).map(node ->
+                        (Integer) ((ConstNode) node).getValue()), SCHEMA_CLAUSE.parse(procedure),
+                        JUDGEMENT_OPERATORS.parse(procedure));
+
 
         @Override
         public Optional<DALNode> parse(DALProcedure procedure) {
             return COLUMN_SPLITTER.before(TABLE_HEADER.sequence(byTableRow(), headers -> new TableNode(headers,
-                    allOptional(() -> {
-                        Optional<Integer> rowIndex = INTEGER.parse(procedure).map(node -> (Integer) ((ConstNode) node).getValue());
-                        Optional<Clause<DALRuntimeContext, DALNode>> rowSchemaClause = SCHEMA_CLAUSE.parse(procedure);
-                        Optional<DALOperator> rowOperator = JUDGEMENT_OPERATORS.parse(procedure);
-                        return oneOf(singleCellRow(rowIndex, rowSchemaClause, rowOperator, ELEMENT_ELLIPSIS),
-                                singleCellRow(rowIndex, rowSchemaClause, rowOperator, ROW_WILDCARD),
-                                dataCellsRow(procedure, headers, rowIndex, rowSchemaClause, rowOperator)).parse(procedure);
-                    })))).parse(procedure);
+                    allOptional(() -> ROW_PREFIX.combine(oneOf(
+                            COLUMN_SPLITTER.before(ELEMENT_ELLIPSIS.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
+                            COLUMN_SPLITTER.before(ROW_WILDCARD.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
+                            COLUMN_SPLITTER.before(dataCellsRow(headers)))).parse(procedure))))).parse(procedure);
         }
 
         private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> cell(
-                List<DALNode> headers, Optional<DALOperator> rowOperator) {
+                DALNode rowPrefix, List<DALNode> headers) {
             return procedure -> {
                 int cellPosition = procedure.getSourceCode().nextPosition();
                 if (procedure.getIndex() == headers.size())
                     throw procedure.getSourceCode().syntaxError("Different cell size", 0);
                 HeaderNode headerNode = (HeaderNode) headers.get(procedure.getIndex());
-                return shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(), p -> rowOperator)
-                        .or(DEFAULT_JUDGEMENT_OPERATOR)).input(headerNode.getProperty()).parse(procedure)
-                        .setPositionBegin(cellPosition);
+                return shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(),
+                        ((RowPrefixNode) rowPrefix).rowOperator()).or(DEFAULT_JUDGEMENT_OPERATOR))
+                        .input(headerNode.getProperty()).parse(procedure).setPositionBegin(cellPosition);
             };
         }
 
-        private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> dataCellsRow(
-                DALProcedure procedure, List<DALNode> headers, Optional<Integer> rowIndex,
-                Optional<Clause<DALRuntimeContext, DALNode>> rowSchemaClause, Optional<DALOperator> rowOperator) {
-            return COLUMN_SPLITTER.before(cell(headers, rowOperator).sequence(byTableRow(), cells -> {
+        private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> dataCellsRow(
+                List<DALNode> headers) {
+            return procedure -> rowPrefix -> cell(rowPrefix, headers).sequence(byTableRow(), cells -> {
                 if (cells.size() != headers.size())
                     throw procedure.getSourceCode().syntaxError("Different cell size", 0);
-                return new RowNode(rowIndex, rowSchemaClause, rowOperator, cells);
-            }));
-        }
-
-        private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> singleCellRow(
-                Optional<Integer> rowIndex, Optional<Clause<DALRuntimeContext, DALNode>> rowSchemaClause,
-                Optional<DALOperator> rowOperator, NodeParser<DALRuntimeContext, DALNode, DALExpression,
-                DALOperator, DALProcedure> element_ellipsis) {
-            return COLUMN_SPLITTER.before(element_ellipsis.closeBy(endWith(COLUMN_SPLITTER))).map(cell ->
-                    new RowNode(rowIndex, rowSchemaClause, rowOperator, cell));
+                return new RowNode(rowPrefix, cells);
+            }).parse(procedure);
         }
     }
 

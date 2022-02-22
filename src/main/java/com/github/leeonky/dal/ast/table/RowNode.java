@@ -5,63 +5,50 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-
-import static java.lang.String.join;
-import static java.util.Arrays.asList;
 
 public class RowNode extends DALNode {
-    private final Optional<Integer> index;
-    private final Optional<Clause<DALRuntimeContext, DALNode>> rowSchema;
-    private final Optional<DALOperator> rowOperator;
     private final List<DALNode> cells;
+    private final RowPrefixNode rowPrefixNode;
 
-    public RowNode(Optional<Integer> index, Optional<Clause<DALRuntimeContext, DALNode>> rowSchemaClause,
-                   Optional<DALOperator> rowOperator, DALNode cell) {
-        this(index, rowSchemaClause, rowOperator, asList(cell));
+    public RowNode(DALNode prefix, DALNode cell) {
+        this(prefix, Collections.singletonList(cell));
     }
 
-    public RowNode(Optional<Integer> index, Optional<Clause<DALRuntimeContext, DALNode>> rowSchemaClause,
-                   Optional<DALOperator> rowOperator, List<DALNode> cells) {
-        this.index = index;
-        rowSchema = rowSchemaClause;
-        this.rowOperator = rowOperator;
+    public RowNode(DALNode prefix, List<DALNode> cells) {
+        rowPrefixNode = (RowPrefixNode) prefix;
         this.cells = new ArrayList<>(cells);
         setPositionBegin(cells.get(0).getOperandPosition());
     }
 
     @Override
     public String inspect() {
-        return join(" ", new ArrayList<String>() {{
-            index.map(Object::toString).ifPresent(this::add);
-            rowSchema.map(clause -> clause.makeExpression(null).inspect()).ifPresent(this::add);
-            rowOperator.map(dalOperator -> dalOperator.inspect("", "").trim()).ifPresent(this::add);
-            add(TableNode.printLine(cells));
-        }});
+        String prefix = rowPrefixNode.inspect();
+        String data = TableNode.printLine(cells);
+        return prefix.isEmpty() ? data : prefix + " " + data;
     }
 
     public Clause<DALRuntimeContext, DALNode> toExpressionClause(DALOperator operator) {
-        return input -> isEllipsis() ? cells.get(0) : transformToExpression(operator,
-                index.map(i -> (DALNode) new DALExpression(InputNode.INSTANCE, new DALOperator.PropertyImplicit(),
-                        new SymbolNode(i, SymbolNode.Type.BRACKET))).orElse(input));
+        return input -> isEllipsis() ? firstCell() : rowPrefixNode.transformToExpression(input, operator,
+                isRowWildcard() ? firstCell() : new ObjectScopeNode(cells).setPositionBegin(firstCell().getOperandPosition())
+        );
     }
 
-    private DALExpression transformToExpression(DALOperator operator, DALNode input) {
-        return new DALExpression(rowSchema.map(clause -> clause.makeExpression(input)).orElse(input),
-                rowOperator.orElse(operator),
-                isRowWildcard() ? cells.get(0) : new ObjectScopeNode(cells).setPositionBegin(cells.get(0).getOperandPosition()));
+    private DALNode firstCell() {
+        return cells.get(0);
     }
 
     private boolean isRowWildcard() {
-        return cells.size() >= 1 && cells.get(0) instanceof WildcardNode;
+        return cells.size() >= 1 && firstCell() instanceof WildcardNode;
     }
 
     private boolean isEllipsis() {
-        return cells.size() >= 1 && cells.get(0) instanceof ListEllipsisNode;
+        return cells.size() >= 1 && firstCell() instanceof ListEllipsisNode;
     }
 
+    @Deprecated
     public boolean hasIndex() {
-        return index.isPresent();
+        return rowPrefixNode.hasIndex();
     }
 }

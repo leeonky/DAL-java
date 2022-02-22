@@ -27,12 +27,13 @@ public class TableNode extends DALNode {
     public TableNode(List<DALNode> headers, List<DALNode> rows) {
         this.headers = headers.stream().map(HeaderNode.class::cast).collect(Collectors.toList());
         this.rows = rows.stream().map(RowNode.class::cast).collect(Collectors.toList());
+//        TODO move logic in RowNode
         hasRowIndex = (!this.rows.isEmpty()) && this.rows.get(0).hasIndex();
-        checkRowIndex(this.rows);
+        checkRowIndex();
     }
 
-    private void checkRowIndex(List<RowNode> rows) {
-        rows.stream().skip(1).filter(rowNode -> hasRowIndex ^ rowNode.hasIndex()).findAny()
+    private void checkRowIndex() {
+        rows.stream().skip(1).filter(rowNode -> rows.get(0).hasIndex() != rowNode.hasIndex()).findAny()
                 .ifPresent(row -> {
                     throw new SyntaxException("Row index should be consistent", row.getPositionBegin(), LINE)
                             .multiPosition(rows.get(0).getPositionBegin(), LINE);
