@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.ast.DALOperator.PropertyImplicit;
 import com.github.leeonky.dal.compiler.DALProcedure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
@@ -23,7 +24,7 @@ public class RowPrefixNode extends DALNode {
         this.rowOperator = rowOperator;
     }
 
-    boolean hasIndex() {
+    public boolean hasIndex() {
         return index.isPresent();
     }
 
@@ -36,9 +37,9 @@ public class RowPrefixNode extends DALNode {
         return rowOperator.map(dalOperator -> dalOperator.inspect(indexAndSchema, "").trim()).orElse(indexAndSchema);
     }
 
-    public DALExpression transformToExpression(DALNode input, DALOperator defaultOperator, DALNode data) {
+    public DALExpression indexAndSchema(DALNode input, DALOperator defaultOperator, DALNode data) {
         DALNode inputWithIndex = index.map(i -> (DALNode) new DALExpression(InputNode.INSTANCE,
-                new DALOperator.PropertyImplicit(), new SymbolNode(i, SymbolNode.Type.BRACKET))).orElse(input);
+                new PropertyImplicit(), new SymbolNode(i, SymbolNode.Type.BRACKET))).orElse(input);
         return new DALExpression(rowSchema.map(clause -> clause.makeExpression(inputWithIndex)).orElse(inputWithIndex),
                 rowOperator.orElse(defaultOperator), data);
     }

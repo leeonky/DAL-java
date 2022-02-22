@@ -349,11 +349,11 @@ public class Compiler {
 
         @Override
         public Optional<DALNode> parse(DALProcedure procedure) {
-            return COLUMN_SPLITTER.before(TABLE_HEADER.sequence(byTableRow(), headers -> new TableNode(headers,
-                    allOptional(() -> ROW_PREFIX.combine(oneOf(
-                            COLUMN_SPLITTER.before(ELEMENT_ELLIPSIS.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
-                            COLUMN_SPLITTER.before(ROW_WILDCARD.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
-                            COLUMN_SPLITTER.before(dataCellsRow(headers)))).parse(procedure))))).parse(procedure);
+            return COLUMN_SPLITTER.before(TABLE_HEADER.sequence(byTableRow(), headers -> new TableNode(
+                    new TableHead(headers), new TableBody(allOptional(() -> ROW_PREFIX.combine(oneOf(
+                    COLUMN_SPLITTER.before(ELEMENT_ELLIPSIS.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
+                    COLUMN_SPLITTER.before(ROW_WILDCARD.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
+                    COLUMN_SPLITTER.before(dataCellsRow(headers)))).parse(procedure)))))).parse(procedure);
         }
 
         private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> cell(
