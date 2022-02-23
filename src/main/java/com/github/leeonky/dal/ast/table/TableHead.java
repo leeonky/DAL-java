@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.SortSequenceNode;
+import com.github.leeonky.dal.compiler.DALProcedure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.Comparator;
@@ -25,5 +26,15 @@ public class TableHead extends DALNode {
     public Comparator<Object> collectComparator(RuntimeContextBuilder.DALRuntimeContext context) {
         return headers.stream().sorted(bySequence()).map(headerNode -> headerNode.getListComparator(context))
                 .reduce(Comparator::thenComparing).orElse(SortSequenceNode.NOP_COMPARATOR);
+    }
+
+    public int size() {
+        return headers.size();
+    }
+
+    public HeaderNode getHeader(DALProcedure procedure) {
+        if (procedure.getIndex() == headers.size())
+            throw procedure.getSourceCode().syntaxError("Different cell size", 0);
+        return headers.get(procedure.getIndex());
     }
 }

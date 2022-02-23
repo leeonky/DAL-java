@@ -340,39 +340,38 @@ public class Compiler {
 
     public class TableParser implements NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> {
         private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+                ROW_PREFIX = procedure -> new RowPrefixNode(INTEGER.parse(procedure).map(node -> (Integer)
+                ((ConstNode) node).getValue()), SCHEMA_CLAUSE.parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
                 TABLE_HEADER = procedure -> new HeaderNode((SortSequenceNode) SEQUENCE.parse(procedure),
-                PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
-                ROW_PREFIX = procedure -> new RowPrefixNode(INTEGER.parse(procedure).map(node ->
-                        (Integer) ((ConstNode) node).getValue()), SCHEMA_CLAUSE.parse(procedure),
-                        JUDGEMENT_OPERATORS.parse(procedure));
+                        PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure));
 
+        private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+                TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head,
+                new TableBody(allOptional(() -> ROW_PREFIX.combine(oneOf(
+                        COLUMN_SPLITTER.before(ELEMENT_ELLIPSIS.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
+                        COLUMN_SPLITTER.before(ROW_WILDCARD.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
+                        COLUMN_SPLITTER.before(dataCellsRow((TableHead) head)))).parse(procedure))));
 
         @Override
         public Optional<DALNode> parse(DALProcedure procedure) {
-            return COLUMN_SPLITTER.before(TABLE_HEADER.sequence(byTableRow(), headers -> new TableNode(
-                    new TableHead(headers), new TableBody(allOptional(() -> ROW_PREFIX.combine(oneOf(
-                    COLUMN_SPLITTER.before(ELEMENT_ELLIPSIS.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
-                    COLUMN_SPLITTER.before(ROW_WILDCARD.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
-                    COLUMN_SPLITTER.before(dataCellsRow(headers)))).parse(procedure)))))).parse(procedure);
+            return COLUMN_SPLITTER.before(TABLE_HEADER.sequence(byTableRow(), TableHead::new))
+                    .expression(TABLE_BODY_CLAUSE).parse(procedure);
         }
 
         private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> cell(
-                DALNode rowPrefix, List<DALNode> headers) {
+                DALNode rowPrefix, TableHead head) {
             return procedure -> {
                 int cellPosition = procedure.getSourceCode().nextPosition();
-                if (procedure.getIndex() == headers.size())
-                    throw procedure.getSourceCode().syntaxError("Different cell size", 0);
-                HeaderNode headerNode = (HeaderNode) headers.get(procedure.getIndex());
-                return shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(),
+                return shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, head.getHeader(procedure).headerOperator(),
                         ((RowPrefixNode) rowPrefix).rowOperator()).or(DEFAULT_JUDGEMENT_OPERATOR))
-                        .input(headerNode.getProperty()).parse(procedure).setPositionBegin(cellPosition);
+                        .input(head.getHeader(procedure).getProperty()).parse(procedure).setPositionBegin(cellPosition);
             };
         }
 
         private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> dataCellsRow(
-                List<DALNode> headers) {
-            return procedure -> rowPrefix -> cell(rowPrefix, headers).sequence(byTableRow(), cells -> {
-                if (cells.size() != headers.size())
+                TableHead tableHead) {
+            return procedure -> rowPrefix -> cell(rowPrefix, tableHead).sequence(byTableRow(), cells -> {
+                if (cells.size() != tableHead.size())
                     throw procedure.getSourceCode().syntaxError("Different cell size", 0);
                 return new RowNode(rowPrefix, cells);
             }).parse(procedure);
