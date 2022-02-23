@@ -68,6 +68,8 @@ public class Compiler {
 
     @Deprecated
     public static boolean NewTransposed = false;
+
+    @Deprecated
     public static boolean NewTable = false;
 
     private static OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
@@ -112,7 +114,7 @@ public class Compiler {
                     CONST_USER_DEFINED_LITERAL),
             ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.nodeParser(token -> new ListEllipsisNode()),
             EMPTY_CELL = procedure -> when(procedure.emptyCell()).optional(EmptyCellNode::new),
-            TABLE = oneOf(new TransposedTableWithRowOperator(), new TableParser(), new TransposedTable()),
+            TABLE = oneOf(new TransposedTableWithRowOperator(), new TableParser().table(), new TransposedTable()),
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
@@ -226,12 +228,9 @@ public class Compiler {
     }
 
     public class TransposedTable implements NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> {
-        private TransposedTableParser transposedTableParser = new TransposedTableParser();
 
         @Override
         public Optional<DALNode> parse(DALProcedure procedure) {
-            if (NewTransposed)
-                return transposedTableParser.parse(procedure);
             return procedure.getSourceCode().popWord(TRANSPOSE_MARK).map(x -> {
                 List<HeaderNodeBk> headerNodes = new ArrayList<>();
                 return new TableNodeBk(headerNodes, getRowNodes(procedure, headerNodes), TableNodeBk.Type.TRANSPOSED);
@@ -319,26 +318,7 @@ public class Compiler {
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }
 
-    public class TransposedTableParser implements NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> {
-
-        private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> TABLE_HEADER = procedure -> {
-            DALNode property = PROPERTY_CHAIN.parse(procedure);
-            return new HeaderNode(SortSequenceNode.noSequence(), property, empty());
-        };
-
-        @Override
-        public Optional<DALNode> parse(DALProcedure procedure) {
-            return procedure.getSourceCode().popWord(TRANSPOSE_MARK).map(x -> {
-                Optional<DALNode> parse = COLUMN_SPLITTER.before(TABLE_HEADER).closeBy(endWith(COLUMN_SPLITTER)).parse(procedure);
-
-                return new TransposedTableNode(new ArrayList<DALNode>() {{
-                    add(new TransposedRowNode(parse.get()));
-                }});
-            });
-        }
-    }
-
-    public class TableParser implements NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> {
+    public class TableParser {
         private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
                 ROW_PREFIX = procedure -> new RowPrefixNode(INTEGER.parse(procedure).map(node -> (Integer)
                 ((ConstNode) node).getValue()), SCHEMA_CLAUSE.parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
@@ -350,15 +330,14 @@ public class Compiler {
                 new TableBody(allOptional(() -> ROW_PREFIX.combine(oneOf(
                         COLUMN_SPLITTER.before(ELEMENT_ELLIPSIS.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
                         COLUMN_SPLITTER.before(ROW_WILDCARD.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
-                        COLUMN_SPLITTER.before(dataCellsRow((TableHead) head)))).parse(procedure))));
+                        COLUMN_SPLITTER.before(tableRow((TableHead) head)))).parse(procedure))));
 
-        @Override
-        public Optional<DALNode> parse(DALProcedure procedure) {
+        private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> table() {
             return COLUMN_SPLITTER.before(TABLE_HEADER.sequence(byTableRow(), TableHead::new))
-                    .expression(TABLE_BODY_CLAUSE).parse(procedure);
+                    .expression(TABLE_BODY_CLAUSE);
         }
 
-        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> cell(
+        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
                 DALNode rowPrefix, TableHead head) {
             return procedure -> {
                 int cellPosition = procedure.getSourceCode().nextPosition();
@@ -368,9 +347,9 @@ public class Compiler {
             };
         }
 
-        private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> dataCellsRow(
+        private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
                 TableHead tableHead) {
-            return procedure -> rowPrefix -> cell(rowPrefix, tableHead).sequence(byTableRow(), cells -> {
+            return procedure -> rowPrefix -> tableCell(rowPrefix, tableHead).sequence(byTableRow(), cells -> {
                 if (cells.size() != tableHead.size())
                     throw procedure.getSourceCode().syntaxError("Different cell size", 0);
                 return new RowNode(rowPrefix, cells);

@@ -1,4 +1,3 @@
-@NewTable
 Feature: syntax error
 
   Scenario: too many headers

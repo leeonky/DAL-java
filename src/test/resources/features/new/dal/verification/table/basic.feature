@@ -1,4 +1,3 @@
-@NewTable
 Feature: basic verification via table
 
   Scenario: table one header and no rows

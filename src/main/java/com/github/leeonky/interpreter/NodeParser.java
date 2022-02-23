@@ -75,7 +75,6 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             };
         }
 
-        //        TODO rename
         default NodeParser<C, N, E, O, P> combine(ClauseParser<C, N, E, O, P> expressionClauseMandatory) {
             return procedure -> procedure.getSourceCode().tryFetch(() -> {
                 N node = parse(procedure);
@@ -83,7 +82,6 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             });
         }
 
-        //        TODO rename
         default Mandatory<C, N, E, O, P> concat(ClauseParser<C, N, E, O, P> clauseParser) {
             return procedure -> {
                 N node = parse(procedure);
