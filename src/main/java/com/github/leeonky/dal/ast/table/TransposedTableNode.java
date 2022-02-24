@@ -2,7 +2,9 @@ package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.ast.ListScopeNode;
+import com.github.leeonky.dal.runtime.ElementAssertionFailure;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,13 +17,21 @@ public class TransposedTableNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
-        return true;
+    public boolean judge(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
+        return judgeAsList(actualNode, operator, context);
     }
 
     @Override
-    public boolean judge(DALNode actualNode, DALOperator.Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
-        return true;
+    public boolean judge(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
+        return judgeAsList(actualNode, operator, context);
+    }
+
+    private boolean judgeAsList(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
+        try {
+            return new ListScopeNode().judgeAll(context, actualNode.evaluateData(context));
+        } catch (ElementAssertionFailure elementAssertionFailure) {
+            throw elementAssertionFailure.linePositionException();
+        }
     }
 
     @Override

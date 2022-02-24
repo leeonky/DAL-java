@@ -68,6 +68,7 @@ public class ListScopeNode extends DALNode {
         return Type.ALL_ITEMS;
     }
 
+    @Deprecated
     public ListScopeNode() {
         this(Collections.emptyList());
     }

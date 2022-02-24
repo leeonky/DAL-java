@@ -231,6 +231,8 @@ public class Compiler {
 
         @Override
         public Optional<DALNode> parse(DALProcedure procedure) {
+            if (NewTable)
+                return TRANSPOSE_MARK.and(new TableParser().transposeTable()).parse(procedure);
             return procedure.getSourceCode().popWord(TRANSPOSE_MARK).map(x -> {
                 List<HeaderNodeBk> headerNodes = new ArrayList<>();
                 return new TableNodeBk(headerNodes, getRowNodes(procedure, headerNodes), TableNodeBk.Type.TRANSPOSED);
@@ -354,6 +356,18 @@ public class Compiler {
                     throw procedure.getSourceCode().syntaxError("Different cell size", 0);
                 return new RowNode(rowPrefix, cells);
             }).parse(procedure);
+        }
+
+        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
+            return procedure -> {
+                List<DALNode> dalNodes = allOptional(() -> {
+                    Optional<DALNode> header = COLUMN_SPLITTER.before(TABLE_HEADER).map(TransposedRowNode::new).parse(procedure);
+                   
+                    procedure.getSourceCode().popWord(COLUMN_SPLITTER);
+                    return header;
+                });
+                return new TransposedTableNode(dalNodes);
+            };
         }
     }
 
