@@ -389,13 +389,12 @@ public class Compiler {
             return procedure -> {
                 List<DALNode> dalNodes = allOptional(() -> {
                     Optional<DALNode> optionalHeader = COLUMN_SPLITTER.before(TABLE_HEADER.closeBy(endWith(COLUMN_SPLITTER))).parse(procedure);
-
                     return optionalHeader.map(header ->
                             tableCell((HeaderNode) header).sequence(byTableRow(), cells ->
                                     new TransposedRowNode(header, cells))
                                     .parse(procedure));
                 });
-                return new TransposedTableNode(dalNodes);
+                return new TransposedTableNode(new EmptyPrefixHeadNode(), dalNodes);
             };
         }
 

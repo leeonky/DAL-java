@@ -14,7 +14,7 @@ public class PrefixHeadNode extends DALNode {
 
     @Override
     public String inspect() {
-        return "| >> " + TableNode.printLine(prefixes);
+        return "| >> " + TableNode.printLine(prefixes) + "\n";
     }
 
     public RowPrefixNode getPrefix(int i) {

@@ -246,93 +246,93 @@ Feature: basic verification via table
       | name | 'Tom' |
                ^
     """
-#
-#  Scenario: compile table and specified header judgement operator which has higher priority than row judgement operator
-#    Given the following json:
-#    """
-#    [{
-#      "user": {
-#        "name": "Tom"
-#      }
-#    }]
-#    """
-#    Then the following verification should pass:
-#    """
-#    : | user=         |
-#    : | {name: 'Tom'} |
-#    """
-#    And the inspect should:
-#    """
-#    : | user= |
-#    : | user= {name: 'Tom'} |
-#    """
-#    Given the following json:
-#    """
-#    [{
-#      "user": {
-#        "name": "Tom",
-#        "age": 10
-#      }
-#    }]
-#    """
-#    When evaluate by:
-#    """
-#    : | user=         |
-#    : | {name: 'Tom'} |
-#    """
-#    Then failed with the message:
-#    """
-#    Unexpected fields `age` in user
-#    """
-#    And got the following notation:
-#    """
-#    : | user=         |
-#            ^
-#    : | {name: 'Tom'} |
-#    ^^^^^^^^^^^^^^^^^^^
-#    """
-#
-#  Scenario: compile table and specified cell judgement operator which has higher priority than header judgement operator
-#    Given the following json:
-#    """
-#    [{
-#      "user": {
-#        "name": "Tom"
-#      }
-#    }]
-#    """
-#    Then the following verification should pass:
-#    """
-#    : | user:           |
-#    : | = {name: 'Tom'} |
-#    """
-#    And the inspect should:
-#    """
-#    : | user: |
-#    : | user= {name: 'Tom'} |
-#    """
-#    Given the following json:
-#    """
-#    [{
-#      "user": {
-#        "name": "Tom",
-#        "age": 10
-#      }
-#    }]
-#    """
-#    When evaluate by:
-#    """
-#    : | user:           |
-#    : | = {name: 'Tom'} |
-#    """
-#    Then failed with the message:
-#    """
-#    Unexpected fields `age` in user
-#    """
-#    And got the following notation:
-#    """
-#    : | user:           |
-#    : | = {name: 'Tom'} |
-#        ^
-#    ^^^^^^^^^^^^^^^^^^^^^
-#    """
+
+  Scenario: compile table and specified header judgement operator which has higher priority than row judgement operator
+    Given the following json:
+    """
+    [{
+      "user": {
+        "name": "Tom"
+      }
+    }]
+    """
+    Then the following verification should pass:
+    """
+    : | >>    | :             |
+      | user= | {name: 'Tom'} |
+    """
+    And the inspect should:
+    """
+    : | >> | : |
+    | user= | user= {name: 'Tom'} |
+    """
+    Given the following json:
+    """
+    [{
+      "user": {
+        "name": "Tom",
+        "age": 10
+      }
+    }]
+    """
+    When evaluate by:
+    """
+    : | >>    | :             |
+      | user= | {name: 'Tom'} |
+    """
+    Then failed with the message:
+    """
+    Unexpected fields `age` in user
+    """
+    And got the following notation:
+    """
+    : | >>    | :             |
+      | user= | {name: 'Tom'} |
+            ^
+                ^
+    """
+
+  Scenario: compile table and specified cell judgement operator which has higher priority than header judgement operator
+    Given the following json:
+    """
+    [{
+      "user": {
+        "name": "Tom"
+      }
+    }]
+    """
+    Then the following verification should pass:
+    """
+    : | >>    | :               |
+      | user: | = {name: 'Tom'} |
+    """
+    And the inspect should:
+    """
+    : | >> | : |
+    | user: | user= {name: 'Tom'} |
+    """
+    Given the following json:
+    """
+    [{
+      "user": {
+        "name": "Tom",
+        "age": 10
+      }
+    }]
+    """
+    When evaluate by:
+    """
+    : | >>    | :               |
+      | user: | = {name: 'Tom'} |
+    """
+    Then failed with the message:
+    """
+    Unexpected fields `age` in user
+    """
+    And got the following notation:
+    """
+    : | >>    | :               |
+      | user: | = {name: 'Tom'} |
+                ^
+                ^
+    """

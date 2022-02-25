@@ -16,12 +16,6 @@ public class TransposedTableNode extends DALNode {
     private final PrefixHeadNode prefixHeadNode;
     private final List<TransposedRowNode> rows;
 
-    @Deprecated
-    public TransposedTableNode(List<DALNode> rows) {
-        prefixHeadNode = null;
-        this.rows = rows.stream().map(TransposedRowNode.class::cast).collect(toList());
-    }
-
     public TransposedTableNode(DALNode prefix, List<DALNode> rows) {
         prefixHeadNode = (PrefixHeadNode) prefix;
         this.rows = rows.stream().map(TransposedRowNode.class::cast).collect(toList());
@@ -60,9 +54,6 @@ public class TransposedTableNode extends DALNode {
 
     @Override
     public String inspect() {
-//        TODO refactor
-        if (prefixHeadNode == null)
-            return ">>" + rows.stream().map(TransposedRowNode::inspect).collect(Collectors.joining("\n"));
-        return prefixHeadNode.inspect() + "\n" + rows.stream().map(TransposedRowNode::inspect).collect(Collectors.joining("\n"));
+        return prefixHeadNode.inspect() + rows.stream().map(TransposedRowNode::inspect).collect(Collectors.joining("\n"));
     }
 }
