@@ -277,6 +277,9 @@ public class Compiler {
 
         @Override
         public Optional<DALNode> parse(DALProcedure procedure) {
+            if (NewTable) {
+                return new TableParser().transposeTableIndex().parse(procedure);
+            }
             return procedure.getSourceCode().tryFetch(() -> when(procedure.getSourceCode().popWord(COLUMN_SPLITTER).isPresent()
                     && procedure.getSourceCode().popWord(TRANSPOSE_MARK).isPresent()).optional(() -> {
                 List<Optional<Integer>> rowIndexes = new ArrayList<>();
@@ -364,6 +367,15 @@ public class Compiler {
             };
         }
 
+        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
+                HeaderNode head, PrefixHeadNode prefixHeadNode) {
+            return procedure -> {
+                int cellPosition = procedure.getSourceCode().nextPosition();
+                return shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, head.headerOperator(), prefixHeadNode.getPrefix(procedure.getIndex()).rowOperator()).or(DEFAULT_JUDGEMENT_OPERATOR))
+                        .input(head.getProperty()).parse(procedure).setPositionBegin(cellPosition);
+            };
+        }
+
         private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
                 TableHead tableHead) {
             return procedure -> rowPrefix -> tableCell(rowPrefix, tableHead).sequence(byTableRow(), cells -> {
@@ -377,7 +389,7 @@ public class Compiler {
             return procedure -> {
                 List<DALNode> dalNodes = allOptional(() -> {
                     Optional<DALNode> optionalHeader = COLUMN_SPLITTER.before(TABLE_HEADER.closeBy(endWith(COLUMN_SPLITTER))).parse(procedure);
-                   
+
                     return optionalHeader.map(header ->
                             tableCell((HeaderNode) header).sequence(byTableRow(), cells ->
                                     new TransposedRowNode(header, cells))
@@ -385,6 +397,32 @@ public class Compiler {
                 });
                 return new TransposedTableNode(dalNodes);
             };
+        }
+
+        //    TODO refactor merge to transposeTable
+        private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable2() {
+            return procedure -> {
+                return input -> {
+                    List<DALNode> dalNodes = allOptional(() -> {
+                        Optional<DALNode> optionalHeader = COLUMN_SPLITTER.before(TABLE_HEADER.closeBy(endWith(COLUMN_SPLITTER))).parse(procedure);
+                        return optionalHeader.map(header -> tableCell((HeaderNode) header, (PrefixHeadNode) input).sequence(byTableRow(), cells ->
+                                new TransposedRowNode(header, cells)).parse(procedure));
+                    });
+                    return new TransposedTableNode(input, dalNodes);
+                };
+            };
+        }
+
+        private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableIndex() {
+            return procedure -> procedure.getSourceCode().tryFetch(() -> {
+                return when(procedure.getSourceCode().popWord(COLUMN_SPLITTER).isPresent()
+                        && procedure.getSourceCode().popWord(TRANSPOSE_MARK).isPresent()
+                        && procedure.getSourceCode().popWord(COLUMN_SPLITTER).isPresent()).optional(() -> {
+                    DALNode prefixHeadNode = ROW_PREFIX.sequence(severalTimes().splitBy(COLUMN_SPLITTER).endWithLine(),
+                            PrefixHeadNode::new).parse(procedure);
+                    return transposeTable2().parse(procedure).makeExpression(prefixHeadNode);
+                });
+            });
         }
     }
 

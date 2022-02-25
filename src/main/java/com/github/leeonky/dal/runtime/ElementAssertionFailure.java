@@ -21,6 +21,7 @@ public class ElementAssertionFailure extends java.lang.RuntimeException {
         this.expressions = expressions;
     }
 
+    @Deprecated
     public DalException linePositionException() {
         return dalException.multiPosition(expressions.get(row).getOperandPosition(), DalException.Position.Type.LINE);
     }

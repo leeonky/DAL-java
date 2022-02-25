@@ -116,87 +116,136 @@ Feature: basic verification via table
                   ^
     """
 
-#  Scenario: judgement table by table judgement
-#    Given the following json:
-#    """
-#    [{
-#      "name": "Tom"
-#    }]
-#    """
-#    Then the following verification should pass:
-#    """
-#    = | name   |
-#      | 'Tom'  |
-#    """
-#    And the inspect should:
-#    """
-#    = | name |
-#    | name= 'Tom' |
-#    """
-#    Given the following json:
-#    """
-#    [{
-#      "name": "John",
-#      "age": 10
-#    }]
-#    """
-#    When evaluate by:
-#    """
-#    = | name   |
-#      | 'Tom'  |
-#    """
-#    Then failed with the message:
-#    """
-#    Unexpected fields `age` in [0]
-#    """
-#    And got the following notation:
-#    """
-#    = | name   |
-#    ^
-#      | 'Tom'  |
-#    ^^^^^^^^^^^^
-#    """
-#
-#  Scenario: compile table with row judgement operator which has higher priority than table judgement operator
-#    Given the following json:
-#    """
-#    [{
-#      "name": "Tom"
-#    }]
-#    """
-#    Then the following verification should pass:
-#    """
-#    : | name   |
-#    = | 'Tom'  |
-#    """
-#    And the inspect should:
-#    """
-#    : | name |
-#    = | name= 'Tom' |
-#    """
-#    Given the following json:
-#    """
-#    [{
-#      "name": "John",
-#      "age": 10
-#    }]
-#    """
-#    When evaluate by:
-#    """
-#    : | name   |
-#    = | 'Tom'  |
-#    """
-#    Then failed with the message:
-#    """
-#    Unexpected fields `age` in [0]
-#    """
-#    And got the following notation:
-#    """
-#    : | name   |
-#    = | 'Tom'  |
-#    ^
-#    ^^^^^^^^^^^^
-#    """
+  Scenario: table two header and two row
+    Given the following json:
+    """
+    [{
+      "name": "Tom",
+      "age": 10
+    },{
+      "name": "Lucy",
+      "age": 15
+    }]
+    """
+    Then the following verification should pass:
+    """
+    : >>| name | 'Tom' | 'Lucy' |
+        | age  | 10    | 15     |
+    """
+    And the inspect should:
+    """
+    : >>| name | name: 'Tom' | name: 'Lucy' |
+    | age | age: 10 | age: 15 |
+    """
+    Given the following json:
+    """
+    [{
+      "name": "Tom",
+      "age": 10
+    },{
+      "name": "Lucy",
+      "age": 20
+    }]
+    """
+    When evaluate by:
+    """
+    : >>| name | 'Tom' | 'Lucy' |
+        | age  | 10    | 15     |
+    """
+    Then failed with the message:
+    """
+    Expecting java.lang.Integer
+    <20>
+    to match java.lang.Integer
+    <15>
+    but was not
+    """
+    And got the following notation:
+    """
+    : >>| name | 'Tom' | 'Lucy' |
+                         ^
+        | age  | 10    | 15     |
+                         ^
+                         ^
+    """
+
+  Scenario: judgement table by table judgement
+    Given the following json:
+    """
+    [{
+      "name": "Tom"
+    }]
+    """
+    Then the following verification should pass:
+    """
+    = >>| name | 'Tom' |
+    """
+    And the inspect should:
+    """
+    = >>| name | name= 'Tom' |
+    """
+    Given the following json:
+    """
+    [{
+      "name": "John",
+      "age": 10
+    }]
+    """
+    When evaluate by:
+    """
+    = >>| name | 'Tom' |
+    """
+    Then failed with the message:
+    """
+    Unexpected fields `age` in [0]
+    """
+    And got the following notation:
+    """
+    = >>| name | 'Tom' |
+    ^
+                 ^
+    """
+
+  Scenario: compile table with row judgement operator which has higher priority than table judgement operator
+    Given the following json:
+    """
+    [{
+      "name": "Tom"
+    }]
+    """
+    Then the following verification should pass:
+    """
+    : | >>   | =     |
+      | name | 'Tom' |
+    """
+    And the inspect should:
+    """
+    : | >> | = |
+    | name | name= 'Tom' |
+    """
+    Given the following json:
+    """
+    [{
+      "name": "John",
+      "age": 10
+    }]
+    """
+    When evaluate by:
+    """
+    : | >>   | =     |
+      | name | 'Tom' |
+    """
+    Then failed with the message:
+    """
+    Unexpected fields `age` in [0]
+    """
+    And got the following notation:
+    """
+    : | >>   | =     |
+               ^
+      | name | 'Tom' |
+               ^
+    """
 #
 #  Scenario: compile table and specified header judgement operator which has higher priority than row judgement operator
 #    Given the following json:

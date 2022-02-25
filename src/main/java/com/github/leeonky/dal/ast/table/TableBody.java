@@ -19,15 +19,15 @@ public class TableBody extends DALNode {
 
     public TableBody(List<? extends DALNode> rows) {
         this.rows = rows.stream().map(RowNode.class::cast).collect(toList());
-        checkRowIndex();
+        checkPrefix();
     }
 
     private boolean isHasRowIndex() {
         return (!rows.isEmpty()) && rows.get(0).hasIndex();
     }
 
-    private void checkRowIndex() {
-        rows.stream().skip(1).filter(rowNode -> rows.get(0).hasIndex() != rowNode.hasIndex()).findAny().ifPresent(row -> {
+    private void checkPrefix() {
+        rows.stream().skip(1).filter(rowNode -> rowNode.samePrefix(rows.get(0))).findAny().ifPresent(row -> {
             throw new SyntaxException("Row index should be consistent", row.getPositionBegin(), LINE)
                     .multiPosition(rows.get(0).getPositionBegin(), LINE);
         });

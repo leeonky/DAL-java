@@ -26,8 +26,15 @@ public class TransposedRowNode extends DALNode {
         }});
     }
 
-    public List<RowNode> transpose() {
-        return cells.stream().map(cell -> new RowNode(new RowPrefixNode(empty(), empty(), empty()),
-                singletonList(cell))).collect(toList());
+    //    TODO refactor
+    public List<RowNode> transpose(PrefixHeadNode prefixHeadNode) {
+        if (prefixHeadNode == null)
+            return cells.stream().map(cell -> new RowNode(new RowPrefixNode(empty(), empty(), empty()),
+                    singletonList(cell))).collect(toList());
+
+        return new ArrayList<RowNode>() {{
+            for (int i = 0; i < cells.size(); i++)
+                add(new RowNode(prefixHeadNode.getPrefix(i), singletonList(cells.get(i))));
+        }};
     }
 }

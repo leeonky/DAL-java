@@ -53,4 +53,15 @@ public class RowNode extends DALNode {
     public List<DALNode> getCells() {
         return cells;
     }
+
+    public boolean samePrefix(RowNode another) {
+        return another.hasIndex() != hasIndex();
+    }
+
+    public RowNode merge(RowNode rowNode) {
+        return (RowNode) new RowNode(rowPrefix, new ArrayList<DALNode>() {{
+            addAll(cells);
+            addAll(rowNode.cells);
+        }}).setPositionBegin(getPositionBegin());
+    }
 }
