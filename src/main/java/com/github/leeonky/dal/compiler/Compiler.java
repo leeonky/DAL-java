@@ -321,6 +321,12 @@ public class Compiler {
     }
 
     public class TableParser {
+        //TODO should test integer or something after table
+//: | a   | b   |
+//0 | 'a' | 'b' |
+//is a
+//        Row prefix ok but no cell
+
         private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
                 ROW_PREFIX = procedure -> new RowPrefixNode(INTEGER.parse(procedure).map(node -> (Integer)
                 ((ConstNode) node).getValue()), SCHEMA_CLAUSE.parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
@@ -349,6 +355,15 @@ public class Compiler {
             };
         }
 
+        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
+                HeaderNode head) {
+            return procedure -> {
+                int cellPosition = procedure.getSourceCode().nextPosition();
+                return shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, head.headerOperator()).or(DEFAULT_JUDGEMENT_OPERATOR))
+                        .input(head.getProperty()).parse(procedure).setPositionBegin(cellPosition);
+            };
+        }
+
         private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
                 TableHead tableHead) {
             return procedure -> rowPrefix -> tableCell(rowPrefix, tableHead).sequence(byTableRow(), cells -> {
@@ -361,10 +376,12 @@ public class Compiler {
         private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
             return procedure -> {
                 List<DALNode> dalNodes = allOptional(() -> {
-                    Optional<DALNode> header = COLUMN_SPLITTER.before(TABLE_HEADER).map(TransposedRowNode::new).parse(procedure);
+                    Optional<DALNode> optionalHeader = COLUMN_SPLITTER.before(TABLE_HEADER.closeBy(endWith(COLUMN_SPLITTER))).parse(procedure);
                    
-                    procedure.getSourceCode().popWord(COLUMN_SPLITTER);
-                    return header;
+                    return optionalHeader.map(header ->
+                            tableCell((HeaderNode) header).sequence(byTableRow(), cells ->
+                                    new TransposedRowNode(header, cells))
+                                    .parse(procedure));
                 });
                 return new TransposedTableNode(dalNodes);
             };

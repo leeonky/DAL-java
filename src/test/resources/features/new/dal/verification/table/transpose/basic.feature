@@ -75,51 +75,47 @@ Feature: basic verification via table
     ^
         | age  |
     """
-#
-#  Scenario: table one header and one row
-#    Given the following json:
-#    """
-#    [{
-#      "name": "Tom"
-#    }]
-#    """
-#    Then the following verification should pass:
-#    """
-#    : | name  |
-#      | 'Tom' |
-#    """
-#    And the inspect should:
-#    """
-#    : | name |
-#    | name: 'Tom' |
-#    """
-#    Given the following json:
-#    """
-#    [{
-#      "name": "John"
-#    }]
-#    """
-#    When evaluate by:
-#    """
-#    : | name  |
-#      | 'Tom' |
-#    """
-#    Then failed with the message:
-#    """
-#    Expecting java.lang.String
-#    <John>
-#    to match java.lang.String
-#    <Tom>
-#    but was not
-#    """
-#    And got the following notation:
-#    """
-#    : | name  |
-#      | 'Tom' |
-#        ^
-#    ^^^^^^^^^^^
-#    """
-#
+
+  Scenario: table one header and one row
+    Given the following json:
+    """
+    [{
+      "name": "Tom"
+    }]
+    """
+    Then the following verification should pass:
+    """
+    : >>| name  | 'Tom' |
+    """
+    And the inspect should:
+    """
+    : >>| name | name: 'Tom' |
+    """
+    Given the following json:
+    """
+    [{
+      "name": "John"
+    }]
+    """
+    When evaluate by:
+    """
+    : >>| name  | 'Tom' |
+    """
+    Then failed with the message:
+    """
+    Expecting java.lang.String
+    <John>
+    to match java.lang.String
+    <Tom>
+    but was not
+    """
+    And got the following notation:
+    """
+    : >>| name  | 'Tom' |
+                  ^
+                  ^
+    """
+
 #  Scenario: judgement table by table judgement
 #    Given the following json:
 #    """

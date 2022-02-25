@@ -9,11 +9,13 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 public class TransposedTableNode extends DALNode {
     private final List<TransposedRowNode> rows;
 
     public TransposedTableNode(List<DALNode> rows) {
-        this.rows = rows.stream().map(TransposedRowNode.class::cast).collect(Collectors.toList());
+        this.rows = rows.stream().map(TransposedRowNode.class::cast).collect(toList());
     }
 
     @Override
@@ -28,10 +30,19 @@ public class TransposedTableNode extends DALNode {
 
     private boolean judgeAsList(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
         try {
-            return new ListScopeNode().judgeAll(context, actualNode.evaluateData(context));
+            return getListScopeNode(operator).judgeAll(context, actualNode.evaluateData(context));
         } catch (ElementAssertionFailure elementAssertionFailure) {
-            throw elementAssertionFailure.linePositionException();
+            throw elementAssertionFailure.columnPositionException(this);
         }
+    }
+
+    private ListScopeNode getListScopeNode(DALOperator operator) {
+        return new TableBody(transposeRows())
+                .transformToListScope(operator);
+    }
+
+    public List<RowNode> transposeRows() {
+        return rows.get(0).transpose();
     }
 
     @Override

@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.toList;
 public class TableBody extends DALNode {
     private final List<RowNode> rows;
 
-    public TableBody(List<DALNode> rows) {
+    public TableBody(List<? extends DALNode> rows) {
         this.rows = rows.stream().map(RowNode.class::cast).collect(toList());
         checkRowIndex();
     }

@@ -49,4 +49,8 @@ public class RowNode extends DALNode {
     public boolean hasIndex() {
         return rowPrefix.hasIndex();
     }
+
+    public List<DALNode> getCells() {
+        return cells;
+    }
 }
