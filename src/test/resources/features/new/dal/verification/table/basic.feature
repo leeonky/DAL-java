@@ -114,6 +114,62 @@ Feature: basic verification via table
     ^^^^^^^^^^^
     """
 
+  Scenario: table two header and two row
+    Given the following json:
+    """
+    [{
+      "name": "Tom",
+      "age": 10
+    },{
+      "name": "Lucy",
+      "age": 15
+    }]
+    """
+    Then the following verification should pass:
+    """
+    : | name   | age |
+      | 'Tom'  | 10  |
+      | 'Lucy' | 15  |
+    """
+    And the inspect should:
+    """
+    : | name | age |
+    | name: 'Tom' | age: 10 |
+    | name: 'Lucy' | age: 15 |
+    """
+    Given the following json:
+    """
+    [{
+      "name": "Tom",
+      "age": 10
+    },{
+      "name": "Lucy",
+      "age": 20
+    }]
+    """
+    When evaluate by:
+    """
+    : | name   | age |
+      | 'Tom'  | 10  |
+      | 'Lucy' | 15  |
+    """
+    Then failed with the message:
+    """
+    Expecting java.lang.Integer
+    <20>
+    to match java.lang.Integer
+    <15>
+    but was not
+    """
+    And got the following notation:
+    """
+    : | name   | age |
+      | 'Tom'  | 10  |
+      | 'Lucy' | 15  |
+                 ^
+    ^^^^^^^^^^^^^^^^^^
+    """
+
   Scenario: judgement table by table judgement
     Given the following json:
     """

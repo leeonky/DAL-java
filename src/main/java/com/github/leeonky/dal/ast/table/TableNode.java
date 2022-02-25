@@ -32,7 +32,7 @@ public class TableNode extends DALNode {
             return tableBody.transformToListScope(operator).judgeAll(context, actualNode.evaluateData(context)
                     .setListComparator(tableHead.collectComparator(context)));
         } catch (ElementAssertionFailure elementAssertionFailure) {
-            throw elementAssertionFailure.linePositionException();
+            throw elementAssertionFailure.linePositionException(this);
         }
     }
 
@@ -43,5 +43,9 @@ public class TableNode extends DALNode {
 
     public static String printLine(List<? extends DALNode> nodes) {
         return nodes.stream().map(DALNode::inspect).collect(Collectors.joining(" | ", "| ", " |"));
+    }
+
+    public RowNode getRow(int row) {
+        return tableBody.getRow(row);
     }
 }

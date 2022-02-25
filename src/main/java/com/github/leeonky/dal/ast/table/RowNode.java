@@ -19,7 +19,7 @@ public class RowNode extends DALNode {
     public RowNode(DALNode prefix, List<DALNode> cells) {
         rowPrefix = (RowPrefixNode) prefix;
         this.cells = new ArrayList<>(cells);
-        setPositionBegin(cells.get(0).getOperandPosition());
+        setPositionBegin(cells.get(cells.size() - 1).getOperandPosition());
     }
 
     @Override

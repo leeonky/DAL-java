@@ -45,4 +45,8 @@ public class TableBody extends DALNode {
                 .collect(toList()), true, ListScopeNode.Type.FIRST_N_ITEMS)
                 : new ListScopeNode(rowClauses.collect(Collectors.toList()), true);
     }
+
+    public RowNode getRow(int row) {
+        return rows.get(row);
+    }
 }
