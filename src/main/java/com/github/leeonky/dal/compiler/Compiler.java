@@ -24,6 +24,7 @@ import static com.github.leeonky.interpreter.OperatorParser.oneOf;
 import static com.github.leeonky.interpreter.Parser.endWith;
 import static com.github.leeonky.interpreter.Sequence.atLeast;
 import static com.github.leeonky.interpreter.Sequence.severalTimes;
+import static com.github.leeonky.interpreter.Syntax.many;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
@@ -96,10 +97,10 @@ public class Compiler {
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
             NUMBER = Tokens.NUMBER.nodeParser(constNode(Token::getNumber)),
             INTEGER = Tokens.INTEGER.nodeParser(constNode(Token::getInteger)),
-            SINGLE_QUOTED_STRING = SINGLE_QUOTED.and(charNode(SINGLE_QUOTED_ESCAPES).sequence(severalTimes().endWith(
-                    SINGLE_QUOTED.getLabel()), DALNode::constString)),
-            DOUBLE_QUOTED_STRING = DOUBLE_QUOTED.and(charNode(DOUBLE_QUOTED_ESCAPES).sequence(severalTimes().endWith(
-                    DOUBLE_QUOTED.getLabel()), DALNode::constString)),
+            SINGLE_QUOTED_STRING = SINGLE_QUOTED.and(many(charNode(SINGLE_QUOTED_ESCAPES))
+                    .endWith(SINGLE_QUOTED.getLabel()).as(DALNode::constString)),
+            DOUBLE_QUOTED_STRING = DOUBLE_QUOTED.and(many(charNode(DOUBLE_QUOTED_ESCAPES))
+                    .endWith(DOUBLE_QUOTED.getLabel()).as(DALNode::constString)),
             CONST_TRUE = Keywords.TRUE.nodeParser(DALNode::constTrue),
             CONST_FALSE = Keywords.FALSE.nodeParser(DALNode::constFalse),
             CONST_NULL = Keywords.NULL.nodeParser(DALNode::constNull),
