@@ -3,6 +3,7 @@ package com.github.leeonky.interpreter;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
@@ -31,6 +32,10 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
         } finally {
             operators.pop();
         }
+    }
+
+    public <T> T positionOf(Function<Integer, T> action) {
+        return action.apply(getSourceCode().nextPosition());
     }
 
     public <T> T actionUnderIndex(Supplier<T> action) {
