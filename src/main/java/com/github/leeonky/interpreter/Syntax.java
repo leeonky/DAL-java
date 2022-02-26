@@ -1,11 +1,5 @@
 package com.github.leeonky.interpreter;
 
-import com.github.leeonky.dal.ast.DALExpression;
-import com.github.leeonky.dal.ast.DALNode;
-import com.github.leeonky.dal.ast.DALOperator;
-import com.github.leeonky.dal.compiler.DALProcedure;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +22,8 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
 
     protected abstract void close(P procedure);
 
+    protected abstract boolean isSplitter(P procedure);
+
     public static class DefaultSyntax<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, OP, MA, T>, T, R> extends Syntax<C, N, E, O, P, OP, MA, T, R> {
@@ -43,6 +39,11 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
 
         @Override
         protected void close(P procedure) {
+        }
+
+        @Override
+        protected boolean isSplitter(P procedure) {
+            return true;
         }
     }
 
@@ -65,6 +66,11 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
         @Override
         protected void close(P procedure) {
             syntax.close(procedure);
+        }
+
+        @Override
+        protected boolean isSplitter(P procedure) {
+            return syntax.isSplitter(procedure);
         }
     }
 
@@ -92,6 +98,58 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
         };
     }
 
+    public Syntax<C, N, E, O, P, OP, MA, T, R> splitBy(Notation notation) {
+        return new CompositeSyntax<C, N, E, O, P, OP, MA, T, R>(this) {
+            @Override
+            public boolean isSplitter(P procedure) {
+                return procedure.getSourceCode().popWord(notation).isPresent();
+            }
+        };
+    }
+
+    public Syntax<C, N, E, O, P, OP, MA, T, R> endWithLine() {
+        return new CompositeSyntax<C, N, E, O, P, OP, MA, T, R>(this) {
+            private boolean isClose = false;
+
+            @Override
+            public boolean isClose(P procedure) {
+                //                TODO need test
+                return isClose = procedure.getSourceCode().isEndOfLine();
+            }
+
+            @Override
+            public void close(P procedure) {
+                if (!isClose)
+//                TODO need test
+                    throw procedure.getSourceCode().syntaxError("unexpected token", 0);
+            }
+        };
+    }
+
+
+    public Syntax<C, N, E, O, P, OP, MA, T, R> optionalSplitBy(Notation splitter) {
+        return new CompositeSyntax<C, N, E, O, P, OP, MA, T, R>(this) {
+
+            @Override
+            public boolean isSplitter(P procedure) {
+                procedure.getSourceCode().popWord(splitter);
+                return true;
+            }
+        };
+    }
+
+    public Syntax<C, N, E, O, P, OP, MA, T, R> mandatoryTailSplitBy(Notation notation) {
+        return new CompositeSyntax<C, N, E, O, P, OP, MA, T, R>(this) {
+
+            @Override
+            public boolean isSplitter(P procedure) {
+                if (procedure.getSourceCode().popWord(notation).isPresent())
+                    return true;
+                throw procedure.getSourceCode().syntaxError(format("should end with `%s`", notation.getLabel()), 0);
+            }
+        };
+    }
+
     @SuppressWarnings("unchecked")
     public R as(Function<List<T>, N> factory) {
         return (R) (NodeParser.Mandatory<C, N, E, O, P>) procedure -> factory.apply(parser.apply(procedure, this));
@@ -105,6 +163,8 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
             while (!syntax.isClose(procedure)) {
                 add(mandatory.parse(procedure));
                 procedure.incrementIndex();
+                if (!syntax.isSplitter(procedure))
+                    break;
             }
             syntax.close(procedure);
         }}));
@@ -121,25 +181,10 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
                     break;
                 add(optional.get());
                 procedure.incrementIndex();
+                if (!syntax.isSplitter(procedure))
+                    break;
             }
             syntax.close(procedure);
         }}));
-    }
-
-    public static void xxx() {
-        NodeParser.Mandatory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> X = null;
-        many(X).endWith("\"").as(null);
-//        new Syntax<>(X) {
-//            @Override
-//            protected List parse(Procedure procedure) {
-//                return procedure.actionUnderIndex(() -> new ArrayList<T>() {{
-//                    while (isClose(procedure)) {
-//                        add(X.parse(procedure));
-//                        procedure.incrementIndex();
-//                    }
-//                    close(procedure);
-//                }});
-//            }
-//        }.endWith("");
     }
 }

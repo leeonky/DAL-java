@@ -152,12 +152,12 @@ public class Compiler {
                 EXPRESSION.closeBy(endWith(CLOSING_PARENTHESES)).map(DALNode::parenthesesNode))));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IMPLICIT_PROPERTY);
         PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursive(EXPLICIT_PROPERTY);
-        OBJECT = DALProcedure.disableCommaAnd(OPENING_BRACES.and(PROPERTY_CHAIN.expression(shortJudgementClause(
-                JUDGEMENT_OPERATORS.mandatory("expect operator `:` or `=`"))).sequence(severalTimes().
-                optionalSplitBy(Notations.COMMA).endWith(CLOSING_BRACES), ObjectScopeNode::new)));
-        LIST = DALProcedure.disableCommaAnd(OPENING_BRACKET.and(ELEMENT_ELLIPSIS.ignoreInput().or(shortJudgementClause(
-                JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR))).sequence(severalTimes().optionalSplitBy(COMMA)
-                .endWith(CLOSING_BRACKET), ListScopeNode::new)));
+        OBJECT = DALProcedure.disableCommaAnd(OPENING_BRACES.and(many(PROPERTY_CHAIN.expression(shortJudgementClause(
+                JUDGEMENT_OPERATORS.mandatory("expect operator `:` or `=`")))).optionalSplitBy(Notations.COMMA)
+                .endWith(CLOSING_BRACES).as(ObjectScopeNode::new)));
+        LIST = DALProcedure.disableCommaAnd(OPENING_BRACKET.and(many(ELEMENT_ELLIPSIS.ignoreInput().or(
+                shortJudgementClause(JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR)))).optionalSplitBy(COMMA)
+                .endWith(CLOSING_BRACKET).as(ListScopeNode::new)));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         OPERAND = lazy(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
                 .mandatory("expect a value or expression").map(DALNode::avoidListMapping);
@@ -335,8 +335,7 @@ public class Compiler {
                 ((ConstNode) node).getValue()), SCHEMA_CLAUSE.parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
                 TABLE_HEADER = procedure -> new HeaderNode((SortSequenceNode) SEQUENCE.parse(procedure),
                         PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
-                PREFIX_ROW = ROW_PREFIX.sequence(severalTimes().splitBy(COLUMN_SPLITTER).endWithLine(),
-                        PrefixHeadNode::new);
+                PREFIX_ROW = many(ROW_PREFIX).splitBy(COLUMN_SPLITTER).endWithLine().as(PrefixHeadNode::new);
 
         private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
                 TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, new TableBody(allOptional(
@@ -382,13 +381,11 @@ public class Compiler {
         }
 
         private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
-            return procedure -> input -> {
+            return procedure -> prefixHead -> {
                 //        TODO test not allow empty table >> with out rows
-                List<DALNode> dalNodes = allOptional(() -> {
-                    return COLUMN_SPLITTER.before(TABLE_HEADER.closeBy(endWith(COLUMN_SPLITTER))).expression(tableRow((PrefixHeadNode) input))
-                            .parse(procedure);
-                });
-                return new TransposedTableNode(input, dalNodes);
+                return many(COLUMN_SPLITTER.before(TABLE_HEADER.closeBy(endWith(COLUMN_SPLITTER))).expression(tableRow(
+                        (PrefixHeadNode) prefixHead))).as(dalNodes -> new TransposedTableNode(prefixHead, dalNodes))
+                        .parse(procedure);
             };
         }
 
