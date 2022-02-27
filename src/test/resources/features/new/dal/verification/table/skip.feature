@@ -153,7 +153,6 @@ Feature: skip
     ^^^^^^^^^^^^^^^^^
     """
 
-#    TODO check position
   Scenario: specify index before row
     When the following json:
     """
@@ -180,6 +179,34 @@ Feature: skip
     0 | name= 'Tom' | age= 10 |
     2 | name= 'Lily' | age= 15 |
     """
+    When evaluate by:
+    """
+    = | name  | age |
+    0 | 'Tom' | 12  |
+    2 | 'Lily' | 15 |
+    """
+    Then got the following notation:
+    """
+    = | name  | age |
+    0 | 'Tom' | 12  |
+                ^
+    ^^^^^^^^^^^^^^^^^
+    2 | 'Lily' | 15 |
+    """
+    When evaluate by:
+    """
+    = | name  | age |
+    0 | 'Tom' | 10  |
+    2 | 'Lily' | 25 |
+    """
+    And got the following notation:
+    """
+    = | name  | age |
+    0 | 'Tom' | 10  |
+    2 | 'Lily' | 25 |
+                 ^
+    ^^^^^^^^^^^^^^^^^
+    """
     And the following verification should pass:
     """
     =  | name   | age |
@@ -189,4 +216,41 @@ Feature: skip
     """
     = | name | age |
     -1 | name= 'Lily' | age= 15 |
+    """
+    Then the following verification should pass:
+    """
+    =  | name   | age |
+     2 | 'Lily' | 15  |
+    -2 | 'John' | 20  |
+    """
+    And the inspect should:
+    """
+    = | name | age |
+    2 | name= 'Lily' | age= 15 |
+    -2 | name= 'John' | age= 20 |
+    """
+    When evaluate by:
+    """
+    =  | name   | age |
+     2 | 'Lily' | 15  |
+    -2 | 'John' | 30  |
+    """
+    Then got the following notation:
+    """
+    =  | name   | age |
+     2 | 'Lily' | 15  |
+    -2 | 'John' | 30  |
+                  ^
+    ^^^^^^^^^^^^^^^^^^^
+    """
+
+  Scenario: ignore row should not check row index
+    Given the following json:
+    """
+    []
+    """
+    Then the following verification should pass:
+    """
+    = | name  | age |
+    0 | ***         |
     """

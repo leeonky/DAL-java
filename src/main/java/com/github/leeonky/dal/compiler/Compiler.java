@@ -335,11 +335,13 @@ public class Compiler {
                 PREFIX_ROW = many(ROW_PREFIX).splitBy(COLUMN_SPLITTER).endWithLine().as(PrefixHeadNode::new);
 
         private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-                TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, new TableBody(allOptional(
-                () -> ROW_PREFIX.combine(oneOf(
-                        COLUMN_SPLITTER.before(single(ELEMENT_ELLIPSIS).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
-                        COLUMN_SPLITTER.before(single(ROW_WILDCARD).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
-                        COLUMN_SPLITTER.before(tableRow((TableHead) head)))).parse(procedure))));
+                TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, new TableBody(
+//                        TODO use many
+                allOptional(
+                        () -> ROW_PREFIX.combine(oneOf(
+                                COLUMN_SPLITTER.before(single(ELEMENT_ELLIPSIS).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
+                                COLUMN_SPLITTER.before(single(ROW_WILDCARD).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
+                                COLUMN_SPLITTER.before(tableRow((TableHead) head)))).parse(procedure))));
 
         private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> table() {
             return COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).expression(TABLE_BODY_CLAUSE);

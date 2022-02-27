@@ -1,6 +1,6 @@
 Feature: syntax error
 
-  Scenario: too many headers
+  Scenario: syntax error too many cells
     When evaluate by:
     """
     : | name  |
@@ -17,7 +17,7 @@ Feature: syntax error
                 ^
     """
 
-  Scenario: syntax error too many cells
+  Scenario: too many headers
     When evaluate by:
     """
     = | name  | age |

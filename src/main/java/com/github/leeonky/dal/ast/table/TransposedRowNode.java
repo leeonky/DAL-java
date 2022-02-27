@@ -14,6 +14,7 @@ public class TransposedRowNode extends DALNode {
     public TransposedRowNode(DALNode header, List<DALNode> cells) {
         headerNode = (HeaderNode) header;
         this.cells = cells;
+        setPositionBegin(header.getPositionBegin());
     }
 
     @Override
@@ -29,5 +30,13 @@ public class TransposedRowNode extends DALNode {
             for (int i = 0; i < cells.size(); i++)
                 add(new RowNode(prefixHeadNode.getPrefix(i), singletonList(cells.get(i))));
         }};
+    }
+
+    public HeaderNode getHeader() {
+        return headerNode;
+    }
+
+    public int cellCount() {
+        return cells.size();
     }
 }

@@ -1,3 +1,4 @@
+@NewTable
 Feature: sort
 
   Scenario: support sort list by header from a to z
@@ -11,29 +12,21 @@ Feature: sort
     """
     Then the following verification should pass:
     """
-    = | ￪ name |
-      | 'John' |
-      | 'Tom'  |
+    = >>| ￪ name | 'John' | 'Tom'  |
     """
     And the inspect should:
     """
-    = | ￪ name |
-    | name= 'John' |
-    | name= 'Tom' |
+    = >>| ￪ name | name= 'John' | name= 'Tom' |
     """
     When evaluate by:
     """
-    = | ￪ name |
-      | 'John' |
-      | 'Lucy' |
+    = >>| ￪ name | 'John' | 'Lucy'  |
     """
     And got the following notation:
     """
-    = | ￪ name |
-      | 'John' |
-      | 'Lucy' |
-        ^
-    ^^^^^^^^^^^^
+    = >>| ￪ name | 'John' | 'Lucy'  |
+                            ^
+                            ^
     """
 
   Scenario: support sort list by header from z to a
@@ -47,15 +40,11 @@ Feature: sort
     """
     Then the following verification should pass:
     """
-    = | ￬ name |
-      | 'Tom'  |
-      | 'John' |
+    = >>| ￬ name | 'Tom'  | 'John' |
     """
     And the inspect should:
     """
-    = | ￬ name |
-    | name= 'Tom' |
-    | name= 'John' |
+    = >>| ￬ name | name= 'Tom' | name= 'John' |
     """
 
   Scenario: support sort list by multi headers before assertion
@@ -74,15 +63,11 @@ Feature: sort
     """
     Then the following verification should pass:
     """
-    = | ￪ name   | ￬￬ age |
-      | 'Tomas'  | 20     |
-      | 'John'   | 10     |
-      | 'Tom'    | 10     |
+    = >>| ￪ name | 'Tomas' | 'John' | 'Tom' |
+        | ￬￬ age | 20      | 10     | 10    |
     """
     And the inspect should:
     """
-    = | ￪ name | ￬￬ age |
-    | name= 'Tomas' | age= 20 |
-    | name= 'John' | age= 10 |
-    | name= 'Tom' | age= 10 |
+    = >>| ￪ name | name= 'Tomas' | name= 'John' | name= 'Tom' |
+    | ￬￬ age | age= 20 | age= 10 | age= 10 |
     """

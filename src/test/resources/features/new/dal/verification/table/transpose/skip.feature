@@ -145,7 +145,6 @@ Feature: skip
                        ^
     """
 
-
   Scenario: specify index before row
     When the following json:
     """
@@ -172,6 +171,36 @@ Feature: skip
     | name | name= 'Tom' | name= 'Lily' |
     | age | age= 10 | age= 15 |
     """
+    When evaluate by:
+    """
+    = | >>   | 0     | 2      |
+      | name | 'Tom' | 'Lily' |
+      | age  | 12    | 15     |
+    """
+    Then got the following notation:
+    """
+    = | >>   | 0     | 2      |
+      | name | 'Tom' | 'Lily' |
+               ^
+      | age  | 12    | 15     |
+               ^
+               ^
+    """
+    When evaluate by:
+    """
+    = | >>   | 0     | 2      |
+      | name | 'Tom' | 'Lily' |
+      | age  | 10    | 25     |
+    """
+    Then got the following notation:
+    """
+    = | >>   | 0     | 2      |
+      | name | 'Tom' | 'Lily' |
+                       ^
+      | age  | 10    | 25     |
+                       ^
+                       ^
+    """
     And the following verification should pass:
     """
     = | >>   | -1     |
@@ -183,4 +212,43 @@ Feature: skip
     = | >> | -1 |
     | name | name= 'Lily' |
     | age | age= 15 |
+    """
+    Then the following verification should pass:
+    """
+    = | >>   | 2      | -2     |
+      | name | 'Lily' | 'John' |
+      | age  |  15    | 20     |
+    """
+    And the inspect should:
+    """
+    = | >> | 2 | -2 |
+    | name | name= 'Lily' | name= 'John' |
+    | age | age= 15 | age= 20 |
+    """
+    When evaluate by:
+    """
+    = | >>   | 2      | -2     |
+      | name | 'Lily' | 'John' |
+      | age  |  15    | 30     |
+    """
+    Then got the following notation:
+    """
+    = | >>   | 2      | -2     |
+      | name | 'Lily' | 'John' |
+                        ^
+      | age  |  15    | 30     |
+                        ^
+                        ^
+    """
+
+  Scenario: ignore row should not check row index
+    Given the following json:
+    """
+    []
+    """
+    Then the following verification should pass:
+    """
+    = | >>   | 0   |
+      | name | *** |
+      | age  |     |
     """

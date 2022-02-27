@@ -18,4 +18,9 @@ public class EmptyPrefixHeadNode extends PrefixHeadNode {
     public RowPrefixNode getPrefix(int i) {
         return new RowPrefixNode(empty(), empty(), empty());
     }
+
+    @Override
+    public void checkSize(TransposedRowNode r) {
+    }
 }
+
