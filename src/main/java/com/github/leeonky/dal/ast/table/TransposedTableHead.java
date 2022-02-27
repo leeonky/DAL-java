@@ -7,10 +7,10 @@ import com.github.leeonky.interpreter.SyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class PrefixHeadNode extends DALNode {
+public class TransposedTableHead extends DALNode {
     private final List<RowPrefixNode> prefixes;
 
-    public PrefixHeadNode(List<DALNode> prefixes) {
+    public TransposedTableHead(List<DALNode> prefixes) {
         this.prefixes = prefixes.stream().map(RowPrefixNode.class::cast).collect(Collectors.toList());
         if (!prefixes.isEmpty())
             setPositionBegin(prefixes.get(prefixes.size() - 1).getPositionBegin());

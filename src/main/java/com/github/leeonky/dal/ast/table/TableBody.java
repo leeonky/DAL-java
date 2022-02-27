@@ -5,13 +5,13 @@ import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.ast.ListScopeNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.Clause;
+import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
 import static java.util.stream.Collectors.toList;
 
 public class TableBody extends DALNode {
@@ -19,18 +19,18 @@ public class TableBody extends DALNode {
 
     public TableBody(List<? extends DALNode> rows) {
         this.rows = rows.stream().map(RowNode.class::cast).collect(toList());
-        checkPrefix();
     }
 
     private boolean isHasRowIndex() {
         return (!rows.isEmpty()) && rows.get(0).hasIndex();
     }
 
-    private void checkPrefix() {
+    public TableBody checkPrefix(InterpreterException.Position.Type type) {
         rows.stream().skip(1).filter(rowNode -> rowNode.samePrefix(rows.get(0))).findAny().ifPresent(row -> {
-            throw new SyntaxException("Row index should be consistent", row.getPositionBegin(), LINE)
-                    .multiPosition(rows.get(0).getPositionBegin(), LINE);
+            throw new SyntaxException("Row index should be consistent", row.getPositionBegin(), type)
+                    .multiPosition(rows.get(0).getPositionBegin(), type);
         });
+        return this;
     }
 
     @Override

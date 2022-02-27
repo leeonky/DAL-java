@@ -8,32 +8,38 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
+
 public class TableNode extends DALNode {
     private final TableHead tableHead;
     private final TableBody tableBody;
 
     public TableNode(TableHead tableHead, TableBody tableBody) {
         this.tableHead = tableHead;
-        this.tableBody = tableBody;
+        this.tableBody = tableBody.checkPrefix(LINE);
     }
 
     @Override
     public boolean judge(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
-        return judgeAsList(actualNode, operator, context);
+        return judgeAsListAndReThrow(actualNode, operator, context);
     }
 
     @Override
     public boolean judge(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
-        return judgeAsList(actualNode, operator, context);
+        return judgeAsListAndReThrow(actualNode, operator, context);
     }
 
-    private boolean judgeAsList(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
+    private boolean judgeAsListAndReThrow(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
         try {
-            return tableBody.transformToListScope(operator).judgeAll(context, actualNode.evaluateData(context)
-                    .setListComparator(tableHead.collectComparator(context)));
+            return judgeAsList(actualNode, operator, context);
         } catch (ElementAssertionFailure elementAssertionFailure) {
             throw elementAssertionFailure.linePositionException(this);
         }
+    }
+
+    public boolean judgeAsList(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
+        return tableBody.transformToListScope(operator).judgeAll(context, actualNode.evaluateData(context)
+                .setListComparator(tableHead.collectComparator(context)));
     }
 
     @Override

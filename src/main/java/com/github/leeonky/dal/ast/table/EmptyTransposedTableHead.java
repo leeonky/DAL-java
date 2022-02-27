@@ -4,8 +4,8 @@ import java.util.Collections;
 
 import static java.util.Optional.empty;
 
-public class EmptyPrefixHeadNode extends PrefixHeadNode {
-    public EmptyPrefixHeadNode() {
+public class EmptyTransposedTableHead extends TransposedTableHead {
+    public EmptyTransposedTableHead() {
         super(Collections.emptyList());
     }
 

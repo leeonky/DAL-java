@@ -91,7 +91,8 @@ public class Compiler {
                     CONST_USER_DEFINED_LITERAL),
             ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.nodeParser(token -> new ListEllipsisNode()),
             EMPTY_CELL = procedure -> when(procedure.emptyCell()).optional(EmptyCellNode::new),
-            TABLE = oneOf(transposeTableIndex(), table(), TRANSPOSE_MARK.and(transposeTable().input(new EmptyPrefixHeadNode()))),
+            TABLE = lazy(() -> oneOf(transposeTableIndex(), table(),
+                    TRANSPOSE_MARK.and(transposeTable().input(new EmptyTransposedTableHead())))),
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
@@ -190,7 +191,7 @@ public class Compiler {
             ((ConstNode) node).getValue()), SCHEMA_CLAUSE.parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
             TABLE_HEADER = procedure -> new HeaderNode((SortSequenceNode) SEQUENCE.parse(procedure),
                     PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
-            PREFIX_ROW = many(ROW_PREFIX).splitBy(COLUMN_SPLITTER).endWithLine().as(PrefixHeadNode::new);
+            PREFIX_ROW = many(ROW_PREFIX).splitBy(COLUMN_SPLITTER).endWithLine().as(TransposedTableHead::new);
 
     private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, (TableBody) many(ROW_PREFIX.combine(oneOf(
@@ -211,9 +212,9 @@ public class Compiler {
     }
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
-            HeaderNode head, PrefixHeadNode prefixHeadNode) {
+            HeaderNode head, TransposedTableHead transposedTableHead) {
         return procedure -> procedure.positionOf(cellPosition -> oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL, ROW_WILDCARD)
-                .or(shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, head.headerOperator(), prefixHeadNode.getPrefix(
+                .or(shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, head.headerOperator(), transposedTableHead.getPrefix(
                         procedure.getIndex()).rowOperator()).or(DEFAULT_JUDGEMENT_OPERATOR)).input(head.getProperty()))
                 .parse(procedure).setPositionBegin(cellPosition));
     }
@@ -229,7 +230,7 @@ public class Compiler {
     }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
-            PrefixHeadNode prefix) {
+            TransposedTableHead prefix) {
         return procedure -> header -> tableLine(tableCell((HeaderNode) header, prefix))
                 .as(cells -> new TransposedRowNode(header, cells)).parse(procedure);
     }
@@ -238,7 +239,7 @@ public class Compiler {
         return procedure -> prefixHead -> {
             //        TODO test not allow empty table >> with out rows
             return many(COLUMN_SPLITTER.before(single(TABLE_HEADER).endWith(COLUMN_SPLITTER).as()).expression(tableRow(
-                    (PrefixHeadNode) prefixHead))).as(dalNodes -> new TransposedTableNode(prefixHead, dalNodes))
+                    (TransposedTableHead) prefixHead))).as(dalNodes -> new TransposedTableNode(prefixHead, dalNodes))
                     .parse(procedure);
         };
     }
