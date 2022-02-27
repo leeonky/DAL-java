@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.Notation.notation;
 import static java.lang.String.format;
 
@@ -23,6 +24,11 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
     protected abstract void close(P procedure);
 
     protected abstract boolean isSplitter(P procedure);
+
+    @SuppressWarnings("unchecked")
+    protected R parse(Syntax<C, N, E, O, P, OP, MA, T, R> syntax, Function<List<T>, N> factory) {
+        return (R) (NodeParser.Mandatory<C, N, E, O, P>) procedure -> factory.apply(parser.apply(procedure, syntax));
+    }
 
     public static class DefaultSyntax<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
@@ -71,6 +77,11 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
         @Override
         protected boolean isSplitter(P procedure) {
             return syntax.isSplitter(procedure);
+        }
+
+        @Override
+        protected R parse(Syntax<C, N, E, O, P, OP, MA, T, R> syntax, Function<List<T>, N> factory) {
+            return this.syntax.parse(syntax, factory);
         }
     }
 
@@ -126,7 +137,6 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
         };
     }
 
-
     public Syntax<C, N, E, O, P, OP, MA, T, R> optionalSplitBy(Notation splitter) {
         return new CompositeSyntax<C, N, E, O, P, OP, MA, T, R>(this) {
 
@@ -151,8 +161,22 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
     }
 
     @SuppressWarnings("unchecked")
+    public Syntax<C, N, E, O, P, OP, MA, T, NodeParser<C, N, E, O, P>> atLeast(int count) {
+        return new CompositeSyntax<C, N, E, O, P, OP, MA, T, NodeParser<C, N, E, O, P>>(
+                (Syntax<C, N, E, O, P, OP, MA, T, NodeParser<C, N, E, O, P>>) this) {
+            @Override
+            protected NodeParser<C, N, E, O, P> parse(Syntax<C, N, E, O, P, OP, MA, T, NodeParser<C, N, E, O, P>> syntax,
+                                                      Function<List<T>, N> factory) {
+                return procedure -> {
+                    List<T> list = parser.apply(procedure, syntax);
+                    return when(list.size() >= count).optional(() -> factory.apply(list));
+                };
+            }
+        };
+    }
+
     public R as(Function<List<T>, N> factory) {
-        return (R) (NodeParser.Mandatory<C, N, E, O, P>) procedure -> factory.apply(parser.apply(procedure, this));
+        return parse(this, factory);
     }
 
     public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,

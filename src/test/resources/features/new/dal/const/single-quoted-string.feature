@@ -18,6 +18,20 @@ Feature: 'string'
       |             | ''            | ''            |
       | hello world | 'hello world' | 'hello world' |
 
+  Scenario: single quoted string with blank
+    When evaluate by:
+    """
+     '  '
+    """
+    Then the result should:
+    """
+    : '  ' and length= 2
+    """
+    And the inspect should:
+    """
+    '  '
+    """
+
   Scenario: escape char
     When evaluate by:
     """

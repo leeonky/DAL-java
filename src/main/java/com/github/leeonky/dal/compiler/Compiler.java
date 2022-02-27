@@ -22,7 +22,6 @@ import static com.github.leeonky.interpreter.NodeParser.oneOf;
 import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.OperatorParser.oneOf;
 import static com.github.leeonky.interpreter.Parser.endWith;
-import static com.github.leeonky.interpreter.Sequence.atLeast;
 import static com.github.leeonky.interpreter.Sequence.severalTimes;
 import static com.github.leeonky.interpreter.Syntax.many;
 import static java.util.Optional.empty;
@@ -120,9 +119,9 @@ public class Compiler {
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SCHEMA_COMPOSE = OPENING_BRACKET.and(SCHEMA.mandatory("expect a schema").sequence(atLeast(1,
-            "expect at least one schema").splitBy(SCHEMA_AND).endWith(CLOSING_BRACKET), DALNode::elementSchemas))
-            .or(SCHEMA.mandatory("expect a schema").sequence(severalTimes().splitBy(SCHEMA_AND), DALNode::schemas)),
+            SCHEMA_COMPOSE = OPENING_BRACKET.and(many(SCHEMA.mandatory("expect a schema")).splitBy(SCHEMA_AND)
+            .as(DALNode::elementSchemas).closeBy(endWith(CLOSING_BRACKET))).or(many(SCHEMA.mandatory("expect a schema"))
+            .splitBy(SCHEMA_AND).as(DALNode::schemas)),
             PROPERTY_CHAIN, OPERAND, EXPRESSION, SHORT_JUDGEMENT_OPERAND;
 
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
@@ -203,10 +202,9 @@ public class Compiler {
             SEQUENCE_ZA_2 = Notations.SEQUENCE_ZA_2.nodeParser(SortNode::new);
 
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SEQUENCE = oneOf(SEQUENCE_AZ.sequence(severalTimes(), SortSequenceNode::new),
-            SEQUENCE_ZA.sequence(severalTimes(), SortSequenceNode::new),
-            SEQUENCE_AZ_2.sequence(severalTimes(), SortSequenceNode::new),
-            SEQUENCE_ZA_2.sequence(severalTimes(), SortSequenceNode::new))
+            SEQUENCE = oneOf(
+            many(SEQUENCE_AZ).atLeast(1).as(SortSequenceNode::new), many(SEQUENCE_AZ_2).atLeast(1).as(SortSequenceNode::new),
+            many(SEQUENCE_ZA).atLeast(1).as(SortSequenceNode::new), many(SEQUENCE_ZA_2).atLeast(1).as(SortSequenceNode::new))
             .or(procedure -> SortSequenceNode.noSequence());
 
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> TABLE_HEADER = procedure -> {

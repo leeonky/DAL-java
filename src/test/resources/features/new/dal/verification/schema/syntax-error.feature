@@ -71,7 +71,7 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    expect at least one schema
+    expect a schema
     """
     And got the following notation:
     """
