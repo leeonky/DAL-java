@@ -21,7 +21,6 @@ import static com.github.leeonky.interpreter.NodeParser.lazy;
 import static com.github.leeonky.interpreter.NodeParser.oneOf;
 import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.OperatorParser.oneOf;
-import static com.github.leeonky.interpreter.Sequence.severalTimes;
 import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
 import static java.util.Optional.empty;
@@ -104,8 +103,7 @@ public class Compiler {
             CONST_FALSE = Keywords.FALSE.nodeParser(DALNode::constFalse),
             CONST_NULL = Keywords.NULL.nodeParser(DALNode::constNull),
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
-            REGEX = REGEX_NOTATION.and(charNode(REGEX_ESCAPES).sequence(severalTimes().endWith(
-                    REGEX_NOTATION.getLabel()), DALNode::regex)),
+            REGEX = OPEN_REGEX.and(many(charNode(REGEX_ESCAPES)).endWith(CLOSE_REGEX.getLabel()).as(DALNode::regex)),
             IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(Tokens.SYMBOL.nodeParser(DALNode::symbolNode))
                     .defaultInputNode(InputNode.INSTANCE),
             WILDCARD = Notations.Operators.WILDCARD.nodeParser(WildcardNode::new),
@@ -133,12 +131,8 @@ public class Compiler {
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
 
     EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).mandatory(
-            "expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.and(
-            single(INTEGER_OR_STRING.mandatory("should given one property or array index in `[]`")).endWith(CLOSING_BRACKET)
-                    .as(DALNode::bracketSymbolNode)
-//                    INTEGER_OR_STRING.mandatory(
-//            "should given one property or array index in `[]`").map(DALNode::bracketSymbolNode).closeBy(endWith(CLOSING_BRACKET))
-    )));
+            "expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.and(single(INTEGER_OR_STRING.mandatory(
+            "should given one property or array index in `[]`")).endWith(CLOSING_BRACKET).as(DALNode::bracketSymbolNode))));
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> shortJudgementClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
@@ -250,8 +244,8 @@ public class Compiler {
             return transpose(allOptional(() -> TRANSPOSED_TABLE_HEADER.parse(procedure).map(HeaderNodeBk.class::cast)
                     .map(headerNode -> {
                         headerNodes.add(headerNode);
-                        return COLUMN_SPLITTER.before(cell(headerNode).sequence(byTableRow()
-                                , CellCollection::new)).parse(procedure).map(n -> ((CellCollection) n).getCells())
+                        return COLUMN_SPLITTER.before(tableLine(cell(headerNode)).as(CellCollection::new))
+                                .parse(procedure).map(n -> ((CellCollection) n).getCells())
 //                                TODO need test
                                 .orElseThrow(() -> procedure.getSourceCode().syntaxError("should end with `|`", 0));
                     }))).stream().map(row -> new com.github.leeonky.dal.ast.RowNode(empty(), empty(), empty(), row)).collect(toList());
@@ -287,7 +281,8 @@ public class Compiler {
                 List<Optional<Integer>> rowIndexes = new ArrayList<>();
                 List<Optional<Clause<DALRuntimeContext, DALNode>>> rowSchemaClauses = new ArrayList<>();
                 List<Optional<DALOperator>> rowOperators = new ArrayList<>();
-                COLUMN_SPLITTER.before(indexCell(rowIndexes, rowSchemaClauses, rowOperators).sequence(byTableRow(), CellCollection::new)).parse(procedure);
+                COLUMN_SPLITTER.before(tableLine(indexCell(rowIndexes, rowSchemaClauses, rowOperators))
+                        .as(CellCollection::new)).parse(procedure);
                 List<HeaderNodeBk> headerNodes = new ArrayList<>();
                 return new TableNodeBk(headerNodes, getRowNodes(procedure, headerNodes, rowSchemaClauses, rowOperators,
                         rowIndexes), TableNodeBk.Type.TRANSPOSED);
@@ -311,8 +306,8 @@ public class Compiler {
             return transpose(allOptional(() -> TRANSPOSED_TABLE_HEADER.parse(dalProcedure).map(HeaderNodeBk.class::cast)
                     .map(headerNode -> {
                         headerNodes.add(headerNode);
-                        return COLUMN_SPLITTER.before(cell(rowOperators, headerNode).sequence(byTableRow()
-                                , CellCollection::new)).parse(dalProcedure).map(n -> ((CellCollection) n).getCells())
+                        return COLUMN_SPLITTER.before(tableLine(cell(rowOperators, headerNode)).as(CellCollection::new))
+                                .parse(dalProcedure).map(n -> ((CellCollection) n).getCells())
 //                                TODO need test
                                 .orElseThrow(() -> dalProcedure.getSourceCode().syntaxError("should end with `|`", 0));
                     }))).stream();
@@ -347,8 +342,7 @@ public class Compiler {
                         COLUMN_SPLITTER.before(tableRow((TableHead) head)))).parse(procedure))));
 
         private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> table() {
-            return COLUMN_SPLITTER.before(TABLE_HEADER.sequence(byTableRow(), TableHead::new))
-                    .expression(TABLE_BODY_CLAUSE);
+            return COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).expression(TABLE_BODY_CLAUSE);
         }
 
         private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
@@ -369,7 +363,8 @@ public class Compiler {
 
         private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
                 TableHead tableHead) {
-            return procedure -> rowPrefix -> tableCell(rowPrefix, tableHead).sequence(byTableRow(), cells -> {
+//            TODO method for input->nodeparser => clauseparser
+            return procedure -> rowPrefix -> tableLine(tableCell(rowPrefix, tableHead)).as(cells -> {
                 if (cells.size() != tableHead.size())
                     throw procedure.getSourceCode().syntaxError("Different cell size", 0);
                 return new RowNode(rowPrefix, cells);
@@ -378,9 +373,10 @@ public class Compiler {
 
         private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
                 PrefixHeadNode prefix) {
-            return procedure -> header -> tableCell((HeaderNode) header, prefix).sequence(byTableRow(), cells ->
-                    new TransposedRowNode(header, cells)).parse(procedure);
+            return procedure -> header -> tableLine(tableCell((HeaderNode) header, prefix))
+                    .as(cells -> new TransposedRowNode(header, cells)).parse(procedure);
         }
+
 
         private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
             return procedure -> prefixHead -> {
@@ -396,7 +392,11 @@ public class Compiler {
         }
     }
 
-    private static Sequence<Procedure<?, ?, ?, ?, ?>> byTableRow() {
-        return severalTimes().mandatoryTailSplitBy(COLUMN_SPLITTER).endWithLine();
+    private static Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, NodeParser<DALRuntimeContext,
+            DALNode, DALExpression, DALOperator, DALProcedure>, NodeParser.Mandatory<DALRuntimeContext, DALNode,
+            DALExpression, DALOperator, DALProcedure>, DALNode, NodeParser.Mandatory<DALRuntimeContext, DALNode,
+            DALExpression, DALOperator, DALProcedure>, List<DALNode>> tableLine(NodeParser.Mandatory<DALRuntimeContext,
+            DALNode, DALExpression, DALOperator, DALProcedure> mandatory) {
+        return many(mandatory).mandatoryTailSplitBy(COLUMN_SPLITTER).endWithLine();
     }
 }
