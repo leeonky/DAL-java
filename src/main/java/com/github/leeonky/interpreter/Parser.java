@@ -19,10 +19,6 @@ public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E ext
         throw new IllegalStateException();
     }
 
-    default OP castParser(Parser<C, N, E, O, P, OP, MA, T> parser) {
-        throw new IllegalStateException();
-    }
-
     default MA or(MA mandatory) {
         return castMandatory(procedure -> parse(procedure).orElseGet(() -> mandatory.parse(procedure)));
     }
@@ -31,31 +27,10 @@ public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E ext
         return castMandatory(procedure -> parse(procedure).orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0)));
     }
 
-    default OP closeBy(Sequence<? super P> sequence) {
-        return castParser(procedure -> {
-            Optional<T> optional = parse(procedure);
-            if (optional.isPresent())
-                sequence.close(procedure);
-            return optional;
-        });
-    }
-
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, OP, MA, T>, T> {
         T parse(P procedure);
-
-        default MA cast(Parser.Mandatory<C, N, E, O, P, OP, MA, T> mandatory) {
-            throw new IllegalStateException();
-        }
-
-        default MA closeBy(Sequence<? super P> sequence) {
-            return cast(procedure -> {
-                T element = parse(procedure);
-                sequence.close(procedure);
-                return element;
-            });
-        }
 
         default NodeParser.Mandatory<C, N, E, O, P> sequence(Sequence<? super P> sequence, Function<List<T>, N> factory) {
             return procedure -> procedure.actionUnderIndex(() -> factory.apply(sequence.validate(procedure, new ArrayList<T>() {{

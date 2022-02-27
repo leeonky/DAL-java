@@ -69,17 +69,6 @@ public abstract class Sequence<P extends Procedure<?, ?, ?, ?, ?>> {
         return new DefaultSequence<>();
     }
 
-    public static <P extends Procedure<?, ?, ?, ?, ?>> Sequence<P> atLeast(int count, String message) {
-        return new DefaultSequence<P>() {
-            @Override
-            public <T> List<T> validate(P procedure, List<T> list) {
-                if (list.size() < count)
-                    throw procedure.getSourceCode().syntaxError(message, -1);
-                return list;
-            }
-        };
-    }
-
     public Sequence<P> endWith(Notation notation) {
         return new CompositeSequence<P>(this) {
             @Override
@@ -119,27 +108,6 @@ public abstract class Sequence<P extends Procedure<?, ?, ?, ?, ?>> {
                 if (!isClose)
 //                TODO need test
                     throw procedure.getSourceCode().syntaxError("unexpected token", 0);
-            }
-        };
-    }
-
-    public Sequence<P> splitBy(Notation notation) {
-        return new CompositeSequence<P>(this) {
-
-            @Override
-            public boolean isSplitter(P procedure) {
-                return procedure.getSourceCode().popWord(notation).isPresent();
-            }
-        };
-    }
-
-    public Sequence<P> optionalSplitBy(Notation splitter) {
-        return new CompositeSequence<P>(this) {
-
-            @Override
-            public boolean isSplitter(P procedure) {
-                procedure.getSourceCode().popWord(splitter);
-                return true;
             }
         };
     }

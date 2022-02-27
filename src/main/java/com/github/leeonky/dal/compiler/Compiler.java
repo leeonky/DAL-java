@@ -21,9 +21,9 @@ import static com.github.leeonky.interpreter.NodeParser.lazy;
 import static com.github.leeonky.interpreter.NodeParser.oneOf;
 import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.OperatorParser.oneOf;
-import static com.github.leeonky.interpreter.Parser.endWith;
 import static com.github.leeonky.interpreter.Sequence.severalTimes;
 import static com.github.leeonky.interpreter.Syntax.many;
+import static com.github.leeonky.interpreter.Syntax.single;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
@@ -119,8 +119,8 @@ public class Compiler {
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SCHEMA_COMPOSE = OPENING_BRACKET.and(many(SCHEMA.mandatory("expect a schema")).splitBy(SCHEMA_AND)
-            .as(DALNode::elementSchemas).closeBy(endWith(CLOSING_BRACKET))).or(many(SCHEMA.mandatory("expect a schema"))
+            SCHEMA_COMPOSE = OPENING_BRACKET.and(single(many(SCHEMA.mandatory("expect a schema")).splitBy(SCHEMA_AND)
+            .as(DALNode::elementSchemas)).endWith(CLOSING_BRACKET).as()).or(many(SCHEMA.mandatory("expect a schema"))
             .splitBy(SCHEMA_AND).as(DALNode::schemas)),
             PROPERTY_CHAIN, OPERAND, EXPRESSION, SHORT_JUDGEMENT_OPERAND;
 
@@ -133,8 +133,12 @@ public class Compiler {
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
 
     EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).mandatory(
-            "expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.and(INTEGER_OR_STRING.mandatory(
-            "should given one property or array index in `[]`").map(DALNode::bracketSymbolNode).closeBy(endWith(CLOSING_BRACKET)))));
+            "expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.and(
+            single(INTEGER_OR_STRING.mandatory("should given one property or array index in `[]`")).endWith(CLOSING_BRACKET)
+                    .as(DALNode::bracketSymbolNode)
+//                    INTEGER_OR_STRING.mandatory(
+//            "should given one property or array index in `[]`").map(DALNode::bracketSymbolNode).closeBy(endWith(CLOSING_BRACKET))
+    )));
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> shortJudgementClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
@@ -147,8 +151,8 @@ public class Compiler {
             JUDGEMENT_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN, WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN, EXPRESSION_CLAUSE;
 
     public Compiler() {
-        PARENTHESES = lazy(() -> enableCommaAnd(OPENING_PARENTHESES.and(
-                EXPRESSION.closeBy(endWith(CLOSING_PARENTHESES)).map(DALNode::parenthesesNode))));
+        PARENTHESES = lazy(() -> enableCommaAnd(OPENING_PARENTHESES.and(single(EXPRESSION).endWith(CLOSING_PARENTHESES)
+                .as(DALNode::parenthesesNode))));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IMPLICIT_PROPERTY);
         PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursive(EXPLICIT_PROPERTY);
         OBJECT = DALProcedure.disableCommaAnd(OPENING_BRACES.and(many(PROPERTY_CHAIN.expression(shortJudgementClause(
@@ -338,8 +342,8 @@ public class Compiler {
         private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
                 TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, new TableBody(allOptional(
                 () -> ROW_PREFIX.combine(oneOf(
-                        COLUMN_SPLITTER.before(ELEMENT_ELLIPSIS.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
-                        COLUMN_SPLITTER.before(ROW_WILDCARD.closeBy(endWith(COLUMN_SPLITTER))).clauseParser(RowNode::new),
+                        COLUMN_SPLITTER.before(single(ELEMENT_ELLIPSIS).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
+                        COLUMN_SPLITTER.before(single(ROW_WILDCARD).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
                         COLUMN_SPLITTER.before(tableRow((TableHead) head)))).parse(procedure))));
 
         private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> table() {
@@ -381,7 +385,7 @@ public class Compiler {
         private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
             return procedure -> prefixHead -> {
                 //        TODO test not allow empty table >> with out rows
-                return many(COLUMN_SPLITTER.before(TABLE_HEADER.closeBy(endWith(COLUMN_SPLITTER))).expression(tableRow(
+                return many(COLUMN_SPLITTER.before(single(TABLE_HEADER).endWith(COLUMN_SPLITTER).as()).expression(tableRow(
                         (PrefixHeadNode) prefixHead))).as(dalNodes -> new TransposedTableNode(prefixHead, dalNodes))
                         .parse(procedure);
             };
