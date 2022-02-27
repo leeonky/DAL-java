@@ -5,7 +5,11 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
-import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.DalException;
+import com.github.leeonky.dal.runtime.ListAccessor;
+import com.github.leeonky.dal.runtime.NameStrategy;
+import com.github.leeonky.dal.runtime.Result;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.SourceCode;
@@ -29,8 +33,8 @@ public class IntegrationTestContext {
     private final List<String> javaClasses = new ArrayList<>();
 
     private static final Compiler compiler = new Compiler();
-    private static final Map<String, NodeParser<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator,
-            DALProcedure>> parserMap = new HashMap<String, NodeParser<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression,
+    private static final Map<String, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
+            DALProcedure>> parserMap = new HashMap<String, NodeParser<DALRuntimeContext, DALNode, DALExpression,
             DALOperator, DALProcedure>>() {{
         put("symbol", compiler.SYMBOL);
         put("number", compiler.NUMBER);
@@ -41,8 +45,8 @@ public class IntegrationTestContext {
     private DALNode dalNode = null;
     private Map<String, Integer> firstIndexes = new HashMap<>();
 
-    private static NodeParser<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> optional(
-            NodeParser.Mandatory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeFactory) {
+    private static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> optional(
+            NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeFactory) {
         return procedure -> Optional.ofNullable(nodeFactory.parse(procedure));
     }
 

@@ -25,46 +25,36 @@ import static java.util.Optional.of;
 public class Compiler {
 
     private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            BINARY_ARITHMETIC_OPERATORS = oneOf(
-            Operators.AND.operatorParser(DALOperator::operatorAnd),
-            Operators.OR.operatorParser(DALOperator::operatorOr),
-            Keywords.AND.operatorParser(DALOperator::keywordAnd),
-            Operators.COMMA.operatorParser(DALOperator::commaAnd, DALProcedure::isEnableCommaAnd),
-            Operators.NOT_EQUAL.operatorParser(DALOperator.NotEqual::new),
-            Keywords.OR.operatorParser(DALOperator::keywordOr),
-            Operators.GREATER_OR_EQUAL.operatorParser(DALOperator.GreaterOrEqual::new),
-            Operators.LESS_OR_EQUAL.operatorParser(DALOperator.LessOrEqual::new),
-            Operators.GREATER.operatorParser(DALOperator.Greater::new),
-            Operators.LESS.operatorParser(DALOperator.Less::new),
-            Operators.PLUS.operatorParser(DALOperator.Plus::new),
-            Operators.SUBTRACTION.operatorParser(DALOperator.Subtraction::new),
-            Operators.MULTIPLICATION.operatorParser(DALOperator.Multiplication::new),
-            Operators.DIVISION.operatorParser(DALOperator.Division::new));
-
-    private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            PROPERTY_DOT = Operators.DOT.operatorParser(DALOperator.PropertyDot::new, not(DALProcedure::mayBeElementEllipsis));
-
-    private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            UNARY_OPERATORS = oneOf(
-            Operators.MINUS.operatorParser(DALOperator.Minus::new, not(DALProcedure::isCodeBeginning)),
-            Operators.NOT.operatorParser(DALOperator.Not::new, not(DALProcedure::mayBeUnEqual)));
-
-    private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            JUDGEMENT_OPERATORS = oneOf(
-            Operators.MATCHER.<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-                    operatorParser(DALOperator.Matcher::new),
-            Operators.EQUAL.operatorParser(DALOperator.Equal::new));
-
-    private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+            DEFAULT_OPERATOR = Procedure::currentOperator,
             IS = Operators.IS.operatorParser(DALOperator.Is::new),
-            WHICH = Operators.WHICH.operatorParser(DALOperator.Which::new);
-
-    private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            PROPERTY_IMPLICIT = procedure -> of(new DALOperator.PropertyImplicit());
+            WHICH = Operators.WHICH.operatorParser(DALOperator.Which::new),
+            PROPERTY_DOT = Operators.DOT.operatorParser(DALOperator.PropertyDot::new, not(DALProcedure::mayBeElementEllipsis)),
+            PROPERTY_IMPLICIT = procedure -> of(new DALOperator.PropertyImplicit()),
+            BINARY_ARITHMETIC_OPERATORS = oneOf(
+                    Operators.AND.operatorParser(DALOperator::operatorAnd),
+                    Operators.OR.operatorParser(DALOperator::operatorOr),
+                    Keywords.AND.operatorParser(DALOperator::keywordAnd),
+                    Operators.COMMA.operatorParser(DALOperator::commaAnd, DALProcedure::isEnableCommaAnd),
+                    Operators.NOT_EQUAL.operatorParser(DALOperator.NotEqual::new),
+                    Keywords.OR.operatorParser(DALOperator::keywordOr),
+                    Operators.GREATER_OR_EQUAL.operatorParser(DALOperator.GreaterOrEqual::new),
+                    Operators.LESS_OR_EQUAL.operatorParser(DALOperator.LessOrEqual::new),
+                    Operators.GREATER.operatorParser(DALOperator.Greater::new),
+                    Operators.LESS.operatorParser(DALOperator.Less::new),
+                    Operators.PLUS.operatorParser(DALOperator.Plus::new),
+                    Operators.SUBTRACTION.operatorParser(DALOperator.Subtraction::new),
+                    Operators.MULTIPLICATION.operatorParser(DALOperator.Multiplication::new),
+                    Operators.DIVISION.operatorParser(DALOperator.Division::new)),
+            UNARY_OPERATORS = oneOf(
+                    Operators.MINUS.operatorParser(DALOperator.Minus::new, not(DALProcedure::isCodeBeginning)),
+                    Operators.NOT.operatorParser(DALOperator.Not::new, not(DALProcedure::mayBeUnEqual))),
+            JUDGEMENT_OPERATORS = oneOf(
+                    Operators.MATCHER.<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+                            operatorParser(DALOperator.Matcher::new),
+                    Operators.EQUAL.operatorParser(DALOperator.Equal::new));
 
     private static final OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-//    TODO remove default matcher logic
-            DEFAULT_JUDGEMENT_OPERATOR = procedure -> procedure.currentOperator().orElseGet(DALOperator.Matcher::new);
+            DEFAULT_JUDGEMENT_OPERATOR = DEFAULT_OPERATOR.mandatory("");
 
     private static final EscapeChars SINGLE_QUOTED_ESCAPES = new EscapeChars()
             .escape("\\\\", '\\')
@@ -78,6 +68,7 @@ public class Compiler {
     private static final EscapeChars REGEX_ESCAPES = new EscapeChars()
             .escape("\\/", '/');
 
+    //    TODO private
     NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             PROPERTY, OBJECT, LIST, PARENTHESES, JUDGEMENT,
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
@@ -100,7 +91,7 @@ public class Compiler {
                     CONST_USER_DEFINED_LITERAL),
             ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.nodeParser(token -> new ListEllipsisNode()),
             EMPTY_CELL = procedure -> when(procedure.emptyCell()).optional(EmptyCellNode::new),
-            TABLE = oneOf(new TableParser().transposeTableIndex(), new TableParser().table(), TRANSPOSE_MARK.and(new TableParser().transposeTable().input(new EmptyPrefixHeadNode()))),
+            TABLE = oneOf(transposeTableIndex(), table(), TRANSPOSE_MARK.and(transposeTable().input(new EmptyPrefixHeadNode()))),
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
@@ -193,75 +184,72 @@ public class Compiler {
             many(SEQUENCE_ZA).atLeast(1).as(SortSequenceNode::new), many(SEQUENCE_ZA_2).atLeast(1).as(SortSequenceNode::new))
             .or(procedure -> SortSequenceNode.noSequence());
 
-    public class TableParser {
-        //TODO should test integer or something after table
+
+    private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+            ROW_PREFIX = procedure -> new RowPrefixNode(INTEGER.parse(procedure).map(node -> (Integer)
+            ((ConstNode) node).getValue()), SCHEMA_CLAUSE.parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
+            TABLE_HEADER = procedure -> new HeaderNode((SortSequenceNode) SEQUENCE.parse(procedure),
+                    PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
+            PREFIX_ROW = many(ROW_PREFIX).splitBy(COLUMN_SPLITTER).endWithLine().as(PrefixHeadNode::new);
+
+    private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+            TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, (TableBody) many(ROW_PREFIX.combine(oneOf(
+            COLUMN_SPLITTER.before(single(ELEMENT_ELLIPSIS).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
+            COLUMN_SPLITTER.before(single(ROW_WILDCARD).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
+            COLUMN_SPLITTER.before(tableRow((TableHead) head))))).as(TableBody::new).parse(procedure));
+
+    private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> table() {
+        return COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).expression(TABLE_BODY_CLAUSE);
+    }
+
+    private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
+            DALNode rowPrefix, TableHead head) {
+        return procedure -> procedure.positionOf(cellPosition -> shortJudgementClause(oneOf(JUDGEMENT_OPERATORS,
+                head.getHeader(procedure).headerOperator(), ((RowPrefixNode) rowPrefix).rowOperator())
+                .or(DEFAULT_JUDGEMENT_OPERATOR)).input(head.getHeader(procedure).getProperty()).parse(procedure)
+                .setPositionBegin(cellPosition));
+    }
+
+    private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
+            HeaderNode head, PrefixHeadNode prefixHeadNode) {
+        return procedure -> procedure.positionOf(cellPosition -> oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL, ROW_WILDCARD)
+                .or(shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, head.headerOperator(), prefixHeadNode.getPrefix(
+                        procedure.getIndex()).rowOperator()).or(DEFAULT_JUDGEMENT_OPERATOR)).input(head.getProperty()))
+                .parse(procedure).setPositionBegin(cellPosition));
+    }
+
+    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
+            TableHead tableHead) {
+//            TODO method for input->nodeparser => clauseparser
+        return procedure -> rowPrefix -> tableLine(tableCell(rowPrefix, tableHead)).as(cells -> {
+            if (cells.size() != tableHead.size())
+                throw procedure.getSourceCode().syntaxError("Different cell size", 0);
+            return new RowNode(rowPrefix, cells);
+        }).parse(procedure);
+    }
+
+    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
+            PrefixHeadNode prefix) {
+        return procedure -> header -> tableLine(tableCell((HeaderNode) header, prefix))
+                .as(cells -> new TransposedRowNode(header, cells)).parse(procedure);
+    }
+
+    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
+        return procedure -> prefixHead -> {
+            //        TODO test not allow empty table >> with out rows
+            return many(COLUMN_SPLITTER.before(single(TABLE_HEADER).endWith(COLUMN_SPLITTER).as()).expression(tableRow(
+                    (PrefixHeadNode) prefixHead))).as(dalNodes -> new TransposedTableNode(prefixHead, dalNodes))
+                    .parse(procedure);
+        };
+    }
+    //TODO should test integer or something after table
 //: | a   | b   |
 //0 | 'a' | 'b' |
 //is a
 //        Row prefix ok but no cell
 
-        private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-                ROW_PREFIX = procedure -> new RowPrefixNode(INTEGER.parse(procedure).map(node -> (Integer)
-                ((ConstNode) node).getValue()), SCHEMA_CLAUSE.parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
-                TABLE_HEADER = procedure -> new HeaderNode((SortSequenceNode) SEQUENCE.parse(procedure),
-                        PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
-                PREFIX_ROW = many(ROW_PREFIX).splitBy(COLUMN_SPLITTER).endWithLine().as(PrefixHeadNode::new);
-
-        private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-                TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, (TableBody) many(ROW_PREFIX.combine(oneOf(
-                COLUMN_SPLITTER.before(single(ELEMENT_ELLIPSIS).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
-                COLUMN_SPLITTER.before(single(ROW_WILDCARD).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
-                COLUMN_SPLITTER.before(tableRow((TableHead) head))))).as(TableBody::new).parse(procedure));
-
-        private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> table() {
-            return COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).expression(TABLE_BODY_CLAUSE);
-        }
-
-        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
-                DALNode rowPrefix, TableHead head) {
-            return procedure -> procedure.positionOf(cellPosition -> shortJudgementClause(oneOf(JUDGEMENT_OPERATORS,
-                    head.getHeader(procedure).headerOperator(), ((RowPrefixNode) rowPrefix).rowOperator())
-                    .or(DEFAULT_JUDGEMENT_OPERATOR)).input(head.getHeader(procedure).getProperty()).parse(procedure)
-                    .setPositionBegin(cellPosition));
-        }
-
-        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
-                HeaderNode head, PrefixHeadNode prefixHeadNode) {
-            return procedure -> procedure.positionOf(cellPosition -> oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL, ROW_WILDCARD)
-                    .or(shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, head.headerOperator(), prefixHeadNode.getPrefix(
-                            procedure.getIndex()).rowOperator()).or(DEFAULT_JUDGEMENT_OPERATOR)).input(head.getProperty()))
-                    .parse(procedure).setPositionBegin(cellPosition));
-        }
-
-        private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
-                TableHead tableHead) {
-//            TODO method for input->nodeparser => clauseparser
-            return procedure -> rowPrefix -> tableLine(tableCell(rowPrefix, tableHead)).as(cells -> {
-                if (cells.size() != tableHead.size())
-                    throw procedure.getSourceCode().syntaxError("Different cell size", 0);
-                return new RowNode(rowPrefix, cells);
-            }).parse(procedure);
-        }
-
-        private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
-                PrefixHeadNode prefix) {
-            return procedure -> header -> tableLine(tableCell((HeaderNode) header, prefix))
-                    .as(cells -> new TransposedRowNode(header, cells)).parse(procedure);
-        }
-
-
-        private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
-            return procedure -> prefixHead -> {
-                //        TODO test not allow empty table >> with out rows
-                return many(COLUMN_SPLITTER.before(single(TABLE_HEADER).endWith(COLUMN_SPLITTER).as()).expression(tableRow(
-                        (PrefixHeadNode) prefixHead))).as(dalNodes -> new TransposedTableNode(prefixHead, dalNodes))
-                        .parse(procedure);
-            };
-        }
-
-        private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableIndex() {
-            return COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(PREFIX_ROW.expression(transposeTable()))));
-        }
+    private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableIndex() {
+        return COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(PREFIX_ROW.expression(transposeTable()))));
     }
 
     private static Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, NodeParser<DALRuntimeContext,

@@ -25,6 +25,7 @@ import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+@Deprecated
 public class CucumberContextBak {
     private static final Compiler compiler = new Compiler();
     private static final Map<String, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
