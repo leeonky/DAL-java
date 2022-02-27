@@ -1,3 +1,4 @@
+@NewTable
 Feature: skip
 
   Scenario: skip one row
@@ -16,33 +17,26 @@ Feature: skip
     """
     Then the following verification should pass:
     """
-    = | name   | age |
-      | 'Tom'  | 10  |
-      | ***          |
-      | 'John' | 16  |
+    = >>| name | 'Tom' | *** | 'John' |
+        | age  | 10    |     | 16     |
     """
     And the inspect should:
     """
-    = | name | age |
-    | name= 'Tom' | age= 10 |
-    | *** |
-    | name= 'John' | age= 16 |
+    = >>| name | name= 'Tom' | *** | name= 'John' |
+    | age | age= 10 |  | age= 16 |
     """
     When evaluate by:
     """
-    = | name   | age |
-      | 'Tom'  | 10  |
-      | ***          |
-      | 'John' | 12  |
+    = >>| name | 'Tom' | *** | 'John' |
+        | age  | 10    |     | 12     |
     """
     Then got the following notation:
     """
-    = | name   | age |
-      | 'Tom'  | 10  |
-      | ***          |
-      | 'John' | 12  |
-                 ^
-    ^^^^^^^^^^^^^^^^^^
+    = >>| name | 'Tom' | *** | 'John' |
+                               ^
+        | age  | 10    |     | 12     |
+                               ^
+                               ^
     """
 
   Scenario: skip row should not access any property
@@ -56,13 +50,15 @@ Feature: skip
     """
     Then use a instance of java class "Data" to evaluate:
     """
-    = | name | age | id |
-      | ***             |
+    = >>| name | *** |
+        | age  |     |
+        | id   |     |
     """
     And the inspect should:
     """
-    = | name | age | id |
-    | *** |
+    = >>| name | *** |
+    | age |  |
+    | id |  |
     """
 
   Scenario: skip row should check size
@@ -72,8 +68,9 @@ Feature: skip
     """
     When evaluate by:
     """
-    = | name | age | id |
-      | ***             |
+    = >>| name | *** |
+        | age  |     |
+        | id   |     |
     """
     Then failed with the message:
     """
@@ -81,9 +78,10 @@ Feature: skip
     """
     And got the following notation:
     """
-    = | name | age | id |
+    = >>| name | *** |
     ^
-      | ***             |
+        | age  |     |
+        | id   |     |
     """
 
   Scenario: skip head or tail rows
@@ -102,58 +100,52 @@ Feature: skip
     """
     Then the following verification should pass:
     """
-    = | name  | age |
-      | 'Tom' | 10  |
-      | ...         |
+    = >>| name | 'Tom' | ... |
+        | age  | 10    |     |
     """
     And the inspect should:
     """
-    = | name | age |
-    | name= 'Tom' | age= 10 |
-    | ... |
+    = >>| name | name= 'Tom' | ... |
+    | age | age= 10 |  |
     """
     When evaluate by:
     """
-    = | name  | age |
-      | 'Tom' | 12  |
-      | ...         |
+    = >>| name | 'Tom' | ... |
+        | age  | 15    |     |
     """
     Then got the following notation:
     """
-    = | name  | age |
-      | 'Tom' | 12  |
-                ^
-    ^^^^^^^^^^^^^^^^^
-      | ...         |
+    = >>| name | 'Tom' | ... |
+                 ^
+        | age  | 15    |     |
+                 ^
+                 ^
     """
     And the following verification should pass:
     """
-    = | name  | age |
-      | ...         |
-      | 'Lily' | 15 |
+    = >>| name | ... | 'Lily' |
+        | age  |     | 15     |
     """
     And the inspect should:
     """
-    = | name | age |
-    | ... |
-    | name= 'Lily' | age= 15 |
+    = >>| name | ... | name= 'Lily' |
+    | age |  | age= 15 |
     """
     When evaluate by:
     """
-    = | name  | age |
-      | ...         |
-      | 'Lily' | 25 |
+    = >>| name | ... | 'Lily' |
+        | age  |     | 25     |
     """
     And got the following notation:
     """
-    = | name  | age |
-      | ...         |
-      | 'Lily' | 25 |
-                 ^
-    ^^^^^^^^^^^^^^^^^
+    = >>| name | ... | 'Lily' |
+                       ^
+        | age  |     | 25     |
+                       ^
+                       ^
     """
 
-#    TODO check position
+
   Scenario: specify index before row
     When the following json:
     """
@@ -170,23 +162,25 @@ Feature: skip
     """
     Then the following verification should pass:
     """
-    = | name  | age |
-    0 | 'Tom' | 10  |
-    2 | 'Lily' | 15 |
+    = | >>   | 0     | 2      |
+      | name | 'Tom' | 'Lily' |
+      | age  | 10    | 15     |
     """
     And the inspect should:
     """
-    = | name | age |
-    0 | name= 'Tom' | age= 10 |
-    2 | name= 'Lily' | age= 15 |
+    = | >> | 0 | 2 |
+    | name | name= 'Tom' | name= 'Lily' |
+    | age | age= 10 | age= 15 |
     """
     And the following verification should pass:
     """
-    =  | name   | age |
-    -1 | 'Lily' | 15  |
+    = | >>   | -1     |
+      | name | 'Lily' |
+      | age  | 15     |
     """
     And the inspect should:
     """
-    = | name | age |
-    -1 | name= 'Lily' | age= 15 |
+    = | >> | -1 |
+    | name | name= 'Lily' |
+    | age | age= 15 |
     """

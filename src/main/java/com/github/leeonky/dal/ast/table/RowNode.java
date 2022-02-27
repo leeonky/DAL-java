@@ -64,4 +64,8 @@ public class RowNode extends DALNode {
             addAll(rowNode.cells);
         }}).setPositionBegin(getPositionBegin());
     }
+
+    public boolean isData() {
+        return !isEllipsis();
+    }
 }

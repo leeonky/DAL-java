@@ -45,7 +45,7 @@ public class TableNode extends DALNode {
         return nodes.stream().map(DALNode::inspect).collect(Collectors.joining(" | ", "| ", " |"));
     }
 
-    public RowNode getRow(int row) {
-        return tableBody.getRow(row);
+    public RowNode getDataRowByDataIndex(int row) {
+        return tableBody.getDataRowByDataIndex(row);
     }
 }

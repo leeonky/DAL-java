@@ -217,9 +217,9 @@ public class Compiler {
             TRANSPOSED_TABLE_HEADER = COLUMN_SPLITTER.before(TABLE_HEADER);
 
     private DALNode getRowCell(DALProcedure dalProcedure, Optional<DALOperator> rowOperator, HeaderNodeBk headerNode) {
-        return dalProcedure.positionOf(cellPosition -> oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL).or(ROW_WILDCARD.or(
+        return dalProcedure.positionOf(cellPosition -> oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL, ROW_WILDCARD).or(
                 shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(), procedure -> rowOperator)
-                        .or(DEFAULT_JUDGEMENT_OPERATOR)).input(headerNode.getProperty()))).parse(dalProcedure)
+                        .or(DEFAULT_JUDGEMENT_OPERATOR)).input(headerNode.getProperty())).parse(dalProcedure)
                 .setPositionBegin(cellPosition));
     }
 
@@ -355,10 +355,10 @@ public class Compiler {
 
         private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
                 HeaderNode head, PrefixHeadNode prefixHeadNode) {
-            return procedure -> procedure.positionOf(cellPosition -> shortJudgementClause(oneOf(JUDGEMENT_OPERATORS,
-                    head.headerOperator(), prefixHeadNode.getPrefix(procedure.getIndex()).rowOperator())
-                    .or(DEFAULT_JUDGEMENT_OPERATOR)).input(head.getProperty()).parse(procedure)
-                    .setPositionBegin(cellPosition));
+            return procedure -> procedure.positionOf(cellPosition -> oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL, ROW_WILDCARD)
+                    .or(shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, head.headerOperator(), prefixHeadNode.getPrefix(
+                            procedure.getIndex()).rowOperator()).or(DEFAULT_JUDGEMENT_OPERATOR)).input(head.getProperty()))
+                    .parse(procedure).setPositionBegin(cellPosition));
         }
 
         private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(

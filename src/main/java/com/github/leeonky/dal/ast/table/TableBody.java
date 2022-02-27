@@ -46,7 +46,7 @@ public class TableBody extends DALNode {
                 : new ListScopeNode(rowClauses.collect(Collectors.toList()), true);
     }
 
-    public RowNode getRow(int row) {
-        return rows.get(row);
+    public RowNode getDataRowByDataIndex(int row) {
+        return rows.stream().filter(RowNode::isData).collect(toList()).get(row);
     }
 }

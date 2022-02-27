@@ -2,6 +2,7 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.TableNodeBk;
+import com.github.leeonky.dal.ast.table.TableBody;
 import com.github.leeonky.dal.ast.table.TableNode;
 import com.github.leeonky.dal.ast.table.TransposedTableNode;
 
@@ -27,7 +28,7 @@ public class ElementAssertionFailure extends java.lang.RuntimeException {
     }
 
     public DalException linePositionException(TableNode tableNode) {
-        return dalException.multiPosition(tableNode.getRow(row).getPositionBegin(), DalException.Position.Type.LINE);
+        return dalException.multiPosition(tableNode.getDataRowByDataIndex(row).getPositionBegin(), DalException.Position.Type.LINE);
     }
 
     @Deprecated
@@ -38,7 +39,7 @@ public class ElementAssertionFailure extends java.lang.RuntimeException {
     }
 
     public DalException columnPositionException(TransposedTableNode transposedTableNode) {
-        transposedTableNode.transposeRows().get(row).getCells().forEach(cell ->
+        new TableBody(transposedTableNode.transposeRows()).getDataRowByDataIndex(row).getCells().forEach(cell ->
                 dalException.multiPosition(cell.getPositionBegin(), CHAR));
         return dalException;
     }
