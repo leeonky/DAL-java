@@ -16,8 +16,6 @@ import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.assertListSize;
 import static com.github.leeonky.dal.ast.SymbolNode.Type.BRACKET;
-import static com.github.leeonky.interpreter.FunctionUtil.eachWithIndex;
-import static com.github.leeonky.interpreter.FunctionUtil.mapWithIndex;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -44,10 +42,13 @@ public class ListScopeNode extends DALNode {
     }
 
     private List<DALNode> getInputExpressions(int firstIndex) {
-        return inputExpressions != null ? inputExpressions : mapWithIndex(expressionFactories.stream(),
-                (i, clause) -> clause.makeExpression(new DALExpression(InputNode.INSTANCE, new PropertyImplicit(),
-                        new SymbolNode(type.indexOfNode(firstIndex, i, expressionFactories.size()), BRACKET))))
-                .collect(toList());
+        if (inputExpressions != null)
+            return inputExpressions;
+        return new ArrayList<DALNode>() {{
+            for (int i = 0; i < expressionFactories.size(); i++)
+                add(expressionFactories.get(i).makeExpression(new DALExpression(InputNode.INSTANCE, new PropertyImplicit(),
+                        new SymbolNode(type.indexOfNode(firstIndex, i, expressionFactories.size()), BRACKET))));
+        }};
     }
 
     public ListScopeNode(List<DALNode> inputExpressions, boolean multiLineList, Type type) {
@@ -105,13 +106,14 @@ public class ListScopeNode extends DALNode {
 
     private boolean assertElementExpressions(DALRuntimeContext context, List<DALNode> expressions) {
         if (multiLineList)
-            eachWithIndex(expressions.stream(), (i, expression) -> {
+            for (int i = 0; i < expressions.size(); i++) {
+                DALNode expression = expressions.get(i);
                 try {
                     expression.evaluate(context);
                 } catch (DalException dalException) {
-                    throw new ElementAssertionFailure(expressions, i, dalException);
+                    throw new ElementAssertionFailure(i, dalException);
                 }
-            });
+            }
         else
             expressions.forEach(expression -> expression.evaluate(context));
         return true;

@@ -11,7 +11,6 @@ import static java.util.Arrays.asList;
 
 public class Notations {
 
-
     public static class Keywords {
         public static final Notation
                 WHICH = notation("which"),
@@ -69,5 +68,6 @@ public class Notations {
             SEQUENCE_AZ = notation("+"),
             SEQUENCE_ZA = notation("-"),
             SEQUENCE_AZ_2 = notation("￪"),
-            SEQUENCE_ZA_2 = notation("￬");
+            SEQUENCE_ZA_2 = notation("￬"),
+            TRANSPOSE_MARK = notation(">>");
 }

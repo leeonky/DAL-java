@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.*;
-import com.github.leeonky.dal.ast.table.RowNode;
 import com.github.leeonky.dal.ast.table.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.*;
@@ -9,23 +8,19 @@ import com.github.leeonky.interpreter.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.DALNode.constNode;
 import static com.github.leeonky.dal.compiler.DALProcedure.enableCommaAnd;
 import static com.github.leeonky.dal.compiler.Notations.*;
 import static com.github.leeonky.interpreter.ClauseParser.oneOf;
-import static com.github.leeonky.interpreter.FunctionUtil.*;
+import static com.github.leeonky.interpreter.FunctionUtil.not;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.NodeParser.lazy;
 import static com.github.leeonky.interpreter.NodeParser.oneOf;
-import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.OperatorParser.oneOf;
 import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
-import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static java.util.stream.Collectors.toList;
 
 public class Compiler {
 
@@ -63,15 +58,8 @@ public class Compiler {
     private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             IS = Operators.IS.operatorParser(DALOperator.Is::new),
             WHICH = Operators.WHICH.operatorParser(DALOperator.Which::new);
-    public static final Notation TRANSPOSE_MARK = notation(">>");
 
-    @Deprecated
-    public static boolean NewTransposed = false;
-
-    @Deprecated
-    public static boolean NewTable = false;
-
-    private static OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+    private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             PROPERTY_IMPLICIT = procedure -> of(new DALOperator.PropertyImplicit());
 
     private static final OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
@@ -112,7 +100,7 @@ public class Compiler {
                     CONST_USER_DEFINED_LITERAL),
             ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.nodeParser(token -> new ListEllipsisNode()),
             EMPTY_CELL = procedure -> when(procedure.emptyCell()).optional(EmptyCellNode::new),
-            TABLE = oneOf(new TransposedTableWithRowOperator(), new TableParser().table(), new TransposedTable()),
+            TABLE = oneOf(new TableParser().transposeTableIndex(), new TableParser().table(), TRANSPOSE_MARK.and(new TableParser().transposeTable().input(new EmptyPrefixHeadNode()))),
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
@@ -205,121 +193,6 @@ public class Compiler {
             many(SEQUENCE_ZA).atLeast(1).as(SortSequenceNode::new), many(SEQUENCE_ZA_2).atLeast(1).as(SortSequenceNode::new))
             .or(procedure -> SortSequenceNode.noSequence());
 
-    private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> TABLE_HEADER = procedure -> {
-        SortSequenceNode sequence = (SortSequenceNode) SEQUENCE.parse(procedure);
-        DALNode property = PROPERTY_CHAIN.parse(procedure);
-        return new HeaderNodeBk(sequence, SCHEMA_CLAUSE.parse(procedure)
-                .map(expressionClause -> expressionClause.makeExpression(property)).orElse(property),
-                JUDGEMENT_OPERATORS.parse(procedure));
-    };
-
-    private final NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            TRANSPOSED_TABLE_HEADER = COLUMN_SPLITTER.before(TABLE_HEADER);
-
-    private DALNode getRowCell(DALProcedure dalProcedure, Optional<DALOperator> rowOperator, HeaderNodeBk headerNode) {
-        return dalProcedure.positionOf(cellPosition -> oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL, ROW_WILDCARD).or(
-                shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, headerNode.headerOperator(), procedure -> rowOperator)
-                        .or(DEFAULT_JUDGEMENT_OPERATOR)).input(headerNode.getProperty())).parse(dalProcedure)
-                .setPositionBegin(cellPosition));
-    }
-
-    public class TransposedTable implements NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> {
-
-        @Override
-        public Optional<DALNode> parse(DALProcedure procedure) {
-            if (NewTable)
-                return TRANSPOSE_MARK.and(new TableParser().transposeTable().input(new EmptyPrefixHeadNode())).parse(procedure);
-            return procedure.getSourceCode().popWord(TRANSPOSE_MARK).map(x -> {
-                List<HeaderNodeBk> headerNodes = new ArrayList<>();
-                return new TableNodeBk(headerNodes, getRowNodes(procedure, headerNodes), TableNodeBk.Type.TRANSPOSED);
-            });
-        }
-
-        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> cell(
-                HeaderNodeBk headerNode) {
-            return procedure -> getRowCell(procedure, empty(), headerNode);
-        }
-
-        private List<com.github.leeonky.dal.ast.RowNode> getRowNodes(DALProcedure procedure, List<HeaderNodeBk> headerNodes) {
-            return transpose(allOptional(() -> TRANSPOSED_TABLE_HEADER.parse(procedure).map(HeaderNodeBk.class::cast)
-                    .map(headerNode -> {
-                        headerNodes.add(headerNode);
-                        return COLUMN_SPLITTER.before(tableLine(cell(headerNode)).as(CellCollection::new))
-                                .parse(procedure).map(n -> ((CellCollection) n).getCells())
-//                                TODO need test
-                                .orElseThrow(() -> procedure.getSourceCode().syntaxError("should end with `|`", 0));
-                    }))).stream().map(row -> new com.github.leeonky.dal.ast.RowNode(empty(), empty(), empty(), row)).collect(toList());
-        }
-    }
-
-
-    private Optional<Integer> getRowIndex(DALProcedure procedure) {
-        return INTEGER.parse(procedure).map(node -> (Integer) ((ConstNode) node).getValue());
-    }
-
-    public class TransposedTableWithRowOperator implements NodeParser<DALRuntimeContext, DALNode, DALExpression,
-            DALOperator, DALProcedure> {
-
-        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> indexCell(
-                List<Optional<Integer>> rowIndexes, List<Optional<Clause<DALRuntimeContext, DALNode>>> rowSchemaClauses,
-                List<Optional<DALOperator>> rowOperators) {
-            return procedure -> {
-                rowIndexes.add(getRowIndex(procedure));
-                rowSchemaClauses.add(SCHEMA_CLAUSE.parse(procedure));
-                rowOperators.add(JUDGEMENT_OPERATORS.parse(procedure));
-                return new EmptyCellNode();
-            };
-        }
-
-        @Override
-        public Optional<DALNode> parse(DALProcedure procedure) {
-            if (NewTable) {
-                return new TableParser().transposeTableIndex().parse(procedure);
-            }
-            return procedure.getSourceCode().tryFetch(() -> when(procedure.getSourceCode().popWord(COLUMN_SPLITTER).isPresent()
-                    && procedure.getSourceCode().popWord(TRANSPOSE_MARK).isPresent()).optional(() -> {
-                List<Optional<Integer>> rowIndexes = new ArrayList<>();
-                List<Optional<Clause<DALRuntimeContext, DALNode>>> rowSchemaClauses = new ArrayList<>();
-                List<Optional<DALOperator>> rowOperators = new ArrayList<>();
-                COLUMN_SPLITTER.before(tableLine(indexCell(rowIndexes, rowSchemaClauses, rowOperators))
-                        .as(CellCollection::new)).parse(procedure);
-                List<HeaderNodeBk> headerNodes = new ArrayList<>();
-                return new TableNodeBk(headerNodes, getRowNodes(procedure, headerNodes, rowSchemaClauses, rowOperators,
-                        rowIndexes), TableNodeBk.Type.TRANSPOSED);
-            }));
-        }
-
-        private List<com.github.leeonky.dal.ast.RowNode> getRowNodes(DALProcedure dalProcedure, List<HeaderNodeBk> headerNodes,
-                                                                     List<Optional<Clause<DALRuntimeContext, DALNode>>> rowSchemaClauses,
-                                                                     List<Optional<DALOperator>> rowOperators, List<Optional<Integer>> rowIndexes) {
-            return FunctionUtil.mapWithIndex(getCells(dalProcedure, headerNodes, rowOperators), (i, row) ->
-                    new com.github.leeonky.dal.ast.RowNode(rowIndexes.get(i), rowSchemaClauses.get(i), rowOperators.get(i), row)).collect(toList());
-        }
-
-        private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> cell(
-                List<Optional<DALOperator>> rowOperators, HeaderNodeBk headerNode) {
-            return procedure -> getRowCell(procedure, rowOperators.get(procedure.getIndex()), headerNode);
-        }
-
-        private Stream<List<DALNode>> getCells(DALProcedure dalProcedure, List<HeaderNodeBk> headerNodes,
-                                               List<Optional<DALOperator>> rowOperators) {
-            return transpose(allOptional(() -> TRANSPOSED_TABLE_HEADER.parse(dalProcedure).map(HeaderNodeBk.class::cast)
-                    .map(headerNode -> {
-                        headerNodes.add(headerNode);
-                        return COLUMN_SPLITTER.before(tableLine(cell(rowOperators, headerNode)).as(CellCollection::new))
-                                .parse(dalProcedure).map(n -> ((CellCollection) n).getCells())
-//                                TODO need test
-                                .orElseThrow(() -> dalProcedure.getSourceCode().syntaxError("should end with `|`", 0));
-                    }))).stream();
-        }
-    }
-
-    private Optional<DALNode> compileUserDefinedLiteral(DALProcedure dalProcedure) {
-        return dalProcedure.getSourceCode().tryFetch(() -> Tokens.SYMBOL.scan(dalProcedure.getSourceCode())
-                .flatMap(token -> dalProcedure.getRuntimeContext().takeUserDefinedLiteral(token.getContent())
-                        .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
-    }
-
     public class TableParser {
         //TODO should test integer or something after table
 //: | a   | b   |
@@ -335,13 +208,10 @@ public class Compiler {
                 PREFIX_ROW = many(ROW_PREFIX).splitBy(COLUMN_SPLITTER).endWithLine().as(PrefixHeadNode::new);
 
         private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-                TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, new TableBody(
-//                        TODO use many
-                allOptional(
-                        () -> ROW_PREFIX.combine(oneOf(
-                                COLUMN_SPLITTER.before(single(ELEMENT_ELLIPSIS).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
-                                COLUMN_SPLITTER.before(single(ROW_WILDCARD).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
-                                COLUMN_SPLITTER.before(tableRow((TableHead) head)))).parse(procedure))));
+                TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, (TableBody) many(ROW_PREFIX.combine(oneOf(
+                COLUMN_SPLITTER.before(single(ELEMENT_ELLIPSIS).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
+                COLUMN_SPLITTER.before(single(ROW_WILDCARD).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
+                COLUMN_SPLITTER.before(tableRow((TableHead) head))))).as(TableBody::new).parse(procedure));
 
         private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> table() {
             return COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).expression(TABLE_BODY_CLAUSE);
@@ -400,5 +270,11 @@ public class Compiler {
             DALExpression, DALOperator, DALProcedure>, List<DALNode>> tableLine(NodeParser.Mandatory<DALRuntimeContext,
             DALNode, DALExpression, DALOperator, DALProcedure> mandatory) {
         return many(mandatory).mandatoryTailSplitBy(COLUMN_SPLITTER).endWithLine();
+    }
+
+    private Optional<DALNode> compileUserDefinedLiteral(DALProcedure dalProcedure) {
+        return dalProcedure.getSourceCode().tryFetch(() -> Tokens.SYMBOL.scan(dalProcedure.getSourceCode())
+                .flatMap(token -> dalProcedure.getRuntimeContext().takeUserDefinedLiteral(token.getContent())
+                        .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }
 }

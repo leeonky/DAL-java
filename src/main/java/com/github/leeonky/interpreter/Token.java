@@ -50,8 +50,4 @@ public class Token {
     public boolean isNumber() {
         return getNumber() != null;
     }
-
-    public char getChar() {
-        return contentBuilder.charAt(0);
-    }
 }

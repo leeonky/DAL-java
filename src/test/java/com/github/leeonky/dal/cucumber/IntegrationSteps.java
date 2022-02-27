@@ -1,8 +1,6 @@
 package com.github.leeonky.dal.cucumber;
 
-import com.github.leeonky.dal.compiler.Compiler;
 import com.github.leeonky.dal.compiler.IntegrationTestContext;
-import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -134,26 +132,5 @@ public class IntegrationSteps {
     @Then("the inspect should:")
     public void the_inspect_should(String inspect) {
         integrationTestContext.verifyInspect(inspect);
-    }
-
-    //    TODO remove
-    @Before("@NewTransposed")
-    public void useNewTransposed() {
-        Compiler.NewTransposed = true;
-    }
-
-    @After("@NewTransposed")
-    public void useOriginTransposed() {
-        Compiler.NewTransposed = false;
-    }
-
-    @Before("@NewTable")
-    public void useNewTable() {
-        Compiler.NewTable = true;
-    }
-
-    @After("@NewTable")
-    public void useOriginTable() {
-        Compiler.NewTable = false;
     }
 }

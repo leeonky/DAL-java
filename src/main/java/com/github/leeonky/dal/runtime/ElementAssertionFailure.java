@@ -1,41 +1,23 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.dal.ast.DALNode;
-import com.github.leeonky.dal.ast.TableNodeBk;
 import com.github.leeonky.dal.ast.table.TableBody;
 import com.github.leeonky.dal.ast.table.TableNode;
 import com.github.leeonky.dal.ast.table.TransposedTableNode;
 
-import java.util.List;
-
 import static com.github.leeonky.interpreter.InterpreterException.Position.Type.CHAR;
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
 
 public class ElementAssertionFailure extends java.lang.RuntimeException {
     private final int row;
     private final DalException dalException;
-    @Deprecated
-    private final List<DALNode> expressions;
 
-    public ElementAssertionFailure(List<DALNode> expressions, int row, DalException dalException) {
+    public ElementAssertionFailure(int row, DalException dalException) {
         this.row = row;
         this.dalException = dalException;
-        this.expressions = expressions;
-    }
-
-    @Deprecated
-    public DalException linePositionException() {
-        return dalException.multiPosition(expressions.get(row).getOperandPosition(), DalException.Position.Type.LINE);
     }
 
     public DalException linePositionException(TableNode tableNode) {
-        return dalException.multiPosition(tableNode.getDataRowByDataIndex(row).getPositionBegin(), DalException.Position.Type.LINE);
-    }
-
-    @Deprecated
-    public DalException columnPositionException(TableNodeBk tableNode) {
-        tableNode.getRows().get(row).getCells().forEach(cell ->
-                dalException.multiPosition(cell.getPositionBegin(), CHAR));
-        return dalException;
+        return dalException.multiPosition(tableNode.getDataRowByDataIndex(row).getPositionBegin(), LINE);
     }
 
     public DalException columnPositionException(TransposedTableNode transposedTableNode) {

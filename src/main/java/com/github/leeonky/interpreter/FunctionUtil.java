@@ -1,11 +1,10 @@
 package com.github.leeonky.interpreter;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.*;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.function.BinaryOperator;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class FunctionUtil {
     public static <T> Predicate<T> not(Predicate<T> t) {
@@ -17,52 +16,6 @@ public class FunctionUtil {
     public static <T> Optional<T> oneOf(Supplier<Optional<? extends T>>... optionals) {
         return (Optional<T>) Stream.of(optionals).map(Supplier::get).filter(Optional::isPresent)
                 .findFirst().orElse(Optional.empty());
-    }
-
-    public static <T> List<T> allOptional(Supplier<Optional<T>> optional) {
-        return new ArrayList<T>() {{
-            for (Optional<T> t = optional.get(); t.isPresent(); t = optional.get())
-                add(t.get());
-        }};
-    }
-
-    public static <T> List<List<T>> transpose(List<List<T>> list) {
-        return transpose(list.stream()).collect(Collectors.toList());
-    }
-
-    public static <T> Stream<List<T>> transpose(Stream<List<T>> list) {
-        return new LinkedHashMap<Integer, List<T>>() {{
-            list.forEach(colCells -> eachWithIndex(colCells.stream(),
-                    (i, colCell) -> computeIfAbsent(i, key -> new ArrayList<>()).add(colCell)));
-        }}.values().stream();
-    }
-
-    public static <A, B, C> Stream<C> zip(Stream<A> streamA, Stream<B> streamB, BiFunction<A, B, C> zipper) {
-        Iterator<A> iteratorA = streamA.iterator();
-        Iterator<B> iteratorB = streamB.iterator();
-        Iterator<C> iteratorC = new Iterator<C>() {
-            @Override
-            public boolean hasNext() {
-                return iteratorA.hasNext() && iteratorB.hasNext();
-            }
-
-            @Override
-            public C next() {
-                return zipper.apply(iteratorA.next(), iteratorB.next());
-            }
-        };
-        return StreamSupport.stream(((Iterable<C>) () -> iteratorC).spliterator(),
-                streamA.isParallel() || streamB.isParallel());
-    }
-
-    public static <T> void eachWithIndex(Stream<T> stream, BiConsumer<Integer, T> consumer) {
-        AtomicInteger atomicInteger = new AtomicInteger(0);
-        stream.forEach(element -> consumer.accept(atomicInteger.getAndIncrement(), element));
-    }
-
-    public static <T, R> Stream<R> mapWithIndex(Stream<T> stream, BiFunction<Integer, T, R> biFunction) {
-        AtomicInteger atomicInteger = new AtomicInteger(0);
-        return stream.map(element -> biFunction.apply(atomicInteger.getAndIncrement(), element));
     }
 
     public static <T> BinaryOperator<T> notAllowParallelReduce() {

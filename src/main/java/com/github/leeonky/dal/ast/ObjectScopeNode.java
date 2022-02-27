@@ -18,10 +18,6 @@ public class ObjectScopeNode extends DALNode {
         this.expressions.addAll(expressions);
     }
 
-    public List<DALNode> getExpressions() {
-        return expressions;
-    }
-
     public ObjectScopeNode() {
         this(Collections.emptyList());
     }
@@ -69,11 +65,5 @@ public class ObjectScopeNode extends DALNode {
             expressions.forEach(expression -> expression.evaluate(context));
             return true;
         });
-    }
-
-    @Override
-    public int getOperandPosition() {
-        return expressions.size() > 0 ? expressions.get(expressions.size() - 1).getOperandPosition()
-                : getPositionBegin();
     }
 }
