@@ -18,6 +18,47 @@ Feature: syntax error
         | age  |
     """
 
+  Scenario: empty table is not allowed
+    When evaluate by:
+    """
+    : >>
+    """
+    Then failed with the message:
+    """
+    Expecting a table
+    """
+    And got the following notation:
+    """
+    : >>
+        ^
+    """
+    When evaluate by:
+    """
+    : | >> |
+    """
+    Then failed with the message:
+    """
+    Expecting a table
+    """
+    And got the following notation:
+    """
+    : | >> |
+            ^
+    """
+    When evaluate by:
+    """
+    : | >> | 0 |
+    """
+    Then failed with the message:
+    """
+    Expecting a table
+    """
+    And got the following notation:
+    """
+    : | >> | 0 |
+                ^
+    """
+
   Scenario: different row size and prefix size
     When evaluate by:
     """

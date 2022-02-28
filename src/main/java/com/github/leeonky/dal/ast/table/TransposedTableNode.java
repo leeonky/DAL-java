@@ -5,15 +5,13 @@ import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
-import java.util.List;
-
 public class TransposedTableNode extends DALNode {
     private final TransposedTableHead tableHead;
     private final TransposedTableBody tableBody;
 
-    public TransposedTableNode(DALNode transposeTableHead, List<DALNode> rows) {
+    public TransposedTableNode(DALNode transposeTableHead, DALNode transposedTableBody) {
         tableHead = (TransposedTableHead) transposeTableHead;
-        tableBody = new TransposedTableBody(rows).checkTable(tableHead);
+        tableBody = ((TransposedTableBody) transposedTableBody).checkTable(tableHead);
     }
 
     @Override

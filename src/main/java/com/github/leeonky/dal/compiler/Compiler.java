@@ -70,7 +70,7 @@ public class Compiler {
 
     //    TODO private
     NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            PROPERTY, OBJECT, LIST, PARENTHESES, JUDGEMENT,
+            PROPERTY, OBJECT, LIST, PARENTHESES, JUDGEMENT, TABLE,
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
             NUMBER = Tokens.NUMBER.nodeParser(constNode(Token::getNumber)),
             INTEGER = Tokens.INTEGER.nodeParser(constNode(Token::getInteger)),
@@ -91,8 +91,6 @@ public class Compiler {
                     CONST_USER_DEFINED_LITERAL),
             ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.nodeParser(token -> new ListEllipsisNode()),
             EMPTY_CELL = procedure -> when(procedure.emptyCell()).optional(EmptyCellNode::new),
-            TABLE = lazy(() -> oneOf(transposeTableIndex(), table(),
-                    TRANSPOSE_MARK.and(transposeTable().input(new EmptyTransposedTableHead())))),
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
@@ -135,6 +133,9 @@ public class Compiler {
         LIST = DALProcedure.disableCommaAnd(OPENING_BRACKET.and(many(ELEMENT_ELLIPSIS.ignoreInput().or(
                 shortJudgementClause(JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR)))).optionalSplitBy(COMMA)
                 .endWith(CLOSING_BRACKET).as(ListScopeNode::new)));
+        TABLE = oneOf(TRANSPOSE_MARK.and(transposeTable().input(new EmptyTransposedTableHead())),
+                COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(PREFIX_ROW.expression(transposeTable())))),
+                COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).expression(TABLE_BODY_CLAUSE));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         OPERAND = lazy(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
                 .mandatory("expect a value or expression").map(DALNode::avoidListMapping);
@@ -199,10 +200,6 @@ public class Compiler {
             COLUMN_SPLITTER.before(single(ROW_WILDCARD).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
             COLUMN_SPLITTER.before(tableRow((TableHead) head))))).as(TableBody::new).parse(procedure));
 
-    private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> table() {
-        return COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).expression(TABLE_BODY_CLAUSE);
-    }
-
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
             DALNode rowPrefix, TableHead head) {
         return procedure -> procedure.positionOf(cellPosition -> shortJudgementClause(oneOf(JUDGEMENT_OPERATORS,
@@ -231,27 +228,21 @@ public class Compiler {
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
             TransposedTableHead prefix) {
+//            TODO method for input->nodeparser => clauseparser
         return procedure -> header -> tableLine(tableCell((HeaderNode) header, prefix))
                 .as(cells -> new TransposedRowNode(header, cells)).parse(procedure);
     }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
-        return procedure -> prefixHead -> {
-            //        TODO test not allow empty table >> with out rows
-            return many(COLUMN_SPLITTER.before(single(TABLE_HEADER).endWith(COLUMN_SPLITTER).as()).expression(tableRow(
-                    (TransposedTableHead) prefixHead))).as(dalNodes -> new TransposedTableNode(prefixHead, dalNodes))
-                    .parse(procedure);
-        };
+        return procedure -> prefixHead -> new TransposedTableNode(prefixHead, many(COLUMN_SPLITTER.before(
+                single(TABLE_HEADER).endWith(COLUMN_SPLITTER).as()).expression(tableRow((TransposedTableHead) prefixHead)))
+                .atLeast(1).as(TransposedTableBody::new).mandatory("Expecting a table").parse(procedure));
     }
     //TODO should test integer or something after table
 //: | a   | b   |
 //0 | 'a' | 'b' |
 //is a
 //        Row prefix ok but no cell
-
-    private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableIndex() {
-        return COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(PREFIX_ROW.expression(transposeTable()))));
-    }
 
     private static Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, NodeParser<DALRuntimeContext,
             DALNode, DALExpression, DALOperator, DALProcedure>, NodeParser.Mandatory<DALRuntimeContext, DALNode,
