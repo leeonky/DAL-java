@@ -27,6 +27,12 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
     }
 
     @Override
+    default NodeParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,
+            Mandatory<C, N, E, O, P>, N> op) {
+        return op::parse;
+    }
+
+    @Override
     default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>,
             NodeParser.Mandatory<C, N, E, O, P>, N> mandatory) {
         return mandatory::parse;
@@ -47,6 +53,12 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends
             Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {
+
+        @Override
+        default NodeParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,
+                Mandatory<C, N, E, O, P>, N> op) {
+            return op::parse;
+        }
 
         default Mandatory<C, N, E, O, P> map(Function<N, N> mapping) {
             return procedure -> mapping.apply(parse(procedure));

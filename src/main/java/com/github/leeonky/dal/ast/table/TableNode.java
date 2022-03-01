@@ -8,15 +8,13 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
-
 public class TableNode extends DALNode {
     private final TableHead tableHead;
     private final TableBody tableBody;
 
     public TableNode(TableHead tableHead, TableBody tableBody) {
         this.tableHead = tableHead;
-        this.tableBody = tableBody.checkPrefix(LINE);
+        this.tableBody = tableBody.checkTable(this.tableHead);
     }
 
     @Override

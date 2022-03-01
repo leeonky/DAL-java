@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
 import static java.util.stream.Collectors.toList;
 
 public class TableBody extends DALNode {
@@ -48,5 +49,10 @@ public class TableBody extends DALNode {
 
     public RowNode getDataRowByDataIndex(int row) {
         return rows.stream().filter(RowNode::isData).collect(toList()).get(row);
+    }
+
+    public TableBody checkTable(TableHead tableHead) {
+        rows.forEach(tableHead::checkSize);
+        return checkPrefix(LINE);
     }
 }

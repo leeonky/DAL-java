@@ -8,6 +8,10 @@ public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E ext
 
     Optional<T> parse(P procedure);
 
+    default OP castParser(Parser<C, N, E, O, P, OP, MA, T> op) {
+        throw new IllegalStateException();
+    }
+
     default MA castMandatory(Parser.Mandatory<C, N, E, O, P, OP, MA, T> mandatory) {
         throw new IllegalStateException();
     }
@@ -23,6 +27,11 @@ public interface Parser<C extends RuntimeContext<C>, N extends Node<C, N>, E ext
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, OP, MA, T>, T> {
+
+        default OP castParser(Parser<C, N, E, O, P, OP, MA, T> op) {
+            throw new IllegalStateException();
+        }
+
         T parse(P procedure);
     }
 }

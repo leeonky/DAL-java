@@ -25,6 +25,12 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
     }
 
     @Override
+    default ClauseParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
+            Mandatory<C, N, E, O, P>, Clause<C, N>> op) {
+        return op::parse;
+    }
+
+    @Override
     default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
             Mandatory<C, N, E, O, P>, Clause<C, N>> mandatory) {
         return mandatory::parse;
@@ -55,6 +61,12 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
             extends Parser.Mandatory<C, N, E, O, P, ClauseParser<C, N, E, O, P>, ClauseParser.Mandatory<C, N, E, O, P>,
             Clause<C, N>> {
+
+        @Override
+        default ClauseParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
+                Mandatory<C, N, E, O, P>, Clause<C, N>> op) {
+            return op::parse;
+        }
 
         default NodeParser.Mandatory<C, N, E, O, P> input(N node) {
             return procedure -> parse(procedure).makeExpression(node);

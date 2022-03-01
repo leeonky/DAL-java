@@ -22,13 +22,17 @@ public class TransposedTableBody extends DALNode {
     }
 
     public TransposedTableBody checkTable(TransposedTableHead tableHead) {
+        checkCellSize(tableHead);
+        transpose(tableHead).checkPrefix(CHAR);
+        return this;
+    }
+
+    private void checkCellSize(TransposedTableHead tableHead) {
         rows.forEach(tableHead::checkSize);
         Map<Integer, List<TransposedRowNode>> rowsByCount = rows.stream().collect(groupingBy(TransposedRowNode::cellCount));
         if (rowsByCount.size() > 1)
             throw new SyntaxException("Different cell size", new ArrayList<>(rowsByCount.values()).get(1).get(0)
                     .getPositionBegin(), InterpreterException.Position.Type.LINE);
-        transpose(tableHead).checkPrefix(CHAR);
-        return this;
     }
 
     public TableBody transpose(TransposedTableHead tableHead) {

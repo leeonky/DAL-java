@@ -68,4 +68,8 @@ public class RowNode extends DALNode {
     public boolean isData() {
         return !isEllipsis();
     }
+
+    public boolean specialRow() {
+        return isEllipsis() || isRowWildcard();
+    }
 }

@@ -5,6 +5,7 @@ import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.SortSequenceNode;
 import com.github.leeonky.dal.compiler.DALProcedure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.Comparator;
 import java.util.List;
@@ -38,5 +39,11 @@ public class TableHead extends DALNode {
         if (procedure.getIndex() >= headers.size())
             return new HeaderNode(SortSequenceNode.NO_SEQUENCE, InputNode.INSTANCE, Optional.empty());
         return headers.get(procedure.getIndex());
+    }
+
+    public void checkSize(RowNode rowNode) {
+        if (!rowNode.specialRow() && rowNode.getCells().size() != headers.size())
+            throw new SyntaxException("Different cell size",
+                    rowNode.getCells().get(rowNode.getCells().size() - 1).getOperandPosition());
     }
 }

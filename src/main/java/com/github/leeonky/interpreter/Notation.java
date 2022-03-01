@@ -58,45 +58,19 @@ public class Notation {
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> before(
-            NodeParser<C, N, E, O, P> nodeParser) {
-        return procedure -> procedure.getSourceCode().tryFetch(() -> getToken(procedure)
-                .flatMap(t -> nodeParser.parse(procedure)));
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
+            MA extends Parser.Mandatory<C, N, E, O, P, OP, MA, T>, T> OP before(OP op) {
+        return op.castParser(procedure -> procedure.getSourceCode().tryFetch(() -> getToken(procedure)
+                .flatMap(t -> op.parse(procedure))));
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> before(
-            NodeParser.Mandatory<C, N, E, O, P> mandatory) {
-        return procedure -> getToken(procedure).map(t -> mandatory.parse(procedure));
-    }
-
-    //    TODO refactor merge all before
-    public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> before(
-            ClauseParser.Mandatory<C, N, E, O, P> mandatory) {
-        return procedure -> getToken(procedure).map(t -> mandatory.parse(procedure));
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
+            MA extends Parser.Mandatory<C, N, E, O, P, OP, MA, T>, T> OP before(MA ma) {
+        return ma.castParser(procedure -> getToken(procedure).map(t -> ma.parse(procedure)));
     }
 
     public int length() {
         return label.length();
     }
-
-//    public Notation with(Notation... others) {
-//        List<Notation> notations = new ArrayList<Notation>() {{
-//            add(Notation.this);
-//            addAll(asList(others));
-//        }};
-//
-//        return new Notation(notations.stream().map(Notation::getLabel).collect(Collectors.joining(" "))) {
-//            @Override
-//            protected <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-//                    O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> Optional<Token> getToken(
-//                    P procedure, Predicate<P> predicate) {
-//                procedure.getSourceCode().tryFetch(() -> procedure.positionOf(position -> when(notations.stream()
-//                        .map(notation -> notation.getToken(procedure, predicate)).filter(Optional::isPresent)
-//                        .count() == notations.size()).optional(() -> new Token(position).append(getLabel()))));
-//                return super.getToken(procedure, predicate);
-//            }
-//        };
-//    }
 }

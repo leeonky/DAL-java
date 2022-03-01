@@ -150,7 +150,7 @@ public class Compiler {
         EXPRESSION_CLAUSE = oneOf(ARITHMETIC_CLAUSE_CHAIN, JUDGEMENT_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN,
                 WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN);
         EXPRESSION = OPERAND.concat(EXPRESSION_CLAUSE);
-        SHORT_JUDGEMENT_OPERAND = JUDGEMENT.or(OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE, /*need test*/EXPLICIT_PROPERTY)));
+        SHORT_JUDGEMENT_OPERAND = JUDGEMENT.or(OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE)));
     }
 
     public List<DALNode> compile(SourceCode sourceCode, DALRuntimeContext DALRuntimeContext) {
@@ -182,10 +182,10 @@ public class Compiler {
 
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SEQUENCE = oneOf(
-            many(SEQUENCE_AZ).atLeast(1).as(SortSequenceNode::new), many(SEQUENCE_AZ_2).atLeast(1).as(SortSequenceNode::new),
-            many(SEQUENCE_ZA).atLeast(1).as(SortSequenceNode::new), many(SEQUENCE_ZA_2).atLeast(1).as(SortSequenceNode::new))
-            .or(procedure -> SortSequenceNode.noSequence());
-
+            many(SEQUENCE_AZ).atLeast(1).as(SortSequenceNode::new),
+            many(SEQUENCE_AZ_2).atLeast(1).as(SortSequenceNode::new),
+            many(SEQUENCE_ZA).atLeast(1).as(SortSequenceNode::new),
+            many(SEQUENCE_ZA_2).atLeast(1).as(SortSequenceNode::new)).or(procedure -> SortSequenceNode.noSequence());
 
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             ROW_PREFIX = procedure -> new RowPrefixNode(INTEGER.parse(procedure).map(node -> (Integer)
@@ -196,10 +196,13 @@ public class Compiler {
 
     private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, (TableBody) many(ROW_PREFIX.combine(oneOf(
-//                    TODO refactor
-            COLUMN_SPLITTER.before(single(single(ELEMENT_ELLIPSIS).endWith(COLUMN_SPLITTER).as()).endWithLine().as()).clauseParser(RowNode::new),
-            COLUMN_SPLITTER.before(single(single(ROW_WILDCARD).endWith(COLUMN_SPLITTER).as()).endWithLine().as()).clauseParser(RowNode::new),
+            COLUMN_SPLITTER.before(singleCellRow(ELEMENT_ELLIPSIS)), COLUMN_SPLITTER.before(singleCellRow(ROW_WILDCARD)),
             COLUMN_SPLITTER.before(tableRow((TableHead) head))))).endWithOptionalLine().as(TableBody::new).parse(procedure));
+
+    private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> singleCellRow(
+            NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> element_ellipsis) {
+        return single(single(element_ellipsis).endWith(COLUMN_SPLITTER).as()).endWithLine().as().clauseParser(RowNode::new);
+    }
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
             DALNode rowPrefix, TableHead head) {
@@ -220,11 +223,8 @@ public class Compiler {
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
             TableHead tableHead) {
 //            TODO method for input->nodeparser => clauseparser
-        return procedure -> rowPrefix -> tableLine(tableCell(rowPrefix, tableHead)).as(cells -> {
-            if (cells.size() != tableHead.size())
-                throw new SyntaxException("Different cell size", cells.get(cells.size() - 1).getOperandPosition());
-            return new RowNode(rowPrefix, cells);
-        }).parse(procedure);
+        return procedure -> rowPrefix -> tableLine(tableCell(rowPrefix, tableHead))
+                .as(cells -> new RowNode(rowPrefix, cells)).parse(procedure);
     }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
