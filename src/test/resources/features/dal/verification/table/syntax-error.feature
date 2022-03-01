@@ -31,7 +31,7 @@ Feature: syntax error
     """
     = | name  | age |
       | 'Tom' |
-               ^
+        ^
     """
 
   Scenario: syntax error missing |
@@ -129,3 +129,29 @@ Feature: syntax error
       | 'John' |
     ^^^^^^^^^^^^
     """
+
+#  TODO
+#  Scenario: table should not end with ,
+#    When evaluate by:
+#    """
+#    :[
+#      | name  | age |
+#      | 'Tom' | 10  |,
+#      | name   | age |
+#      | 'John' | 15  |
+#    ]
+#    """
+#    Then failed with the message:
+#    """
+#    Different cell size
+#    """
+#    And got the following notation:
+#    """
+#    :[
+#      | name  | age |
+#      | 'Tom' | 10  |,
+#                     ^
+#      | name   | age |
+#      | 'John' | 15  |
+#    ]
+#    """

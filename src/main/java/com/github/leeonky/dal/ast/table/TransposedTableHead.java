@@ -7,6 +7,8 @@ import com.github.leeonky.interpreter.SyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.empty;
+
 public class TransposedTableHead extends DALNode {
     private final List<RowPrefixNode> prefixes;
 
@@ -23,7 +25,7 @@ public class TransposedTableHead extends DALNode {
 
     public RowPrefixNode getPrefix(int i) {
         if (i >= prefixes.size())
-            throw new SyntaxException("Different cell size", getPositionBegin(), InterpreterException.Position.Type.LINE);
+            return new RowPrefixNode(empty(), empty(), empty());
         return prefixes.get(i);
     }
 

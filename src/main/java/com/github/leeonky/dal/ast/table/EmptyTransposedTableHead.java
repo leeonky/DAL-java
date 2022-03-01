@@ -2,8 +2,6 @@ package com.github.leeonky.dal.ast.table;
 
 import java.util.Collections;
 
-import static java.util.Optional.empty;
-
 public class EmptyTransposedTableHead extends TransposedTableHead {
     public EmptyTransposedTableHead() {
         super(Collections.emptyList());
@@ -12,11 +10,6 @@ public class EmptyTransposedTableHead extends TransposedTableHead {
     @Override
     public String inspect() {
         return ">>";
-    }
-
-    @Override
-    public RowPrefixNode getPrefix(int i) {
-        return new RowPrefixNode(empty(), empty(), empty());
     }
 
     @Override

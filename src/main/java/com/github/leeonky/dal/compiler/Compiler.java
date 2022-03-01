@@ -192,13 +192,14 @@ public class Compiler {
             ((ConstNode) node).getValue()), SCHEMA_CLAUSE.parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
             TABLE_HEADER = procedure -> new HeaderNode((SortSequenceNode) SEQUENCE.parse(procedure),
                     PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
-            PREFIX_ROW = many(ROW_PREFIX).splitBy(COLUMN_SPLITTER).endWithLine().as(TransposedTableHead::new);
+            PREFIX_ROW = tableLine(ROW_PREFIX).as(TransposedTableHead::new);
 
     private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, (TableBody) many(ROW_PREFIX.combine(oneOf(
-            COLUMN_SPLITTER.before(single(ELEMENT_ELLIPSIS).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
-            COLUMN_SPLITTER.before(single(ROW_WILDCARD).endWith(COLUMN_SPLITTER).as()).clauseParser(RowNode::new),
-            COLUMN_SPLITTER.before(tableRow((TableHead) head))))).as(TableBody::new).parse(procedure));
+//                    TODO refactor
+            COLUMN_SPLITTER.before(single(single(ELEMENT_ELLIPSIS).endWith(COLUMN_SPLITTER).as()).endWithLine().as()).clauseParser(RowNode::new),
+            COLUMN_SPLITTER.before(single(single(ROW_WILDCARD).endWith(COLUMN_SPLITTER).as()).endWithLine().as()).clauseParser(RowNode::new),
+            COLUMN_SPLITTER.before(tableRow((TableHead) head))))).endWithOptionalLine().as(TableBody::new).parse(procedure));
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
             DALNode rowPrefix, TableHead head) {
@@ -221,7 +222,7 @@ public class Compiler {
 //            TODO method for input->nodeparser => clauseparser
         return procedure -> rowPrefix -> tableLine(tableCell(rowPrefix, tableHead)).as(cells -> {
             if (cells.size() != tableHead.size())
-                throw procedure.getSourceCode().syntaxError("Different cell size", 0);
+                throw new SyntaxException("Different cell size", cells.get(cells.size() - 1).getOperandPosition());
             return new RowNode(rowPrefix, cells);
         }).parse(procedure);
     }
@@ -236,13 +237,8 @@ public class Compiler {
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
         return procedure -> prefixHead -> new TransposedTableNode(prefixHead, many(COLUMN_SPLITTER.before(
                 single(TABLE_HEADER).endWith(COLUMN_SPLITTER).as()).expression(tableRow((TransposedTableHead) prefixHead)))
-                .atLeast(1).as(TransposedTableBody::new).mandatory("Expecting a table").parse(procedure));
+                .atLeast(1).endWithOptionalLine().as(TransposedTableBody::new).mandatory("Expecting a table").parse(procedure));
     }
-    //TODO should test integer or something after table
-//: | a   | b   |
-//0 | 'a' | 'b' |
-//is a
-//        Row prefix ok but no cell
 
     private static Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, NodeParser<DALRuntimeContext,
             DALNode, DALExpression, DALOperator, DALProcedure>, NodeParser.Mandatory<DALRuntimeContext, DALNode,

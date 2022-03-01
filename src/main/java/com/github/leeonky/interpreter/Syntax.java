@@ -1,6 +1,7 @@
 package com.github.leeonky.interpreter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -125,7 +126,10 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
             @Override
             public boolean isClose(P procedure) {
                 //                TODO need test
-                return isClose = procedure.getSourceCode().isEndOfLine();
+                isClose = procedure.getSourceCode().isEndOfLine();
+                if (isClose && procedure.getSourceCode().hasCode())
+                    procedure.getSourceCode().popChar(Collections.emptyMap());
+                return isClose;
             }
 
             @Override
@@ -133,6 +137,24 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
                 if (!isClose)
 //                TODO need test
                     throw procedure.getSourceCode().syntaxError("unexpected token", 0);
+            }
+        };
+    }
+
+    public Syntax<C, N, E, O, P, OP, MA, T, R, A> endWithOptionalLine() {
+        return new CompositeSyntax<C, N, E, O, P, OP, MA, T, R, A>(this) {
+
+            @Override
+            public boolean isClose(P procedure) {
+                //                TODO need test
+                boolean endOfLine = procedure.getSourceCode().isEndOfLine();
+                if (endOfLine && procedure.getSourceCode().hasCode())
+                    procedure.getSourceCode().popChar(Collections.emptyMap());
+                return endOfLine;
+            }
+
+            @Override
+            public void close(P procedure) {
             }
         };
     }
@@ -191,8 +213,10 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
             NodeParser<C, N, E, O, P>, T> single(OP parser) {
         return new DefaultSyntax<C, N, E, O, P, OP, MA, T, NodeParser<C, N, E, O, P>, T>((procedure, syntax) -> {
             Optional<T> optional = parser.parse(procedure);
-            if (optional.isPresent())
+            if (optional.isPresent()) {
+                syntax.isClose(procedure);
                 syntax.close(procedure);
+            }
             return optional.orElse(null);
         }) {
             @Override
