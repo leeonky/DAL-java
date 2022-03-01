@@ -59,7 +59,7 @@ Feature: access object property by .xxx
     """
     Then failed with the message:
     """
-    expect a symbol
+    Expect a symbol
     """
     And got the following notation:
     """
@@ -74,7 +74,7 @@ Feature: access object property by .xxx
     """
     Then failed with the message:
     """
-    expect a symbol
+    Expect a symbol
     """
     And got the following notation:
     """

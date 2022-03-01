@@ -242,7 +242,7 @@ Feature: object
     """
     Then failed with the message:
     """
-    should end with `}`
+    Should end with `}`
     """
     And got the following notation:
     """
@@ -257,7 +257,7 @@ Feature: object
     """
     Then failed with the message:
     """
-    expect a value or expression
+    Expect a value or expression
     """
     And got the following notation:
     """
@@ -272,7 +272,7 @@ Feature: object
     """
     Then failed with the message:
     """
-    expect a object property
+    Expect a object property
     """
     And got the following notation:
     """
@@ -287,7 +287,7 @@ Feature: object
     """
     Then failed with the message:
     """
-    expect operator `:` or `=`
+    Expect operator `:` or `=`
     """
     And got the following notation:
     """
@@ -302,7 +302,7 @@ Feature: object
     """
     Then failed with the message:
     """
-    expect operator `:` or `=`
+    Expect operator `:` or `=`
     """
     And got the following notation:
     """

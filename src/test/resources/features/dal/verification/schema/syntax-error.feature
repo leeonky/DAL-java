@@ -7,7 +7,7 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    expect a schema
+    Expect a schema
     """
     And got the following notation:
     """
@@ -26,7 +26,7 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    expect a schema
+    Expect a schema
     """
     And got the following notation:
     """
@@ -41,7 +41,7 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    expect a schema
+    Expect a schema
     """
     And got the following notation:
     """
@@ -56,7 +56,7 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    should end with `]`
+    Should end with `]`
     """
     And got the following notation:
     """
@@ -71,7 +71,7 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    expect a schema
+    Expect a schema
     """
     And got the following notation:
     """
@@ -86,7 +86,7 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    expect a schema
+    Expect a schema
     """
     And got the following notation:
     """
@@ -121,7 +121,7 @@ Feature: syntax-error
     """
     Then failed to parse "schema" with the following message:
     """
-    expect a schema
+    Expect a schema
     """
     Examples:
       | code  |
@@ -190,7 +190,7 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    expect a schema
+    Expect a schema
     """
     And got the following notation:
     """

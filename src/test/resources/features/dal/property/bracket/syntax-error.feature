@@ -7,7 +7,7 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    should given one property or array index in `[]`
+    Should given one property or array index in `[]`
     """
     And got the following notation:
     """
@@ -26,7 +26,7 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    should end with `]`
+    Should end with `]`
     """
     And got the following notation:
     """
@@ -41,7 +41,7 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    should end with `]`
+    Should end with `]`
     """
     And got the following notation:
     """
@@ -56,7 +56,7 @@ Feature: syntax-error
     """
     Then failed with the message:
     """
-    should given one property or array index in `[]`
+    Should given one property or array index in `[]`
     """
     And got the following notation:
     """

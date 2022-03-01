@@ -96,7 +96,7 @@ Feature: const number node
     """
     Then failed with the message:
     """
-    expect a symbol
+    Expect a symbol
     """
     And got the following notation:
     """

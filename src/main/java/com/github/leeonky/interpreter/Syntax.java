@@ -91,7 +91,7 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
             @Override
             public void close(P procedure) {
                 if (!procedure.getSourceCode().popWord(notation).isPresent())
-                    throw procedure.getSourceCode().syntaxError(format("should end with `%s`", notation.getLabel()), 0);
+                    throw procedure.getSourceCode().syntaxError(format("Should end with `%s`", notation.getLabel()), 0);
             }
 
             @Override
@@ -177,7 +177,7 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
             public boolean isSplitter(P procedure) {
                 if (procedure.getSourceCode().popWord(notation).isPresent())
                     return true;
-                throw procedure.getSourceCode().syntaxError(format("should end with `%s`", notation.getLabel()), 0);
+                throw procedure.getSourceCode().syntaxError(format("Should end with `%s`", notation.getLabel()), 0);
             }
         };
     }

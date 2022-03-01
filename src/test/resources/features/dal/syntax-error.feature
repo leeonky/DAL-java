@@ -11,22 +11,22 @@ Feature: syntax error expression
     """
     Examples:
       | opt  | message                      |
-      | +    | expect a value or expression |
-      | -    | expect a value or expression |
-      | *    | expect a value or expression |
-      | /    | expect a value or expression |
-      | &&   | expect a value or expression |
-      | \|\| | expect a value or expression |
-      | and  | expect a value or expression |
-      | or   | expect a value or expression |
-      | ,    | expect a value or expression |
-      | >    | expect a value or expression |
-      | <    | expect a value or expression |
-      | >=   | expect a value or expression |
-      | <=   | expect a value or expression |
-      | !=   | expect a value or expression |
-      | =    | expect a value or expression |
-      | :    | expect a value or expression |
+      | +    | Expect a value or expression |
+      | -    | Expect a value or expression |
+      | *    | Expect a value or expression |
+      | /    | Expect a value or expression |
+      | &&   | Expect a value or expression |
+      | \|\| | Expect a value or expression |
+      | and  | Expect a value or expression |
+      | or   | Expect a value or expression |
+      | ,    | Expect a value or expression |
+      | >    | Expect a value or expression |
+      | <    | Expect a value or expression |
+      | >=   | Expect a value or expression |
+      | <=   | Expect a value or expression |
+      | !=   | Expect a value or expression |
+      | =    | Expect a value or expression |
+      | :    | Expect a value or expression |
 
   Scenario Outline: missing operand2
     When evaluate by:
@@ -39,22 +39,22 @@ Feature: syntax error expression
     """
     Examples:
       | opt  | message                      |
-      | +    | expect a value or expression |
-      | -    | expect a value or expression |
-      | *    | expect a value or expression |
-      | /    | expect a value or expression |
-      | &&   | expect a value or expression |
-      | \|\| | expect a value or expression |
-      | and  | expect a value or expression |
-      | or   | expect a value or expression |
-      | ,    | expect a value or expression |
-      | >    | expect a value or expression |
-      | <    | expect a value or expression |
-      | >=   | expect a value or expression |
-      | <=   | expect a value or expression |
-      | !=   | expect a value or expression |
-      | =    | expect a value or expression |
-      | :    | expect a value or expression |
+      | +    | Expect a value or expression |
+      | -    | Expect a value or expression |
+      | *    | Expect a value or expression |
+      | /    | Expect a value or expression |
+      | &&   | Expect a value or expression |
+      | \|\| | Expect a value or expression |
+      | and  | Expect a value or expression |
+      | or   | Expect a value or expression |
+      | ,    | Expect a value or expression |
+      | >    | Expect a value or expression |
+      | <    | Expect a value or expression |
+      | >=   | Expect a value or expression |
+      | <=   | Expect a value or expression |
+      | !=   | Expect a value or expression |
+      | =    | Expect a value or expression |
+      | :    | Expect a value or expression |
 
   Scenario: unexpected token after schema
     When evaluate by:
@@ -76,7 +76,7 @@ Feature: syntax error expression
     """
     Then failed with the message:
     """
-    expect a value or expression
+    Expect a value or expression
     """
     And got the following notation:
     """

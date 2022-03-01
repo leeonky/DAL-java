@@ -19,7 +19,7 @@ Feature: which expression
     """
     Then failed with the message:
     """
-    expect a value or expression
+    Expect a value or expression
     """
     And got the following notation:
     """
@@ -34,7 +34,7 @@ Feature: which expression
     """
     Then failed with the message:
     """
-    expect a value or expression
+    Expect a value or expression
     """
     And got the following notation:
     """

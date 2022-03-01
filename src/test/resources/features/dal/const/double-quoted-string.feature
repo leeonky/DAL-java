@@ -57,7 +57,7 @@ Feature: "string"
     """
     Then failed with the message:
     """
-    should end with `"`
+    Should end with `"`
     """
     And got the following notation:
     """

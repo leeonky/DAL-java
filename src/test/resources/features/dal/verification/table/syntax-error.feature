@@ -41,7 +41,7 @@ Feature: syntax error
     """
     Then failed with the message:
     """
-    should end with `|`
+    Should end with `|`
     """
     And got the following notation:
     """
@@ -60,7 +60,7 @@ Feature: syntax error
     """
     Then failed with the message:
     """
-    unexpected token
+    Unexpected token
     """
     And got the following notation:
     """
@@ -81,7 +81,7 @@ Feature: syntax error
     """
     Then failed with the message:
     """
-    unexpected token
+    Unexpected token
     """
     And got the following notation:
     """
@@ -101,7 +101,7 @@ Feature: syntax error
     """
     Then failed with the message:
     """
-    unexpected token
+    Unexpected token
     """
     And got the following notation:
     """
@@ -130,28 +130,27 @@ Feature: syntax error
     ^^^^^^^^^^^^
     """
 
-#  TODO
-#  Scenario: table should not end with ,
-#    When evaluate by:
-#    """
-#    :[
-#      | name  | age |
-#      | 'Tom' | 10  |,
-#      | name   | age |
-#      | 'John' | 15  |
-#    ]
-#    """
-#    Then failed with the message:
-#    """
-#    Different cell size
-#    """
-#    And got the following notation:
-#    """
-#    :[
-#      | name  | age |
-#      | 'Tom' | 10  |,
-#                     ^
-#      | name   | age |
-#      | 'John' | 15  |
-#    ]
-#    """
+  Scenario: table should not end with ,
+    When evaluate by:
+    """
+    :[
+      | name  | age |
+      | 'Tom' | 10  |,
+      | name   | age |
+      | 'John' | 15  |
+    ]
+    """
+    Then failed with the message:
+    """
+    Expect a value or expression
+    """
+    And got the following notation:
+    """
+    :[
+      | name  | age |
+      | 'Tom' | 10  |,
+                     ^
+      | name   | age |
+      | 'John' | 15  |
+    ]
+    """

@@ -155,7 +155,7 @@ public class ListScopeNode extends DALNode {
         public List<DALNode> checkElements(List<DALNode> inputExpressions) {
             toChecking(inputExpressions).forEach(node -> {
                 if (node instanceof ListEllipsisNode)
-                    throw new SyntaxException("unexpected token", node.getPositionBegin());
+                    throw new SyntaxException("Unexpected token", node.getPositionBegin());
             });
             return inputExpressions;
         }

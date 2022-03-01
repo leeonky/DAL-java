@@ -49,7 +49,7 @@ class CompilerTest {
 
         @Test
         void miss_opening_bracket() {
-            assertSyntaxException("1]", 1, "expect a value or expression");
+            assertSyntaxException("1]", 1, "Expect a value or expression");
         }
     }
 
@@ -77,12 +77,12 @@ class CompilerTest {
 
         @Test
         void not_supported_operator() {
-            assertSyntaxException("&1", 0, "unexpected token");
+            assertSyntaxException("&1", 0, "Unexpected token");
         }
 
         @Test
         void should_raise_error_when_expression_not_finished_1() {
-            assertSyntaxException("=", 1, "expect a value or expression");
+            assertSyntaxException("=", 1, "Expect a value or expression");
         }
 
         @Test
@@ -152,7 +152,7 @@ class CompilerTest {
 
         @Test
         void miss_opening_parenthesis_should_raise_error() {
-            assertSyntaxException("1)", 1, "expect a value or expression");
+            assertSyntaxException("1)", 1, "Expect a value or expression");
         }
     }
 
@@ -213,7 +213,7 @@ class CompilerTest {
 
     @Test
     void miss_opening_brace() {
-        assertSyntaxException("1}", 1, "expect a value or expression");
+        assertSyntaxException("1}", 1, "Expect a value or expression");
     }
 
     @Test

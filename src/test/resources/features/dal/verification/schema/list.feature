@@ -111,7 +111,7 @@ Feature: list
     """
     Then failed with the message:
     """
-    should end with `]`
+    Should end with `]`
     """
     And got the following notation:
     """
@@ -126,7 +126,7 @@ Feature: list
     """
     Then failed with the message:
     """
-    expect a value or expression
+    Expect a value or expression
     """
     And got the following notation:
     """
@@ -163,7 +163,7 @@ Feature: list
     """
     Then failed with the message:
     """
-    unexpected token
+    Unexpected token
     """
     And got the following notation:
     """
@@ -176,7 +176,7 @@ Feature: list
     """
     Then failed with the message:
     """
-    unexpected token
+    Unexpected token
     """
     And got the following notation:
     """
@@ -189,7 +189,7 @@ Feature: list
     """
     Then failed with the message:
     """
-    unexpected token
+    Unexpected token
     """
     And got the following notation:
     """

@@ -95,8 +95,8 @@ public class Compiler {
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SCHEMA_COMPOSE = OPENING_BRACKET.and(single(many(SCHEMA.mandatory("expect a schema")).splitBy(SCHEMA_AND)
-            .as(DALNode::elementSchemas)).endWith(CLOSING_BRACKET).as()).or(many(SCHEMA.mandatory("expect a schema"))
+            SCHEMA_COMPOSE = OPENING_BRACKET.and(single(many(SCHEMA.mandatory("Expect a schema")).splitBy(SCHEMA_AND)
+            .as(DALNode::elementSchemas)).endWith(CLOSING_BRACKET).as()).or(many(SCHEMA.mandatory("Expect a schema"))
             .splitBy(SCHEMA_AND).as(DALNode::schemas)),
             PROPERTY_CHAIN, OPERAND, EXPRESSION, SHORT_JUDGEMENT_OPERAND;
 
@@ -109,8 +109,8 @@ public class Compiler {
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
 
     EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).mandatory(
-            "expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.and(single(INTEGER_OR_STRING.mandatory(
-            "should given one property or array index in `[]`")).endWith(CLOSING_BRACKET).as(DALNode::bracketSymbolNode))));
+            "Expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.and(single(INTEGER_OR_STRING.mandatory(
+            "Should given one property or array index in `[]`")).endWith(CLOSING_BRACKET).as(DALNode::bracketSymbolNode))));
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> shortJudgementClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
@@ -126,9 +126,9 @@ public class Compiler {
         PARENTHESES = lazy(() -> enableCommaAnd(OPENING_PARENTHESES.and(single(EXPRESSION).endWith(CLOSING_PARENTHESES)
                 .as(DALNode::parenthesesNode))));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IMPLICIT_PROPERTY);
-        PROPERTY_CHAIN = PROPERTY.mandatory("expect a object property").recursive(EXPLICIT_PROPERTY);
+        PROPERTY_CHAIN = PROPERTY.mandatory("Expect a object property").recursive(EXPLICIT_PROPERTY);
         OBJECT = DALProcedure.disableCommaAnd(OPENING_BRACES.and(many(PROPERTY_CHAIN.expression(shortJudgementClause(
-                JUDGEMENT_OPERATORS.mandatory("expect operator `:` or `=`")))).optionalSplitBy(Notations.COMMA)
+                JUDGEMENT_OPERATORS.mandatory("Expect operator `:` or `=`")))).optionalSplitBy(Notations.COMMA)
                 .endWith(CLOSING_BRACES).as(ObjectScopeNode::new)));
         LIST = DALProcedure.disableCommaAnd(OPENING_BRACKET.and(many(ELEMENT_ELLIPSIS.ignoreInput().or(
                 shortJudgementClause(JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR)))).optionalSplitBy(COMMA)
@@ -138,7 +138,7 @@ public class Compiler {
                 COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).expression(TABLE_BODY_CLAUSE));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         OPERAND = lazy(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
-                .mandatory("expect a value or expression").map(DALNode::avoidListMapping);
+                .mandatory("Expect a value or expression").map(DALNode::avoidListMapping);
         ARITHMETIC_CLAUSE = BINARY_ARITHMETIC_OPERATORS.clause(OPERAND);
         JUDGEMENT_CLAUSE = JUDGEMENT_OPERATORS.clause(JUDGEMENT.or(OPERAND));
         ARITHMETIC_CLAUSE_CHAIN = ClauseParser.lazy(() -> ARITHMETIC_CLAUSE.concat(EXPRESSION_CLAUSE));
@@ -158,7 +158,7 @@ public class Compiler {
             DALProcedure dalParser = new DALProcedure(sourceCode, DALRuntimeContext, DALExpression::new);
             add(EXPRESSION.parse(dalParser));
             if (sourceCode.isBeginning() && sourceCode.hasCode())
-                throw sourceCode.syntaxError("unexpected token", 0);
+                throw sourceCode.syntaxError("Unexpected token", 0);
             while (sourceCode.hasCode())
                 add(EXPRESSION.parse(dalParser));
         }};

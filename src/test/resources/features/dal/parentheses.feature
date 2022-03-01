@@ -53,7 +53,7 @@ Feature: parentheses node
     """
     Then failed with the message:
     """
-    expect a value or expression
+    Expect a value or expression
     """
     And got the following notation:
     """
@@ -68,7 +68,7 @@ Feature: parentheses node
     """
     Then failed with the message:
     """
-    should end with `)`
+    Should end with `)`
     """
     And got the following notation:
     """
@@ -83,7 +83,7 @@ Feature: parentheses node
     """
     Then failed with the message:
     """
-    should end with `)`
+    Should end with `)`
     """
     And got the following notation:
     """
