@@ -1,4 +1,3 @@
-@NewTable
 Feature: sort
 
   Scenario: support sort list by header from a to z

@@ -67,7 +67,6 @@ public class SymbolNode extends DALNode {
         return Collections.singletonList(symbol);
     }
 
-    //    TODO  to be remove
     @Override
     public Object getRootSymbolName() {
         return symbol;

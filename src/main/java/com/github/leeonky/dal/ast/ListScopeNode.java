@@ -46,7 +46,7 @@ public class ListScopeNode extends DALNode {
             return inputExpressions;
         return new ArrayList<DALNode>() {{
             for (int i = 0; i < expressionFactories.size(); i++)
-                add(expressionFactories.get(i).makeExpression(new DALExpression(InputNode.INSTANCE, new PropertyImplicit(),
+                add(expressionFactories.get(i).expression(new DALExpression(InputNode.INSTANCE, new PropertyImplicit(),
                         new SymbolNode(type.indexOfNode(firstIndex, i, expressionFactories.size()), BRACKET))));
         }};
     }
@@ -120,7 +120,7 @@ public class ListScopeNode extends DALNode {
     }
 
     private boolean isListEllipsis(Clause<DALRuntimeContext, DALNode> clause) {
-        return clause.makeExpression(null) instanceof ListEllipsisNode;
+        return clause.expression(null) instanceof ListEllipsisNode;
     }
 
     public enum Type {

@@ -32,7 +32,7 @@ public class RowPrefixNode extends DALNode {
     public String inspect() {
         String indexAndSchema = join(" ", new ArrayList<String>() {{
             index.map(Object::toString).ifPresent(this::add);
-            rowSchema.map(clause -> clause.makeExpression(null).inspect()).ifPresent(this::add);
+            rowSchema.map(clause -> clause.expression(null).inspect()).ifPresent(this::add);
         }});
         return rowOperator.map(dalOperator -> dalOperator.inspect(indexAndSchema, "").trim()).orElse(indexAndSchema);
     }
@@ -40,7 +40,7 @@ public class RowPrefixNode extends DALNode {
     public DALExpression indexAndSchema(DALNode input, DALOperator defaultOperator, DALNode data) {
         DALNode inputWithIndex = index.map(i -> (DALNode) new DALExpression(InputNode.INSTANCE,
                 new PropertyImplicit(), new SymbolNode(i, SymbolNode.Type.BRACKET))).orElse(input);
-        return new DALExpression(rowSchema.map(clause -> clause.makeExpression(inputWithIndex)).orElse(inputWithIndex),
+        return new DALExpression(rowSchema.map(clause -> clause.expression(inputWithIndex)).orElse(inputWithIndex),
                 rowOperator.orElse(defaultOperator), data);
     }
 

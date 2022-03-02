@@ -22,4 +22,4 @@ Feature: property
     items[0].id
     """
 
-#    TODO list mapping; static methed extension
+#    TODO list mapping; static method extension

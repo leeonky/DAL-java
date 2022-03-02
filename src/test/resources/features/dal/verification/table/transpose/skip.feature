@@ -1,4 +1,3 @@
-@NewTable
 Feature: skip
 
   Scenario: skip one row

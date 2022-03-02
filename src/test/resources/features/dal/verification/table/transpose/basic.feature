@@ -1,4 +1,3 @@
-@NewTable
 Feature: basic verification via table
 
   Scenario: table one header and no rows
@@ -357,22 +356,6 @@ Feature: basic verification via table
     | age | age: 10 |, [1]: >>| name | name: 'John' |
     | age | age: 15 |]
     """
-#    TODO
-#    Then the following verification should pass:
-#    """
-#    :[
-#      >>| name  | 'Tom' |
-#        | age   | 10    |,
-#      >>| name  | 'John' |
-#        | age   | 15     |
-#    ]
-#    """
-#    And the inspect should:
-#    """
-#    : [[0]: >>| name | name: 'Tom' |
-#    | age | age: 10 |, [1]: >>| name | name: 'John' |
-#    | age | age: 15 |]
-#    """
     Then the following verification should pass:
     """
     :[

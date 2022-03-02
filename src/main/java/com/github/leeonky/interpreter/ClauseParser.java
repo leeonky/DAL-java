@@ -44,8 +44,8 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
                 Optional<Clause<C, N>> nextOptionalClause = oneOf(clauses).parse(procedure);
                 if (nextOptionalClause.isPresent()) {
                     return Optional.of(previous -> {
-                        N input = optionalExpressionClause.get().makeExpression(previous);
-                        return nextOptionalClause.get().makeExpression(input).setPositionBegin(input.getPositionBegin());
+                        N input = optionalExpressionClause.get().expression(previous);
+                        return nextOptionalClause.get().expression(input).setPositionBegin(input.getPositionBegin());
                     });
                 }
             }
@@ -54,7 +54,7 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
     }
 
     default NodeParser<C, N, E, O, P> defaultInputNode(N input) {
-        return procedure -> parse(procedure).map(clause -> clause.makeExpression(input));
+        return procedure -> parse(procedure).map(clause -> clause.expression(input));
     }
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>,
@@ -69,7 +69,7 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         }
 
         default NodeParser.Mandatory<C, N, E, O, P> input(N node) {
-            return procedure -> parse(procedure).makeExpression(node);
+            return procedure -> parse(procedure).expression(node);
         }
     }
 }

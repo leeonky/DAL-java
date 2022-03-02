@@ -42,7 +42,7 @@ public class TableBody extends DALNode {
     public ListScopeNode transformToListScope(DALOperator operator) {
         Stream<Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode>> rowClauses = rows.stream().map(rowNode ->
                 rowNode.verificationClause(operator));
-        return isHasRowIndex() ? new ListScopeNode(rowClauses.map(rowNode -> rowNode.makeExpression(null))
+        return isHasRowIndex() ? new ListScopeNode(rowClauses.map(rowNode -> rowNode.expression(null))
                 .collect(toList()), true, ListScopeNode.Type.FIRST_N_ITEMS)
                 : new ListScopeNode(rowClauses.collect(Collectors.toList()), true);
     }

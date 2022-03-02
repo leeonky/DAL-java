@@ -1,4 +1,3 @@
-@NewTable
 Feature: schema in table
 
   Scenario: verification with element schema of table

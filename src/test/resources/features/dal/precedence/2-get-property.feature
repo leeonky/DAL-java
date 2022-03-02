@@ -112,4 +112,26 @@ Feature: property
       : false
     """
 
-#  TODO (list match)= ['value'], : ['value'], (property value)= (['value'])
+  Scenario: [] after verification is list verification
+    Given the following json:
+    """
+    ["a"]
+    """
+    Then the following verification should pass:
+    """
+    = ['a']
+    """
+    And the inspect should:
+    """
+    = [[0]= 'a']
+    """
+    Given the following json:
+    """
+    {
+      "name": "Tom"
+    }
+    """
+    Then the following verification should pass:
+    """
+    'Tom': (['name'])
+    """

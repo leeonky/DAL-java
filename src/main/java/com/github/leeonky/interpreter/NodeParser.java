@@ -47,7 +47,7 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
     }
 
     default NodeParser<C, N, E, O, P> expression(ClauseParser.Mandatory<C, N, E, O, P> mandatory) {
-        return procedure -> parse(procedure).map(node -> mandatory.parse(procedure).makeExpression(node));
+        return procedure -> parse(procedure).map(node -> mandatory.parse(procedure).expression(node));
     }
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
@@ -67,21 +67,21 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         default Mandatory<C, N, E, O, P> expression(ClauseParser.Mandatory<C, N, E, O, P> expressionClauseMandatory) {
             return procedure -> {
                 N node = parse(procedure);
-                return expressionClauseMandatory.parse(procedure).makeExpression(node);
+                return expressionClauseMandatory.parse(procedure).expression(node);
             };
         }
 
         default NodeParser<C, N, E, O, P> combine(ClauseParser<C, N, E, O, P> expressionClauseMandatory) {
             return procedure -> procedure.getSourceCode().tryFetch(() -> {
                 N node = parse(procedure);
-                return expressionClauseMandatory.parse(procedure).map(clause -> clause.makeExpression(node));
+                return expressionClauseMandatory.parse(procedure).map(clause -> clause.expression(node));
             });
         }
 
         default Mandatory<C, N, E, O, P> concat(ClauseParser<C, N, E, O, P> clauseParser) {
             return procedure -> {
                 N node = parse(procedure);
-                return clauseParser.parse(procedure).map(right -> right.makeExpression(node)).orElse(node);
+                return clauseParser.parse(procedure).map(right -> right.expression(node)).orElse(node);
             };
         }
 
@@ -90,11 +90,17 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
                 N node = parse(procedure);
                 Optional<Clause<C, N>> optionalNode = clauseParser.parse(procedure);
                 while (optionalNode.isPresent()) {
-                    node = optionalNode.get().makeExpression(node);
+                    node = optionalNode.get().expression(node);
                     optionalNode = clauseParser.parse(procedure);
                 }
                 return node;
             };
+        }
+
+        static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends Operator<C,
+                N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser.Mandatory<C, N, E, O, P> clause(Function<N,
+                Mandatory<C, N, E, O, P>> mandatoryFactory) {
+            return procedure -> input -> mandatoryFactory.apply(input).parse(procedure);
         }
     }
 }

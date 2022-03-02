@@ -15,6 +15,7 @@ import static com.github.leeonky.dal.compiler.Notations.*;
 import static com.github.leeonky.interpreter.ClauseParser.oneOf;
 import static com.github.leeonky.interpreter.FunctionUtil.not;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
+import static com.github.leeonky.interpreter.NodeParser.Mandatory.clause;
 import static com.github.leeonky.interpreter.NodeParser.lazy;
 import static com.github.leeonky.interpreter.NodeParser.oneOf;
 import static com.github.leeonky.interpreter.OperatorParser.oneOf;
@@ -134,7 +135,8 @@ public class Compiler {
                 shortJudgementClause(JUDGEMENT_OPERATORS.or(DEFAULT_JUDGEMENT_OPERATOR)))).optionalSplitBy(COMMA)
                 .endWith(CLOSING_BRACKET).as(ListScopeNode::new)));
         TABLE = oneOf(TRANSPOSE_MARK.and(transposeTable().input(new EmptyTransposedTableHead())),
-                COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(PREFIX_ROW.expression(transposeTable())))),
+                COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(
+                        tableLine(ROW_PREFIX).as(TransposedTableHead::new).expression(transposeTable())))),
                 COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).expression(TABLE_BODY_CLAUSE));
         JUDGEMENT = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         OPERAND = lazy(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
@@ -191,8 +193,7 @@ public class Compiler {
             ROW_PREFIX = procedure -> new RowPrefixNode(INTEGER.parse(procedure).map(node -> (Integer)
             ((ConstNode) node).getValue()), SCHEMA_CLAUSE.parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
             TABLE_HEADER = procedure -> new HeaderNode((SortSequenceNode) SEQUENCE.parse(procedure),
-                    PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure)),
-            PREFIX_ROW = tableLine(ROW_PREFIX).as(TransposedTableHead::new);
+                    PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), JUDGEMENT_OPERATORS.parse(procedure));
 
     private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, (TableBody) many(ROW_PREFIX.combine(oneOf(
@@ -212,32 +213,25 @@ public class Compiler {
                 .setPositionBegin(cellPosition));
     }
 
-    private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
-            HeaderNode head, TransposedTableHead transposedTableHead) {
-        return procedure -> procedure.positionOf(cellPosition -> oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL, ROW_WILDCARD)
-                .or(shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, head.headerOperator(), transposedTableHead.getPrefix(
-                        procedure.getIndex()).rowOperator()).or(DEFAULT_JUDGEMENT_OPERATOR)).input(head.getProperty()))
-                .parse(procedure).setPositionBegin(cellPosition));
-    }
-
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
             TableHead tableHead) {
-//            TODO method for input->nodeparser => clauseparser
-        return procedure -> rowPrefix -> tableLine(tableCell(rowPrefix, tableHead))
-                .as(cells -> new RowNode(rowPrefix, cells)).parse(procedure);
+        return clause(rowPrefix -> tableLine(tableCell(rowPrefix, tableHead)).as(cells -> new RowNode(rowPrefix, cells)));
     }
 
-    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
-            TransposedTableHead prefix) {
-//            TODO method for input->nodeparser => clauseparser
-        return procedure -> header -> tableLine(tableCell((HeaderNode) header, prefix))
-                .as(cells -> new TransposedRowNode(header, cells)).parse(procedure);
+    private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableCell(
+            DALNode head, DALNode transposedTableHead) {
+        return procedure -> procedure.positionOf(cellPosition -> oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL, ROW_WILDCARD)
+                .or(shortJudgementClause(oneOf(JUDGEMENT_OPERATORS, ((HeaderNode) head).headerOperator(),
+                        ((TransposedTableHead) transposedTableHead).getPrefix(procedure.getIndex()).rowOperator())
+                        .or(DEFAULT_JUDGEMENT_OPERATOR)).input(((HeaderNode) head).getProperty())).parse(procedure)
+                .setPositionBegin(cellPosition));
     }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
         return procedure -> prefixHead -> new TransposedTableNode(prefixHead, many(COLUMN_SPLITTER.before(
-                single(TABLE_HEADER).endWith(COLUMN_SPLITTER).as()).expression(tableRow((TransposedTableHead) prefixHead)))
-                .atLeast(1).endWithOptionalLine().as(TransposedTableBody::new).mandatory("Expecting a table").parse(procedure));
+                single(TABLE_HEADER).endWith(COLUMN_SPLITTER).as()).expression(clause(header -> tableLine(
+                transposeTableCell(header, prefixHead)).as(cells -> new TransposedRowNode(header, cells))))).atLeast(1)
+                .endWithOptionalLine().as(TransposedTableBody::new).mandatory("Expecting a table").parse(procedure));
     }
 
     private static Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, NodeParser<DALRuntimeContext,
