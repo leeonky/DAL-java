@@ -71,6 +71,25 @@ class SourceCodeTest {
     }
 
     @Nested
+    class StartWithString {
+
+        @Test
+        void start_with_given_word() {
+            assertThat(new SourceCode("ab").startsWith("a")).isTrue();
+        }
+
+        @Test
+        void not_start_with_given_word() {
+            assertThat(new SourceCode("ab").startsWith("b")).isFalse();
+        }
+
+        @Test
+        void should_not_trim_blank_when_start_with_given_word() {
+            assertThat(new SourceCode(" \n\r\tab").startsWith("a")).isFalse();
+        }
+    }
+
+    @Nested
     class EscapedPop {
 
         @Test

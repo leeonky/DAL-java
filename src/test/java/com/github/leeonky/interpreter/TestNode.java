@@ -10,6 +10,10 @@ public class TestNode extends NodeBase<TestContext, TestNode> {
         this.content = content;
     }
 
+    public TestNode() {
+        this(null);
+    }
+
     public Object getContent() {
         return content;
     }

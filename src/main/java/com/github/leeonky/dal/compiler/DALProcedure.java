@@ -4,7 +4,7 @@ import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.interpreter.ExpressionConstructor;
+import com.github.leeonky.interpreter.ExpressionFactory;
 import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.Procedure;
 import com.github.leeonky.interpreter.SourceCode;
@@ -22,8 +22,8 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
     private final LinkedList<Boolean> enableAndComma = new LinkedList<>(singleton(true));
 
     public DALProcedure(SourceCode sourceCode, DALRuntimeContext runtimeContext,
-                        ExpressionConstructor<DALRuntimeContext, DALNode, DALExpression, DALOperator> expressionConstructor) {
-        super(sourceCode, runtimeContext, expressionConstructor);
+                        ExpressionFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator> expressionFactory) {
+        super(sourceCode, runtimeContext, expressionFactory);
     }
 
     public static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> disableCommaAnd(

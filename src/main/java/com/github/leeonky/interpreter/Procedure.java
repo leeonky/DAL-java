@@ -12,13 +12,13 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
     private final SourceCode sourceCode;
     private final C runtimeContext;
     private final LinkedList<O> operators = new LinkedList<>();
-    private final ExpressionConstructor<C, N, E, O> expressionConstructor;
+    private final ExpressionFactory<C, N, E, O> expressionFactory;
     private final LinkedList<AtomicInteger> columns = new LinkedList<>();
 
-    public Procedure(SourceCode sourceCode, C runtimeContext, ExpressionConstructor<C, N, E, O> expressionConstructor) {
+    public Procedure(SourceCode sourceCode, C runtimeContext, ExpressionFactory<C, N, E, O> expressionFactory) {
         this.sourceCode = sourceCode;
         this.runtimeContext = runtimeContext;
-        this.expressionConstructor = expressionConstructor;
+        this.expressionFactory = expressionFactory;
     }
 
     public SourceCode getSourceCode() {
@@ -56,7 +56,7 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
     }
 
     public N createExpression(N node1, O operator, N node2) {
-        return expressionConstructor.newInstance(node1, operator, node2).adjustOperatorOrder(expressionConstructor);
+        return expressionFactory.create(node1, operator, node2).applyPrecedence(expressionFactory);
     }
 
     public C getRuntimeContext() {
