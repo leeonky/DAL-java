@@ -18,25 +18,25 @@ public class TableNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
-        return judgeAsListAndReThrow(actualNode, operator, context);
+    public boolean verify(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
+        return verifyAsListAndReThrow(actualNode, operator, context);
     }
 
     @Override
-    public boolean judge(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
-        return judgeAsListAndReThrow(actualNode, operator, context);
+    public boolean verify(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
+        return verifyAsListAndReThrow(actualNode, operator, context);
     }
 
-    private boolean judgeAsListAndReThrow(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
+    private boolean verifyAsListAndReThrow(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
         try {
-            return judgeAsList(actualNode, operator, context);
+            return verifyAsList(actualNode, operator, context);
         } catch (ElementAssertionFailure elementAssertionFailure) {
             throw elementAssertionFailure.linePositionException(this);
         }
     }
 
-    public boolean judgeAsList(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
-        return tableBody.transformToListScope(operator).judgeAll(context, actualNode.evaluateData(context)
+    public boolean verifyAsList(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
+        return tableBody.transformToListScope(operator).verifyAll(context, actualNode.evaluateData(context)
                 .setListComparator(tableHead.collectComparator(context)));
     }
 

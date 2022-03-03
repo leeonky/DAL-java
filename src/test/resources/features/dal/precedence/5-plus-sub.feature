@@ -37,7 +37,7 @@ Feature: plus-sub
       | false | \|\| |
       | false | or   |
 
-  Scenario Outline: plus with judgement
+  Scenario Outline: plus with verification
     * the following verification should pass:
     """
     4 <opt> 2+2
@@ -84,7 +84,7 @@ Feature: plus-sub
       | false | \|\| |
       | false | or   |
 
-  Scenario Outline: sub with judgement
+  Scenario Outline: sub with verification
     * the following verification should pass:
     """
     3 <opt> 4-1

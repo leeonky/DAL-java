@@ -197,7 +197,7 @@ Feature: list
          ^
     """
 
-  Scenario: support different judgement operator in element
+  Scenario: support different verification operator in element
     Given the following json:
     """
     [ 1 ]

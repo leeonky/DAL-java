@@ -65,7 +65,7 @@ Feature: unary
     is -1
     """
 
-  Scenario Outline: minus with judgement
+  Scenario Outline: minus with verification
     Given the following json:
     """
     -1
@@ -79,7 +79,7 @@ Feature: unary
       | :   | 1      |
       | =   | 1      |
 
-  Scenario Outline: logic not with judgement
+  Scenario Outline: logic not with verification
     Given the following json:
     """
     false

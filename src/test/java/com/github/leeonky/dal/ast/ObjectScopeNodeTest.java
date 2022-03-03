@@ -22,13 +22,13 @@ class ObjectScopeNodeTest {
 
         @Test
         void empty_data_equal_to_empty_object() {
-            assertThat(objectScopeNode.judge(new ConstNode(new HashMap<>()), EQUAL, DALRuntimeContext)).isTrue();
+            assertThat(objectScopeNode.verify(new ConstNode(new HashMap<>()), EQUAL, DALRuntimeContext)).isTrue();
         }
 
         @Test
         void not_equal_when_has_unexpected_field() {
             assertThrows(AssertionFailure.class, () ->
-                    objectScopeNode.judge(new ConstNode(new HashMap<String, Object>() {{
+                    objectScopeNode.verify(new ConstNode(new HashMap<String, Object>() {{
                         put("unexpected", "field");
                     }}), EQUAL, DALRuntimeContext));
         }
@@ -41,7 +41,7 @@ class ObjectScopeNodeTest {
 
         @Test
         void any_data_matches_empty_object() {
-            assertThat(objectScopeNode.judge(new ConstNode(new HashMap<String, Object>() {{
+            assertThat(objectScopeNode.verify(new ConstNode(new HashMap<String, Object>() {{
                 put("any fields", "any value");
             }}), MATCHER, DALRuntimeContext)).isTrue();
         }
@@ -49,7 +49,7 @@ class ObjectScopeNodeTest {
         @Test
         void null_does_not_match_empty_object() {
             assertThrows(AssertionFailure.class, () ->
-                    objectScopeNode.judge(new ConstNode(null), MATCHER, DALRuntimeContext)
+                    objectScopeNode.verify(new ConstNode(null), MATCHER, DALRuntimeContext)
             );
         }
     }

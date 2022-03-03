@@ -48,7 +48,7 @@ public class CucumberContextBak {
         put("parentheses", compiler.PARENTHESES);
         put("object", compiler.OBJECT);
         put("list", compiler.LIST);
-        put("judgement-expression-operand", optional(compiler.SHORT_JUDGEMENT_OPERAND));
+        put("judgement-expression-operand", optional(compiler.SHORT_VERIFICATION_OPERAND));
         put("table", compiler.TABLE);
         put("schema", compiler.SCHEMA);
         put("symbol", compiler.SYMBOL);

@@ -119,7 +119,7 @@ Feature: define field alias in schema
       is Order which .user.aliasOfAge = 18
     """
 
-  Scenario: provide schema via is and use alias in object judgement
+  Scenario: provide schema via is and use alias in object verification
     Given the following schema class:
     """
     @Partial
@@ -148,7 +148,7 @@ Feature: define field alias in schema
       }
     """
 
-  Scenario: provide schema via is and use alias alias in nested object judgement
+  Scenario: provide schema via is and use alias alias in nested object verification
     Given the following schema class:
     """
     @Partial
@@ -189,7 +189,7 @@ Feature: define field alias in schema
       }
     """
 
-  Scenario: provide schema via is and use alias in list judgement
+  Scenario: provide schema via is and use alias in list verification
     Given the following schema class:
     """
     public class Order {
@@ -225,7 +225,7 @@ Feature: define field alias in schema
       }
     """
 
-  Scenario: provide schema via is and use alias in nested list judgement
+  Scenario: provide schema via is and use alias in nested list verification
     Given the following schema class:
     """
     public class Image {
@@ -349,7 +349,7 @@ Feature: define field alias in schema
       }
     """
 
-  Scenario: provide schema via object judgement key
+  Scenario: provide schema via object verification key
     Given the following schema class:
     """
     @Partial
@@ -376,7 +376,7 @@ Feature: define field alias in schema
     }
     """
 
-  Scenario: provide schema via list judgement element
+  Scenario: provide schema via list verification element
     Given the following schema class:
     """
     @Partial
@@ -422,7 +422,7 @@ Feature: define field alias in schema
     is [Order] which [0].aliasOfId: 0
     """
 
-  Scenario: provide element schema via object judgement key
+  Scenario: provide element schema via object verification key
     Given the following schema class:
     """
     @Partial
@@ -447,7 +447,7 @@ Feature: define field alias in schema
       }
     """
 
-  Scenario: provide element schema via list judgement key
+  Scenario: provide element schema via list verification key
     Given the following schema class:
     """
     @Partial

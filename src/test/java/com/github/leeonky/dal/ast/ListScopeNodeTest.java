@@ -16,7 +16,7 @@ class ListScopeNodeTest {
 
     @Test
     void empty_list_equal_to_or_matches_empty_list() {
-        assertThat(listScopeNode.judge(new ConstNode(Collections.emptyList()), EQUAL, DALRuntimeContext)).isTrue();
-        assertThat(listScopeNode.judge(new ConstNode(Collections.emptyList()), MATCHER, DALRuntimeContext)).isTrue();
+        assertThat(listScopeNode.verify(new ConstNode(Collections.emptyList()), EQUAL, DALRuntimeContext)).isTrue();
+        assertThat(listScopeNode.verify(new ConstNode(Collections.emptyList()), MATCHER, DALRuntimeContext)).isTrue();
     }
 }

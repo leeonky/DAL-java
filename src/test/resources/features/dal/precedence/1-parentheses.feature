@@ -37,7 +37,7 @@ Feature: parentheses
       | 5     | <=       | 4     | false  |
       | 5     | !=       | 3     | true   |
 
-  Scenario Outline: judgement before parentheses precedence
+  Scenario Outline: verification before parentheses precedence
     Given the following json:
     """
       {

@@ -18,7 +18,7 @@ Feature: table
         | 'Tomas' | 21   |
     """
 
-  Scenario: assert table with default judgement operator
+  Scenario: assert table with default verification operator
     Given the following input data:
     """
       [{

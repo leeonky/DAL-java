@@ -75,7 +75,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return node2.judge(node1, this, context);
+            return node2.verify(node1, this, context);
         }
 
         @Override
@@ -246,7 +246,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return node2.judge(node1, this, context);
+            return node2.verify(node1, this, context);
         }
 
         @Override

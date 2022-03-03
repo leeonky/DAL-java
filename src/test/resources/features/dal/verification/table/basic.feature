@@ -170,7 +170,7 @@ Feature: basic verification via table
     ^^^^^^^^^^^^^^^^^^
     """
 
-  Scenario: judgement table by table judgement
+  Scenario: verification table by table verification
     Given the following json:
     """
     [{
@@ -211,7 +211,7 @@ Feature: basic verification via table
     ^^^^^^^^^^^^
     """
 
-  Scenario: compile table with row judgement operator which has higher priority than table judgement operator
+  Scenario: compile table with row verification operator which has higher priority than table verification operator
     Given the following json:
     """
     [{
@@ -252,7 +252,7 @@ Feature: basic verification via table
     ^^^^^^^^^^^^
     """
 
-  Scenario: compile table and specified header judgement operator which has higher priority than row judgement operator
+  Scenario: compile table and specified header verification operator which has higher priority than row verification operator
     Given the following json:
     """
     [{
@@ -297,7 +297,7 @@ Feature: basic verification via table
     ^^^^^^^^^^^^^^^^^^^
     """
 
-  Scenario: compile table and specified cell judgement operator which has higher priority than header judgement operator
+  Scenario: compile table and specified cell verification operator which has higher priority than header verification operator
     Given the following json:
     """
     [{

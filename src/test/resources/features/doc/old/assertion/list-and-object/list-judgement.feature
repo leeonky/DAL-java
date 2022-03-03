@@ -1,4 +1,4 @@
-Feature: judge list
+Feature: verify list
 
   Scenario: '= []' means both list size and element at the same index should be equal
     Given the following input data:
@@ -94,7 +94,7 @@ Feature: judge list
       = []
     """
 
-  Scenario: explicit element judgement
+  Scenario: explicit element verification
     Given the following input data:
     """
       [1, 2]
@@ -336,7 +336,7 @@ Feature: judge list
       = [is IdZero]
     """
 
-  Scenario: use schema in judgement expression
+  Scenario: use schema in verification expression
     Given the following schema:
     """
     @Partial

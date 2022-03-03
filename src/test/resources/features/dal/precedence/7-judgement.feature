@@ -1,4 +1,4 @@
-Feature: judgement operators
+Feature: verification operators
 
   Scenario Outline: : with logical opt
     When evaluate by:

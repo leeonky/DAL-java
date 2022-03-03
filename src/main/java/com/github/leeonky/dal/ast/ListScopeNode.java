@@ -86,16 +86,16 @@ public class ListScopeNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
-        return judgeAll(context, actualNode.evaluateData(context));
+    public boolean verify(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
+        return verifyAll(context, actualNode.evaluateData(context));
     }
 
     @Override
-    public boolean judge(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
-        return judgeAll(context, actualNode.evaluateData(context));
+    public boolean verify(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
+        return verifyAll(context, actualNode.evaluateData(context));
     }
 
-    public boolean judgeAll(DALRuntimeContext context, Data data) {
+    public boolean verifyAll(DALRuntimeContext context, Data data) {
         if (!data.isList())
             throw new RuntimeException(format("Cannot compare%sand list", data.inspect()), getPositionBegin());
         List<DALNode> expressions = getExpressions(data.getListFirstIndex());

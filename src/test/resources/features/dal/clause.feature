@@ -37,7 +37,7 @@ Feature: chain
       | 'a' + 'b' which length | 2     | 'a' + 'b' which length |
       | 4/2 is Number          | 2     | 4 / 2 is Number        |
 
-  Scenario Outline: chain after judgement
+  Scenario Outline: chain after verification
     When evaluate by:
     """
     <code>

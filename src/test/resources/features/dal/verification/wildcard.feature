@@ -1,6 +1,6 @@
 Feature: wildcard
 
-  Scenario Outline: force positive judgement
+  Scenario Outline: force positive verification
     Given the following json:
     """
     <input>

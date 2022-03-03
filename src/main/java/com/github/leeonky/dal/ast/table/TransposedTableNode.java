@@ -15,18 +15,18 @@ public class TransposedTableNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
-        return judgeAsListAndReThrow(actualNode, operator, context);
+    public boolean verify(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
+        return verifyAsListAndReThrow(actualNode, operator, context);
     }
 
     @Override
-    public boolean judge(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
-        return judgeAsListAndReThrow(actualNode, operator, context);
+    public boolean verify(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
+        return verifyAsListAndReThrow(actualNode, operator, context);
     }
 
-    private boolean judgeAsListAndReThrow(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
+    private boolean verifyAsListAndReThrow(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
         try {
-            return transpose().judgeAsList(actualNode, operator, context);
+            return transpose().verifyAsList(actualNode, operator, context);
         } catch (ElementAssertionFailure elementAssertionFailure) {
             throw elementAssertionFailure.columnPositionException(this);
         }

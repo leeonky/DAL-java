@@ -1,6 +1,6 @@
-Feature: judge object
+Feature: verify object
 
-  Scenario: '= {}' means no unexpected fields and echo field value judgement should pass
+  Scenario: '= {}' means no unexpected fields and echo field value verification should pass
     Given the following input data:
     """
       {
@@ -52,7 +52,7 @@ Feature: judge object
       }
     """
 
-  Scenario: ': {}' means ignore unexpected fields and echo field value judgement should pass
+  Scenario: ': {}' means ignore unexpected fields and echo field value verification should pass
     Given the following input data:
     """
       {
@@ -115,7 +115,7 @@ Feature: judge object
       | "any string" |
       | 100          |
 
-  Scenario: nested object judgement
+  Scenario: nested object verification
     Given the following input data:
     """
       {
@@ -162,7 +162,7 @@ Feature: judge object
       }
     """
 
-  Scenario: judgement value can be calculation expression or regex
+  Scenario: verification value can be calculation expression or regex
     Given the following input data:
     """
       {
@@ -278,7 +278,7 @@ Feature: judge object
       }
     """
 
-  Scenario: use schema in judgement expression
+  Scenario: use schema in verification expression
     Given the following schema:
     """
     @Partial

@@ -41,7 +41,7 @@ Feature: mul-div
       | false | \|\| |
       | false | or   |
 
-  Scenario Outline: mul with judgement
+  Scenario Outline: mul with verification
     * the following verification should pass:
     """
     4 <opt> 2*2
@@ -92,7 +92,7 @@ Feature: mul-div
       | false | \|\| |
       | false | or   |
 
-  Scenario Outline: div with judgement
+  Scenario Outline: div with verification
     * the following verification should pass:
     """
     2 <opt> 4/2

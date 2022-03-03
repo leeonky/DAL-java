@@ -28,7 +28,7 @@ public class ObjectScopeNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
+    public boolean verify(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
         Data data = actualNode.evaluateData(context);
         checkNull(data);
         if (data.isList()) {
@@ -37,7 +37,7 @@ public class ObjectScopeNode extends DALNode {
                     actualNode.inspect() + format("[%d]", integer.getAndIncrement()), operator.getPosition()));
         } else
             assertUnexpectedFields(collectUnexpectedFields(data), actualNode.inspect(), operator.getPosition());
-        return judgeAll(context, data);
+        return verifyAll(context, data);
     }
 
     private void checkNull(Data data) {
@@ -54,13 +54,13 @@ public class ObjectScopeNode extends DALNode {
     }
 
     @Override
-    public boolean judge(DALNode actualNode, DALOperator.Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
+    public boolean verify(DALNode actualNode, DALOperator.Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
         Data data = actualNode.evaluateData(context);
         checkNull(data);
-        return judgeAll(context, data);
+        return verifyAll(context, data);
     }
 
-    private boolean judgeAll(RuntimeContextBuilder.DALRuntimeContext context, Data data) {
+    private boolean verifyAll(RuntimeContextBuilder.DALRuntimeContext context, Data data) {
         return context.newBlockScope(data, () -> {
             expressions.forEach(expression -> expression.evaluate(context));
             return true;
