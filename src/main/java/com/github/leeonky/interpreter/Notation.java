@@ -20,11 +20,14 @@ public class Notation {
         return label;
     }
 
-    public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> nodeParser(
-            Function<String, N> factory) {
-        return procedure -> getToken(procedure).map(token ->
-                factory.apply(token.getContent()).setPositionBegin(token.getPosition()));
+    public int length() {
+        return label.length();
+    }
+
+    private <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> Optional<Token> getToken(
+            P procedure, Predicate<P> predicate) {
+        return procedure.getSourceCode().popWord(this, () -> predicate.test(procedure));
     }
 
     private <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
@@ -33,26 +36,27 @@ public class Notation {
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> OperatorParser<C, N, E, O, P> operatorParser(
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> node(
+            Function<String, N> factory) {
+        return procedure -> getToken(procedure).map(token ->
+                factory.apply(token.getContent()).setPositionBegin(token.getPosition()));
+    }
+
+    public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> OperatorParser<C, N, E, O, P> operator(
             Supplier<O> factory, Predicate<P> predicate) {
         return procedure -> getToken(procedure, predicate)
                 .map(token -> factory.get().setPosition(token.getPosition()));
     }
 
-    protected <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> Optional<Token> getToken(
-            P procedure, Predicate<P> predicate) {
-        return procedure.getSourceCode().popWord(this, () -> predicate.test(procedure));
-    }
-
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> OperatorParser<C, N, E, O, P> operatorParser(
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> OperatorParser<C, N, E, O, P> operator(
             Supplier<O> factory) {
-        return operatorParser(factory, procedure -> true);
+        return operator(factory, procedure -> true);
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> and(
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> with(
             NodeParser.Mandatory<C, N, E, O, P> mandatory) {
         return procedure -> getToken(procedure).map(t -> mandatory.parse(procedure).setPositionBegin(t.getPosition()));
     }
@@ -68,9 +72,5 @@ public class Notation {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, OP, MA, T>, T> OP before(MA ma) {
         return ma.castParser(procedure -> getToken(procedure).map(t -> ma.parse(procedure)));
-    }
-
-    public int length() {
-        return label.length();
     }
 }

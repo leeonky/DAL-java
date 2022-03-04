@@ -363,45 +363,4 @@ class SourceCodeTest {
             assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('c');
         }
     }
-
-    @Nested
-    class OperatorMatchers {
-
-        @Test
-        void return_when_match_symbol() {
-            TestOperator testOperator = new TestOperator();
-            SourceCode sourceCode = new SourceCode(" +=");
-            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
-                    notation("+=").operatorParser(() -> testOperator);
-
-            TestOperator testOperator2 = operatorParser.parse(new TestProcedure(sourceCode)).get();
-
-            assertThat(testOperator2).isSameAs(testOperator);
-            assertThat(testOperator2.getPosition()).isEqualTo(1);
-        }
-
-        @Test
-        void return_empty_when_not_match() {
-            SourceCode sourceCode = new SourceCode(" +=");
-            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
-                    notation("++").operatorParser(TestOperator::new);
-
-            assertThat(operatorParser.parse(new TestProcedure(sourceCode))).isEmpty();
-        }
-
-        @Test
-        void return_empty_when_predicate_false() {
-            TestOperator testOperator = new TestOperator();
-            SourceCode sourceCode = new SourceCode(" +=");
-            TestProcedure testProcedure = new TestProcedure(sourceCode);
-
-            OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
-                    notation("+=").operatorParser(() -> testOperator, scanner1 -> {
-                        assertThat(scanner1).isSameAs(testProcedure);
-                        return false;
-                    });
-
-            assertThat(operatorParser.parse(testProcedure)).isEmpty();
-        }
-    }
 }

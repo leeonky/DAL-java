@@ -28,33 +28,33 @@ public class Compiler {
 
     private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             DEFAULT_OPERATOR = Procedure::currentOperator,
-            IS = Operators.IS.operatorParser(DALOperator.Is::new),
-            WHICH = Operators.WHICH.operatorParser(DALOperator.Which::new),
-            PROPERTY_DOT = Operators.DOT.operatorParser(DALOperator.PropertyDot::new,
+            IS = Operators.IS.operator(DALOperator.Is::new),
+            WHICH = Operators.WHICH.operator(DALOperator.Which::new),
+            PROPERTY_DOT = Operators.DOT.operator(DALOperator.PropertyDot::new,
                     not(DALProcedure::mayBeElementEllipsis)),
             PROPERTY_IMPLICIT = procedure -> of(new DALOperator.PropertyImplicit()),
             BINARY_ARITHMETIC_OPERATORS = oneOf(
-                    Operators.AND.operatorParser(DALOperator::operatorAnd),
-                    Operators.OR.operatorParser(DALOperator::operatorOr),
-                    Keywords.AND.operatorParser(DALOperator::keywordAnd),
-                    Operators.COMMA.operatorParser(DALOperator::commaAnd, DALProcedure::isEnableCommaAnd),
-                    Operators.NOT_EQUAL.operatorParser(DALOperator.NotEqual::new),
-                    Keywords.OR.operatorParser(DALOperator::keywordOr),
-                    Operators.GREATER_OR_EQUAL.operatorParser(DALOperator.GreaterOrEqual::new),
-                    Operators.LESS_OR_EQUAL.operatorParser(DALOperator.LessOrEqual::new),
-                    Operators.GREATER.operatorParser(DALOperator.Greater::new),
-                    Operators.LESS.operatorParser(DALOperator.Less::new),
-                    Operators.PLUS.operatorParser(DALOperator.Plus::new),
-                    Operators.SUBTRACTION.operatorParser(DALOperator.Subtraction::new),
-                    Operators.MULTIPLICATION.operatorParser(DALOperator.Multiplication::new),
-                    Operators.DIVISION.operatorParser(DALOperator.Division::new)),
+                    Operators.AND.operator(DALOperator::operatorAnd),
+                    Operators.OR.operator(DALOperator::operatorOr),
+                    Keywords.AND.operator(DALOperator::keywordAnd),
+                    Operators.COMMA.operator(DALOperator::commaAnd, DALProcedure::isEnableCommaAnd),
+                    Operators.NOT_EQUAL.operator(DALOperator.NotEqual::new),
+                    Keywords.OR.operator(DALOperator::keywordOr),
+                    Operators.GREATER_OR_EQUAL.operator(DALOperator.GreaterOrEqual::new),
+                    Operators.LESS_OR_EQUAL.operator(DALOperator.LessOrEqual::new),
+                    Operators.GREATER.operator(DALOperator.Greater::new),
+                    Operators.LESS.operator(DALOperator.Less::new),
+                    Operators.PLUS.operator(DALOperator.Plus::new),
+                    Operators.SUBTRACTION.operator(DALOperator.Subtraction::new),
+                    Operators.MULTIPLICATION.operator(DALOperator.Multiplication::new),
+                    Operators.DIVISION.operator(DALOperator.Division::new)),
             UNARY_OPERATORS = oneOf(
-                    Operators.MINUS.operatorParser(DALOperator.Minus::new, not(DALProcedure::isCodeBeginning)),
-                    Operators.NOT.operatorParser(DALOperator.Not::new, not(DALProcedure::mayBeUnEqual))),
+                    Operators.MINUS.operator(DALOperator.Minus::new, not(DALProcedure::isCodeBeginning)),
+                    Operators.NOT.operator(DALOperator.Not::new, not(DALProcedure::mayBeUnEqual))),
             VERIFICATION_OPERATORS = oneOf(
                     Operators.MATCHER.<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-                            operatorParser(DALOperator.Matcher::new),
-                    Operators.EQUAL.operatorParser(DALOperator.Equal::new));
+                            operator(DALOperator.Matcher::new),
+                    Operators.EQUAL.operator(DALOperator.Equal::new));
 
     private static final OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             DEFAULT_VERIFICATION_OPERATOR = DEFAULT_OPERATOR.mandatory("");
@@ -77,28 +77,28 @@ public class Compiler {
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
             NUMBER = Tokens.NUMBER.nodeParser(constNode(Token::getNumber)),
             INTEGER = Tokens.INTEGER.nodeParser(constNode(Token::getInteger)),
-            SINGLE_QUOTED_STRING = SINGLE_QUOTED.and(many(charNode(SINGLE_QUOTED_ESCAPES))
+            SINGLE_QUOTED_STRING = SINGLE_QUOTED.with(many(charNode(SINGLE_QUOTED_ESCAPES))
                     .and(endWith(SINGLE_QUOTED.getLabel())).as(DALNode::constString)),
-            DOUBLE_QUOTED_STRING = DOUBLE_QUOTED.and(many(charNode(DOUBLE_QUOTED_ESCAPES))
+            DOUBLE_QUOTED_STRING = DOUBLE_QUOTED.with(many(charNode(DOUBLE_QUOTED_ESCAPES))
                     .and(endWith(DOUBLE_QUOTED.getLabel())).as(DALNode::constString)),
-            CONST_TRUE = Keywords.TRUE.nodeParser(DALNode::constTrue),
-            CONST_FALSE = Keywords.FALSE.nodeParser(DALNode::constFalse),
-            CONST_NULL = Keywords.NULL.nodeParser(DALNode::constNull),
+            CONST_TRUE = Keywords.TRUE.node(DALNode::constTrue),
+            CONST_FALSE = Keywords.FALSE.node(DALNode::constFalse),
+            CONST_NULL = Keywords.NULL.node(DALNode::constNull),
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
-            REGEX = OPEN_REGEX.and(many(charNode(REGEX_ESCAPES)).and(endWith(CLOSE_REGEX.getLabel())).as(DALNode::regex)),
+            REGEX = OPEN_REGEX.with(many(charNode(REGEX_ESCAPES)).and(endWith(CLOSE_REGEX.getLabel())).as(DALNode::regex)),
             IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(Tokens.SYMBOL.nodeParser(DALNode::symbolNode))
                     .defaultInputNode(InputNode.INSTANCE),
-            WILDCARD = Notations.Operators.WILDCARD.nodeParser(WildcardNode::new),
-            ROW_WILDCARD = Notations.Operators.ROW_WILDCARD.nodeParser(WildcardNode::new),
+            WILDCARD = Notations.Operators.WILDCARD.node(WildcardNode::new),
+            ROW_WILDCARD = Notations.Operators.ROW_WILDCARD.node(WildcardNode::new),
             CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
                     CONST_USER_DEFINED_LITERAL),
-            ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.nodeParser(token -> new ListEllipsisNode()),
+            ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.node(token -> new ListEllipsisNode()),
             EMPTY_CELL = procedure -> when(procedure.emptyCell()).optional(EmptyCellNode::new),
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SCHEMA_COMPOSE = OPENING_BRACKET.and(single(many(SCHEMA.mandatory("Expect a schema"))
+            SCHEMA_COMPOSE = OPENING_BRACKET.with(single(many(SCHEMA.mandatory("Expect a schema"))
             .and(Syntax.Rules.splitBy(SCHEMA_AND)).as(DALNode::elementSchemas)).and(endWith(CLOSING_BRACKET)).as())
             .or(many(SCHEMA.mandatory("Expect a schema")).and(Syntax.Rules.splitBy(SCHEMA_AND)).as(DALNode::schemas)),
             PROPERTY_CHAIN, OPERAND, EXPRESSION, SHORT_VERIFICATION_OPERAND;
@@ -111,7 +111,7 @@ public class Compiler {
             SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE),
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
             EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).mandatory(
-                    "Expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.and(single(INTEGER_OR_STRING.mandatory(
+                    "Expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
                     "Should given one property or array index in `[]`")).and(endWith(CLOSING_BRACKET))
                     .as(DALNode::bracketSymbolNode))));
 
@@ -126,17 +126,17 @@ public class Compiler {
             VERIFICATION_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN, WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN, EXPRESSION_CLAUSE;
 
     public Compiler() {
-        PARENTHESES = lazy(() -> enableCommaAnd(OPENING_PARENTHESES.and(single(EXPRESSION).and(endWith(CLOSING_PARENTHESES))
+        PARENTHESES = lazy(() -> enableCommaAnd(OPENING_PARENTHESES.with(single(EXPRESSION).and(endWith(CLOSING_PARENTHESES))
                 .as(DALNode::parenthesesNode))));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IMPLICIT_PROPERTY);
         PROPERTY_CHAIN = PROPERTY.mandatory("Expect a object property").recursive(EXPLICIT_PROPERTY);
-        OBJECT = DALProcedure.disableCommaAnd(OPENING_BRACES.and(many(PROPERTY_CHAIN.expression(shortVerificationClause(
+        OBJECT = DALProcedure.disableCommaAnd(OPENING_BRACES.with(many(PROPERTY_CHAIN.expression(shortVerificationClause(
                 VERIFICATION_OPERATORS.mandatory("Expect operator `:` or `=`")))).and(optionalSplitBy(COMMA))
                 .and(endWith(CLOSING_BRACES)).as(ObjectScopeNode::new)));
-        LIST = DALProcedure.disableCommaAnd(OPENING_BRACKET.and(many(ELEMENT_ELLIPSIS.ignoreInput().or(
+        LIST = DALProcedure.disableCommaAnd(OPENING_BRACKET.with(many(ELEMENT_ELLIPSIS.ignoreInput().or(
                 shortVerificationClause(VERIFICATION_OPERATORS.or(DEFAULT_VERIFICATION_OPERATOR)))).and(optionalSplitBy(COMMA))
                 .and(endWith(CLOSING_BRACKET)).as(ListScopeNode::new)));
-        TABLE = oneOf(TRANSPOSE_MARK.and(transposeTable().input(new EmptyTransposedTableHead())),
+        TABLE = oneOf(TRANSPOSE_MARK.with(transposeTable().input(new EmptyTransposedTableHead())),
                 COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(
                         tableLine(ROW_PREFIX).as(TransposedTableHead::new).expression(transposeTable())))),
                 COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).expression(TABLE_BODY_CLAUSE));
@@ -179,10 +179,10 @@ public class Compiler {
     }
 
     private final NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SEQUENCE_AZ = Notations.SEQUENCE_AZ.nodeParser(SortNode::new),
-            SEQUENCE_ZA = Notations.SEQUENCE_ZA.nodeParser(SortNode::new),
-            SEQUENCE_AZ_2 = Notations.SEQUENCE_AZ_2.nodeParser(SortNode::new),
-            SEQUENCE_ZA_2 = Notations.SEQUENCE_ZA_2.nodeParser(SortNode::new);
+            SEQUENCE_AZ = Notations.SEQUENCE_AZ.node(SortNode::new),
+            SEQUENCE_ZA = Notations.SEQUENCE_ZA.node(SortNode::new),
+            SEQUENCE_AZ_2 = Notations.SEQUENCE_AZ_2.node(SortNode::new),
+            SEQUENCE_ZA_2 = Notations.SEQUENCE_ZA_2.node(SortNode::new);
 
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SEQUENCE = oneOf(
