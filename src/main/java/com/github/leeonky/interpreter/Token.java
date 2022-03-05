@@ -3,7 +3,7 @@ package com.github.leeonky.interpreter;
 import java.math.BigInteger;
 
 public class Token {
-    private final StringBuilder contentBuilder;
+    private final StringBuilder content;
     private final int position;
     private static final NumberParser NUMBER_PARSER = new NumberParser();
 
@@ -13,7 +13,7 @@ public class Token {
 
     public Token(int position) {
         this.position = position;
-        contentBuilder = new StringBuilder();
+        content = new StringBuilder();
     }
 
     public Number getInteger() {
@@ -34,16 +34,15 @@ public class Token {
     }
 
     public String getContent() {
-        return contentBuilder.toString();
+        return content.toString();
     }
 
-    public Token append(char c) {
-        contentBuilder.append(c);
-        return this;
+    public void append(char c) {
+        content.append(c);
     }
 
     public Token append(String str) {
-        contentBuilder.append(str);
+        content.append(str);
         return this;
     }
 

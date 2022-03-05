@@ -79,12 +79,12 @@ class ProcedureTest {
             TestNode testNode = new TestNode();
             TestNode testNode2 = new TestNode();
 
-            assertThat(procedure.actionUnderIndex(() -> {
+            assertThat(procedure.withIndex(() -> {
                 assertThat(procedure.getIndex()).isEqualTo(0);
                 procedure.incrementIndex();
                 assertThat(procedure.getIndex()).isEqualTo(1);
 
-                assertThat(procedure.actionUnderIndex(() -> {
+                assertThat(procedure.withIndex(() -> {
                     assertThat(procedure.getIndex()).isEqualTo(0);
                     procedure.incrementIndex();
                     assertThat(procedure.getIndex()).isEqualTo(1);
@@ -103,18 +103,43 @@ class ProcedureTest {
             TestProcedure procedure = givenProcedureWithCode("");
             TestNode testNode = new TestNode();
 
-            assertThat(procedure.actionUnderIndex(() -> {
+            assertThat(procedure.withIndex(() -> {
                 assertThat(procedure.getIndex()).isEqualTo(0);
                 procedure.incrementIndex();
                 assertThat(procedure.getIndex()).isEqualTo(1);
 
-                assertThrows(RuntimeException.class, () -> procedure.actionUnderIndex(() -> {
+                assertThrows(RuntimeException.class, () -> procedure.withIndex(() -> {
                     throw new RuntimeException();
                 }));
 
                 assertThat(procedure.getIndex()).isEqualTo(1);
                 return testNode;
             })).isEqualTo(testNode);
+        }
+    }
+
+    @Nested
+    class CreateExpression {
+
+        @Test
+        void create_expression_with_factory_and_apply_precedence() {
+            Procedure procedure = new Procedure<>(null, null, TestExpression::new);
+
+            TestNode left = new TestNode();
+            TestNode right = new TestNode();
+            TestNode node3 = new TestNode();
+            TestOperator operator1 = new TestOperator(1);
+            TestOperator operator2 = new TestOperator(2);
+
+            TestExpression newExpression = (TestExpression) procedure.createExpression(new TestExpression(left, operator1, right), operator2, node3);
+
+            assertThat(newExpression.getLeftOperand()).isSameAs(left);
+            assertThat(newExpression.getOperator()).isSameAs(operator1);
+
+            TestExpression rightOperand = (TestExpression) newExpression.getRightOperand();
+            assertThat(rightOperand.getLeftOperand()).isSameAs(right);
+            assertThat(rightOperand.getOperator()).isSameAs(operator2);
+            assertThat(rightOperand.getRightOperand()).isSameAs(node3);
         }
     }
 }

@@ -38,7 +38,7 @@ public class Procedure<C extends RuntimeContext<C>, N extends Node<C, N>, E exte
         return action.apply(getSourceCode().nextPosition());
     }
 
-    public <T> T actionUnderIndex(Supplier<T> action) {
+    public <T> T withIndex(Supplier<T> action) {
         columns.push(new AtomicInteger());
         try {
             return action.get();

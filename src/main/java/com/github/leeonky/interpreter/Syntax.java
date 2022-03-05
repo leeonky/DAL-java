@@ -142,7 +142,7 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, OP, MA, T>, T> Syntax<C, N, E, O, P, OP, MA, T,
             NodeParser.Mandatory<C, N, E, O, P>, List<T>> many(MA mandatory) {
-        return new DefaultSyntax<>((procedure, syntax) -> procedure.actionUnderIndex(() -> new ArrayList<T>() {{
+        return new DefaultSyntax<>((procedure, syntax) -> procedure.withIndex(() -> new ArrayList<T>() {{
             while (!syntax.isClose(procedure)) {
                 add(mandatory.parse(procedure));
                 procedure.incrementIndex();
@@ -157,7 +157,7 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, OP, MA, T>, T> Syntax<C, N, E, O, P, OP, MA, T,
             NodeParser.Mandatory<C, N, E, O, P>, List<T>> many(OP parser) {
-        return new DefaultSyntax<>((procedure, syntax) -> procedure.actionUnderIndex(() -> new ArrayList<T>() {{
+        return new DefaultSyntax<>((procedure, syntax) -> procedure.withIndex(() -> new ArrayList<T>() {{
             while (!syntax.isClose(procedure)) {
                 Optional<T> optional = parser.parse(procedure);
                 if (!optional.isPresent())
