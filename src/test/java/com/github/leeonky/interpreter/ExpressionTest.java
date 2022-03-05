@@ -26,7 +26,7 @@ class ExpressionTest {
         }
 
         @Test
-        void change_expression_when_current_expression_has_higher_precedenec() {
+        void change_expression_when_current_expression_has_higher_precedence() {
             TestNode left = new TestNode();
             TestNode right = new TestNode();
             TestNode node3 = new TestNode();
