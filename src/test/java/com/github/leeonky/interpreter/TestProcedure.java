@@ -4,4 +4,9 @@ public class TestProcedure extends Procedure<TestContext, TestNode, TestExpressi
     public TestProcedure(SourceCode sourceCode) {
         super(sourceCode, null, null);
     }
+
+    public TestProcedure(SourceCode sourceCode,
+                         ExpressionFactory<TestContext, TestNode, TestExpression, TestOperator> expressionFactory) {
+        super(sourceCode, null, expressionFactory);
+    }
 }

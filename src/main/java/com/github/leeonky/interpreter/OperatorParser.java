@@ -6,7 +6,8 @@ import java.util.stream.Stream;
 import static java.util.Optional.empty;
 
 public interface OperatorParser<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-        O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> {
+        O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser<C, N, E, O, P,
+        OperatorParser<C, N, E, O, P>, OperatorParser.Mandatory<C, N, E, O, P>, O> {
     static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> OperatorParser<C, N, E, O, P> oneOf(
             OperatorParser<C, N, E, O, P>... parsers) {
@@ -14,14 +15,16 @@ public interface OperatorParser<C extends RuntimeContext<C>, N extends Node<C, N
                 filter(Optional::isPresent).findFirst().orElse(empty());
     }
 
-    Optional<O> parse(P procedure);
-
-    default Mandatory<C, N, E, O, P> or(Mandatory<C, N, E, O, P> compiler) {
-        return procedure -> parse(procedure).orElseGet(() -> compiler.parse(procedure));
+    @Override
+    default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<C, N, E, O, P, OperatorParser<C, N, E, O, P>,
+            Mandatory<C, N, E, O, P>, O> mandatory) {
+        return mandatory::parse;
     }
 
-    default Mandatory<C, N, E, O, P> mandatory(String message) {
-        return procedure -> parse(procedure).orElseThrow(() -> procedure.getSourceCode().syntaxError(message, 0));
+    @Override
+    default OperatorParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, OperatorParser<C, N, E, O, P>,
+            Mandatory<C, N, E, O, P>, O> op) {
+        return op::parse;
     }
 
     default ClauseParser<C, N, E, O, P> clause(NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
@@ -43,8 +46,14 @@ public interface OperatorParser<C extends RuntimeContext<C>, N extends Node<C, N
     }
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> {
-        O parse(P procedure);
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser.Mandatory<C, N, E, O, P,
+            OperatorParser<C, N, E, O, P>, OperatorParser.Mandatory<C, N, E, O, P>, O> {
+
+        @Override
+        default OperatorParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, OperatorParser<C, N, E, O, P>,
+                Mandatory<C, N, E, O, P>, O> op) {
+            return op::parse;
+        }
 
         default ClauseParser.Mandatory<C, N, E, O, P> clause(NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
             return procedure -> {
