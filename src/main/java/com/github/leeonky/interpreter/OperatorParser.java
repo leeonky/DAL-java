@@ -1,19 +1,8 @@
 package com.github.leeonky.interpreter;
 
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import static java.util.Optional.empty;
-
 public interface OperatorParser<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
         O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser<C, N, E, O, P,
         OperatorParser<C, N, E, O, P>, OperatorParser.Mandatory<C, N, E, O, P>, O> {
-    static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> OperatorParser<C, N, E, O, P> oneOf(
-            OperatorParser<C, N, E, O, P>... parsers) {
-        return procedure -> Stream.of(parsers).map(operatorParser -> operatorParser.parse(procedure)).
-                filter(Optional::isPresent).findFirst().orElse(empty());
-    }
 
     @Override
     default Mandatory<C, N, E, O, P> castMandatory(Parser.Mandatory<C, N, E, O, P, OperatorParser<C, N, E, O, P>,

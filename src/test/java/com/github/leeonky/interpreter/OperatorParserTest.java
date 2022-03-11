@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static com.github.leeonky.interpreter.Notation.notation;
-import static com.github.leeonky.interpreter.OperatorParser.oneOf;
+import static com.github.leeonky.interpreter.Parser.oneOf;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
