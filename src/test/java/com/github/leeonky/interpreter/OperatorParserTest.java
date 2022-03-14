@@ -14,11 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class OperatorParserTest {
-
-    private TestProcedure givenProcedureWithCode(String s) {
-        return new TestProcedure(new SourceCode(s));
-    }
+class OperatorParserTest extends BaseTest {
 
     @Nested
     class Parser {
