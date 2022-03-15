@@ -53,17 +53,17 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             return procedure -> mapping.apply(parse(procedure));
         }
 
-        default Mandatory<C, N, E, O, P> expression(ClauseParser.Mandatory<C, N, E, O, P> expressionClauseMandatory) {
+        default Mandatory<C, N, E, O, P> expression(ClauseParser.Mandatory<C, N, E, O, P> clauseMandatory) {
             return procedure -> {
                 N node = parse(procedure);
-                return expressionClauseMandatory.parse(procedure).expression(node);
+                return clauseMandatory.parse(procedure).expression(node);
             };
         }
 
-        default NodeParser<C, N, E, O, P> combine(ClauseParser<C, N, E, O, P> expressionClauseMandatory) {
+        default NodeParser<C, N, E, O, P> combine(ClauseParser<C, N, E, O, P> clauseParser) {
             return procedure -> procedure.getSourceCode().tryFetch(() -> {
                 N node = parse(procedure);
-                return expressionClauseMandatory.parse(procedure).map(clause -> clause.expression(node));
+                return clauseParser.parse(procedure).map(clause -> clause.expression(node));
             });
         }
 
@@ -86,9 +86,9 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             };
         }
 
-        static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends Operator<C,
-                N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser.Mandatory<C, N, E, O, P> clause(Function<N,
-                Mandatory<C, N, E, O, P>> mandatoryFactory) {
+        static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
+                Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser.Mandatory<C, N, E, O, P> clause(
+                Function<N, Mandatory<C, N, E, O, P>> mandatoryFactory) {
             return procedure -> input -> mandatoryFactory.apply(input).parse(procedure);
         }
     }

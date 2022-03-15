@@ -1,11 +1,14 @@
 package com.github.leeonky.interpreter;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static com.github.leeonky.interpreter.NodeParser.lazy;
+import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -110,5 +113,84 @@ class NodeParserTest extends BaseTest {
         };
 
         assertThat(nodeParser.expression(null).parse(testProcedure)).isEmpty();
+    }
+
+    @Nested
+    class Mandatory {
+
+        @Test
+        void map() {
+            TestProcedure testProcedure = givenProcedureWithCode("");
+            TestNode node = new TestNode();
+            NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeMandatory = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return node;
+            };
+
+            Function<TestNode, TestNode> mapper = mock(Function.class);
+            TestNode mappedNode = new TestNode();
+            when(mapper.apply(node)).thenReturn(mappedNode);
+
+            assertThat(nodeMandatory.map(mapper).parse(testProcedure)).isSameAs(mappedNode);
+        }
+
+        @Test
+        void expression() {
+            TestProcedure testProcedure = givenProcedureWithCode("");
+            TestNode node = new TestNode();
+            NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeMandatory = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return node;
+            };
+
+            Clause<TestContext, TestNode> clause = mock(Clause.class);
+            TestNode expression = new TestNode();
+            when(clause.expression(node)).thenReturn(expression);
+            ClauseParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> mandatory = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return clause;
+            };
+
+            assertThat(nodeMandatory.expression(mandatory).parse(testProcedure)).isSameAs(expression);
+        }
+
+        @Test
+        void combine_with_clause_parser() {
+            TestProcedure testProcedure = givenProcedureWithCode("");
+            TestNode node = new TestNode();
+            NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeMandatory = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return node;
+            };
+
+            Clause<TestContext, TestNode> clause = mock(Clause.class);
+            TestNode expression = new TestNode();
+            when(clause.expression(node)).thenReturn(expression);
+            ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return of(clause);
+            };
+
+            assertThat(nodeMandatory.combine(clauseParser).parse(testProcedure).get()).isSameAs(expression);
+        }
+
+        @Test
+        void combine_with_empty_clause_parser() {
+            TestProcedure testProcedure = givenProcedureWithCode("a");
+            TestNode node = new TestNode();
+            NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeMandatory = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                testProcedure.getSourceCode().popChar(emptyMap());
+                return node;
+            };
+
+            ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return empty();
+            };
+
+            assertThat(nodeMandatory.combine(clauseParser).parse(testProcedure)).isEmpty();
+            assertThat(testProcedure.getSourceCode().nextPosition()).isEqualTo(0);
+        }
     }
 }
