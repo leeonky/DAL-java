@@ -192,5 +192,121 @@ class NodeParserTest extends BaseTest {
             assertThat(nodeMandatory.combine(clauseParser).parse(testProcedure)).isEmpty();
             assertThat(testProcedure.getSourceCode().nextPosition()).isEqualTo(0);
         }
+
+        @Test
+        void concat_with_clause_parser() {
+            TestProcedure testProcedure = givenProcedureWithCode("");
+            TestNode node = new TestNode();
+            NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeMandatory = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return node;
+            };
+
+            Clause<TestContext, TestNode> clause = mock(Clause.class);
+            TestNode expression = new TestNode();
+            when(clause.expression(node)).thenReturn(expression);
+            ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return of(clause);
+            };
+
+            assertThat(nodeMandatory.concat(clauseParser).parse(testProcedure)).isSameAs(expression);
+        }
+
+        @Test
+        void concat_with_empty_clause_parser() {
+            TestProcedure testProcedure = givenProcedureWithCode("");
+            TestNode node = new TestNode();
+            NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeMandatory = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return node;
+            };
+
+            ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return empty();
+            };
+
+            assertThat(nodeMandatory.concat(clauseParser).parse(testProcedure)).isSameAs(node);
+        }
+
+        @Nested
+        class Recursive {
+
+            @Test
+            void recursive_with_empty_clause_parser() {
+                TestProcedure testProcedure = givenProcedureWithCode("");
+                TestNode node = new TestNode();
+                NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeMandatory = procedure -> {
+                    assertThat(procedure).isSameAs(testProcedure);
+                    return node;
+                };
+
+                ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
+                    assertThat(procedure).isSameAs(testProcedure);
+                    return empty();
+                };
+
+                assertThat(nodeMandatory.recursive(clauseParser).parse(testProcedure)).isSameAs(node);
+            }
+        }
+
+        int recursiveTimes = 0;
+
+        @Test
+        void recursive_with_clause_parser_once() {
+            recursiveTimes = 1;
+            TestProcedure testProcedure = givenProcedureWithCode("");
+            TestNode node = new TestNode();
+            NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeMandatory = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return node;
+            };
+
+            Clause<TestContext, TestNode> clause = mock(Clause.class);
+            TestNode expression = new TestNode();
+            when(clause.expression(node)).thenReturn(expression);
+            ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                if (recursiveTimes-- > 0)
+                    return of(clause);
+                return empty();
+            };
+
+            assertThat(nodeMandatory.recursive(clauseParser).parse(testProcedure)).isSameAs(expression);
+        }
+
+        @Test
+        void recursive_with_clause_parser_twice() {
+            recursiveTimes = 2;
+            TestProcedure testProcedure = givenProcedureWithCode("");
+            TestNode node = new TestNode();
+            NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeMandatory = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return node;
+            };
+
+            Clause<TestContext, TestNode> clause = mock(Clause.class);
+            TestNode expression = new TestNode();
+            when(clause.expression(node)).thenReturn(expression);
+
+            Clause<TestContext, TestNode> clause2 = mock(Clause.class);
+            TestNode expression2 = new TestNode();
+            when(clause2.expression(expression)).thenReturn(expression2);
+
+            ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                switch (recursiveTimes--) {
+                    case 2:
+                        return of(clause);
+                    case 1:
+                        return of(clause2);
+                    default:
+                        return empty();
+                }
+            };
+
+            assertThat(nodeMandatory.recursive(clauseParser).parse(testProcedure)).isSameAs(expression2);
+        }
     }
 }
