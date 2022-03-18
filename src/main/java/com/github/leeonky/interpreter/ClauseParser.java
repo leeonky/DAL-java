@@ -26,12 +26,11 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return mandatory::parse;
     }
 
-    @SuppressWarnings("unchecked")
-    default ClauseParser<C, N, E, O, P> concat(ClauseParser<C, N, E, O, P>... clauses) {
+    default ClauseParser<C, N, E, O, P> concat(ClauseParser<C, N, E, O, P> clause) {
         return procedure -> {
             Optional<Clause<C, N>> optionalExpressionClause = parse(procedure);
             if (optionalExpressionClause.isPresent()) {
-                Optional<Clause<C, N>> nextOptionalClause = Parser.oneOf(clauses).parse(procedure);
+                Optional<Clause<C, N>> nextOptionalClause = clause.parse(procedure);
                 if (nextOptionalClause.isPresent()) {
                     return Optional.of(previous -> {
                         N input = optionalExpressionClause.get().expression(previous);
