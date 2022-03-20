@@ -185,7 +185,7 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
 
                 @Override
                 public boolean isClose(P procedure) {
-                    return !procedure.getSourceCode().hasCode() || procedure.getSourceCode().startsWith(notation);
+                    return procedure.getSourceCode().startsWith(notation) || !procedure.getSourceCode().hasCode();
                 }
             };
         }

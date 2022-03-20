@@ -5,10 +5,13 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.github.leeonky.interpreter.Notation.notation;
+import static com.github.leeonky.interpreter.Syntax.Rules.endWith;
 import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
 import static java.util.Optional.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class SyntaxTest extends BaseTest {
@@ -263,6 +266,164 @@ class SyntaxTest extends BaseTest {
 
             verify(many, times(2)).isClose(testProcedure);
             verify(many).close(testProcedure);
+        }
+    }
+
+    @Nested
+    class EndWithNotation {
+
+        @Test
+        void raise_error_when_not_end_with() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(notation("a")));
+
+            assertThrows(SyntaxException.class, () -> syntax.close(givenProcedureWithCode("")));
+        }
+
+        @Test
+        void move_position_when_close() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(notation("a")));
+
+            TestProcedure testProcedure = givenProcedureWithCode("a");
+            syntax.close(testProcedure);
+
+            assertThat(testProcedure.getSourceCode().hasCode()).isFalse();
+        }
+
+        @Test
+        void return_false_when_no_code() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(notation(" a")));
+
+            assertThat(syntax.isClose(givenProcedureWithCode(" "))).isTrue();
+        }
+
+        @Test
+        void return_false_when_not_close() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(notation("a")));
+
+            assertThat(syntax.isClose(givenProcedureWithCode("b"))).isFalse();
+        }
+
+        @Test
+        void return_true_when_close() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith(notation("a")));
+
+            assertThat(syntax.isClose(givenProcedureWithCode(" a"))).isTrue();
+        }
+    }
+
+    @Nested
+    class EndWithString {
+
+        @Test
+        void raise_error_when_not_end_with() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith("a"));
+
+            assertThrows(SyntaxException.class, () -> syntax.close(givenProcedureWithCode("")));
+        }
+
+        @Test
+        void move_position_when_close() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith("a"));
+
+            TestProcedure testProcedure = givenProcedureWithCode("a");
+            syntax.close(testProcedure);
+
+            assertThat(testProcedure.getSourceCode().hasCode()).isFalse();
+        }
+
+        @Test
+        void return_false_when_no_code() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith("a"));
+
+            assertThat(syntax.isClose(givenProcedureWithCode(""))).isTrue();
+        }
+
+        @Test
+        void return_true_when_has_blank_code() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith("a"));
+
+            assertThat(syntax.isClose(givenProcedureWithCode(" "))).isFalse();
+        }
+
+        @Test
+        void return_false_when_not_close() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith("a"));
+
+            assertThat(syntax.isClose(givenProcedureWithCode("b"))).isFalse();
+        }
+
+        @Test
+        void return_false_when_blank_before_close() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith("a"));
+
+            assertThat(syntax.isClose(givenProcedureWithCode(" a"))).isFalse();
+        }
+
+        @Test
+        void return_true_when_close() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
+
+            Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                    TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                    TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith("a"));
+
+            assertThat(syntax.isClose(givenProcedureWithCode("a"))).isTrue();
         }
     }
 }
