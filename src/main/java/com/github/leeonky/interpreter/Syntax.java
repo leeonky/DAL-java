@@ -96,7 +96,6 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
     }
 
     @SuppressWarnings("unchecked")
-//    TODO rename
     public R as() {
         return parse(this, a -> (N) a);
     }
@@ -127,6 +126,7 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
             NodeParser.Mandatory<C, N, E, O, P>, T> single(MA parser) {
         return new DefaultSyntax<C, N, E, O, P, OP, MA, T, NodeParser.Mandatory<C, N, E, O, P>, T>((procedure, syntax) -> {
             T t = parser.parse(procedure);
+            syntax.isClose(procedure);
             syntax.close(procedure);
             return t;
         }) {
