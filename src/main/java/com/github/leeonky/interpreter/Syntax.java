@@ -211,7 +211,6 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
 
                 @Override
                 public boolean isClose(P procedure) {
-                    //                TODO need test
                     isClose = procedure.getSourceCode().isEndOfLine();
                     if (isClose && procedure.getSourceCode().hasCode())
                         procedure.getSourceCode().popChar(Collections.emptyMap());
@@ -221,7 +220,6 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
                 @Override
                 public void close(P procedure) {
                     if (!isClose)
-//                TODO need test
                         throw procedure.getSourceCode().syntaxError("unexpected token", 0);
                 }
             };
@@ -243,17 +241,7 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
                 O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
                 MA extends Parser.Mandatory<C, N, E, O, P, OP, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, OP, MA, T, R, A>,
                 Syntax<C, N, E, O, P, OP, MA, T, R, A>> endWithOptionalLine() {
-            return syntax -> new CompositeSyntax<C, N, E, O, P, OP, MA, T, R, A>(syntax) {
-
-                @Override
-                public boolean isClose(P procedure) {
-                    //                TODO need test
-                    boolean endOfLine = procedure.getSourceCode().isEndOfLine();
-                    if (endOfLine && procedure.getSourceCode().hasCode())
-                        procedure.getSourceCode().popChar(Collections.emptyMap());
-                    return endOfLine;
-                }
-
+            return syntax -> new CompositeSyntax<C, N, E, O, P, OP, MA, T, R, A>(syntax.and(Rules.endWithLine())) {
                 @Override
                 public void close(P procedure) {
                 }
