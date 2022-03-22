@@ -240,7 +240,7 @@ public class Compiler {
             DALExpression, DALOperator, DALProcedure>, DALNode, NodeParser.Mandatory<DALRuntimeContext, DALNode,
             DALExpression, DALOperator, DALProcedure>, List<DALNode>> tableLine(NodeParser.Mandatory<DALRuntimeContext,
             DALNode, DALExpression, DALOperator, DALProcedure> mandatory) {
-        return many(mandatory).and(Syntax.Rules.mandatoryTailSplitBy(COLUMN_SPLITTER)).and(endWithLine());
+        return many(mandatory).and(Syntax.Rules.mandatorySplitBy(COLUMN_SPLITTER)).and(endWithLine());
     }
 
     private Optional<DALNode> compileUserDefinedLiteral(DALProcedure dalProcedure) {

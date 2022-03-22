@@ -264,7 +264,7 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
         public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
                 O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
                 MA extends Parser.Mandatory<C, N, E, O, P, OP, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, OP, MA, T, R, A>,
-                Syntax<C, N, E, O, P, OP, MA, T, R, A>> mandatoryTailSplitBy(Notation splitter) {
+                Syntax<C, N, E, O, P, OP, MA, T, R, A>> mandatorySplitBy(Notation splitter) {
             return syntax -> new CompositeSyntax<C, N, E, O, P, OP, MA, T, R, A>(syntax) {
                 @Override
                 public boolean isSplitter(P procedure) {
@@ -286,10 +286,10 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
                 @Override
                 protected NodeParser<C, N, E, O, P> parse(Syntax<C, N, E, O, P, OP, MA, T, NodeParser<C, N, E, O, P>, List<T>> syntax,
                                                           Function<List<T>, N> factory) {
-                    return procedure -> {
+                    return procedure -> procedure.getSourceCode().tryFetch(() -> {
                         List<T> list = parser.apply(procedure, syntax);
                         return when(list.size() >= size).optional(() -> factory.apply(list));
-                    };
+                    });
                 }
             };
         }
