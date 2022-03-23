@@ -134,4 +134,45 @@ class ClauseParserTest extends BaseTest {
 
         assertThat(mandatory.input(node).parse(testProcedure)).isSameAs(expression);
     }
+
+    @Test
+    void convert_to_mandatory() {
+        TestProcedure testProcedure = givenProcedureWithCode("");
+
+        Clause<TestContext, TestNode> clause = mock(Clause.class);
+        TestNode node = new TestNode();
+
+        TestNode expression = new TestNode();
+        when(clause.expression(node)).thenReturn(expression);
+
+        ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
+            assertThat(procedure).isSameAs(testProcedure);
+            return of(clause);
+        };
+
+        assertThat(clauseParser.mandatory("").parse(testProcedure).expression(node)).isSameAs(expression);
+    }
+
+    @Test
+    void convert_to_mandatory_with_mandatory() {
+        TestProcedure testProcedure = givenProcedureWithCode("");
+
+        Clause<TestContext, TestNode> clause = mock(Clause.class);
+        TestNode node = new TestNode();
+
+        TestNode expression = new TestNode();
+        when(clause.expression(node)).thenReturn(expression);
+
+        ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
+            assertThat(procedure).isSameAs(testProcedure);
+            return empty();
+        };
+
+        ClauseParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> mandatory = procedure -> {
+            assertThat(procedure).isSameAs(testProcedure);
+            return clause;
+        };
+
+        assertThat(clauseParser.or(mandatory).parse(testProcedure).expression(node)).isSameAs(expression);
+    }
 }
