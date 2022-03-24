@@ -16,8 +16,8 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
 
     @Override
     default ClauseParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
-            Mandatory<C, N, E, O, P>, Clause<C, N>> op) {
-        return op::parse;
+            Mandatory<C, N, E, O, P>, Clause<C, N>> parser) {
+        return parser::parse;
     }
 
     @Override
@@ -53,8 +53,8 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
 
         @Override
         default ClauseParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
-                Mandatory<C, N, E, O, P>, Clause<C, N>> op) {
-            return op::parse;
+                Mandatory<C, N, E, O, P>, Clause<C, N>> parser) {
+            return parser::parse;
         }
 
         default NodeParser.Mandatory<C, N, E, O, P> input(N node) {

@@ -62,15 +62,15 @@ public class Notation {
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
-            MA extends Parser.Mandatory<C, N, E, O, P, OP, MA, T>, T> OP before(OP op) {
-        return op.castParser(procedure -> procedure.getSourceCode().tryFetch(() -> getToken(procedure)
-                .flatMap(t -> op.parse(procedure))));
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T> PA before(PA parser) {
+        return parser.castParser(procedure -> procedure.getSourceCode().tryFetch(() -> getToken(procedure)
+                .flatMap(t -> parser.parse(procedure))));
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, OP extends Parser<C, N, E, O, P, OP, MA, T>,
-            MA extends Parser.Mandatory<C, N, E, O, P, OP, MA, T>, T> OP before(MA ma) {
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T> PA before(MA ma) {
         return ma.castParser(procedure -> getToken(procedure).map(t -> ma.parse(procedure)));
     }
 }

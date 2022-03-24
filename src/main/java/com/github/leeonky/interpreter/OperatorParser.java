@@ -12,8 +12,8 @@ public interface OperatorParser<C extends RuntimeContext<C>, N extends Node<C, N
 
     @Override
     default OperatorParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, OperatorParser<C, N, E, O, P>,
-            Mandatory<C, N, E, O, P>, O> op) {
-        return op::parse;
+            Mandatory<C, N, E, O, P>, O> parser) {
+        return parser::parse;
     }
 
     default ClauseParser<C, N, E, O, P> clause(NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {
@@ -40,8 +40,8 @@ public interface OperatorParser<C extends RuntimeContext<C>, N extends Node<C, N
 
         @Override
         default OperatorParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, OperatorParser<C, N, E, O, P>,
-                Mandatory<C, N, E, O, P>, O> op) {
-            return op::parse;
+                Mandatory<C, N, E, O, P>, O> parser) {
+            return parser::parse;
         }
 
         default ClauseParser.Mandatory<C, N, E, O, P> clause(NodeParser.Mandatory<C, N, E, O, P> nodeFactory) {

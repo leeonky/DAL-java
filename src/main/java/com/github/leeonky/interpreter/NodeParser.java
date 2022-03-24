@@ -17,8 +17,8 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
 
     @Override
     default NodeParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,
-            Mandatory<C, N, E, O, P>, N> op) {
-        return op::parse;
+            Mandatory<C, N, E, O, P>, N> parser) {
+        return parser::parse;
     }
 
     @Override
@@ -45,8 +45,8 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
 
         @Override
         default NodeParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,
-                Mandatory<C, N, E, O, P>, N> op) {
-            return op::parse;
+                Mandatory<C, N, E, O, P>, N> parser) {
+            return parser::parse;
         }
 
         default Mandatory<C, N, E, O, P> map(Function<N, N> mapping) {
