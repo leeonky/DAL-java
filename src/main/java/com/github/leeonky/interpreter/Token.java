@@ -17,8 +17,7 @@ public class Token {
     }
 
     public Number getInteger() {
-        String content = getContent();
-        Number number = NUMBER_PARSER.parse(content);
+        Number number = getNumber();
         if (number != null) {
             Class<? extends Number> type = number.getClass();
             if (type.equals(Integer.class) || type.equals(Long.class) || type.equals(Short.class)
