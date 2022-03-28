@@ -29,11 +29,11 @@ class VerifySchemaFormatterField extends Base {
     }
 
     public static class InstantNowValue {
-        public static final Formatters.Instant instant = Formatters.Instant.now();
+        public final Formatters.Instant instant = Formatters.Instant.now();
     }
 
     public static class IntegerValue {
-        public static final Formatters.Integer integer1 = Formatters.Integer.equalTo(1);
+        public final Formatters.Integer integer1 = Formatters.Integer.equalTo(1);
         public Formatters.Integer integer2 = Formatters.Integer.equalTo(2);
     }
 
