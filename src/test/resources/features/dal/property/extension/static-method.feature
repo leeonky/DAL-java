@@ -64,3 +64,22 @@ Feature: static method
     nonStaticProperty
     ^
     """
+
+  Scenario: bug - return null should not cause exception
+    Given the following java class:
+    """
+    public class Data {
+    }
+    """
+    And the following java class:
+    """
+    public class DataMethods {
+      public static String property(Data data) {
+        return null;
+      }
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    property: null
+    """

@@ -250,15 +250,15 @@ public class RuntimeContextBuilder {
     }
 
     public Object invokeExtensionMethod(Object instance, String name) {
-        return FunctionUtil.oneOf(() -> findExtensionMethod(instance, name, Object::equals),
-                () -> findExtensionMethod(instance, name, Class::isAssignableFrom)).map(method -> {
-            try {
-                return method.invoke(null, instance);
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
-        }).orElseThrow(() -> new IllegalStateException(format("Method or property `%s` does not exist in `%s`",
-                name, instance.getClass().getName())));
+        Method method = FunctionUtil.oneOf(() -> findExtensionMethod(instance, name, Object::equals),
+                () -> findExtensionMethod(instance, name, Class::isAssignableFrom)).orElseThrow(() ->
+                new IllegalStateException(format("Method or property `%s` does not exist in `%s`", name,
+                        instance.getClass().getName())));
+        try {
+            return method.invoke(null, instance);
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private Optional<Method> findExtensionMethod(Object instance, String name, BiPredicate<Class<?>, Class<?>> condition) {
