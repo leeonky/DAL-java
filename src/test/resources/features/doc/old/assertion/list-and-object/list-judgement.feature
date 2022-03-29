@@ -101,11 +101,11 @@ Feature: verify list
     """
     Then the following assertion should pass:
     """
-      = [1 :{}]
+      = [1 :{...}]
     """
     And the following assertion should pass:
     """
-      : [=1 {}]
+      : [=1 {...}]
     """
 
   Scenario: element can be calculation expression or regex

@@ -128,9 +128,10 @@ public class Compiler {
                 .as(DALNode::parenthesesNode))));
         PROPERTY = oneOf(EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE), IMPLICIT_PROPERTY);
         PROPERTY_CHAIN = PROPERTY.mandatory("Expect a object property").recursive(EXPLICIT_PROPERTY);
-        OBJECT = DALProcedure.disableCommaAnd(OPENING_BRACES.with(many(PROPERTY_CHAIN.expression(shortVerificationClause(
-                VERIFICATION_OPERATORS.mandatory("Expect operator `:` or `=`")))).and(optionalSplitBy(COMMA))
-                .and(endWith(CLOSING_BRACES)).as(ObjectScopeNode::new)));
+        OBJECT = DALProcedure.disableCommaAnd(OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(CLOSING_BRACES))
+                .as(ObjectScopeNode::new).or(many(PROPERTY_CHAIN.expression(shortVerificationClause(
+                        VERIFICATION_OPERATORS.mandatory("Expect operator `:` or `=`")))).and(optionalSplitBy(COMMA))
+                        .and(endWith(CLOSING_BRACES)).as(ObjectScopeNode::new))));
         LIST = DALProcedure.disableCommaAnd(OPENING_BRACKET.with(many(ELEMENT_ELLIPSIS.ignoreInput().or(
                 shortVerificationClause(VERIFICATION_OPERATORS.or(DEFAULT_VERIFICATION_OPERATOR)))).and(optionalSplitBy(COMMA))
                 .and(endWith(CLOSING_BRACKET)).as(ListScopeNode::new)));

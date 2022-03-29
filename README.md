@@ -13,7 +13,7 @@
 - DAL是一个比较简单的表达式语言，主要用于在自动化测试环境中对数据进行读取和断言。
 - DAL的应用场景比较专注于在测试中操作数据，因此相较于编程语言，它的语言复杂性低，没有逻辑控制或变量系统，但能够集中语言特性以针对数据操作提供更多的便利性。
 - DAL的执行总是针对一个输入数据（根数据）。
-- DAL输入的数据是一个泛化的类型，不但可以是 Java Class，Java Map/List，还可以通过`registerPropertyAccessor`和`registerListAccessor`方法的注册而支持其他类型格式。以下代码用来支持 JsonObject 类型数据：
+- DAL会以键值对或集合的方式操作数据，数据类型是一个泛化的类型。不但可以是 Java Class，Java Map/List，还可以通过`registerPropertyAccessor`和`registerListAccessor`方法的注册而支持其他类型格式。以下代码用来支持 JsonObject 类型数据：
 ``` java
         DAL dal = new DAL();
         dal.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
@@ -396,11 +396,11 @@ DAL对象断言仍以`=`或`:`开始，后边跟随一个`{}`，在`{}`中阐明
 ```
 
 - #### 非空对象
-DAL目前没有提供否定语义的断言支持。`!=` 仅是一般的逻辑运算符，并不具有`not =`的效果。因此 `null != null` 仅返回一个false的boolean值，并不会触发断言不通过的异常。要想达到 not null 的判定可以通过`: {}`来实现：
+DAL目前没有提供否定语义的断言支持。`!=` 仅是一般的逻辑运算符，并不具有`not =`的效果。因此 `null != null` 仅返回一个false的boolean值，并不会触发断言不通过的异常。要想达到 not null 的判定可以通过`: {...}`来实现：
 ``` javascript
-null: {}    // 失败
-1: {}       // 通过
-"": {}      // 通过
+null: {...}    // 失败
+1: {...}       // 通过
+"": {...}      // 通过
 ```
 
 ### 断言一个集合

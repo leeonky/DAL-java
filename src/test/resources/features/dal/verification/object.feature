@@ -11,7 +11,7 @@ Feature: object
     """
     When evaluate by:
     """
-    null: {}
+    null: {...}
     """
     Then failed with the message:
     """
@@ -19,12 +19,12 @@ Feature: object
     """
     And got the following notation:
     """
-    null: {}
+    null: {...}
           ^
     """
     And the inspect should:
     """
-    null: {}
+    null: {...}
     """
 
   Scenario: unexpected fields

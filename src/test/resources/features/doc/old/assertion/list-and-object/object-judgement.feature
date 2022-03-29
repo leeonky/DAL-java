@@ -107,13 +107,32 @@ Feature: verify object
     """
     Then the following assertion should pass:
     """
-      : { }
+      : {...}
     """
     Examples:
       | data         |
       | {}           |
       | "any string" |
       | 100          |
+
+  Scenario: do not allow :{}
+    Given the following input data:
+    """
+      {}
+    """
+    When evaluate by:
+    """
+      : {}
+    """
+    Then failed with the message:
+    """
+    Should use `{...}` to verify any non null object
+    """
+    And got the following notation:
+    """
+      : {}
+        ^
+    """
 
   Scenario: nested object verification
     Given the following input data:

@@ -5,6 +5,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,7 +19,7 @@ class ObjectScopeNodeTest {
     @Nested
     class EqualTo {
         RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder().build(null);
-        ObjectScopeNode objectScopeNode = new ObjectScopeNode();
+        ObjectScopeNode objectScopeNode = new ObjectScopeNode(Collections.emptyList());
 
         @Test
         void empty_data_equal_to_empty_object() {
@@ -37,7 +38,7 @@ class ObjectScopeNodeTest {
     @Nested
     class Matches {
         RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder().build(null);
-        ObjectScopeNode objectScopeNode = new ObjectScopeNode();
+        ObjectScopeNode objectScopeNode = new ObjectScopeNode(new ListEllipsisNode());
 
         @Test
         void any_data_matches_empty_object() {

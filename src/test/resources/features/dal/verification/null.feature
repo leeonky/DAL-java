@@ -103,7 +103,7 @@ Feature: compare null
   Scenario Outline: compare null and object
     When evaluate by:
     """
-      null <operator> {}
+      null <operator> <empty>
     """
     Then failed with the message:
     """
@@ -111,13 +111,13 @@ Feature: compare null
     """
     And got the following notation:
     """
-      null <operator> {}
+      null <operator> <empty>
              ^
     """
     Examples:
-      | operator |
-      | =        |
-      | :        |
+      | operator | empty |
+      | =        | {}    |
+      | :        | {...} |
 
   Scenario Outline: compare null and null
     Given the following json:
