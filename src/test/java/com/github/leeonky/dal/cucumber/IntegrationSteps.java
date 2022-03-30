@@ -133,4 +133,39 @@ public class IntegrationSteps {
     public void the_inspect_should(String inspect) {
         integrationTestContext.verifyInspect(inspect);
     }
+
+    @Then("the following expectation should pass:")
+    public void theFollowingExpectationShouldPass(String dalExpression) {
+        integrationTestContext.shouldPass(dalExpression);
+    }
+
+    @When("expect by the following code:")
+    public void expectByTheFollowingCode(String dalExpression) {
+        integrationTestContext.should(dalExpression);
+    }
+
+    @Then("assert error with the message:")
+    public void assertErrorWithTheMessage(String message) {
+        integrationTestContext.shouldAssertError(message);
+    }
+
+    @Then("the following exact expectation should pass:")
+    public void theFollowingEqualExpectationShouldPass(String exactExpression) {
+        integrationTestContext.exactPass(exactExpression);
+    }
+
+    @When("expect exact by the following code:")
+    public void expectEqualByTheFollowingCode(String exactExpression) {
+        integrationTestContext.exact(exactExpression);
+    }
+
+    @Then("the following matching expectation should pass:")
+    public void theFollowingMatchingExpectationShouldPass(String matchingExpression) {
+        integrationTestContext.matchPass(matchingExpression);
+    }
+
+    @When("expect matching by the following code:")
+    public void expectMatchingByTheFollowingCode(String matchingExpression) {
+        integrationTestContext.match(matchingExpression);
+    }
 }

@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.compiler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.leeonky.dal.Assertions;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
@@ -28,6 +29,7 @@ public class IntegrationTestContext {
     private Object input = null;
     private Object result;
     private InterpreterException exception;
+    private Throwable bizException;
     private String expression;
     private final List<String> schemas = new ArrayList<>();
     private final List<String> javaClasses = new ArrayList<>();
@@ -195,4 +197,45 @@ public class IntegrationTestContext {
     public void setArrayFirstIndex(String type, int index) {
         firstIndexes.put(type, index);
     }
+
+    public void shouldPass(String dalExpression) {
+        Assertions.expect(input).should(dalExpression);
+    }
+
+    public void should(String dalExpression) {
+        try {
+            Assertions.expect(input).should(dalExpression);
+        } catch (Throwable e) {
+            bizException = e;
+        }
+    }
+
+    public void exact(String equalExpression) {
+        try {
+            Assertions.expect(input).exact(equalExpression);
+        } catch (Throwable e) {
+            bizException = e;
+        }
+    }
+
+    public void shouldAssertError(String message) {
+        assertThat(bizException).isInstanceOf(AssertionError.class).hasMessage(message);
+    }
+
+    public void exactPass(String equalExpression) {
+        Assertions.expect(input).exact(equalExpression);
+    }
+
+    public void matchPass(String matchingExpression) {
+        Assertions.expect(input).match(matchingExpression);
+    }
+
+    public void match(String matchingExpression) {
+        try {
+            Assertions.expect(input).match(matchingExpression);
+        } catch (Throwable e) {
+            bizException = e;
+        }
+    }
+
 }
