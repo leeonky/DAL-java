@@ -131,3 +131,4 @@ Feature: symbol
       | `TAB      |
       | `SPACE    |
       | .         |
+      | #         |

@@ -3,6 +3,7 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.interpreter.Notation;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -69,5 +70,9 @@ public class Notations {
             SEQUENCE_ZA = notation("-"),
             SEQUENCE_AZ_2 = notation("￪"),
             SEQUENCE_ZA_2 = notation("￬"),
-            TRANSPOSE_MARK = notation(">>");
+            TRANSPOSE_MARK = notation(">>"),
+            LINE_COMMENT1 = notation("#"),
+            LINE_COMMENT2 = notation("//");
+
+    public final static List<Notation> LINE_COMMENTS = asList(LINE_COMMENT1, LINE_COMMENT2);
 }

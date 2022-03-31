@@ -10,6 +10,14 @@ import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class NotationTest {
+    private int START_POSITION;
+
+    private SourceCode givenSourceCode(String path) {
+        SourceCode sourceCode = new SourceCode("prefix" + path);
+        sourceCode.popWord(notation("prefix"));
+        START_POSITION = 6;
+        return sourceCode;
+    }
 
     @Nested
     class Node {
@@ -17,7 +25,7 @@ class NotationTest {
 
         @Test
         void return_empty_when_not_match() {
-            SourceCode sourceCode = new SourceCode("not match");
+            SourceCode sourceCode = givenSourceCode("not match");
 
             assertThat(nodeParser.parse(new TestProcedure(sourceCode))).isEmpty();
 
@@ -26,7 +34,7 @@ class NotationTest {
 
         @Test
         void trim_left_blank_even_not_match() {
-            SourceCode sourceCode = new SourceCode(" not match");
+            SourceCode sourceCode = givenSourceCode(" not match");
 
             assertThat(nodeParser.parse(new TestProcedure(sourceCode))).isEmpty();
 
@@ -36,22 +44,22 @@ class NotationTest {
 
         @Test
         void return_node_when_matches() {
-            SourceCode sourceCode = new SourceCode("true");
+            SourceCode sourceCode = givenSourceCode("true");
 
             Optional<TestNode> testNode = nodeParser.parse(new TestProcedure(sourceCode));
 
-            assertThat(testNode.get().getPositionBegin()).isEqualTo(0);
+            assertThat(testNode.get().getPositionBegin()).isEqualTo(0 + START_POSITION);
             assertThat(testNode.get().getContent()).isEqualTo("true");
             assertThat(sourceCode.hasCode()).isFalse();
         }
 
         @Test
         void trim_left_blank_before_matching() {
-            SourceCode sourceCode = new SourceCode(" true");
+            SourceCode sourceCode = givenSourceCode(" true");
 
             Optional<TestNode> testNode = nodeParser.parse(new TestProcedure(sourceCode));
 
-            assertThat(testNode.get().getPositionBegin()).isEqualTo(1);
+            assertThat(testNode.get().getPositionBegin()).isEqualTo(1 + START_POSITION);
             assertThat(testNode.get().getContent()).isEqualTo("true");
             assertThat(sourceCode.hasCode()).isFalse();
         }
@@ -63,19 +71,19 @@ class NotationTest {
         @Test
         void return_when_match_symbol() {
             TestOperator testOperator = new TestOperator();
-            SourceCode sourceCode = new SourceCode(" +=");
+            SourceCode sourceCode = givenSourceCode(" +=");
             OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
                     notation("+=").operator(() -> testOperator);
 
             TestOperator testOperator2 = operatorParser.parse(new TestProcedure(sourceCode)).get();
 
             assertThat(testOperator2).isSameAs(testOperator);
-            assertThat(testOperator2.getPosition()).isEqualTo(1);
+            assertThat(testOperator2.getPosition()).isEqualTo(1 + START_POSITION);
         }
 
         @Test
         void return_empty_when_not_match() {
-            SourceCode sourceCode = new SourceCode(" +=");
+            SourceCode sourceCode = givenSourceCode(" +=");
             OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
                     notation("++").operator(TestOperator::new);
 
@@ -86,7 +94,7 @@ class NotationTest {
         @Test
         void return_empty_when_predicate_false() {
             TestOperator testOperator = new TestOperator();
-            SourceCode sourceCode = new SourceCode(" +=");
+            SourceCode sourceCode = givenSourceCode(" +=");
             TestProcedure testProcedure = new TestProcedure(sourceCode);
 
             OperatorParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> operatorParser =
@@ -107,7 +115,7 @@ class NotationTest {
 
         @Test
         void return_empty_when_not_start_with() {
-            SourceCode sourceCode = new SourceCode("not match");
+            SourceCode sourceCode = givenSourceCode("not match");
 
             assertThat(notation("s").with(mandatory).parse(new TestProcedure(sourceCode))).isEmpty();
             assertThat(sourceCode.popChar(emptyMap())).isEqualTo('n');
@@ -115,7 +123,7 @@ class NotationTest {
 
         @Test
         void left_trim_even_not_match() {
-            SourceCode sourceCode = new SourceCode(" not match");
+            SourceCode sourceCode = givenSourceCode(" not match");
 
             assertThat(notation("s").with(mandatory).parse(new TestProcedure(sourceCode))).isEmpty();
             assertThat(sourceCode.popChar(emptyMap())).isEqualTo('n');
@@ -123,23 +131,23 @@ class NotationTest {
 
         @Test
         void return_node_when_matches() {
-            SourceCode sourceCode = new SourceCode("(a");
+            SourceCode sourceCode = givenSourceCode("(a");
 
             Optional<TestNode> testNode = notation("(").with(mandatory).parse(new TestProcedure(sourceCode));
 
             assertThat(testNode.get().getContent()).isEqualTo("a");
-            assertThat(testNode.get().getPositionBegin()).isEqualTo(0);
+            assertThat(testNode.get().getPositionBegin()).isEqualTo(0 + START_POSITION);
             assertThat(sourceCode.hasCode()).isFalse();
         }
 
         @Test
         void trim_and_return_node_when_matches() {
-            SourceCode sourceCode = new SourceCode(" (a");
+            SourceCode sourceCode = givenSourceCode(" (a");
 
             Optional<TestNode> testNode = notation("(").with(mandatory).parse(new TestProcedure(sourceCode));
 
             assertThat(testNode.get().getContent()).isEqualTo("a");
-            assertThat(testNode.get().getPositionBegin()).isEqualTo(1);
+            assertThat(testNode.get().getPositionBegin()).isEqualTo(1 + START_POSITION);
             assertThat(sourceCode.hasCode()).isFalse();
         }
     }
@@ -152,7 +160,7 @@ class NotationTest {
 
         @Test
         void return_empty_when_not_start_with() {
-            SourceCode sourceCode = new SourceCode("not match");
+            SourceCode sourceCode = givenSourceCode("not match");
 
             assertThat(notation("s").before(mandatory).parse(new TestProcedure(sourceCode))).isEmpty();
             assertThat(sourceCode.popChar(emptyMap())).isEqualTo('n');
@@ -160,7 +168,7 @@ class NotationTest {
 
         @Test
         void left_trim_even_not_match() {
-            SourceCode sourceCode = new SourceCode(" not match");
+            SourceCode sourceCode = givenSourceCode(" not match");
 
             assertThat(notation("s").before(mandatory).parse(new TestProcedure(sourceCode))).isEmpty();
             assertThat(sourceCode.popChar(emptyMap())).isEqualTo('n');
@@ -168,23 +176,23 @@ class NotationTest {
 
         @Test
         void return_node_when_matches() {
-            SourceCode sourceCode = new SourceCode("(a");
+            SourceCode sourceCode = givenSourceCode("(a");
 
             Optional<TestNode> testNode = notation("(").before(mandatory).parse(new TestProcedure(sourceCode));
 
             assertThat(testNode.get().getContent()).isEqualTo("a");
-            assertThat(testNode.get().getPositionBegin()).isEqualTo(1);
+            assertThat(testNode.get().getPositionBegin()).isEqualTo(1 + START_POSITION);
             assertThat(sourceCode.hasCode()).isFalse();
         }
 
         @Test
         void trim_and_return_node_when_matches() {
-            SourceCode sourceCode = new SourceCode(" (a");
+            SourceCode sourceCode = givenSourceCode(" (a");
 
             Optional<TestNode> testNode = notation("(").before(mandatory).parse(new TestProcedure(sourceCode));
 
             assertThat(testNode.get().getContent()).isEqualTo("a");
-            assertThat(testNode.get().getPositionBegin()).isEqualTo(2);
+            assertThat(testNode.get().getPositionBegin()).isEqualTo(2 + START_POSITION);
             assertThat(sourceCode.hasCode()).isFalse();
         }
     }
@@ -197,7 +205,7 @@ class NotationTest {
 
         @Test
         void return_empty_when_not_start_with() {
-            SourceCode sourceCode = new SourceCode("not match");
+            SourceCode sourceCode = givenSourceCode("not match");
 
             assertThat(notation("s").before(parser).parse(new TestProcedure(sourceCode))).isEmpty();
             assertThat(sourceCode.popChar(emptyMap())).isEqualTo('n');
@@ -205,7 +213,7 @@ class NotationTest {
 
         @Test
         void left_trim_even_not_match() {
-            SourceCode sourceCode = new SourceCode(" not match");
+            SourceCode sourceCode = givenSourceCode(" not match");
 
             assertThat(notation("s").before(parser).parse(new TestProcedure(sourceCode))).isEmpty();
             assertThat(sourceCode.popChar(emptyMap())).isEqualTo(' ');
@@ -213,23 +221,23 @@ class NotationTest {
 
         @Test
         void return_node_when_matches() {
-            SourceCode sourceCode = new SourceCode("(a");
+            SourceCode sourceCode = givenSourceCode("(a");
 
             Optional<TestNode> testNode = notation("(").before(parser).parse(new TestProcedure(sourceCode));
 
             assertThat(testNode.get().getContent()).isEqualTo("a");
-            assertThat(testNode.get().getPositionBegin()).isEqualTo(1);
+            assertThat(testNode.get().getPositionBegin()).isEqualTo(1 + START_POSITION);
             assertThat(sourceCode.hasCode()).isFalse();
         }
 
         @Test
         void trim_and_return_node_when_matches() {
-            SourceCode sourceCode = new SourceCode(" (a");
+            SourceCode sourceCode = givenSourceCode(" (a");
 
             Optional<TestNode> testNode = notation("(").before(parser).parse(new TestProcedure(sourceCode));
 
             assertThat(testNode.get().getContent()).isEqualTo("a");
-            assertThat(testNode.get().getPositionBegin()).isEqualTo(2);
+            assertThat(testNode.get().getPositionBegin()).isEqualTo(2 + START_POSITION);
             assertThat(sourceCode.hasCode()).isFalse();
         }
     }

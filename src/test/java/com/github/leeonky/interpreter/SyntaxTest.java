@@ -391,7 +391,7 @@ class SyntaxTest extends BaseTest {
                     TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
                     TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith("a"));
 
-            assertThat(syntax.isClose(givenProcedureWithCode(" "))).isFalse();
+            assertThat(syntax.isClose(givenProcedureWithBlankCode(" "))).isFalse();
         }
 
         @Test
@@ -415,7 +415,7 @@ class SyntaxTest extends BaseTest {
                     TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
                     TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endWith("a"));
 
-            assertThat(syntax.isClose(givenProcedureWithCode(" a"))).isFalse();
+            assertThat(syntax.isClose(givenProcedureWithBlankCode(" a"))).isFalse();
         }
 
         @Test

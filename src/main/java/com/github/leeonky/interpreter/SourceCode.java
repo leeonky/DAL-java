@@ -1,5 +1,7 @@
 package com.github.leeonky.interpreter;
 
+import com.github.leeonky.dal.compiler.Notations;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -14,6 +16,7 @@ import static java.util.Optional.of;
 public class SourceCode {
     private final String code;
     private int position = 0;
+    private int startPosition = 0;
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> tokenScanner(
@@ -52,6 +55,15 @@ public class SourceCode {
 
     public SourceCode(String code) {
         this.code = code;
+        trimComment();
+        startPosition = position;
+    }
+
+    private void trimComment() {
+        while (Notations.LINE_COMMENTS.stream().anyMatch(this::startsWith)) {
+            int newLinePosition = code.indexOf("\n", position);
+            position = newLinePosition == -1 ? code.length() : newLinePosition + 1;
+        }
     }
 
     private int seek(int seek) {
@@ -84,11 +96,11 @@ public class SourceCode {
 
     public boolean startsWith(Notation notation) {
         leftTrim();
-        return (code.startsWith(notation.getLabel(), position));
+        return code.startsWith(notation.getLabel(), position);
     }
 
     public boolean startsWith(String word) {
-        return (code.startsWith(word, position));
+        return code.startsWith(word, position);
     }
 
     public char popChar(Map<String, Character> escapeChars) {
@@ -99,7 +111,7 @@ public class SourceCode {
     }
 
     public boolean isBeginning() {
-        return code.chars().limit(position).allMatch(Character::isWhitespace);
+        return code.chars().skip(startPosition).limit(position - startPosition).allMatch(Character::isWhitespace);
     }
 
     public SyntaxException syntaxError(String message, int positionOffset) {

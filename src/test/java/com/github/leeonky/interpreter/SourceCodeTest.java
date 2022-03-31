@@ -24,7 +24,6 @@ class SourceCodeTest {
         @Test
         void should_has_code_when_position_not_end() {
             assertThat(new SourceCode("a").hasCode()).isTrue();
-            assertThat(new SourceCode(" ").hasCode()).isTrue();
         }
 
         @Test
@@ -85,7 +84,9 @@ class SourceCodeTest {
 
         @Test
         void should_not_trim_blank_when_start_with_given_word() {
-            assertThat(new SourceCode(" \n\r\tab").startsWith("a")).isFalse();
+            SourceCode sourceCode = new SourceCode("prefix \n\r\tab");
+            sourceCode.popWord(notation("prefix"));
+            assertThat(sourceCode.startsWith("a")).isFalse();
         }
     }
 
@@ -128,11 +129,7 @@ class SourceCodeTest {
 
         @Test
         void also_is_beginning_even_pop_blanks() {
-            SourceCode sourceCode = new SourceCode(" \n\r\t");
-            sourceCode.popChar(NO_ESCAPE);
-            sourceCode.popChar(NO_ESCAPE);
-            sourceCode.popChar(NO_ESCAPE);
-            sourceCode.popChar(NO_ESCAPE);
+            SourceCode sourceCode = new SourceCode(" \n\r\txx");
             assertThat(sourceCode.isBeginning()).isTrue();
         }
     }
