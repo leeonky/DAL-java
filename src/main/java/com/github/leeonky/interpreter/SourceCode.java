@@ -40,7 +40,7 @@ public class SourceCode {
                 Token token = new Token(sourceCode.position);
                 if (trimStart) {
                     sourceCode.popChar();
-                    sourceCode.leftTrim();
+                    sourceCode.trimBlankAndComment();
                 }
                 if (sourceCode.hasCode())
                     do token.append(sourceCode.popChar());
@@ -55,15 +55,16 @@ public class SourceCode {
 
     public SourceCode(String code) {
         this.code = code;
-        trimComment();
+        trimBlankAndComment();
         startPosition = position;
     }
 
-    private void trimComment() {
+    private SourceCode trimBlankAndComment() {
         while (Notations.LINE_COMMENTS.stream().anyMatch(this::startsWith)) {
             int newLinePosition = code.indexOf("\n", position);
             position = newLinePosition == -1 ? code.length() : newLinePosition + 1;
         }
+        return this;
     }
 
     private int seek(int seek) {
@@ -81,21 +82,21 @@ public class SourceCode {
     }
 
     private boolean whenFirstChar(Predicate<Character> predicate) {
-        return leftTrim().hasCode() && predicate.test(currentChar());
+        return trimBlankAndComment().hasCode() && predicate.test(currentChar());
     }
 
     public boolean hasCode() {
         return position < code.length();
     }
 
-    private SourceCode leftTrim() {
+    private SourceCode leftBlank() {
         while (hasCode() && Character.isWhitespace(currentChar()))
             position++;
         return this;
     }
 
     public boolean startsWith(Notation notation) {
-        leftTrim();
+        leftBlank();
         return code.startsWith(notation.getLabel(), position);
     }
 
@@ -144,6 +145,6 @@ public class SourceCode {
     }
 
     public int nextPosition() {
-        return leftTrim().position;
+        return trimBlankAndComment().position;
     }
 }

@@ -61,3 +61,46 @@ Feature: support line comment
       | comment |
       | #       |
       | //      |
+
+  Scenario: comments in code
+    When the following json:
+    """
+    {
+      "key1": "value1",
+      "key2": "value2"
+    }
+    """
+    Then the following verification should pass:
+    """
+    = {
+#    this is a comment
+      key1: "value1" # comment after clause
+
+//    this is anther comment
+
+      key2: "value2"
+    }
+    """
+    When evaluate by:
+    """
+    = {
+#    this is a comment
+      key1: "value1" # comment after clause
+
+//    this is anther comment
+
+      key2: "value3"
+    }
+    """
+    Then got the following notation:
+    """
+    = {
+#    this is a comment
+      key1: "value1" # comment after clause
+
+//    this is anther comment
+
+      key2: "value3"
+            ^
+    }
+    """
