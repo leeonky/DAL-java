@@ -97,7 +97,7 @@ public class ListScopeNode extends DALNode {
 
     public boolean verifyAll(DALRuntimeContext context, Data data) {
         if (!data.isList())
-            throw new RuntimeException(format("Cannot compare%sand list", data.inspect()), getPositionBegin());
+            throw new RuntimeException(format("Cannot compare %sand list", data.inspect()), getPositionBegin());
         List<DALNode> expressions = getExpressions(data.getListFirstIndex());
         if (type == Type.ALL_ITEMS)
             assertListSize(expressions.size(), data.getListSize(), getPositionBegin());

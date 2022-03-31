@@ -109,7 +109,7 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
 
     private void invalidTypeToMatchValue(Class<?> actualType, Data actual, Class<?> expectedType, Data expected, Matcher operator) {
         if (actualType.isInstance(actual.getInstance()) && expectedType.isInstance(expected.getInstance()))
-            throw new RuntimeException(format("Cannot compare between%sand%s", actual.inspect(), expected.inspect()),
+            throw new RuntimeException(format("Cannot compare between %sand %s", actual.inspect(), expected.inspect()),
                     operator.getPosition());
     }
 

@@ -88,6 +88,20 @@ Feature: string
     """
       instant: '2000-10-10T00:00:00Z'
     """
+    When use a instance of java class "Data" to evaluate:
+    """
+      instant: 'un matched'
+    """
+    And failed with the message:
+    """
+    Expecting java.time.Instant
+    <2000-10-10T00:00:00Z>
+    Convert to: java.lang.String
+    <2000-10-10T00:00:00Z>
+    to match java.lang.String
+    <un matched>
+    but was not
+    """
 
   Scenario: not allow convert number to string implicitly
     When evaluate by:

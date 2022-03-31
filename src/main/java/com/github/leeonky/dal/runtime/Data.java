@@ -25,7 +25,7 @@ public class Data {
     }
 
     public String inspect() {
-        return isNull() ? " null " : String.format(" %s\n<%s>\n", getClassName(getInstance()), getInstance());
+        return isNull() ? "null " : String.format("%s\n<%s>\n", getClassName(getInstance()), getInstance());
     }
 
     public Object getInstance() {
