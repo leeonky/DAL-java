@@ -13,7 +13,7 @@ class NotationTest {
     private int START_POSITION;
 
     private SourceCode givenSourceCode(String path) {
-        SourceCode sourceCode = new SourceCode("prefix" + path);
+        SourceCode sourceCode = BaseTest.createSourceCode("prefix" + path);
         sourceCode.popWord(notation("prefix"));
         START_POSITION = 6;
         return sourceCode;

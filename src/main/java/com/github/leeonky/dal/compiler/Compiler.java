@@ -173,7 +173,7 @@ public class Compiler {
     }
 
     public List<Object> toChainNodes(String sourceCode) {
-        return PROPERTY_CHAIN.parse(new DALProcedure(new SourceCode(sourceCode),
+        return PROPERTY_CHAIN.parse(new DALProcedure(SourceCode.createSourceCode(sourceCode, LINE_COMMENTS),
                 null, DALExpression::new)).propertyChain();
     }
 

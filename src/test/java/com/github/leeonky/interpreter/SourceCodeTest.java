@@ -23,17 +23,17 @@ class SourceCodeTest {
 
         @Test
         void should_has_code_when_position_not_end() {
-            assertThat(new SourceCode("a").hasCode()).isTrue();
+            assertThat(BaseTest.createSourceCode("a").hasCode()).isTrue();
         }
 
         @Test
         void should_not_has_code_when_at_the_end() {
-            assertThat(new SourceCode("").hasCode()).isFalse();
+            assertThat(BaseTest.createSourceCode("").hasCode()).isFalse();
         }
 
         @Test
         void check_has_code_after_pop() {
-            SourceCode code = new SourceCode("ab ");
+            SourceCode code = BaseTest.createSourceCode("ab ");
             code.popChar(NO_ESCAPE);
             assertThat(code.hasCode()).isTrue();
             code.popChar(NO_ESCAPE);
@@ -48,22 +48,22 @@ class SourceCodeTest {
 
         @Test
         void start_with_given_word() {
-            assertThat(new SourceCode("ab").startsWith(notation("a"))).isTrue();
+            assertThat(BaseTest.createSourceCode("ab").startsWith(notation("a"))).isTrue();
         }
 
         @Test
         void not_start_with_given_word() {
-            assertThat(new SourceCode("ab").startsWith(notation("b"))).isFalse();
+            assertThat(BaseTest.createSourceCode("ab").startsWith(notation("b"))).isFalse();
         }
 
         @Test
         void trim_blank_and_start_with_given_word() {
-            assertThat(new SourceCode(" \n\r\tab").startsWith(notation("a"))).isTrue();
+            assertThat(BaseTest.createSourceCode(" \n\r\tab").startsWith(notation("a"))).isTrue();
         }
 
         @Test
         void starts_with_after_pop() {
-            SourceCode sourceCode = new SourceCode("x \n\r\tab");
+            SourceCode sourceCode = BaseTest.createSourceCode("x \n\r\tab");
             sourceCode.popChar(NO_ESCAPE);
             assertThat(sourceCode.startsWith(notation("a"))).isTrue();
         }
@@ -74,17 +74,17 @@ class SourceCodeTest {
 
         @Test
         void start_with_given_word() {
-            assertThat(new SourceCode("ab").startsWith("a")).isTrue();
+            assertThat(BaseTest.createSourceCode("ab").startsWith("a")).isTrue();
         }
 
         @Test
         void not_start_with_given_word() {
-            assertThat(new SourceCode("ab").startsWith("b")).isFalse();
+            assertThat(BaseTest.createSourceCode("ab").startsWith("b")).isFalse();
         }
 
         @Test
         void should_not_trim_blank_when_start_with_given_word() {
-            SourceCode sourceCode = new SourceCode("prefix \n\r\tab");
+            SourceCode sourceCode = BaseTest.createSourceCode("prefix \n\r\tab");
             sourceCode.popWord(notation("prefix"));
             assertThat(sourceCode.startsWith("a")).isFalse();
         }
@@ -95,21 +95,21 @@ class SourceCodeTest {
 
         @Test
         void pop_up_when_no_escape() {
-            SourceCode sourceCode = new SourceCode("a");
+            SourceCode sourceCode = BaseTest.createSourceCode("a");
             assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('a');
             assertThat(sourceCode.hasCode()).isFalse();
         }
 
         @Test
         void pop_up_when_escape_not_match() {
-            SourceCode sourceCode = new SourceCode("a");
+            SourceCode sourceCode = BaseTest.createSourceCode("a");
             assertThat(sourceCode.popChar(new EscapeChars().escape("b", 'a'))).isEqualTo('a');
             assertThat(sourceCode.hasCode()).isFalse();
         }
 
         @Test
         void pop_up_when_escaped() {
-            SourceCode sourceCode = new SourceCode("aabbx");
+            SourceCode sourceCode = BaseTest.createSourceCode("aabbx");
             EscapeChars escape = new EscapeChars().escape("bb", 'a').escape("aa", 'b');
             assertThat(sourceCode.popChar(escape)).isEqualTo('b');
             assertThat(sourceCode.popChar(escape)).isEqualTo('a');
@@ -122,14 +122,14 @@ class SourceCodeTest {
 
         @Test
         void position_is_0() {
-            assertThat(new SourceCode("a").isBeginning()).isTrue();
-            assertThat(new SourceCode(" ").isBeginning()).isTrue();
-            assertThat(new SourceCode("").isBeginning()).isTrue();
+            assertThat(BaseTest.createSourceCode("a").isBeginning()).isTrue();
+            assertThat(BaseTest.createSourceCode(" ").isBeginning()).isTrue();
+            assertThat(BaseTest.createSourceCode("").isBeginning()).isTrue();
         }
 
         @Test
         void also_is_beginning_even_pop_blanks() {
-            SourceCode sourceCode = new SourceCode(" \n\r\txx");
+            SourceCode sourceCode = BaseTest.createSourceCode(" \n\r\txx");
             assertThat(sourceCode.isBeginning()).isTrue();
         }
     }
@@ -139,7 +139,7 @@ class SourceCodeTest {
 
         @Test
         void throw_exception_with_position_info() {
-            SourceCode sourceCode = new SourceCode("abc");
+            SourceCode sourceCode = BaseTest.createSourceCode("abc");
             sourceCode.popChar(NO_ESCAPE);
             assertThat(sourceCode.syntaxError("test", 1).show("abc")).isEqualTo("abc\n  ^");
         }
@@ -150,7 +150,7 @@ class SourceCodeTest {
 
         @Test
         void pop_matched_word() {
-            SourceCode code = new SourceCode("ab");
+            SourceCode code = BaseTest.createSourceCode("ab");
             code.popChar(NO_ESCAPE);
             Token token = code.popWord(notation("b")).get();
             assertThat(token.getContent()).isEqualTo("b");
@@ -159,14 +159,14 @@ class SourceCodeTest {
 
         @Test
         void pop_not_matched_word() {
-            SourceCode code = new SourceCode("ab");
+            SourceCode code = BaseTest.createSourceCode("ab");
             assertThat(code.popWord(notation("b"))).isEmpty();
             assertThat(code.popChar(NO_ESCAPE)).isEqualTo('a');
         }
 
         @Test
         void trim_before_pop_word() {
-            SourceCode code = new SourceCode(" \n\t\rb");
+            SourceCode code = BaseTest.createSourceCode(" \n\t\rb");
 
             assertThat(code.popWord(notation("b")).get().getContent()).isEqualTo("b");
         }
@@ -176,7 +176,7 @@ class SourceCodeTest {
 
             @Test
             void non_matched_word() {
-                SourceCode code = new SourceCode("ab");
+                SourceCode code = BaseTest.createSourceCode("ab");
                 assertThat(code.popWord(notation("a"), () -> false)).isEmpty();
 
                 assertThat(code.nextPosition()).isEqualTo(0);
@@ -184,7 +184,7 @@ class SourceCodeTest {
 
             @Test
             void predicate_should_not_called_when_word_not_matched() {
-                SourceCode code = new SourceCode("ab");
+                SourceCode code = BaseTest.createSourceCode("ab");
                 assertThat(code.popWord(notation("b"), () -> {
                     throw new RuntimeException();
                 })).isEmpty();
@@ -197,7 +197,7 @@ class SourceCodeTest {
 
         @Test
         void fetch_result_and_move_to_next() {
-            SourceCode code = new SourceCode("ab");
+            SourceCode code = BaseTest.createSourceCode("ab");
             assertThat(code.tryFetch(() -> code.popWord(notation("a"))).get().getContent()).isEqualTo("a");
 
             assertThat(code.popChar(NO_ESCAPE)).isEqualTo('b');
@@ -205,7 +205,7 @@ class SourceCodeTest {
 
         @Test
         void should_not_move_position_when_fetch_empty() {
-            SourceCode code = new SourceCode("ab");
+            SourceCode code = BaseTest.createSourceCode("ab");
             assertThat(code.tryFetch(() -> code.popWord(notation("b")))).isEmpty();
 
             assertThat(code.popChar(NO_ESCAPE)).isEqualTo('a');
@@ -217,7 +217,7 @@ class SourceCodeTest {
 
         @Test
         void should_skip_blank_return_position() {
-            assertThat(new SourceCode(" \n\r\ta").nextPosition()).isEqualTo(4);
+            assertThat(BaseTest.createSourceCode(" \n\r\ta").nextPosition()).isEqualTo(4);
         }
     }
 
@@ -226,15 +226,15 @@ class SourceCodeTest {
 
         @Test
         void at_end_of_code() {
-            assertThat(new SourceCode("").isEndOfLine()).isTrue();
+            assertThat(BaseTest.createSourceCode("").isEndOfLine()).isTrue();
         }
 
         @Test
         void space_before_change_line() {
-            assertThat(new SourceCode("\n").isEndOfLine()).isTrue();
-            assertThat(new SourceCode(" \n").isEndOfLine()).isTrue();
-            assertThat(new SourceCode("\t\n").isEndOfLine()).isTrue();
-            assertThat(new SourceCode(" \t\r\n").isEndOfLine()).isTrue();
+            assertThat(BaseTest.createSourceCode("\n").isEndOfLine()).isTrue();
+            assertThat(BaseTest.createSourceCode(" \n").isEndOfLine()).isTrue();
+            assertThat(BaseTest.createSourceCode("\t\n").isEndOfLine()).isTrue();
+            assertThat(BaseTest.createSourceCode(" \t\r\n").isEndOfLine()).isTrue();
         }
     }
 
@@ -243,7 +243,7 @@ class SourceCodeTest {
 
         @Test
         void return_empty_when_not_match_opening_char() {
-            SourceCode sourceCode = new SourceCode(" notStartsWithA");
+            SourceCode sourceCode = BaseTest.createSourceCode(" notStartsWithA");
             Optional<Token> optionalToken = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
                     false, ONE_CHAR_TOKEN, token -> true).scan(sourceCode);
 
@@ -253,7 +253,7 @@ class SourceCodeTest {
 
         @Test
         void return_token_with_content_and_position() {
-            SourceCode sourceCode = new SourceCode(" abc");
+            SourceCode sourceCode = BaseTest.createSourceCode(" abc");
 
             Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
                     false, ONE_CHAR_TOKEN, token1 -> true).scan(sourceCode).get();
@@ -265,7 +265,7 @@ class SourceCodeTest {
 
         @Test
         void should_append_a_char_when_no_matter_end_with_when_trim() {
-            SourceCode sourceCode = new SourceCode(" abc");
+            SourceCode sourceCode = BaseTest.createSourceCode(" abc");
 
             Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
                     true, ONE_CHAR_TOKEN, token1 -> true).scan(sourceCode).get();
@@ -277,7 +277,7 @@ class SourceCodeTest {
 
         @Test
         void trim_start_blank() {
-            SourceCode sourceCode = new SourceCode(" a bc");
+            SourceCode sourceCode = BaseTest.createSourceCode(" a bc");
 
             Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
                     true, ONE_CHAR_TOKEN, token1 -> true).scan(sourceCode).get();
@@ -289,7 +289,7 @@ class SourceCodeTest {
 
         @Test
         void should_return_empty_content_token_when_start_char_is_at_the_end_of_code() {
-            SourceCode sourceCode = new SourceCode(" a ");
+            SourceCode sourceCode = BaseTest.createSourceCode(" a ");
 
             Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
                     true, ONE_CHAR_TOKEN, token1 -> true).scan(sourceCode).get();
@@ -301,7 +301,7 @@ class SourceCodeTest {
 
         @Test
         void should_return_all_content_when_got_the_end_of_code() {
-            SourceCode sourceCode = new SourceCode(" abc");
+            SourceCode sourceCode = BaseTest.createSourceCode(" abc");
 
             Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
                     false, UNLIMITED_ENDING, token1 -> true).scan(sourceCode).get();
@@ -313,7 +313,7 @@ class SourceCodeTest {
 
         @Test
         void should_return_content_when_before_closing_char() {
-            SourceCode sourceCode = new SourceCode(" abc");
+            SourceCode sourceCode = BaseTest.createSourceCode(" abc");
 
             Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
                     false, (code, position) -> code.charAt(position) == 'c', token1 -> true).scan(sourceCode).get();
@@ -325,7 +325,7 @@ class SourceCodeTest {
 
         @Test
         void return_empty_when_excluded() {
-            SourceCode sourceCode = new SourceCode(" abc");
+            SourceCode sourceCode = BaseTest.createSourceCode(" abc");
             Optional<Token> optionalToken = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(asList("a")),
                     false, ONE_CHAR_TOKEN, token -> true).scan(sourceCode);
 
@@ -335,7 +335,7 @@ class SourceCodeTest {
 
         @Test
         void return_empty_when_predicate_false() {
-            SourceCode sourceCode = new SourceCode(" abc");
+            SourceCode sourceCode = BaseTest.createSourceCode(" abc");
 
             Optional<Token> optionalToken = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
                     false, (code, position) -> code.charAt(position) == 'c', token -> {
@@ -350,7 +350,7 @@ class SourceCodeTest {
 
         @Test
         void return_by_delimiters() {
-            SourceCode sourceCode = new SourceCode(" abc");
+            SourceCode sourceCode = BaseTest.createSourceCode(" abc");
 
             Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
                     false, new HashSet<>(asList('c'))).scan(sourceCode).get();

@@ -1,7 +1,6 @@
 package com.github.leeonky.interpreter;
 
-import com.github.leeonky.dal.compiler.Notations;
-
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -17,6 +16,7 @@ public class SourceCode {
     private final String code;
     private int position = 0;
     private int startPosition = 0;
+    private final List<Notation> lineComments;
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> tokenScanner(
@@ -53,14 +53,19 @@ public class SourceCode {
         };
     }
 
-    public SourceCode(String code) {
+    private SourceCode(String code, List<Notation> lineComments) {
         this.code = code;
+        this.lineComments = lineComments;
         trimBlankAndComment();
         startPosition = position;
     }
 
+    public static SourceCode createSourceCode(String code, List<Notation> lineComments) {
+        return new SourceCode(code, lineComments);
+    }
+
     private SourceCode trimBlankAndComment() {
-        while (Notations.LINE_COMMENTS.stream().anyMatch(this::startsWith)) {
+        while (lineComments.stream().anyMatch(this::startsWith)) {
             int newLinePosition = code.indexOf("\n", position);
             position = newLinePosition == -1 ? code.length() : newLinePosition + 1;
         }

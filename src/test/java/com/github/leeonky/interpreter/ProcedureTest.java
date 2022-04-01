@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ProcedureTest {
     private TestProcedure givenProcedureWithCode(String s) {
-        return new TestProcedure(new SourceCode(s));
+        return new TestProcedure(BaseTest.createSourceCode(s));
     }
 
     @Nested

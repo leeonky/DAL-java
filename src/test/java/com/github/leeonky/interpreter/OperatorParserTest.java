@@ -137,7 +137,7 @@ class OperatorParserTest extends BaseTest {
                         return testNode;
                     };
 
-                    TestProcedure procedure = new TestProcedure(new SourceCode(""), TestExpression::new);
+                    TestProcedure procedure = new TestProcedure(BaseTest.createSourceCode(""), TestExpression::new);
                     Optional<Clause<TestContext, TestNode>> clause =
                             operatorParser.clause(nodeMandatory).parse(procedure);
 
@@ -191,7 +191,7 @@ class OperatorParserTest extends BaseTest {
                         return of(testNode);
                     };
 
-                    TestProcedure procedure = new TestProcedure(new SourceCode(""), TestExpression::new);
+                    TestProcedure procedure = new TestProcedure(BaseTest.createSourceCode(""), TestExpression::new);
                     Optional<Clause<TestContext, TestNode>> clause =
                             operatorParser.clause(nodeParser).parse(procedure);
 
@@ -235,7 +235,7 @@ class OperatorParserTest extends BaseTest {
                         return testNode;
                     };
 
-                    TestProcedure procedure = new TestProcedure(new SourceCode(""), TestExpression::new);
+                    TestProcedure procedure = new TestProcedure(BaseTest.createSourceCode(""), TestExpression::new);
 
                     TestExpression expression = (TestExpression) operatorParser.unary(nodeMandatory).parse(procedure).get();
 
@@ -270,7 +270,7 @@ class OperatorParserTest extends BaseTest {
                         return testNode;
                     };
 
-                    TestProcedure procedure = new TestProcedure(new SourceCode(""), TestExpression::new);
+                    TestProcedure procedure = new TestProcedure(BaseTest.createSourceCode(""), TestExpression::new);
                     Clause<TestContext, TestNode> clause =
                             operatorMandatory.clause(nodeMandatory).parse(procedure);
 

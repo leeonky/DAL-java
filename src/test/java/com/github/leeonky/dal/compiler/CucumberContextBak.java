@@ -9,9 +9,9 @@ import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.ListAccessor;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.interpreter.BaseTest;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
-import com.github.leeonky.interpreter.SourceCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -82,7 +82,7 @@ public class CucumberContextBak {
     }
 
     public void giveDalSourceCode(String code) {
-        dalProcedure = new DALProcedure(new SourceCode(sourceCodeString = parseTabAndSpace(code)),
+        dalProcedure = new DALProcedure(BaseTest.createSourceCode(sourceCodeString = parseTabAndSpace(code)),
                 dal.getRuntimeContextBuilder().build(null), DALExpression::new);
     }
 
@@ -95,7 +95,7 @@ public class CucumberContextBak {
     }
 
     public void assertNodeValue(String assertion, String factory) {
-        Object evaluate = matcherMap.get(factory).parse(new DALProcedure(new SourceCode(sourceCodeString),
+        Object evaluate = matcherMap.get(factory).parse(new DALProcedure(BaseTest.createSourceCode(sourceCodeString),
                 dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null));
         expect(evaluate).should(assertion);

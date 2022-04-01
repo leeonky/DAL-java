@@ -11,9 +11,9 @@ import com.github.leeonky.dal.runtime.ListAccessor;
 import com.github.leeonky.dal.runtime.NameStrategy;
 import com.github.leeonky.dal.runtime.Result;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.interpreter.BaseTest;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
-import com.github.leeonky.interpreter.SourceCode;
 import com.github.leeonky.interpreter.SyntaxException;
 import lombok.SneakyThrows;
 
@@ -152,7 +152,7 @@ public class IntegrationTestContext {
 
     public DALNode parseNode(String factory) {
         try {
-            return dalNode = parserMap.get(factory).parse(new DALProcedure(new SourceCode(expression),
+            return dalNode = parserMap.get(factory).parse(new DALProcedure(BaseTest.createSourceCode(expression),
                     dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null);
         } catch (InterpreterException e) {
             exception = e;
@@ -190,7 +190,7 @@ public class IntegrationTestContext {
     }
 
     public void verifyInspect(String inspect) {
-        assertThat(compiler.compile(new SourceCode(expression), dal.getRuntimeContextBuilder().build(null)).get(0).inspect())
+        assertThat(compiler.compile(BaseTest.createSourceCode(expression), dal.getRuntimeContextBuilder().build(null)).get(0).inspect())
                 .isEqualTo(inspect);
     }
 
