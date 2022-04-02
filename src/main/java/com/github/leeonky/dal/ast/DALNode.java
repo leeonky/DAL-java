@@ -113,6 +113,7 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
                     operator.getPosition());
     }
 
+    @Deprecated
     public DALNode avoidListMapping() {
         return this;
     }

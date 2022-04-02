@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.RuntimeException;
 
 import java.util.Collections;
@@ -9,9 +8,9 @@ import java.util.List;
 
 import static java.lang.String.format;
 
-public class SymbolNode extends DALNode {
-    private final Object symbol;
-    private final Type type;
+public class SymbolNode extends DALNode implements ExcuteableNode {
+    protected final Object symbol;
+    protected final Type type;
 
     public SymbolNode(Object symbol, Type type) {
         this.symbol = symbol;
@@ -23,11 +22,8 @@ public class SymbolNode extends DALNode {
         return type.inspect(symbol);
     }
 
-    public Data getPropertyValue(DALNode node1, RuntimeContextBuilder.DALRuntimeContext context) {
-        return getPropertyValue(node1.evaluateData(context));
-    }
-
-    private Data getPropertyValue(Data data) {
+    @Override
+    public Data getPropertyValue(Data data) {
         if (data.isNull())
             throw new RuntimeException("Instance is null", getPositionBegin());
         try {

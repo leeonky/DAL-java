@@ -39,6 +39,12 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return procedure -> parse(procedure).map(node -> mandatory.parse(procedure).expression(node));
     }
 
+    //    TODO test
+    default NodeParser<C, N, E, O, P> concat(ClauseParser<C, N, E, O, P> clauseParser) {
+        return procedure -> parse(procedure).map(node -> clauseParser.parse(procedure)
+                .map(right -> right.expression(node)).orElse(node));
+    }
+
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends
             Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {

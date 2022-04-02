@@ -109,5 +109,6 @@ Feature: access data
     : [1 2 3]
     """
 
+#  order.lines.product[]
 # TODO invalid element mapping .@ (.@) .@+1 1+.@; valid: a.@b; a@[0]; a.@.b
 # TODO list mapping

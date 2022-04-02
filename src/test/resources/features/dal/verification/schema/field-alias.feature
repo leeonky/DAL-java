@@ -260,6 +260,7 @@ Feature: define field alias in schema
       }
     """
 
+#    TODO list mapping
   Scenario: provide schema via is and use alias in list mapping
     Given the following schema class:
     """

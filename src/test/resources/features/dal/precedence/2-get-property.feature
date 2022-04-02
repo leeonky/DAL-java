@@ -39,14 +39,16 @@ Feature: property
     Given the following json:
     """
       {
-        "obj": {
-          "value": 100
+        "container": {
+          "obj": {
+            "value": 100
+          }
         }
       }
     """
-    When evaluate by:
+    Then the following verification should pass:
     """
-    (which obj).value = (which obj.value)
+    container which obj.value = 100
     """
 
   Scenario Outline: bracket precedence

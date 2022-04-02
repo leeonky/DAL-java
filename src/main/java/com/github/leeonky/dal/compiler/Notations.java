@@ -72,7 +72,8 @@ public class Notations {
             SEQUENCE_ZA_2 = notation("￬"),
             TRANSPOSE_MARK = notation(">>"),
             LINE_COMMENT1 = notation("#"),
-            LINE_COMMENT2 = notation("//");
+            LINE_COMMENT2 = notation("//"),
+            LIST_MAPPING = notation("[]");
 
     public final static List<Notation> LINE_COMMENTS = asList(LINE_COMMENT1, LINE_COMMENT2);
 }

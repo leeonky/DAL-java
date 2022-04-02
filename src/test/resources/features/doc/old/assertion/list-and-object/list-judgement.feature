@@ -254,6 +254,7 @@ Feature: verify list
       : [... 3]
     """
 
+#    TODO list mapping
   Scenario: support mapping list element property to new list by optional `.@`
     Given the following input data:
     """
@@ -287,6 +288,7 @@ Feature: verify list
       list.@size = [2 3]
     """
 
+#    TODO list mapping
   Scenario: use mandatory .@ before [xx] to mapping sub list element ot new list
     Given the following input data:
     """
