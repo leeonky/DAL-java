@@ -104,3 +104,21 @@ Feature: support line comment
             ^
     }
     """
+
+  Scenario: comments bug
+    When the following json:
+    """
+    {
+      "key1": "value1",
+      "key2": "value2"
+    }
+    """
+    Then the following verification should pass:
+    """
+    = {
+      key1: "value1"
+      key2: "value2" # comment 1
+//    comment 2
+    } # comment 3
+//    comment 4
+    """

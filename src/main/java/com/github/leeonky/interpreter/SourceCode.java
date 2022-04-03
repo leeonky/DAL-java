@@ -64,8 +64,14 @@ public class SourceCode {
         return new SourceCode(code, lineComments);
     }
 
+    private boolean codeStartWith(Notation notation) {
+        while (hasCode() && Character.isWhitespace(currentChar()))
+            position++;
+        return code.startsWith(notation.getLabel(), position);
+    }
+
     private SourceCode trimBlankAndComment() {
-        while (lineComments.stream().anyMatch(this::startsWith)) {
+        while (lineComments.stream().anyMatch(this::codeStartWith)) {
             int newLinePosition = code.indexOf("\n", position);
             position = newLinePosition == -1 ? code.length() : newLinePosition + 1;
         }
@@ -94,14 +100,8 @@ public class SourceCode {
         return position < code.length();
     }
 
-    private SourceCode leftBlank() {
-        while (hasCode() && Character.isWhitespace(currentChar()))
-            position++;
-        return this;
-    }
-
     public boolean startsWith(Notation notation) {
-        leftBlank();
+        trimBlankAndComment();
         return code.startsWith(notation.getLabel(), position);
     }
 
