@@ -45,22 +45,8 @@ public class RuntimeContextBuilder {
                 .registerSchema("List", Data::isList)
                 .registerListAccessor(Iterable.class, iterable -> iterable)
                 .registerListAccessor(Stream.class, stream -> stream::iterator)
-                .registerPropertyAccessor(Map.class, new PropertyAccessor<Map<String, ?>>() {
-                    @Override
-                    public Object getValue(Map<String, ?> instance, String name) {
-                        return instance.get(name);
-                    }
-
-                    @Override
-                    public Set<String> getPropertyNames(Map<String, ?> instance) {
-                        return instance.keySet();
-                    }
-
-                    @Override
-                    public boolean isNull(Map<String, ?> instance) {
-                        return instance == null;
-                    }
-                });
+                .registerPropertyAccessor(Map.class, new MapPropertyAccessor())
+                .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor());
     }
 
     public DALRuntimeContext build(Object inputValue) {
@@ -132,10 +118,26 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    private static class MapPropertyAccessor implements PropertyAccessor<Map<String, ?>> {
+        @Override
+        public Object getValue(Map<String, ?> instance, String name) {
+            return instance.get(name);
+        }
+
+        @Override
+        public Set<String> getPropertyNames(Map<String, ?> instance) {
+            return instance.keySet();
+        }
+
+        @Override
+        public boolean isNull(Map<String, ?> instance) {
+            return instance == null;
+        }
+    }
+
     public class DALRuntimeContext implements RuntimeContext<DALRuntimeContext> {
         private final LinkedList<Data> thisStack = new LinkedList<>();
         private final Set<Class<?>> schemaSet;
-        private boolean listMapping = false;
 
         public DALRuntimeContext(Object inputValue) {
             schemaSet = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
@@ -172,8 +174,8 @@ public class RuntimeContextBuilder {
                     .orElseGet(() -> Objects.equals(instance, null));
         }
 
-        public Object getPropertyValue(Object instance, String name) {
-            return propertyAccessors.getData(instance).getValue(instance, name);
+        public Object getPropertyValue(Data data, String name) {
+            return propertyAccessors.getData(data.getInstance()).getValueByData(data, name);
         }
 
         @SuppressWarnings("unchecked")
@@ -230,18 +232,6 @@ public class RuntimeContextBuilder {
             return this;
         }
 
-        public void beginListMapping() {
-            listMapping = true;
-        }
-
-        public boolean isListMapping() {
-            return listMapping;
-        }
-
-        public void endListMapping() {
-            listMapping = false;
-        }
-
         public Optional<Result> takeUserDefinedLiteral(String token) {
             return userDefinedLiterals.stream().map(userLiteralRule -> userLiteralRule.compile(token))
                     .filter(Result::hasResult)
@@ -277,5 +267,16 @@ public class RuntimeContextBuilder {
 
     private boolean isMethod(Method method, int modifier) {
         return (modifier & method.getModifiers()) != 0;
+    }
+
+    private class AutoMappingListPropertyAccessor extends JavaClassPropertyAccessor<AutoMappingList> {
+        public AutoMappingListPropertyAccessor() {
+            super(RuntimeContextBuilder.this, BeanClass.create(AutoMappingList.class));
+        }
+
+        @Override
+        public Object getValueByData(Data data, String name) {
+            return data.mapList(name).getInstance();
+        }
     }
 }

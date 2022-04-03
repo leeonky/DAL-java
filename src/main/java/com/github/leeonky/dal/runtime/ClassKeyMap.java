@@ -23,4 +23,9 @@ public class ClassKeyMap<T> extends LinkedHashMap<Class<?>, T> {
     public T getData(Object instance) {
         return tryGetData(instance).orElseThrow(IllegalArgumentException::new);
     }
+
+    @Override
+    public T put(Class<?> key, T value) {
+        return super.put(key, value);
+    }
 }

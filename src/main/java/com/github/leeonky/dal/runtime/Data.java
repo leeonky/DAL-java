@@ -78,23 +78,14 @@ public class Data {
     }
 
     private Object getPropertyValue(Object property) {
-        return isList() ? getValueFromList(property) : DALRuntimeContext.getPropertyValue(instance, (String) property);
+        return isList() ? getValueFromList(property) : DALRuntimeContext.getPropertyValue(this, (String) property);
     }
 
     private Object getValueFromList(Object property) {
-        if (DALRuntimeContext.isListMapping()) {
-            DALRuntimeContext.endListMapping();
-            return getListObjects().stream().map(e -> e.getValue(property).getInstance()).collect(toList());
-        }
         if ("size".equals(property))
             return getListSize();
         if (property instanceof String) {
-            try {
-                return DALRuntimeContext.getPropertyValue(instance, (String) property);
-            } catch (Exception e) {
-                DALRuntimeContext.beginListMapping();
-                return getValueFromList(property);
-            }
+            return DALRuntimeContext.getPropertyValue(this, (String) property);
         }
         if ((int) property < 0)
             return getListValues().get(getListSize() + (int) property);

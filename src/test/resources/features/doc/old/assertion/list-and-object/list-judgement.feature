@@ -254,30 +254,6 @@ Feature: verify list
       : [... 3]
     """
 
-#    TODO to be removed
-#  TODO do no allow auto mapping
-  Scenario: support mapping list element property to new list by optional `.@`
-    Given the following input data:
-    """
-      {"list": [{
-        "data": {
-          "value": "v1"
-        }
-      }, {
-        "data": {
-          "value": "v2"
-        }
-      }]}
-    """
-    Then the following assertion should pass:
-    """
-      list.data.value = ['v1' 'v2']
-    """
-    And the following assertion should pass:
-    """
-      list: { data.value: ['v1' 'v2'] }
-    """
-
   Scenario: support mapping list element property to new list by postfix `[]`
     Given the following input data:
     """

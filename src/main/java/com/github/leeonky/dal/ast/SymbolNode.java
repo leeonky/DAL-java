@@ -29,15 +29,20 @@ public class SymbolNode extends DALNode implements ExcuteableNode {
         } catch (IndexOutOfBoundsException ex) {
             throw new RuntimeException("Index out of bounds (" + ex.getMessage() + ")", getPositionBegin());
         } catch (Exception e) {
-            throw new RuntimeException(format("Get property `%s` failed, property can be:\n" +
+            throw new RuntimeException(format(format("Get property `%%s` failed, property can be:\n" +
                     "  1. public field\n" +
                     "  2. public getter\n" +
                     "  3. public no args method\n" +
                     "  4. Map key value\n" +
                     "  5. customized type getter\n" +
-                    "  6. static method extension\n" +
-                    e.getMessage(), symbol), getPositionBegin());
+                    "  6. static method extension\n%s%s", e.getMessage(), listMappingMessage(data, symbol)), symbol),
+                    getPositionBegin());
         }
+    }
+
+    private String listMappingMessage(Data data, Object symbol) {
+        return data.isList() ? format("\nImplicit list mapping is not allowed in current version of DAL, use `%s[]` instead",
+                symbol) : "";
     }
 
     public enum Type {
@@ -49,7 +54,7 @@ public class SymbolNode extends DALNode implements ExcuteableNode {
         }, BRACKET {
             @Override
             public String inspect(Object symbol) {
-                return symbol instanceof String ? String.format("['%s']", symbol) : String.format("[%s]", symbol);
+                return symbol instanceof String ? format("['%s']", symbol) : format("[%s]", symbol);
             }
         };
 

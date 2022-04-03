@@ -82,8 +82,7 @@ Feature: property
     products.catalog[].sub.value.string
     """
 
-# TODO
-  Scenario: disable list auto mapping
+  Scenario: disable implicit list mapping
     Given the following json:
     """
       {
@@ -96,12 +95,20 @@ Feature: property
     """
     items.id= [100]
     """
-#    Then failed with the message:
-#    """
-#    Method not found
-#    """
-#    And got the following notation:
-#    """
-#    items.id= [100]
-#          ^
-#    """
+    Then failed with the message:
+    """
+    Get property `id` failed, property can be:
+      1. public field
+      2. public getter
+      3. public no args method
+      4. Map key value
+      5. customized type getter
+      6. static method extension
+    Method or property `id` does not exist in `java.util.ArrayList`
+    Implicit list mapping is not allowed in current version of DAL, use `id[]` instead
+    """
+    And got the following notation:
+    """
+    items.id= [100]
+          ^
+    """
