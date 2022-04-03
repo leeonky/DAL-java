@@ -46,5 +46,38 @@ Feature: property
     items.id[]
     """
 
-
-#    TODO list mapping; static method extension
+  Scenario: List mapping chain
+    Given the following json:
+    """
+      {
+        "products": [{
+          "catalog": {
+            "sub": {
+              "value": {
+                "string": "001"
+              }
+            }
+          }
+        }, {
+          "catalog": {
+            "sub": {
+              "value": {
+                "string": "002"
+              }
+            }
+          }
+        }]
+      }
+    """
+    When evaluate by:
+    """
+      products.catalog[].sub.value.string
+    """
+    Then the result should:
+    """
+    : ["001" "002"]
+    """
+    And the inspect should:
+    """
+    products.catalog[].sub.value.string
+    """

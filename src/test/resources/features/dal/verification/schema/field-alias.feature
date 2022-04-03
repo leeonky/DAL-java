@@ -260,62 +260,6 @@ Feature: define field alias in schema
       }
     """
 
-#    TODO to be removed
-  Scenario: provide schema via is and use alias in list mapping - to be removed
-    Given the following schema class:
-    """
-    public class Order {
-      public List<Product> products;
-    }
-    """
-    And the following schema class:
-    """
-    public class Product {
-        public Catalog catalog;
-    }
-    """
-    And the following schema class:
-    """
-    @FieldAliases({
-            @FieldAlias(alias = "aliasOfName", field = "name"),
-            @FieldAlias(alias = "aliasOfDescription", field = "description"),
-    })
-    @Partial
-    public class Catalog {
-    }
-    """
-    And the following json:
-    """
-      {
-        "products": [{
-          "catalog": {
-            "name": "c1",
-            "description": "catalog c1"
-          }
-        }, {
-          "catalog": {
-            "name": "c2",
-            "description": "catalog c1"
-          }
-        }]
-      }
-    """
-    Then the following verification should pass:
-    """
-      is Order: {
-        products.catalog: [
-          {aliasOfName: 'c1'}
-          {aliasOfName: 'c2'}
-        ]
-        products.@.catalog: [
-          {aliasOfDescription: 'catalog c1'}
-          {aliasOfDescription: 'catalog c1'}
-        ]
-      }
-    """
-
-#    TODO alias in sub list chain
-#    TODO alias in sub sub auto mapping list
   Scenario: provide schema via is and use alias in list mapping
     Given the following schema class:
     """
@@ -334,9 +278,31 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "aliasOfName", field = "name"),
             @FieldAlias(alias = "aliasOfDescription", field = "description"),
+            @FieldAlias(alias = "aliasOfSubType", field = "sub"),
     })
     @Partial
     public class Catalog {
+      public SubType sub;
+    }
+    """
+    And the following schema class:
+    """
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfId", field = "id"),
+            @FieldAlias(alias = "aliasOfValue", field = "value"),
+    })
+    @Partial
+    public class SubType {
+      public SubTypeValue value;
+    }
+    """
+    And the following schema class:
+    """
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfString", field = "string"),
+    })
+    @Partial
+    public class SubTypeValue {
     }
     """
     And the following json:
@@ -345,12 +311,24 @@ Feature: define field alias in schema
         "products": [{
           "catalog": {
             "name": "c1",
-            "description": "catalog c1"
+            "description": "catalog c1",
+            "sub": {
+              "id": 1,
+              "value": {
+                "string": "001"
+              }
+            }
           }
         }, {
           "catalog": {
             "name": "c2",
-            "description": "catalog c2"
+            "description": "catalog c2",
+            "sub": {
+              "id": 2,
+              "value": {
+                "string": "002"
+              }
+            }
           }
         }]
       }
@@ -359,14 +337,28 @@ Feature: define field alias in schema
     """
       is Order: {
         products.catalog[]: [
-          {
-            aliasOfName: 'c1'
-          }
-          {
-            aliasOfName: 'c2'
-          }
+          { aliasOfName: 'c1' }
+          { aliasOfName: 'c2' }
         ]
         products.catalog[].aliasOfDescription: [ 'catalog c1' 'catalog c2' ]
+
+        products.catalog[].aliasOfSubType: [
+          { aliasOfId: 1 }
+          { aliasOfId: 2 }
+        ]
+        products.catalog[].aliasOfSubType.aliasOfId: [ 1 2 ]
+
+        products.catalog[].aliasOfSubType.aliasOfValue: [
+          { aliasOfString: "001" }
+          { aliasOfString: "002" }
+        ]
+        products.catalog[].aliasOfSubType.aliasOfValue.aliasOfString: [ "001" "002" ]
+
+        products.catalog[].aliasOfSubType.value: [
+          { aliasOfString: "001" }
+          { aliasOfString: "002" }
+        ]
+        products.catalog[].aliasOfSubType.value.aliasOfString: [ "001" "002" ]
       }
     """
 
