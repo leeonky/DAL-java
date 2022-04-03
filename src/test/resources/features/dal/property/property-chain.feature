@@ -81,3 +81,27 @@ Feature: property
     """
     products.catalog[].sub.value.string
     """
+
+# TODO
+  Scenario: disable list auto mapping
+    Given the following json:
+    """
+      {
+        "items": [{
+          "id": 100
+        }]
+      }
+    """
+    When evaluate by:
+    """
+    items.id= [100]
+    """
+#    Then failed with the message:
+#    """
+#    Method not found
+#    """
+#    And got the following notation:
+#    """
+#    items.id= [100]
+#          ^
+#    """

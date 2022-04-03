@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.util.stream.Collectors.toList;
@@ -87,16 +88,12 @@ public class Data {
         }
         if ("size".equals(property))
             return getListSize();
-        if ("@".equals(property)) {
-            DALRuntimeContext.beginListMapping();
-            return instance;
-        }
         if (property instanceof String) {
             try {
                 return DALRuntimeContext.getPropertyValue(instance, (String) property);
             } catch (Exception e) {
                 DALRuntimeContext.beginListMapping();
-                return getValueFromList(subProperty((String) property));
+                return getValueFromList(property);
             }
         }
         if ((int) property < 0)
@@ -108,14 +105,8 @@ public class Data {
         return DALRuntimeContext.getListFirstIndex(instance);
     }
 
-    private Object subProperty(String property) {
-        return property.replace("@size", "size");
-    }
-
     private SchemaType propertySchema(Object property) {
         if (isList() && property instanceof String) {
-            if ("@".equals(property))
-                return schemaType;
             if (!"size".equals(property))
                 return schemaType.mappingAccess(property);
         }
@@ -138,6 +129,8 @@ public class Data {
     public Data mapList(Object property) {
 //        TODO raise error when data is not list
         return new Data(getListObjects().stream().map(data -> data.getValue(property).getInstance())
-                .collect(toList()), DALRuntimeContext, propertySchema(property));
+                .collect(Collectors.toCollection(AutoMappingList::new)),
+                DALRuntimeContext, propertySchema(property));
     }
+
 }

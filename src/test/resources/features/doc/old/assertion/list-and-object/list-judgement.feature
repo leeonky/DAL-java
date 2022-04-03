@@ -271,7 +271,6 @@ Feature: verify list
     """
     Then the following assertion should pass:
     """
-      list.@.data.value = ['v1' 'v2'] and
       list.data.value = ['v1' 'v2']
     """
     And the following assertion should pass:
@@ -301,16 +300,6 @@ Feature: verify list
       list: { data[].value: ['v1' 'v2'] }
     """
 
-  Scenario: use @size to mapping sub list size ot new list
-    Given the following input data:
-    """
-      {"list": [[1,2], [1,2,3]]}
-    """
-    Then the following assertion should pass:
-    """
-      list.@size = [2 3]
-    """
-
   Scenario: use size[] to mapping sub list size ot new list
     Given the following input data:
     """
@@ -319,17 +308,6 @@ Feature: verify list
     Then the following assertion should pass:
     """
       list.size[] = [2 3]
-    """
-
-#    TODO to be removed
-  Scenario: use mandatory .@ before [xx] to mapping sub list element ot new list
-    Given the following input data:
-    """
-      {"list": [[1,2], [1,2,3]]}
-    """
-    Then the following assertion should pass:
-    """
-      list.@[0] = [1 1]
     """
 
   Scenario: use mandatory [] after [xx] to mapping sub list element ot new list
