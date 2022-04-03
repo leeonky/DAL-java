@@ -80,7 +80,7 @@ new DAL().evaluateAll(null, "1 2");     //return [1, 2]
         "object value": "hello"
     }
 ```
-那么可以通过DAL分别获取各个属性：(DAL目前不支持注释)
+那么可以通过DAL分别获取各个属性：
 ``` json
     .property           // 1
     ['object value']    // hello
@@ -142,7 +142,7 @@ DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集�
 ```
 那么可以映射元素的某个属性，并形成新的集合：
 ``` json
-    list.value    // [1, 2]
+    list.value[]    // [1, 2]
 ```
 如果是一个二维集合，可以通过`.@`来映射子集合的数据：
 ``` json
@@ -152,8 +152,8 @@ DAL中集合也会被当做对象对待，但DAL额外提供了一些操作集�
 ```
 
 ``` json
-    list.@.size     // [2, 3, 4]
-    list.@[-1]       // [1, 3, 5]
+    list.size[]      // [2, 3, 4]
+    list[-1][]       // [1, 3, 5]
 ```
 
 #### 调用对象方法
