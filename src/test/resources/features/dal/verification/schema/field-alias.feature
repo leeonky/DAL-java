@@ -260,8 +260,8 @@ Feature: define field alias in schema
       }
     """
 
-#    TODO list mapping
-  Scenario: provide schema via is and use alias in list mapping
+#    TODO to be removed
+  Scenario: provide schema via is and use alias in list mapping - to be removed
     Given the following schema class:
     """
     public class Order {
@@ -310,6 +310,56 @@ Feature: define field alias in schema
         products.@.catalog: [
           {aliasOfDescription: 'catalog c1'}
           {aliasOfDescription: 'catalog c1'}
+        ]
+      }
+    """
+
+#    TODO alias in sub list chain
+#    TODO alias in sub sub auto mapping list
+  Scenario: provide schema via is and use alias in list mapping
+    Given the following schema class:
+    """
+    public class Order {
+      public List<Product> products;
+    }
+    """
+    And the following schema class:
+    """
+    public class Product {
+        public Catalog catalog;
+    }
+    """
+    And the following schema class:
+    """
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfName", field = "name"),
+    })
+    @Partial
+    public class Catalog {
+    }
+    """
+    And the following json:
+    """
+      {
+        "products": [{
+          "catalog": {
+            "name": "c1",
+            "description": "catalog c1"
+          }
+        }, {
+          "catalog": {
+            "name": "c2",
+            "description": "catalog c1"
+          }
+        }]
+      }
+    """
+    Then the following verification should pass:
+    """
+      is Order: {
+        products.catalog[]: [
+          {aliasOfName: 'c1'}
+          {aliasOfName: 'c2'}
         ]
       }
     """

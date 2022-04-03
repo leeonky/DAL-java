@@ -254,7 +254,8 @@ Feature: verify list
       : [... 3]
     """
 
-#    TODO list mapping
+#    TODO to be removed
+#  TODO do no allow auto mapping
   Scenario: support mapping list element property to new list by optional `.@`
     Given the following input data:
     """
@@ -278,6 +279,29 @@ Feature: verify list
       list: { data.value: ['v1' 'v2'] }
     """
 
+#    TODO sub sub auto list mapping
+  Scenario: support mapping list element property to new list by postfix `[]`
+    Given the following input data:
+    """
+      {"list": [{
+        "data": {
+          "value": "v1"
+        }
+      }, {
+        "data": {
+          "value": "v2"
+        }
+      }]}
+    """
+    Then the following assertion should pass:
+    """
+      list.data[].value = ['v1' 'v2']
+    """
+    And the following assertion should pass:
+    """
+      list: { data[].value: ['v1' 'v2'] }
+    """
+
   Scenario: use @size to mapping sub list size ot new list
     Given the following input data:
     """
@@ -288,7 +312,7 @@ Feature: verify list
       list.@size = [2 3]
     """
 
-#    TODO list mapping
+#    TODO to be removed
   Scenario: use mandatory .@ before [xx] to mapping sub list element ot new list
     Given the following input data:
     """
@@ -297,6 +321,16 @@ Feature: verify list
     Then the following assertion should pass:
     """
       list.@[0] = [1 1]
+    """
+
+  Scenario: use mandatory [] after [xx] to mapping sub list element ot new list
+    Given the following input data:
+    """
+      {"list": [[1,2], [1,2,3]]}
+    """
+    Then the following assertion should pass:
+    """
+      list[0][] = [1 1]
     """
 
   Scenario: use schema expression in object

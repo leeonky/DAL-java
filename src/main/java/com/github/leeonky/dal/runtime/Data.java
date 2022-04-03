@@ -134,4 +134,11 @@ public class Data {
         this.listComparator = listComparator;
         return this;
     }
+
+    public Data mapList(Object property) {
+//        TODO raise error when data is not list
+// TODO should check schemaType
+        return new Data(getListObjects().stream().map(data -> data.getValue(property).getInstance())
+                .collect(toList()), DALRuntimeContext, propertySchema(property));
+    }
 }

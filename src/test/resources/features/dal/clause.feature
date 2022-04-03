@@ -118,19 +118,3 @@ Feature: chain
       | 1 is Number :1        | true  | 1 is Number: 1        |
       | 1 is Number which 1   | 1     | 1 is Number which 1   |
       | 1 is Number is Number | 1     | 1 is Number is Number |
-
-#  TODO *******************
-#  Scenario: end with .@ is invalid
-#    When evaluate by:
-#    """
-#      .@ + 0
-#    """
-#    Then failed with the message:
-#    """
-#    element property needed
-#    """
-#    And got the following notation:
-#    """
-#      .@
-#      ^
-#    """

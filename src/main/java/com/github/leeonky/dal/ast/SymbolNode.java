@@ -9,8 +9,8 @@ import java.util.List;
 import static java.lang.String.format;
 
 public class SymbolNode extends DALNode implements ExcuteableNode {
-    protected final Object symbol;
-    protected final Type type;
+    private final Object symbol;
+    private final Type type;
 
     public SymbolNode(Object symbol, Type type) {
         this.symbol = symbol;
@@ -24,8 +24,6 @@ public class SymbolNode extends DALNode implements ExcuteableNode {
 
     @Override
     public Data getPropertyValue(Data data) {
-        if (data.isNull())
-            throw new RuntimeException("Instance is null", getPositionBegin());
         try {
             return data.getValue(symbol);
         } catch (IndexOutOfBoundsException ex) {

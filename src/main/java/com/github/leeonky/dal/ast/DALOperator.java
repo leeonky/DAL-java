@@ -278,7 +278,10 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Data calculateData(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return ((ExcuteableNode) node2).getPropertyValue(node1.evaluateData(context));
+            Data data = node1.evaluateData(context);
+            if (data.isNull())
+                throw new RuntimeException("Instance is null", node2.getOperandPosition());
+            return ((ExcuteableNode) node2).getPropertyValue(data);
         }
     }
 

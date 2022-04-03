@@ -16,6 +16,7 @@ public class ListMappingNode extends DALNode implements ExcuteableNode {
 
     @Override
     public Data getPropertyValue(Data data) {
-        return symbolNode.getPropertyValue(data);
+//        TODO exception handler same as in SymbolNode
+        return data.mapList(symbolNode.getRootSymbolName());
     }
 }
