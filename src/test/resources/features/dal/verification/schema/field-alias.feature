@@ -333,6 +333,7 @@ Feature: define field alias in schema
     """
     @FieldAliases({
             @FieldAlias(alias = "aliasOfName", field = "name"),
+            @FieldAlias(alias = "aliasOfDescription", field = "description"),
     })
     @Partial
     public class Catalog {
@@ -349,7 +350,7 @@ Feature: define field alias in schema
         }, {
           "catalog": {
             "name": "c2",
-            "description": "catalog c1"
+            "description": "catalog c2"
           }
         }]
       }
@@ -358,9 +359,14 @@ Feature: define field alias in schema
     """
       is Order: {
         products.catalog[]: [
-          {aliasOfName: 'c1'}
-          {aliasOfName: 'c2'}
+          {
+            aliasOfName: 'c1'
+          }
+          {
+            aliasOfName: 'c2'
+          }
         ]
+        products.catalog[].aliasOfDescription: [ 'catalog c1' 'catalog c2' ]
       }
     """
 

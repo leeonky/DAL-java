@@ -83,7 +83,7 @@ public class Data {
     private Object getValueFromList(Object property) {
         if (DALRuntimeContext.isListMapping()) {
             DALRuntimeContext.endListMapping();
-            return getListObjects().stream().map(e -> e.getPropertyValue(property)).collect(toList());
+            return getListObjects().stream().map(e -> e.getValue(property).getInstance()).collect(toList());
         }
         if ("size".equals(property))
             return getListSize();
@@ -137,7 +137,6 @@ public class Data {
 
     public Data mapList(Object property) {
 //        TODO raise error when data is not list
-// TODO should check schemaType
         return new Data(getListObjects().stream().map(data -> data.getValue(property).getInstance())
                 .collect(toList()), DALRuntimeContext, propertySchema(property));
     }
