@@ -122,3 +122,22 @@ Feature: support line comment
     } # comment 3
 //    comment 4
     """
+
+  Scenario: comments in table
+    When the following json:
+    """
+    [{
+      "key1": "value1",
+      "key2": "value2"
+    },{
+      "key1": "value3",
+      "key2": "value4"
+    }]
+    """
+    Then the following verification should pass:
+    """
+    = | key1   | key2   |
+      | 'value1' | 'value2' |
+#      | 'value' | 'value' |
+      | 'value3' | 'value4' |
+    """

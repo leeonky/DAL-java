@@ -96,6 +96,8 @@ Feature: symbol
       | or     |
       | and    |
       | 100    |
+      | '      |
+      | "      |
 
   Scenario Outline: identity should end with delimiter and dot
     Given the following dal expression:
@@ -132,3 +134,5 @@ Feature: symbol
       | `SPACE    |
       | .         |
       | #         |
+      | '         |
+      | "         |

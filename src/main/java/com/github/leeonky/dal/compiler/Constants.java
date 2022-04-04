@@ -7,7 +7,7 @@ import static java.util.Arrays.asList;
 
 public class Constants {
     public static final Set<Character> DELIMITER = new HashSet<>(asList('=', '>', '<', '+', '-', '*', '/', ':',
-            '&', '|', '!', ',', '(', ')', '[', ']', '{', '}', ' ', '\t', '\n', '#'));
+            '&', '|', '!', ',', '(', ')', '[', ']', '{', '}', ' ', '\t', '\n', '#', '\'', '"'));
     public static final Set<Character> DELIMITER_OR_DOT = new HashSet<Character>(DELIMITER) {{
         add('.');
     }};
