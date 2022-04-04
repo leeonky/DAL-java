@@ -20,7 +20,6 @@ import static com.github.leeonky.interpreter.Parser.oneOf;
 import static com.github.leeonky.interpreter.Syntax.Rules.*;
 import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
-import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 public class Compiler {
@@ -72,7 +71,7 @@ public class Compiler {
 
     //    TODO private
     NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            PROPERTY, OBJECT, LIST, PARENTHESES, VERIFICATION_OPERAND, TABLE,
+            PROPERTY, OBJECT, LIST, PARENTHESES, VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND, TABLE,
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
             NUMBER = Tokens.NUMBER.nodeParser(constNode(Token::getNumber)),
             INTEGER = Tokens.INTEGER.nodeParser(constNode(Token::getInteger)),
@@ -93,7 +92,7 @@ public class Compiler {
             EMPTY_CELL = procedure -> when(procedure.emptyCell()).optional(EmptyCellNode::new),
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
-            SIMPLE_STRING = this::relaxString;
+            EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(DALNode::relaxString);
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SCHEMA_COMPOSE = OPENING_BRACKET.with(single(many(SCHEMA.mandatory("Expect a schema"))
@@ -141,11 +140,14 @@ public class Compiler {
                 COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(
                         tableLine(ROW_PREFIX).as(TransposedTableHead::new).expression(transposeTable())))),
                 COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).expression(TABLE_BODY_CLAUSE));
-        VERIFICATION_OPERAND = oneOf(SIMPLE_STRING, REGEX, OBJECT, LIST, WILDCARD, TABLE);
+        VERIFICATION_SPECIAL_OPERAND = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         OPERAND = lazy(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
                 .mandatory("Expect a value or expression").map(DALNode::avoidListMapping);
+        VERIFICATION_VALUE_OPERAND = oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, EXPLICIT_PROPERTY.defaultInputNode(
+                InputNode.INSTANCE), PARENTHESES);
         ARITHMETIC_CLAUSE = BINARY_ARITHMETIC_OPERATORS.clause(OPERAND);
-        VERIFICATION_CLAUSE = VERIFICATION_OPERATORS.clause(VERIFICATION_OPERAND.or(OPERAND));
+        VERIFICATION_CLAUSE = VERIFICATION_OPERATORS.clause(oneOf(VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND,
+                EXPRESSION_RELAX_STRING).mandatory("Expect a value or expression"));
         ARITHMETIC_CLAUSE_CHAIN = ClauseParser.lazy(() -> ARITHMETIC_CLAUSE.concat(EXPRESSION_CLAUSE));
         VERIFICATION_CLAUSE_CHAIN = ClauseParser.lazy(() -> VERIFICATION_CLAUSE.concat(EXPRESSION_CLAUSE));
         EXPLICIT_PROPERTY_CHAIN = ClauseParser.lazy(() -> EXPLICIT_PROPERTY.concat(EXPRESSION_CLAUSE));
@@ -155,7 +157,10 @@ public class Compiler {
         EXPRESSION_CLAUSE = oneOf(ARITHMETIC_CLAUSE_CHAIN, VERIFICATION_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN,
                 WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN);
         EXPRESSION = OPERAND.concat(EXPRESSION_CLAUSE);
-        SHORT_VERIFICATION_OPERAND = VERIFICATION_OPERAND.or(OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE)));
+
+//TODO before blank , } ]
+//TODO table: before |
+        SHORT_VERIFICATION_OPERAND = VERIFICATION_SPECIAL_OPERAND.or(OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE)));
     }
 
     public List<DALNode> compile(SourceCode sourceCode, DALRuntimeContext DALRuntimeContext) {
@@ -250,18 +255,5 @@ public class Compiler {
         return dalProcedure.getSourceCode().tryFetch(() -> Tokens.SYMBOL.scan(dalProcedure.getSourceCode())
                 .flatMap(token -> dalProcedure.getRuntimeContext().takeUserDefinedLiteral(token.getContent())
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
-    }
-
-    //    TODO need more test
-    private Optional<DALNode> relaxString(DALProcedure dalProcedure) {
-        return dalProcedure.getSourceCode().tryFetch(() -> Tokens.RELAX_STRING.scan(dalProcedure.getSourceCode())
-                .flatMap(token -> {
-                    String content = token.getContent();
-                    if (dalProcedure.getRuntimeContext().takeUserDefinedLiteral(content).isPresent())
-                        return empty();
-                    if (content.contains("."))
-                        return empty();
-                    return of(new ConstNode(content));
-                }));
     }
 }

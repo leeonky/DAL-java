@@ -140,37 +140,3 @@ Feature: string
       true: 'true'
           ^
     """
-
-  Scenario: expected value can be a string with out quota
-    * the following verification should pass:
-    """
-      'abc': abc
-    """
-    And the inspect should:
-    """
-    'abc': 'abc'
-    """
-
-  Scenario: simple string in table
-    Given the following json:
-    """
-    [{
-      "name": "Tom"
-    }]
-    """
-    Then the following verification should pass:
-    """
-    : | name |
-      | Tom  |
-    """
-    And the inspect should:
-    """
-    : | name |
-    | name: 'Tom' |
-    """
-
-
-#   TODO not user defined literal
-#   TODO not key word
-#   TODO not start with symbol
-#   TODO not be a expression

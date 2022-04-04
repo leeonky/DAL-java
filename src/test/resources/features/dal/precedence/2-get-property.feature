@@ -11,7 +11,7 @@ Feature: property
     """
     When evaluate by:
     """
-      <input> <operator> obj.value
+      <input> <operator> .obj.value
     """
     Then the result should:
     """
