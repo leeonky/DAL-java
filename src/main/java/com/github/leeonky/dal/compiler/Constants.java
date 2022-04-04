@@ -11,6 +11,9 @@ public class Constants {
     public static final Set<Character> DELIMITER_OR_DOT = new HashSet<Character>(DELIMITER) {{
         add('.');
     }};
+
+    //    TODO missing table |
+    public static final Set<Character> BLANKS = new HashSet<>(asList(' ', '\t', '\n'));
     public static final Set<Character> DIGITAL = new HashSet<>(asList('1', '2', '3', '4', '5', '6', '7', '8', '9', '0'));
     public static final Set<Character> DIGITAL_OR_MINUS = new HashSet<Character>(DIGITAL) {{
         add('-');

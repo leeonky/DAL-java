@@ -128,7 +128,7 @@ Feature: compare null
     """
     Then the following verification should pass:
     """
-      value <operator> null and null <operator> value
+      value <operator> null and null <operator> .value
     """
     Examples:
       | operator |

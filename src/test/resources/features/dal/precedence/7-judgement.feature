@@ -45,7 +45,7 @@ Feature: verification operators
     """
     When evaluate by:
     """
-    obj which number<opt>operand
+    obj which number<opt> .operand
     """
     Then the result should:
     """

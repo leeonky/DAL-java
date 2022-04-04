@@ -19,7 +19,9 @@ public class Tokens {
             INTEGER = tokenScanner(DIGITAL_OR_MINUS::contains, emptySet(), false, DELIMITER, Token::isNumber),
             SYMBOL = tokenScanner(not(DELIMITER::contains), Keywords.ALL_STRING, false, DELIMITER_OR_DOT, not(Token::isNumber)),
             DOT_SYMBOL = tokenScanner(not(DELIMITER::contains), emptySet(), false, DELIMITER_OR_DOT, not(Token::isNumber)),
-            SCHEMA = tokenScanner(not(DELIMITER::contains), Keywords.ALL_STRING, false, DELIMITER, not(Token::isNumber));
+            SCHEMA = tokenScanner(not(DELIMITER::contains), Keywords.ALL_STRING, false, DELIMITER, not(Token::isNumber)),
+            RELAX_STRING = tokenScanner(not(DELIMITER_OR_DOT::contains), Keywords.ALL_STRING, false, BLANKS, not(Token::isNumber));
+
 
     private static boolean notNumber(String code, int position) {
         return notSymbolAfterPower(code, position) || notNumberPoint(code, position);
