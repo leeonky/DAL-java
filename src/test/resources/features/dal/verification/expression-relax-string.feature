@@ -1,7 +1,5 @@
 Feature: expression-relax-string
 
-  // TODO before blank , || && )
-
   Scenario Outline: supported expression-relax-string
     * the following verification should pass:
     """
@@ -96,5 +94,3 @@ Feature: expression-relax-string
 
 #   TODO not user defined literal
 #   TODO not key word
-#   TODO not start with symbol
-#   TODO not be a expression

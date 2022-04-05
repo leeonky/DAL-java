@@ -13,7 +13,7 @@ public class Constants {
         add('.');
     }};
 
-    public static final Set<Character> RELAX_STRING_TAIL = new HashSet<>(asList(' ', '\r', '\t', '\n', ','));
+    public static final Set<Character> RELAX_STRING_TAIL = new HashSet<>(asList(' ', '\r', '\t', '\n', ',', '}'));
     public static final Set<Character> DIGITAL = new HashSet<>(asList('1', '2', '3', '4', '5', '6', '7', '8', '9', '0'));
     public static final Set<Character> DIGITAL_OR_MINUS = new HashSet<Character>(DIGITAL) {{
         add('-');

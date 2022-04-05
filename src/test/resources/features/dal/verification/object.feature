@@ -250,21 +250,6 @@ Feature: object
        ^
     """
 
-  Scenario: raise error when operand is invalid
-    When evaluate by:
-    """
-    : { name: + }
-    """
-    Then failed with the message:
-    """
-    Expect a value or expression
-    """
-    And got the following notation:
-    """
-    : { name: + }
-              ^
-    """
-
   Scenario: raise error when invalid verification expression
     When evaluate by:
     """

@@ -1,6 +1,5 @@
 package com.github.leeonky.interpreter;
 
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -41,8 +40,11 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
 
     //    TODO test
     default NodeParser<C, N, E, O, P> concat(ClauseParser<C, N, E, O, P> clauseParser) {
-        return procedure -> parse(procedure).map(node -> clauseParser.parse(procedure)
-                .map(right -> right.expression(node)).orElse(node));
+        return procedure -> parse(procedure).map(node -> clauseParser.concated(procedure, node));
+    }
+
+    default NodeParser<C, N, E, O, P> recursive(ClauseParser<C, N, E, O, P> clauseParser) {
+        return procedure -> parse(procedure).map(node -> clauseParser.recursived(procedure, node));
     }
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
@@ -67,29 +69,16 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         }
 
         default NodeParser<C, N, E, O, P> combine(ClauseParser<C, N, E, O, P> clauseParser) {
-            return procedure -> procedure.getSourceCode().tryFetch(() -> {
-                N node = parse(procedure);
-                return clauseParser.parse(procedure).map(clause -> clause.expression(node));
-            });
+            return procedure -> procedure.getSourceCode().tryFetch(() ->
+                    clauseParser.combined(procedure, parse(procedure)));
         }
 
         default Mandatory<C, N, E, O, P> concat(ClauseParser<C, N, E, O, P> clauseParser) {
-            return procedure -> {
-                N node = parse(procedure);
-                return clauseParser.parse(procedure).map(right -> right.expression(node)).orElse(node);
-            };
+            return procedure -> clauseParser.concated(procedure, parse(procedure));
         }
 
         default Mandatory<C, N, E, O, P> recursive(ClauseParser<C, N, E, O, P> clauseParser) {
-            return procedure -> {
-                N node = parse(procedure);
-                Optional<Clause<C, N>> optionalNode = clauseParser.parse(procedure);
-                while (optionalNode.isPresent()) {
-                    node = optionalNode.get().expression(node);
-                    optionalNode = clauseParser.parse(procedure);
-                }
-                return node;
-            };
+            return procedure -> clauseParser.recursived(procedure, parse(procedure));
         }
 
         static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends

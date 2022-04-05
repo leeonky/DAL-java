@@ -46,6 +46,23 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return procedure -> parse(procedure).map(clause -> clause.expression(input));
     }
 
+    default Optional<N> combined(P procedure, N node) {
+        return parse(procedure).map(clause -> clause.expression(node));
+    }
+
+    default N concated(P procedure, N node) {
+        return parse(procedure).map(right -> right.expression(node)).orElse(node);
+    }
+
+    default N recursived(P procedure, N node) {
+        Optional<Clause<C, N>> optionalNode = parse(procedure);
+        while (optionalNode.isPresent()) {
+            node = optionalNode.get().expression(node);
+            optionalNode = parse(procedure);
+        }
+        return node;
+    }
+
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>,
             E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
             extends Parser.Mandatory<C, N, E, O, P, ClauseParser<C, N, E, O, P>, ClauseParser.Mandatory<C, N, E, O, P>,

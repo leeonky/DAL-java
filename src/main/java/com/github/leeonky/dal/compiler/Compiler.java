@@ -72,6 +72,7 @@ public class Compiler {
     //    TODO private
     NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             PROPERTY, OBJECT, LIST, PARENTHESES, VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND, TABLE,
+            SHORT_VERIFICATION_OPERAND,
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
             NUMBER = Tokens.NUMBER.nodeParser(constNode(Token::getNumber)),
             INTEGER = Tokens.INTEGER.nodeParser(constNode(Token::getInteger)),
@@ -92,13 +93,16 @@ public class Compiler {
             EMPTY_CELL = procedure -> when(procedure.emptyCell()).optional(EmptyCellNode::new),
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
-            EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(DALNode::relaxString);
+            EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(DALNode::relaxString),
+            OBJECT_SCOPE_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(DALNode::relaxString);
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SCHEMA_COMPOSE = OPENING_BRACKET.with(single(many(SCHEMA.mandatory("Expect a schema"))
                     .and(Syntax.Rules.splitBy(SCHEMA_AND)).as(DALNode::elementSchemas)).and(endWith(CLOSING_BRACKET)).as())
             .or(many(SCHEMA.mandatory("Expect a schema")).and(Syntax.Rules.splitBy(SCHEMA_AND)).as(DALNode::schemas)),
-            PROPERTY_CHAIN, OPERAND, EXPRESSION, SHORT_VERIFICATION_OPERAND;
+            PROPERTY_CHAIN, OPERAND, EXPRESSION,
+    //    TODO to be removed
+    SHORT_VERIFICATION_OPERAND_bk;
 
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SYMBOL = Tokens.SYMBOL.nodeParser(DALNode::symbolNode);
@@ -114,11 +118,20 @@ public class Compiler {
                     "Should given one property or array index in `[]`")).and(endWith(CLOSING_BRACKET))
                     .as(DALNode::bracketSymbolNode).concat(LIST_MAPPING)))); //TODO need test
 
+    @Deprecated
+    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
+            DALProcedure> shortVerificationClauseBk(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
+            DALOperator, DALProcedure> operatorMandatory) {
+        return procedure -> SCHEMA_CLAUSE.concat(VERIFICATION_OPERATORS.clause(SHORT_VERIFICATION_OPERAND_bk))
+                .or(operatorMandatory.clause(SHORT_VERIFICATION_OPERAND_bk)).parse(procedure);
+    }
+
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> shortVerificationClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
-            DALOperator, DALProcedure> operatorMandatory) {
-        return procedure -> SCHEMA_CLAUSE.concat(VERIFICATION_OPERATORS.clause(SHORT_VERIFICATION_OPERAND))
-                .or(operatorMandatory.clause(SHORT_VERIFICATION_OPERAND)).parse(procedure);
+            DALOperator, DALProcedure> operatorMandatory, NodeParser<DALRuntimeContext, DALNode, DALExpression,
+            DALOperator, DALProcedure> relaxString) {
+        return procedure -> SCHEMA_CLAUSE.concat(VERIFICATION_OPERATORS.clause(SHORT_VERIFICATION_OPERAND.or(relaxString.mandatory(""))))
+                .or(operatorMandatory.clause(SHORT_VERIFICATION_OPERAND.or(relaxString.mandatory("")))).parse(procedure);
     }
 
     private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> ARITHMETIC_CLAUSE_CHAIN,
@@ -131,10 +144,10 @@ public class Compiler {
         PROPERTY_CHAIN = PROPERTY.mandatory("Expect a object property").recursive(EXPLICIT_PROPERTY);
         OBJECT = DALProcedure.disableCommaAnd(OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(CLOSING_BRACES))
                 .as(ObjectScopeNode::new).or(many(PROPERTY_CHAIN.expression(shortVerificationClause(
-                        VERIFICATION_OPERATORS.mandatory("Expect operator `:` or `=`")))).and(optionalSplitBy(COMMA))
-                        .and(endWith(CLOSING_BRACES)).as(ObjectScopeNode::new))));
+                        VERIFICATION_OPERATORS.mandatory("Expect operator `:` or `=`"), OBJECT_SCOPE_RELAX_STRING)))
+                        .and(optionalSplitBy(COMMA)).and(endWith(CLOSING_BRACES)).as(ObjectScopeNode::new))));
         LIST = DALProcedure.disableCommaAnd(OPENING_BRACKET.with(many(ELEMENT_ELLIPSIS.ignoreInput().or(
-                shortVerificationClause(VERIFICATION_OPERATORS.or(DEFAULT_VERIFICATION_OPERATOR)))).and(optionalSplitBy(COMMA))
+                shortVerificationClauseBk(VERIFICATION_OPERATORS.or(DEFAULT_VERIFICATION_OPERATOR)))).and(optionalSplitBy(COMMA))
                 .and(endWith(CLOSING_BRACKET)).as(ListScopeNode::new)));
         TABLE = oneOf(TRANSPOSE_MARK.with(transposeTable().input(new EmptyTransposedTableHead())),
                 COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(
@@ -158,9 +171,11 @@ public class Compiler {
                 WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN);
         EXPRESSION = OPERAND.concat(EXPRESSION_CLAUSE);
 
-//TODO before blank , } ]
+//TODO object before blank , }
+//TODO list before blank , ]
 //TODO table: before |
-        SHORT_VERIFICATION_OPERAND = VERIFICATION_SPECIAL_OPERAND.or(OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE)));
+        SHORT_VERIFICATION_OPERAND = oneOf(VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE)));
+        SHORT_VERIFICATION_OPERAND_bk = VERIFICATION_SPECIAL_OPERAND.or(OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE)));
     }
 
     public List<DALNode> compile(SourceCode sourceCode, DALRuntimeContext DALRuntimeContext) {
@@ -216,7 +231,7 @@ public class Compiler {
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
             DALNode rowPrefix, TableHead head) {
-        return procedure -> procedure.positionOf(cellPosition -> shortVerificationClause(oneOf(VERIFICATION_OPERATORS,
+        return procedure -> procedure.positionOf(cellPosition -> shortVerificationClauseBk(oneOf(VERIFICATION_OPERATORS,
                 head.getHeader(procedure).headerOperator(), ((RowPrefixNode) rowPrefix).rowOperator())
                 .or(DEFAULT_VERIFICATION_OPERATOR)).input(head.getHeader(procedure).getProperty()).parse(procedure)
                 .setPositionBegin(cellPosition));
@@ -230,7 +245,7 @@ public class Compiler {
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableCell(
             DALNode head, DALNode transposedTableHead) {
         return procedure -> procedure.positionOf(cellPosition -> oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL, ROW_WILDCARD)
-                .or(shortVerificationClause(oneOf(VERIFICATION_OPERATORS, ((HeaderNode) head).headerOperator(),
+                .or(shortVerificationClauseBk(oneOf(VERIFICATION_OPERATORS, ((HeaderNode) head).headerOperator(),
                         ((TransposedTableHead) transposedTableHead).getPrefix(procedure.getIndex()).rowOperator())
                         .or(DEFAULT_VERIFICATION_OPERATOR)).input(((HeaderNode) head).getProperty())).parse(procedure)
                 .setPositionBegin(cellPosition));

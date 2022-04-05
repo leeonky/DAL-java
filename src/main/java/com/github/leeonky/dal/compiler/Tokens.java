@@ -20,8 +20,10 @@ public class Tokens {
             SYMBOL = tokenScanner(not(DELIMITER::contains), Keywords.ALL_STRING, false, DELIMITER_OR_DOT, not(Token::isNumber)),
             DOT_SYMBOL = tokenScanner(not(DELIMITER::contains), emptySet(), false, DELIMITER_OR_DOT, not(Token::isNumber)),
             SCHEMA = tokenScanner(not(DELIMITER::contains), Keywords.ALL_STRING, false, DELIMITER, not(Token::isNumber)),
-            EXPRESSION_RELAX_STRING = tokenScanner(not(DELIMITER_OR_DOT::contains), Keywords.ALL_STRING, false,
-                    Tokens::relaxStringEnd, not(Token::isNumber));
+
+    //    TODO do not limit start
+    EXPRESSION_RELAX_STRING = tokenScanner(not(DELIMITER_OR_DOT::contains), Keywords.ALL_STRING, false,
+            Tokens::relaxStringEnd, not(Token::isNumber));
 
     private static boolean relaxStringEnd(String code, Integer position) {
         return RELAX_STRING_TAIL.contains(code.charAt(position)) || code.startsWith("&&", position)
