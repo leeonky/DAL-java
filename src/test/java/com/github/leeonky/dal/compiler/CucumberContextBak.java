@@ -96,7 +96,7 @@ public class CucumberContextBak {
 
     public void assertNodeValue(String assertion, String factory) {
         Object evaluate = matcherMap.get(factory).parse(new DALProcedure(BaseTest.createSourceCode(sourceCodeString),
-                dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null)
+                        dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null)
                 .evaluate(dal.getRuntimeContextBuilder().build(null));
         expect(evaluate).should(assertion);
     }
@@ -130,10 +130,10 @@ public class CucumberContextBak {
             com.github.leeonky.dal.cucumber.Compiler compiler
                     = new com.github.leeonky.dal.cucumber.Compiler();
             compiler.compileToClasses(schemas.stream().map(s ->
-                    "import com.github.leeonky.dal.type.*;\n" +
-                            "import com.github.leeonky.dal.runtime.*;\n" +
-                            "import java.util.*;\n" + s)
-                    .collect(Collectors.toList()))
+                                    "import com.github.leeonky.dal.type.*;\n" +
+                                            "import com.github.leeonky.dal.runtime.*;\n" +
+                                            "import java.util.*;\n" + s)
+                            .collect(Collectors.toList()))
                     .forEach(dal.getRuntimeContextBuilder()::registerSchema);
             dal.evaluate(inputObject, assertion);
             interpreterException = null;
@@ -231,6 +231,11 @@ public class CucumberContextBak {
 
         public USDollar(int amount) {
             this.amount = amount;
+        }
+
+        @Override
+        public String toString() {
+            return amount + "$";
         }
     }
 }

@@ -88,23 +88,61 @@ Feature: expression-relax-string
       | =   |
       | :   |
 
-#  Scenario: simple string in table
-#    Given the following json:
-#    """
-#    [{
-#      "name": "Tom"
-#    }]
-#    """
-#    Then the following verification should pass:
-#    """
-#    : | name |
-#      | Tom  |
-#    """
-#    And the inspect should:
-#    """
-#    : | name |
-#    | name: 'Tom' |
-#    """
+  Scenario: relax string should not be user literal value
+    When defined US dollar money object with the following regex
+    """
+    ^\$\d+
+    """
+    When evaluate by:
+    """
+      "$1"= $1
+    """
+    Then failed with the message:
+    """
+    Expecting java.lang.String
+    <$1>
+    to be equal to com.github.leeonky.dal.compiler.CucumberContextBak$USDollar
+    <1$>
+    but was not
+    """
 
-#   TODO not user defined literal
-#   TODO not key word
+  Scenario Outline: allowed key word relax string
+    * the following verification should pass:
+    """
+      "<string>"= <string>
+    """
+    Examples:
+      | string |
+      | is     |
+      | which  |
+      | and    |
+      | or     |
+
+  Scenario: not allowed key word relax string
+    When evaluate by:
+    """
+      "true"= true
+    """
+    Then got the following notation:
+    """
+      "true"= true
+              ^
+    """
+    When evaluate by:
+    """
+      "false"= false
+    """
+    Then got the following notation:
+    """
+      "false"= false
+               ^
+    """
+    When evaluate by:
+    """
+      "null"= null
+    """
+    Then got the following notation:
+    """
+      "null"= null
+              ^
+    """

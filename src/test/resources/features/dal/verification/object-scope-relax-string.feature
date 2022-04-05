@@ -70,5 +70,5 @@ Feature: object-scope-relax-string
     : {value1: 'a'} and value2: 'b'
     """
 
-#   TODO not user defined literal
-#   TODO not key word
+  #   TODO not user defined literal
+  #   TODO not key word
