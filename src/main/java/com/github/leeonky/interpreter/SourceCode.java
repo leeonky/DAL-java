@@ -9,8 +9,6 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.interpreter.IfThenFactory.when;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 public class SourceCode {
     private final String code;
@@ -35,21 +33,25 @@ public class SourceCode {
             O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> tokenScanner(
             Predicate<Character> startsWith, Set<String> excluded, boolean trimStart,
             BiPredicate<String, Integer> endsWith, Predicate<Token> predicate) {
+        return sourceCode -> sourceCode.tryFetch(() -> when(sourceCode.whenFirstChar(startsWith)).optional(() -> {
+            Token token = tokenScanner(trimStart, endsWith).scan(sourceCode);
+            return !excluded.contains(token.getContent()) && predicate.test(token) ? token : null;
+        }));
+    }
+
+    public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
+            O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner.Mandatory<C, N, E, O, S> tokenScanner(
+            boolean trimStart, BiPredicate<String, Integer> endsWith) {
         return sourceCode -> {
-            if (sourceCode.whenFirstChar(startsWith)) {
-                Token token = new Token(sourceCode.position);
-                if (trimStart) {
-                    sourceCode.popChar();
-                    sourceCode.trimBlankAndComment();
-                }
-                if (sourceCode.hasCode())
-                    do token.append(sourceCode.popChar());
-                    while (sourceCode.hasCode() && !endsWith.test(sourceCode.code, sourceCode.position));
-                if (!excluded.contains(token.getContent()) && predicate.test(token))
-                    return of(token);
-                sourceCode.position = token.getPosition();
+            Token token = new Token(sourceCode.position);
+            if (trimStart) {
+                sourceCode.popChar();
+                sourceCode.trimBlankAndComment();
             }
-            return empty();
+            if (sourceCode.hasCode())
+                do token.append(sourceCode.popChar());
+                while (sourceCode.hasCode() && !endsWith.test(sourceCode.code, sourceCode.position));
+            return token;
         };
     }
 
