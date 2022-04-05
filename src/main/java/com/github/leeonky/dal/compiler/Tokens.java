@@ -27,7 +27,8 @@ public class Tokens {
             DALOperator, DALProcedure>
             EXPRESSION_RELAX_STRING = relaxString(EXPRESSION_RELAX_STRING_TAIL),
             OBJECT_SCOPE_RELAX_STRING = relaxString(OBJECT_SCOPE_RELAX_STRING_TAIL),
-            LIST_SCOPE_RELAX_STRING = relaxString(LIST_SCOPE_RELAX_STRING_TAIL);
+            LIST_SCOPE_RELAX_STRING = relaxString(LIST_SCOPE_RELAX_STRING_TAIL),
+            TABLE_CELL_RELAX_STRING = relaxString(TABLE_CELL_RELAX_STRING_TAIL);
 
     private static TokenScanner.Mandatory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> relaxString(List<String> expressionRelaxStringTail) {

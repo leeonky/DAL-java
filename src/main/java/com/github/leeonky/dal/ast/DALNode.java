@@ -45,7 +45,7 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
     }
 
     public static DALNode relaxString(Token token) {
-        return new ConstNode(token.getContent());
+        return new ConstNode(token.getContent().trim());
     }
 
     public static DALNode regex(List<DALNode> nodes) {
