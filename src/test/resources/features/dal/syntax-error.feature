@@ -25,8 +25,9 @@ Feature: syntax error expression
       | >=   | Expect a value or expression |
       | <=   | Expect a value or expression |
       | !=   | Expect a value or expression |
-      | =    | Expect a value or expression |
-      | :    | Expect a value or expression |
+#    verification will parse a empty string when no operand is missing
+#      | =    | Expect a value or expression |
+#      | :    | Expect a value or expression |
 
   Scenario Outline: missing operand2
     When evaluate by:
@@ -53,8 +54,9 @@ Feature: syntax error expression
       | >=   | Expect a value or expression |
       | <=   | Expect a value or expression |
       | !=   | Expect a value or expression |
-      | =    | Expect a value or expression |
-      | :    | Expect a value or expression |
+#    verification will parse a empty string when no operand is missing
+#      | =    | Expect a value or expression |
+#      | :    | Expect a value or expression |
 
   Scenario: unexpected token after schema
     When evaluate by:

@@ -29,26 +29,9 @@ class CompilerTest {
             relaxStringShouldBe("hello", "hello");
         }
 
-        @Nested
-        class Invalid {
-
-            @Test
-            void should_not_starts_with() {
-                Set<Character> DELIMITER = new HashSet<>(asList('=', '>', '<', '+', '-', '*', '/', ':', '&', '|', '!',
-                        ',', '(', ')', '[', ']', '{', '}', ' ', '\t', '\n', '\r', '#', '\'', '"', '.'));
-
-                DELIMITER.forEach(c -> invalidRelaxString(c + "any"));
-            }
-        }
-
         private void relaxStringShouldBe(String code, String expected) {
             assertThat(compiler.EXPRESSION_RELAX_STRING.parse(new DALProcedure(SourceCode.createSourceCode(code, emptyList()),
-                    runtimeContext, DALExpression::new)).get().evaluate(runtimeContext)).isEqualTo(expected);
-        }
-
-        private void invalidRelaxString(String code) {
-            assertThat(compiler.EXPRESSION_RELAX_STRING.parse(new DALProcedure(SourceCode.createSourceCode(code, emptyList()),
-                    runtimeContext, DALExpression::new))).as("invalid relax string: " + code).isEmpty();
+                    runtimeContext, DALExpression::new)).evaluate(runtimeContext)).isEqualTo(expected);
         }
     }
 }

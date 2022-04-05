@@ -74,6 +74,20 @@ Feature: expression-relax-string
     'abc'= 'abc' && 'def'= 'def'
     """
 
+  Scenario Outline: no verification operand empty string
+    * the following verification should pass:
+    """
+      ''<opt>
+    """
+    And the inspect should:
+    """
+    ''<opt> ''
+    """
+    Examples:
+      | opt |
+      | =   |
+      | :   |
+
 #  Scenario: simple string in table
 #    Given the following json:
 #    """

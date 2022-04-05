@@ -22,8 +22,12 @@ public class Tokens {
             SCHEMA = tokenScanner(not(DELIMITER::contains), Keywords.ALL_STRING, false, DELIMITER, not(Token::isNumber)),
 
     //    TODO do not limit start
-    EXPRESSION_RELAX_STRING = tokenScanner(not(DELIMITER_OR_DOT::contains), Keywords.ALL_STRING, false,
+//TODO remove
+    EXPRESSION_RELAX_STRING_BK = tokenScanner(not(DELIMITER_OR_DOT::contains), Keywords.ALL_STRING, false,
             Tokens::relaxStringEnd, not(Token::isNumber));
+
+    public static final TokenScanner.Mandatory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression,
+            DALOperator, DALProcedure> EXPRESSION_RELAX_STRING = tokenScanner(false, Tokens::relaxStringEnd);
 
     private static boolean relaxStringEnd(String code, Integer position) {
         return RELAX_STRING_TAIL.contains(code.charAt(position)) || code.startsWith("&&", position)

@@ -81,11 +81,6 @@ class CompilerTest {
         }
 
         @Test
-        void should_raise_error_when_expression_not_finished_1() {
-            assertSyntaxException("=", 1, "Expect a value or expression");
-        }
-
-        @Test
         void simple_expression() {
             assertCompileNode("+1=2",
                     new DALExpression(new DALExpression(InputNode.INSTANCE, new DALOperator.Plus(), new ConstNode(1)),
