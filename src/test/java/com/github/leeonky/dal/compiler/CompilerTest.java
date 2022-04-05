@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CompilerTest {
 
     @Nested
-    class RelaxString {
+    class ExpressionRelaxString {
         private Compiler compiler = new Compiler();
         private RuntimeContextBuilder.DALRuntimeContext runtimeContext = new RuntimeContextBuilder().build(null);
 
@@ -31,6 +31,26 @@ class CompilerTest {
 
         private void relaxStringShouldBe(String code, String expected) {
             assertThat(compiler.EXPRESSION_RELAX_STRING.parse(new DALProcedure(SourceCode.createSourceCode(code, emptyList()),
+                    runtimeContext, DALExpression::new)).evaluate(runtimeContext)).isEqualTo(expected);
+        }
+    }
+
+    @Nested
+    class ObjectScopeRelaxString {
+        private Compiler compiler = new Compiler();
+        private RuntimeContextBuilder.DALRuntimeContext runtimeContext = new RuntimeContextBuilder().build(null);
+
+        @Test
+        void relax_string_end_with_chars() {
+            Set<Character> DELIMITER = new HashSet<>(asList('\r'));
+
+            DELIMITER.forEach(c -> relaxStringShouldBe(String.format("hello%cworld", c), "hello"));
+
+            relaxStringShouldBe("hello", "hello");
+        }
+
+        private void relaxStringShouldBe(String code, String expected) {
+            assertThat(compiler.OBJECT_SCOPE_RELAX_STRING.parse(new DALProcedure(SourceCode.createSourceCode(code, emptyList()),
                     runtimeContext, DALExpression::new)).evaluate(runtimeContext)).isEqualTo(expected);
         }
     }

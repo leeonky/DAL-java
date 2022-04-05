@@ -77,11 +77,11 @@ Feature: expression-relax-string
   Scenario Outline: no verification operand empty string
     * the following verification should pass:
     """
-      ''<opt>
+      ''<opt>,''<opt>
     """
     And the inspect should:
     """
-    ''<opt> ''
+    ''<opt> '' , ''<opt> ''
     """
     Examples:
       | opt |

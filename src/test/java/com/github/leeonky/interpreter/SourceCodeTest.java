@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Optional;
-import java.util.function.BiPredicate;
 
 import static com.github.leeonky.interpreter.Notation.notation;
 import static java.util.Arrays.asList;
@@ -15,8 +14,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SourceCodeTest {
 
     public static final HashMap<String, Character> NO_ESCAPE = new HashMap<>();
-    public static final BiPredicate<String, Integer> ONE_CHAR_TOKEN = (c1, c2) -> true;
-    public static final BiPredicate<String, Integer> UNLIMITED_ENDING = (c1, c2) -> false;
+    public static final TriplePredicate<String, Integer, Integer> ONE_CHAR_TOKEN = (c1, c2, s) -> s == 1;
+    public static final TriplePredicate<String, Integer, Integer> UNLIMITED_ENDING = (c1, c2, s) -> false;
 
     @Nested
     class HasCode {
@@ -314,9 +313,8 @@ class SourceCodeTest {
         @Test
         void should_return_content_when_before_closing_char() {
             SourceCode sourceCode = BaseTest.createSourceCode(" abc");
-
             Token token = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
-                    false, (code, position) -> code.charAt(position) == 'c', token1 -> true).scan(sourceCode).get();
+                    false, (code, position, size) -> code.charAt(position) == 'c', token1 -> true).scan(sourceCode).get();
 
             assertThat(token.getContent()).isEqualTo("ab");
             assertThat(token.getPosition()).isEqualTo(1);
@@ -338,7 +336,7 @@ class SourceCodeTest {
             SourceCode sourceCode = BaseTest.createSourceCode(" abc");
 
             Optional<Token> optionalToken = SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(),
-                    false, (code, position) -> code.charAt(position) == 'c', token -> {
+                    false, (code, position, size) -> code.charAt(position) == 'c', token -> {
                         assertThat(token.getContent()).isEqualTo("ab");
                         assertThat(token.getPosition()).isEqualTo(1);
                         return false;

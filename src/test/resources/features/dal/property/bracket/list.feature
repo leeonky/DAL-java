@@ -24,7 +24,6 @@ Feature: access list element by [n]
       | [\n2\n] | 3     | [2]     |
 
   Scenario Outline: access from the end of list
-
     Given the following json:
     """
       [1, 2, 3]

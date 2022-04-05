@@ -92,14 +92,14 @@ public class Compiler {
             ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.node(token -> new ListEllipsisNode()),
             EMPTY_CELL = procedure -> when(procedure.emptyCell()).optional(EmptyCellNode::new),
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
-            INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
-            OBJECT_SCOPE_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING_BK.nodeParser(DALNode::relaxString);
+            INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SCHEMA_COMPOSE = OPENING_BRACKET.with(single(many(SCHEMA.mandatory("Expect a schema"))
                     .and(Syntax.Rules.splitBy(SCHEMA_AND)).as(DALNode::elementSchemas)).and(endWith(CLOSING_BRACKET)).as())
             .or(many(SCHEMA.mandatory("Expect a schema")).and(Syntax.Rules.splitBy(SCHEMA_AND)).as(DALNode::schemas)),
             EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(DALNode::relaxString),
+            OBJECT_SCOPE_RELAX_STRING = Tokens.OBJECT_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
             PROPERTY_CHAIN, OPERAND, EXPRESSION,
     //    TODO to be removed
     SHORT_VERIFICATION_OPERAND_bk;
@@ -128,10 +128,10 @@ public class Compiler {
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> shortVerificationClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
-            DALOperator, DALProcedure> operatorMandatory, NodeParser<DALRuntimeContext, DALNode, DALExpression,
+            DALOperator, DALProcedure> operatorMandatory, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
             DALOperator, DALProcedure> relaxString) {
-        return procedure -> SCHEMA_CLAUSE.concat(VERIFICATION_OPERATORS.clause(SHORT_VERIFICATION_OPERAND.or(relaxString.mandatory(""))))
-                .or(operatorMandatory.clause(SHORT_VERIFICATION_OPERAND.or(relaxString.mandatory("")))).parse(procedure);
+        return procedure -> SCHEMA_CLAUSE.concat(VERIFICATION_OPERATORS.clause(SHORT_VERIFICATION_OPERAND.or(relaxString)))
+                .or(operatorMandatory.clause(SHORT_VERIFICATION_OPERAND.or(relaxString))).parse(procedure);
     }
 
     private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> ARITHMETIC_CLAUSE_CHAIN,
@@ -171,7 +171,6 @@ public class Compiler {
                 WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN);
         EXPRESSION = OPERAND.concat(EXPRESSION_CLAUSE);
 
-//TODO object before blank , }
 //TODO list before blank , ]
 //TODO table: before |
         SHORT_VERIFICATION_OPERAND = oneOf(VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE)));

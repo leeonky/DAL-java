@@ -16,25 +16,21 @@ import static java.util.Collections.emptySet;
 public class Tokens {
     public static final TokenScanner<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             NUMBER = tokenScanner(DIGITAL::contains, emptySet(), false, Tokens::notNumber, Token::isNumber),
-            INTEGER = tokenScanner(DIGITAL_OR_MINUS::contains, emptySet(), false, DELIMITER, Token::isNumber),
+            INTEGER = tokenScanner(DIGITAL_OR_MINUS::contains, emptySet(), false, Tokens::notNumber, Token::isNumber),
             SYMBOL = tokenScanner(not(DELIMITER::contains), Keywords.ALL_STRING, false, DELIMITER_OR_DOT, not(Token::isNumber)),
             DOT_SYMBOL = tokenScanner(not(DELIMITER::contains), emptySet(), false, DELIMITER_OR_DOT, not(Token::isNumber)),
-            SCHEMA = tokenScanner(not(DELIMITER::contains), Keywords.ALL_STRING, false, DELIMITER, not(Token::isNumber)),
-
-    //    TODO do not limit start
-//TODO remove
-    EXPRESSION_RELAX_STRING_BK = tokenScanner(not(DELIMITER_OR_DOT::contains), Keywords.ALL_STRING, false,
-            Tokens::relaxStringEnd, not(Token::isNumber));
+            SCHEMA = tokenScanner(not(DELIMITER::contains), Keywords.ALL_STRING, false, DELIMITER, not(Token::isNumber));
 
     public static final TokenScanner.Mandatory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression,
-            DALOperator, DALProcedure> EXPRESSION_RELAX_STRING = tokenScanner(false, Tokens::relaxStringEnd);
+            DALOperator, DALProcedure>
+            EXPRESSION_RELAX_STRING = tokenScanner(false, (code, position, size) -> EXPRESSION_RELAX_STRING_TAIL.stream()
+            .anyMatch(tail -> code.startsWith(tail, position))),
+            OBJECT_SCOPE_RELAX_STRING = tokenScanner(false, (code, position, size) -> OBJECT_SCOPE_RELAX_STRING_TAIL.stream()
+                    .anyMatch(tail -> code.startsWith(tail, position)));
 
-    private static boolean relaxStringEnd(String code, Integer position) {
-        return RELAX_STRING_TAIL.contains(code.charAt(position)) || code.startsWith("&&", position)
-                || code.startsWith("||", position);
-    }
-
-    private static boolean notNumber(String code, int position) {
+    private static boolean notNumber(String code, int position, int size) {
+        if (size == 0)
+            return false;
         return notSymbolAfterPower(code, position) || notNumberPoint(code, position);
     }
 

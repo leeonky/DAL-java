@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -26,13 +25,13 @@ public class SourceCode {
             O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> tokenScanner(
             Predicate<Character> startsWith, Set<String> excluded, boolean trimStart, Set<Character> delimiters,
             Predicate<Token> validator) {
-        return tokenScanner(startsWith, excluded, trimStart, (code, position) -> delimiters.contains(code.charAt(position)), validator);
+        return tokenScanner(startsWith, excluded, trimStart, (code, position, size) -> delimiters.contains(code.charAt(position)), validator);
     }
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner<C, N, E, O, S> tokenScanner(
             Predicate<Character> startsWith, Set<String> excluded, boolean trimStart,
-            BiPredicate<String, Integer> endsWith, Predicate<Token> predicate) {
+            TriplePredicate<String, Integer, Integer> endsWith, Predicate<Token> predicate) {
         return sourceCode -> sourceCode.tryFetch(() -> when(sourceCode.whenFirstChar(startsWith)).optional(() -> {
             Token token = tokenScanner(trimStart, endsWith).scan(sourceCode);
             return !excluded.contains(token.getContent()) && predicate.test(token) ? token : null;
@@ -41,16 +40,17 @@ public class SourceCode {
 
     public static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
             O extends Operator<C, N, O>, S extends Procedure<C, N, E, O, S>> TokenScanner.Mandatory<C, N, E, O, S> tokenScanner(
-            boolean trimStart, BiPredicate<String, Integer> endsWith) {
+            boolean trimStart, TriplePredicate<String, Integer, Integer> endsWith) {
         return sourceCode -> {
             Token token = new Token(sourceCode.position);
             if (trimStart) {
                 sourceCode.popChar();
                 sourceCode.trimBlankAndComment();
             }
-            if (sourceCode.hasCode())
-                do token.append(sourceCode.popChar());
-                while (sourceCode.hasCode() && !endsWith.test(sourceCode.code, sourceCode.position));
+//            if (sourceCode.hasCode())
+            int size = 0;
+            while (sourceCode.hasCode() && !endsWith.test(sourceCode.code, sourceCode.position, size++))
+                token.append(sourceCode.popChar());
             return token;
         };
     }
