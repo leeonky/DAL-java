@@ -119,21 +119,6 @@ Feature: list
         ^
     """
 
-  Scenario: raise error when element is invalid
-    When evaluate by:
-    """
-    : [ + ]
-    """
-    Then failed with the message:
-    """
-    Expect a value or expression
-    """
-    And got the following notation:
-    """
-    : [ + ]
-        ^
-    """
-
   Scenario: support incomplete List
     Given the following json:
     """

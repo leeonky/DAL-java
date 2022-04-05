@@ -1,19 +1,17 @@
-Feature: object-scope-relax-string
+Feature: list-scope-relax-string
 
-  Scenario Outline: supported object-scope-relax-string
+  Scenario Outline: supported list-scope-relax-string
     Given the following json:
     """
-    {
-      "value": "a<char>c"
-    }
+    [ "a<char>c" ]
     """
     * the following verification should pass:
     """
-    : { value= a<char>c }
+    = [ a<char>c ]
     """
     And the inspect should:
     """
-    : {value= 'a<char>c'}
+    = [[0]= 'a<char>c']
     """
     Examples:
       | char |
@@ -31,67 +29,62 @@ Feature: object-scope-relax-string
   Scenario: split relax string
     Given the following json:
     """
-    {
-      "value1": "a",
-      "value2": "b"
-    }
+    [ "a", "b" ]
     """
     Then the following verification should pass:
     """
-    : { value1: a value2: b }
+    : [ a b ]
     """
     And the inspect should:
     """
-    : {value1: 'a', value2: 'b'}
+    : [[0]: 'a', [1]: 'b']
     """
     Then the following verification should pass:
     """
-    : {value1: a  value2: b }
+    : [a  b]
     """
     And the inspect should:
     """
-    : {value1: 'a', value2: 'b'}
+    : [[0]: 'a', [1]: 'b']
     """
     Then the following verification should pass:
     """
-    : { value1: a
-    value2: b }
+    : [a
+    b]
     """
     And the inspect should:
     """
-    : {value1: 'a', value2: 'b'}
+    : [[0]: 'a', [1]: 'b']
     """
     Then the following verification should pass:
     """
-    : {value1: a, value2: b }
+    : [a, b]
     """
     And the inspect should:
     """
-    : {value1: 'a', value2: 'b'}
+    : [[0]: 'a', [1]: 'b']
     """
     Then the following verification should pass:
     """
-    : { value1: a} and value2: b
+    : [... b] and [0]: 'a'
     """
     And the inspect should:
     """
-    : {value1: 'a'} and value2: 'b'
+    : [..., [-1]: 'b'] and [0]: 'a'
     """
 
   Scenario: no verification operand empty string
     Given the following json:
     """
-    {
-      "value": ""
-    }
+    [ "" ]
     """
     Then the following verification should pass:
     """
-    : { value:}
+    : [: ]
     """
     And the inspect should:
     """
-    : {value: ''}
+    : [[0]: '']
     """
 
   Scenario: relax string should not be user literal value
@@ -101,13 +94,11 @@ Feature: object-scope-relax-string
     """
     Given the following json:
     """
-    {
-      "value": "$1"
-    }
+    [ "$1" ]
     """
     When evaluate by:
     """
-    value= $1
+    = [$1]
     """
     Then failed with the message:
     """
@@ -121,17 +112,14 @@ Feature: object-scope-relax-string
   Scenario Outline: allowed key word relax string
     Given the following json:
     """
-    {
-      "value": "<string>"
-    }
+    [ "<string>" ]
     """
     * the following verification should pass:
     """
-    : { value= <string> }
+    : [ <string> ]
     """
     Examples:
       | string |
-      | is     |
       | which  |
       | and    |
       | or     |
@@ -139,18 +127,16 @@ Feature: object-scope-relax-string
   Scenario Outline: not allowed key word relax string
     Given the following json:
     """
-    {
-       "value": "<string>"
-    }
+    [ "<string>" ]
     """
     When evaluate by:
     """
-    : { value= <string> }
+    = [ <string> ]
     """
     Then got the following notation:
     """
-    : { value= <string> }
-               ^
+    = [ <string> ]
+        ^
     """
     Examples:
       | string |

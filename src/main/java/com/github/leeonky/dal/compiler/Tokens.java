@@ -7,6 +7,8 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.Token;
 import com.github.leeonky.interpreter.TokenScanner;
 
+import java.util.List;
+
 import static com.github.leeonky.dal.compiler.Constants.*;
 import static com.github.leeonky.dal.compiler.Notations.Keywords;
 import static com.github.leeonky.interpreter.FunctionUtil.not;
@@ -23,10 +25,15 @@ public class Tokens {
 
     public static final TokenScanner.Mandatory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression,
             DALOperator, DALProcedure>
-            EXPRESSION_RELAX_STRING = tokenScanner(false, (code, position, size) -> EXPRESSION_RELAX_STRING_TAIL.stream()
-            .anyMatch(tail -> code.startsWith(tail, position))),
-            OBJECT_SCOPE_RELAX_STRING = tokenScanner(false, (code, position, size) -> OBJECT_SCOPE_RELAX_STRING_TAIL.stream()
-                    .anyMatch(tail -> code.startsWith(tail, position)));
+            EXPRESSION_RELAX_STRING = relaxString(EXPRESSION_RELAX_STRING_TAIL),
+            OBJECT_SCOPE_RELAX_STRING = relaxString(OBJECT_SCOPE_RELAX_STRING_TAIL),
+            LIST_SCOPE_RELAX_STRING = relaxString(LIST_SCOPE_RELAX_STRING_TAIL);
+
+    private static TokenScanner.Mandatory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator,
+            DALProcedure> relaxString(List<String> expressionRelaxStringTail) {
+        return tokenScanner(false, (code, position, size) -> expressionRelaxStringTail.stream()
+                .anyMatch(tail -> code.startsWith(tail, position)));
+    }
 
     private static boolean notNumber(String code, int position, int size) {
         if (size == 0)

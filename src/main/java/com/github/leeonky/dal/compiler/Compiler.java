@@ -100,6 +100,7 @@ public class Compiler {
             .or(many(SCHEMA.mandatory("Expect a schema")).and(Syntax.Rules.splitBy(SCHEMA_AND)).as(DALNode::schemas)),
             EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(DALNode::relaxString),
             OBJECT_SCOPE_RELAX_STRING = Tokens.OBJECT_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
+            LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
             PROPERTY_CHAIN, OPERAND, EXPRESSION,
     //    TODO to be removed
     SHORT_VERIFICATION_OPERAND_bk;
@@ -147,8 +148,8 @@ public class Compiler {
                         VERIFICATION_OPERATORS.mandatory("Expect operator `:` or `=`"), OBJECT_SCOPE_RELAX_STRING)))
                         .and(optionalSplitBy(COMMA)).and(endWith(CLOSING_BRACES)).as(ObjectScopeNode::new))));
         LIST = DALProcedure.disableCommaAnd(OPENING_BRACKET.with(many(ELEMENT_ELLIPSIS.ignoreInput().or(
-                shortVerificationClauseBk(VERIFICATION_OPERATORS.or(DEFAULT_VERIFICATION_OPERATOR)))).and(optionalSplitBy(COMMA))
-                .and(endWith(CLOSING_BRACKET)).as(ListScopeNode::new)));
+                shortVerificationClause(VERIFICATION_OPERATORS.or(DEFAULT_VERIFICATION_OPERATOR), LIST_SCOPE_RELAX_STRING)))
+                .and(optionalSplitBy(COMMA)).and(endWith(CLOSING_BRACKET)).as(ListScopeNode::new)));
         TABLE = oneOf(TRANSPOSE_MARK.with(transposeTable().input(new EmptyTransposedTableHead())),
                 COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(
                         tableLine(ROW_PREFIX).as(TransposedTableHead::new).expression(transposeTable())))),
