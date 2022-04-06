@@ -3,61 +3,28 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
-import com.github.leeonky.dal.ast.DALOperator;
-import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.ListAccessor;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.BaseTest;
 import com.github.leeonky.interpreter.InterpreterException;
-import com.github.leeonky.interpreter.NodeParser;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Deprecated
 public class CucumberContextBak {
-    private static final Compiler compiler = new Compiler();
-    private static final Map<String, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
-            DALProcedure>> matcherMap = new HashMap<String, NodeParser<DALRuntimeContext, DALNode, DALExpression,
-            DALOperator, DALProcedure>>() {{
-        put("number", compiler.NUMBER);
-        put("integer", compiler.INTEGER);
-        put("single-quoted-string", compiler.SINGLE_QUOTED_STRING);
-        put("double-quoted-string", compiler.DOUBLE_QUOTED_STRING);
-        put("const-true", compiler.CONST_TRUE);
-        put("const-false", compiler.CONST_FALSE);
-        put("const-null", compiler.CONST_NULL);
-        put("const", compiler.CONST);
-        put("regex", compiler.REGEX);
-        put("explicit-property", compiler.EXPLICIT_PROPERTY.defaultInputNode(InputNode.INSTANCE));
-        put("property", compiler.PROPERTY);
-        put("operand", optional(compiler.OPERAND));
-//        put("binary-operator-expression", compiler.BINARY_OPERATOR_EXPRESSION.defaultInputNode(InputNode.INSTANCE));
-        put("expression", optional(compiler.EXPRESSION));
-        put("parentheses", compiler.PARENTHESES);
-        put("object", compiler.OBJECT);
-        put("list", compiler.LIST);
-        put("judgement-expression-operand", optional(compiler.SHORT_VERIFICATION_OPERAND_bk));
-        put("table", compiler.TABLE);
-        put("schema", compiler.SCHEMA);
-        put("symbol", compiler.SYMBOL);
-    }};
-
-    private static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> optional(
-            NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeFactory) {
-        return procedure -> Optional.ofNullable(nodeFactory.parse(procedure));
-    }
 
     public static CucumberContextBak INSTANCE = new CucumberContextBak();
     DAL dal = new DAL();
@@ -94,34 +61,12 @@ public class CucumberContextBak {
         expect(node.evaluate(dal.getRuntimeContextBuilder().build(inputObject))).should(assertion);
     }
 
-    public void assertNodeValue(String assertion, String factory) {
-        Object evaluate = matcherMap.get(factory).parse(new DALProcedure(BaseTest.createSourceCode(sourceCodeString),
-                        dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null)
-                .evaluate(dal.getRuntimeContextBuilder().build(null));
-        expect(evaluate).should(assertion);
-    }
-
     public void shouldShowSourceCodePosition(String sourceCodePosition) {
         assertThat("\n" + interpreterException.show(sourceCodeString)).isEqualTo("\n" + sourceCodePosition);
     }
 
-    public void failedToGetNodeWithMessage(String factory, String message) {
-        interpreterException = assertThrows(InterpreterException.class, () -> matcherMap.get(factory).parse(dalProcedure));
-        shouldHasDalMessage(message);
-    }
-
     public void shouldHasDalMessage(String message) {
         assertThat(interpreterException).hasMessage(message);
-    }
-
-    public void compileAndAssertNode(String factory, String assertion) {
-        try {
-            node = matcherMap.get(factory).parse(dalProcedure).orElse(null);
-        } catch (InterpreterException e) {
-            System.err.println(e.show(sourceCodeString));
-            throw e;
-        }
-        expect(node).should(assertion);
     }
 
     public void assertInputData(String assertion) {
@@ -151,10 +96,6 @@ public class CucumberContextBak {
     @SneakyThrows
     public void givenInputByJson(String json) {
         inputObject = new JSONArray(String.format("[%s]", json)).get(0);
-    }
-
-    public void ignoreNodeBy(String factory) {
-        matcherMap.get(factory).parse(dalProcedure);
     }
 
     public void registerSchema(String schemaCode) {

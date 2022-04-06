@@ -10,7 +10,6 @@ import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -67,11 +66,6 @@ public class ListScopeNode extends DALNode {
         else if (expressionFactories.size() > 0 && isListEllipsis(expressionFactories.get(0)))
             return Type.LAST_N_ITEMS;
         return Type.ALL_ITEMS;
-    }
-
-    @Deprecated
-    public ListScopeNode() {
-        this(Collections.emptyList());
     }
 
     // Only for test

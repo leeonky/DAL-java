@@ -12,7 +12,7 @@ class ListScopeNodeTest {
     public static final DALOperator.Equal EQUAL = new DALOperator.Equal();
     public static final DALOperator.Matcher MATCHER = new DALOperator.Matcher();
     RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder().build(null);
-    ListScopeNode listScopeNode = new ListScopeNode();
+    ListScopeNode listScopeNode = new ListScopeNode(Collections.emptyList());
 
     @Test
     void empty_list_equal_to_or_matches_empty_list() {

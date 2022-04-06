@@ -18,29 +18,9 @@ public class TestSteps {
         CucumberContextBak.INSTANCE.giveDalSourceCode(code);
     }
 
-    @Given("ignore an {string} node")
-    public void ignore_an_node(String factory) {
-        CucumberContextBak.INSTANCE.ignoreNodeBy(factory);
-    }
-
-    @Then("got the following {string} node:")
-    public void got_the_following_node(String factory, String assertion) {
-        CucumberContextBak.INSTANCE.compileAndAssertNode(factory, assertion);
-    }
-
     @Then("node evaluate result is:")
     public void evaluate_result_is(String assertion) {
         CucumberContextBak.INSTANCE.assertLastNodeValue(assertion);
-    }
-
-    @Then("node evaluate as {string} result is:")
-    public void evaluate_as_result_is(String factory, String assertion) {
-        CucumberContextBak.INSTANCE.assertNodeValue(assertion, factory);
-    }
-
-    @Then("failed to get {string} node with the following message:")
-    public void failed_to_get_the_following_node_with_the_following_message(String factory, String message) {
-        CucumberContextBak.INSTANCE.failedToGetNodeWithMessage(factory, message);
     }
 
     @Then("got the following source code information:")

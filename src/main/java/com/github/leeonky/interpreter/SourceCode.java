@@ -152,6 +152,7 @@ public class SourceCode {
     }
 
     //    TODO need test
+//    TODO refactor
     public String codeBefore(Notation notation) {
         int index = code.indexOf(notation.getLabel(), position);
         if (index >= 0) {

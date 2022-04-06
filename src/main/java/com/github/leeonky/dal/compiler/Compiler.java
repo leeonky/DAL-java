@@ -91,7 +91,6 @@ public class Compiler {
             CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
                     CONST_USER_DEFINED_LITERAL),
             ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.node(token -> new ListEllipsisNode()),
-            EMPTY_CELL = procedure -> when(procedure.emptyCell()).optional(EmptyCellNode::new),
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
 
@@ -103,9 +102,7 @@ public class Compiler {
             EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(DALNode::relaxString),
             OBJECT_SCOPE_RELAX_STRING = Tokens.OBJECT_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
             LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
-            TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(DALNode::relaxString),
-    //    TODO to be removed
-    SHORT_VERIFICATION_OPERAND_bk;
+            TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(DALNode::relaxString);
 
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SYMBOL = Tokens.SYMBOL.nodeParser(DALNode::symbolNode);
@@ -114,20 +111,13 @@ public class Compiler {
             ARITHMETIC_CLAUSE, VERIFICATION_CLAUSE,
             SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE),
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
-            LIST_MAPPING = procedure -> procedure.getSourceCode().popWord(Notations.LIST_MAPPING).map(token -> ListMappingNode::new), //  TODO extract method notation =>
+    //  TODO extract method notation =>
+    LIST_MAPPING = procedure -> procedure.getSourceCode().popWord(Notations.LIST_MAPPING).map(token -> ListMappingNode::new),
             IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(Tokens.SYMBOL.nodeParser(DALNode::symbolNode).concat(LIST_MAPPING)), //TODO need test
             EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).concat(LIST_MAPPING).mandatory( //TODO need test
                     "Expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
                     "Should given one property or array index in `[]`")).and(endWith(CLOSING_BRACKET))
                     .as(DALNode::bracketSymbolNode).concat(LIST_MAPPING)))); //TODO need test
-
-    @Deprecated
-    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
-            DALProcedure> shortVerificationClauseBk(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
-            DALOperator, DALProcedure> operatorMandatory) {
-        return procedure -> SCHEMA_CLAUSE.concat(VERIFICATION_OPERATORS.clause(SHORT_VERIFICATION_OPERAND_bk))
-                .or(operatorMandatory.clause(SHORT_VERIFICATION_OPERAND_bk)).parse(procedure);
-    }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> shortVerificationClause(OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression,
@@ -180,8 +170,6 @@ public class Compiler {
         EXPRESSION_CLAUSE = oneOf(ARITHMETIC_CLAUSE_CHAIN, VERIFICATION_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN,
                 WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN);
         EXPRESSION = OPERAND.concat(EXPRESSION_CLAUSE);
-
-//TODO table: before |
         SHORT_VERIFICATION_OPERAND = oneOf(VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE)));
 
 //TODO refactor
@@ -195,7 +183,6 @@ public class Compiler {
             }
             return empty();
         });
-        SHORT_VERIFICATION_OPERAND_bk = VERIFICATION_SPECIAL_OPERAND.or(OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE)));
     }
 
     public List<DALNode> compile(SourceCode sourceCode, DALRuntimeContext DALRuntimeContext) {
@@ -291,5 +278,4 @@ public class Compiler {
                 .flatMap(token -> dalProcedure.getRuntimeContext().takeUserDefinedLiteral(token.getContent())
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }
-
 }
