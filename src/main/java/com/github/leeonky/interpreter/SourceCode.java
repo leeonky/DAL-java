@@ -151,6 +151,15 @@ public class SourceCode {
         return currentChar() == '\n';
     }
 
+    //    TODO need test
+    public String codeBefore(Notation notation) {
+        int index = code.indexOf(notation.getLabel(), position);
+        if (index >= 0) {
+            return code.substring(position, index);
+        }
+        return code.substring(position);
+    }
+
     public int nextPosition() {
         return trimBlankAndComment().position;
     }

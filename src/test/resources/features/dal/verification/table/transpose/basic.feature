@@ -410,3 +410,21 @@ Feature: basic verification via table
     | name | name: 'John' |
     | age | age: 15 |]
     """
+    Then the following verification should pass:
+    """
+    :[  | >>    | 0     |
+        | name  | 'Tom' |
+        | age   | 10    |,
+        | >>    | 0     |
+        | name  | 'John' |
+        | age   | 15     |
+    ]
+    """
+    And the inspect should:
+    """
+    : [[0]: | >> | 0 |
+    | name | name: 'Tom' |
+    | age | age: 10 |, [1]: | >> | 0 |
+    | name | name: 'John' |
+    | age | age: 15 |]
+    """
