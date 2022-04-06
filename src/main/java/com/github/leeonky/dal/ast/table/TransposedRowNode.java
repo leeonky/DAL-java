@@ -1,6 +1,8 @@
 package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.DALNode;
+import com.github.leeonky.dal.ast.ListEllipsisNode;
+import com.github.leeonky.dal.ast.WildcardNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,5 +40,13 @@ public class TransposedRowNode extends DALNode {
 
     public int cellCount() {
         return cells.size();
+    }
+
+    public void replaceEmptyCell(TransposedRowNode transposedRowNode) {
+        for (int i = 0; i < transposedRowNode.cells.size(); i++) {
+            DALNode row = transposedRowNode.cells.get(i);
+            if (row instanceof WildcardNode || row instanceof ListEllipsisNode)
+                cells.set(i, new EmptyCellNode());
+        }
     }
 }

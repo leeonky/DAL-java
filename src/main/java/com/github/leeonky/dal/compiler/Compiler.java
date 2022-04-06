@@ -186,7 +186,7 @@ public class Compiler {
 
 //TODO refactor
         CELL_VERIFICATION_OPERAND = procedure -> procedure.getSourceCode().tryFetch(() -> {
-            Optional<DALNode> parse = SHORT_VERIFICATION_OPERAND.parse(procedure);
+            Optional<DALNode> parse = oneOf(oneOf(REGEX, OBJECT, LIST, WILDCARD), VERIFICATION_VALUE_OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE))).parse(procedure);
             if (parse.isPresent()) {
                 if (procedure.getSourceCode().startsWith(COLUMN_SPLITTER)) {
                     return parse;
@@ -264,8 +264,8 @@ public class Compiler {
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableCell(
             DALNode head, DALNode transposedTableHead) {
-        return procedure -> procedure.positionOf(cellPosition -> oneOf(ELEMENT_ELLIPSIS, EMPTY_CELL, ROW_WILDCARD)
-                .or(shortVerificationClauseBk(oneOf(VERIFICATION_OPERATORS, ((HeaderNode) head).headerOperator(),
+        return procedure -> procedure.positionOf(cellPosition -> oneOf(ELEMENT_ELLIPSIS, ROW_WILDCARD)
+                .or(shortVerificationClauseInCell(oneOf(VERIFICATION_OPERATORS, ((HeaderNode) head).headerOperator(),
                         ((TransposedTableHead) transposedTableHead).getPrefix(procedure.getIndex()).rowOperator())
                         .or(DEFAULT_VERIFICATION_OPERATOR)).input(((HeaderNode) head).getProperty())).parse(procedure)
                 .setPositionBegin(cellPosition));

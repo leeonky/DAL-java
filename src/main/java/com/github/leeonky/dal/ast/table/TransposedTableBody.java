@@ -23,8 +23,14 @@ public class TransposedTableBody extends DALNode {
 
     public TransposedTableBody checkTable(TransposedTableHead tableHead) {
         checkCellSize(tableHead);
+        replaceEmptyCell();
         transpose(tableHead).checkPrefix(CHAR);
         return this;
+    }
+
+    private void replaceEmptyCell() {
+        rows.stream().skip(1).forEach(row -> row.replaceEmptyCell(rows.get(0)));
+
     }
 
     private void checkCellSize(TransposedTableHead tableHead) {

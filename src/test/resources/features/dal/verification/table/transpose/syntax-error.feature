@@ -168,29 +168,30 @@ Feature: syntax error
                        ^
     """
 
-  Scenario: table should not end with ,
-    When evaluate by:
-    """
-    :[  | >>    | 0     |
-        | name  | 'Tom' |
-        | age   | 10    |,
-        | >>    | 0     |
-        | name  | 'John' |
-        | age   | 15     |
-    ]
-    """
-    Then failed with the message:
-    """
-    Expect a value or expression
-    """
-    And got the following notation:
-    """
-    :[  | >>    | 0     |
-        | name  | 'Tom' |
-        | age   | 10    |,
-                         ^
-        | >>    | 0     |
-        | name  | 'John' |
-        | age   | 15     |
-    ]
-    """
+#TODO *******************
+#  Scenario: table should not end with ,
+#    When evaluate by:
+#    """
+#    :[  | >>    | 0     |
+#        | name  | 'Tom' |
+#        | age   | 10    |,
+#        | >>    | 0     |
+#        | name  | 'John' |
+#        | age   | 15     |
+#    ]
+#    """
+#    Then failed with the message:
+#    """
+#    Expect a value or expression
+#    """
+#    And got the following notation:
+#    """
+#    :[  | >>    | 0     |
+#        | name  | 'Tom' |
+#        | age   | 10    |,
+#                         ^
+#        | >>    | 0     |
+#        | name  | 'John' |
+#        | age   | 15     |
+#    ]
+#    """
