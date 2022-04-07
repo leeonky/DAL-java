@@ -112,7 +112,9 @@ public class Compiler {
             SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE),
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
     //  TODO extract method notation =>
-    LIST_MAPPING = procedure -> procedure.getSourceCode().popWord(Notations.LIST_MAPPING).map(token -> ListMappingNode::new),
+    LIST_MAPPING = procedure -> procedure.getSourceCode().popWord(Notations.LIST_MAPPING).map(token -> symbolNode -> {
+        return new ListMappingNode(symbolNode).setPositionBegin(token.getPosition());
+    }),
             IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(Tokens.SYMBOL.nodeParser(DALNode::symbolNode).concat(LIST_MAPPING)), //TODO need test
             EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).concat(LIST_MAPPING).mandatory( //TODO need test
                     "Expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(

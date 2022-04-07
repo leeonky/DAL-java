@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.RuntimeException;
+import com.github.leeonky.dal.runtime.PropertyAccessException;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,23 +26,9 @@ public class SymbolNode extends DALNode implements ExcuteableNode {
     public Data getPropertyValue(Data data) {
         try {
             return data.getValue(symbol);
-        } catch (IndexOutOfBoundsException ex) {
-            throw new RuntimeException("Index out of bounds (" + ex.getMessage() + ")", getPositionBegin());
-        } catch (Exception e) {
-            throw new RuntimeException(format(format("Get property `%%s` failed, property can be:\n" +
-                    "  1. public field\n" +
-                    "  2. public getter\n" +
-                    "  3. public no args method\n" +
-                    "  4. Map key value\n" +
-                    "  5. customized type getter\n" +
-                    "  6. static method extension\n%s%s", e.getMessage(), listMappingMessage(data, symbol)), symbol),
-                    getPositionBegin());
+        } catch (PropertyAccessException e) {
+            throw e.toDalError("", getPositionBegin());
         }
-    }
-
-    private String listMappingMessage(Data data, Object symbol) {
-        return data.isList() ? format("\nImplicit list mapping is not allowed in current version of DAL, use `%s[]` instead",
-                symbol) : "";
     }
 
     public enum Type {

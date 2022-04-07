@@ -6,9 +6,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -26,7 +26,7 @@ public class Data {
     }
 
     public String inspect() {
-        return isNull() ? "null " : String.format("%s\n<%s>\n", getClassName(getInstance()), getInstance());
+        return isNull() ? "null " : format("%s\n<%s>\n", getClassName(getInstance()), getInstance());
     }
 
     public Object getInstance() {
@@ -71,10 +71,27 @@ public class Data {
     }
 
     public Data getValue(Object property) {
-        List<Object> propertyChain = schemaType.access(property).getPropertyChainBefore(schemaType);
-        if (propertyChain.size() == 1 && propertyChain.get(0).equals(property))
-            return new Data(getPropertyValue(property), DALRuntimeContext, propertySchema(property));
-        return getValue(propertyChain);
+        try {
+            List<Object> propertyChain = schemaType.access(property).getPropertyChainBefore(schemaType);
+            if (propertyChain.size() == 1 && propertyChain.get(0).equals(property))
+                return new Data(getPropertyValue(property), DALRuntimeContext, propertySchema(property));
+            return getValue(propertyChain);
+        } catch (IndexOutOfBoundsException ex) {
+            throw new PropertyAccessException(property, "Index out of bounds (" + ex.getMessage() + ")");
+        } catch (Exception e) {
+            throw new PropertyAccessException(property, format("Get property `%s` failed, property can be:\n" +
+                    "  1. public field\n" +
+                    "  2. public getter\n" +
+                    "  3. public no args method\n" +
+                    "  4. Map key value\n" +
+                    "  5. customized type getter\n" +
+                    "  6. static method extension\n%s%s", property, e.getMessage(), listMappingMessage(this, property)));
+        }
+    }
+
+    private String listMappingMessage(Data data, Object symbol) {
+        return data.isList() ? format("\nImplicit list mapping is not allowed in current version of DAL, use `%s[]` instead",
+                symbol) : "";
     }
 
     private Object getPropertyValue(Object property) {
@@ -118,10 +135,16 @@ public class Data {
     }
 
     public Data mapList(Object property) {
-//        TODO raise error when data is not list
-        return new Data(getListObjects().stream().map(data -> data.getValue(property).getInstance())
-                .collect(Collectors.toCollection(AutoMappingList::new)),
-                DALRuntimeContext, propertySchema(property));
+        return new Data(new AutoMappingList() {{
+            List<Data> list = getListObjects();
+            for (int i = 0; i < list.size(); i++) {
+                try {
+                    add(list.get(i).getValue(property).getInstance());
+                } catch (PropertyAccessException e) {
+                    throw new ElementAccessException(i, e);
+                }
+            }
+        }}, DALRuntimeContext, propertySchema(property));
     }
 
 }

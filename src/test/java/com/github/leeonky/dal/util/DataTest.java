@@ -2,10 +2,7 @@ package com.github.leeonky.dal.util;
 
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
-import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.PropertyAccessor;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.dal.runtime.SchemaType;
+import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.type.FieldAlias;
 import com.github.leeonky.dal.type.FieldAliases;
 import com.github.leeonky.dal.type.Partial;
@@ -119,7 +116,7 @@ class DataTest {
 
         @Test
         void should_raise_error_when_index_out_of_range() {
-            assertThrows(IndexOutOfBoundsException.class, () ->
+            assertThrows(PropertyAccessException.class, () ->
                     runtimeContextBuilder.build(null).wrap(new String[0]).getValue(0));
         }
 
