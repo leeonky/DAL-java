@@ -38,7 +38,6 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return procedure -> parse(procedure).map(node -> mandatory.parse(procedure).expression(node));
     }
 
-    //    TODO test
     default NodeParser<C, N, E, O, P> concat(ClauseParser<C, N, E, O, P> clauseParser) {
         return procedure -> parse(procedure).map(node -> clauseParser.concated(procedure, node));
     }

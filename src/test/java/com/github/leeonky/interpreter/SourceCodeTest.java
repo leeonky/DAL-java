@@ -11,7 +11,7 @@ import static com.github.leeonky.interpreter.Notation.notation;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SourceCodeTest {
+class SourceCodeTest extends BaseTest {
 
     public static final HashMap<String, Character> NO_ESCAPE = new HashMap<>();
     public static final TriplePredicate<String, Integer, Integer> ONE_CHAR_TOKEN = (c1, c2, s) -> s == 1;
@@ -356,6 +356,28 @@ class SourceCodeTest {
             assertThat(token.getContent()).isEqualTo("ab");
             assertThat(token.getPosition()).isEqualTo(1);
             assertThat(sourceCode.popChar(NO_ESCAPE)).isEqualTo('c');
+        }
+    }
+
+    @Nested
+    class CodeBefore {
+
+        @Test
+        void return_code_before_notation() {
+            SourceCode sourceCode = createSourceCodeWithBlank(" abc");
+            assertThat(sourceCode.codeBefore(notation("bc"))).isEqualTo(" a");
+        }
+
+        @Test
+        void return_last_code_when_not_matches() {
+            SourceCode sourceCode = createSourceCodeWithBlank(" abc");
+            assertThat(sourceCode.codeBefore(notation("x"))).isEqualTo(" abc");
+        }
+
+        @Test
+        void return_empty_when_no_code() {
+            SourceCode sourceCode = createSourceCode("");
+            assertThat(sourceCode.codeBefore(notation("x"))).isEqualTo("");
         }
     }
 }

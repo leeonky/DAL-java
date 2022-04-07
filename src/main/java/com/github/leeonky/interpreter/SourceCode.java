@@ -151,14 +151,9 @@ public class SourceCode {
         return currentChar() == '\n';
     }
 
-    //    TODO need test
-//    TODO refactor
     public String codeBefore(Notation notation) {
         int index = code.indexOf(notation.getLabel(), position);
-        if (index >= 0) {
-            return code.substring(position, index);
-        }
-        return code.substring(position);
+        return index >= 0 ? code.substring(position, index) : code.substring(position);
     }
 
     public int nextPosition() {

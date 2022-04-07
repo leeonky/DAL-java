@@ -12,8 +12,13 @@ public class BaseTest {
     }
 
     protected TestProcedure givenProcedureWithBlankCode(String s) {
+        SourceCode sourceCode = createSourceCodeWithBlank(s);
+        return new TestProcedure(sourceCode);
+    }
+
+    public SourceCode createSourceCodeWithBlank(String s) {
         SourceCode sourceCode = createSourceCode("blabla" + s);
         sourceCode.popWord(Notation.notation("blabla"));
-        return new TestProcedure(sourceCode);
+        return sourceCode;
     }
 }
