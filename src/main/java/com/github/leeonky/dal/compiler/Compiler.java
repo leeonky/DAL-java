@@ -20,7 +20,6 @@ import static com.github.leeonky.interpreter.Parser.oneOf;
 import static com.github.leeonky.interpreter.Syntax.Rules.*;
 import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
-import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 public class Compiler {
@@ -167,17 +166,7 @@ public class Compiler {
         EXPRESSION = OPERAND.concat(EXPRESSION_CLAUSE);
         SHORT_VERIFICATION_OPERAND = oneOf(VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE)));
 
-//TODO refactor
-        CELL_VERIFICATION_OPERAND = procedure -> procedure.getSourceCode().tryFetch(() -> {
-            Optional<DALNode> parse = oneOf(oneOf(REGEX, OBJECT, LIST, WILDCARD), VERIFICATION_VALUE_OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE))).parse(procedure);
-            if (parse.isPresent()) {
-                if (procedure.getSourceCode().startsWith(COLUMN_SPLITTER)) {
-                    return parse;
-                }
-                return empty();
-            }
-            return empty();
-        });
+        CELL_VERIFICATION_OPERAND = single(oneOf(oneOf(REGEX, OBJECT, LIST, WILDCARD), VERIFICATION_VALUE_OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE)))).and(enabledBefore(COLUMN_SPLITTER)).as();
     }
 
     public List<DALNode> compile(SourceCode sourceCode, DALRuntimeContext DALRuntimeContext) {

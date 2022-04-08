@@ -280,7 +280,6 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
                 O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
                 MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
                 Syntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, List<T>>> atLeast(int size) {
-
             return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, List<T>>(
                     (Syntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, List<T>>) syntax) {
                 @Override
@@ -290,6 +289,22 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
                         List<T> list = parser.apply(procedure, syntax);
                         return when(list.size() >= size).optional(() -> factory.apply(list));
                     });
+                }
+            };
+        }
+
+        public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+                O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+                MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, A> Function<Syntax<C, N, E, O, P, PA, MA, T,
+                NodeParser<C, N, E, O, P>, A>, Syntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, A>> enabledBefore(Notation notation) {
+            return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, A>(syntax) {
+
+                @Override
+                protected NodeParser<C, N, E, O, P> parse(Syntax<C, N, E, O, P, PA, MA, T, NodeParser<C, N, E, O, P>, A> syntax,
+                                                          Function<A, N> factory) {
+                    NodeParser<C, N, E, O, P> nodeParser = super.parse(syntax, factory);
+                    return procedure -> procedure.getSourceCode().tryFetch(() -> nodeParser.parse(procedure).map(node ->
+                            procedure.getSourceCode().startsWith(notation) ? node : null));
                 }
             };
         }

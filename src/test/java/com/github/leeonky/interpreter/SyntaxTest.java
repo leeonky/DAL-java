@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.Syntax.Rules.*;
@@ -624,6 +625,7 @@ class SyntaxTest extends BaseTest {
 
     @Nested
     class AtLeast {
+
         @Test
         void return_when_enough() {
             NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = notation("a").node(TestNode::new);
@@ -649,6 +651,47 @@ class SyntaxTest extends BaseTest {
             TestProcedure testProcedure = givenProcedureWithCode("a");
             assertThat(syntax.as(TestNode::new).parse(testProcedure)).isEmpty();
             assertThat(testProcedure.getSourceCode().nextPosition()).isEqualTo(0);
+        }
+    }
+
+    @Nested
+    class EnabledBefore {
+
+        @Test
+        void return_node_when_end_with_target_notation() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = notation("a").node(TestNode::new);
+            TestProcedure procedure = givenProcedureWithCode("a|");
+
+            Optional<TestNode> testNode = single(nodeParser).and(enabledBefore(notation("|"))).as(Function.identity()).parse(procedure);
+
+            assertThat(testNode.get().getContent()).isEqualTo("a");
+
+            assertThat(procedure.getSourceCode().popChar(emptyMap())).isEqualTo('|');
+        }
+
+        @Test
+        void return_empty_when_not_end_with_target_notation_and_source_move_back() {
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = notation("a").node(TestNode::new);
+            TestProcedure procedure = givenProcedureWithCode("a+");
+
+            Optional<TestNode> testNode = single(nodeParser).and(enabledBefore(notation("|"))).as(Function.identity()).parse(procedure);
+
+            assertThat(testNode).isEmpty();
+
+            assertThat(procedure.getSourceCode().popChar(emptyMap())).isEqualTo('a');
+        }
+
+        @Test
+        void return_empty_when_node_parser_is_empty() {
+            TestProcedure testProcedure = givenProcedureWithCode("");
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return empty();
+            };
+
+            Optional<TestNode> testNode = single(nodeParser).and(enabledBefore(notation("|"))).as(Function.identity()).parse(testProcedure);
+
+            assertThat(testNode).isEmpty();
         }
     }
 }
