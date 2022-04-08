@@ -24,6 +24,50 @@ Feature: list mapping
     items.id[]
     """
 
+  Scenario: Map list element for implicit property
+    Given the following json:
+    """
+    [{
+        "id": 100
+      }, {
+        "id": 200
+      }]
+    """
+    When evaluate by:
+    """
+      id[]
+    """
+    Then the result should:
+    """
+    : [100 200]
+    """
+    And the inspect should:
+    """
+    id[]
+    """
+
+  Scenario: Map list element for bracket property
+    Given the following json:
+    """
+    [{
+        "id": 100
+      }, {
+        "id": 200
+      }]
+    """
+    When evaluate by:
+    """
+      ['id'][]
+    """
+    Then the result should:
+    """
+    : [100 200]
+    """
+    And the inspect should:
+    """
+    ['id'][]
+    """
+
   Scenario: List mapping chain
     Given the following json:
     """
