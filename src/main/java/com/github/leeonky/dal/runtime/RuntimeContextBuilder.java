@@ -137,6 +137,9 @@ public class RuntimeContextBuilder {
 
     public static class ContextData {
         private final Data data;
+        private Set<Object> flattenProperties = new HashSet<>();
+        private FlattenData flattenData;
+        private Object symbol;
 
         public ContextData(Data data) {
             this.data = data;
@@ -144,6 +147,17 @@ public class RuntimeContextBuilder {
 
         public Data getData() {
             return data;
+        }
+
+        public void setFlattenProperty(FlattenData flattenData, Object symbol, Set<Object> flattenProperties) {
+            this.flattenData = flattenData;
+            this.symbol = symbol;
+            this.flattenProperties = flattenProperties;
+        }
+
+        public Set<String> removeExpectedFields(Set<String> fields) {
+            flattenProperties.forEach(property -> flattenData.removeExpectedFields(fields, symbol, property));
+            return fields;
         }
     }
 
@@ -248,6 +262,16 @@ public class RuntimeContextBuilder {
             return userDefinedLiterals.stream().map(userLiteralRule -> userLiteralRule.compile(token))
                     .filter(Result::hasResult)
                     .findFirst();
+        }
+
+        private Set<Object> flattenProperties = new HashSet<>();
+
+        public void appendFlattenProperty(Object symbol) {
+            flattenProperties.add(symbol);
+        }
+
+        public void setFlattenProperty(FlattenData flattenData, Object symbol) {
+            currentStack().setFlattenProperty(flattenData, symbol, flattenProperties = new HashSet<>());
         }
     }
 

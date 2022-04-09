@@ -37,10 +37,11 @@ public class ObjectScopeNode extends DALNode {
     public boolean verify(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
         Data data = actualNode.evaluateData(context);
         checkNull(data);
-        boolean pass = verifyAll(context, data);
-        if (pass)
-            assertUnexpectedFields(collectUnexpectedFields(data), actualNode.inspect(), operator.getPosition());
-        return pass;
+        return context.newBlockScope(data, () -> {
+            expressions.forEach(expression -> expression.evaluate(context));
+            assertUnexpectedFields(collectUnexpectedFields(data, context), actualNode.inspect(), operator.getPosition());
+            return true;
+        });
     }
 
     @Override
@@ -50,7 +51,10 @@ public class ObjectScopeNode extends DALNode {
         }
         Data data = actualNode.evaluateData(context);
         checkNull(data);
-        return verifyAll(context, data);
+        return context.newBlockScope(data, () -> {
+            expressions.forEach(expression -> expression.evaluate(context));
+            return true;
+        });
     }
 
     private void checkNull(Data data) {
@@ -58,18 +62,11 @@ public class ObjectScopeNode extends DALNode {
             throw new AssertionFailure("The input value is null", getPositionBegin());
     }
 
-    private Set<String> collectUnexpectedFields(Data data) {
-        return new LinkedHashSet<String>(data.getFieldNames()) {{
-            removeAll(expressions.stream().map(expression ->
-                            data.firstFieldFromAlias(expression.getRootSymbolName()))
+    private Set<String> collectUnexpectedFields(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
+        LinkedHashSet<String> fields = new LinkedHashSet<String>(data.getFieldNames()) {{
+            removeAll(expressions.stream().map(expression -> data.firstFieldFromAlias(expression.getRootSymbolName()))
                     .collect(Collectors.toSet()));
         }};
-    }
-
-    private boolean verifyAll(RuntimeContextBuilder.DALRuntimeContext context, Data data) {
-        return context.newBlockScope(data, () -> {
-            expressions.forEach(expression -> expression.evaluate(context));
-            return true;
-        });
+        return context.currentStack().removeExpectedFields(fields);
     }
 }
