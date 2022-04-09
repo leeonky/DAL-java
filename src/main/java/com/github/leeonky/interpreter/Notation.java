@@ -1,6 +1,7 @@
 package com.github.leeonky.interpreter;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -72,5 +73,12 @@ public class Notation {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
             MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T> PA before(MA ma) {
         return ma.castParser(procedure -> getToken(procedure).map(t -> ma.parse(procedure)));
+    }
+
+    public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> clause(
+            BiFunction<Token, N, N> nodeFactory) {
+        return procedure -> getToken(procedure).map(token -> input ->
+                nodeFactory.apply(token, input).setPositionBegin(token.getPosition()));
     }
 }

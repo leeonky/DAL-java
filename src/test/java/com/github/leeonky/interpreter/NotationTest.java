@@ -9,7 +9,7 @@ import static com.github.leeonky.interpreter.Notation.notation;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class NotationTest {
+class NotationTest extends BaseTest {
     private int START_POSITION;
 
     private SourceCode givenSourceCode(String path) {
@@ -62,6 +62,42 @@ class NotationTest {
             assertThat(testNode.get().getPositionBegin()).isEqualTo(1 + START_POSITION);
             assertThat(testNode.get().getContent()).isEqualTo("true");
             assertThat(sourceCode.hasCode()).isFalse();
+        }
+    }
+
+    @Nested
+    class ClauseTest {
+
+        @Test
+        void return_empty_when_not_match() {
+            SourceCode sourceCode = givenSourceCode("not match");
+
+            ClauseParser<TestContext, TestNode, ?, ?, TestProcedure> clauseParser = notation("[]")
+                    .clause((token, testNode) -> new TestNode());
+
+            assertThat(clauseParser.parse(new TestProcedure(sourceCode))).isEmpty();
+
+            assertThat(sourceCode.popChar(emptyMap())).isEqualTo('n');
+        }
+
+
+        @Test
+        void return_clause_when_matches() {
+            TestProcedure procedure = givenProcedureWithCode("  []");
+            TestNode inputNode = new TestNode();
+            TestNode testNode = new TestNode();
+
+            ClauseParser<TestContext, TestNode, ?, ?, TestProcedure> clauseParser = notation("[]")
+                    .clause((token, input) -> {
+                        assertThat(input).isSameAs(inputNode);
+                        assertThat(token.getContent()).isEqualTo("[]");
+                        return testNode;
+                    });
+
+            TestNode expression = clauseParser.parse(procedure).get().expression(inputNode);
+
+            assertThat(expression).isSameAs(testNode);
+            assertThat(expression.getPositionBegin()).isEqualTo(2);
         }
     }
 
