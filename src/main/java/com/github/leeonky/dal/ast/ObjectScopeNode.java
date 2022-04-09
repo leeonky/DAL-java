@@ -37,8 +37,10 @@ public class ObjectScopeNode extends DALNode {
     public boolean verify(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
         Data data = actualNode.evaluateData(context);
         checkNull(data);
-        assertUnexpectedFields(collectUnexpectedFields(data), actualNode.inspect(), operator.getPosition());
-        return verifyAll(context, data);
+        boolean pass = verifyAll(context, data);
+        if (pass)
+            assertUnexpectedFields(collectUnexpectedFields(data), actualNode.inspect(), operator.getPosition());
+        return pass;
     }
 
     @Override
@@ -59,7 +61,7 @@ public class ObjectScopeNode extends DALNode {
     private Set<String> collectUnexpectedFields(Data data) {
         return new LinkedHashSet<String>(data.getFieldNames()) {{
             removeAll(expressions.stream().map(expression ->
-                    data.firstFieldFromAlias(expression.getRootSymbolName()))
+                            data.firstFieldFromAlias(expression.getRootSymbolName()))
                     .collect(Collectors.toSet()));
         }};
     }

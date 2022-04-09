@@ -135,22 +135,34 @@ public class RuntimeContextBuilder {
         }
     }
 
+    public static class ContextData {
+        private final Data data;
+
+        public ContextData(Data data) {
+            this.data = data;
+        }
+
+        public Data getData() {
+            return data;
+        }
+    }
+
     public class DALRuntimeContext implements RuntimeContext<DALRuntimeContext> {
-        private final LinkedList<Data> thisStack = new LinkedList<>();
+        private final LinkedList<ContextData> thisStack = new LinkedList<>();
         private final Set<Class<?>> schemaSet;
 
         public DALRuntimeContext(Object inputValue) {
             schemaSet = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
-            thisStack.push(wrap(inputValue));
+            thisStack.push(new ContextData(wrap(inputValue)));
         }
 
-        public Data getInputValue() {
+        public ContextData currentStack() {
             return thisStack.getFirst();
         }
 
         public <T> T newBlockScope(Data data, Supplier<T> supplier) {
             try {
-                thisStack.push(data);
+                thisStack.push(new ContextData(data));
                 return supplier.get();
             } finally {
                 thisStack.pop();

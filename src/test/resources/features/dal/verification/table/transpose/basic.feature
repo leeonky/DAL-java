@@ -192,7 +192,7 @@ Feature: basic verification via table
     """
     When evaluate by:
     """
-    = >>| name | 'Tom' |
+    = >>| name | 'John' |
     """
     Then failed with the message:
     """
@@ -200,7 +200,7 @@ Feature: basic verification via table
     """
     And got the following notation:
     """
-    = >>| name | 'Tom' |
+    = >>| name | 'John' |
     ^
                  ^
     """
@@ -231,8 +231,8 @@ Feature: basic verification via table
     """
     When evaluate by:
     """
-    : | >>   | =     |
-      | name | 'Tom' |
+    : | >>   | =      |
+      | name | 'John' |
     """
     Then failed with the message:
     """
@@ -240,9 +240,9 @@ Feature: basic verification via table
     """
     And got the following notation:
     """
-    : | >>   | =     |
+    : | >>   | =      |
                ^
-      | name | 'Tom' |
+      | name | 'John' |
                ^
     """
 
