@@ -135,11 +135,9 @@ public class RuntimeContextBuilder {
         }
     }
 
-    public static class ContextData {
+    static class ContextData {
         private final Data data;
-        private Set<Object> flattenProperties = new HashSet<>();
-        private FlattenData flattenData;
-        private Object symbol;
+        private final Map<Object, FlattenProperties> flattenPropertiesMap = new HashMap<>();
 
         public ContextData(Data data) {
             this.data = data;
@@ -149,15 +147,33 @@ public class RuntimeContextBuilder {
             return data;
         }
 
-        public void setFlattenProperty(FlattenData flattenData, Object symbol, Set<Object> flattenProperties) {
-            this.flattenData = flattenData;
-            this.symbol = symbol;
-            this.flattenProperties = flattenProperties;
+        public FlattenProperties setFlattenProperty(FlattenData flattenData, Object symbol) {
+            return flattenPropertiesMap.computeIfAbsent(symbol, k -> new FlattenProperties(flattenData, k));
         }
 
         public Set<String> removeExpectedFields(Set<String> fields) {
-            flattenProperties.forEach(property -> flattenData.removeExpectedFields(fields, symbol, property));
+            flattenPropertiesMap.values().forEach(flattenProperties -> flattenProperties.removeExpectedFields(fields));
             return fields;
+        }
+
+    }
+
+    static class FlattenProperties {
+        private final FlattenData flattenData;
+        final Object symbol;
+        private final Set<Object> flattenProperties = new HashSet<>();
+
+        public FlattenProperties(FlattenData flattenData, Object symbol) {
+            this.flattenData = flattenData;
+            this.symbol = symbol;
+        }
+
+        private void removeExpectedFields(Set<String> fields) {
+            flattenProperties.forEach(property -> flattenData.removeExpectedFields(fields, symbol, property));
+        }
+
+        private void appendFlattenProperty(Object symbol) {
+            flattenProperties.add(symbol);
         }
     }
 
@@ -264,14 +280,14 @@ public class RuntimeContextBuilder {
                     .findFirst();
         }
 
-        private Set<Object> flattenProperties = new HashSet<>();
+        private FlattenProperties flattenProperties;
 
         public void appendFlattenProperty(Object symbol) {
-            flattenProperties.add(symbol);
+            flattenProperties.appendFlattenProperty(symbol);
         }
 
         public void setFlattenProperty(FlattenData flattenData, Object symbol) {
-            currentStack().setFlattenProperty(flattenData, symbol, flattenProperties = new HashSet<>());
+            flattenProperties = currentStack().setFlattenProperty(flattenData, symbol);
         }
     }
 

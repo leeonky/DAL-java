@@ -33,14 +33,14 @@ Feature: flatten-data
       }
     }
     """
-#    And the following verification for the instance of java class "Order" should pass:
-#    """
-#    = {
-#      id= '001'
-#      user.name= Tom
-#      user.age= 18
-#    }
-#    """
+    And the following verification for the instance of java class "Order" should pass:
+    """
+    = {
+      id= '001'
+      user.name= Tom
+      user.age= 18
+    }
+    """
 
 #
 ##  a.b.c
