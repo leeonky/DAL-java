@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
+import static java.util.Collections.emptySet;
 
 public class RuntimeContextBuilder {
     private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
@@ -138,10 +139,12 @@ public class RuntimeContextBuilder {
     public class DALRuntimeContext implements RuntimeContext<DALRuntimeContext> {
         private final LinkedList<Data> stack = new LinkedList<>();
         private final Set<Class<?>> schemaSet;
+        private final Map<Data, FlattenDataCollection> flattenDataMap;
 
         public DALRuntimeContext(Object inputValue) {
             schemaSet = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
             stack.push(wrap(inputValue));
+            flattenDataMap = new HashMap<>();
         }
 
         public Data getThis() {
@@ -238,28 +241,29 @@ public class RuntimeContextBuilder {
                     .findFirst();
         }
 
-        private final Map<Data, FlattenDataCollection> children = new HashMap<>();
-
         public void appendFlattenProperty(Data data, Object symbol) {
             fetchFlattenData(data).map(flattenData -> flattenData.properties.add(symbol));
         }
 
         private Optional<FlattenData> fetchFlattenData(Data data) {
-            return children.values().stream().map(flattenDataCollection -> flattenDataCollection.fetchFlattenData(data))
+            return flattenDataMap.values().stream().map(flattenDataCollection -> flattenDataCollection.fetchFlattenData(data))
                     .filter(Objects::nonNull).findFirst();
         }
 
         public void setFlattenProperty(Data parent, Object symbol, Data property) {
-            FlattenDataCollection flattenDataCollection = children.get(parent);
+            FlattenDataCollection flattenDataCollection = flattenDataMap.get(parent);
             if (flattenDataCollection == null)
                 flattenDataCollection = fetchFlattenData(parent).map(flattenData -> flattenData.children).orElse(null);
             if (flattenDataCollection == null)
-                children.put(parent, flattenDataCollection = new FlattenDataCollection());
+                flattenDataMap.put(parent, flattenDataCollection = new FlattenDataCollection());
             flattenDataCollection.initFlattenData(property, symbol);
         }
 
         public Set<String> removeFlattenProperties(Data parent) {
-            return children.getOrDefault(parent, new FlattenDataCollection()).removeFlattenProperties(parent);
+            FlattenDataCollection flattenDataCollection = flattenDataMap.get(parent);
+            if (flattenDataCollection != null)
+                return flattenDataCollection.removeFlattenProperties(parent);
+            return fetchFlattenData(parent).map(flattenData -> flattenData.children.removeFlattenProperties(parent)).orElse(emptySet());
         }
     }
 
@@ -295,10 +299,10 @@ public class RuntimeContextBuilder {
             this.symbol = symbol;
         }
 
-        public List<String> removeFlattenProperties(Data data) {
-            return Stream.concat(children.removeFlattenProperties(instance).stream(), properties.stream())
-                    .map(property -> (((Flatten) instance.getInstance()).removeExpectedFields(data.getFieldNames(), symbol, property)))
-                    .flatMap(Collection::stream).collect(Collectors.toList());
+        public Set<String> removeFlattenProperties(Data data) {
+            properties.addAll(children.removeFlattenProperties(instance));
+            return properties.stream().map(property -> ((Flatten) instance.getInstance())
+                    .removeExpectedFields(data.getFieldNames(), symbol, property)).flatMap(Collection::stream).collect(Collectors.toSet());
         }
     }
 

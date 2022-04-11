@@ -23,16 +23,16 @@ Feature: flatten-data
       }
     }
     """
-#    Then the following verification for the instance of java class "Order" should pass:
-#    """
-#    = {
-#      id= '001'
-#      user= {
-#        name= Tom
-#        age= 18
-#      }
-#    }
-#    """
+    Then the following verification for the instance of java class "Order" should pass:
+    """
+    = {
+      id= '001'
+      user= {
+        name= Tom
+        age= 18
+      }
+    }
+    """
     And the following verification for the instance of java class "Order" should pass:
     """
     = {
@@ -88,19 +88,19 @@ Feature: flatten-data
       }
     }
     """
-#    Then the following verification for the instance of java class "Store" should pass:
-#    """
-#    = {
-#      id= s001
-#      order= {
-#        id= '001'
-#        user= {
-#          name= Tom
-#          age= 18
-#        }
-#      }
-#    }
-#    """
+    Then the following verification for the instance of java class "Store" should pass:
+    """
+    = {
+      id= s001
+      order= {
+        id= '001'
+        user= {
+          name= Tom
+          age= 18
+        }
+      }
+    }
+    """
     And the following verification for the instance of java class "Store" should pass:
     """
     = {
@@ -170,19 +170,22 @@ Feature: flatten-data
       }
     }
     """
-#    Then the following verification for the instance of java class "Store" should pass:
-#    """
-#    = {
-#      id= s001
-#      order= {
-#        id= '001'
-#        user= {
-#          name= Tom
-#          age= 18
-#        }
-#      }
-#    }
-#    """
+    Then the following verification for the instance of java class "Site" should pass:
+    """
+    = {
+      id= site1
+      store= {
+        id= s001
+        order= {
+          id= '001'
+          user= {
+            name= Tom
+            age= 18
+          }
+        }
+      }
+    }
+    """
     And the following verification for the instance of java class "Site" should pass:
     """
     = {
