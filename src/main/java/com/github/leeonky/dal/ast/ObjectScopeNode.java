@@ -63,10 +63,10 @@ public class ObjectScopeNode extends DALNode {
     }
 
     private Set<String> collectUnexpectedFields(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
-        LinkedHashSet<String> fields = new LinkedHashSet<String>(data.getFieldNames()) {{
+        return new LinkedHashSet<String>(data.getFieldNames()) {{
             removeAll(expressions.stream().map(expression -> data.firstFieldFromAlias(expression.getRootSymbolName()))
                     .collect(Collectors.toSet()));
+            removeAll(context.removeFlattenProperties(data));
         }};
-        return context.currentStack().removeExpectedFields(fields);
     }
 }

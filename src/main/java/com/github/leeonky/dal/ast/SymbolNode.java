@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.FlattenData;
+import com.github.leeonky.dal.runtime.Flatten;
 import com.github.leeonky.dal.runtime.PropertyAccessException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
@@ -27,11 +27,11 @@ public class SymbolNode extends DALNode implements ExcuteableNode {
     @Override
     public Data getPropertyValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
         try {
-            if (data.getInstance() instanceof FlattenData)
-                context.appendFlattenProperty(symbol);
+            if (data.getInstance() instanceof Flatten)
+                context.appendFlattenProperty(data, symbol);
             Data value = data.getValue(symbol);
-            if (value.getInstance() instanceof FlattenData)
-                context.setFlattenProperty((FlattenData) value.getInstance(), symbol);
+            if (value.getInstance() instanceof Flatten)
+                context.setFlattenProperty(data, symbol, value);
             return value;
         } catch (PropertyAccessException e) {
             throw e.toDalError("", getPositionBegin());

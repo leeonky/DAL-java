@@ -135,9 +135,8 @@ public class RuntimeContextBuilder {
         }
     }
 
-    static class ContextData {
+    public static class ContextData {
         private final Data data;
-        private final Map<Object, FlattenProperties> flattenPropertiesMap = new HashMap<>();
 
         public ContextData(Data data) {
             this.data = data;
@@ -147,55 +146,27 @@ public class RuntimeContextBuilder {
             return data;
         }
 
-        public FlattenProperties setFlattenProperty(FlattenData flattenData, Object symbol) {
-            return flattenPropertiesMap.computeIfAbsent(symbol, k -> new FlattenProperties(flattenData, k));
-        }
-
-        public Set<String> removeExpectedFields(Set<String> fields) {
-            flattenPropertiesMap.values().forEach(flattenProperties -> flattenProperties.removeExpectedFields(fields));
-            return fields;
-        }
-
-    }
-
-    static class FlattenProperties {
-        private final FlattenData flattenData;
-        final Object symbol;
-        private final Set<Object> flattenProperties = new HashSet<>();
-
-        public FlattenProperties(FlattenData flattenData, Object symbol) {
-            this.flattenData = flattenData;
-            this.symbol = symbol;
-        }
-
-        private void removeExpectedFields(Set<String> fields) {
-            flattenProperties.forEach(property -> flattenData.removeExpectedFields(fields, symbol, property));
-        }
-
-        private void appendFlattenProperty(Object symbol) {
-            flattenProperties.add(symbol);
-        }
     }
 
     public class DALRuntimeContext implements RuntimeContext<DALRuntimeContext> {
-        private final LinkedList<ContextData> thisStack = new LinkedList<>();
+        private final LinkedList<Data> stack = new LinkedList<>();
         private final Set<Class<?>> schemaSet;
 
         public DALRuntimeContext(Object inputValue) {
             schemaSet = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
-            thisStack.push(new ContextData(wrap(inputValue)));
+            stack.push(wrap(inputValue));
         }
 
-        public ContextData currentStack() {
-            return thisStack.getFirst();
+        public Data getThis() {
+            return stack.getFirst();
         }
 
         public <T> T newBlockScope(Data data, Supplier<T> supplier) {
             try {
-                thisStack.push(new ContextData(data));
+                stack.push(data);
                 return supplier.get();
             } finally {
-                thisStack.pop();
+                stack.pop();
             }
         }
 
@@ -280,14 +251,41 @@ public class RuntimeContextBuilder {
                     .findFirst();
         }
 
-        private FlattenProperties flattenProperties;
+        private final FlattenData flattenData = new FlattenData(null, null);
 
-        public void appendFlattenProperty(Object symbol) {
-            flattenProperties.appendFlattenProperty(symbol);
+        public void appendFlattenProperty(Data data, Object symbol) {
+            flattenData.children.values().forEach(child -> child.get(data).properties.add(symbol));
         }
 
-        public void setFlattenProperty(FlattenData flattenData, Object symbol) {
-            flattenProperties = currentStack().setFlattenProperty(flattenData, symbol);
+        public void setFlattenProperty(Data parent, Object symbol, Data property) {
+            flattenData.children.computeIfAbsent(parent, k -> new HashMap<>()).put(property, new FlattenData(property, symbol));
+        }
+
+        public Set<String> removeFlattenProperties(Data data) {
+            return flattenData.removeFlattenProperties(data);
+        }
+    }
+
+    public static class FlattenData {
+        final Data instance;
+        final Object symbol;
+        final Set<Object> properties = new HashSet<>();
+        final Map</*instance's instance*/Data, Map<Data/* instance */, FlattenData>> children = new HashMap<>();
+
+        public FlattenData(Data instance, Object symbol) {
+            this.instance = instance;
+            this.symbol = symbol;
+        }
+
+        public Set<String> removeFlattenProperties(Data data) {
+            Set<String> removed = new HashSet<>();
+            children.getOrDefault(data, Collections.emptyMap()).values().forEach(child -> {
+                child.properties.forEach(property -> {
+                    removed.addAll(
+                            ((Flatten) child.instance.getInstance()).removeExpectedFields(data.getFieldNames(), child.symbol, property));
+                });
+            });
+            return removed;
         }
     }
 

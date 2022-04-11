@@ -11,7 +11,7 @@ public class InputNode extends DALNode {
 
     @Override
     public Data evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {
-        return context.currentStack().getData();
+        return context.getThis();
     }
 
     @Override
