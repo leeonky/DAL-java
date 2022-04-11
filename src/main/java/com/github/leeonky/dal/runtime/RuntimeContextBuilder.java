@@ -252,40 +252,57 @@ public class RuntimeContextBuilder {
         }
 
         private final FlattenData flattenData = new FlattenData(null, null);
+        final Map<Data, FlattenDataCollection> children = new HashMap<>();
 
         public void appendFlattenProperty(Data data, Object symbol) {
-            flattenData.children.values().forEach(child -> child.get(data).properties.add(symbol));
+            children.values().forEach(child -> child.collection.get(data).properties.add(symbol));
         }
 
         public void setFlattenProperty(Data parent, Object symbol, Data property) {
-            flattenData.children.computeIfAbsent(parent, k -> new HashMap<>()).put(property, new FlattenData(property, symbol));
+            FlattenDataCollection flattenDataCollection = children.get(parent);
+
+            if (flattenDataCollection == null) {
+                children.values().forEach(collection-> collection.
+
+            }
+
+            if (flattenDataCollection == null) {
+                flattenDataCollection = new FlattenDataCollection();
+                children.put(parent, flattenDataCollection);
+            }
+            flattenDataCollection.collection.put(property, new FlattenData(property, symbol));
         }
 
         public Set<String> removeFlattenProperties(Data data) {
-            return flattenData.removeFlattenProperties(data);
-        }
-    }
-
-    public static class FlattenData {
-        final Data instance;
-        final Object symbol;
-        final Set<Object> properties = new HashSet<>();
-        final Map</*instance's instance*/Data, Map<Data/* instance */, FlattenData>> children = new HashMap<>();
-
-        public FlattenData(Data instance, Object symbol) {
-            this.instance = instance;
-            this.symbol = symbol;
+            return removeFlattenProperties(data, children);
         }
 
-        public Set<String> removeFlattenProperties(Data data) {
+        public Set<String> removeFlattenProperties(Data data, Map<Data, FlattenDataCollection> children) {
             Set<String> removed = new HashSet<>();
-            children.getOrDefault(data, Collections.emptyMap()).values().forEach(child -> {
+            children.getOrDefault(data, new FlattenDataCollection()).collection.values().forEach(child -> {
                 child.properties.forEach(property -> {
                     removed.addAll(
                             ((Flatten) child.instance.getInstance()).removeExpectedFields(data.getFieldNames(), child.symbol, property));
                 });
             });
             return removed;
+        }
+    }
+
+    public static class FlattenDataCollection {
+        private final Map<Data, FlattenData> collection = new HashMap<>();
+
+    }
+
+    public static class FlattenData {
+        final Data instance;
+        final Object symbol;
+        final Set<Object> properties = new HashSet<>();
+        final Map<Data, FlattenData> children = new HashMap<>();
+
+        public FlattenData(Data instance, Object symbol) {
+            this.instance = instance;
+            this.symbol = symbol;
         }
     }
 

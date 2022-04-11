@@ -95,15 +95,15 @@ Feature: flatten-data
 #      }
 #    }
 #    """
-#    And the following verification for the instance of java class "Store" should pass:
-#    """
-#    = {
-#      id= s001,
-#      order.id= '001',
-#      order.user.name= Tom,
-#      order.user.age= 18
-#    }
-#    """
+    And the following verification for the instance of java class "Store" should pass:
+    """
+    = {
+      id= s001,
+      order.id= '001',
+      order.user.name= Tom,
+      order.user.age= 18
+    }
+    """
 
 #
 ##  a.b.c
