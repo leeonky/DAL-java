@@ -135,19 +135,6 @@ public class RuntimeContextBuilder {
         }
     }
 
-    public static class ContextData {
-        private final Data data;
-
-        public ContextData(Data data) {
-            this.data = data;
-        }
-
-        public Data getData() {
-            return data;
-        }
-
-    }
-
     public class DALRuntimeContext implements RuntimeContext<DALRuntimeContext> {
         private final LinkedList<Data> stack = new LinkedList<>();
         private final Set<Class<?>> schemaSet;
@@ -251,58 +238,67 @@ public class RuntimeContextBuilder {
                     .findFirst();
         }
 
-        private final FlattenData flattenData = new FlattenData(null, null);
-        final Map<Data, FlattenDataCollection> children = new HashMap<>();
+        private final Map<Data, FlattenDataCollection> children = new HashMap<>();
 
         public void appendFlattenProperty(Data data, Object symbol) {
-            children.values().forEach(child -> child.collection.get(data).properties.add(symbol));
+            fetchFlattenData(data).map(flattenData -> flattenData.properties.add(symbol));
+        }
+
+        private Optional<FlattenData> fetchFlattenData(Data data) {
+            return children.values().stream().map(flattenDataCollection -> flattenDataCollection.fetchFlattenData(data))
+                    .filter(Objects::nonNull).findFirst();
         }
 
         public void setFlattenProperty(Data parent, Object symbol, Data property) {
             FlattenDataCollection flattenDataCollection = children.get(parent);
+            if (flattenDataCollection == null)
+                flattenDataCollection = fetchFlattenData(parent).map(flattenData -> flattenData.children).orElse(null);
+            if (flattenDataCollection == null)
+                children.put(parent, flattenDataCollection = new FlattenDataCollection());
+            flattenDataCollection.initFlattenData(property, symbol);
+        }
 
-            if (flattenDataCollection == null) {
-                children.values().forEach(collection-> collection.
+        public Set<String> removeFlattenProperties(Data parent) {
+            return children.getOrDefault(parent, new FlattenDataCollection()).removeFlattenProperties(parent);
+        }
+    }
 
-            }
+    static class FlattenDataCollection {
+        private final Map<Data, FlattenData> collection = new HashMap<>();
 
-            if (flattenDataCollection == null) {
-                flattenDataCollection = new FlattenDataCollection();
-                children.put(parent, flattenDataCollection);
-            }
-            flattenDataCollection.collection.put(property, new FlattenData(property, symbol));
+        public void initFlattenData(Data instance, Object symbol) {
+            collection.put(instance, new FlattenData(instance, symbol));
+        }
+
+        public FlattenData fetchFlattenData(Data data) {
+            FlattenData flattenData = collection.get(data);
+            if (flattenData == null)
+                flattenData = collection.values().stream().map(subFlattenData -> subFlattenData.children.fetchFlattenData(data))
+                        .filter(Objects::nonNull).findFirst().orElse(null);
+            return flattenData;
         }
 
         public Set<String> removeFlattenProperties(Data data) {
-            return removeFlattenProperties(data, children);
-        }
-
-        public Set<String> removeFlattenProperties(Data data, Map<Data, FlattenDataCollection> children) {
-            Set<String> removed = new HashSet<>();
-            children.getOrDefault(data, new FlattenDataCollection()).collection.values().forEach(child -> {
-                child.properties.forEach(property -> {
-                    removed.addAll(
-                            ((Flatten) child.instance.getInstance()).removeExpectedFields(data.getFieldNames(), child.symbol, property));
-                });
-            });
-            return removed;
+            return collection.values().stream().flatMap(flattenData -> flattenData.removeFlattenProperties(data).stream())
+                    .collect(Collectors.toSet());
         }
     }
 
-    public static class FlattenDataCollection {
-        private final Map<Data, FlattenData> collection = new HashMap<>();
-
-    }
-
-    public static class FlattenData {
+    static class FlattenData {
         final Data instance;
         final Object symbol;
         final Set<Object> properties = new HashSet<>();
-        final Map<Data, FlattenData> children = new HashMap<>();
+        final FlattenDataCollection children = new FlattenDataCollection();
 
         public FlattenData(Data instance, Object symbol) {
             this.instance = instance;
             this.symbol = symbol;
+        }
+
+        public List<String> removeFlattenProperties(Data data) {
+            return Stream.concat(children.removeFlattenProperties(instance).stream(), properties.stream())
+                    .map(property -> (((Flatten) instance.getInstance()).removeExpectedFields(data.getFieldNames(), symbol, property)))
+                    .flatMap(Collection::stream).collect(Collectors.toList());
         }
     }
 
