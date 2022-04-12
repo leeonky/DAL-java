@@ -3,6 +3,7 @@ package com.github.leeonky.dal.compiler;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 
@@ -13,6 +14,8 @@ public class Constants {
     public static final Set<Character> DELIMITER_OR_DOT = new HashSet<Character>(DELIMITER) {{
         add('.');
     }};
+
+    public static final Set<String> DELIMITER_STRING = DELIMITER_OR_DOT.stream().map(Object::toString).collect(Collectors.toSet());
 
     public static final List<String> EXPRESSION_RELAX_STRING_TAIL = asList(" ", "\r", "\t", "\n", ",", "||", "&&");
     public static final List<String> OBJECT_SCOPE_RELAX_STRING_TAIL = asList(" ", "\r", "\t", "\n", ",", "}");

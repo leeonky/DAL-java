@@ -1,6 +1,7 @@
 package com.github.leeonky.interpreter;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -41,6 +42,17 @@ public class Notation {
             Function<String, N> factory) {
         return procedure -> getToken(procedure).map(token ->
                 factory.apply(token.getContent()).setPositionBegin(token.getPosition()));
+    }
+
+    //    TODO test
+    public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> wordNode(
+            Function<String, N> factory, Set<String> Delimiter) {
+        return procedure -> procedure.getSourceCode().tryFetch(() -> getToken(procedure).map(token -> {
+            if (procedure.getSourceCode().hasCode() && Delimiter.stream().noneMatch(s -> procedure.getSourceCode().startsWith(s)))
+                return null;
+            return factory.apply(token.getContent()).setPositionBegin(token.getPosition());
+        }));
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,

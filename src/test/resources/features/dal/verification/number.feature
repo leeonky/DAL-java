@@ -127,7 +127,6 @@ Feature: number
     <5>
     and java.lang.Integer
     <5>
-
     """
     And got the following notation:
     """

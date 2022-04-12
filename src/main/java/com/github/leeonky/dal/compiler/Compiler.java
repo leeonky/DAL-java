@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.github.leeonky.dal.ast.DALNode.constNode;
+import static com.github.leeonky.dal.compiler.Constants.DELIMITER_STRING;
 import static com.github.leeonky.dal.compiler.DALProcedure.enableCommaAnd;
 import static com.github.leeonky.dal.compiler.Notations.*;
 import static com.github.leeonky.interpreter.FunctionUtil.not;
@@ -83,9 +84,9 @@ public class Compiler {
                     .and(endWith(SINGLE_QUOTED.getLabel())).as(DALNode::constString)),
             DOUBLE_QUOTED_STRING = DOUBLE_QUOTED.with(many(charNode(DOUBLE_QUOTED_ESCAPES))
                     .and(endWith(DOUBLE_QUOTED.getLabel())).as(DALNode::constString)),
-            CONST_TRUE = Keywords.TRUE.node(DALNode::constTrue),
-            CONST_FALSE = Keywords.FALSE.node(DALNode::constFalse),
-            CONST_NULL = Keywords.NULL.node(DALNode::constNull),
+            CONST_TRUE = Keywords.TRUE.wordNode(DALNode::constTrue, DELIMITER_STRING),
+            CONST_FALSE = Keywords.FALSE.wordNode(DALNode::constFalse, DELIMITER_STRING),
+            CONST_NULL = Keywords.NULL.wordNode(DALNode::constNull, DELIMITER_STRING),
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
             REGEX = OPEN_REGEX.with(many(charNode(REGEX_ESCAPES)).and(endWith(CLOSE_REGEX.getLabel())).as(DALNode::regex)),
             WILDCARD = Notations.Operators.WILDCARD.node(WildcardNode::new),

@@ -83,7 +83,6 @@ Feature: boolean
     <true>
     and java.lang.Boolean
     <true>
-
     """
     And got the following notation:
     """

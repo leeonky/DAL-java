@@ -114,7 +114,6 @@ Feature: string
     <5>
     and java.lang.String
     <5>
-
     """
     And got the following notation:
     """
@@ -133,7 +132,6 @@ Feature: string
     <true>
     and java.lang.String
     <true>
-
     """
     And got the following notation:
     """
