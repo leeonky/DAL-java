@@ -24,7 +24,6 @@ Feature: access object property by .xxx
       | id   | .id   | .id     |
       | name | .name | .name   |
 
-
   Scenario Outline: dot property same with keyword
     Given the following json:
     """

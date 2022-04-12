@@ -394,3 +394,23 @@ Feature: object
     """
     : {,}
     """
+
+  Scenario: support slash property
+    Given the following json:
+    """
+    {
+      "user": {
+        "name": "Tom"
+      }
+    }
+    """
+    Then the following verification should pass:
+    """
+    : {
+      user/name: Tom
+    }
+    """
+    And the inspect should:
+    """
+    : {user/name: 'Tom'}
+    """

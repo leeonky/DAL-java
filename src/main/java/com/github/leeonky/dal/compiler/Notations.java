@@ -48,6 +48,7 @@ public class Notations {
                 MATCHER = notation(":"),
                 EQUAL = notation("="),
                 DOT = notation("."),
+                SLASH = notation("/"),
                 IS = Keywords.IS,
                 WHICH = Keywords.WHICH;
     }

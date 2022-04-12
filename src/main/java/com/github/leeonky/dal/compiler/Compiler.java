@@ -20,6 +20,7 @@ import static com.github.leeonky.interpreter.Parser.oneOf;
 import static com.github.leeonky.interpreter.Syntax.Rules.*;
 import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 public class Compiler {
@@ -30,6 +31,8 @@ public class Compiler {
             WHICH = Operators.WHICH.operator(DALOperator.Which::new),
             PROPERTY_DOT = Operators.DOT.operator(DALOperator.PropertyDot::new,
                     not(DALProcedure::mayBeElementEllipsis)),
+            MAYBE_PROPERTY_SLASH = Operators.SLASH.operator(DALOperator.PropertySlash::new),
+            PROPERTY_SLASH = procedure -> procedure.isEnableSlashProperty() ? MAYBE_PROPERTY_SLASH.parse(procedure) : empty(),
             PROPERTY_IMPLICIT = procedure -> of(new DALOperator.PropertyImplicit()),
             BINARY_ARITHMETIC_OPERATORS = oneOf(
                     Operators.AND.operator(DALOperator::operatorAnd),
@@ -101,7 +104,8 @@ public class Compiler {
             EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(DALNode::relaxString),
             OBJECT_SCOPE_RELAX_STRING = Tokens.OBJECT_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
             LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
-            TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(DALNode::relaxString);
+            TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(DALNode::relaxString),
+            VERIFICATION_PROPERTY = procedure -> procedure.enableSlashProperty(() -> PROPERTY_CHAIN.parse(procedure));
 
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SYMBOL = Tokens.SYMBOL.nodeParser(DALNode::symbolNode);
@@ -113,9 +117,11 @@ public class Compiler {
             LIST_MAPPING = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
             IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(Tokens.SYMBOL.nodeParser(DALNode::symbolNode).concat(LIST_MAPPING)),
             EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).concat(LIST_MAPPING).mandatory(
+                    "Expect a symbol")), PROPERTY_SLASH.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).concat(LIST_MAPPING).mandatory(
                     "Expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
                     "Should given one property or array index in `[]`")).and(endWith(CLOSING_BRACKET))
                     .as(DALNode::bracketSymbolNode).concat(LIST_MAPPING))));
+
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> shortVerificationClause(
             OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> operatorMandatory,
@@ -133,7 +139,7 @@ public class Compiler {
         PROPERTY = oneOf(EXPLICIT_PROPERTY, IMPLICIT_PROPERTY).defaultInputNode(InputNode.INSTANCE);
         PROPERTY_CHAIN = PROPERTY.mandatory("Expect a object property").recursive(EXPLICIT_PROPERTY);
         OBJECT = lazy(() -> DALProcedure.disableCommaAnd(OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(CLOSING_BRACES))
-                .as(ObjectScopeNode::new).or(many(PROPERTY_CHAIN.expression(shortVerificationClause(VERIFICATION_OPERATORS
+                .as(ObjectScopeNode::new).or(many(VERIFICATION_PROPERTY.expression(shortVerificationClause(VERIFICATION_OPERATORS
                         .mandatory("Expect operator `:` or `=`"), SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING))))
                         .and(optionalSplitBy(COMMA)).and(endWith(CLOSING_BRACES)).as(ObjectScopeNode::new)))));
         LIST = lazy(() -> DALProcedure.disableCommaAnd(OPENING_BRACKET.with(many(ELEMENT_ELLIPSIS.ignoreInput().or(
@@ -204,7 +210,7 @@ public class Compiler {
             ROW_PREFIX = procedure -> new RowPrefixNode(INTEGER.parse(procedure).map(node -> (Integer)
             ((ConstNode) node).getValue()), SCHEMA_CLAUSE.parse(procedure), VERIFICATION_OPERATORS.parse(procedure)),
             TABLE_HEADER = procedure -> new HeaderNode((SortSequenceNode) SEQUENCE.parse(procedure),
-                    PROPERTY_CHAIN.concat(SCHEMA_CLAUSE).parse(procedure), VERIFICATION_OPERATORS.parse(procedure));
+                    VERIFICATION_PROPERTY.concat(SCHEMA_CLAUSE).parse(procedure), VERIFICATION_OPERATORS.parse(procedure));
 
     private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, (TableBody) many(ROW_PREFIX.combine(oneOf(

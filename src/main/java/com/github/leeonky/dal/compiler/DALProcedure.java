@@ -13,13 +13,14 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static com.github.leeonky.dal.compiler.Notations.COLUMN_SPLITTER;
 import static com.github.leeonky.dal.compiler.Notations.Operators.NOT_EQUAL;
 import static java.util.Collections.singleton;
 
 public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> {
 
     private final LinkedList<Boolean> enableAndComma = new LinkedList<>(singleton(true));
+
+    private boolean enableSlashProperty = false;
 
     public DALProcedure(SourceCode sourceCode, DALRuntimeContext runtimeContext,
                         ExpressionFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator> expressionFactory) {
@@ -61,7 +62,16 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
         return getSourceCode().startsWith("..");
     }
 
-    public boolean emptyCell() {
-        return getSourceCode().startsWith(COLUMN_SPLITTER);
+    public boolean isEnableSlashProperty() {
+        return enableSlashProperty;
+    }
+
+    public <T> T enableSlashProperty(Supplier<T> supplier) {
+        enableSlashProperty = true;
+        try {
+            return supplier.get();
+        } finally {
+            enableSlashProperty = false;
+        }
     }
 }

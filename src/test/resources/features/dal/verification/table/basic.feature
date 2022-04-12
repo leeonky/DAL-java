@@ -413,3 +413,27 @@ Feature: basic verification via table
     | name: 'Tom' | age: 10 |, [1]: | name | age |
     | name: 'John' | age: 15 |]
     """
+
+  Scenario Outline: property chain in header
+    Given the following json:
+    """
+    [{
+      "user": {
+        "name": "Tom"
+      }
+    }]
+    """
+    Then the following verification should pass:
+    """
+    : | user<opt>name |
+      | Tom       |
+    """
+    And the inspect should:
+    """
+    : | user<opt>name |
+    | user<opt>name: 'Tom' |
+    """
+    Examples:
+      | opt |
+      | .   |
+      | /   |

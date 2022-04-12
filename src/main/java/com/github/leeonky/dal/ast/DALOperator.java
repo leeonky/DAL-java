@@ -297,6 +297,18 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         }
     }
 
+    public static class PropertySlash extends Property {
+
+        public PropertySlash() {
+            super(PRECEDENCE_PROPERTY, "/", false);
+        }
+
+        @Override
+        public String inspect(String node1, String node2) {
+            return String.format("%s%s%s", node1, label, node2);
+        }
+    }
+
     public static class PropertyImplicit extends Property {
 
         public PropertyImplicit() {
