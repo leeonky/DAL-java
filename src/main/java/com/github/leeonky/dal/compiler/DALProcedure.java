@@ -22,6 +22,8 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
 
     private boolean enableSlashProperty = false;
 
+    private boolean enableRelaxProperty = false;
+
     public DALProcedure(SourceCode sourceCode, DALRuntimeContext runtimeContext,
                         ExpressionFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator> expressionFactory) {
         super(sourceCode, runtimeContext, expressionFactory);
@@ -72,6 +74,19 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
             return supplier.get();
         } finally {
             enableSlashProperty = false;
+        }
+    }
+
+    public boolean isEnableRelaxProperty() {
+        return enableRelaxProperty;
+    }
+
+    public <T> T enableRelaxProperty(Supplier<T> supplier) {
+        enableRelaxProperty = true;
+        try {
+            return supplier.get();
+        } finally {
+            enableRelaxProperty = false;
         }
     }
 }

@@ -94,7 +94,9 @@ public class Compiler {
                     CONST_USER_DEFINED_LITERAL),
             ELEMENT_ELLIPSIS = Operators.ELEMENT_ELLIPSIS.node(token -> new ListEllipsisNode()),
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
-            INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING);
+            INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
+            STRING_PROPERTY = procedure -> procedure.isEnableRelaxProperty() ? single(oneOf(SINGLE_QUOTED_STRING,
+                    DOUBLE_QUOTED_STRING)).as(DALNode::stringSymbol).parse(procedure) : empty();
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             PROPERTY_CHAIN, OPERAND, EXPRESSION,
@@ -105,23 +107,24 @@ public class Compiler {
             OBJECT_SCOPE_RELAX_STRING = Tokens.OBJECT_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
             LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
             TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(DALNode::relaxString),
-            VERIFICATION_PROPERTY = procedure -> procedure.enableSlashProperty(() -> PROPERTY_CHAIN.parse(procedure));
+            VERIFICATION_PROPERTY = procedure -> procedure.enableRelaxProperty(() ->
+                    procedure.enableSlashProperty(() -> PROPERTY_CHAIN.parse(procedure)));
 
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SYMBOL = Tokens.SYMBOL.nodeParser(DALNode::symbolNode);
+            SYMBOL = Tokens.SYMBOL.nodeParser(DALNode::symbolNode),
+            DOT_SYMBOL = Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode);
 
     public ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             ARITHMETIC_CLAUSE, VERIFICATION_CLAUSE,
             SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE),
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
             LIST_MAPPING = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
-            IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(Tokens.SYMBOL.nodeParser(DALNode::symbolNode).concat(LIST_MAPPING)),
-            EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).concat(LIST_MAPPING).mandatory(
-                    "Expect a symbol")), PROPERTY_SLASH.clause(Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode).concat(LIST_MAPPING).mandatory(
+            IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(oneOf(STRING_PROPERTY, SYMBOL).concat(LIST_MAPPING)),
+            EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING).mandatory(
+                    "Expect a symbol")), PROPERTY_SLASH.clause(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING).mandatory(
                     "Expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
                     "Should given one property or array index in `[]`")).and(endWith(CLOSING_BRACKET))
                     .as(DALNode::bracketSymbolNode).concat(LIST_MAPPING))));
-
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> shortVerificationClause(
             OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> operatorMandatory,

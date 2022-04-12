@@ -49,6 +49,11 @@ public class SymbolNode extends DALNode implements ExcuteableNode {
             public String inspect(Object symbol) {
                 return symbol instanceof String ? format("['%s']", symbol) : format("[%s]", symbol);
             }
+        }, STRING {
+            @Override
+            public String inspect(Object symbol) {
+                return format("'%s'", symbol);
+            }
         };
 
         abstract public String inspect(Object symbol);

@@ -16,6 +16,10 @@ import static java.lang.String.format;
 
 public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeContext, DALNode> {
 
+    public static DALNode stringSymbol(DALNode dalNode) {
+        return new SymbolNode(((ConstNode) dalNode).getValue(), SymbolNode.Type.STRING);
+    }
+
     public static SymbolNode symbolNode(Token token) {
         return new SymbolNode(token.getContent(), SymbolNode.Type.SYMBOL);
     }
