@@ -38,10 +38,10 @@ public class Compiler {
             BINARY_ARITHMETIC_OPERATORS = oneOf(
                     Operators.AND.operator(DALOperator::operatorAnd),
                     Operators.OR.operator(DALOperator::operatorOr),
-                    Keywords.AND.operator(DALOperator::keywordAnd),
+                    Keywords.AND.keywordOperator(DALOperator::keywordAnd, DELIMITER_STRING),
                     Operators.COMMA.operator(DALOperator::commaAnd, DALProcedure::isEnableCommaAnd),
                     Operators.NOT_EQUAL.operator(DALOperator.NotEqual::new),
-                    Keywords.OR.operator(DALOperator::keywordOr),
+                    Keywords.OR.keywordOperator(DALOperator::keywordOr, DELIMITER_STRING),
                     Operators.GREATER_OR_EQUAL.operator(DALOperator.GreaterOrEqual::new),
                     Operators.LESS_OR_EQUAL.operator(DALOperator.LessOrEqual::new),
                     Operators.GREATER.operator(DALOperator.Greater::new),

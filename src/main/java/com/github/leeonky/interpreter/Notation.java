@@ -48,11 +48,14 @@ public class Notation {
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> wordNode(
             Function<String, N> factory, Set<String> Delimiter) {
-        return procedure -> procedure.getSourceCode().tryFetch(() -> getToken(procedure).map(token -> {
-            if (procedure.getSourceCode().hasCode() && Delimiter.stream().noneMatch(s -> procedure.getSourceCode().startsWith(s)))
-                return null;
-            return factory.apply(token.getContent()).setPositionBegin(token.getPosition());
-        }));
+        return procedure -> procedure.getSourceCode().tryFetch(() -> getToken(procedure).map(token ->
+                notAWord(Delimiter, procedure) ? null :
+                        factory.apply(token.getContent()).setPositionBegin(token.getPosition())));
+    }
+
+    private <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends Operator<C, N, O>,
+            P extends Procedure<C, N, E, O, P>> boolean notAWord(Set<String> Delimiter, P procedure) {
+        return procedure.getSourceCode().hasCode() && Delimiter.stream().noneMatch(s -> procedure.getSourceCode().startsWith(s));
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
@@ -66,6 +69,14 @@ public class Notation {
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> OperatorParser<C, N, E, O, P> operator(
             Supplier<O> factory) {
         return operator(factory, procedure -> true);
+    }
+
+    //    TODO test
+    public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> OperatorParser<C, N, E, O, P> keywordOperator(
+            Supplier<O> factory, Set<String> Delimiter) {
+        return procedure -> procedure.getSourceCode().tryFetch(() -> ((OperatorParser<C, N, E, O, P>) operator(factory, p -> true))
+                .parse(procedure).map(operator -> notAWord(Delimiter, procedure) ? null : operator));
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,

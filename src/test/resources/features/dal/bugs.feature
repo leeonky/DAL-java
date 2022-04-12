@@ -1,6 +1,6 @@
 Feature: bugs
 
-  Scenario Outline: incorrect key word
+  Scenario Outline: missing when start with keyword (true false null)
     When evaluate by:
     """
     true: <word>
@@ -17,3 +17,23 @@ Feature: bugs
       | trueBlabla  |
       | falseBlabla |
       | nullBlabla  |
+
+  Scenario Outline: missing when start with keyword (and or)
+    Given the following json:
+    """
+    {
+      "key1": 1,
+      "<key>": 2
+    }
+    """
+    Then the following verification should pass:
+    """
+    : {
+      key1: 1
+      <key>: 2
+    }
+    """
+    Examples:
+      | key   |
+      | order |
+      | andXx |
