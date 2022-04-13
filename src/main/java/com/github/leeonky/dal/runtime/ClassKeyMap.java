@@ -13,7 +13,12 @@ public class ClassKeyMap<T> extends LinkedHashMap<Class<?>, T> {
         if (data != null)
             return Optional.of(data);
         return entrySet().stream().filter(e -> e.getKey().isInstance(object))
-                .findFirst().map(Map.Entry::getValue);
+                .sorted(Map.Entry.comparingByKey(this::sortClass))
+                .map(Map.Entry::getValue).findFirst();
+    }
+
+    private int sortClass(Class<?> c1, Class<?> c2) {
+        return c1.isAssignableFrom(c2) ? 1 : -1;
     }
 
     public boolean containsType(Object object) {
