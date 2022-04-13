@@ -17,6 +17,13 @@ public class Constants {
 
     public static final Set<String> DELIMITER_STRING = DELIMITER_OR_DOT.stream().map(Object::toString).collect(Collectors.toSet());
 
+    public static final Set<Character> RELAX_DELIMITER = new HashSet<Character>() {{
+        addAll(DELIMITER_OR_DOT);
+        for (char c : ",-+%;".toCharArray()) {
+            remove(c);
+        }
+    }};
+
     public static final List<String> EXPRESSION_RELAX_STRING_TAIL = asList(" ", "\r", "\t", "\n", ",", "||", "&&");
     public static final List<String> OBJECT_SCOPE_RELAX_STRING_TAIL = asList(" ", "\r", "\t", "\n", ",", "}");
     public static final List<String> LIST_SCOPE_RELAX_STRING_TAIL = asList(" ", "\r", "\t", "\n", ",", "]");

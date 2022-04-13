@@ -112,8 +112,10 @@ public class Compiler {
                     procedure.enableSlashProperty(() -> PROPERTY_CHAIN.parse(procedure)));
 
     public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SYMBOL = Tokens.SYMBOL.nodeParser(DALNode::symbolNode),
-            DOT_SYMBOL = Tokens.DOT_SYMBOL.nodeParser(DALNode::symbolNode);
+            SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_SYMBOL : Tokens.SYMBOL).nodeParser(
+            DALNode::symbolNode).parse(procedure),
+            DOT_SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_DOT_SYMBOL : Tokens.DOT_SYMBOL)
+                    .nodeParser(DALNode::symbolNode).parse(procedure);
 
     public ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             ARITHMETIC_CLAUSE, VERIFICATION_CLAUSE,
