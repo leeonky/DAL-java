@@ -6,6 +6,7 @@ import com.github.leeonky.interpreter.FunctionUtil;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.Suppressor;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -311,11 +312,7 @@ public class RuntimeContextBuilder {
                 () -> findExtensionMethod(instance, name, Class::isAssignableFrom)).orElseThrow(() ->
                 new IllegalStateException(format("Method or property `%s` does not exist in `%s`", name,
                         instance.getClass().getName())));
-        try {
-            return method.invoke(null, instance);
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
+        return Suppressor.get(() -> method.invoke(null, instance));
     }
 
     private Optional<Method> findExtensionMethod(Object instance, String name, BiPredicate<Class<?>, Class<?>> condition) {
