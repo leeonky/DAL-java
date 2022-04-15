@@ -113,7 +113,7 @@ public class RuntimeContextBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> RuntimeContextBuilder registerObjectData(Class<T> type, Function<T, Object> mapper) {
+    public <T> RuntimeContextBuilder registerImplicitData(Class<T> type, Function<T, Object> mapper) {
         objectImplicitMapper.put(type, (Function) mapper);
         return this;
     }

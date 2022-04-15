@@ -21,7 +21,7 @@ class DALRuntimeContextTest {
         DAL dal = new DAL();
         RuntimeContextBuilder runtimeContextBuilder = dal.getRuntimeContextBuilder();
         runtimeContextBuilder.registerStaticMethodExtension(StaticMethods.class);
-        runtimeContextBuilder.registerObjectData(Obj.class, obj -> "obj-string");
+        runtimeContextBuilder.registerImplicitData(Obj.class, obj -> "obj-string");
 
         org.assertj.core.api.Assertions.assertThat((Object) dal.evaluate(new Obj(), "objString")).isEqualTo("obj-string");
     }
