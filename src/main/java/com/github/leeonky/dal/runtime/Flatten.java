@@ -1,14 +1,25 @@
 package com.github.leeonky.dal.runtime;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface Flatten {
-    default List<String> removeExpectedFields(Set<String> fields, Object symbol, Object property) {
-//        TODO refactor rule
-        //        TODO expectedFields should not more than one
-        return fields.stream().filter(field -> (String.valueOf(symbol) + property)
-                .equalsIgnoreCase(field)).collect(Collectors.toList());
+    default Optional<String> removeExpectedField(Set<String> fields, Object prefix, Object postfix) {
+        List<String> removed = fields.stream().filter(field -> predicate(field, buildField(prefix, postfix)))
+                .collect(Collectors.toList());
+        if (removed.size() > 1)
+            //        TODO need test
+            throw new IllegalArgumentException("More than one expected field found: " + removed);
+        return removed.stream().findFirst();
+    }
+
+    default boolean predicate(String candidate, String field) {
+        return candidate.equalsIgnoreCase(field);
+    }
+
+    default String buildField(Object prefix, Object postfix) {
+        return String.format("%s%s", prefix, postfix);
     }
 }

@@ -250,7 +250,7 @@ public class RuntimeContextBuilder {
         }
 
         public void appendFlattenProperty(Data data, Object symbol) {
-            fetchFlattenData(data).map(flattenData -> flattenData.properties.add(symbol));
+            fetchFlattenData(data).map(flattenData -> flattenData.postfixes.add(symbol));
         }
 
         private Optional<FlattenData> fetchFlattenData(Data data) {
@@ -258,13 +258,13 @@ public class RuntimeContextBuilder {
                     .filter(Objects::nonNull).findFirst();
         }
 
-        public void setFlattenProperty(Data parent, Object symbol, Data property) {
+        public void setFlattenProperty(Data parent, Object prefix, Data property) {
             FlattenDataCollection flattenDataCollection = flattenDataMap.get(parent);
             if (flattenDataCollection == null)
                 flattenDataCollection = fetchFlattenData(parent).map(flattenData -> flattenData.children).orElse(null);
             if (flattenDataCollection == null)
                 flattenDataMap.put(parent, flattenDataCollection = new FlattenDataCollection());
-            flattenDataCollection.initFlattenData(property, symbol);
+            flattenDataCollection.initFlattenData(property, prefix);
         }
 
         public Set<String> removeFlattenProperties(Data parent) {
@@ -278,8 +278,8 @@ public class RuntimeContextBuilder {
     static class FlattenDataCollection {
         private final Map<Data, FlattenData> collection = new HashMap<>();
 
-        public void initFlattenData(Data instance, Object symbol) {
-            collection.put(instance, new FlattenData(instance, symbol));
+        public void initFlattenData(Data instance, Object prefix) {
+            collection.put(instance, new FlattenData(instance, prefix));
         }
 
         public FlattenData fetchFlattenData(Data data) {
@@ -298,19 +298,21 @@ public class RuntimeContextBuilder {
 
     static class FlattenData {
         final Data instance;
-        final Object symbol;
-        final Set<Object> properties = new HashSet<>();
+        final Object prefix;
+        final Set<Object> postfixes = new HashSet<>();
         final FlattenDataCollection children = new FlattenDataCollection();
 
-        public FlattenData(Data instance, Object symbol) {
+        public FlattenData(Data instance, Object prefix) {
             this.instance = instance;
-            this.symbol = symbol;
+            this.prefix = prefix;
         }
 
         public Set<String> removeFlattenProperties(Data data) {
-            properties.addAll(children.removeFlattenProperties(instance));
-            return properties.stream().map(property -> ((Flatten) instance.getInstance())
-                    .removeExpectedFields(data.getFieldNames(), symbol, property)).flatMap(Collection::stream).collect(Collectors.toSet());
+            postfixes.addAll(children.removeFlattenProperties(instance));
+            return postfixes.stream().map(property -> ((Flatten) instance.getInstance())
+                            .removeExpectedField(data.getFieldNames(), prefix, property))
+                    .filter(Optional::isPresent).map(Optional::get)
+                    .collect(Collectors.toSet());
         }
     }
 
