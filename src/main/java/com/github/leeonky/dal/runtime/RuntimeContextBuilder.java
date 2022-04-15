@@ -25,6 +25,7 @@ import static java.util.Collections.emptySet;
 public class RuntimeContextBuilder {
     private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
     private final ClassKeyMap<ListAccessor<Object>> listAccessors = new ClassKeyMap<>();
+    private final ClassKeyMap<Function<Object, Object>> objectImplicitMapper = new ClassKeyMap<>();
     private final Map<String, ConstructorViaSchema> constructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
     private Converter converter = Converter.getInstance();
@@ -108,6 +109,12 @@ public class RuntimeContextBuilder {
         Stream.of(staticMethodExtensionClass.getMethods())
                 .filter(RuntimeContextBuilder.this::maybeExtensionMethods)
                 .forEach(extensionMethods::add);
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> RuntimeContextBuilder registerObjectData(Class<T> type, Function<T, Object> mapper) {
+        objectImplicitMapper.put(type, (Function) mapper);
         return this;
     }
 
@@ -307,12 +314,15 @@ public class RuntimeContextBuilder {
         }
     }
 
-    public Object invokeExtensionMethod(Object instance, String name) {
-        Method method = FunctionUtil.oneOf(() -> findExtensionMethod(instance, name, Object::equals),
-                () -> findExtensionMethod(instance, name, Class::isAssignableFrom)).orElseThrow(() ->
-                new IllegalStateException(format("Method or property `%s` does not exist in `%s`", name,
-                        instance.getClass().getName())));
-        return Suppressor.get(() -> method.invoke(null, instance));
+    public Object invokeExtensionMethod(Object instance, String name, String typeName) {
+        Optional<Method> optionalMethod = FunctionUtil.oneOf(() -> findExtensionMethod(instance, name, Object::equals),
+                () -> findExtensionMethod(instance, name, Class::isAssignableFrom));
+        if (optionalMethod.isPresent())
+            return Suppressor.get(() -> optionalMethod.get().invoke(null, instance));
+        Optional<Function<Object, Object>> mapper = objectImplicitMapper.tryGetData(instance);
+        if (mapper.isPresent())
+            return invokeExtensionMethod(mapper.get().apply(instance), name, typeName);
+        throw new IllegalStateException(format("Method or property `%s` does not exist in `%s`", name, typeName));
     }
 
     private Optional<Method> findExtensionMethod(Object instance, String name, BiPredicate<Class<?>, Class<?>> condition) {

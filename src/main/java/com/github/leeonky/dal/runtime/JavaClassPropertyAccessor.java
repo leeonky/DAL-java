@@ -23,7 +23,7 @@ public class JavaClassPropertyAccessor<T> implements PropertyAccessor<T> {
             try {
                 return beanClass.getType().getMethod(name).invoke(instance);
             } catch (IllegalAccessException | NoSuchMethodException e) {
-                return runtimeContextBuilder.invokeExtensionMethod(instance, name);
+                return runtimeContextBuilder.invokeExtensionMethod(instance, name, instance.getClass().getName());
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }

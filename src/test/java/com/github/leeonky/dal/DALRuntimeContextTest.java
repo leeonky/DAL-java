@@ -15,4 +15,26 @@ class DALRuntimeContextTest {
         assertThrows(IllegalArgumentException.class, () -> runtimeContext.getPropertyValue(new Data(new Object(),
                 new RuntimeContextBuilder().build(null), SchemaType.createRoot()), "anyc"));
     }
+
+    @Test
+    void invoke_static_extended_method_through_object_implicit_data() {
+        DAL dal = new DAL();
+        RuntimeContextBuilder runtimeContextBuilder = dal.getRuntimeContextBuilder();
+        runtimeContextBuilder.registerStaticMethodExtension(StaticMethods.class);
+        runtimeContextBuilder.registerObjectData(Obj.class, obj -> "obj-string");
+
+        org.assertj.core.api.Assertions.assertThat((Object) dal.evaluate(new Obj(), "objString")).isEqualTo("obj-string");
+    }
+
+
+    public static class Obj {
+
+    }
+
+    public static class StaticMethods {
+
+        public static String objString(String string) {
+            return string;
+        }
+    }
 }
