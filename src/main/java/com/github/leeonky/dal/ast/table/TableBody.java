@@ -39,6 +39,7 @@ public class TableBody extends DALNode {
         return rows.stream().map(RowNode::inspect).collect(Collectors.joining());
     }
 
+    // TODO    set position
     public ListScopeNode transformToListScope(DALOperator operator) {
         Stream<Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode>> rowClauses = rows.stream().map(rowNode ->
                 rowNode.verificationClause(operator));

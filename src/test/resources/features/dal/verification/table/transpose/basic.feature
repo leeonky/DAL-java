@@ -23,7 +23,7 @@ Feature: basic verification via table
     """
     When evaluate by:
     """
-    : >>| name |
+     : >>| name |
     """
     Then failed with the message:
     """
@@ -31,8 +31,8 @@ Feature: basic verification via table
     """
     And got the following notation:
     """
-    : >>| name |
-    ^
+     : >>| name |
+       ^
     """
 
   Scenario: table two header and no rows
@@ -61,8 +61,8 @@ Feature: basic verification via table
     """
     When evaluate by:
     """
-    : >>| name |
-        | age  |
+     : >>| name |
+         | age  |
     """
     Then failed with the message:
     """
@@ -70,9 +70,9 @@ Feature: basic verification via table
     """
     And got the following notation:
     """
-    : >>| name |
-    ^
-        | age  |
+     : >>| name |
+       ^
+         | age  |
     """
 
   Scenario: table one header and one row
@@ -192,7 +192,7 @@ Feature: basic verification via table
     """
     When evaluate by:
     """
-    = >>| name | 'John' |
+     = >>| name | 'John' |
     """
     Then failed with the message:
     """
@@ -200,9 +200,9 @@ Feature: basic verification via table
     """
     And got the following notation:
     """
-    = >>| name | 'John' |
-    ^
-                 ^
+     = >>| name | 'John' |
+     ^
+                  ^
     """
 
   Scenario: compile table with row verification operator which has higher priority than table verification operator

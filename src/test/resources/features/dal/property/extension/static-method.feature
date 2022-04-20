@@ -26,7 +26,7 @@ Feature: static method
     """
     When evaluate by:
     """
-    privateProperty
+     privateProperty
     """
     Then failed with the message:
     """
@@ -41,12 +41,12 @@ Feature: static method
     """
     And got the following notation:
     """
-    privateProperty
-    ^
+     privateProperty
+     ^
     """
     When evaluate by:
     """
-    nonStaticProperty
+     nonStaticProperty
     """
     Then failed with the message:
     """
@@ -61,8 +61,8 @@ Feature: static method
     """
     And got the following notation:
     """
-    nonStaticProperty
-    ^
+     nonStaticProperty
+     ^
     """
 
   Scenario: bug - return null should not cause exception

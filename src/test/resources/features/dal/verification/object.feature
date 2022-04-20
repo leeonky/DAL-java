@@ -142,9 +142,9 @@ Feature: object
     """
     When evaluate by:
     """
-    = {
-      name: 'Tom'
-    }
+     = {
+       name: 'Tom'
+     }
     """
     Then failed with the message:
     """
@@ -152,10 +152,10 @@ Feature: object
     """
     And got the following notation:
     """
-    = {
-    ^
-      name: 'Tom'
-    }
+     = {
+     ^
+       name: 'Tom'
+     }
     """
 
   Scenario: property chain

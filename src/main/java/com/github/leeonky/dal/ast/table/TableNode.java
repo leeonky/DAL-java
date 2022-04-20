@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
+import com.github.leeonky.dal.ast.ListScopeNode;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
@@ -15,6 +16,7 @@ public class TableNode extends DALNode {
     public TableNode(TableHead tableHead, TableBody tableBody) {
         this.tableHead = tableHead;
         this.tableBody = tableBody.checkTable(this.tableHead);
+        setPositionBegin(tableHead.getPositionBegin());
     }
 
     @Override
@@ -36,8 +38,8 @@ public class TableNode extends DALNode {
     }
 
     public boolean verifyAsList(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
-        return tableBody.transformToListScope(operator).verifyAll(context, actualNode.evaluateData(context)
-                .setListComparator(tableHead.collectComparator(context)));
+        return ((ListScopeNode) tableBody.transformToListScope(operator).setPositionBegin(getPositionBegin()))
+                .verifyAll(context, actualNode.evaluateData(context).setListComparator(tableHead.collectComparator(context)));
     }
 
     @Override

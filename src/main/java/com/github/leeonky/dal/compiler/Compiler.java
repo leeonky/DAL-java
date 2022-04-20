@@ -153,9 +153,9 @@ public class Compiler {
                         SHORT_VERIFICATION_OPERAND.or(LIST_SCOPE_RELAX_STRING)))).and(optionalSplitBy(COMMA))
                 .and(endWith(CLOSING_BRACKET)).as(ListScopeNode::new))));
         TABLE = oneOf(TRANSPOSE_MARK.with(transposeTable().input(new EmptyTransposedTableHead())),
-                COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(
-                        tableLine(ROW_PREFIX).as(TransposedTableHead::new).expression(transposeTable())))),
-                COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).expression(TABLE_BODY_CLAUSE));
+                COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(tableLine(ROW_PREFIX)
+                        .as(TransposedTableHead::new)))).withStartPosition().expression(transposeTable()),
+                COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).withStartPosition().expression(TABLE_BODY_CLAUSE));
         VERIFICATION_SPECIAL_OPERAND = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         OPERAND = lazy(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
                 .mandatory("Expect a value or expression");
@@ -253,7 +253,7 @@ public class Compiler {
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
         return procedure -> prefixHead -> new TransposedTableNode(prefixHead, many(COLUMN_SPLITTER.before(
-                single(TABLE_HEADER).and(endWith(COLUMN_SPLITTER)).as()).expression(clause(header -> tableLine(
+                single(TABLE_HEADER).and(endWith(COLUMN_SPLITTER)).as()).withStartPosition().expression(clause(header -> tableLine(
                 transposeTableCell(header, prefixHead)).as(cells -> new TransposedRowNode(header, cells))))).and(atLeast(1))
                 .and(endWithOptionalLine()).as(TransposedTableBody::new).mandatory("Expecting a table").parse(procedure));
     }

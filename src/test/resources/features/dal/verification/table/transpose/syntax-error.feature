@@ -3,8 +3,9 @@ Feature: syntax error
   Scenario: different transposed row size
     When evaluate by:
     """
-    : >>| name | 'Tom' |
-        | age  |
+    #
+     : >>| name | 'Tom' |
+         | age  |
     """
     Then failed with the message:
     """
@@ -12,9 +13,10 @@ Feature: syntax error
     """
     And got the following notation:
     """
-    : >>| name | 'Tom' |
-    ^^^^^^^^^^^^^^^^^^^^
-        | age  |
+    #
+     : >>| name | 'Tom' |
+    ^^^^^^^^^^^^^^^^^^^^^
+         | age  |
     """
 
   Scenario: empty table is not allowed
@@ -61,8 +63,9 @@ Feature: syntax error
   Scenario: different row size and prefix size
     When evaluate by:
     """
-    : | >>   |
-      | name | 'Tom' |
+    #
+     : | >>   |
+       | name | 'Tom' |
     """
     Then failed with the message:
     """
@@ -70,14 +73,16 @@ Feature: syntax error
     """
     And got the following notation:
     """
-    : | >>   |
-    ^^^^^^^^^^
-      | name | 'Tom' |
+    #
+     : | >>   |
+    ^^^^^^^^^^^
+       | name | 'Tom' |
     """
     When evaluate by:
     """
-    : | >>   | 0     |
-      | name |
+    #
+     : | >>   | 0     |
+       | name |
     """
     Then failed with the message:
     """
@@ -85,9 +90,10 @@ Feature: syntax error
     """
     And got the following notation:
     """
-    : | >>   | 0     |
-    ^^^^^^^^^^^^^^^^^^
-      | name |
+    #
+     : | >>   | 0     |
+    ^^^^^^^^^^^^^^^^^^^
+       | name |
     """
 
   Scenario: syntax error missing |

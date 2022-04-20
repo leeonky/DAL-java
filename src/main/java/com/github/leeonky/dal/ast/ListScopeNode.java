@@ -35,6 +35,16 @@ public class ListScopeNode extends DALNode {
         getExpressions(0);
     }
 
+    public ListScopeNode(List<DALNode> inputExpressions, boolean multiLineList, Type type) {
+        expressions__ = this.inputExpressions = new ArrayList<>(inputExpressions);
+        this.multiLineList = multiLineList;
+        this.type = type;
+    }
+
+    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories) {
+        this(expressionFactories, false);
+    }
+
     private List<DALNode> getExpressions(int firstIndex) {
         return expressions__ != null ? expressions__ : type.checkElements(getInputExpressions(firstIndex)).stream()
                 .filter(node -> !(node instanceof ListEllipsisNode)).collect(toList());
@@ -48,16 +58,6 @@ public class ListScopeNode extends DALNode {
                 add(expressionFactories.get(i).expression(new DALExpression(InputNode.INSTANCE, new PropertyImplicit(),
                         new SymbolNode(type.indexOfNode(firstIndex, i, expressionFactories.size()), BRACKET))));
         }};
-    }
-
-    public ListScopeNode(List<DALNode> inputExpressions, boolean multiLineList, Type type) {
-        expressions__ = this.inputExpressions = new ArrayList<>(inputExpressions);
-        this.multiLineList = multiLineList;
-        this.type = type;
-    }
-
-    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories) {
-        this(expressionFactories, false);
     }
 
     private Type guessType(List<Clause<DALRuntimeContext, DALNode>> expressionFactories) {

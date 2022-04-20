@@ -67,9 +67,9 @@ Feature: skip
     """
     When evaluate by:
     """
-    = >>| name | *** |
-        | age  |     |
-        | id   |     |
+     = >>| name | *** |
+         | age  |     |
+         | id   |     |
     """
     Then failed with the message:
     """
@@ -77,10 +77,10 @@ Feature: skip
     """
     And got the following notation:
     """
-    = >>| name | *** |
-    ^
-        | age  |     |
-        | id   |     |
+     = >>| name | *** |
+       ^
+         | age  |     |
+         | id   |     |
     """
 
   Scenario: skip head or tail rows

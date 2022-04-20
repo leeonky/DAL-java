@@ -46,6 +46,10 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return procedure -> parse(procedure).map(node -> clauseParser.recursived(procedure, node));
     }
 
+    default NodeParser<C, N, E, O, P> withStartPosition() {
+        return procedure -> procedure.positionOf(position -> parse(procedure).map(node -> node.setPositionBegin(position)));
+    }
+
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends
             Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {

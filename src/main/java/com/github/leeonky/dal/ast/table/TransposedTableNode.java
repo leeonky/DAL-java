@@ -33,11 +33,17 @@ public class TransposedTableNode extends DALNode {
     }
 
     public TableNode transpose() {
-        return new TableNode(tableBody.transposeHead(), tableBody.transpose(tableHead));
+        return (TableNode) new TableNode(tableBody.transposeHead(), tableBody.transpose(tableHead))
+                .setPositionBegin(getPositionBegin());
     }
 
     @Override
     public String inspect() {
         return tableHead.inspect() + tableBody.inspect();
+    }
+
+    @Override
+    public DALNode setPositionBegin(int positionBegin) {
+        return super.setPositionBegin(positionBegin);
     }
 }

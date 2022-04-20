@@ -61,7 +61,7 @@ Feature: list
     """
     When evaluate by:
     """
-    = [ /1/ ]
+     = [ /1/ ]
     """
     Then failed with the message:
     """
@@ -69,8 +69,8 @@ Feature: list
     """
     And got the following notation:
     """
-    = [ /1/ ]
-    ^
+     = [ /1/ ]
+     ^
     """
 
   Scenario: two element

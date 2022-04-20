@@ -31,6 +31,6 @@ public class TransposedTableHead extends DALNode {
 
     public void checkSize(TransposedRowNode r) {
         if (r.cellCount() != prefixes.size())
-            throw new SyntaxException("Different cell size", r.getPositionBegin(), InterpreterException.Position.Type.LINE);
+            throw new SyntaxException("Different cell size", getPositionBegin(), InterpreterException.Position.Type.LINE);
     }
 }
