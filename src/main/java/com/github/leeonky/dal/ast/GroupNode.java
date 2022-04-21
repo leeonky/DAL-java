@@ -1,14 +1,18 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.interpreter.Clause;
+import com.github.leeonky.interpreter.FunctionUtil;
 import com.github.leeonky.interpreter.InterpreterException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class GroupNode extends DALNode {
 
     private final List<DALNode> elements;
+    private final List<Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode>> clauses = new ArrayList<>();
 
     public GroupNode(List<DALNode> elements) {
         this.elements = elements;
@@ -16,7 +20,8 @@ public class GroupNode extends DALNode {
 
     @Override
     public String inspect() {
-        return elements.stream().map(DALNode::inspect).collect(Collectors.joining(", ", "<<", ">>"));
+        return elements.stream().map(DALNode::inspect).collect(Collectors.joining(", ", "<<", ">>"))
+                + getElement(InputNode.INSTANCE).inspect();
     }
 
     @Override
@@ -24,12 +29,16 @@ public class GroupNode extends DALNode {
                             RuntimeContextBuilder.DALRuntimeContext context) {
         return elements.stream().allMatch(element -> {
             try {
-                return element.verifyBy(expected, operator, context);
+                return getElement(element).verifyBy(expected, operator, context);
             } catch (InterpreterException e) {
-                e.multiPosition(element.getPositionBegin(), InterpreterException.Position.Type.CHAR);
+                e.multiPosition(element.getOperandPosition(), InterpreterException.Position.Type.CHAR);
                 throw e;
             }
         });
+    }
+
+    private DALNode getElement(DALNode element) {
+        return clauses.stream().reduce(element, (e, clause) -> clause.expression(e), FunctionUtil.notAllowParallelReduce());
     }
 
     @Override
@@ -37,11 +46,16 @@ public class GroupNode extends DALNode {
                             RuntimeContextBuilder.DALRuntimeContext context) {
         return elements.stream().allMatch(element -> {
             try {
-                return element.verifyBy(expected, operator, context);
+                return getElement(element).verifyBy(expected, operator, context);
             } catch (InterpreterException e) {
-                e.multiPosition(element.getPositionBegin(), InterpreterException.Position.Type.CHAR);
+                e.multiPosition(element.getOperandPosition(), InterpreterException.Position.Type.CHAR);
                 throw e;
             }
         });
+    }
+
+    public GroupNode appendChain(Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode> clause) {
+        clauses.add(clause);
+        return this;
     }
 }
