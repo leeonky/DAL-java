@@ -6,7 +6,9 @@ Feature: group
     {
       "a": 1,
       "b": 1,
-      "c": 2
+      "c": {
+        "value": 2
+      }
     }
     """
     Then the following verification should pass:
@@ -19,7 +21,7 @@ Feature: group
     """
     And evaluate by:
     """
-    <<a, c>><opt> 1
+    <<a, c.value>><opt> 1
     """
     Then failed with the message:
     """
@@ -31,9 +33,9 @@ Feature: group
     """
     And got the following notation:
     """
-    <<a, c>><opt> 1
-         ^
-              ^
+    <<a, c.value>><opt> 1
+           ^
+                    ^
     """
     Examples:
       | opt | text        |
