@@ -46,7 +46,7 @@ public class Compiler {
                     Operators.GREATER_OR_EQUAL.operator(DALOperator.GreaterOrEqual::new),
                     Operators.LESS_OR_EQUAL.operator(DALOperator.LessOrEqual::new),
                     Operators.GREATER.operator(DALOperator.Greater::new),
-                    Operators.LESS.operator(DALOperator.Less::new),
+                    Operators.LESS.operator(DALOperator.Less::new, not(DALProcedure::mayBeOpeningGroup)),
                     Operators.PLUS.operator(DALOperator.Plus::new),
                     Operators.SUBTRACTION.operator(DALOperator.Subtraction::new),
                     Operators.MULTIPLICATION.operator(DALOperator.Multiplication::new),
@@ -77,7 +77,7 @@ public class Compiler {
     //    TODO private
     NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             PROPERTY, OBJECT, LIST, PARENTHESES, VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND, TABLE,
-            SHORT_VERIFICATION_OPERAND, CELL_VERIFICATION_OPERAND,
+            SHORT_VERIFICATION_OPERAND, CELL_VERIFICATION_OPERAND, GROUP_PROPERTY,
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
             NUMBER = Tokens.NUMBER.nodeParser(constNode(Token::getNumber)),
             INTEGER = Tokens.INTEGER.nodeParser(constNode(Token::getInteger)),
@@ -148,7 +148,7 @@ public class Compiler {
     public Compiler() {
         PARENTHESES = lazy(() -> enableCommaAnd(OPENING_PARENTHESES.with(single(EXPRESSION).and(endWith(CLOSING_PARENTHESES))
                 .as(DALNode::parenthesesNode))));
-        PROPERTY = oneOf(EXPLICIT_PROPERTY, IMPLICIT_PROPERTY).defaultInputNode(InputNode.INSTANCE);
+        PROPERTY = lazy(() -> oneOf(GROUP_PROPERTY, oneOf(EXPLICIT_PROPERTY, IMPLICIT_PROPERTY).defaultInputNode(InputNode.INSTANCE)));
         PROPERTY_CHAIN = PROPERTY.mandatory("Expect a object property").recursive(EXPLICIT_PROPERTY);
         OBJECT = lazy(() -> DALProcedure.disableCommaAnd(OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(CLOSING_BRACES))
                 .as(ObjectScopeNode::new).or(many(VERIFICATION_PROPERTY.expression(shortVerificationClause(VERIFICATION_OPERATORS
@@ -182,6 +182,8 @@ public class Compiler {
         SHORT_VERIFICATION_OPERAND = oneOf(VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE)));
         CELL_VERIFICATION_OPERAND = single(oneOf(oneOf(REGEX, OBJECT, LIST, WILDCARD), VERIFICATION_VALUE_OPERAND
                 .recursive(oneOf(ARITHMETIC_CLAUSE)))).and(enabledBefore(COLUMN_SPLITTER)).as();
+        GROUP_PROPERTY = DALProcedure.disableCommaAnd(OPENING_GROUP.with(many(PROPERTY_CHAIN).and(optionalSplitBy(COMMA))
+                .and(endWith(CLOSING_GROUP)).as(GroupNode::new)));
     }
 
     public List<DALNode> compile(SourceCode sourceCode, DALRuntimeContext DALRuntimeContext) {

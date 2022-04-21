@@ -86,6 +86,16 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return evaluateData(context).getInstance();
     }
 
+    public boolean verifyBy(DALNode expected, DALOperator.Equal operator,
+                            RuntimeContextBuilder.DALRuntimeContext context) {
+        return expected.verify(this, operator, context);
+    }
+
+    public boolean verifyBy(DALNode expected, DALOperator.Matcher operator,
+                            RuntimeContextBuilder.DALRuntimeContext context) {
+        return expected.verify(this, operator, context);
+    }
+
     public boolean verify(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
         return assertEquals(evaluateData(context), evaluateAndWrapperFailureMessage(actualNode, context),
                 getPositionBegin());

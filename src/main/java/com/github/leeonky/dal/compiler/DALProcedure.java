@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static com.github.leeonky.dal.compiler.Notations.OPENING_GROUP;
 import static com.github.leeonky.dal.compiler.Notations.Operators.NOT_EQUAL;
 import static java.util.Collections.singleton;
 
@@ -58,6 +59,10 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
 
     public boolean mayBeUnEqual() {
         return getSourceCode().startsWith(NOT_EQUAL);
+    }
+
+    public boolean mayBeOpeningGroup() {
+        return getSourceCode().startsWith(OPENING_GROUP);
     }
 
     public boolean mayBeElementEllipsis() {
