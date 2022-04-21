@@ -18,6 +18,8 @@ public class PropertyPattern extends DALNode implements ExcuteableNode {
     @Override
     public Data getPropertyValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
         String prefix = symbol.getRootSymbolName().toString();
-        return data.filter(prefix);
+        Data filter = data.filter(prefix);
+        context.setFlattenProperty(data, prefix, filter);
+        return filter;
     }
 }

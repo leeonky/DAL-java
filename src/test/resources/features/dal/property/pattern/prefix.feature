@@ -1,6 +1,6 @@
 Feature: prefix
 
-  Scenario: filter object by property pattern with prefix
+  Scenario Outline: filter object by property pattern with prefix
     Given the following json:
     """
     {
@@ -17,7 +17,7 @@ Feature: prefix
     """
     When evaluate by:
     """
-    value{}
+    <propertyType>value{}
     """
     Then the result should:
     """
@@ -35,8 +35,39 @@ Feature: prefix
     """
     And the inspect should:
     """
-    value{}
+    <propertyType>value{}
+    """
+    Examples:
+      | propertyType |
+      |              |
+      | .            |
+
+  Scenario: check all property when use prefix
+    Given the following json:
+    """
+    {
+      "valueA": {
+        "value": "A"
+      },
+      "valueB": {
+        "value": "B"
+      },
+      "valueC": {
+        "value": "C"
+      }
+    }
+    """
+    Then the following verification should pass:
+    """
+    = {
+      value{}: {
+        a.value: A
+        b.value: B
+        c.value: C
+      }
+    }
     """
 
+#  TODO field alias not support yet
+#  TODO bracket string relax not support yet
 
-#    TODO alias

@@ -129,8 +129,8 @@ public class Compiler {
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
             LIST_MAPPING = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
             IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(oneOf(PROPERTY_PATTERN, oneOf(STRING_PROPERTY, SYMBOL).concat(LIST_MAPPING))),
-            EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING).mandatory(
-                    "Expect a symbol")), PROPERTY_SLASH.clause(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING).mandatory(
+            EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(PROPERTY_PATTERN.or(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING).mandatory(
+                    "Expect a symbol"))), PROPERTY_SLASH.clause(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING).mandatory(
                     "Expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
                     "Should given one property or array index in `[]`")).and(endWith(CLOSING_BRACKET))
                     .as(DALNode::bracketSymbolNode).concat(LIST_MAPPING))));

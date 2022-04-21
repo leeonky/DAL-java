@@ -3,10 +3,10 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.dal.ast.SortSequenceNode;
 
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
@@ -149,10 +149,17 @@ public class Data {
     }
 
     public Data filter(String prefix) {
-        return new Data(getFieldNames().stream().filter(fieldName -> fieldName.startsWith(prefix))
-                .collect(Collectors.toMap(fieldName -> fieldName.substring(prefix.length(), prefix.length() + 1).toLowerCase()
-                        + fieldName.substring(prefix.length() + 1), property ->
-                        getValue(property).getInstance())),
-                DALRuntimeContext, schemaType).setListComparator(listComparator);
+        FilteredObject filteredObject = new FilteredObject();
+        getFieldNames().stream().filter(fieldName -> fieldName.startsWith(prefix))
+                .forEach(fieldName -> filteredObject.put(trimPrefix(prefix, fieldName), getValue(fieldName).getInstance()));
+        return new Data(filteredObject, DALRuntimeContext, schemaType).setListComparator(listComparator);
+    }
+
+    private String trimPrefix(String prefix, String fieldName) {
+        return fieldName.substring(prefix.length(), prefix.length() + 1).toLowerCase()
+                + fieldName.substring(prefix.length() + 1);
+    }
+
+    private static class FilteredObject extends LinkedHashMap<String, Object> implements Flatten {
     }
 }
