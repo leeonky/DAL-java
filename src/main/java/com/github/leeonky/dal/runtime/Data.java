@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
@@ -147,4 +148,11 @@ public class Data {
         }}, DALRuntimeContext, propertySchema(property));
     }
 
+    public Data filter(String prefix) {
+        return new Data(getFieldNames().stream().filter(fieldName -> fieldName.startsWith(prefix))
+                .collect(Collectors.toMap(fieldName -> fieldName.substring(prefix.length(), prefix.length() + 1).toLowerCase()
+                        + fieldName.substring(prefix.length() + 1), property ->
+                        getValue(property).getInstance())),
+                DALRuntimeContext, schemaType).setListComparator(listComparator);
+    }
 }

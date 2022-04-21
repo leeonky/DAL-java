@@ -19,21 +19,24 @@ Feature: prefix
     """
     value{}
     """
-#    Then the result should:
-#    """
-#    {
-#      "a": {
-#        "value": "A"
-#      },
-#      "b": {
-#        "value": "B"
-#      },
-#      "c": {
-#        "value": "C"
-#      }
-#    }
-#    """
-#    And the inspect should:
-#    """
-#    value{}
-#    """
+    Then the result should:
+    """
+    = {
+      "a": {
+        "value": "A"
+      },
+      "b": {
+        "value": "B"
+      },
+      "c": {
+        "value": "C"
+      }
+    }
+    """
+    And the inspect should:
+    """
+    value{}
+    """
+
+
+#    TODO alias

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+import static com.github.leeonky.dal.Assertions.expect;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Deprecated

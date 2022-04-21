@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.compiler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.leeonky.dal.Assertions;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
@@ -20,7 +19,7 @@ import lombok.SneakyThrows;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.extension.assertj.DALAssert.expect;
+import static com.github.leeonky.dal.Assertions.expect;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -199,12 +198,12 @@ public class IntegrationTestContext {
     }
 
     public void shouldPass(String dalExpression) {
-        Assertions.expect(input).should(dalExpression);
+        expect(input).should(dalExpression);
     }
 
     public void should(String dalExpression) {
         try {
-            Assertions.expect(input).should(dalExpression);
+            expect(input).should(dalExpression);
         } catch (Throwable e) {
             bizException = e;
         }
@@ -212,7 +211,7 @@ public class IntegrationTestContext {
 
     public void exact(String equalExpression) {
         try {
-            Assertions.expect(input).exact(equalExpression);
+            expect(input).exact(equalExpression);
         } catch (Throwable e) {
             bizException = e;
         }
@@ -223,16 +222,16 @@ public class IntegrationTestContext {
     }
 
     public void exactPass(String equalExpression) {
-        Assertions.expect(input).exact(equalExpression);
+        expect(input).exact(equalExpression);
     }
 
     public void matchPass(String matchingExpression) {
-        Assertions.expect(input).match(matchingExpression);
+        expect(input).match(matchingExpression);
     }
 
     public void match(String matchingExpression) {
         try {
-            Assertions.expect(input).match(matchingExpression);
+            expect(input).match(matchingExpression);
         } catch (Throwable e) {
             bizException = e;
         }

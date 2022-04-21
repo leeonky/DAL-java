@@ -50,6 +50,10 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return procedure -> procedure.positionOf(position -> parse(procedure).map(node -> node.setPositionBegin(position)));
     }
 
+    default NodeParser<C, N, E, O, P> and(ClauseParser<C, N, E, O, P> clauseParser) {
+        return procedure -> procedure.getSourceCode().tryFetch(() -> parse(procedure).flatMap(node -> clauseParser.combined(procedure, node)));
+    }
+
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends
             Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {

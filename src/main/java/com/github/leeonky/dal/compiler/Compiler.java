@@ -17,6 +17,7 @@ import static com.github.leeonky.interpreter.FunctionUtil.not;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.NodeParser.Mandatory.clause;
 import static com.github.leeonky.interpreter.NodeParser.lazy;
+import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.Parser.oneOf;
 import static com.github.leeonky.interpreter.Syntax.Rules.*;
 import static com.github.leeonky.interpreter.Syntax.many;
@@ -97,7 +98,18 @@ public class Compiler {
             SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
             STRING_PROPERTY = procedure -> procedure.isEnableRelaxProperty() ? single(oneOf(SINGLE_QUOTED_STRING,
-                    DOUBLE_QUOTED_STRING)).as(DALNode::stringSymbol).parse(procedure) : empty();
+                    DOUBLE_QUOTED_STRING)).as(DALNode::stringSymbol).parse(procedure) : empty(),
+            SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_SYMBOL : Tokens.SYMBOL).nodeParser(
+                    DALNode::symbolNode).parse(procedure),
+            DOT_SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_DOT_SYMBOL : Tokens.DOT_SYMBOL)
+                    .nodeParser(DALNode::symbolNode).parse(procedure),
+            PROPERTY_PATTERN = this::propertyPattern;
+
+    private Optional<DALNode> propertyPattern(DALProcedure dalProcedure) {
+        ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> patternClause =
+                notation("{}").clause((token, symbol) -> new PropertyPattern(symbol));
+        return SYMBOL.and(patternClause).parse(dalProcedure);
+    }
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             PROPERTY_CHAIN, OPERAND, EXPRESSION,
@@ -111,18 +123,12 @@ public class Compiler {
             VERIFICATION_PROPERTY = procedure -> procedure.enableRelaxProperty(() ->
                     procedure.enableSlashProperty(() -> PROPERTY_CHAIN.parse(procedure)));
 
-    public NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_SYMBOL : Tokens.SYMBOL).nodeParser(
-            DALNode::symbolNode).parse(procedure),
-            DOT_SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_DOT_SYMBOL : Tokens.DOT_SYMBOL)
-                    .nodeParser(DALNode::symbolNode).parse(procedure);
-
     public ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             ARITHMETIC_CLAUSE, VERIFICATION_CLAUSE,
             SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE),
             WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
             LIST_MAPPING = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
-            IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(oneOf(STRING_PROPERTY, SYMBOL).concat(LIST_MAPPING)),
+            IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(oneOf(PROPERTY_PATTERN, oneOf(STRING_PROPERTY, SYMBOL).concat(LIST_MAPPING))),
             EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING).mandatory(
                     "Expect a symbol")), PROPERTY_SLASH.clause(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING).mandatory(
                     "Expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
