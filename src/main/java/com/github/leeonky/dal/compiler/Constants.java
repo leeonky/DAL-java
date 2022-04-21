@@ -11,14 +11,14 @@ public class Constants {
     public static final Set<Character> DELIMITER = new HashSet<>(asList('=', '>', '<', '+', '-', '*', '/', ':',
             '&', '|', '!', ',', '(', ')', '[', ']', '{', '}', ' ', '\t', '\n', '\r', '#', '\'', '"'));
     //    TODO missing testing \r
-    public static final Set<Character> DELIMITER_OR_DOT = new HashSet<Character>(DELIMITER) {{
+    public static final Set<Character> PROPERTY_DELIMITER = new HashSet<Character>(DELIMITER) {{
         add('.');
     }};
 
-    public static final Set<String> DELIMITER_STRING = DELIMITER_OR_DOT.stream().map(Object::toString).collect(Collectors.toSet());
+    public static final Set<String> PROPERTY_DELIMITER_STRING = PROPERTY_DELIMITER.stream().map(Object::toString).collect(Collectors.toSet());
 
-    public static final Set<Character> RELAX_DELIMITER = new HashSet<Character>() {{
-        addAll(DELIMITER_OR_DOT);
+    public static final Set<Character> RELAX_PROPERTY_DELIMITER = new HashSet<Character>() {{
+        addAll(PROPERTY_DELIMITER);
         for (char c : ",-+%;".toCharArray()) {
             remove(c);
         }
