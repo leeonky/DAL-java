@@ -112,7 +112,7 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
 
         invalidTypeToMatchValue(Number.class, actual, String.class, expected, operator);
         invalidTypeToMatchValue(Boolean.class, actual, String.class, expected, operator);
-        return assertMatch(expected, actual, getPositionBegin(), context.getConverter());
+        return assertMatch(expected, actual, getPositionBegin(), context.getNumberType());
     }
 
     private Data evaluateAndWrapperFailureMessage(DALNode actualNode, RuntimeContextBuilder.DALRuntimeContext context) {

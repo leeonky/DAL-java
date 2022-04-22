@@ -6,6 +6,7 @@ import com.github.leeonky.interpreter.FunctionUtil;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.NumberType;
 import com.github.leeonky.util.Suppressor;
 
 import java.lang.reflect.Array;
@@ -31,6 +32,7 @@ public class RuntimeContextBuilder {
     private Converter converter = Converter.getInstance();
     private final Set<Method> extensionMethods = new HashSet<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
+    private final NumberType numberType = new NumberType();
 
     public RuntimeContextBuilder() {
         registerValueFormat(new Formatters.String())
@@ -272,6 +274,10 @@ public class RuntimeContextBuilder {
             if (flattenDataCollection != null)
                 return flattenDataCollection.removeFlattenProperties(parent);
             return fetchFlattenData(parent).map(flattenData -> flattenData.children.removeFlattenProperties(parent)).orElse(emptySet());
+        }
+
+        public NumberType getNumberType() {
+            return numberType;
         }
     }
 

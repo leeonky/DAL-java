@@ -3,8 +3,7 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.runtime.Calculator;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.util.Converter;
-import com.github.leeonky.util.NumberUtil;
+import com.github.leeonky.util.NumberType;
 
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -28,11 +27,11 @@ public class AssertionFailure extends DalException {
         return true;
     }
 
-    public static boolean assertMatch(Data expected, Data actual, int position, Converter converter) {
+    public static boolean assertMatch(Data expected, Data actual, int position, NumberType numberType) {
         Object expectedValue = expected.getInstance();
         Object actualValue = actual.getInstance();
         if (expectedValue instanceof Number && actualValue instanceof Number)
-            return NumberUtil.compare((Number) expectedValue, (Number) actualValue, converter) == 0
+            return numberType.compare((Number) expectedValue, (Number) actualValue) == 0
                     || raiseNotMatchError(expected, actual, position);
         else {
             Data converted = actual.convert(expectedValue.getClass());

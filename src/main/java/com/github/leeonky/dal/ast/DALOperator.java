@@ -91,7 +91,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return Calculator.compare(node1.evaluate(context), node2.evaluate(context), context.getConverter()) < 0;
+            return Calculator.compare(node1.evaluate(context), node2.evaluate(context), context) < 0;
         }
     }
 
@@ -102,7 +102,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return Calculator.compare(node1.evaluate(context), node2.evaluate(context), context.getConverter()) >= 0;
+            return Calculator.compare(node1.evaluate(context), node2.evaluate(context), context) >= 0;
         }
     }
 
@@ -113,7 +113,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return Calculator.compare(node1.evaluate(context), node2.evaluate(context), context.getConverter()) <= 0;
+            return Calculator.compare(node1.evaluate(context), node2.evaluate(context), context) <= 0;
         }
     }
 
@@ -135,7 +135,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return Calculator.plus(node1.evaluate(context), node2.evaluate(context), context.getConverter());
+            return Calculator.plus(node1.evaluate(context), node2.evaluate(context), context);
         }
     }
 
@@ -146,7 +146,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return Calculator.compare(node1.evaluate(context), node2.evaluate(context), context.getConverter()) > 0;
+            return Calculator.compare(node1.evaluate(context), node2.evaluate(context), context) > 0;
         }
     }
 
@@ -157,7 +157,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return Calculator.subtract(node1.evaluate(context), node2.evaluate(context), context.getConverter());
+            return Calculator.subtract(node1.evaluate(context), node2.evaluate(context), context);
         }
     }
 
@@ -168,7 +168,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return Calculator.multiply(node1.evaluate(context), node2.evaluate(context), context.getConverter());
+            return Calculator.multiply(node1.evaluate(context), node2.evaluate(context), context);
         }
     }
 
@@ -179,7 +179,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return Calculator.divide(node1.evaluate(context), node2.evaluate(context), context.getConverter());
+            return Calculator.divide(node1.evaluate(context), node2.evaluate(context), context);
         }
     }
 
@@ -229,7 +229,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return Calculator.negate(node2.evaluate(context));
+            return Calculator.negate(node2.evaluate(context), context);
         }
 
         @Override

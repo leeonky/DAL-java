@@ -1,19 +1,16 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.util.Converter;
-import com.github.leeonky.util.NumberUtil;
-
 import java.util.Objects;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 
 public class Calculator {
-    public static int compare(Object v1, Object v2, Converter converter) {
+    public static int compare(Object v1, Object v2, RuntimeContextBuilder.DALRuntimeContext context) {
         if (v1 == null || v2 == null)
             throw new IllegalArgumentException(String.format("Can not compare [%s] and [%s]", v1, v2));
         if (v1 instanceof Number && v2 instanceof Number)
-            return NumberUtil.compare((Number) v1, (Number) v2, converter);
+            return context.getNumberType().compare((Number) v1, (Number) v2);
         if (v1 instanceof String && v2 instanceof String)
             return ((String) v1).compareTo((String) v2);
         throw new IllegalArgumentException(String.format("Can not compare [%s: %s] and [%s: %s]",
@@ -26,9 +23,9 @@ public class Calculator {
         return !v2.isNull() && Objects.equals(v1.getInstance(), v2.getInstance());
     }
 
-    public static Object plus(Object v1, Object v2, Converter converter) {
+    public static Object plus(Object v1, Object v2, RuntimeContextBuilder.DALRuntimeContext context) {
         if (v1 instanceof Number && v2 instanceof Number)
-            return NumberUtil.plus((Number) v1, (Number) v2, converter);
+            return context.getNumberType().plus((Number) v1, (Number) v2);
         if (v1 instanceof String)
             return v1.toString() + v2;
         if (v2 instanceof String)
@@ -36,19 +33,19 @@ public class Calculator {
         throw new IllegalArgumentException(String.format("Can not plus '%s' and '%s'", getClassName(v1), getClassName(v2)));
     }
 
-    public static Object subtract(Object v1, Object v2, Converter converter) {
+    public static Object subtract(Object v1, Object v2, RuntimeContextBuilder.DALRuntimeContext context) {
         requireNumber(v1, v2);
-        return NumberUtil.subtract((Number) v1, (Number) v2, converter);
+        return context.getNumberType().subtract((Number) v1, (Number) v2);
     }
 
-    public static Object multiply(Object v1, Object v2, Converter converter) {
+    public static Object multiply(Object v1, Object v2, RuntimeContextBuilder.DALRuntimeContext context) {
         requireNumber(v1, v2);
-        return NumberUtil.multiply((Number) v1, (Number) v2, converter);
+        return context.getNumberType().multiply((Number) v1, (Number) v2);
     }
 
-    public static Object divide(Object v1, Object v2, Converter converter) {
+    public static Object divide(Object v1, Object v2, RuntimeContextBuilder.DALRuntimeContext context) {
         requireNumber(v1, v2);
-        return NumberUtil.divide((Number) v1, (Number) v2, converter);
+        return context.getNumberType().divide((Number) v1, (Number) v2);
     }
 
     private static void requireNumber(Object v1, Object v2) {
@@ -89,9 +86,9 @@ public class Calculator {
             throw new IllegalArgumentException(operand + " should be boolean but '" + getClassName(v) + "'");
     }
 
-    public static Object negate(Object v) {
+    public static Object negate(Object v, RuntimeContextBuilder.DALRuntimeContext context) {
         if (v instanceof Number)
-            return NumberUtil.negate((Number) v);
+            return context.getNumberType().negate((Number) v);
         throw new IllegalArgumentException(String.format("Operands should be number but '%s'", getClassName(v)));
     }
 }
