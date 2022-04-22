@@ -3,6 +3,8 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.runtime.Calculator;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.RuntimeException;
+import com.github.leeonky.util.ConvertException;
 import com.github.leeonky.util.NumberType;
 
 import java.util.Set;
@@ -34,10 +36,14 @@ public class AssertionFailure extends DalException {
             return numberType.compare((Number) expectedValue, (Number) actualValue) == 0
                     || raiseNotMatchError(expected, actual, position);
         else {
-            Data converted = actual.convert(expectedValue.getClass());
-            return Calculator.equals(converted, expected) ||
-                    (converted.getInstance() == actual.getInstance() ? raiseNotMatchError(expected, actual, position)
-                            : raiseNotMatchErrorWithConvertedValue(expected, actual, position, converted));
+            try {
+                Data converted = actual.convert(expectedValue.getClass());
+                return Calculator.equals(converted, expected) ||
+                        (converted.getInstance() == actual.getInstance() ? raiseNotMatchError(expected, actual, position)
+                                : raiseNotMatchErrorWithConvertedValue(expected, actual, position, converted));
+            } catch (ConvertException e) {
+                throw new RuntimeException(e.getMessage(), position);
+            }
         }
     }
 
