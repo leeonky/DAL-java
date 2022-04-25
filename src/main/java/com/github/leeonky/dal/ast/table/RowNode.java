@@ -54,10 +54,6 @@ public class RowNode extends DALNode {
         return cells;
     }
 
-    public boolean samePrefix(RowNode another) {
-        return another.hasIndex() != hasIndex();
-    }
-
     public RowNode merge(RowNode rowNode) {
         return (RowNode) new RowNode(rowPrefix, new ArrayList<DALNode>() {{
             addAll(cells);
@@ -71,5 +67,9 @@ public class RowNode extends DALNode {
 
     public boolean specialRow() {
         return isEllipsis() || isRowWildcard();
+    }
+
+    public RowKey.RowKeyType combineRowKey(RowKey.RowKeyType rowKeyType) {
+        return rowKeyType.merge(rowPrefix.getRowKeyType());
     }
 }

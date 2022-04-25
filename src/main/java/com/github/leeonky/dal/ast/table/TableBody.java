@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.ast.table.RowKey.RowKeyType.EMPTY_TABLE_ROW_KEY;
+import static com.github.leeonky.interpreter.FunctionUtil.notAllowParallelReduce;
 import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
 import static java.util.stream.Collectors.toList;
 
@@ -27,10 +29,14 @@ public class TableBody extends DALNode {
     }
 
     public TableBody checkPrefix(InterpreterException.Position.Type type) {
-        rows.stream().skip(1).filter(rowNode -> rowNode.samePrefix(rows.get(0))).findAny().ifPresent(row -> {
-            throw new SyntaxException("Row index should be consistent", row.getPositionBegin(), type)
-                    .multiPosition(rows.get(0).getPositionBegin(), type);
-        });
+        RowKey.RowKeyType keyType = rows.stream().reduce(EMPTY_TABLE_ROW_KEY, (rowKeyType, rowNode) -> {
+            RowKey.RowKeyType rowKeyType1 = rowNode.combineRowKey(rowKeyType);
+            if (rowKeyType1 == null) {
+                throw new SyntaxException("Row index should be consistent", rowNode.getPositionBegin(), type)
+                        .multiPosition(rows.get(0).getPositionBegin(), type);
+            }
+            return rowKeyType1;
+        }, notAllowParallelReduce());
         return this;
     }
 
@@ -39,7 +45,6 @@ public class TableBody extends DALNode {
         return rows.stream().map(RowNode::inspect).collect(Collectors.joining());
     }
 
-    // TODO    set position
     public ListScopeNode transformToListScope(DALOperator operator) {
         Stream<Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode>> rowClauses = rows.stream().map(rowNode ->
                 rowNode.verificationClause(operator));
