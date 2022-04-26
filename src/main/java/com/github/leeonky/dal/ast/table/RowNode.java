@@ -46,6 +46,7 @@ public class RowNode extends DALNode {
         return cells.size() >= 1 && firstCell() instanceof ListEllipsisNode;
     }
 
+    @Deprecated
     public boolean hasIndex() {
         return rowPrefix.hasIndex();
     }

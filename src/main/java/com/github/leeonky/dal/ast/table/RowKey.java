@@ -71,7 +71,7 @@ public class RowKey {
         @Override
         protected RowKeyType mergeBy(NoRowKeyType noRowKeyType) {
 //            TODO need raise error
-            return null;
+            throw new IllegalArgumentException();
         }
     }
 
@@ -84,7 +84,7 @@ public class RowKey {
         @Override
         protected RowKeyType mergeBy(IndexRowKeyType indexRowKeyType) {
 //            TODO need raise error
-            return null;
+            throw new IllegalArgumentException();
         }
 
         @Override

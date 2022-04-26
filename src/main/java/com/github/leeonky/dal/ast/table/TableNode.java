@@ -2,7 +2,6 @@ package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
-import com.github.leeonky.dal.ast.ListScopeNode;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
@@ -21,25 +20,25 @@ public class TableNode extends DALNode {
 
     @Override
     public boolean verify(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
-        return verifyAsListAndReThrow(actualNode, operator, context);
-    }
-
-    @Override
-    public boolean verify(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
-        return verifyAsListAndReThrow(actualNode, operator, context);
-    }
-
-    private boolean verifyAsListAndReThrow(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
         try {
-            return verifyAsList(actualNode, operator, context);
+            return transformToVerificationNode(operator, context).verify(actualNode, operator, context);
         } catch (ElementAssertionFailure elementAssertionFailure) {
             throw elementAssertionFailure.linePositionException(this);
         }
     }
 
-    public boolean verifyAsList(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
-        return ((ListScopeNode) tableBody.transformToListScope(operator).setPositionBegin(getPositionBegin()))
-                .verifyAll(context, actualNode.evaluateData(context).setListComparator(tableHead.collectComparator(context)));
+    @Override
+    public boolean verify(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
+        try {
+            return transformToVerificationNode(operator, context).verify(actualNode, operator, context);
+        } catch (ElementAssertionFailure elementAssertionFailure) {
+            throw elementAssertionFailure.linePositionException(this);
+        }
+    }
+
+    public DALNode transformToVerificationNode(DALOperator operator, DALRuntimeContext context) {
+        return tableBody.transformToListScope(operator, tableHead.collectComparator(context))
+                .setPositionBegin(getPositionBegin());
     }
 
     @Override

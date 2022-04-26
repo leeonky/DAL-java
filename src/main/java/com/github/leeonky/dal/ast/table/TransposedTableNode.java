@@ -16,17 +16,17 @@ public class TransposedTableNode extends DALNode {
 
     @Override
     public boolean verify(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
-        return verifyAsListAndReThrow(actualNode, operator, context);
+        try {
+            return transpose().transformToVerificationNode(operator, context).verify(actualNode, operator, context);
+        } catch (ElementAssertionFailure elementAssertionFailure) {
+            throw elementAssertionFailure.columnPositionException(this);
+        }
     }
 
     @Override
     public boolean verify(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
-        return verifyAsListAndReThrow(actualNode, operator, context);
-    }
-
-    private boolean verifyAsListAndReThrow(DALNode actualNode, DALOperator operator, DALRuntimeContext context) {
         try {
-            return transpose().verifyAsList(actualNode, operator, context);
+            return transpose().transformToVerificationNode(operator, context).verify(actualNode, operator, context);
         } catch (ElementAssertionFailure elementAssertionFailure) {
             throw elementAssertionFailure.columnPositionException(this);
         }

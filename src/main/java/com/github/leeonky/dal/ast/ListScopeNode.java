@@ -10,6 +10,7 @@ import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -25,24 +26,27 @@ public class ListScopeNode extends DALNode {
     private List<Clause<DALRuntimeContext, DALNode>> expressionFactories;
     private final Type type;
     private final boolean multiLineList;
+    private final Comparator<Object> listComparator;
 
-    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories, boolean multiLineList) {
+    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories, boolean multiLineList, Comparator<Object> listComparator) {
         type = guessType(expressionFactories);
         this.expressionFactories = expressionFactories;
         this.multiLineList = multiLineList;
+        this.listComparator = listComparator;
 
         // just use side effect to check list syntax: [1 ... 2 ... ]
         getExpressions(0);
     }
 
-    public ListScopeNode(List<DALNode> inputExpressions, boolean multiLineList, Type type) {
+    public ListScopeNode(List<DALNode> inputExpressions, boolean multiLineList, Type type, Comparator<Object> listComparator) {
         expressions__ = this.inputExpressions = new ArrayList<>(inputExpressions);
         this.multiLineList = multiLineList;
         this.type = type;
+        this.listComparator = listComparator;
     }
 
     public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories) {
-        this(expressionFactories, false);
+        this(expressionFactories, false, SortSequenceNode.NOP_COMPARATOR);
     }
 
     private List<DALNode> getExpressions(int firstIndex) {
@@ -81,12 +85,12 @@ public class ListScopeNode extends DALNode {
 
     @Override
     public boolean verify(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
-        return verifyAll(context, actualNode.evaluateData(context));
+        return verifyAll(context, actualNode.evaluateData(context).setListComparator(listComparator));
     }
 
     @Override
     public boolean verify(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
-        return verifyAll(context, actualNode.evaluateData(context));
+        return verifyAll(context, actualNode.evaluateData(context).setListComparator(listComparator));
     }
 
     public boolean verifyAll(DALRuntimeContext context, Data data) {

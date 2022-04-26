@@ -22,6 +22,7 @@ public class RowPrefixNode extends DALNode {
         this.rowOperator = rowOperator;
     }
 
+    @Deprecated
     public boolean hasIndex() {
         return rowKey.index.isPresent();
     }

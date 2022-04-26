@@ -24,7 +24,7 @@ public class TransposedTableBody extends DALNode {
     public TransposedTableBody checkTable(TransposedTableHead tableHead) {
         checkCellSize(tableHead);
         replaceEmptyCell();
-        transpose(tableHead).checkPrefix(CHAR);
+        transpose(tableHead);
         return this;
     }
 
@@ -42,7 +42,7 @@ public class TransposedTableBody extends DALNode {
 
     public TableBody transpose(TransposedTableHead tableHead) {
         return new TableBody(rows.stream().map(rowNode -> rowNode.transpose(tableHead))
-                .reduce(this::merge).orElse(Collections.emptyList()));
+                .reduce(this::merge).orElse(Collections.emptyList()), CHAR);
     }
 
     private List<RowNode> merge(List<RowNode> rows1, List<RowNode> rows2) {
