@@ -22,11 +22,6 @@ public class RowPrefixNode extends DALNode {
         this.rowOperator = rowOperator;
     }
 
-    @Deprecated
-    public boolean hasIndex() {
-        return rowKey.index.isPresent();
-    }
-
     @Override
     public String inspect() {
         String indexAndSchema = (rowKey.inspect() + " " + rowSchema.map(clause ->

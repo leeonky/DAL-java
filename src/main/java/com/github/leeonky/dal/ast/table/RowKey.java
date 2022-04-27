@@ -1,14 +1,20 @@
 package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.interpreter.Clause;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.table.RowKey.RowKeyType.INDEX_ROW_KEY;
 import static com.github.leeonky.dal.ast.table.RowKey.RowKeyType.NO_ROW_KEY;
+import static java.util.stream.Collectors.toList;
 
 public class RowKey {
-    final Optional<Integer> index;
+    private final Optional<Integer> index;
 
     public RowKey(Optional<Integer> index) {
         this.index = index;
@@ -37,6 +43,13 @@ public class RowKey {
         protected abstract RowKeyType mergeBy(IndexRowKeyType indexRowKeyType);
 
         protected abstract RowKeyType mergeBy(NoRowKeyType noRowKeyType);
+
+        public DALNode transformToVerificationNode(DALOperator operator, List<RowNode> rows, Comparator<Object> comparator) {
+            return makeNode(rows.stream().map(rowNode -> rowNode.verificationClause(operator)), comparator);
+        }
+
+        protected abstract DALNode makeNode(Stream<Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode>> rowClauses,
+                                            Comparator<Object> comparator);
     }
 
     private static class EmptyTableRowKeyType extends RowKeyType {
@@ -55,6 +68,12 @@ public class RowKey {
         protected RowKeyType mergeBy(NoRowKeyType noRowKeyType) {
             return this;
         }
+
+        @Override
+        protected DALNode makeNode(Stream<Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode>> rowClauses,
+                                   Comparator<Object> comparator) {
+            return new ListScopeNode(rowClauses.collect(toList()), true, comparator);
+        }
     }
 
     private static class IndexRowKeyType extends RowKeyType {
@@ -70,8 +89,14 @@ public class RowKey {
 
         @Override
         protected RowKeyType mergeBy(NoRowKeyType noRowKeyType) {
-//            TODO need raise error
             throw new IllegalArgumentException();
+        }
+
+        @Override
+        protected DALNode makeNode(Stream<Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode>> rowClauses,
+                                   Comparator<Object> comparator) {
+            return new ListScopeNode(rowClauses.map(rowNode -> rowNode.expression(null))
+                    .collect(toList()), true, ListScopeNode.Type.FIRST_N_ITEMS, comparator);
         }
     }
 
@@ -83,13 +108,18 @@ public class RowKey {
 
         @Override
         protected RowKeyType mergeBy(IndexRowKeyType indexRowKeyType) {
-//            TODO need raise error
             throw new IllegalArgumentException();
         }
 
         @Override
         protected RowKeyType mergeBy(NoRowKeyType noRowKeyType) {
             return noRowKeyType;
+        }
+
+        @Override
+        protected DALNode makeNode(Stream<Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode>> rowClauses,
+                                   Comparator<Object> comparator) {
+            return new ListScopeNode(rowClauses.collect(toList()), true, comparator);
         }
     }
 }

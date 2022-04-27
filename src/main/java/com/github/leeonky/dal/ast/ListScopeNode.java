@@ -28,7 +28,8 @@ public class ListScopeNode extends DALNode {
     private final boolean multiLineList;
     private final Comparator<Object> listComparator;
 
-    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories, boolean multiLineList, Comparator<Object> listComparator) {
+    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories, boolean multiLineList,
+                         Comparator<Object> listComparator) {
         type = guessType(expressionFactories);
         this.expressionFactories = expressionFactories;
         this.multiLineList = multiLineList;
@@ -38,7 +39,8 @@ public class ListScopeNode extends DALNode {
         getExpressions(0);
     }
 
-    public ListScopeNode(List<DALNode> inputExpressions, boolean multiLineList, Type type, Comparator<Object> listComparator) {
+    public ListScopeNode(List<DALNode> inputExpressions, boolean multiLineList, Type type,
+                         Comparator<Object> listComparator) {
         expressions__ = this.inputExpressions = new ArrayList<>(inputExpressions);
         this.multiLineList = multiLineList;
         this.type = type;
@@ -70,12 +72,6 @@ public class ListScopeNode extends DALNode {
         else if (expressionFactories.size() > 0 && isListEllipsis(expressionFactories.get(0)))
             return Type.LAST_N_ITEMS;
         return Type.ALL_ITEMS;
-    }
-
-    // Only for test
-//    TODO remove
-    public List<DALNode> getExpressions() {
-        return getExpressions(0);
     }
 
     @Override

@@ -2,16 +2,12 @@ package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
-import com.github.leeonky.dal.ast.ListScopeNode;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.table.RowKey.RowKeyType.EMPTY_TABLE_ROW_KEY;
 import static com.github.leeonky.interpreter.FunctionUtil.notAllowParallelReduce;
@@ -31,11 +27,6 @@ public class TableBody extends DALNode {
         rowKeyType = resolveRowKeyType(type);
     }
 
-    @Deprecated
-    private boolean isHasRowIndex() {
-        return (!rows.isEmpty()) && rows.get(0).hasIndex();
-    }
-
     public RowKey.RowKeyType resolveRowKeyType(InterpreterException.Position.Type type) {
         return rows.stream().reduce(EMPTY_TABLE_ROW_KEY, (last, rowNode) -> {
             try {
@@ -52,15 +43,8 @@ public class TableBody extends DALNode {
         return rows.stream().map(RowNode::inspect).collect(Collectors.joining());
     }
 
-    public ListScopeNode transformToListScope(DALOperator operator, Comparator<Object> comparator) {
-        Stream<Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode>> rowClauses = rows.stream().map(rowNode ->
-                rowNode.verificationClause(operator));
-        if (isHasRowIndex()) {
-            return new ListScopeNode(rowClauses.map(rowNode -> rowNode.expression(null))
-                    .collect(toList()), true, ListScopeNode.Type.FIRST_N_ITEMS, comparator);
-        } else {
-            return new ListScopeNode(rowClauses.collect(toList()), true, comparator);
-        }
+    public DALNode transformToListScope(DALOperator operator, Comparator<Object> comparator) {
+        return rowKeyType.transformToVerificationNode(operator, rows, comparator);
     }
 
     public RowNode getDataRowByDataIndex(int row) {
