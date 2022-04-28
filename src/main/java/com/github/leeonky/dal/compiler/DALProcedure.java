@@ -74,6 +74,7 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
         return enableSlashProperty;
     }
 
+    //    TODO refactor
     public <T> T enableSlashProperty(Supplier<T> supplier) {
         enableSlashProperty = true;
         try {
@@ -87,6 +88,7 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
         return enableRelaxProperty;
     }
 
+    //    TODO refactor
     public <T> T enableRelaxProperty(Supplier<T> supplier) {
         enableRelaxProperty = true;
         try {

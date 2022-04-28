@@ -47,7 +47,6 @@ public class SourceCode {
                 sourceCode.popChar();
                 sourceCode.trimBlankAndComment();
             }
-//            if (sourceCode.hasCode())
             int size = 0;
             while (sourceCode.hasCode() && !endsWith.test(sourceCode.code, sourceCode.position, size++))
                 token.append(sourceCode.popChar());

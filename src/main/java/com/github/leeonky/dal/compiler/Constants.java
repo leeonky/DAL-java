@@ -19,7 +19,7 @@ public class Constants {
 
     public static final Set<Character> RELAX_PROPERTY_DELIMITER = new HashSet<Character>() {{
         addAll(PROPERTY_DELIMITER);
-        for (char c : ",-+%;".toCharArray()) {
+        for (char c : "-+%;".toCharArray()) {
             remove(c);
         }
     }};

@@ -77,7 +77,7 @@ public class Compiler {
     //    TODO private
     NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             PROPERTY, OBJECT, LIST, PARENTHESES, VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND, TABLE,
-            SHORT_VERIFICATION_OPERAND, CELL_VERIFICATION_OPERAND, GROUP_PROPERTY,
+            SHORT_VERIFICATION_OPERAND, CELL_VERIFICATION_OPERAND, GROUP_PROPERTY, OPTIONAL_PROPERTY_CHAIN,
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
             NUMBER = Tokens.NUMBER.nodeParser(constNode(Token::getNumber)),
             INTEGER = Tokens.INTEGER.nodeParser(constNode(Token::getInteger)),
@@ -103,7 +103,9 @@ public class Compiler {
                     DALNode::symbolNode).parse(procedure),
             DOT_SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_DOT_SYMBOL : Tokens.DOT_SYMBOL)
                     .nodeParser(DALNode::symbolNode).parse(procedure),
-            PROPERTY_PATTERN = this::propertyPattern;
+            PROPERTY_PATTERN = this::propertyPattern,
+            OPTIONAL_VERIFICATION_PROPERTY = procedure -> procedure.enableRelaxProperty(() ->
+                    procedure.enableSlashProperty(() -> OPTIONAL_PROPERTY_CHAIN.parse(procedure)));
 
     private Optional<DALNode> propertyPattern(DALProcedure dalProcedure) {
         ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> patternClause =
@@ -149,7 +151,8 @@ public class Compiler {
         PARENTHESES = lazy(() -> enableCommaAnd(OPENING_PARENTHESES.with(single(EXPRESSION).and(endWith(CLOSING_PARENTHESES))
                 .as(DALNode::parenthesesNode))));
         PROPERTY = lazy(() -> oneOf(GROUP_PROPERTY, oneOf(EXPLICIT_PROPERTY, IMPLICIT_PROPERTY).defaultInputNode(InputNode.INSTANCE)));
-        PROPERTY_CHAIN = PROPERTY.mandatory("Expect a object property").recursive(EXPLICIT_PROPERTY);
+        OPTIONAL_PROPERTY_CHAIN = PROPERTY.recursive(EXPLICIT_PROPERTY);
+        PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
         OBJECT = lazy(() -> DALProcedure.disableCommaAnd(OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(CLOSING_BRACES))
                 .as(ObjectScopeNode::new).or(many(VERIFICATION_PROPERTY.expression(shortVerificationClause(VERIFICATION_OPERATORS
                         .mandatory("Expect operator `:` or `=`"), SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING))))
@@ -211,7 +214,8 @@ public class Compiler {
             SEQUENCE_AZ = Notations.SEQUENCE_AZ.node(SortNode::new),
             SEQUENCE_ZA = Notations.SEQUENCE_ZA.node(SortNode::new),
             SEQUENCE_AZ_2 = Notations.SEQUENCE_AZ_2.node(SortNode::new),
-            SEQUENCE_ZA_2 = Notations.SEQUENCE_ZA_2.node(SortNode::new);
+            SEQUENCE_ZA_2 = Notations.SEQUENCE_ZA_2.node(SortNode::new),
+            ROW_KEY = oneOf(INTEGER, OPTIONAL_VERIFICATION_PROPERTY);
 
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SEQUENCE = oneOf(
@@ -221,8 +225,8 @@ public class Compiler {
             many(SEQUENCE_ZA_2).and(atLeast(1)).as(SortSequenceNode::new)).or(procedure -> SortSequenceNode.noSequence());
 
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            ROW_PREFIX = procedure -> new RowPrefixNode(INTEGER.parse(procedure).map(node -> (Integer)
-            ((ConstNode) node).getValue()), SCHEMA_CLAUSE.parse(procedure), VERIFICATION_OPERATORS.parse(procedure)),
+            ROW_PREFIX = procedure -> new RowPrefixNode(ROW_KEY.parse(procedure), SCHEMA_CLAUSE.parse(procedure),
+            VERIFICATION_OPERATORS.parse(procedure)),
             TABLE_HEADER = procedure -> new HeaderNode((SortSequenceNode) SEQUENCE.parse(procedure),
                     VERIFICATION_PROPERTY.concat(SCHEMA_CLAUSE).parse(procedure), VERIFICATION_OPERATORS.parse(procedure));
 

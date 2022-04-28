@@ -28,20 +28,20 @@ Feature: relax header property
     Given the following json:
     """
     [{
-      ",-+%;": {
-        ",-+%;": "Tom"
+      "%-+;": {
+        "%-+;": "Tom"
       }
     }]
     """
     Then the following verification should pass:
     """
-    : | ,-+%;<opt>,-+%; |
+    : | %-+;<opt>%-+; |
       | Tom       |
     """
     And the inspect should:
     """
-    : | ,-+%;<opt>,-+%; |
-    | ,-+%;<opt>,-+%;: 'Tom' |
+    : | %-+;<opt>%-+; |
+    | %-+;<opt>%-+;: 'Tom' |
     """
     Examples:
       | opt |

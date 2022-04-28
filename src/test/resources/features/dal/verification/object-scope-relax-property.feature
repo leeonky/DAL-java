@@ -28,18 +28,18 @@ Feature: object-scope-relax-property
     Given the following json:
     """
     {
-      ",-+%;": {
-        ",-+%;": "Tom"
+      "-+%;": {
+        "-+%;": "Tom"
       }
     }
     """
     Then the following verification should pass:
     """
     : {
-      ,-+%;.,-+%;: Tom
+      -+%;.-+%;: Tom
     }
     """
     And the inspect should:
     """
-    : {,-+%;.,-+%;: 'Tom'}
+    : {-+%;.-+%;: 'Tom'}
     """

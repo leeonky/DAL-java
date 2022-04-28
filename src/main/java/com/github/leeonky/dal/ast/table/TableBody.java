@@ -9,14 +9,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.ast.table.RowKey.RowKeyType.EMPTY_TABLE_ROW_KEY;
+import static com.github.leeonky.dal.ast.table.RowKeyType.EMPTY_TABLE_ROW_KEY;
 import static com.github.leeonky.interpreter.FunctionUtil.notAllowParallelReduce;
 import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
 import static java.util.stream.Collectors.toList;
 
 public class TableBody extends DALNode {
     private final List<RowNode> rows;
-    private final RowKey.RowKeyType rowKeyType;
+    private final RowKeyType rowKeyType;
 
     public TableBody(List<? extends DALNode> rows) {
         this(rows, LINE);
@@ -27,7 +27,7 @@ public class TableBody extends DALNode {
         rowKeyType = resolveRowKeyType(type);
     }
 
-    public RowKey.RowKeyType resolveRowKeyType(InterpreterException.Position.Type type) {
+    public RowKeyType resolveRowKeyType(InterpreterException.Position.Type type) {
         return rows.stream().reduce(EMPTY_TABLE_ROW_KEY, (last, rowNode) -> {
             try {
                 return rowNode.combineRowKey(last);

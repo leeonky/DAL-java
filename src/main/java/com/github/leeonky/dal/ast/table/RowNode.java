@@ -29,8 +29,8 @@ public class RowNode extends DALNode {
         return "\n" + (prefix.isEmpty() ? data : prefix + " " + data);
     }
 
-    public Clause<DALRuntimeContext, DALNode> verificationClause(DALOperator operator) {
-        return input -> isEllipsis() ? firstCell() : rowPrefix.indexAndSchema(input, operator, isRowWildcard() ?
+    public Clause<DALRuntimeContext, DALNode> verificationClause(DALOperator operator, RowKeyType rowKeyType) {
+        return input -> isEllipsis() ? firstCell() : rowPrefix.indexAndSchema(rowKeyType, input, operator, isRowWildcard() ?
                 firstCell() : new ObjectScopeNode(cells).setPositionBegin(firstCell().getOperandPosition()));
     }
 
@@ -65,7 +65,7 @@ public class RowNode extends DALNode {
         return isEllipsis() || isRowWildcard();
     }
 
-    public RowKey.RowKeyType combineRowKey(RowKey.RowKeyType rowKeyType) {
+    public RowKeyType combineRowKey(RowKeyType rowKeyType) {
         return rowKeyType.merge(rowPrefix.getRowKeyType());
     }
 }
