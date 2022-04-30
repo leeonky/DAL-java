@@ -46,4 +46,37 @@ Feature: this
     }
     """
 
-#  TODO this field alias;
+  Scenario: field alias on this reference
+    Given the following schema class:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfAge", field = "age"),
+    })
+    public class User {
+    }
+    """
+    And the following schema class:
+    """
+    public class Order {
+        public User user;
+    }
+    """
+    And the following json:
+    """
+      {
+        "user": {
+          "age": 10
+        }
+      }
+    """
+    Then the following verification should pass:
+    """
+      is Order: {
+        {}: {
+          user: {
+            aliasOfAge: 10
+          }
+        }
+      }
+    """

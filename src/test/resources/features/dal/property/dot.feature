@@ -78,7 +78,7 @@ Feature: access object property by .xxx
     And got the following notation:
     """
     . 
-     ^
+      ^
     """
 
   Scenario: raise error when access invalid property
