@@ -68,25 +68,5 @@ Feature: prefix
     }
     """
 
-  Scenario: {} as this reference
-    Given the following java class:
-    """
-    public class Data {
-      public int value = 10;
-    }
-    """
-    Then the following verification for the instance of java class "Data" should pass:
-    """
-    : {
-      {}: {
-        value: 10
-      }
-    }
-    """
-    And the inspect should:
-    """
-    : {{}: {value: 10}}
-    """
-
 #  TODO field alias not support yet
 #  TODO bracket string relax not support yet
