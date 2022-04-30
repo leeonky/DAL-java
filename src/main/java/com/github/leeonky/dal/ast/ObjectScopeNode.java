@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
@@ -34,8 +34,7 @@ public class ObjectScopeNode extends DALNode {
     }
 
     @Override
-    public boolean verify(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
-        Data data = actualNode.evaluateData(context);
+    protected boolean verify(Data data, DALOperator.Equal operator, DALRuntimeContext context, DALNode actualNode) {
         checkNull(data);
         return context.newBlockScope(data, () -> {
             expressions.forEach(expression -> expression.evaluate(context));
@@ -45,11 +44,10 @@ public class ObjectScopeNode extends DALNode {
     }
 
     @Override
-    public boolean verify(DALNode actualNode, DALOperator.Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
+    protected boolean verify(Data data, DALOperator.Matcher operator, DALRuntimeContext context, DALNode actualNode) {
         if (expressions.isEmpty() && !isObjectWildcard) {
             throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
         }
-        Data data = actualNode.evaluateData(context);
         checkNull(data);
         return context.newBlockScope(data, () -> {
             expressions.forEach(expression -> expression.evaluate(context));
@@ -62,7 +60,7 @@ public class ObjectScopeNode extends DALNode {
             throw new AssertionFailure("The input value is null", getPositionBegin());
     }
 
-    private Set<String> collectUnexpectedFields(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
+    private Set<String> collectUnexpectedFields(Data data, DALRuntimeContext context) {
         return new LinkedHashSet<String>(data.getFieldNames()) {{
             removeAll(expressions.stream().map(expression -> data.firstFieldFromAlias(expression.getRootSymbolName()))
                     .collect(Collectors.toSet()));

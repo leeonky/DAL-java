@@ -3,6 +3,7 @@ package com.github.leeonky.dal.ast.table;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.SortSequenceNode;
+import com.github.leeonky.dal.ast.TableNode;
 import com.github.leeonky.dal.compiler.DALProcedure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.SyntaxException;

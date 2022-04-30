@@ -1,8 +1,9 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.ast.DALOperator.Equal;
 import com.github.leeonky.dal.ast.DALOperator.Matcher;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.NodeBase;
 import com.github.leeonky.interpreter.Token;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.dal.ast.AssertionFailure.*;
 import static java.lang.String.format;
 
-public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeContext, DALNode> {
+public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
 
     public static DALNode stringSymbol(DALNode dalNode) {
         return new SymbolNode(((ConstNode) dalNode).getValue(), SymbolNode.Type.STRING);
@@ -77,33 +78,39 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         return token -> new ConstNode(function.apply(token));
     }
 
-    public Data evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {
+    public Data evaluateData(DALRuntimeContext context) {
         return context.wrap(evaluate(context));
     }
 
     @Override
-    public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
+    public Object evaluate(DALRuntimeContext context) {
         return evaluateData(context).getInstance();
     }
 
-    public boolean verifyBy(DALNode expected, DALOperator.Equal operator,
-                            RuntimeContextBuilder.DALRuntimeContext context) {
+    public boolean verifyBy(DALNode expected, Equal operator,
+                            DALRuntimeContext context) {
         return expected.verify(this, operator, context);
     }
 
     public boolean verifyBy(DALNode expected, DALOperator.Matcher operator,
-                            RuntimeContextBuilder.DALRuntimeContext context) {
+                            DALRuntimeContext context) {
         return expected.verify(this, operator, context);
     }
 
-    public boolean verify(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
-        return assertEquals(evaluateData(context), evaluateAndWrapperFailureMessage(actualNode, context),
-                getPositionBegin());
+    public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
+        return verify(actualNode.evaluateData(context), operator, context, actualNode);
     }
 
-    public boolean verify(DALNode actualNode, Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
+    public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+        return verify(actualNode.evaluateData(context), operator, context, actualNode);
+    }
+
+    protected boolean verify(Data actual, Equal operator, DALRuntimeContext context, DALNode actualNode) {
+        return assertEquals(evaluateData(context), actual, getPositionBegin());
+    }
+
+    protected boolean verify(Data actual, Matcher operator, DALRuntimeContext context, DALNode actualNode) {
         Data expected = evaluateData(context);
-        Data actual = evaluateAndWrapperFailureMessage(actualNode, context);
         if (expected.isNull())
             return assertMatchNull(actual, actualNode.getPositionBegin());
 
@@ -113,14 +120,6 @@ public abstract class DALNode extends NodeBase<RuntimeContextBuilder.DALRuntimeC
         invalidTypeToMatchValue(Number.class, actual, String.class, expected, operator);
         invalidTypeToMatchValue(Boolean.class, actual, String.class, expected, operator);
         return assertMatch(expected, actual, getPositionBegin(), context.getNumberType());
-    }
-
-    private Data evaluateAndWrapperFailureMessage(DALNode actualNode, RuntimeContextBuilder.DALRuntimeContext context) {
-        try {
-            return actualNode.evaluateData(context);
-        } catch (AssertionFailure assertionFailure) {
-            throw assertionFailure.multiPosition(getPositionBegin(), Position.Type.CHAR);
-        }
     }
 
     public abstract String inspect();

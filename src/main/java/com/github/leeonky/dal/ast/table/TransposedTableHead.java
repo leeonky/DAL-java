@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.DALNode;
+import com.github.leeonky.dal.ast.TableNode;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.SyntaxException;
 

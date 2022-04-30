@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.DALNode;
-import com.github.leeonky.dal.ast.table.TableNode;
-import com.github.leeonky.dal.ast.table.TransposedTableNode;
+import com.github.leeonky.dal.ast.TableNode;
+import com.github.leeonky.dal.ast.TransposedTableNode;
 
 import static com.github.leeonky.interpreter.FunctionUtil.notAllowParallelReduce;
 import static com.github.leeonky.interpreter.InterpreterException.Position.Type.CHAR;

@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
 
 import java.util.regex.Pattern;
@@ -25,16 +25,14 @@ public class RegexNode extends DALNode {
     }
 
     @Override
-    public boolean verify(DALNode actualNode, DALOperator.Equal operator, RuntimeContextBuilder.DALRuntimeContext context) {
-        Data actual = actualNode.evaluateData(context);
+    protected boolean verify(Data actual, DALOperator.Equal operator, DALRuntimeContext context, DALNode actualNode) {
         if (actual.getInstance() instanceof String)
             return matches((String) actual.getInstance(), actual);
         throw new RuntimeException("Operator = before regex need a string input value", operator.getPosition());
     }
 
     @Override
-    public boolean verify(DALNode actualNode, DALOperator.Matcher operator, RuntimeContextBuilder.DALRuntimeContext context) {
-        Data actual = actualNode.evaluateData(context);
+    protected boolean verify(Data actual, DALOperator.Matcher operator, DALRuntimeContext context, DALNode actualNode) {
         return matches((String) actual.convert(String.class).getInstance(), actual);
     }
 
