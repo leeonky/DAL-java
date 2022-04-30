@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.SyntaxException;
 
@@ -43,8 +44,8 @@ public class TableBody extends DALNode {
         return rows.stream().map(RowNode::inspect).collect(Collectors.joining());
     }
 
-    public DALNode transformToListScope(DALOperator operator, Comparator<Object> comparator) {
-        return rowKeyType.transformToVerificationNode(operator, rows, comparator);
+    public DALNode transformToListScope(Data actual, DALOperator operator, Comparator<Object> comparator) {
+        return rowKeyType.transformToVerificationNode(actual, operator, rows, comparator);
     }
 
     public RowNode getDataRowByDataIndex(int row) {

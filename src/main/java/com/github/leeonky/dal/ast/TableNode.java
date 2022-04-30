@@ -23,7 +23,7 @@ public class TableNode extends DALNode {
     @Override
     protected boolean verify(Data actual, DALOperator.Equal operator, DALRuntimeContext context, DALNode actualNode) {
         try {
-            return transformToVerificationNode(operator, context).verify(actual, operator, context, actualNode);
+            return transformToVerificationNode(actual, operator, context).verify(actual, operator, context, actualNode);
         } catch (ElementAssertionFailure elementAssertionFailure) {
             throw elementAssertionFailure.linePositionException(this);
         }
@@ -32,14 +32,14 @@ public class TableNode extends DALNode {
     @Override
     protected boolean verify(Data actual, DALOperator.Matcher operator, DALRuntimeContext context, DALNode actualNode) {
         try {
-            return transformToVerificationNode(operator, context).verify(actual, operator, context, actualNode);
+            return transformToVerificationNode(actual, operator, context).verify(actual, operator, context, actualNode);
         } catch (ElementAssertionFailure elementAssertionFailure) {
             throw elementAssertionFailure.linePositionException(this);
         }
     }
 
-    public DALNode transformToVerificationNode(DALOperator operator, DALRuntimeContext context) {
-        return tableBody.transformToListScope(operator, tableHead.collectComparator(context))
+    public DALNode transformToVerificationNode(Data actual, DALOperator operator, DALRuntimeContext context) {
+        return tableBody.transformToListScope(actual, operator, tableHead.collectComparator(context))
                 .setPositionBegin(getPositionBegin());
     }
 

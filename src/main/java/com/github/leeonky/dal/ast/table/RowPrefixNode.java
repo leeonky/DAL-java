@@ -11,8 +11,7 @@ import com.github.leeonky.interpreter.OperatorParser;
 
 import java.util.Optional;
 
-import static com.github.leeonky.dal.ast.table.RowKeyType.INDEX_ROW_KEY;
-import static com.github.leeonky.dal.ast.table.RowKeyType.NO_ROW_KEY;
+import static com.github.leeonky.dal.ast.table.RowKeyType.*;
 
 public class RowPrefixNode extends DALNode {
     private final Optional<DALNode> key;
@@ -46,10 +45,12 @@ public class RowPrefixNode extends DALNode {
     public RowKeyType getRowKeyType() {
         final RowKeyType keyType;
         keyType = key.map(dalNode -> {
-            if (dalNode instanceof ConstNode) {
+            if (dalNode instanceof ConstNode)
                 return INDEX_ROW_KEY;
-            } else
-                return null;
+            else if (dalNode instanceof DALExpression)
+                return PROPERTY_ROW_KEY;
+            else
+                return NO_ROW_KEY;
         }).orElse(NO_ROW_KEY);
         return keyType;
     }
