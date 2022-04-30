@@ -11,9 +11,9 @@ import com.github.leeonky.interpreter.OperatorParser;
 
 import java.util.Optional;
 
-import static com.github.leeonky.dal.ast.table.RowKeyType.*;
-
 public class RowPrefixNode extends DALNode {
+    private static final RowKeyType NO_ROW_KEY = new NoRowKeyType(), INDEX_ROW_KEY = new IndexRowKeyType(),
+            PROPERTY_ROW_KEY = new PropertyRowKeyType();
     private final Optional<DALNode> key;
     private final Optional<Clause<DALRuntimeContext, DALNode>> rowSchema;
     private final Optional<DALOperator> rowOperator;

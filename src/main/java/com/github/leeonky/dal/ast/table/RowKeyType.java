@@ -15,8 +15,6 @@ import static com.github.leeonky.dal.ast.SymbolNode.Type.BRACKET;
 import static java.util.stream.Collectors.toList;
 
 abstract class RowKeyType {
-    static final RowKeyType NO_ROW_KEY = new NoRowKeyType(), INDEX_ROW_KEY = new IndexRowKeyType(),
-            PROPERTY_ROW_KEY = new PropertyRowKeyType(), EMPTY_TABLE_ROW_KEY = new EmptyTableRowKeyType();
 
     public abstract RowKeyType merge(RowKeyType rowKeyType);
 

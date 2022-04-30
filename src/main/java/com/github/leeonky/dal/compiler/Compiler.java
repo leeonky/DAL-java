@@ -110,7 +110,7 @@ public class Compiler {
     private Optional<DALNode> propertyPattern(DALProcedure dalProcedure) {
         ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> patternClause =
                 notation("{}").clause((token, symbol) -> new PropertyPattern(symbol));
-        return SYMBOL.and(patternClause).parse(dalProcedure);
+        return oneOf(notation("{}").node(n -> new PropertyThis()), SYMBOL.and(patternClause)).parse(dalProcedure);
     }
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
