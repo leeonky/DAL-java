@@ -5,6 +5,7 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.Clause;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -19,9 +20,17 @@ abstract class RowKeyType {
 
     public abstract RowKeyType merge(RowKeyType rowKeyType);
 
-    protected abstract RowKeyType mergeBy(IndexRowKeyType indexRowKeyType);
+    protected RowKeyType mergeBy(IndexRowKeyType indexRowKeyType) {
+        throw new IllegalArgumentException();
+    }
 
-    protected abstract RowKeyType mergeBy(NoRowKeyType noRowKeyType);
+    protected RowKeyType mergeBy(NoRowKeyType noRowKeyType) {
+        throw new IllegalArgumentException();
+    }
+
+    protected RowKeyType mergeBy(PropertyRowKeyType propertyRowKeyType) {
+        throw new IllegalArgumentException();
+    }
 
     public DALNode transformToVerificationNode(Data actual, DALOperator operator, List<RowNode> rows, Comparator<Object> comparator) {
         return makeNode(actual, rows.stream().map(rowNode -> rowNode.verificationClause(operator, this)), comparator);
@@ -33,8 +42,6 @@ abstract class RowKeyType {
     public DALNode inputWithRowKey(DALNode input, Optional<DALNode> keyNode) {
         return input;
     }
-
-    protected abstract RowKeyType mergeBy(PropertyRowKeyType propertyRowKeyType);
 }
 
 class EmptyTableRowKeyType extends RowKeyType {
@@ -55,16 +62,15 @@ class EmptyTableRowKeyType extends RowKeyType {
     }
 
     @Override
-    protected DALNode makeNode(Data actual, Stream<Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode>> rowClauses,
-                               Comparator<Object> comparator) {
-//            TODO to list or object
-        return new ListScopeNode(rowClauses.collect(toList()), true, comparator);
+    protected RowKeyType mergeBy(PropertyRowKeyType propertyRowKeyType) {
+        return this;
     }
 
-    //    TODO need test
     @Override
-    protected RowKeyType mergeBy(PropertyRowKeyType propertyRowKeyType) {
-        return null;
+    protected DALNode makeNode(Data actual, Stream<Clause<RuntimeContextBuilder.DALRuntimeContext, DALNode>> rowClauses,
+                               Comparator<Object> comparator) {
+        return actual.isList() ? new ListScopeNode(rowClauses.collect(toList()), true, comparator)
+                : new ObjectScopeNode(Collections.emptyList());
     }
 }
 
@@ -77,11 +83,6 @@ class IndexRowKeyType extends RowKeyType {
     @Override
     protected RowKeyType mergeBy(IndexRowKeyType indexRowKeyType) {
         return indexRowKeyType;
-    }
-
-    @Override
-    protected RowKeyType mergeBy(NoRowKeyType noRowKeyType) {
-        throw new IllegalArgumentException();
     }
 
     @Override
@@ -98,23 +99,12 @@ class IndexRowKeyType extends RowKeyType {
                         InputNode.INSTANCE, new DALOperator.PropertyImplicit(), new SymbolNode(i, BRACKET)))
                 .orElseThrow(IllegalStateException::new);
     }
-
-    //    TODO need test
-    @Override
-    protected RowKeyType mergeBy(PropertyRowKeyType propertyRowKeyType) {
-        return null;
-    }
 }
 
 class NoRowKeyType extends RowKeyType {
     @Override
     public RowKeyType merge(RowKeyType rowKeyType) {
         return rowKeyType.mergeBy(this);
-    }
-
-    @Override
-    protected RowKeyType mergeBy(IndexRowKeyType indexRowKeyType) {
-        throw new IllegalArgumentException();
     }
 
     @Override
@@ -127,12 +117,6 @@ class NoRowKeyType extends RowKeyType {
                                Comparator<Object> comparator) {
         return new ListScopeNode(rowClauses.collect(toList()), true, comparator);
     }
-
-    //    TODO need test
-    @Override
-    protected RowKeyType mergeBy(PropertyRowKeyType propertyRowKeyType) {
-        return null;
-    }
 }
 
 class PropertyRowKeyType extends RowKeyType {
@@ -140,18 +124,6 @@ class PropertyRowKeyType extends RowKeyType {
     @Override
     public RowKeyType merge(RowKeyType rowKeyType) {
         return rowKeyType.mergeBy(this);
-    }
-
-    //    TODO test
-    @Override
-    protected RowKeyType mergeBy(IndexRowKeyType indexRowKeyType) {
-        return null;
-    }
-
-    //    TODO test
-    @Override
-    protected RowKeyType mergeBy(NoRowKeyType noRowKeyType) {
-        return null;
     }
 
     @Override
