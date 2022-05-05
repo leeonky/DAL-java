@@ -175,9 +175,8 @@ public class Data {
         if (isList()) {
             if (getListValues().isEmpty())
                 return "[]";
-            String subIndentation = indentation + "  ";
-            return getListObjects().stream().map(data -> subIndentation + data.dump(subIndentation))
-                    .collect(Collectors.joining(",\n", "[\n", "\n" + indentation + "]"));
+            return getListObjects().stream().map(data -> data.dump(indentation))
+                    .collect(Collectors.joining(", ", "[", "]"));
         }
         return dalRuntimeContext.fetchSingleDumper(instance).map(dumper -> dumper.apply(instance))
                 .orElseGet(() -> dumpObject(indentation));

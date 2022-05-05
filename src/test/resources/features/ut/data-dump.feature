@@ -22,12 +22,7 @@ Feature: dump-data
     """
     Then dumped data should be:
     """
-    [
-      1,
-      2,
-      "3",
-      null
-    ]
+    [1, 2, "3", null]
     """
 
   Scenario: dump empty list
@@ -43,20 +38,11 @@ Feature: dump-data
   Scenario: dump nested list
     Given the following json:
     """
-    [ [1], [1, 2], [] ]
+    [[1], [1, 2], []]
     """
     Then dumped data should be:
     """
-    [
-      [
-        1
-      ],
-      [
-        1,
-        2
-      ],
-      []
-    ]
+    [[1], [1, 2], []]
     """
 
   Scenario: dump object
@@ -107,4 +93,31 @@ Feature: dump-data
       },
       "c": {}
     }
+    """
+
+  Scenario: list of object
+    Given the following json:
+    """
+    [
+      {
+        "name": "John"
+      },
+      {
+         "name": "Tom"
+      },
+      {},
+      {
+        "name": "Jerry"
+      }
+    ]
+    """
+    Then dumped data should be:
+    """
+    [{
+      "name": "John"
+    }, {
+      "name": "Tom"
+    }, {}, {
+      "name": "Jerry"
+    }]
     """
