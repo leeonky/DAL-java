@@ -58,3 +58,53 @@ Feature: dump-data
       []
     ]
     """
+
+  Scenario: dump object
+    Given the following json:
+    """
+    {
+      "name": "John"
+    }
+    """
+    Then dumped data should be:
+    """
+    {
+      "name": "John"
+    }
+    """
+
+  Scenario: empty object
+    Given the following json:
+    """
+    { }
+    """
+    Then dumped data should be:
+    """
+    {}
+    """
+
+  Scenario: nested object
+    Given the following json:
+    """
+    {
+      "a": {
+        "name": "John"
+      },
+      "b": {
+        "name": "John"
+      },
+      "c": {}
+    }
+    """
+    Then dumped data should be:
+    """
+    {
+      "a": {
+        "name": "John"
+      },
+      "b": {
+        "name": "John"
+      },
+      "c": {}
+    }
+    """

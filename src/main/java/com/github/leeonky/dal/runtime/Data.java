@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
-import static java.util.Collections.nCopies;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -167,26 +166,30 @@ public class Data {
     }
 
     public String dump() {
-        return dump(0);
+        return dump("");
     }
 
-    private String dump(int indent) {
-        String indentation = indent(indent);
+    private String dump(String indentation) {
         if (isNull())
-            return indentation + "null";
+            return "null";
         if (isList()) {
-            List<Data> listObjects = getListObjects();
-            if (listObjects.isEmpty())
-                return indentation + "[]";
-            return listObjects.stream().map(data -> data.dump(indent + 2))
-                    .collect(Collectors.joining(",\n", indentation + "[\n", "\n" + indentation + "]"));
+            if (getListValues().isEmpty())
+                return "[]";
+            String subIndentation = indentation + "  ";
+            return getListObjects().stream().map(data -> subIndentation + data.dump(subIndentation))
+                    .collect(Collectors.joining(",\n", "[\n", "\n" + indentation + "]"));
         }
-        return dalRuntimeContext.fetchSingleDumper(instance).map(dumper -> indentation + dumper.apply(instance))
-                .orElseThrow(IllegalStateException::new);
+        return dalRuntimeContext.fetchSingleDumper(instance).map(dumper -> dumper.apply(instance))
+                .orElseGet(() -> dumpObject(indentation));
     }
 
-    private String indent(int indent) {
-        return String.join("", nCopies(indent, " "));
+    private String dumpObject(String indentation) {
+        Set<String> fieldNames = getFieldNames();
+        if (fieldNames.isEmpty())
+            return "{}";
+        String keyIndentation = indentation + "  ";
+        return fieldNames.stream().map(fieldName -> keyIndentation + "\"" + fieldName + "\": " + getValue(fieldName).dump(keyIndentation))
+                .collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
     }
 
     private static class FilteredObject extends LinkedHashMap<String, Object> implements Flatten {
