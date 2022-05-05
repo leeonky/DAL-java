@@ -2,11 +2,9 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.SortSequenceNode;
 
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
@@ -162,6 +160,16 @@ public class Data {
 
     public Data wrapThis() {
         return new Data(new ThisObject(this), dalRuntimeContext, schemaType);
+    }
+
+    public String dump() {
+        if (isNull())
+            return "null";
+        Optional<Function<Object, String>> singleDumper = dalRuntimeContext.fetchSingleDumper(instance);
+        if (singleDumper.isPresent()) {
+            return singleDumper.get().apply(instance);
+        }
+        throw new IllegalStateException();
     }
 
     private static class FilteredObject extends LinkedHashMap<String, Object> implements Flatten {

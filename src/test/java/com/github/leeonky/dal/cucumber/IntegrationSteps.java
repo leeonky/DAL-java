@@ -168,4 +168,9 @@ public class IntegrationSteps {
     public void expectMatchingByTheFollowingCode(String matchingExpression) {
         integrationTestContext.match(matchingExpression);
     }
+
+    @Then("dumped data should be:")
+    public void dumpedDataShouldBe(String verification) {
+        integrationTestContext.verifyDumpedData(verification);
+    }
 }

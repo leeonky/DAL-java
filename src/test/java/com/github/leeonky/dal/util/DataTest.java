@@ -148,4 +148,14 @@ class DataTest {
                     .isEqualTo(expected);
         }
     }
+
+    @Nested
+    class DumpData {
+        private RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder().build(null);
+
+        @Test
+        void dump_null_value() {
+            assertThat(build.wrap(null).dump()).isEqualTo("null");
+        }
+    }
 }

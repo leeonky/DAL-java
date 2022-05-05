@@ -5,10 +5,7 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
-import com.github.leeonky.dal.runtime.DalException;
-import com.github.leeonky.dal.runtime.ListAccessor;
-import com.github.leeonky.dal.runtime.NameStrategy;
-import com.github.leeonky.dal.runtime.Result;
+import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.BaseTest;
 import com.github.leeonky.interpreter.InterpreterException;
@@ -237,4 +234,13 @@ public class IntegrationTestContext {
         }
     }
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @SneakyThrows
+    public void verifyDumpedData(String verification) {
+        RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(null);
+
+        expect(objectMapper.readValue("[" + runtimeContext.wrap(input).dump() + "]", List.class).get(0))
+                .should(verification);
+    }
 }

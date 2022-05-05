@@ -33,6 +33,7 @@ public class RuntimeContextBuilder {
     private final Set<Method> extensionMethods = new HashSet<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
+    private final ClassKeyMap<Function<Object, String>> singleDumpers = new ClassKeyMap<>();
 
     public RuntimeContextBuilder() {
         registerValueFormat(new Formatters.String())
@@ -55,6 +56,14 @@ public class RuntimeContextBuilder {
                 .registerPropertyAccessor(ThisObject.class, new ThisObjectPropertyAccessor())
                 .registerImplicitData(ThisObject.class, thisObject -> thisObject.getData().getInstance())
         ;
+
+        singleDumpers.put(String.class, RuntimeContextBuilder::dumpString);
+        singleDumpers.put(Number.class, Object::toString);
+    }
+
+    private static String dumpString(Object o) {
+        return "\"" + o.toString().replace("\\", "\\\\").replace("\t", "\\t").replace("\b", "\\b").replace("\n", "\\n")
+                .replace("\r", "\\r").replace("\f", "\\f").replace("'", "\\'").replace("\"", "\\\"") + "\"";
     }
 
     public DALRuntimeContext build(Object inputValue) {
@@ -281,6 +290,10 @@ public class RuntimeContextBuilder {
 
         public NumberType getNumberType() {
             return numberType;
+        }
+
+        public Optional<Function<Object, String>> fetchSingleDumper(Object instance) {
+            return singleDumpers.tryGetData(instance);
         }
     }
 
