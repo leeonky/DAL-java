@@ -234,13 +234,10 @@ public class IntegrationTestContext {
         }
     }
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @SneakyThrows
     public void verifyDumpedData(String verification) {
         RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(null);
 
-        expect(objectMapper.readValue("[" + runtimeContext.wrap(input).dump() + "]", List.class).get(0))
-                .should(verification);
+        assertThat(runtimeContext.wrap(input).dump()).isEqualTo(verification);
     }
 }

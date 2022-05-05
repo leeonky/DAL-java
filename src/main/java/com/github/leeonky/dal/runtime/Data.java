@@ -2,12 +2,16 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.SortSequenceNode;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
+import static java.util.Collections.nCopies;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -163,13 +167,26 @@ public class Data {
     }
 
     public String dump() {
+        return dump(0);
+    }
+
+    private String dump(int indent) {
+        String indentation = indent(indent);
         if (isNull())
-            return "null";
-        Optional<Function<Object, String>> singleDumper = dalRuntimeContext.fetchSingleDumper(instance);
-        if (singleDumper.isPresent()) {
-            return singleDumper.get().apply(instance);
+            return indentation + "null";
+        if (isList()) {
+            List<Data> listObjects = getListObjects();
+            if (listObjects.isEmpty())
+                return indentation + "[]";
+            return listObjects.stream().map(data -> data.dump(indent + 2))
+                    .collect(Collectors.joining(",\n", indentation + "[\n", "\n" + indentation + "]"));
         }
-        throw new IllegalStateException();
+        return dalRuntimeContext.fetchSingleDumper(instance).map(dumper -> indentation + dumper.apply(instance))
+                .orElseThrow(IllegalStateException::new);
+    }
+
+    private String indent(int indent) {
+        return String.join("", nCopies(indent, " "));
     }
 
     private static class FilteredObject extends LinkedHashMap<String, Object> implements Flatten {
