@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
-import static java.lang.String.join;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -164,47 +163,42 @@ public class Data {
     }
 
     public String dump() {
-        return dump("", new HashMap<>(), new ArrayList<>());
+        return dump("", new HashMap<>(), "");
     }
 
-    private String dump(String indentation, Map<Object, List<String>> dumped, List<String> paths) {
+    private String dump(String indentation, Map<Object, String> dumped, String path) {
         if (isNull())
             return "null";
-        return isList() ? dumpList(indentation, dumped, paths) :
+        return isList() ? dumpList(indentation, dumped, path) :
                 dalRuntimeContext.fetchSingleDumper(instance).map(dumper -> dumper.apply(instance))
-                        .orElseGet(() -> dumpObject(indentation, dumped, paths));
+                        .orElseGet(() -> dumpObject(indentation, dumped, path));
     }
 
-    private String dumpList(String indentation, Map<Object, List<String>> dumped, List<String> paths) {
-        return getListValues().isEmpty() ? "[]" : fetchSameReference(dumped, paths).orElseGet(() -> {
+    private String dumpList(String indentation, Map<Object, String> dumped, String path) {
+        return getListValues().isEmpty() ? "[]" : fetchSameReference(dumped, path).orElseGet(() -> {
             StringJoiner joiner = new StringJoiner(", ", "[", "]");
             List<Data> listObjects = getListObjects();
-            for (int i = 0; i < listObjects.size(); i++) {
-                int index = i;
-                joiner.add(listObjects.get(i).dump(indentation, dumped, new ArrayList<String>(paths) {{
-                    add("[" + index + "]");
-                }}));
-            }
+            for (int i = 0; i < listObjects.size(); i++)
+                joiner.add(listObjects.get(i).dump(indentation, dumped, path + "[" + i + "]"));
             return joiner.toString();
         });
     }
 
-    private String dumpObject(String indentation, Map<Object, List<String>> dumped, List<String> paths) {
-        return getFieldNames().isEmpty() ? "{}" : fetchSameReference(dumped, paths).orElseGet(() -> {
+    private String dumpObject(String indentation, Map<Object, String> dumped, String path) {
+        return getFieldNames().isEmpty() ? "{}" : fetchSameReference(dumped, path).orElseGet(() -> {
             String keyIndentation = indentation + "  ";
             return getFieldNames().stream().map(fieldName -> format("%s\"%s\": %s", keyIndentation, fieldName,
-                    getValue(fieldName).dump(keyIndentation, dumped, new ArrayList<String>(paths) {{
-                        add(fieldName);
-                    }}))).collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
+                            getValue(fieldName).dump(keyIndentation, dumped, path + "." + fieldName)))
+                    .collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
         });
     }
 
-    private Optional<String> fetchSameReference(Map<Object, List<String>> dumped, List<String> paths) {
-        List<String> reference = dumped.get(instance);
+    private Optional<String> fetchSameReference(Map<Object, String> dumped, String path) {
+        String reference = dumped.get(instance);
         if (reference != null)
-            return Optional.of(format("\"** reference to %s\"", reference.isEmpty() ? "root" : join(".", reference)));
+            return Optional.of(format("\"** same with %s\"", reference.isEmpty() ? "root" : reference));
         else {
-            dumped.put(instance, paths);
+            dumped.put(instance, path);
             return Optional.empty();
         }
     }

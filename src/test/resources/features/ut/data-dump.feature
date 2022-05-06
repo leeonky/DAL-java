@@ -136,7 +136,7 @@ Feature: dump-data
     """
     {
       "value": 1,
-      "this": "** reference to root"
+      "this": "** same with root"
     }
     """
 
@@ -163,7 +163,7 @@ Feature: dump-data
       "value": 1,
       "subData": {
         "value": 2,
-        "this": "** reference to subData"
+        "this": "** same with .subData"
       }
     }
     """
@@ -191,7 +191,7 @@ Feature: dump-data
     """
     [[{
       "a": 1
-    }], "** reference to [0]"]
+    }], "** same with [0]"]
     """
 
   Scenario: ignore empty list in list reference
@@ -202,6 +202,34 @@ Feature: dump-data
     Then dumped data should be:
     """
     [[], [], []]
+    """
+
+  Scenario: complex data dump
+    Given the following json:
+    """
+    [{
+      "obj": [{
+        "user": {
+          "name": "John"
+         }
+      }]
+    }, {
+      "name": "Tom"
+    }, {
+       "name": "John"
+    }]
+    """
+    Then dumped data should be:
+    """
+    [{
+      "obj": [{
+        "user": {
+          "name": "John"
+        }
+      }]
+    }, {
+      "name": "Tom"
+    }, "** same with [0].obj[0].user"]
     """
 
 # TODO value type
