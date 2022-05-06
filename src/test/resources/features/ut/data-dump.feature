@@ -77,7 +77,7 @@ Feature: dump-data
         "name": "John"
       },
       "b": {
-        "name": "John"
+        "name": "Tom"
       },
       "c": {}
     }
@@ -89,7 +89,7 @@ Feature: dump-data
         "name": "John"
       },
       "b": {
-        "name": "John"
+        "name": "Tom"
       },
       "c": {}
     }
@@ -121,3 +121,53 @@ Feature: dump-data
       "name": "Jerry"
     }]
     """
+
+  Scenario: circle reference
+    Given the following java class:
+    """
+    public class Data {
+      public int value = 1;
+      public Data getThis() {
+        return this;
+      }
+    }
+    """
+    Then dumped instance of java class "Data" should be:
+    """
+    {
+      "value": 1,
+      "this": "** reference to root"
+    }
+    """
+
+  Scenario: circle reference of sub object
+    Given the following java class:
+    """
+    public class Data {
+      public int value = 1;
+      public SubData subData = new SubData();
+    }
+    """
+    And the following java class:
+    """
+    public class SubData {
+      public SubData getThis() {
+        return this;
+      }
+      public int value = 2;
+    }
+    """
+    Then dumped instance of java class "Data" should be:
+    """
+    {
+      "value": 1,
+      "subData": {
+        "value": 2,
+        "this": "** reference to subData"
+      }
+    }
+    """
+
+# TODO value type
+# TODO loop ref list
+# TODO loop ref empty object and empty list

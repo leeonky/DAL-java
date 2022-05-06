@@ -240,4 +240,10 @@ public class IntegrationTestContext {
 
         assertThat(runtimeContext.wrap(input).dump()).isEqualTo(verification);
     }
+
+    public void verifyDumpedClass(String type, String verification) {
+        RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(null);
+
+        assertThat(runtimeContext.wrap(input).dump()).isEqualTo(verification);
+    }
 }

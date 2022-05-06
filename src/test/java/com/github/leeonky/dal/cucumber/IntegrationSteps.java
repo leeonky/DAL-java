@@ -173,4 +173,10 @@ public class IntegrationSteps {
     public void dumpedDataShouldBe(String verification) {
         integrationTestContext.verifyDumpedData(verification);
     }
+
+    @Then("dumped instance of java class {string} should be:")
+    public void dumpedInstanceOfJavaClassShouldBe(String type, String verification) {
+        integrationTestContext.givenJavaDataByClassName(type);
+        integrationTestContext.verifyDumpedData(verification);
+    }
 }

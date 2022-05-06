@@ -2,15 +2,13 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.SortSequenceNode;
 
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
+import static java.lang.String.join;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -166,29 +164,37 @@ public class Data {
     }
 
     public String dump() {
-        return dump("");
+        return dump("", new HashMap<>(), "", new ArrayList<>());
     }
 
-    private String dump(String indentation) {
+    private String dump(String indentation, Map<Object, List<String>> dumped, String path, List<String> paths) {
         if (isNull())
             return "null";
         if (isList()) {
             if (getListValues().isEmpty())
                 return "[]";
-            return getListObjects().stream().map(data -> data.dump(indentation))
-                    .collect(Collectors.joining(", ", "[", "]"));
+            StringJoiner joiner = new StringJoiner(", ", "[", "]");
+            for (Data data : getListObjects())
+                joiner.add(data.dump(indentation, dumped, path, paths));
+            return joiner.toString();
         }
         return dalRuntimeContext.fetchSingleDumper(instance).map(dumper -> dumper.apply(instance))
-                .orElseGet(() -> dumpObject(indentation));
+                .orElseGet(() -> dumpObject(indentation, dumped, path, paths));
     }
 
-    private String dumpObject(String indentation) {
+    private String dumpObject(String indentation, Map<Object, List<String>> dumped, String path, List<String> paths) {
+        List<String> reference = dumped.get(instance);
+        if (reference != null)
+            return String.format("\"** reference to %s\"", reference.isEmpty() ? "root" : join(".", reference));
+        dumped.put(instance, paths);
         Set<String> fieldNames = getFieldNames();
         if (fieldNames.isEmpty())
             return "{}";
         String keyIndentation = indentation + "  ";
-        return fieldNames.stream().map(fieldName -> keyIndentation + "\"" + fieldName + "\": " + getValue(fieldName).dump(keyIndentation))
-                .collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
+        return fieldNames.stream().map(fieldName -> keyIndentation + "\"" + fieldName + "\": " +
+                getValue(fieldName).dump(keyIndentation, dumped, path + "." + fieldName, new ArrayList<String>(paths) {{
+                    add(fieldName);
+                }})).collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
     }
 
     private static class FilteredObject extends LinkedHashMap<String, Object> implements Flatten {
