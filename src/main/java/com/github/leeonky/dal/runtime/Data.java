@@ -149,8 +149,8 @@ public class Data {
 
     public Data filter(String prefix) {
         FilteredObject filteredObject = new FilteredObject();
-        getFieldNames().stream().filter(fieldName -> fieldName.startsWith(prefix))
-                .forEach(fieldName -> filteredObject.put(trimPrefix(prefix, fieldName), getValue(fieldName).getInstance()));
+        getFieldNames().stream().filter(fieldName -> fieldName.startsWith(prefix)).forEach(fieldName ->
+                filteredObject.put(trimPrefix(prefix, fieldName), getValue(fieldName).getInstance()));
         return new Data(filteredObject, dalRuntimeContext, schemaType).setListComparator(listComparator);
     }
 
@@ -164,37 +164,49 @@ public class Data {
     }
 
     public String dump() {
-        return dump("", new HashMap<>(), "", new ArrayList<>());
+        return dump("", new HashMap<>(), new ArrayList<>());
     }
 
-    private String dump(String indentation, Map<Object, List<String>> dumped, String path, List<String> paths) {
+    private String dump(String indentation, Map<Object, List<String>> dumped, List<String> paths) {
         if (isNull())
             return "null";
-        if (isList()) {
-            if (getListValues().isEmpty())
-                return "[]";
-            StringJoiner joiner = new StringJoiner(", ", "[", "]");
-            for (Data data : getListObjects())
-                joiner.add(data.dump(indentation, dumped, path, paths));
-            return joiner.toString();
-        }
-        return dalRuntimeContext.fetchSingleDumper(instance).map(dumper -> dumper.apply(instance))
-                .orElseGet(() -> dumpObject(indentation, dumped, path, paths));
+        return isList() ? dumpList(indentation, dumped, paths) :
+                dalRuntimeContext.fetchSingleDumper(instance).map(dumper -> dumper.apply(instance))
+                        .orElseGet(() -> dumpObject(indentation, dumped, paths));
     }
 
-    private String dumpObject(String indentation, Map<Object, List<String>> dumped, String path, List<String> paths) {
+    private String dumpList(String indentation, Map<Object, List<String>> dumped, List<String> paths) {
+        return getListValues().isEmpty() ? "[]" : fetchSameReference(dumped, paths).orElseGet(() -> {
+            StringJoiner joiner = new StringJoiner(", ", "[", "]");
+            List<Data> listObjects = getListObjects();
+            for (int i = 0; i < listObjects.size(); i++) {
+                int index = i;
+                joiner.add(listObjects.get(i).dump(indentation, dumped, new ArrayList<String>(paths) {{
+                    add("[" + index + "]");
+                }}));
+            }
+            return joiner.toString();
+        });
+    }
+
+    private String dumpObject(String indentation, Map<Object, List<String>> dumped, List<String> paths) {
+        return getFieldNames().isEmpty() ? "{}" : fetchSameReference(dumped, paths).orElseGet(() -> {
+            String keyIndentation = indentation + "  ";
+            return getFieldNames().stream().map(fieldName -> format("%s\"%s\": %s", keyIndentation, fieldName,
+                    getValue(fieldName).dump(keyIndentation, dumped, new ArrayList<String>(paths) {{
+                        add(fieldName);
+                    }}))).collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
+        });
+    }
+
+    private Optional<String> fetchSameReference(Map<Object, List<String>> dumped, List<String> paths) {
         List<String> reference = dumped.get(instance);
         if (reference != null)
-            return String.format("\"** reference to %s\"", reference.isEmpty() ? "root" : join(".", reference));
-        dumped.put(instance, paths);
-        Set<String> fieldNames = getFieldNames();
-        if (fieldNames.isEmpty())
-            return "{}";
-        String keyIndentation = indentation + "  ";
-        return fieldNames.stream().map(fieldName -> keyIndentation + "\"" + fieldName + "\": " +
-                getValue(fieldName).dump(keyIndentation, dumped, path + "." + fieldName, new ArrayList<String>(paths) {{
-                    add(fieldName);
-                }})).collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
+            return Optional.of(format("\"** reference to %s\"", reference.isEmpty() ? "root" : join(".", reference)));
+        else {
+            dumped.put(instance, paths);
+            return Optional.empty();
+        }
     }
 
     private static class FilteredObject extends LinkedHashMap<String, Object> implements Flatten {

@@ -168,6 +168,40 @@ Feature: dump-data
     }
     """
 
+  Scenario: should not be circle reference for empty map
+    Given the following json:
+    """
+    { "a": {}, "b": {}, "c": {} }
+    """
+    Then dumped data should be:
+    """
+    {
+      "a": {},
+      "b": {},
+      "c": {}
+    }
+    """
+
+  Scenario: same reference of list
+    Given the following json:
+    """
+    [[{ "a": 1 }], [{ "a": 1 }]]
+    """
+    Then dumped data should be:
+    """
+    [[{
+      "a": 1
+    }], "** reference to [0]"]
+    """
+
+  Scenario: ignore empty list in list reference
+    Given the following json:
+    """
+    [[], [], []]
+    """
+    Then dumped data should be:
+    """
+    [[], [], []]
+    """
+
 # TODO value type
-# TODO loop ref list
-# TODO loop ref empty object and empty list
