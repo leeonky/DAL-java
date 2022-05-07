@@ -1,10 +1,13 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.SortSequenceNode;
+import com.github.leeonky.util.BeanClass;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
@@ -167,11 +170,20 @@ public class Data {
     }
 
     private String dump(String indentation, Map<Object, String> dumped, String path) {
-        if (isNull())
-            return "null";
-        return isList() ? dumpList(indentation, dumped, path) :
-                dalRuntimeContext.fetchSingleDumper(instance).map(dumper -> dumper.apply(instance))
-                        .orElseGet(() -> dumpObject(indentation, dumped, path));
+        if (isList())
+            return dumpList(indentation, dumped, path);
+        return dumpInstance(instance, indentation, dumped, path);
+    }
+
+    private String dumpInstance(Object instance, String indentation, Map<Object, String> dumped, String path) {
+        return isNull() ? "null" : dalRuntimeContext.fetchSingleDumper(instance).map(dumper -> dumper.apply(instance))
+                .orElseGet(() -> {
+                    Optional<Function<Object, Map<String, Object>>> dumper = dalRuntimeContext.fetchObjectDumper(instance);
+                    if (dumper.isPresent()) {
+                        return dumpSingleObject(dumper.get().apply(instance), indentation);
+                    }
+                    return dumpObject(indentation, dumped, path);
+                });
     }
 
     private String dumpList(String indentation, Map<Object, String> dumped, String path) {
@@ -184,12 +196,26 @@ public class Data {
         });
     }
 
+    private String dumpSingleObject(Map<String, Object> instance, String indentation) {
+        String keyIndentation = indentation + "  ";
+        return instance.entrySet().stream().map(entry -> format("%s\"%s\": %s", keyIndentation, entry.getKey(),
+                        dumpInstance(entry.getValue(), keyIndentation, new HashMap<>(), entry.getKey())))
+                .collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
+    }
+
     private String dumpObject(String indentation, Map<Object, String> dumped, String path) {
-        return getFieldNames().isEmpty() ? "{}" : fetchSameReference(dumped, path).orElseGet(() -> {
+        Set<String> fieldNames = new LinkedHashSet<>(getFieldNames());
+        return fieldNames.isEmpty() ? "{}" : fetchSameReference(dumped, path).orElseGet(() -> {
             String keyIndentation = indentation + "  ";
-            return getFieldNames().stream().map(fieldName -> format("%s\"%s\": %s", keyIndentation, fieldName,
-                            getValue(fieldName).dump(keyIndentation, dumped, path + "." + fieldName)))
-                    .collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
+            Stream<String> stringStream = fieldNames.stream().map(fieldName -> format("%s\"%s\": %s", keyIndentation, fieldName,
+                    getValue(fieldName).dump(keyIndentation, dumped, path + "." + fieldName)));
+            List<String> strings = stringStream.collect(toList());
+
+            if (!(instance instanceof Map)) {
+                strings.add(format("%s\"%s\": %s", keyIndentation, "__type", "\"" + BeanClass.getClassName(instance) + "\""));
+            }
+
+            return strings.stream().collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
         });
     }
 

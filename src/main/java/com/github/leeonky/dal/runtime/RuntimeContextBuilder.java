@@ -34,6 +34,7 @@ public class RuntimeContextBuilder {
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final ClassKeyMap<Function<Object, String>> singleDumpers = new ClassKeyMap<>();
+    private final ClassKeyMap<Function<Object, Map<String, Object>>> objectDumpers = new ClassKeyMap<>();
 
     public RuntimeContextBuilder() {
         registerValueFormat(new Formatters.String())
@@ -59,6 +60,13 @@ public class RuntimeContextBuilder {
 
         singleDumpers.put(String.class, RuntimeContextBuilder::dumpString);
         singleDumpers.put(Number.class, Object::toString);
+        singleDumpers.put(Boolean.class, Object::toString);
+        singleDumpers.put(boolean.class, Object::toString);
+
+        objectDumpers.put(UUID.class, uuid -> new LinkedHashMap<String, Object>() {{
+            put("__type", uuid.getClass().getName());
+            put("__value", uuid.toString());
+        }});
     }
 
     private static String dumpString(Object o) {
@@ -294,6 +302,10 @@ public class RuntimeContextBuilder {
 
         public Optional<Function<Object, String>> fetchSingleDumper(Object instance) {
             return singleDumpers.tryGetData(instance);
+        }
+
+        public Optional<Function<Object, Map<String, Object>>> fetchObjectDumper(Object instance) {
+            return objectDumpers.tryGetData(instance);
         }
     }
 

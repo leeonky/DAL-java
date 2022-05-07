@@ -136,7 +136,8 @@ Feature: dump-data
     """
     {
       "value": 1,
-      "this": "** same with root"
+      "this": "** same with root",
+      "__type": "Data"
     }
     """
 
@@ -163,8 +164,10 @@ Feature: dump-data
       "value": 1,
       "subData": {
         "value": 2,
-        "this": "** same with .subData"
-      }
+        "this": "** same with .subData",
+        "__type": "SubData"
+      },
+      "__type": "Data"
     }
     """
 
@@ -232,4 +235,31 @@ Feature: dump-data
     }, "** same with [0].obj[0].user"]
     """
 
+  Scenario: build-in value type:
+    Given the following java class:
+    """
+    public class Data {
+      public boolean booleanValue = true;
+      public Boolean boxedBoolean = false;
+      public java.util.UUID uuid = java.util.UUID.fromString("00000000-0000-0000-0000-000000000000");
+    }
+    """
+    Then dumped instance of java class "Data" should be:
+    """
+    {
+      "booleanValue": true,
+      "boxedBoolean": false,
+      "uuid": {
+        "__type": "java.util.UUID",
+        "__value": "00000000-0000-0000-0000-000000000000"
+      },
+      "__type": "Data"
+    }
+    """
+
+#  public java.time.Instant instant = java.time.Instant.now();
+#  "instant": {
+#  "class": "java.time.Instant",
+#  "value": "2000-01-01T00:00:00Z"
+#  },
 # TODO value type
