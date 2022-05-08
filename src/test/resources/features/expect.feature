@@ -35,6 +35,11 @@ Feature: expect - assertion
     to be equal to java.lang.Integer
     <200>
     but was not
+
+    The root value was:
+    {
+      "key": 100
+    }
     """
 
   Scenario: exact pass
@@ -72,6 +77,11 @@ Feature: expect - assertion
     to be equal to java.lang.Integer
     <200>
     but was not
+
+    The root value was:
+    {
+      "key": 100
+    }
     """
 
   Scenario: matching pass
@@ -109,4 +119,9 @@ Feature: expect - assertion
     to be equal to java.lang.Integer
     <200>
     but was not
+
+    The root value was:
+    {
+      "key": 100
+    }
     """

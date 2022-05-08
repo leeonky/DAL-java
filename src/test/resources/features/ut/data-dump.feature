@@ -301,5 +301,3 @@ Feature: dump-data
       "__type": "Data"
     }
     """
-
-# TODO value type

@@ -4,7 +4,16 @@ import com.github.leeonky.interpreter.InterpreterException;
 
 public class Assertions {
     private final Object input;
-    private final DAL dal = DAL.getInstance();
+    private static DAL dal = DAL.getInstance();
+    public static boolean dumpInput = true;
+
+    public static void setDal(DAL dal) {
+        Assertions.dal = dal;
+    }
+
+    public static void dumpInput(boolean enable) {
+        dumpInput = enable;
+    }
 
     private Assertions(Object input) {
         this.input = input;
@@ -23,7 +32,10 @@ public class Assertions {
         try {
             dal.evaluate(input, fullCode);
         } catch (InterpreterException e) {
-            throw new AssertionError("\n" + e.show(fullCode, prefix.length()) + "\n" + e.getMessage());
+            String detailMessage = "\n" + e.show(fullCode, prefix.length()) + "\n" + e.getMessage();
+            if (dumpInput)
+                detailMessage += "\n\nThe root value was:\n" + dal.getRuntimeContextBuilder().build(null).wrap(input).dump();
+            throw new AssertionError(detailMessage);
         }
     }
 
