@@ -210,11 +210,8 @@ public class Data {
             Stream<String> stringStream = fieldNames.stream().map(fieldName -> format("%s\"%s\": %s", keyIndentation, fieldName,
                     getValue(fieldName).dump(keyIndentation, dumped, path + "." + fieldName)));
             List<String> strings = stringStream.collect(toList());
-
-            if (!(instance instanceof Map)) {
+            if (!(instance instanceof Map))
                 strings.add(format("%s\"%s\": %s", keyIndentation, "__type", "\"" + BeanClass.getClassName(instance) + "\""));
-            }
-
             return strings.stream().collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
         });
     }

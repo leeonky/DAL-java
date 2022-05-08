@@ -11,6 +11,7 @@ import com.github.leeonky.util.Suppressor;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.time.*;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -58,15 +59,37 @@ public class RuntimeContextBuilder {
                 .registerImplicitData(ThisObject.class, thisObject -> thisObject.getData().getInstance())
         ;
 
-        singleDumpers.put(String.class, RuntimeContextBuilder::dumpString);
-        singleDumpers.put(Number.class, Object::toString);
-        singleDumpers.put(Boolean.class, Object::toString);
-        singleDumpers.put(boolean.class, Object::toString);
+        registerSingleDumper(String.class, RuntimeContextBuilder::dumpString)
+                .registerSingleDumper(Number.class, Object::toString)
+                .registerSingleDumper(Boolean.class, Object::toString)
+                .registerSingleDumper(boolean.class, Object::toString)
+        ;
 
-        objectDumpers.put(UUID.class, uuid -> new LinkedHashMap<String, Object>() {{
-            put("__type", uuid.getClass().getName());
-            put("__value", uuid.toString());
+        registerObjectDumper(UUID.class, Object::toString)
+                .registerObjectDumper(Instant.class, Object::toString)
+                .registerObjectDumper(Date.class, date -> date.toInstant().toString())
+                .registerObjectDumper(LocalTime.class, LocalTime::toString)
+                .registerObjectDumper(LocalDate.class, LocalDate::toString)
+                .registerObjectDumper(LocalDateTime.class, LocalDateTime::toString)
+                .registerObjectDumper(OffsetDateTime.class, OffsetDateTime::toString)
+                .registerObjectDumper(ZonedDateTime.class, ZonedDateTime::toString)
+                .registerObjectDumper(YearMonth.class, YearMonth::toString)
+        ;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> RuntimeContextBuilder registerSingleDumper(Class<T> key, Function<T, String> toString) {
+        singleDumpers.put(key, obj -> toString.apply((T) obj));
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> RuntimeContextBuilder registerObjectDumper(Class<T> type, Function<T, String> toString) {
+        objectDumpers.put(type, obj -> new LinkedHashMap<String, Object>() {{
+            put("__type", obj.getClass().getName());
+            put("__value", toString.apply((T) obj));
         }});
+        return this;
     }
 
     private static String dumpString(Object o) {

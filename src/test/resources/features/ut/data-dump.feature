@@ -242,6 +242,14 @@ Feature: dump-data
       public boolean booleanValue = true;
       public Boolean boxedBoolean = false;
       public java.util.UUID uuid = java.util.UUID.fromString("00000000-0000-0000-0000-000000000000");
+      public java.time.Instant instant = java.time.Instant.parse("2000-01-01T00:00:00Z");
+      public java.util.Date date = java.util.Date.from(java.time.Instant.parse("2000-01-02T00:00:00Z"));
+      public java.time.LocalTime localTime = java.time.LocalTime.parse("12:00:00");
+      public java.time.LocalDate localDate = java.time.LocalDate.parse("2000-12-01");
+      public java.time.LocalDateTime localDateTime = java.time.LocalDateTime.parse("2000-12-01T12:00:00");
+      public java.time.OffsetDateTime offsetDateTime = java.time.OffsetDateTime.parse("1996-01-23T00:00:01+08:00");
+      public java.time.ZonedDateTime zonedDateTime = java.time.ZonedDateTime.parse("1996-01-23T00:00:01+08:00[Asia/Shanghai]");
+      public java.time.YearMonth yearMonth = java.time.YearMonth.parse("2000-12");
     }
     """
     Then dumped instance of java class "Data" should be:
@@ -253,13 +261,40 @@ Feature: dump-data
         "__type": "java.util.UUID",
         "__value": "00000000-0000-0000-0000-000000000000"
       },
+      "instant": {
+        "__type": "java.time.Instant",
+        "__value": "2000-01-01T00:00:00Z"
+      },
+      "date": {
+        "__type": "java.util.Date",
+        "__value": "2000-01-02T00:00:00Z"
+      },
+      "localTime": {
+        "__type": "java.time.LocalTime",
+        "__value": "12:00"
+      },
+      "localDate": {
+        "__type": "java.time.LocalDate",
+        "__value": "2000-12-01"
+      },
+      "localDateTime": {
+        "__type": "java.time.LocalDateTime",
+        "__value": "2000-12-01T12:00"
+      },
+      "offsetDateTime": {
+        "__type": "java.time.OffsetDateTime",
+        "__value": "1996-01-23T00:00:01+08:00"
+      },
+      "zonedDateTime": {
+        "__type": "java.time.ZonedDateTime",
+        "__value": "1996-01-23T00:00:01+08:00[Asia/Shanghai]"
+      },
+      "yearMonth": {
+        "__type": "java.time.YearMonth",
+        "__value": "2000-12"
+      },
       "__type": "Data"
     }
     """
 
-#  public java.time.Instant instant = java.time.Instant.now();
-#  "instant": {
-#  "class": "java.time.Instant",
-#  "value": "2000-01-01T00:00:00Z"
-#  },
 # TODO value type
