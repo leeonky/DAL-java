@@ -74,6 +74,7 @@ public class RuntimeContextBuilder {
                 .registerObjectDumper(OffsetDateTime.class, OffsetDateTime::toString)
                 .registerObjectDumper(ZonedDateTime.class, ZonedDateTime::toString)
                 .registerObjectDumper(YearMonth.class, YearMonth::toString)
+                .registerObjectDumper(Class.class, Class::getName)
         ;
     }
 

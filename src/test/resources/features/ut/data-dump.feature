@@ -250,6 +250,7 @@ Feature: dump-data
       public java.time.OffsetDateTime offsetDateTime = java.time.OffsetDateTime.parse("1996-01-23T00:00:01+08:00");
       public java.time.ZonedDateTime zonedDateTime = java.time.ZonedDateTime.parse("1996-01-23T00:00:01+08:00[Asia/Shanghai]");
       public java.time.YearMonth yearMonth = java.time.YearMonth.parse("2000-12");
+      public Class type = java.lang.String.class;
     }
     """
     Then dumped instance of java class "Data" should be:
@@ -292,6 +293,10 @@ Feature: dump-data
       "yearMonth": {
         "__type": "java.time.YearMonth",
         "__value": "2000-12"
+      },
+      "type": {
+        "__type": "java.lang.Class",
+        "__value": "java.lang.String"
       },
       "__type": "Data"
     }
