@@ -102,11 +102,10 @@ Feature: list-scope-relax-string
     """
     Then failed with the message:
     """
-    Expecting java.lang.String
-    <$1>
-    to be equal to com.github.leeonky.dal.compiler.CucumberContextBak$USDollar
+    Expected to be equal to: com.github.leeonky.dal.compiler.CucumberContextBak$USDollar
     <1$>
-    but was not
+    Actual: java.lang.String
+    <$1>
     """
 
   Scenario Outline: allowed key word relax string

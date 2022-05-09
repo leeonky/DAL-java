@@ -22,11 +22,10 @@ Feature: boolean
     """
     Then failed with the message:
     """
-    Expecting java.lang.Boolean
-    <true>
-    to be equal to java.lang.Boolean
+    Expected to be equal to: java.lang.Boolean
     <false>
-    but was not
+    Actual: java.lang.Boolean
+    <true>
     """
     And got the following notation:
     """
@@ -41,11 +40,10 @@ Feature: boolean
     """
     Then failed with the message:
     """
-    Expecting java.lang.Boolean
-    <true>
-    to match java.lang.Boolean
+    Expected to match: java.lang.Boolean
     <false>
-    but was not
+    Actual: java.lang.Boolean
+    <true>
     """
     And got the following notation:
     """
@@ -60,11 +58,10 @@ Feature: boolean
     """
     Then failed with the message:
     """
-    Expecting java.lang.String
+    Expected to be equal to: java.lang.Boolean
     <true>
-    to be equal to java.lang.Boolean
+    Actual: java.lang.String
     <true>
-    but was not
     """
     And got the following notation:
     """

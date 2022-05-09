@@ -102,11 +102,10 @@ Feature: basic verification via table
     """
     Then failed with the message:
     """
-    Expecting java.lang.String
-    <John>
-    to match java.lang.String
+    Expected to match: java.lang.String
     <Tom>
-    but was not
+    Actual: java.lang.String
+    <John>
     """
     And got the following notation:
     """
@@ -153,11 +152,10 @@ Feature: basic verification via table
     """
     Then failed with the message:
     """
-    Expecting java.lang.Integer
-    <20>
-    to match java.lang.Integer
+    Expected to match: java.lang.Integer
     <15>
-    but was not
+    Actual: java.lang.Integer
+    <20>
     """
     And got the following notation:
     """

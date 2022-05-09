@@ -85,11 +85,10 @@ Feature: object
     """
     Then failed with the message:
     """
-    Expecting java.lang.String
-    <Tom>
-    to match java.lang.String
+    Expected to match: java.lang.String
     <Jack>
-    but was not
+    Actual: java.lang.String
+    <Tom>
     """
     And got the following notation:
     """
@@ -220,11 +219,10 @@ Feature: object
     """
     Then failed with the message:
     """
-    Expecting java.lang.String
-    <001>
-    to match java.lang.String
+    Expected to match: java.lang.String
     <002>
-    but was not
+    Actual: java.lang.String
+    <001>
     """
     And got the following notation:
     """

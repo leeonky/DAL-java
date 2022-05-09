@@ -32,7 +32,7 @@ public class Assertions {
         try {
             dal.evaluate(input, fullCode);
         } catch (InterpreterException e) {
-            String detailMessage = "\n" + e.show(fullCode, prefix.length()) + "\n" + e.getMessage();
+            String detailMessage = "\n" + e.show(fullCode, prefix.length()) + "\n\n" + e.getMessage();
             if (dumpInput)
                 detailMessage += "\n\nThe root value was:\n" + dal.getRuntimeContextBuilder().build(null).wrap(input).dump();
             throw new AssertionError(detailMessage);

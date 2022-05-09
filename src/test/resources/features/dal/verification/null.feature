@@ -11,9 +11,9 @@ Feature: compare null
     """
     Then failed with the message:
     """
-    Expecting <type>
+    Expected to be equal to: null
+    Actual: <type>
     <<message>>
-    to be equal to null but was not
     """
     Examples:
       | value | type                    | message |
@@ -51,9 +51,9 @@ Feature: compare null
     """
     Then failed with the message:
     """
-    Expecting null to be equal to <type>
+    Expected to be equal to: <type>
     <<message>>
-    but was not
+    Actual: null
     """
     And got the following notation:
     """
@@ -72,9 +72,9 @@ Feature: compare null
     """
     Then failed with the message:
     """
-    Expecting null to match <type>
+    Expected to match: <type>
     <<message>>
-    but was not
+    Actual: null
     """
     Examples:
       | value | message | type              |

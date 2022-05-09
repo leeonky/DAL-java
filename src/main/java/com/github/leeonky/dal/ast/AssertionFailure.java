@@ -15,7 +15,7 @@ import static java.util.stream.Collectors.joining;
 
 public class AssertionFailure extends DalException {
     public AssertionFailure(String message, int position) {
-        super(message, position);
+        super(message.trim(), position);
     }
 
     public static void assertListSize(int expected, int actual, int position) {
@@ -53,8 +53,8 @@ public class AssertionFailure extends DalException {
     }
 
     private static boolean raiseNotMatchError(Data expected, Data actual, int position) {
-        throw new AssertionFailure(format("Expecting %sto match %sbut was not",
-                actual.inspect(), expected.inspect()), position);
+        throw new AssertionFailure(format("Expected to match: %s\nActual: %s",
+                expected.inspect().trim(), actual.inspect().trim()), position);
     }
 
     public static void assertUnexpectedFields(Set<String> dataFields, String element, int position) {
@@ -66,8 +66,8 @@ public class AssertionFailure extends DalException {
 
     public static boolean assertEquals(Data expected, Data actual, int position) {
         if (!Calculator.equals(actual, expected))
-            throw new AssertionFailure(format("Expecting %sto be equal to %sbut was not",
-                    actual.inspect(), expected.inspect()), position);
+            throw new AssertionFailure(format("Expected to be equal to: %s\nActual: %s",
+                    expected.inspect().trim(), actual.inspect().trim()), position);
         return true;
     }
 

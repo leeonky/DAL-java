@@ -25,11 +25,10 @@ Feature: group
     """
     Then failed with the message:
     """
-    Expecting java.lang.Integer
-    <2>
-    to <text> java.lang.Integer
+    Expected to <text>: java.lang.Integer
     <1>
-    but was not
+    Actual: java.lang.Integer
+    <2>
     """
     And got the following notation:
     """
@@ -71,11 +70,10 @@ Feature: group
     """
     Then failed with the message:
     """
-    Expecting java.lang.Integer
-    <2>
-    to <text> java.lang.Integer
+    Expected to <text>: java.lang.Integer
     <1>
-    but was not
+    Actual: java.lang.Integer
+    <2>
     """
     And got the following notation:
     """

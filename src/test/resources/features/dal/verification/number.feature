@@ -66,11 +66,10 @@ Feature: number
     """
     Then failed with the message:
     """
-    Expecting java.lang.Integer
-    <5>
-    to be equal to java.lang.Integer
+    Expected to be equal to: java.lang.Integer
     <4>
-    but was not
+    Actual: java.lang.Integer
+    <5>
     """
     And got the following notation:
     """
@@ -85,11 +84,10 @@ Feature: number
     """
     Then failed with the message:
     """
-    Expecting java.lang.Integer
-    <5>
-    to be equal to java.lang.Double
+    Expected to be equal to: java.lang.Double
     <5.0>
-    but was not
+    Actual: java.lang.Integer
+    <5>
     """
     And got the following notation:
     """
@@ -104,11 +102,10 @@ Feature: number
     """
     Then failed with the message:
     """
-    Expecting java.lang.Integer
-    <5>
-    to match java.lang.Double
+    Expected to match: java.lang.Double
     <4.0>
-    but was not
+    Actual: java.lang.Integer
+    <5>
     """
     And got the following notation:
     """

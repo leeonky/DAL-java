@@ -28,11 +28,10 @@ Feature: verify list
     """
     Then failed with the following message:
     """
-    Expecting java.lang.Integer
-    <2>
-    to be equal to java.lang.Integer
+    Expected to be equal to: java.lang.Integer
     <3>
-    but was not
+    Actual: java.lang.Integer
+    <2>
     """
     And got the following source code information:
     """
@@ -68,11 +67,10 @@ Feature: verify list
     """
     Then failed with the following message:
     """
-    Expecting java.lang.Integer
-    <2>
-    to match java.lang.Integer
+    Expected to match: java.lang.Integer
     <3>
-    but was not
+    Actual: java.lang.Integer
+    <2>
     """
     And got the following source code information:
     """
@@ -152,11 +150,10 @@ Feature: verify list
     """
     Then failed with the following message:
     """
-    Expecting java.lang.Integer
-    <3>
-    to be equal to java.lang.Integer
+    Expected to be equal to: java.lang.Integer
     <4>
-    but was not
+    Actual: java.lang.Integer
+    <3>
     """
     And got the following source code information:
     """

@@ -42,11 +42,10 @@ Feature: list
     """
     Then failed with the message:
     """
-    Expecting java.lang.Integer
-    <1>
-    to match java.lang.Integer
+    Expected to match: java.lang.Integer
     <2>
-    but was not
+    Actual: java.lang.Integer
+    <1>
     """
     And got the following notation:
     """
@@ -92,11 +91,10 @@ Feature: list
     """
     Then failed with the message:
     """
-    Expecting java.lang.Integer
-    <2>
-    to match java.lang.Integer
+    Expected to match: java.lang.Integer
     <3>
-    but was not
+    Actual: java.lang.Integer
+    <2>
     """
     And got the following notation:
     """

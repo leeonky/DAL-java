@@ -21,11 +21,10 @@ Feature: string
     """
     Then failed with the message:
     """
-    Expecting java.lang.String
-    <abc>
-    to be equal to java.lang.String
+    Expected to be equal to: java.lang.String
     <efg>
-    but was not
+    Actual: java.lang.String
+    <abc>
     """
     And got the following notation:
     """
@@ -40,11 +39,10 @@ Feature: string
     """
     Then failed with the message:
     """
-    Expecting java.lang.String
-    <abc>
-    to match java.lang.String
+    Expected to match: java.lang.String
     <efg>
-    but was not
+    Actual: java.lang.String
+    <abc>
     """
     And got the following notation:
     """
@@ -65,11 +63,10 @@ Feature: string
     """
     Then failed with the message:
     """
-    Expecting java.time.Instant
+    Expected to be equal to: java.lang.String
     <2000-10-10T00:00:00Z>
-    to be equal to java.lang.String
+    Actual: java.time.Instant
     <2000-10-10T00:00:00Z>
-    but was not
     """
     And got the following notation:
     """

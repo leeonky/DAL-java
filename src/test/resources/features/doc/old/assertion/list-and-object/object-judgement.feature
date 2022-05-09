@@ -37,11 +37,10 @@ Feature: verify object
     """
     Then failed with the following message:
     """
-    Expecting java.lang.String
-    <2>
-    to match java.lang.String
+    Expected to match: java.lang.String
     <unmatched>
-    but was not
+    Actual: java.lang.String
+    <2>
     """
     And got the following source code information:
     """
@@ -75,11 +74,10 @@ Feature: verify object
     """
     Then failed with the following message:
     """
-    Expecting java.lang.String
-    <2>
-    to match java.lang.String
+    Expected to match: java.lang.String
     <unmatched>
-    but was not
+    Actual: java.lang.String
+    <2>
     """
     And got the following source code information:
     """
@@ -165,11 +163,10 @@ Feature: verify object
     """
     Then failed with the following message:
     """
-    Expecting java.lang.Integer
-    <3>
-    to match java.lang.Integer
+    Expected to match: java.lang.Integer
     <100>
-    but was not
+    Actual: java.lang.Integer
+    <3>
     """
     And got the following source code information:
     """
@@ -244,11 +241,10 @@ Feature: verify object
     """
     Then failed with the following message:
     """
-    Expecting java.lang.Integer
-    <10>
-    to match java.lang.Integer
+    Expected to match: java.lang.Integer
     <100>
-    but was not
+    Actual: java.lang.Integer
+    <10>
     """
     And got the following source code information:
     """

@@ -30,11 +30,11 @@ Feature: expect - assertion
       key= 200
            ^
     }
-    Expecting java.lang.Integer
-    <100>
-    to be equal to java.lang.Integer
+
+    Expected to be equal to: java.lang.Integer
     <200>
-    but was not
+    Actual: java.lang.Integer
+    <100>
 
     The root value was:
     {
@@ -72,11 +72,11 @@ Feature: expect - assertion
       key= 200
            ^
     }
-    Expecting java.lang.Integer
-    <100>
-    to be equal to java.lang.Integer
+
+    Expected to be equal to: java.lang.Integer
     <200>
-    but was not
+    Actual: java.lang.Integer
+    <100>
 
     The root value was:
     {
@@ -114,11 +114,11 @@ Feature: expect - assertion
       key= 200
            ^
     }
-    Expecting java.lang.Integer
-    <100>
-    to be equal to java.lang.Integer
+
+    Expected to be equal to: java.lang.Integer
     <200>
-    but was not
+    Actual: java.lang.Integer
+    <100>
 
     The root value was:
     {
