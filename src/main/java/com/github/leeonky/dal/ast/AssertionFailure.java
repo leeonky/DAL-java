@@ -20,7 +20,7 @@ public class AssertionFailure extends DalException {
 
     public static void assertListSize(int expected, int actual, int position) {
         if (expected != actual)
-            throw new AssertionFailure(format("Expecting list size to be <%d> but was <%d>", expected, actual), position);
+            throw new AssertionFailure(format("Different list size\nExpected: <%d>\nActual: <%d>", expected, actual), position);
     }
 
     public static boolean assertMatchNull(Data actual, int position) {

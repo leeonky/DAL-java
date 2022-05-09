@@ -15,7 +15,9 @@ Feature: verify list
     """
     Then failed with the following message:
     """
-    Expecting list size to be <1> but was <2>
+    Different list size
+    Expected: <1>
+    Actual: <2>
     """
     And got the following source code information:
     """
@@ -54,7 +56,9 @@ Feature: verify list
     """
     Then failed with the following message:
     """
-    Expecting list size to be <1> but was <2>
+    Different list size
+    Expected: <1>
+    Actual: <2>
     """
     And got the following source code information:
     """
@@ -137,7 +141,9 @@ Feature: verify list
     """
     Then failed with the following message:
     """
-    Expecting list size to be <1> but was <2>
+    Different list size
+    Expected: <1>
+    Actual: <2>
     """
     And got the following source code information:
     """

@@ -29,7 +29,9 @@ Feature: list
     """
     Then failed with the message:
     """
-    Expecting list size to be <0> but was <1>
+    Different list size
+    Expected: <0>
+    Actual: <1>
     """
     And got the following notation:
     """

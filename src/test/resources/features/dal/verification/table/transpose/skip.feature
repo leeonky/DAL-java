@@ -73,7 +73,9 @@ Feature: skip
     """
     Then failed with the message:
     """
-    Expecting list size to be <1> but was <0>
+    Different list size
+    Expected: <1>
+    Actual: <0>
     """
     And got the following notation:
     """
