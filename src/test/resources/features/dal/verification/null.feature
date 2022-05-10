@@ -33,9 +33,9 @@ Feature: compare null
     """
     Then failed with the message:
     """
-    Expecting <type>
+    Expected to match: null
+    Actual: <type>
     <<message>>
-    to match null but was not
     """
     Examples:
       | value | type                    | message |

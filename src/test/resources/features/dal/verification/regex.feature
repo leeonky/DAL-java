@@ -1,29 +1,45 @@
 Feature: regex
 
-  Scenario Outline: regex does not match
+  Scenario: regex does not match via =
     When evaluate by:
     """
-    'hello'<opt> /unmatched/
+    'hello'= /unmatched/
     """
     Then failed with the message:
     """
-    Expecting java.lang.String
-    <hello>
-    to match /unmatched/ but was not
+    Expected to match: /unmatched/
+    Actual: <hello>
     """
     And got the following notation:
     """
-    'hello'<opt> /unmatched/
+    'hello'= /unmatched/
              ^
     """
     And the inspect should:
     """
-    'hello'<opt> /unmatched/
+    'hello'= /unmatched/
     """
-    Examples:
-      | opt |
-      | =   |
-      | :   |
+
+  Scenario: regex does not match via :
+    When evaluate by:
+    """
+    123: /unmatched/
+    """
+    Then failed with the message:
+    """
+    Expected to match: /unmatched/
+    Actual: <123> converted from: java.lang.Integer
+    <123>
+    """
+    And got the following notation:
+    """
+    123: /unmatched/
+         ^
+    """
+    And the inspect should:
+    """
+    123: /unmatched/
+    """
 
   Scenario: input value of 'equal to regex' must string type
     When assert by the following code:

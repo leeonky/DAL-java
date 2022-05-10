@@ -20,20 +20,17 @@ public class RegexNode extends DALNode {
         return format("/%s/", pattern.toString());
     }
 
-    private boolean matches(String actual, Data input) {
-        return AssertionFailure.assertRegexMatches(pattern, actual, getPositionBegin(), input);
-    }
-
     @Override
     protected boolean verify(Data actual, DALOperator.Equal operator, DALRuntimeContext context, DALNode actualNode) {
         if (actual.getInstance() instanceof String)
-            return matches((String) actual.getInstance(), actual);
+            return AssertionFailure.assertRegexMatches(pattern, (String) actual.getInstance(), getPositionBegin());
         throw new RuntimeException("Operator = before regex need a string input value", operator.getPosition());
     }
 
     @Override
     protected boolean verify(Data actual, DALOperator.Matcher operator, DALRuntimeContext context, DALNode actualNode) {
-        return matches((String) actual.convert(String.class).getInstance(), actual);
+        String converted = (String) actual.convert(String.class).getInstance();
+        return AssertionFailure.assertRegexMatches(pattern, converted, actual, getPositionBegin());
     }
 
     @Override

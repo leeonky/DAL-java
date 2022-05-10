@@ -25,7 +25,7 @@ public class AssertionFailure extends DalException {
 
     public static boolean assertMatchNull(Data actual, int position) {
         if (!actual.isNull())
-            throw new AssertionFailure(format("Expecting %sto match null but was not", actual.inspect()), position);
+            throw new AssertionFailure(format("Expected to match: null\nActual: %s", actual.inspect()), position);
         return true;
     }
 
@@ -48,8 +48,8 @@ public class AssertionFailure extends DalException {
     }
 
     private static boolean raiseNotMatchErrorWithConvertedValue(Data expected, Data actual, int position, Data converted) {
-        throw new AssertionFailure(format("Expecting %sConvert to: %sto match %sbut was not",
-                actual.inspect(), converted.inspect(), expected.inspect()), position);
+        throw new AssertionFailure(format("Expected to match: %s\nActual: %s converted from: %s",
+                expected.inspect().trim(), converted.inspect().trim(), actual.inspect().trim()), position);
     }
 
     private static boolean raiseNotMatchError(Data expected, Data actual, int position) {
@@ -71,9 +71,16 @@ public class AssertionFailure extends DalException {
         return true;
     }
 
-    public static boolean assertRegexMatches(Pattern pattern, String actual, int position, Data input) {
+    public static boolean assertRegexMatches(Pattern pattern, String actual, int position) {
         if (!pattern.matcher(actual).matches())
-            throw new AssertionFailure(format("Expecting %sto match /%s/ but was not", input.inspect(), pattern), position);
+            throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s>", pattern, actual), position);
+        return true;
+    }
+
+
+    public static boolean assertRegexMatches(Pattern pattern, String converted, Data input, int position) {
+        if (!pattern.matcher(converted).matches())
+            throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s> converted from: %s", pattern, converted, input.inspect()), position);
         return true;
     }
 }

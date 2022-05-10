@@ -91,13 +91,11 @@ Feature: string
     """
     And failed with the message:
     """
-    Expecting java.time.Instant
-    <2000-10-10T00:00:00Z>
-    Convert to: java.lang.String
-    <2000-10-10T00:00:00Z>
-    to match java.lang.String
+    Expected to match: java.lang.String
     <un matched>
-    but was not
+    Actual: java.lang.String
+    <2000-10-10T00:00:00Z> converted from: java.time.Instant
+    <2000-10-10T00:00:00Z>
     """
 
   Scenario: not allow convert number to string implicitly
