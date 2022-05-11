@@ -67,10 +67,20 @@ public class ListScopeNode extends DALNode {
     }
 
     private Type guessType(List<Clause<DALRuntimeContext, DALNode>> expressionFactories) {
-        if (expressionFactories.size() > 0 && isListEllipsis(expressionFactories.get(expressionFactories.size() - 1)))
-            return Type.FIRST_N_ITEMS;
-        else if (expressionFactories.size() > 0 && isListEllipsis(expressionFactories.get(0)))
-            return Type.LAST_N_ITEMS;
+        List<Boolean> isListEllipsis = expressionFactories.stream().map(this::isListEllipsis).collect(toList());
+        long ellipsesCount = isListEllipsis.stream().filter(Boolean::booleanValue).count();
+        if (ellipsesCount > 0) {
+            if (ellipsesCount == 1) {
+                if (isListEllipsis.get(0))
+                    return Type.LAST_N_ITEMS;
+                if (isListEllipsis.get(isListEllipsis.size() - 1))
+                    return Type.FIRST_N_ITEMS;
+//            } else if (ellipsesCount == 2 && isListEllipsis.get(0) && isListEllipsis.get(isListEllipsis.size() - 1)) {
+//                return Type.CONTAINS;
+            }
+            throw new SyntaxException("Invalid ellipsis", expressionFactories.get(isListEllipsis.lastIndexOf(true))
+                    .expression(null).getOperandPosition());
+        }
         return Type.ALL_ITEMS;
     }
 
@@ -138,6 +148,11 @@ public class ListScopeNode extends DALNode {
             @Override
             protected Stream<DALNode> toChecking(List<DALNode> inputExpressions) {
                 return inputExpressions.stream().skip(1);
+            }
+        }, CONTAINS {
+            @Override
+            protected Stream<DALNode> toChecking(List<DALNode> inputExpressions) {
+                return null;
             }
         };
 

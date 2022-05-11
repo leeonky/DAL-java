@@ -119,7 +119,7 @@ Feature: syntax error
     """
     Then failed with the message:
     """
-    Unexpected token
+    Invalid ellipsis
     """
     And got the following notation:
     """
@@ -129,27 +129,12 @@ Feature: syntax error
     """
     When evaluate by:
     """
-    = >>| name | 'Lily' | ... | 'Tom' | ... |
-        | age  | 20     |     | 10    |     |
-    """
-    Then failed with the message:
-    """
-    Unexpected token
-    """
-    And got the following notation:
-    """
-    = >>| name | 'Lily' | ... | 'Tom' | ... |
-                          ^
-        | age  | 20     |     | 10    |     |
-    """
-    When evaluate by:
-    """
     = >>| name | 'Lily' | ... | 'Tom' |
         | age  | 20     |     | 10    |
     """
     Then failed with the message:
     """
-    Unexpected token
+    Invalid ellipsis
     """
     And got the following notation:
     """

@@ -60,7 +60,7 @@ Feature: syntax error
     """
     Then failed with the message:
     """
-    Unexpected token
+    Invalid ellipsis
     """
     And got the following notation:
     """
@@ -79,19 +79,6 @@ Feature: syntax error
       | 'Tom'  | 10  |
       | ...          |
     """
-    Then failed with the message:
-    """
-    Unexpected token
-    """
-    And got the following notation:
-    """
-    = | name   | age |
-      | 'Lily' | 20  |
-      | ...          |
-        ^
-      | 'Tom'  | 10  |
-      | ...          |
-    """
     When evaluate by:
     """
     = | name   | age |
@@ -101,7 +88,7 @@ Feature: syntax error
     """
     Then failed with the message:
     """
-    Unexpected token
+    Invalid ellipsis
     """
     And got the following notation:
     """

@@ -148,7 +148,7 @@ Feature: list
     """
     Then failed with the message:
     """
-    Unexpected token
+    Invalid ellipsis
     """
     And got the following notation:
     """
@@ -159,22 +159,13 @@ Feature: list
     """
     : [0 ... 1 ...]
     """
-    Then failed with the message:
-    """
-    Unexpected token
-    """
-    And got the following notation:
-    """
-    : [0 ... 1 ...]
-         ^
-    """
     When evaluate by:
     """
     : [0 ... 1]
     """
     Then failed with the message:
     """
-    Unexpected token
+    Invalid ellipsis
     """
     And got the following notation:
     """
@@ -361,5 +352,19 @@ Feature: list
     : >>| v1 | 11 | 21 |
         | v2 | 12 | 22 |
     """
+
+#  Scenario: list "contains"
+#    Given the following json:
+#    """
+#    [1, 2, 3, 4]
+#    """
+#    Then the following verification should pass:
+#    """
+#    : [... 1 4 ...]
+#    """
+#    And the inspect should:
+#    """
+#    : [... 1 4 ...]
+#    """
 
 #    TODO try to support [1 ... 2] ?
