@@ -80,7 +80,8 @@ public class AssertionFailure extends DalException {
 
     public static boolean assertRegexMatches(Pattern pattern, String converted, Data input, int position) {
         if (!pattern.matcher(converted).matches())
-            throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s> converted from: %s", pattern, converted, input.inspect()), position);
+            throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s> converted from: %s", pattern,
+                    converted, input.inspect()), position);
         return true;
     }
 }
