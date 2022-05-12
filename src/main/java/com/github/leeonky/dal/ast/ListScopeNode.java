@@ -12,7 +12,6 @@ import com.github.leeonky.interpreter.SyntaxException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.assertListSize;
 import static com.github.leeonky.dal.ast.SymbolNode.Type.BRACKET;
@@ -34,9 +33,6 @@ public class ListScopeNode extends DALNode {
         this.expressionFactories = expressionFactories;
         this.multiLineList = multiLineList;
         this.listComparator = listComparator;
-
-        // just use side effect to check list syntax: [1 ... 2 ... ]
-        getExpressions(0);
     }
 
     public ListScopeNode(List<DALNode> inputExpressions, boolean multiLineList, Type type,
@@ -52,7 +48,7 @@ public class ListScopeNode extends DALNode {
     }
 
     private List<DALNode> getExpressions(int firstIndex) {
-        return expressions__ != null ? expressions__ : type.checkElements(getInputExpressions(firstIndex)).stream()
+        return expressions__ != null ? expressions__ : getInputExpressions(firstIndex).stream()
                 .filter(node -> !(node instanceof ListEllipsisNode)).collect(toList());
     }
 
@@ -129,45 +125,16 @@ public class ListScopeNode extends DALNode {
     }
 
     public enum Type {
-        ALL_ITEMS {
-            @Override
-            protected Stream<DALNode> toChecking(List<DALNode> inputExpressions) {
-                return inputExpressions.stream();
-            }
-        }, FIRST_N_ITEMS {
-            @Override
-            protected Stream<DALNode> toChecking(List<DALNode> inputExpressions) {
-                return inputExpressions.stream().limit(inputExpressions.size() - 1);
-            }
-        }, LAST_N_ITEMS {
+        ALL_ITEMS, FIRST_N_ITEMS, LAST_N_ITEMS {
             @Override
             int indexOfNode(int firstIndex, int index, int count) {
                 return index - count;
             }
 
-            @Override
-            protected Stream<DALNode> toChecking(List<DALNode> inputExpressions) {
-                return inputExpressions.stream().skip(1);
-            }
-        }, CONTAINS {
-            @Override
-            protected Stream<DALNode> toChecking(List<DALNode> inputExpressions) {
-                return null;
-            }
-        };
+        }, CONTAINS;
 
         int indexOfNode(int firstIndex, int index, int count) {
             return index + firstIndex;
-        }
-
-        protected abstract Stream<DALNode> toChecking(List<DALNode> inputExpressions);
-
-        public List<DALNode> checkElements(List<DALNode> inputExpressions) {
-            toChecking(inputExpressions).forEach(node -> {
-                if (node instanceof ListEllipsisNode)
-                    throw new SyntaxException("Unexpected token", node.getPositionBegin());
-            });
-            return inputExpressions;
         }
     }
 }
