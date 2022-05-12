@@ -360,11 +360,71 @@ Feature: list
     """
     Then the following verification should pass:
     """
-    : [... 1 4 ...]
+    : [... 1 3 ...]
     """
     And the inspect should:
     """
-    : [..., : 1, : 4, ...]
+    : [..., : 1, : 3, ...]
+    """
+    When evaluate by:
+    """
+    : [... 1 5 ...]
+    """
+    Then failed with the message:
+    """
+    No such element
+    """
+    And got the following notation:
+    """
+    : [... 1 5 ...]
+             ^
+    """
+
+  Scenario: list contains object
+    Given the following json:
+    """
+    [{
+      "name": "Tom",
+      "age": 18
+    }, {
+      "name": "John",
+      "age": 20
+    }]
+    """
+    Then the following verification should pass:
+    """
+    : [... {
+      name: Tom
+    } ...]
+    """
+    And the inspect should:
+    """
+    : [..., : {name: 'Tom'}, ...]
+    """
+    When evaluate by:
+    """
+    : [...
+    {
+      name: John
+    } {
+      age: 30
+    }
+    ...]
+    """
+    Then failed with the message:
+    """
+    No such element
+    """
+    And got the following notation:
+    """
+    : [...
+    {
+      name: John
+    } {
+      ^
+      age: 30
+    }
+    ...]
     """
 
 #  TODO contains in table

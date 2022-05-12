@@ -81,10 +81,9 @@ public class ListScopeNode extends DALNode {
 
     @Override
     public String inspect() {
-        if (type == Type.CONTAINS) {
+        if (type == Type.CONTAINS)
             return expressionFactories.stream().map(clause -> clause.expression(InputNode.INSTANCE).inspect())
                     .collect(joining(", ", "[", "]"));
-        }
         return getInputExpressions(0).stream().map(DALNode::inspect).collect(joining(", ", "[", "]"));
     }
 
@@ -99,16 +98,33 @@ public class ListScopeNode extends DALNode {
     }
 
     private boolean verifyAll(DALRuntimeContext context, Data data) {
-        data.setListComparator(listComparator);
         if (!data.isList())
             throw new RuntimeException(format("Cannot compare %sand list", data.inspect()), getPositionBegin());
+        data.setListComparator(listComparator);
+        int listFirstIndex = data.getListFirstIndex();
         if (type == Type.CONTAINS) {
+//            TODO raise error when index list(expressionFactories == null)
+            int elementIndex = 0;
+            for (Clause<DALRuntimeContext, DALNode> clause : expressionFactories.subList(1, expressionFactories.size() - 1))
+                while (!verifyContains(context, data, elementIndex++, clause, listFirstIndex)) ;
             return true;
         } else {
-            List<DALNode> expressions = getExpressions(data.getListFirstIndex());
+            List<DALNode> expressions = getExpressions(listFirstIndex);
             if (type == Type.ALL_ITEMS)
                 assertListSize(expressions.size(), data.getListSize(), getPositionBegin());
             return context.newBlockScope(data, () -> assertElementExpressions(context, expressions));
+        }
+    }
+
+    private boolean verifyContains(DALRuntimeContext context, Data data, int index,
+                                   Clause<DALRuntimeContext, DALNode> clause, int listFirstIndex) {
+        if (index == data.getListSize())
+            throw new AssertionFailure("No such element", clause.expression(InputNode.INSTANCE).getOperandPosition());
+        try {
+            return context.newBlockScope(data, () -> (boolean) clause.expression(new DALExpression(InputNode.INSTANCE,
+                    new PropertyImplicit(), new SymbolNode(index + listFirstIndex, BRACKET))).evaluate(context));
+        } catch (AssertionFailure ignore) {
+            return false;
         }
     }
 
