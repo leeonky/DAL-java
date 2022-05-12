@@ -71,9 +71,8 @@ public class ListScopeNode extends DALNode {
                     return Type.LAST_N_ITEMS;
                 if (isListEllipsis.get(isListEllipsis.size() - 1))
                     return Type.FIRST_N_ITEMS;
-//            } else if (ellipsesCount == 2 && isListEllipsis.get(0) && isListEllipsis.get(isListEllipsis.size() - 1)) {
-//                return Type.CONTAINS;
-            }
+            } else if (ellipsesCount == 2 && isListEllipsis.get(0) && isListEllipsis.get(isListEllipsis.size() - 1))
+                return Type.CONTAINS;
             throw new SyntaxException("Invalid ellipsis", expressionFactories.get(isListEllipsis.lastIndexOf(true))
                     .expression(null).getOperandPosition());
         }
@@ -82,6 +81,10 @@ public class ListScopeNode extends DALNode {
 
     @Override
     public String inspect() {
+        if (type == Type.CONTAINS) {
+            return expressionFactories.stream().map(clause -> clause.expression(InputNode.INSTANCE).inspect())
+                    .collect(joining(", ", "[", "]"));
+        }
         return getInputExpressions(0).stream().map(DALNode::inspect).collect(joining(", ", "[", "]"));
     }
 
@@ -99,10 +102,14 @@ public class ListScopeNode extends DALNode {
         data.setListComparator(listComparator);
         if (!data.isList())
             throw new RuntimeException(format("Cannot compare %sand list", data.inspect()), getPositionBegin());
-        List<DALNode> expressions = getExpressions(data.getListFirstIndex());
-        if (type == Type.ALL_ITEMS)
-            assertListSize(expressions.size(), data.getListSize(), getPositionBegin());
-        return context.newBlockScope(data, () -> assertElementExpressions(context, expressions));
+        if (type == Type.CONTAINS) {
+            return true;
+        } else {
+            List<DALNode> expressions = getExpressions(data.getListFirstIndex());
+            if (type == Type.ALL_ITEMS)
+                assertListSize(expressions.size(), data.getListSize(), getPositionBegin());
+            return context.newBlockScope(data, () -> assertElementExpressions(context, expressions));
+        }
     }
 
     private boolean assertElementExpressions(DALRuntimeContext context, List<DALNode> expressions) {

@@ -353,18 +353,21 @@ Feature: list
         | v2 | 12 | 22 |
     """
 
-#  Scenario: list "contains"
-#    Given the following json:
-#    """
-#    [1, 2, 3, 4]
-#    """
-#    Then the following verification should pass:
-#    """
-#    : [... 1 4 ...]
-#    """
-#    And the inspect should:
-#    """
-#    : [... 1 4 ...]
-#    """
+  Scenario: list "contains"
+    Given the following json:
+    """
+    [1, 2, 3, 4]
+    """
+    Then the following verification should pass:
+    """
+    : [... 1 4 ...]
+    """
+    And the inspect should:
+    """
+    : [..., : 1, : 4, ...]
+    """
+
+#  TODO contains in table
+#  TODO contains not allow set index or key in table
 
 #    TODO try to support [1 ... 2] ?
