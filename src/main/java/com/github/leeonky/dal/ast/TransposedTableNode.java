@@ -3,7 +3,7 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.ast.table.TransposedTableBody;
 import com.github.leeonky.dal.ast.table.TransposedTableHead;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.ElementAssertionFailure;
+import com.github.leeonky.dal.runtime.RowAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 public class TransposedTableNode extends DALNode {
@@ -19,8 +19,8 @@ public class TransposedTableNode extends DALNode {
     protected boolean verify(Data actual, DALOperator.Matcher operator, DALRuntimeContext context, DALNode actualNode) {
         try {
             return transpose().transformToVerificationNode(actual, operator, context).verify(actual, operator, context, actualNode);
-        } catch (ElementAssertionFailure elementAssertionFailure) {
-            throw elementAssertionFailure.columnPositionException(this);
+        } catch (RowAssertionFailure rowAssertionFailure) {
+            throw rowAssertionFailure.columnPositionException(this);
         }
     }
 
@@ -28,8 +28,8 @@ public class TransposedTableNode extends DALNode {
     protected boolean verify(Data actual, DALOperator.Equal operator, DALRuntimeContext context, DALNode actualNode) {
         try {
             return transpose().transformToVerificationNode(actual, operator, context).verify(actual, operator, context, actualNode);
-        } catch (ElementAssertionFailure elementAssertionFailure) {
-            throw elementAssertionFailure.columnPositionException(this);
+        } catch (RowAssertionFailure rowAssertionFailure) {
+            throw rowAssertionFailure.columnPositionException(this);
         }
     }
 

@@ -1,11 +1,9 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.ast.DALOperator.PropertyImplicit;
-import com.github.leeonky.dal.runtime.DalException;
-import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.ElementAssertionFailure;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeException;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.SyntaxException;
 
@@ -15,8 +13,6 @@ import java.util.List;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.assertListSize;
 import static com.github.leeonky.dal.ast.SymbolNode.Type.BRACKET;
-import static com.github.leeonky.interpreter.InterpreterException.Position.Type.CHAR;
-import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -107,8 +103,11 @@ public class ListScopeNode extends DALNode {
         if (type == Type.CONTAINS) {
 //            TODO raise error when index list(expressionFactories == null)
             int elementIndex = 0;
-            for (Clause<DALRuntimeContext, DALNode> clause : expressionFactories.subList(1, expressionFactories.size() - 1))
-                while (!verifyContains(context, data, elementIndex++, clause, listFirstIndex)) ;
+            List<Clause<DALRuntimeContext, DALNode>> subList = expressionFactories.subList(1, expressionFactories.size() - 1);
+            for (int clauseIndex = 0; clauseIndex < subList.size(); clauseIndex++) {
+                Clause<DALRuntimeContext, DALNode> clause = subList.get(clauseIndex);
+                while (!verifyContains(clauseIndex, context, data, elementIndex++, clause, listFirstIndex)) ;
+            }
             return true;
         } else {
             List<DALNode> expressions = getExpressions(listFirstIndex);
@@ -118,11 +117,13 @@ public class ListScopeNode extends DALNode {
         }
     }
 
-    private boolean verifyContains(DALRuntimeContext context, Data data, int index,
+    private boolean verifyContains(int clauseIndex, DALRuntimeContext context, Data data, int index,
                                    Clause<DALRuntimeContext, DALNode> clause, int listFirstIndex) {
-        if (index == data.getListSize())
-            throw new AssertionFailure("No such element", clause.expression(InputNode.INSTANCE).getOperandPosition(),
-                    multiLineList ? LINE : CHAR);
+        if (index == data.getListSize()) {
+            int operandPosition = clause.expression(InputNode.INSTANCE).getOperandPosition();
+            throw multiLineList ? new RowAssertionFailure(clauseIndex, new AssertionFailure("No such element",
+                    operandPosition)) : new AssertionFailure("No such element", operandPosition);
+        }
         try {
             return context.newBlockScope(data, () -> (boolean) clause.expression(new DALExpression(InputNode.INSTANCE,
                     new PropertyImplicit(), new SymbolNode(index + listFirstIndex, BRACKET))).evaluate(context));

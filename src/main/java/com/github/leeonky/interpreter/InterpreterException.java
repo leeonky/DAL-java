@@ -41,6 +41,15 @@ public class InterpreterException extends RuntimeException {
                 .reduce(code.substring(offset), (r, p) -> p.process(r), notAllowParallelReduce());
     }
 
+    public void setType(Position.Type type) {
+        if (positions.size() > 0)
+            positions.set(0, new Position(type, positions.get(0).position));
+    }
+
+    public void clearPosition() {
+        positions.clear();
+    }
+
     public static class Position {
         private final Type type;
         private final int position;

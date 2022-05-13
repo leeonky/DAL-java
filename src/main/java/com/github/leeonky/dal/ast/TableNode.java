@@ -4,7 +4,7 @@ import com.github.leeonky.dal.ast.table.RowNode;
 import com.github.leeonky.dal.ast.table.TableBody;
 import com.github.leeonky.dal.ast.table.TableHead;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.ElementAssertionFailure;
+import com.github.leeonky.dal.runtime.RowAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 import java.util.List;
@@ -24,8 +24,8 @@ public class TableNode extends DALNode {
     protected boolean verify(Data actual, DALOperator.Equal operator, DALRuntimeContext context, DALNode actualNode) {
         try {
             return transformToVerificationNode(actual, operator, context).verify(actual, operator, context, actualNode);
-        } catch (ElementAssertionFailure elementAssertionFailure) {
-            throw elementAssertionFailure.linePositionException(this);
+        } catch (RowAssertionFailure rowAssertionFailure) {
+            throw rowAssertionFailure.linePositionException(this);
         }
     }
 
@@ -33,8 +33,8 @@ public class TableNode extends DALNode {
     protected boolean verify(Data actual, DALOperator.Matcher operator, DALRuntimeContext context, DALNode actualNode) {
         try {
             return transformToVerificationNode(actual, operator, context).verify(actual, operator, context, actualNode);
-        } catch (ElementAssertionFailure elementAssertionFailure) {
-            throw elementAssertionFailure.linePositionException(this);
+        } catch (RowAssertionFailure rowAssertionFailure) {
+            throw rowAssertionFailure.linePositionException(this);
         }
     }
 
