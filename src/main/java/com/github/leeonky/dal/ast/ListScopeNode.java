@@ -15,6 +15,8 @@ import java.util.List;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.assertListSize;
 import static com.github.leeonky.dal.ast.SymbolNode.Type.BRACKET;
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.CHAR;
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -119,7 +121,8 @@ public class ListScopeNode extends DALNode {
     private boolean verifyContains(DALRuntimeContext context, Data data, int index,
                                    Clause<DALRuntimeContext, DALNode> clause, int listFirstIndex) {
         if (index == data.getListSize())
-            throw new AssertionFailure("No such element", clause.expression(InputNode.INSTANCE).getOperandPosition());
+            throw new AssertionFailure("No such element", clause.expression(InputNode.INSTANCE).getOperandPosition(),
+                    multiLineList ? LINE : CHAR);
         try {
             return context.newBlockScope(data, () -> (boolean) clause.expression(new DALExpression(InputNode.INSTANCE,
                     new PropertyImplicit(), new SymbolNode(index + listFirstIndex, BRACKET))).evaluate(context));

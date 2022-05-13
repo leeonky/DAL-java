@@ -18,6 +18,10 @@ public class AssertionFailure extends DalException {
         super(message.trim(), position);
     }
 
+    public AssertionFailure(String message, int position, Position.Type type) {
+        super(message.trim(), position, type);
+    }
+
     public static void assertListSize(int expected, int actual, int position) {
         if (expected != actual)
             throw new AssertionFailure(format("Different list size\nExpected: <%d>\nActual: <%d>", expected, actual), position);

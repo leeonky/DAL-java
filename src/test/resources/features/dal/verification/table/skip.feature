@@ -256,3 +256,44 @@ Feature: skip
     = | name  | age |
     0 | ***         |
     """
+
+  Scenario: contains element
+    When the following json:
+    """
+    [{
+      "name": "Tom",
+      "age": 10
+    },{
+      "name": "John",
+      "age": 20
+    },{
+      "name": "Lily",
+      "age": 15
+    }]
+    """
+    Then the following verification should pass:
+    """
+    = | name  | age |
+      | ...         |
+      | 'Lily' | 15 |
+      | ...         |
+    """
+    When evaluate by:
+    """
+    = | name  | age |
+      | ...         |
+      | 'Lily' | 18 |
+      | ...         |
+    """
+    Then failed with the message:
+    """
+    No such element
+    """
+    And got the following notation:
+    """
+    = | name  | age |
+      | ...         |
+      | 'Lily' | 18 |
+    ^^^^^^^^^^^^^^^^^
+      | ...         |
+    """
