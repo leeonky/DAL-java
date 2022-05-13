@@ -19,12 +19,36 @@ Feature: this
     """
     : {{}: {value: 10}}
     """
-    And the following verification for the instance of java class "Data" should pass:
+
+  Scenario: verify field when {} in object scope with "{}: {}" mode
+    Given the following json:
+    """
+    {
+      "key": "value"
+    }
+    """
+    Then the following verification should pass:
     """
     = {
-      {}: {
-        value: 10
+      {}= {
+        key: value
       }
+    }
+    """
+
+  Scenario: verify field when {} in object scope with "{}.property: value" mode
+    Given the following json:
+    """
+    {
+      "key": {
+        "sub": "value"
+      }
+    }
+    """
+    And the following verification should pass:
+    """
+    = {
+      {}.key.sub: value
     }
     """
 

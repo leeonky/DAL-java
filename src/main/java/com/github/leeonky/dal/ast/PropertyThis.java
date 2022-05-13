@@ -12,9 +12,9 @@ public class PropertyThis extends DALNode implements ExcuteableNode {
 
     @Override
     public Data getPropertyValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
-        Data thisReference = data.wrapThis();
-        context.setFlattenProperty(data, "", thisReference);
-        return thisReference;
+//        Data thisReference = data.wrapThis();
+//        context.setFlattenProperty(data, "", thisReference);
+        return data;
     }
 
 }

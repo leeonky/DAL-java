@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.assertUnexpectedFields;
 import static java.lang.String.format;
@@ -38,7 +39,11 @@ public class ObjectScopeNode extends DALNode {
         checkNull(data);
         return context.newBlockScope(data, () -> {
             expressions.forEach(expression -> expression.evaluate(context));
-            assertUnexpectedFields(collectUnexpectedFields(data, context), actualNode.inspect(), operator.getPosition());
+            Set<String> unexpectedFields = new LinkedHashSet<String>(data.getFieldNames()) {{
+                removeAll(collectFields(data));
+                removeAll(context.removeFlattenProperties(data));
+            }};
+            assertUnexpectedFields(unexpectedFields, actualNode.inspect(), operator.getPosition());
             return true;
         });
     }
@@ -60,11 +65,15 @@ public class ObjectScopeNode extends DALNode {
             throw new AssertionFailure("The input value is null", getPositionBegin());
     }
 
-    private Set<String> collectUnexpectedFields(Data data, DALRuntimeContext context) {
-        return new LinkedHashSet<String>(data.getFieldNames()) {{
-            removeAll(expressions.stream().map(expression -> data.firstFieldFromAlias(expression.getRootSymbolName()))
-                    .collect(Collectors.toSet()));
-            removeAll(context.removeFlattenProperties(data));
-        }};
+    private Set<Object> collectFields(Data data) {
+        return expressions.stream().flatMap(expression -> {
+            DALNode keyNode = ((DALExpression) ((DALExpression) expression).getLeftOperand()).getRightOperand();
+            if (keyNode instanceof PropertyThis) {
+                DALNode expectedNode = ((DALExpression) expression).getRightOperand();
+                if (expectedNode instanceof ObjectScopeNode)
+                    return ((ObjectScopeNode) expectedNode).collectFields(data).stream();
+            }
+            return Stream.of(data.firstFieldFromAlias(expression.getRootSymbolName()));
+        }).collect(Collectors.toSet());
     }
 }
