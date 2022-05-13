@@ -72,6 +72,8 @@ public class IntegrationTestContext {
     }
 
     public void verifyLastEvaluated(String verification) {
+        if (exception != null)
+            throw exception;
         expect(result).should("\n" + verification);
     }
 

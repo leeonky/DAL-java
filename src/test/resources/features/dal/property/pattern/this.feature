@@ -104,3 +104,17 @@ Feature: this
         }
       }
     """
+
+  Scenario: expression with this reference
+    Given the following json:
+    """
+    1
+    """
+    When evaluate by:
+    """
+    {} + 1
+    """
+    Then the result should:
+    """
+    = 2
+    """

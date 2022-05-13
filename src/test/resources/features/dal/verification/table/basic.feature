@@ -439,3 +439,16 @@ Feature: basic verification via table
       | opt |
       | .   |
       | /   |
+
+  Scenario: sort list with table
+    Given the following json:
+    """
+    [1, 3, 2]
+    """
+    Then the following verification should pass:
+    """
+    : | +{} |
+      | 1   |
+      | 2   |
+      | 3   |
+    """
