@@ -160,10 +160,6 @@ public class Data {
                 + fieldName.substring(prefix.length() + 1);
     }
 
-    public Data wrapThis() {
-        return new Data(new ThisObject(this), dalRuntimeContext, schemaType);
-    }
-
     public String dump() {
         return dump("", new HashMap<>(), "");
     }

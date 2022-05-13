@@ -55,8 +55,6 @@ public class RuntimeContextBuilder {
                 .registerListAccessor(Stream.class, stream -> stream::iterator)
                 .registerPropertyAccessor(Map.class, new MapPropertyAccessor())
                 .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor())
-                .registerPropertyAccessor(ThisObject.class, new ThisObjectPropertyAccessor())
-                .registerImplicitData(ThisObject.class, thisObject -> thisObject.getData().getInstance())
         ;
 
         registerSingleDumper(String.class, RuntimeContextBuilder::dumpString)
@@ -411,22 +409,6 @@ public class RuntimeContextBuilder {
         @Override
         public Object getValueByData(Data data, String name) {
             return data.mapList(name).getInstance();
-        }
-    }
-
-    private class ThisObjectPropertyAccessor extends JavaClassPropertyAccessor<ThisObject> {
-        public ThisObjectPropertyAccessor() {
-            super(RuntimeContextBuilder.this, BeanClass.create(ThisObject.class));
-        }
-
-        @Override
-        public Set<String> getPropertyNames(ThisObject thisObject) {
-            return thisObject.getData().getFieldNames();
-        }
-
-        @Override
-        public Object getValue(ThisObject thisObject, String name) {
-            return thisObject.getData().getValue(name).getInstance();
         }
     }
 }
