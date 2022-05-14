@@ -4,7 +4,6 @@ import com.github.leeonky.dal.runtime.Calculator;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeException;
-import com.github.leeonky.util.ConvertException;
 import com.github.leeonky.util.NumberType;
 
 import java.util.Set;
@@ -16,10 +15,6 @@ import static java.util.stream.Collectors.joining;
 public class AssertionFailure extends DalException {
     public AssertionFailure(String message, int position) {
         super(message.trim(), position);
-    }
-
-    public AssertionFailure(String message, int position, Position.Type type) {
-        super(message.trim(), position, type);
     }
 
     public static void assertListSize(int expected, int actual, int position) {
@@ -40,14 +35,15 @@ public class AssertionFailure extends DalException {
             return numberType.compare((Number) expectedValue, (Number) actualValue) == 0
                     || raiseNotMatchError(expected, actual, position);
         else {
+            Data converted;
             try {
-                Data converted = actual.convert(expectedValue.getClass());
-                return Calculator.equals(converted, expected) ||
-                        (converted.getInstance() == actual.getInstance() ? raiseNotMatchError(expected, actual, position)
-                                : raiseNotMatchErrorWithConvertedValue(expected, actual, position, converted));
-            } catch (ConvertException e) {
+                converted = actual.convert(expectedValue.getClass());
+            } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), position);
             }
+            return Calculator.equals(converted, expected) ||
+                    (converted.getInstance() == actual.getInstance() ? raiseNotMatchError(expected, actual, position)
+                            : raiseNotMatchErrorWithConvertedValue(expected, actual, position, converted));
         }
     }
 
@@ -80,7 +76,6 @@ public class AssertionFailure extends DalException {
             throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s>", pattern, actual), position);
         return true;
     }
-
 
     public static boolean assertRegexMatches(Pattern pattern, String converted, Data input, int position) {
         if (!pattern.matcher(converted).matches())
