@@ -43,7 +43,7 @@ Feature: which expression
     """
     Examples:
       | code |
-      | +    |
+      | *    |
       | :    |
       | =    |
 

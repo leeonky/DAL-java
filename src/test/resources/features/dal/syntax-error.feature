@@ -74,7 +74,7 @@ Feature: syntax error expression
     """
     When evaluate by:
     """
-    1 is Number + 1
+    1 is Number * 1
     """
     Then failed with the message:
     """
@@ -82,6 +82,6 @@ Feature: syntax error expression
     """
     And got the following notation:
     """
-    1 is Number + 1
+    1 is Number * 1
                 ^
     """

@@ -229,12 +229,29 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
         @Override
         public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
-            return Calculator.negate(node2.evaluate(context), context);
+            return Calculator.negate(node2.evaluateData(context), context);
         }
 
         @Override
         public String inspect(String node1, String node2) {
             return "-" + node2;
+        }
+    }
+
+    public static class Positive extends DALOperator {
+
+        public Positive() {
+            super(PRECEDENCE_UNARY_OPERATION, "+", false);
+        }
+
+        @Override
+        public Object calculate(DALNode node1, DALNode node2, DALRuntimeContext context) {
+            return Calculator.positive(node2.evaluateData(context), context);
+        }
+
+        @Override
+        public String inspect(String node1, String node2) {
+            return "+" + node2;
         }
     }
 

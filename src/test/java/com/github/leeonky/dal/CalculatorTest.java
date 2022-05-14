@@ -214,13 +214,13 @@ class CalculatorTest {
 
         @Test
         void support_all_number_type() {
-            assertThat(Calculator.negate(1, context)).isEqualTo(-1);
-            assertThat(Calculator.negate(1L, context)).isEqualTo(-1L);
+            assertThat(Calculator.negate(context.wrap(1), context)).isEqualTo(-1);
+            assertThat(Calculator.negate(context.wrap(1L), context)).isEqualTo(-1L);
         }
 
         @Test
         void should_raise_error_when_negate_non_number_types() {
-            assertIllegalArgument(() -> Calculator.negate("2", context), "Operands should be number but 'java.lang.String'");
+            assertIllegalArgument(() -> Calculator.negate(context.wrap("2"), context), "Operands should be number but 'java.lang.String'");
         }
     }
 

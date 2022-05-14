@@ -46,7 +46,7 @@ public class Data {
         return getListValues().size();
     }
 
-    private List<Object> getListValues() {
+    public List<Object> getListValues() {
         return listValue == null ? (listValue = stream(dalRuntimeContext.getList(instance).spliterator(), false)
                 .sorted(listComparator).collect(toList())) : listValue;
     }

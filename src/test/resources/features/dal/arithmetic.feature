@@ -38,12 +38,6 @@ Feature: arithmetic
       | -1    | -1     | -1      |
       | !true | false  | !true   |
 
-  Scenario: not support +1
-    * the following verification should syntax error:
-    """
-    (+1)
-    """
-
   Scenario: should not parse as minus when start with minus
     Given the following json:
     """

@@ -1,19 +1,24 @@
 package com.github.leeonky.dal.runtime;
 
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
+import static java.lang.String.format;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.reverseOrder;
+import static java.util.stream.Collectors.toList;
 
 public class Calculator {
     public static int compare(Object v1, Object v2, RuntimeContextBuilder.DALRuntimeContext context) {
         if (v1 == null || v2 == null)
-            throw new IllegalArgumentException(String.format("Can not compare [%s] and [%s]", v1, v2));
+            throw new IllegalArgumentException(format("Can not compare [%s] and [%s]", v1, v2));
         if (v1 instanceof Number && v2 instanceof Number)
             return context.getNumberType().compare((Number) v1, (Number) v2);
         if (v1 instanceof String && v2 instanceof String)
             return ((String) v1).compareTo((String) v2);
-        throw new IllegalArgumentException(String.format("Can not compare [%s: %s] and [%s: %s]",
+        throw new IllegalArgumentException(format("Can not compare [%s: %s] and [%s: %s]",
                 getClassName(v1), v1, getClassName(v2), v2));
     }
 
@@ -30,7 +35,7 @@ public class Calculator {
             return v1.toString() + v2;
         if (v2 instanceof String)
             return v1 + v2.toString();
-        throw new IllegalArgumentException(String.format("Can not plus '%s' and '%s'", getClassName(v1), getClassName(v2)));
+        throw new IllegalArgumentException(format("Can not plus '%s' and '%s'", getClassName(v1), getClassName(v2)));
     }
 
     public static Object subtract(Object v1, Object v2, RuntimeContextBuilder.DALRuntimeContext context) {
@@ -50,7 +55,7 @@ public class Calculator {
 
     private static void requireNumber(Object v1, Object v2) {
         if (!(v1 instanceof Number && v2 instanceof Number))
-            throw new IllegalArgumentException(String.format("Operands should be number but '%s' and '%s'",
+            throw new IllegalArgumentException(format("Operands should be number but '%s' and '%s'",
                     getClassName(v1), getClassName(v2)));
     }
 
@@ -86,9 +91,25 @@ public class Calculator {
             throw new IllegalArgumentException(operand + " should be boolean but '" + getClassName(v) + "'");
     }
 
-    public static Object negate(Object v, RuntimeContextBuilder.DALRuntimeContext context) {
-        if (v instanceof Number)
-            return context.getNumberType().negate((Number) v);
-        throw new IllegalArgumentException(String.format("Operands should be number but '%s'", getClassName(v)));
+    @SuppressWarnings("unchecked")
+    public static Object negate(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
+        Object value = data.getInstance();
+        if (value instanceof Number)
+            return context.getNumberType().negate((Number) value);
+
+        if (data.isList())
+            return data.getListValues().stream().sorted((Comparator) reverseOrder()).collect(toList());
+        throw new IllegalArgumentException(format("Operands should be number but '%s'", getClassName(value)));
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Object positive(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
+        Object value = data.getInstance();
+        if (value instanceof Number)
+            return value;
+
+        if (data.isList())
+            return data.getListValues().stream().sorted((Comparator) naturalOrder()).collect(toList());
+        throw new IllegalArgumentException(format("Operands should be List but '%s'", getClassName(value)));
     }
 }

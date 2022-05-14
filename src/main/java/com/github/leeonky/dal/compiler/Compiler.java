@@ -53,6 +53,7 @@ public class Compiler {
                     Operators.DIVISION.operator(DALOperator.Division::new)),
             UNARY_OPERATORS = oneOf(
                     Operators.MINUS.operator(DALOperator.Minus::new, not(DALProcedure::isCodeBeginning)),
+                    Operators.PLUS.operator(DALOperator.Positive::new, not(DALProcedure::isCodeBeginning)),
                     Operators.NOT.operator(DALOperator.Not::new, not(DALProcedure::mayBeUnEqual))),
             VERIFICATION_OPERATORS = oneOf(
                     Operators.MATCHER.<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>

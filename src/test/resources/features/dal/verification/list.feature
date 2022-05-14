@@ -427,7 +427,36 @@ Feature: list
     ...]
     """
 
-#  TODO contains in table
+  Scenario: sort list
+    Given the following json:
+    """
+    [1, 3, 2]
+    """
+    When evaluate by:
+    """
+    (+{})
+    """
+    Then the result should:
+    """
+    : [1, 2, 3]
+    """
+    And the inspect should:
+    """
+    (+{})
+    """
+    When evaluate by:
+    """
+    (-{})
+    """
+    Then the result should:
+    """
+    : [3, 2, 1]
+    """
+    And the inspect should:
+    """
+    (-{})
+    """
+
 #  TODO contains not allow set index or key in table
 
 #    TODO try to support [1 ... 2] ?

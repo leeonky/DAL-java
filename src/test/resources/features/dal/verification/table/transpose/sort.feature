@@ -17,6 +17,14 @@ Feature: sort
     """
     = >>| ￪ name | name= 'John' | name= 'Tom' |
     """
+    Then the following verification should pass:
+    """
+    = >>| + name | 'John' | 'Tom'  |
+    """
+    And the inspect should:
+    """
+    = >>| + name | name= 'John' | name= 'Tom' |
+    """
     When evaluate by:
     """
     = >>| ￪ name | 'John' | 'Lucy'  |
