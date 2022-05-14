@@ -262,7 +262,8 @@ public class RuntimeContextBuilder {
         }
 
         public boolean isRegisteredList(Object instance) {
-            return listAccessors.containsType(instance);
+            Optional<ListAccessor<Object>> objectListAccessor = listAccessors.tryGetData(instance);
+            return objectListAccessor.isPresent() && objectListAccessor.get().isList(instance);
         }
 
         public Converter getConverter() {

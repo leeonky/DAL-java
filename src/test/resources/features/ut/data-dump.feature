@@ -301,3 +301,22 @@ Feature: dump-data
       "__type": "Data"
     }
     """
+
+  Scenario: ignore exception during dump
+    And the following java class:
+    """
+    public class Data {
+      public int value = 2;
+      public int getError() {
+        throw new RuntimeException("error");
+      }
+    }
+    """
+    Then dumped instance of java class "Data" should be:
+    """
+    {
+      "value": 2,
+      "error": "** Got exception during dump: java.lang.IllegalStateException: java.lang.RuntimeException: error",
+      "__type": "Data"
+    }
+    """

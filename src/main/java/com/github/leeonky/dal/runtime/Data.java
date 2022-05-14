@@ -86,7 +86,7 @@ public class Data {
                     "  3. public no args method\n" +
                     "  4. Map key value\n" +
                     "  5. customized type getter\n" +
-                    "  6. static method extension\n%s%s", property, e.getMessage(), listMappingMessage(this, property)));
+                    "  6. static method extension\n%s%s", property, e.getMessage(), listMappingMessage(this, property)), e);
         }
     }
 
@@ -167,9 +167,13 @@ public class Data {
     private String dump(String indentation, Map<Object, String> dumped, String path) {
         if (path.length() > 100)
             return "\"** too deep level property!\"";
-        if (isList())
-            return dumpList(indentation, dumped, path);
-        return dumpInstance(instance, indentation, dumped, path);
+        try {
+            if (isList())
+                return dumpList(indentation, dumped, path);
+            return dumpInstance(instance, indentation, dumped, path);
+        } catch (Exception e) {
+            return String.format("\"** Got exception during dump: %s\"", e);
+        }
     }
 
     private String dumpInstance(Object instance, String indentation, Map<Object, String> dumped, String path) {
@@ -213,8 +217,8 @@ public class Data {
         try {
             return format("%s\"%s\": %s", keyIndentation, fieldName,
                     getValue(fieldName).dump(keyIndentation, dumped, path + "." + fieldName));
-        } catch (PropertyAccessException ignore) {
-            return null;
+        } catch (PropertyAccessException e) {
+            return format("%s\"%s\": \"%s\"", keyIndentation, fieldName, "** Got exception during dump: " + e.getCause());
         }
     }
 

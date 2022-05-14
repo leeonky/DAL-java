@@ -6,4 +6,8 @@ public interface ListAccessor<T> {
     default int firstIndex() {
         return 0;
     }
+
+    default boolean isList(T instance) {
+        return true;
+    }
 }
