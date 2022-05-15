@@ -23,14 +23,18 @@ public class Assertions {
         return new Assertions(input);
     }
 
-    public void should(String dalExpression) {
-        should("", dalExpression);
+    public <T> T should(String dalExpression) {
+        return should("", dalExpression);
     }
 
-    public void should(String prefix, String verification) {
+    public <T> T get(String dalExpression) {
+        return should(dalExpression);
+    }
+
+    public <T> T should(String prefix, String verification) {
         String fullCode = prefix + verification;
         try {
-            dal.evaluate(input, fullCode);
+            return dal.evaluate(input, fullCode);
         } catch (InterpreterException e) {
             String detailMessage = "\n" + e.show(fullCode, prefix.length()) + "\n\n" + e.getMessage();
             if (dumpInput)
