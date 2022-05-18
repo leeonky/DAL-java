@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.dal.ast.SortSequenceNode;
+import com.github.leeonky.dal.ast.SortGroupNode;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.*;
@@ -18,7 +18,7 @@ public class Data {
     private final RuntimeContextBuilder.DALRuntimeContext dalRuntimeContext;
     private final Object instance;
     private List<Object> listValue;
-    private Comparator<Object> listComparator = SortSequenceNode.NOP_COMPARATOR;
+    private Comparator<Object> listComparator = SortGroupNode.NOP_COMPARATOR;
 
     public Data(Object instance, RuntimeContextBuilder.DALRuntimeContext context, SchemaType schemaType) {
         this.instance = instance;

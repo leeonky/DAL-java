@@ -2,7 +2,7 @@ package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.InputNode;
-import com.github.leeonky.dal.ast.SortSequenceNode;
+import com.github.leeonky.dal.ast.SortGroupNode;
 import com.github.leeonky.dal.ast.TableNode;
 import com.github.leeonky.dal.compiler.DALProcedure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
@@ -28,8 +28,8 @@ public class TableHead extends DALNode {
     }
 
     public Comparator<Object> collectComparator(RuntimeContextBuilder.DALRuntimeContext context) {
-        return headers.stream().sorted(bySequence()).map(headerNode -> headerNode.getListComparator(context))
-                .reduce(Comparator::thenComparing).orElse(SortSequenceNode.NOP_COMPARATOR);
+        return headers.stream().sorted(bySequence()).map(headerNode -> headerNode.comparator(context))
+                .reduce(Comparator::thenComparing).orElse(SortGroupNode.NOP_COMPARATOR);
     }
 
     public int size() {
@@ -38,7 +38,7 @@ public class TableHead extends DALNode {
 
     public HeaderNode getHeader(DALProcedure procedure) {
         if (procedure.getIndex() >= headers.size())
-            return new HeaderNode(SortSequenceNode.NO_SEQUENCE, InputNode.INSTANCE, Optional.empty());
+            return new HeaderNode(SortGroupNode.NO_SEQUENCE, InputNode.INSTANCE, Optional.empty());
         return headers.get(procedure.getIndex());
     }
 

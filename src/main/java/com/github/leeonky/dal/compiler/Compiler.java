@@ -141,8 +141,7 @@ public class Compiler {
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> shortVerificationClause(
             OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> operatorMandatory,
             NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> operand) {
-        return procedure -> SCHEMA_CLAUSE.concat(VERIFICATION_OPERATORS.clause(operand))
-                .or(operatorMandatory.clause(operand)).parse(procedure);
+        return SCHEMA_CLAUSE.concat(VERIFICATION_OPERATORS.clause(operand)).or(operatorMandatory.clause(operand));
     }
 
     private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> ARITHMETIC_CLAUSE_CHAIN,
@@ -212,23 +211,23 @@ public class Compiler {
     }
 
     private final NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            SEQUENCE_AZ = Notations.SEQUENCE_AZ.node(SortNode::new),
-            SEQUENCE_ZA = Notations.SEQUENCE_ZA.node(SortNode::new),
-            SEQUENCE_AZ_2 = Notations.SEQUENCE_AZ_2.node(SortNode::new),
-            SEQUENCE_ZA_2 = Notations.SEQUENCE_ZA_2.node(SortNode::new),
+            SEQUENCE_AZ = Notations.SEQUENCE_AZ.node(SortSymbolNode::new),
+            SEQUENCE_ZA = Notations.SEQUENCE_ZA.node(SortSymbolNode::new),
+            SEQUENCE_AZ_2 = Notations.SEQUENCE_AZ_2.node(SortSymbolNode::new),
+            SEQUENCE_ZA_2 = Notations.SEQUENCE_ZA_2.node(SortSymbolNode::new),
             ROW_KEY = oneOf(INTEGER, OPTIONAL_VERIFICATION_PROPERTY);
 
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             SEQUENCE = oneOf(
-            many(SEQUENCE_AZ).and(atLeast(1)).as(SortSequenceNode::new),
-            many(SEQUENCE_AZ_2).and(atLeast(1)).as(SortSequenceNode::new),
-            many(SEQUENCE_ZA).and(atLeast(1)).as(SortSequenceNode::new),
-            many(SEQUENCE_ZA_2).and(atLeast(1)).as(SortSequenceNode::new)).or(procedure -> SortSequenceNode.noSequence());
+            many(SEQUENCE_AZ).and(atLeast(1)).as(SortGroupNode::new),
+            many(SEQUENCE_AZ_2).and(atLeast(1)).as(SortGroupNode::new),
+            many(SEQUENCE_ZA).and(atLeast(1)).as(SortGroupNode::new),
+            many(SEQUENCE_ZA_2).and(atLeast(1)).as(SortGroupNode::new)).or(procedure -> SortGroupNode.noSequence());
 
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             ROW_PREFIX = procedure -> new RowPrefixNode(ROW_KEY.parse(procedure), SCHEMA_CLAUSE.parse(procedure),
             VERIFICATION_OPERATORS.parse(procedure)),
-            TABLE_HEADER = procedure -> new HeaderNode((SortSequenceNode) SEQUENCE.parse(procedure),
+            TABLE_HEADER = procedure -> new HeaderNode((SortGroupNode) SEQUENCE.parse(procedure),
                     VERIFICATION_PROPERTY.concat(SCHEMA_CLAUSE).parse(procedure), VERIFICATION_OPERATORS.parse(procedure));
 
     private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
@@ -244,10 +243,15 @@ public class Compiler {
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
             DALNode rowPrefix, TableHead head) {
-        return procedure -> procedure.positionOf(cellPosition -> shortVerificationClause(oneOf(VERIFICATION_OPERATORS,
-                head.getHeader(procedure).headerOperator(), ((RowPrefixNode) rowPrefix).rowOperator())
+        return procedure -> cellVerificationExpression((RowPrefixNode) rowPrefix, head.getHeader(procedure))
+                .withStartPosition().parse(procedure);
+    }
+
+    private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
+            DALProcedure> cellVerificationExpression(RowPrefixNode rowPrefix, HeaderNode header) {
+        return shortVerificationClause(oneOf(VERIFICATION_OPERATORS, header.operator(), rowPrefix.rowOperator())
                 .or(DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING))
-                .input(head.getHeader(procedure).getProperty()).parse(procedure).setPositionBegin(cellPosition));
+                .input(header.property());
     }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
@@ -257,11 +261,9 @@ public class Compiler {
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableCell(
             DALNode head, DALNode transposedTableHead) {
-        return procedure -> procedure.positionOf(cellPosition -> oneOf(ELEMENT_ELLIPSIS, ROW_WILDCARD)
-                .or(shortVerificationClause(oneOf(VERIFICATION_OPERATORS, ((HeaderNode) head).headerOperator(),
-                        ((TransposedTableHead) transposedTableHead).getPrefix(procedure.getIndex()).rowOperator())
-                        .or(DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING)).
-                        input(((HeaderNode) head).getProperty())).parse(procedure).setPositionBegin(cellPosition));
+        return procedure -> oneOf(ELEMENT_ELLIPSIS, ROW_WILDCARD).or(cellVerificationExpression(
+                        ((TransposedTableHead) transposedTableHead).getPrefix(procedure.getIndex()), (HeaderNode) head))
+                .withStartPosition().parse(procedure);
     }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {

@@ -42,7 +42,7 @@ public class ListScopeNode extends DALNode {
     }
 
     public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> expressionFactories) {
-        this(expressionFactories, false, SortSequenceNode.NOP_COMPARATOR);
+        this(expressionFactories, false, SortGroupNode.NOP_COMPARATOR);
     }
 
     private List<DALNode> getExpressions(int firstIndex) {

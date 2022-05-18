@@ -4,11 +4,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.leeonky.dal.ast.SortNode.Type.AZ;
-import static com.github.leeonky.dal.ast.SortNode.Type.ZA;
+import static com.github.leeonky.dal.ast.SortSymbolNode.Type.AZ;
+import static com.github.leeonky.dal.ast.SortSymbolNode.Type.ZA;
 import static com.github.leeonky.dal.compiler.Notations.*;
 
-public class SortNode extends DALNode {
+public class SortSymbolNode extends DALNode {
     private static Map<String, Type> types = new HashMap<String, Type>() {{
         put(SEQUENCE_AZ.getLabel(), AZ);
         put(SEQUENCE_AZ_2.getLabel(), AZ);
@@ -18,7 +18,7 @@ public class SortNode extends DALNode {
     private final String label;
     private final Type type;
 
-    public SortNode(String label) {
+    public SortSymbolNode(String label) {
         this.label = label;
         type = types.get(label);
     }

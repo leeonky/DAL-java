@@ -75,6 +75,10 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             };
         }
 
+        default Mandatory<C, N, E, O, P> withStartPosition() {
+            return procedure -> procedure.positionOf(position -> parse(procedure).setPositionBegin(position));
+        }
+
         default NodeParser<C, N, E, O, P> combine(ClauseParser<C, N, E, O, P> clauseParser) {
             return procedure -> procedure.getSourceCode().tryFetch(() ->
                     clauseParser.combined(procedure, parse(procedure)));
