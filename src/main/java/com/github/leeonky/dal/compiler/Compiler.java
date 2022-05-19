@@ -225,7 +225,7 @@ public class Compiler {
             many(SEQUENCE_ZA_2).and(atLeast(1)).as(SortGroupNode::new)).or(procedure -> SortGroupNode.noSequence());
 
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            ROW_PREFIX = procedure -> new RowPrefixNode(ROW_KEY.parse(procedure), SCHEMA_CLAUSE.parse(procedure),
+            ROW_PREFIX = procedure -> new TableRowPrefixNode(ROW_KEY.parse(procedure), SCHEMA_CLAUSE.parse(procedure),
             VERIFICATION_OPERATORS.parse(procedure)),
             TABLE_HEADER = procedure -> new HeaderNode((SortGroupNode) SEQUENCE.parse(procedure),
                     VERIFICATION_PROPERTY.concat(SCHEMA_CLAUSE).parse(procedure), VERIFICATION_OPERATORS.parse(procedure));
@@ -238,17 +238,17 @@ public class Compiler {
     private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> singleCellRow(
             NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> element_ellipsis) {
         return single(single(element_ellipsis).and(endWith(COLUMN_SPLITTER)).as()).and(endWithLine()).as()
-                .clauseParser(RowNode::new);
+                .clauseParser(TableRowNode::new);
     }
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
             DALNode rowPrefix, TableHead head) {
-        return procedure -> cellVerificationExpression((RowPrefixNode) rowPrefix, head.getHeader(procedure))
+        return procedure -> cellVerificationExpression((TableRowPrefixNode) rowPrefix, head.getHeader(procedure))
                 .withStartPosition().parse(procedure);
     }
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
-            DALProcedure> cellVerificationExpression(RowPrefixNode rowPrefix, HeaderNode header) {
+            DALProcedure> cellVerificationExpression(TableRowPrefixNode rowPrefix, HeaderNode header) {
         return shortVerificationClause(oneOf(VERIFICATION_OPERATORS, header.operator(), rowPrefix.rowOperator())
                 .or(DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING))
                 .input(header.property());
@@ -256,7 +256,7 @@ public class Compiler {
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
             TableHead tableHead) {
-        return clause(rowPrefix -> tableLine(tableCell(rowPrefix, tableHead)).as(cells -> new RowNode(rowPrefix, cells)));
+        return clause(rowPrefix -> tableLine(tableCell(rowPrefix, tableHead)).as(cells -> new TableRowNode(rowPrefix, cells)));
     }
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableCell(

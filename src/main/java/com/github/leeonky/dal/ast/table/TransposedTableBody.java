@@ -45,8 +45,8 @@ public class TransposedTableBody extends DALNode {
                 .reduce(this::merge).orElse(Collections.emptyList()), CHAR);
     }
 
-    private List<RowNode> merge(List<RowNode> rows1, List<RowNode> rows2) {
-        return new ArrayList<RowNode>() {{
+    private List<TableRowNode> merge(List<TableRowNode> rows1, List<TableRowNode> rows2) {
+        return new ArrayList<TableRowNode>() {{
             for (int i = 0; i < rows1.size(); i++)
                 add(rows1.get(i).merge(rows2.get(i)));
         }};

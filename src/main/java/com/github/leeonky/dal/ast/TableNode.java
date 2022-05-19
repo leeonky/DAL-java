@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.ast.table.RowNode;
 import com.github.leeonky.dal.ast.table.TableBody;
 import com.github.leeonky.dal.ast.table.TableHead;
+import com.github.leeonky.dal.ast.table.TableRowNode;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RowAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -52,7 +52,7 @@ public class TableNode extends DALNode {
         return nodes.stream().map(DALNode::inspect).collect(Collectors.joining(" | ", "| ", " |"));
     }
 
-    public RowNode getDataRowByDataIndex(int row) {
+    public TableRowNode getDataRowByDataIndex(int row) {
         return tableBody.getDataRowByDataIndex(row);
     }
 }

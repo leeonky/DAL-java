@@ -42,7 +42,7 @@ public class TableHead extends DALNode {
         return headers.get(procedure.getIndex());
     }
 
-    public void checkSize(RowNode rowNode) {
+    public void checkSize(TableRowNode rowNode) {
         if (!rowNode.specialRow() && rowNode.getCells().size() != headers.size())
             throw new SyntaxException("Different cell size",
                     rowNode.getCells().get(rowNode.getCells().size() - 1).getOperandPosition());

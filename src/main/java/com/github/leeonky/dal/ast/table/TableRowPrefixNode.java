@@ -11,29 +11,29 @@ import com.github.leeonky.interpreter.OperatorParser;
 
 import java.util.Optional;
 
-public class RowPrefixNode extends DALNode {
-    private static final RowKeyType NO_ROW_KEY = new NoRowKeyType(), INDEX_ROW_KEY = new IndexRowKeyType(),
-            PROPERTY_ROW_KEY = new PropertyRowKeyType();
-    private final Optional<DALNode> key;
+public class TableRowPrefixNode extends DALNode {
+    private static final RowType NO_ROW_KEY = new NoRowType(), INDEX_ROW_KEY = new IndexRowType(),
+            PROPERTY_ROW_KEY = new PropertyRowType();
+    private final Optional<DALNode> indexOrKey;
     private final Optional<Clause<DALRuntimeContext, DALNode>> rowSchema;
     private final Optional<DALOperator> rowOperator;
 
-    public RowPrefixNode(Optional<DALNode> key, Optional<Clause<DALRuntimeContext, DALNode>> rowSchema,
-                         Optional<DALOperator> rowOperator) {
+    public TableRowPrefixNode(Optional<DALNode> indexOrKey, Optional<Clause<DALRuntimeContext, DALNode>> rowSchema,
+                              Optional<DALOperator> rowOperator) {
         this.rowSchema = rowSchema;
         this.rowOperator = rowOperator;
-        this.key = key;
+        this.indexOrKey = indexOrKey;
     }
 
     @Override
     public String inspect() {
-        String indexAndSchema = (key.map(DALNode::inspect).orElse("") + " " + rowSchema.map(clause ->
+        String indexAndSchema = (indexOrKey.map(DALNode::inspect).orElse("") + " " + rowSchema.map(clause ->
                 clause.expression(null).inspect()).orElse("")).trim();
         return rowOperator.map(dalOperator -> dalOperator.inspect(indexAndSchema, "").trim()).orElse(indexAndSchema);
     }
 
-    public DALExpression indexAndSchema(RowKeyType rowKeyType, DALNode input, DALOperator defaultOperator, DALNode data) {
-        DALNode inputWithRowKey = rowKeyType.inputWithRowKey(input, key);
+    public DALExpression indexAndSchema(RowType rowType, DALNode input, DALOperator defaultOperator, DALNode data) {
+        DALNode inputWithRowKey = rowType.inputWithRowKey(input, indexOrKey);
         return new DALExpression(rowSchema.map(clause -> clause.expression(inputWithRowKey)).orElse(inputWithRowKey),
                 rowOperator.orElse(defaultOperator), data);
     }
@@ -42,9 +42,9 @@ public class RowPrefixNode extends DALNode {
         return procedure -> rowOperator;
     }
 
-    public RowKeyType getRowKeyType() {
-        final RowKeyType keyType;
-        keyType = key.map(dalNode -> {
+    public RowType getRowKeyType() {
+        final RowType keyType;
+        keyType = indexOrKey.map(dalNode -> {
             if (dalNode instanceof ConstNode)
                 return INDEX_ROW_KEY;
             else if (dalNode instanceof DALExpression)

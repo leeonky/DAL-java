@@ -8,16 +8,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class RowNode extends DALNode {
+public class TableRowNode extends DALNode {
     private final List<DALNode> cells;
-    private final RowPrefixNode rowPrefix;
+    private final TableRowPrefixNode rowPrefix;
 
-    public RowNode(DALNode prefix, DALNode cell) {
+    public TableRowNode(DALNode prefix, DALNode cell) {
         this(prefix, Collections.singletonList(cell));
     }
 
-    public RowNode(DALNode prefix, List<DALNode> cells) {
-        rowPrefix = (RowPrefixNode) prefix;
+    public TableRowNode(DALNode prefix, List<DALNode> cells) {
+        rowPrefix = (TableRowPrefixNode) prefix;
         this.cells = new ArrayList<>(cells);
         setPositionBegin(cells.get(cells.size() - 1).getOperandPosition());
     }
@@ -29,8 +29,8 @@ public class RowNode extends DALNode {
         return "\n" + (prefix.isEmpty() ? data : prefix + " " + data);
     }
 
-    public Clause<DALRuntimeContext, DALNode> verificationClause(DALOperator operator, RowKeyType rowKeyType) {
-        return input -> isEllipsis() ? firstCell() : rowPrefix.indexAndSchema(rowKeyType, input, operator, isRowWildcard() ?
+    public Clause<DALRuntimeContext, DALNode> constructVerificationClause(DALOperator operator, RowType rowType) {
+        return input -> isEllipsis() ? firstCell() : rowPrefix.indexAndSchema(rowType, input, operator, isRowWildcard() ?
                 firstCell() : new ObjectScopeNode(cells).setPositionBegin(firstCell().getOperandPosition()));
     }
 
@@ -50,8 +50,8 @@ public class RowNode extends DALNode {
         return cells;
     }
 
-    public RowNode merge(RowNode rowNode) {
-        return (RowNode) new RowNode(rowPrefix, new ArrayList<DALNode>() {{
+    public TableRowNode merge(TableRowNode rowNode) {
+        return (TableRowNode) new TableRowNode(rowPrefix, new ArrayList<DALNode>() {{
             addAll(cells);
             addAll(rowNode.cells);
         }}).setPositionBegin(getPositionBegin());
@@ -65,7 +65,7 @@ public class RowNode extends DALNode {
         return isEllipsis() || isRowWildcard();
     }
 
-    public RowKeyType combineRowKey(RowKeyType rowKeyType) {
-        return rowKeyType.merge(rowPrefix.getRowKeyType());
+    public RowType combineRowKey(RowType rowType) {
+        return rowType.merge(rowPrefix.getRowKeyType());
     }
 }

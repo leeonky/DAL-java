@@ -15,20 +15,20 @@ import static com.github.leeonky.interpreter.InterpreterException.Position.Type.
 import static java.util.stream.Collectors.toList;
 
 public class TableBody extends DALNode {
-    private static final RowKeyType EMPTY_TABLE_ROW_KEY = new EmptyTableRowKeyType();
-    private final List<RowNode> rows;
-    private final RowKeyType rowKeyType;
+    private static final RowType EMPTY_TABLE_ROW_KEY = new EmptyTableRowType();
+    private final List<TableRowNode> rows;
+    private final RowType rowType;
 
     public TableBody(List<? extends DALNode> rows) {
         this(rows, LINE);
     }
 
     public TableBody(List<? extends DALNode> rows, InterpreterException.Position.Type type) {
-        this.rows = rows.stream().map(RowNode.class::cast).collect(toList());
-        rowKeyType = resolveRowKeyType(type);
+        this.rows = rows.stream().map(TableRowNode.class::cast).collect(toList());
+        rowType = resolveRowKeyType(type);
     }
 
-    public RowKeyType resolveRowKeyType(InterpreterException.Position.Type type) {
+    public RowType resolveRowKeyType(InterpreterException.Position.Type type) {
         return rows.stream().reduce(EMPTY_TABLE_ROW_KEY, (last, rowNode) -> {
             try {
                 return rowNode.combineRowKey(last);
@@ -41,15 +41,15 @@ public class TableBody extends DALNode {
 
     @Override
     public String inspect() {
-        return rows.stream().map(RowNode::inspect).collect(Collectors.joining());
+        return rows.stream().map(TableRowNode::inspect).collect(Collectors.joining());
     }
 
     public DALNode transformToListScope(Data actual, DALOperator operator, Comparator<Object> comparator) {
-        return rowKeyType.transformToVerificationNode(actual, operator, rows, comparator);
+        return rowType.convertToVerificationNode(actual, operator, rows, comparator);
     }
 
-    public RowNode getDataRowByDataIndex(int row) {
-        return rows.stream().filter(RowNode::isData).collect(toList()).get(row);
+    public TableRowNode getDataRowByDataIndex(int row) {
+        return rows.stream().filter(TableRowNode::isData).collect(toList()).get(row);
     }
 
     public TableBody checkTable(TableHead tableHead) {

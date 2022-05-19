@@ -11,10 +11,10 @@ import java.util.stream.Collectors;
 import static java.util.Optional.empty;
 
 public class TransposedTableHead extends DALNode {
-    private final List<RowPrefixNode> prefixes;
+    private final List<TableRowPrefixNode> prefixes;
 
     public TransposedTableHead(List<DALNode> prefixes) {
-        this.prefixes = prefixes.stream().map(RowPrefixNode.class::cast).collect(Collectors.toList());
+        this.prefixes = prefixes.stream().map(TableRowPrefixNode.class::cast).collect(Collectors.toList());
         if (!prefixes.isEmpty())
             setPositionBegin(prefixes.get(prefixes.size() - 1).getPositionBegin());
     }
@@ -24,9 +24,9 @@ public class TransposedTableHead extends DALNode {
         return "| >> " + TableNode.printLine(prefixes) + "\n";
     }
 
-    public RowPrefixNode getPrefix(int i) {
+    public TableRowPrefixNode getPrefix(int i) {
         if (i >= prefixes.size())
-            return new RowPrefixNode(empty(), empty(), empty());
+            return new TableRowPrefixNode(empty(), empty(), empty());
         return prefixes.get(i);
     }
 

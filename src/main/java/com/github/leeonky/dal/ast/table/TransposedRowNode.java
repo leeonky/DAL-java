@@ -28,10 +28,10 @@ public class TransposedRowNode extends DALNode {
         }});
     }
 
-    public List<RowNode> transpose(TransposedTableHead transposedTableHead) {
-        return new ArrayList<RowNode>() {{
+    public List<TableRowNode> transpose(TransposedTableHead transposedTableHead) {
+        return new ArrayList<TableRowNode>() {{
             for (int i = 0; i < cells.size(); i++)
-                add(new RowNode(transposedTableHead.getPrefix(i), singletonList(cells.get(i))));
+                add(new TableRowNode(transposedTableHead.getPrefix(i), singletonList(cells.get(i))));
         }};
     }
 
