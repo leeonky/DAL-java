@@ -148,7 +148,7 @@ public class ListScopeNode extends DALNode {
     }
 
     private boolean isListEllipsis(Clause<DALRuntimeContext, DALNode> clause) {
-        return clause.expression(null) instanceof ListEllipsisNode;
+        return clause.expression(InputNode.INSTANCE) instanceof ListEllipsisNode;
     }
 
     public enum Type {

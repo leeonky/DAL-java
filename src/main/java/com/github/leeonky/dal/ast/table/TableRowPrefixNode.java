@@ -32,10 +32,10 @@ public class TableRowPrefixNode extends DALNode {
         return rowOperator.map(dalOperator -> dalOperator.inspect(indexAndSchema, "").trim()).orElse(indexAndSchema);
     }
 
-    public DALExpression indexAndSchema(RowType rowType, DALNode input, DALOperator defaultOperator, DALNode data) {
+    public DALExpression indexAndSchema(RowType rowType, DALNode input, DALOperator defaultOperator, DALNode expectedRow) {
         DALNode inputWithRowKey = rowType.inputWithRowKey(input, indexOrKey);
         return new DALExpression(rowSchema.map(clause -> clause.expression(inputWithRowKey)).orElse(inputWithRowKey),
-                rowOperator.orElse(defaultOperator), data);
+                rowOperator.orElse(defaultOperator), expectedRow);
     }
 
     public OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> rowOperator() {

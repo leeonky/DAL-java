@@ -39,7 +39,7 @@ public class TableNode extends DALNode {
     }
 
     public DALNode transformToVerificationNode(Data actual, DALOperator operator, DALRuntimeContext context) {
-        return tableBody.transformToListScope(actual, operator, tableHead.collectComparator(context))
+        return tableBody.convertToVerificationNode(actual, operator, tableHead.collectComparator(context))
                 .setPositionBegin(getPositionBegin());
     }
 

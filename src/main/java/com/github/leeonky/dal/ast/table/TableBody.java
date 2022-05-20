@@ -44,8 +44,9 @@ public class TableBody extends DALNode {
         return rows.stream().map(TableRowNode::inspect).collect(Collectors.joining());
     }
 
-    public DALNode transformToListScope(Data actual, DALOperator operator, Comparator<Object> comparator) {
-        return rowType.convertToVerificationNode(actual, operator, rows, comparator);
+    public DALNode convertToVerificationNode(Data actual, DALOperator operator, Comparator<Object> comparator) {
+        return rowType.constructVerificationNode(actual, rows.stream().map(rowNode ->
+                rowNode.constructVerificationClause(operator, rowType)), comparator);
     }
 
     public TableRowNode getDataRowByDataIndex(int row) {
