@@ -25,13 +25,13 @@ public class TableBody extends DALNode {
 
     public TableBody(List<? extends DALNode> rows, InterpreterException.Position.Type type) {
         this.rows = rows.stream().map(TableRowNode.class::cast).collect(toList());
-        rowType = resolveRowKeyType(type);
+        rowType = resolveRowType(type);
     }
 
-    public RowType resolveRowKeyType(InterpreterException.Position.Type type) {
+    public RowType resolveRowType(InterpreterException.Position.Type type) {
         return rows.stream().reduce(EMPTY_TABLE_ROW_KEY, (last, rowNode) -> {
             try {
-                return rowNode.combineRowKey(last);
+                return rowNode.mergeRowTypeBy(last);
             } catch (IllegalArgumentException ignored) {
                 throw new SyntaxException("Row index should be consistent", rowNode.getPositionBegin(), type)
                         .multiPosition(rows.get(0).getPositionBegin(), type);

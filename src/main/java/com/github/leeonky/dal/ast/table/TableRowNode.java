@@ -30,8 +30,13 @@ public class TableRowNode extends DALNode {
     }
 
     public Clause<DALRuntimeContext, DALNode> constructVerificationClause(DALOperator operator, RowType rowType) {
-        return input -> isEllipsis() ? firstCell() : rowPrefix.indexAndSchema(rowType, input, operator, isRowWildcard() ?
-                firstCell() : new ObjectScopeNode(cells).setPositionBegin(firstCell().getOperandPosition()));
+        return input -> isEllipsis() ? firstCell() :
+                rowPrefix.makeExpressionWithOptionalIndexAndSchema(rowType, input, operator, expectedRow());
+    }
+
+    private DALNode expectedRow() {
+        return isRowWildcard() ? firstCell()
+                : new ObjectScopeNode(cells).setPositionBegin(firstCell().getOperandPosition());
     }
 
     private DALNode firstCell() {
@@ -65,7 +70,7 @@ public class TableRowNode extends DALNode {
         return isEllipsis() || isRowWildcard();
     }
 
-    public RowType combineRowKey(RowType rowType) {
-        return rowType.merge(rowPrefix.getRowKeyType());
+    public RowType mergeRowTypeBy(RowType rowType) {
+        return rowType.merge(rowPrefix.resolveRowType());
     }
 }

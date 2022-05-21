@@ -17,22 +17,22 @@ abstract class RowType {
 
     public abstract RowType merge(RowType another);
 
-    protected RowType mergeBy(IndexRowType indexRowType) {
+    protected RowType mergeBy(SpecifyIndexRowType specifyIndexRowType) {
         throw new IllegalArgumentException();
     }
 
-    protected RowType mergeBy(NoRowType noRowType) {
+    protected RowType mergeBy(DefaultIndexRowType defaultIndexRowType) {
         throw new IllegalArgumentException();
     }
 
-    protected RowType mergeBy(PropertyRowType propertyRowType) {
+    protected RowType mergeBy(SpecifyPropertyRowType specifyPropertyRowType) {
         throw new IllegalArgumentException();
     }
 
     public abstract DALNode constructVerificationNode(Data actual, Stream<Clause<DALRuntimeContext, DALNode>> rowClauses,
                                                       Comparator<Object> comparator);
 
-    public DALNode inputWithRowKey(DALNode input, Optional<DALNode> indexOrKey) {
+    public DALNode rowAccessor(DALNode input, Optional<DALNode> indexOrKey) {
         return input;
     }
 }
@@ -45,17 +45,17 @@ class EmptyTableRowType extends RowType {
     }
 
     @Override
-    protected RowType mergeBy(IndexRowType indexRowType) {
+    protected RowType mergeBy(SpecifyIndexRowType specifyIndexRowType) {
         return this;
     }
 
     @Override
-    protected RowType mergeBy(NoRowType noRowType) {
+    protected RowType mergeBy(DefaultIndexRowType defaultIndexRowType) {
         return this;
     }
 
     @Override
-    protected RowType mergeBy(PropertyRowType propertyRowType) {
+    protected RowType mergeBy(SpecifyPropertyRowType specifyPropertyRowType) {
         return this;
     }
 
@@ -67,15 +67,15 @@ class EmptyTableRowType extends RowType {
     }
 }
 
-class IndexRowType extends RowType {
+class SpecifyIndexRowType extends RowType {
     @Override
     public RowType merge(RowType another) {
         return another.mergeBy(this);
     }
 
     @Override
-    protected RowType mergeBy(IndexRowType indexRowType) {
-        return indexRowType;
+    protected RowType mergeBy(SpecifyIndexRowType specifyIndexRowType) {
+        return specifyIndexRowType;
     }
 
     @Override
@@ -87,22 +87,22 @@ class IndexRowType extends RowType {
     }
 
     @Override
-    public DALNode inputWithRowKey(DALNode input, Optional<DALNode> indexOrKey) {
+    public DALNode rowAccessor(DALNode input, Optional<DALNode> indexOrKey) {
         return indexOrKey.map(node -> ((ConstNode) node).getValue()).map(i -> new DALExpression(
                         InputNode.INSTANCE, new DALOperator.PropertyImplicit(), new SymbolNode(i, BRACKET)))
                 .orElseThrow(IllegalStateException::new);
     }
 }
 
-class NoRowType extends RowType {
+class DefaultIndexRowType extends RowType {
     @Override
     public RowType merge(RowType another) {
         return another.mergeBy(this);
     }
 
     @Override
-    protected RowType mergeBy(NoRowType noRowType) {
-        return noRowType;
+    protected RowType mergeBy(DefaultIndexRowType defaultIndexRowType) {
+        return defaultIndexRowType;
     }
 
     @Override
@@ -112,7 +112,7 @@ class NoRowType extends RowType {
     }
 }
 
-class PropertyRowType extends RowType {
+class SpecifyPropertyRowType extends RowType {
 
     @Override
     public RowType merge(RowType another) {
@@ -126,12 +126,12 @@ class PropertyRowType extends RowType {
     }
 
     @Override
-    protected RowType mergeBy(PropertyRowType propertyRowType) {
-        return propertyRowType;
+    protected RowType mergeBy(SpecifyPropertyRowType specifyPropertyRowType) {
+        return specifyPropertyRowType;
     }
 
     @Override
-    public DALNode inputWithRowKey(DALNode input, Optional<DALNode> indexOrKey) {
+    public DALNode rowAccessor(DALNode input, Optional<DALNode> indexOrKey) {
         return indexOrKey.orElseThrow(IllegalStateException::new);
     }
 }
