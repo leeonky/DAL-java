@@ -8,18 +8,18 @@ import static com.github.leeonky.interpreter.InterpreterException.Position.Type.
 
 public class ElementAssertionFailure extends RowAssertionFailure {
 
-    public ElementAssertionFailure(int row, DalException dalException) {
-        super(row, dalException);
+    public ElementAssertionFailure(int indexSkipEllipsis, DalException dalException) {
+        super(indexSkipEllipsis, dalException);
     }
 
     @Override
     public DalException linePositionException(TableNode tableNode) {
-        return dalException.multiPosition(tableNode.getDataRowByDataIndex(row).getPositionBegin(), LINE);
+        return dalException.multiPosition(tableNode.dataRowSkipEllipsis(indexSkipEllipsis).getPositionBegin(), LINE);
     }
 
     @Override
     public DalException columnPositionException(TransposedTableNode transposedTableNode) {
-        return transposedTableNode.transpose().getDataRowByDataIndex(row).getCells().stream()
+        return transposedTableNode.transpose().dataRowSkipEllipsis(indexSkipEllipsis).getCells().stream()
                 .reduce(dalException, this::markPosition, notAllowParallelReduce());
     }
 }

@@ -9,11 +9,11 @@ import static com.github.leeonky.interpreter.FunctionUtil.notAllowParallelReduce
 import static com.github.leeonky.interpreter.InterpreterException.Position.Type.CHAR;
 
 public class RowAssertionFailure extends java.lang.RuntimeException {
-    protected final int row;
+    protected final int indexSkipEllipsis;
     protected final DalException dalException;
 
-    public RowAssertionFailure(int row, DalException dalException) {
-        this.row = row;
+    public RowAssertionFailure(int indexSkipEllipsis, DalException dalException) {
+        this.indexSkipEllipsis = indexSkipEllipsis;
         this.dalException = dalException;
     }
 
@@ -24,7 +24,7 @@ public class RowAssertionFailure extends java.lang.RuntimeException {
 
     public DalException columnPositionException(TransposedTableNode transposedTableNode) {
         dalException.clearPosition();
-        return transposedTableNode.transpose().getDataRowByDataIndex(row).getCells().stream()
+        return transposedTableNode.transpose().dataRowSkipEllipsis(indexSkipEllipsis).getCells().stream()
                 .reduce(dalException, this::markPosition, notAllowParallelReduce());
     }
 

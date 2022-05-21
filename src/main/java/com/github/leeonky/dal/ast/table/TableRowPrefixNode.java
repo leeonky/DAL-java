@@ -34,7 +34,7 @@ public class TableRowPrefixNode extends DALNode {
 
     public DALExpression makeExpressionWithOptionalIndexAndSchema(RowType rowType, DALNode input,
                                                                   DALOperator defaultOperator, DALNode expectedRow) {
-        DALNode rowAccessor = rowType.rowAccessor(input, indexOrProperty);
+        DALNode rowAccessor = rowType.constructAccessingRowNode(input, indexOrProperty);
         return new DALExpression(rowSchema.map(clause -> clause.expression(rowAccessor)).orElse(rowAccessor),
                 rowOperator.orElse(defaultOperator), expectedRow);
     }

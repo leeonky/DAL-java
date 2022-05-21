@@ -134,12 +134,12 @@ public class ListScopeNode extends DALNode {
 
     private boolean assertElementExpressions(DALRuntimeContext context, List<DALNode> expressions) {
         if (multiLineList)
-            for (int i = 0; i < expressions.size(); i++) {
-                DALNode expression = expressions.get(i);
+            for (int index = 0; index < expressions.size(); index++) {
+                DALNode expression = expressions.get(index);
                 try {
                     expression.evaluate(context);
                 } catch (DalException dalException) {
-                    throw new ElementAssertionFailure(i, dalException);
+                    throw new ElementAssertionFailure(index, dalException);
                 }
             }
         else

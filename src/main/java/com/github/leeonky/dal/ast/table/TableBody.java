@@ -10,12 +10,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.interpreter.FunctionUtil.notAllowParallelReduce;
 import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
 import static java.util.stream.Collectors.toList;
 
 public class TableBody extends DALNode {
-    private static final RowType EMPTY_TABLE_ROW_KEY = new EmptyTableRowType();
+    private static final RowType EMPTY_TABLE_ROW_TYPE = new EmptyTableRowType();
     private final List<TableRowNode> rows;
     private final RowType rowType;
 
@@ -29,14 +28,14 @@ public class TableBody extends DALNode {
     }
 
     public RowType resolveRowType(InterpreterException.Position.Type type) {
-        return rows.stream().reduce(EMPTY_TABLE_ROW_KEY, (last, rowNode) -> {
+        return rows.stream().reduce(EMPTY_TABLE_ROW_TYPE, (last, rowNode) -> {
             try {
-                return rowNode.mergeRowTypeBy(last);
+                return rowNode.mergeRowTypeBy(last, type);
             } catch (IllegalArgumentException ignored) {
                 throw new SyntaxException("Row index should be consistent", rowNode.getPositionBegin(), type)
                         .multiPosition(rows.get(0).getPositionBegin(), type);
             }
-        }, notAllowParallelReduce());
+        }, RowType::merge);
     }
 
     @Override
@@ -49,10 +48,11 @@ public class TableBody extends DALNode {
                 rowNode.constructVerificationClause(operator, rowType)), comparator);
     }
 
-    public TableRowNode getDataRowByDataIndex(int row) {
-        return rows.stream().filter(TableRowNode::isData).collect(toList()).get(row);
+    public TableRowNode dataRowSkipEllipsis(int indexSkipEllipsis) {
+        return rows.stream().filter(TableRowNode::isData).collect(toList()).get(indexSkipEllipsis);
     }
 
+    @Deprecated
     public TableBody checkTable(TableHead tableHead) {
         rows.forEach(tableHead::checkSize);
         return this;

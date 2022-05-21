@@ -32,7 +32,7 @@ abstract class RowType {
     public abstract DALNode constructVerificationNode(Data actual, Stream<Clause<DALRuntimeContext, DALNode>> rowClauses,
                                                       Comparator<Object> comparator);
 
-    public DALNode rowAccessor(DALNode input, Optional<DALNode> indexOrKey) {
+    public DALNode constructAccessingRowNode(DALNode input, Optional<DALNode> indexOrKey) {
         return input;
     }
 }
@@ -87,7 +87,7 @@ class SpecifyIndexRowType extends RowType {
     }
 
     @Override
-    public DALNode rowAccessor(DALNode input, Optional<DALNode> indexOrKey) {
+    public DALNode constructAccessingRowNode(DALNode input, Optional<DALNode> indexOrKey) {
         return indexOrKey.map(node -> ((ConstNode) node).getValue()).map(i -> new DALExpression(
                         InputNode.INSTANCE, new DALOperator.PropertyImplicit(), new SymbolNode(i, BRACKET)))
                 .orElseThrow(IllegalStateException::new);
@@ -131,7 +131,7 @@ class SpecifyPropertyRowType extends RowType {
     }
 
     @Override
-    public DALNode rowAccessor(DALNode input, Optional<DALNode> indexOrKey) {
+    public DALNode constructAccessingRowNode(DALNode input, Optional<DALNode> indexOrKey) {
         return indexOrKey.orElseThrow(IllegalStateException::new);
     }
 }

@@ -24,7 +24,6 @@ public class TransposedTableBody extends DALNode {
     public TransposedTableBody checkTable(TransposedTableHead tableHead) {
         checkCellSize(tableHead);
         replaceEmptyCell();
-        transpose(tableHead);
         return this;
     }
 
