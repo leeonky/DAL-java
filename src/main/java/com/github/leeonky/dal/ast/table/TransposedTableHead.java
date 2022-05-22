@@ -2,12 +2,12 @@ package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.TableNode;
-import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
 import static java.util.Optional.empty;
 
 public class TransposedTableHead extends DALNode {
@@ -30,8 +30,8 @@ public class TransposedTableHead extends DALNode {
         return prefixes.get(i);
     }
 
-    public void checkSize(TransposedRowNode r) {
-        if (r.cellCount() != prefixes.size())
-            throw new SyntaxException("Different cell size", getPositionBegin(), InterpreterException.Position.Type.LINE);
+    public void checkSize(TransposedRowNode row) {
+        if (row.cellCount() != prefixes.size())
+            throw new SyntaxException("Different cell size", getPositionBegin(), LINE);
     }
 }

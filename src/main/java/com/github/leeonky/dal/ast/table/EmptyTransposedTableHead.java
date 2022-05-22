@@ -13,7 +13,7 @@ public class EmptyTransposedTableHead extends TransposedTableHead {
     }
 
     @Override
-    public void checkSize(TransposedRowNode r) {
+    public void checkSize(TransposedRowNode row) {
     }
 }
 

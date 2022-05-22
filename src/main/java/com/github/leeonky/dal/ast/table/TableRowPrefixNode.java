@@ -12,7 +12,8 @@ import com.github.leeonky.interpreter.OperatorParser;
 import java.util.Optional;
 
 public class TableRowPrefixNode extends DALNode {
-    private static final RowType DEFAULT_INDEX = new DefaultIndexRowType(), SPECIFY_INDEX = new SpecifyIndexRowType(),
+    private static final RowType DEFAULT_INDEX = new DefaultIndexRowType(),
+            SPECIFY_INDEX = new SpecifyIndexRowType(),
             SPECIFY_PROPERTY = new SpecifyPropertyRowType();
     private final Optional<DALNode> indexOrProperty;
     private final Optional<Clause<DALRuntimeContext, DALNode>> rowSchema;
@@ -39,13 +40,12 @@ public class TableRowPrefixNode extends DALNode {
                 rowOperator.orElse(defaultOperator), expectedRow);
     }
 
-    public OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> rowOperator() {
+    public OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> operator() {
         return procedure -> rowOperator;
     }
 
     public RowType resolveRowType() {
-        final RowType rowType;
-        rowType = indexOrProperty.map(dalNode -> {
+        return indexOrProperty.map(dalNode -> {
             if (dalNode instanceof ConstNode)
                 return SPECIFY_INDEX;
             else if (dalNode instanceof DALExpression)
@@ -53,6 +53,5 @@ public class TableRowPrefixNode extends DALNode {
             else
                 return DEFAULT_INDEX;
         }).orElse(DEFAULT_INDEX);
-        return rowType;
     }
 }

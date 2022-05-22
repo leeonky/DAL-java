@@ -22,6 +22,8 @@ public class ConstNode extends DALNode {
     }
 
     @Override
+    @Deprecated
+//    TODO remove
     public boolean equals(Object obj) {
         return obj instanceof ConstNode && Objects.equals(value, ((ConstNode) obj).value);
     }

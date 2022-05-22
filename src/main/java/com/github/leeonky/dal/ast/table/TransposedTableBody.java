@@ -21,14 +21,15 @@ public class TransposedTableBody extends DALNode {
         this.rows = rows.stream().map(TransposedRowNode.class::cast).collect(toList());
     }
 
-    public TransposedTableBody checkTable(TransposedTableHead tableHead) {
+    public TransposedTableBody checkFormat(TransposedTableHead tableHead) {
         checkCellSize(tableHead);
         replaceEmptyCell();
         return this;
     }
 
     private void replaceEmptyCell() {
-        rows.stream().skip(1).forEach(row -> row.replaceEmptyCell(rows.get(0)));
+        TransposedRowNode firstRow = rows.get(0);
+        rows.stream().skip(1).forEach(row -> row.replaceEmptyCell(firstRow));
     }
 
     private void checkCellSize(TransposedTableHead tableHead) {
@@ -51,8 +52,8 @@ public class TransposedTableBody extends DALNode {
         }};
     }
 
-    public TableHead transposeHead() {
-        return new TableHead(rows.stream().map(TransposedRowNode::getHeader).collect(toList()));
+    public TableHeadRow transposeHead() {
+        return new TableHeadRow(rows.stream().map(TransposedRowNode::getHeader).collect(toList()));
     }
 
     @Override

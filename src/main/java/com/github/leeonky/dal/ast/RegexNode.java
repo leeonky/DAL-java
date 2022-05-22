@@ -6,6 +6,7 @@ import com.github.leeonky.dal.runtime.RuntimeException;
 
 import java.util.regex.Pattern;
 
+import static com.github.leeonky.dal.ast.AssertionFailure.assertRegexMatches;
 import static java.lang.String.format;
 
 public class RegexNode extends DALNode {
@@ -23,14 +24,13 @@ public class RegexNode extends DALNode {
     @Override
     protected boolean verify(Data actual, DALOperator.Equal operator, DALRuntimeContext context, DALNode actualNode) {
         if (actual.getInstance() instanceof String)
-            return AssertionFailure.assertRegexMatches(pattern, (String) actual.getInstance(), getPositionBegin());
+            return assertRegexMatches(pattern, (String) actual.getInstance(), getPositionBegin());
         throw new RuntimeException("Operator = before regex need a string input value", operator.getPosition());
     }
 
     @Override
     protected boolean verify(Data actual, DALOperator.Matcher operator, DALRuntimeContext context, DALNode actualNode) {
-        String converted = (String) actual.convert(String.class).getInstance();
-        return AssertionFailure.assertRegexMatches(pattern, converted, actual, getPositionBegin());
+        return assertRegexMatches(pattern, (String) actual.convert(String.class).getInstance(), actual, getPositionBegin());
     }
 
     @Override

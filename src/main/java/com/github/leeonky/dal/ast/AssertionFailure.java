@@ -19,7 +19,8 @@ public class AssertionFailure extends DalException {
 
     public static void assertListSize(int expected, int actual, int position) {
         if (expected != actual)
-            throw new AssertionFailure(format("Different list size\nExpected: <%d>\nActual: <%d>", expected, actual), position);
+            throw new AssertionFailure(format("Different list size\nExpected: <%d>\nActual: <%d>", expected, actual),
+                    position);
     }
 
     public static boolean assertMatchNull(Data actual, int position) {
@@ -35,15 +36,18 @@ public class AssertionFailure extends DalException {
             return numberType.compare((Number) expectedValue, (Number) actualValue) == 0
                     || raiseNotMatchError(expected, actual, position);
         else {
-            Data converted;
-            try {
-                converted = actual.convert(expectedValue.getClass());
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage(), position);
-            }
-            return Calculator.equals(converted, expected) ||
-                    (converted.getInstance() == actual.getInstance() ? raiseNotMatchError(expected, actual, position)
-                            : raiseNotMatchErrorWithConvertedValue(expected, actual, position, converted));
+            Data converted = convert(actual, expectedValue.getClass(), position);
+            return Calculator.equals(converted, expected) || (converted.getInstance() == actual.getInstance()
+                    ? raiseNotMatchError(expected, actual, position) : raiseNotMatchErrorWithConvertedValue(expected,
+                    actual, position, converted));
+        }
+    }
+
+    private static Data convert(Data actual, Class<?> targetType, int position) {
+        try {
+            return actual.convert(targetType);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), position);
         }
     }
 

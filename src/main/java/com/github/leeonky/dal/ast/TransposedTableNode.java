@@ -12,7 +12,7 @@ public class TransposedTableNode extends DALNode {
 
     public TransposedTableNode(DALNode transposeTableHead, DALNode transposedTableBody) {
         tableHead = (TransposedTableHead) transposeTableHead;
-        tableBody = ((TransposedTableBody) transposedTableBody).checkTable(tableHead);
+        tableBody = ((TransposedTableBody) transposedTableBody).checkFormat(tableHead);
     }
 
     @Override

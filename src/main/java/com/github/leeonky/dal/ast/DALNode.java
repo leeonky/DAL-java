@@ -87,13 +87,11 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         return evaluateData(context).getInstance();
     }
 
-    public boolean verifyBy(DALNode expected, Equal operator,
-                            DALRuntimeContext context) {
+    public boolean verifyBy(DALNode expected, Equal operator, DALRuntimeContext context) {
         return expected.verify(this, operator, context);
     }
 
-    public boolean verifyBy(DALNode expected, DALOperator.Matcher operator,
-                            DALRuntimeContext context) {
+    public boolean verifyBy(DALNode expected, DALOperator.Matcher operator, DALRuntimeContext context) {
         return expected.verify(this, operator, context);
     }
 
@@ -124,7 +122,8 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
 
     public abstract String inspect();
 
-    private void invalidTypeToMatchValue(Class<?> actualType, Data actual, Class<?> expectedType, Data expected, Matcher operator) {
+    private void invalidTypeToMatchValue(Class<?> actualType, Data actual, Class<?> expectedType, Data expected,
+                                         Matcher operator) {
         if (actualType.isInstance(actual.getInstance()) && expectedType.isInstance(expected.getInstance()))
             throw new RuntimeException(format("Cannot compare between %sand %s", actual.inspect(), expected.inspect()).trim(),
                     operator.getPosition());

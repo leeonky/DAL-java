@@ -3,7 +3,6 @@ package com.github.leeonky.dal.ast.table;
 import com.github.leeonky.dal.ast.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
-import com.github.leeonky.interpreter.InterpreterException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,7 +70,7 @@ public class TableRowNode extends DALNode {
         return isEllipsis() || isRowWildcard();
     }
 
-    public RowType mergeRowTypeBy(RowType rowType, InterpreterException.Position.Type type) {
+    public RowType mergeRowTypeBy(RowType rowType) {
         return rowType.merge(rowPrefix.resolveRowType());
     }
 }

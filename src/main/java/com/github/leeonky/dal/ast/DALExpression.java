@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.ast.DALOperator.PropertyImplicit;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
@@ -10,25 +11,25 @@ import java.util.List;
 import java.util.Objects;
 
 public class DALExpression extends DALNode implements Expression<DALRuntimeContext, DALNode, DALExpression, DALOperator> {
-    private final DALNode node1;
+    private final DALNode left;
     private final DALOperator operator;
-    private final DALNode node2;
+    private final DALNode right;
 
-    public DALExpression(DALNode node1, DALOperator operator, DALNode node2) {
-        this.node1 = node1;
-        this.node2 = node2;
+    public DALExpression(DALNode left, DALOperator operator, DALNode right) {
+        this.left = left;
+        this.right = right;
         this.operator = operator;
-        setPositionBegin(operator instanceof DALOperator.PropertyImplicit ? node2.getPositionBegin() : operator.getPosition());
+        setPositionBegin(operator instanceof PropertyImplicit ? right.getPositionBegin() : operator.getPosition());
     }
 
     @Override
     public DALNode getLeftOperand() {
-        return node1;
+        return left;
     }
 
     @Override
     public DALNode getRightOperand() {
-        return node2;
+        return right;
     }
 
     @Override
@@ -39,47 +40,52 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     @Override
     public Data evaluateData(DALRuntimeContext context) {
         try {
-            Data result = operator.calculateData(node1, node2, context);
-            if (operator.isNeedInspect() && (result.getInstance() instanceof Boolean) && !(boolean) result.getInstance())
-                System.err.println("Warning: Expression `" + inspect() + "` got false.");
-            return result;
+            return logFalseResultAsNeeded(operator.calculateData(left, right, context));
         } catch (IllegalArgumentException ex) {
             throw new RuntimeException(ex.getMessage(), operator.getPosition());
         }
     }
 
+    private Data logFalseResultAsNeeded(Data result) {
+        if (operator.isNeedInspect() && (result.getInstance() instanceof Boolean) && !(boolean) result.getInstance())
+            System.err.println("Warning: Expression `" + inspect() + "` got false.");
+        return result;
+    }
+
     @Override
+    @Deprecated
+//    TODO remove
     public boolean equals(Object obj) {
         return obj instanceof DALExpression
-                && Objects.equals(node1, ((DALExpression) obj).node1)
-                && Objects.equals(node2, ((DALExpression) obj).node2)
+                && Objects.equals(left, ((DALExpression) obj).left)
+                && Objects.equals(right, ((DALExpression) obj).right)
                 && Objects.equals(operator, ((DALExpression) obj).operator);
     }
 
     @Override
     public String inspect() {
-        return operator.inspect(node1 == null ? null : node1.inspect(), node2.inspect());
+        return operator.inspect(left == null ? null : left.inspect(), right.inspect());
     }
 
     @Override
     public Object getRootSymbolName() {
-        return node1 instanceof InputNode || isRootPropertyThis() ? node2.getRootSymbolName() : node1.getRootSymbolName();
+        return left instanceof InputNode || isRootPropertyThis() ? right.getRootSymbolName() : left.getRootSymbolName();
     }
 
     private boolean isRootPropertyThis() {
-        return node1 instanceof DALExpression && ((DALExpression) node1).getRightOperand() instanceof PropertyThis;
+        return left instanceof DALExpression && ((DALExpression) left).getRightOperand() instanceof PropertyThis;
     }
 
     @Override
     public int getOperandPosition() {
-        return node2.getPositionBegin();
+        return right.getPositionBegin();
     }
 
     @Override
     public List<Object> propertyChain() {
         return new ArrayList<Object>() {{
-            addAll(node1.propertyChain());
-            addAll(node2.propertyChain());
+            addAll(left.propertyChain());
+            addAll(right.propertyChain());
         }};
     }
 }

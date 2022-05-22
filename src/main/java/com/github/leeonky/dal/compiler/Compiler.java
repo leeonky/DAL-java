@@ -164,7 +164,7 @@ public class Compiler {
         TABLE = oneOf(TRANSPOSE_MARK.with(transposeTable().input(new EmptyTransposedTableHead())),
                 COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(tableLine(ROW_PREFIX)
                         .as(TransposedTableHead::new)))).withStartPosition().expression(transposeTable()),
-                COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHead::new)).withStartPosition().expression(TABLE_BODY_CLAUSE));
+                COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHeadRow::new)).withStartPosition().expression(TABLE_BODY_CLAUSE));
         VERIFICATION_SPECIAL_OPERAND = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         OPERAND = lazy(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
                 .mandatory("Expect a value or expression");
@@ -231,9 +231,9 @@ public class Compiler {
                     VERIFICATION_PROPERTY.concat(SCHEMA_CLAUSE).parse(procedure), VERIFICATION_OPERATORS.parse(procedure));
 
     private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHead) head, (TableBody) many(ROW_PREFIX.combine(oneOf(
+            TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHeadRow) head, (TableBody) many(ROW_PREFIX.combine(oneOf(
             COLUMN_SPLITTER.before(singleCellRow(ELEMENT_ELLIPSIS)), COLUMN_SPLITTER.before(singleCellRow(ROW_WILDCARD)),
-            COLUMN_SPLITTER.before(tableRow((TableHead) head))))).and(endWithOptionalLine()).as(TableBody::new).parse(procedure));
+            COLUMN_SPLITTER.before(tableRow((TableHeadRow) head))))).and(endWithOptionalLine()).as(TableBody::new).parse(procedure));
 
     private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> singleCellRow(
             NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> element_ellipsis) {
@@ -242,21 +242,21 @@ public class Compiler {
     }
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
-            DALNode rowPrefix, TableHead head) {
-        return procedure -> cellVerificationExpression((TableRowPrefixNode) rowPrefix, head.getHeader(procedure))
-                .withStartPosition().parse(procedure);
+            DALNode rowPrefix, TableHeadRow head) {
+        return procedure -> cellVerificationExpression((TableRowPrefixNode) rowPrefix,
+                head.getHeader(procedure.getIndex())).withStartPosition().parse(procedure);
     }
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> cellVerificationExpression(TableRowPrefixNode rowPrefix, HeaderNode header) {
-        return shortVerificationClause(oneOf(VERIFICATION_OPERATORS, header.operator(), rowPrefix.rowOperator())
+        return shortVerificationClause(oneOf(VERIFICATION_OPERATORS, header.operator(), rowPrefix.operator())
                 .or(DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING))
                 .input(header.property());
     }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
-            TableHead tableHead) {
-        return clause(rowPrefix -> tableLine(tableCell(rowPrefix, tableHead)).as(cells -> new TableRowNode(rowPrefix, cells)));
+            TableHeadRow headRow) {
+        return clause(rowPrefix -> tableLine(tableCell(rowPrefix, headRow)).as(cells -> new TableRowNode(rowPrefix, cells)));
     }
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableCell(

@@ -30,7 +30,7 @@ public class TableBody extends DALNode {
     public RowType resolveRowType(InterpreterException.Position.Type type) {
         return rows.stream().reduce(EMPTY_TABLE_ROW_TYPE, (last, rowNode) -> {
             try {
-                return rowNode.mergeRowTypeBy(last, type);
+                return rowNode.mergeRowTypeBy(last);
             } catch (IllegalArgumentException ignored) {
                 throw new SyntaxException("Row index should be consistent", rowNode.getPositionBegin(), type)
                         .multiPosition(rows.get(0).getPositionBegin(), type);
@@ -52,9 +52,8 @@ public class TableBody extends DALNode {
         return rows.stream().filter(TableRowNode::isData).collect(toList()).get(indexSkipEllipsis);
     }
 
-    @Deprecated
-    public TableBody checkTable(TableHead tableHead) {
-        rows.forEach(tableHead::checkSize);
+    public TableBody checkFormat(TableHeadRow headRow) {
+        rows.forEach(headRow::checkDataCellSize);
         return this;
     }
 }
