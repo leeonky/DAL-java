@@ -476,6 +476,26 @@ Feature: list
     : {items: +[[0]: 1, [1]: 2, [2]: 3], items: -[[0]: 3, [1]: 2, [2]: 1]}
     """
 
+  Scenario: sort list in nested list
+    Given the following json:
+    """
+    [
+      [1, 3, 2],
+      [1, 3, 2]
+    ]
+    """
+    And the following verification should pass:
+    """
+    : [
+      +[1 2 3]
+      -[3 2 1]
+    ]
+    """
+    And the inspect should:
+    """
+    : [[0]: +[[0]: 1, [1]: 2, [2]: 3], [1]: -[[0]: 3, [1]: 2, [2]: 1]]
+    """
+
 #  TODO contains not allow set index or key in table
 
 #    TODO try to support [1 ... 2] ?
