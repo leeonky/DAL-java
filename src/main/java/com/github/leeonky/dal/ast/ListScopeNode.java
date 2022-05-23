@@ -14,6 +14,8 @@ import java.util.List;
 import static com.github.leeonky.dal.ast.AssertionFailure.assertListSize;
 import static com.github.leeonky.dal.ast.SymbolNode.Type.BRACKET;
 import static java.lang.String.format;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.reverseOrder;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -162,6 +164,32 @@ public class ListScopeNode extends DALNode {
 
         int indexOfNode(int firstIndex, int index, int count) {
             return index + firstIndex;
+        }
+    }
+
+    public static class NatureOrder extends ListScopeNode {
+
+        @SuppressWarnings("unchecked")
+        public NatureOrder(List<Clause<DALRuntimeContext, DALNode>> expressionFactories) {
+            super(expressionFactories, false, (Comparator) naturalOrder());
+        }
+
+        @Override
+        public String inspect() {
+            return "+" + super.inspect();
+        }
+    }
+
+    public static class ReverseOrder extends ListScopeNode {
+
+        @SuppressWarnings("unchecked")
+        public ReverseOrder(List<Clause<DALRuntimeContext, DALNode>> expressionFactories) {
+            super(expressionFactories, false, (Comparator) reverseOrder());
+        }
+
+        @Override
+        public String inspect() {
+            return "-" + super.inspect();
         }
     }
 }

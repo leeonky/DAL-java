@@ -457,6 +457,25 @@ Feature: list
     (-{})
     """
 
+  Scenario: sort list in object scope verification
+    Given the following json:
+    """
+    {
+      "items": [1, 3, 2]
+    }
+    """
+    And the following verification should pass:
+    """
+    : {
+      items: +[1 2 3]
+      items: -[3 2 1]
+    }
+    """
+    And the inspect should:
+    """
+    : {items: +[[0]: 1, [1]: 2, [2]: 3], items: -[[0]: 3, [1]: 2, [2]: 1]}
+    """
+
 #  TODO contains not allow set index or key in table
 
 #    TODO try to support [1 ... 2] ?
