@@ -99,9 +99,9 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
     }
 
     @Override
-    public DALNode createExpression(DALNode node1, DALOperator operator, DALNode node2) {
-        if (node1 instanceof GroupNode && !(operator instanceof DALOperator.Matcher || operator instanceof DALOperator.Equal))
-            return ((GroupNode) node1).appendChain(n -> createExpression(n, operator, node2));
-        return super.createExpression(node1, operator, node2);
+    public DALNode createExpression(DALNode left, DALOperator operator, DALNode right) {
+        if (left instanceof GroupNode && !(operator instanceof DALOperator.Matcher || operator instanceof DALOperator.Equal))
+            return ((GroupNode) left).appendClauseChain(n -> createExpression(n, operator, right));
+        return super.createExpression(left, operator, right);
     }
 }

@@ -3,7 +3,7 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
-public class PropertyThis extends DALNode implements ExcuteableNode {
+public class PropertyThis extends DALNode implements ExecutableNode {
 
     @Override
     public String inspect() {
@@ -11,7 +11,7 @@ public class PropertyThis extends DALNode implements ExcuteableNode {
     }
 
     @Override
-    public Data getPropertyValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
+    public Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
         return data;
     }
 }

@@ -8,7 +8,7 @@ import com.github.leeonky.dal.runtime.RuntimeException;
 import static com.github.leeonky.util.BeanClass.createFrom;
 import static java.lang.String.format;
 
-public class ListMappingNode extends DALNode implements ExcuteableNode {
+public class ListMappingNode extends DALNode implements ExecutableNode {
     private final SymbolNode symbolNode;
 
     public ListMappingNode(DALNode symbolNode) {
@@ -22,12 +22,12 @@ public class ListMappingNode extends DALNode implements ExcuteableNode {
     }
 
     @Override
-    public Data getPropertyValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
+    public Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
         try {
-            if (!data.isList())
-                throw new RuntimeException(format("The instance of '%s' is not a list",
-                        createFrom(data.getInstance()).getName()), getPositionBegin());
-            return data.mapList(symbolNode.getRootSymbolName());
+            if (data.isList())
+                return data.mapList(symbolNode.getRootSymbolName());
+            throw new RuntimeException(format("The instance of '%s' is not a list",
+                    createFrom(data.getInstance()).getName()), getPositionBegin());
         } catch (ElementAccessException e) {
             throw e.toDalError(symbolNode.getPositionBegin());
         }

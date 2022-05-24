@@ -10,7 +10,7 @@ import java.util.List;
 
 import static java.lang.String.format;
 
-public class SymbolNode extends DALNode implements ExcuteableNode {
+public class SymbolNode extends DALNode implements ExecutableNode {
     private final Object symbol;
     private final Type type;
 
@@ -25,7 +25,7 @@ public class SymbolNode extends DALNode implements ExcuteableNode {
     }
 
     @Override
-    public Data getPropertyValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
+    public Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
         try {
             if (data.getInstance() instanceof Flatten)
                 context.appendFlattenProperty(data, symbol);
