@@ -5,6 +5,7 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
@@ -233,5 +234,9 @@ public class Data {
     }
 
     private static class FilteredObject extends LinkedHashMap<String, Object> implements Flatten {
+    }
+
+    public <T> T newBlockScope(Supplier<T> supplier) {
+        return dalRuntimeContext.newBlockScope(this, supplier);
     }
 }

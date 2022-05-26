@@ -105,14 +105,14 @@ public class ListScopeNode extends DALNode {
         if (!data.isList())
             throw new RuntimeException(format("Cannot compare %sand list", data.inspect()), getPositionBegin());
         data.setListComparator(comparator);
-        return type == Type.CONTAINS ? verifyContainElement(context, data) : verifyEachElement(context, data);
+        return type == Type.CONTAINS ? verifyContainElement(context, data) : verifyCorrespondingElement(context, data);
     }
 
-    private Boolean verifyEachElement(DALRuntimeContext context, Data data) {
+    private Boolean verifyCorrespondingElement(DALRuntimeContext context, Data data) {
         List<DALNode> expressions = getVerificationExpressions(data.getListFirstIndex());
         if (type == Type.ALL_ITEMS)
             assertListSize(expressions.size(), data.getListSize(), getPositionBegin());
-        return context.newBlockScope(data, () -> assertElementExpressions(context, expressions));
+        return data.newBlockScope(() -> assertElementExpressions(context, expressions));
     }
 
     private boolean verifyContainElement(DALRuntimeContext context, Data data) {
@@ -121,40 +121,42 @@ public class ListScopeNode extends DALNode {
         List<Clause<DALRuntimeContext, DALNode>> expected = trimFirstEllipsis();
         for (int clauseIndex = 0; clauseIndex < expected.size(); clauseIndex++) {
             Clause<DALRuntimeContext, DALNode> clause = expected.get(clauseIndex);
-            while (!verifyContains(clauseIndex, context, data, elementIndex++, clause, data.getListFirstIndex())) ;
+            try {
+                while (!isElementPassedVerification(context, clause, getElement(data, elementIndex++, clause))) ;
+            } catch (AssertionFailure exception) {
+                throw isTable ? new RowAssertionFailure(clauseIndex, exception) : exception;
+            }
         }
         return true;
+    }
+
+    private boolean isElementPassedVerification(DALRuntimeContext context, Clause<DALRuntimeContext, DALNode> clause,
+                                                Object element) {
+        try {
+            return (boolean) clause.expression(new ConstNode(element)).evaluate(context);
+        } catch (AssertionFailure ignore) {
+            return false;
+        }
+    }
+
+    private Object getElement(Data data, int elementIndex, Clause<DALRuntimeContext, DALNode> clause) {
+        if (elementIndex == data.getListSize())
+            throw new AssertionFailure("No such element", clause.expression(InputNode.INSTANCE).getOperandPosition());
+        return data.getListValues().get(elementIndex);
     }
 
     private List<Clause<DALRuntimeContext, DALNode>> trimFirstEllipsis() {
         return inputClauses.subList(1, inputClauses.size() - 1);
     }
 
-    private boolean verifyContains(int clauseIndex, DALRuntimeContext context, Data data, int index,
-                                   Clause<DALRuntimeContext, DALNode> clause, int firstIndex) {
-        if (index == data.getListSize()) {
-            int operandPosition = clause.expression(InputNode.INSTANCE).getOperandPosition();
-            throw isTable ? new RowAssertionFailure(clauseIndex, new AssertionFailure("No such element",
-                    operandPosition)) : new AssertionFailure("No such element", operandPosition);
-        }
-        try {
-            return context.newBlockScope(data, () -> (boolean) clause.expression(new DALExpression(InputNode.INSTANCE,
-                    new PropertyImplicit(), new SymbolNode(index + firstIndex, BRACKET))).evaluate(context));
-        } catch (AssertionFailure ignore) {
-            return false;
-        }
-    }
-
     private boolean assertElementExpressions(DALRuntimeContext context, List<DALNode> expressions) {
         if (isTable)
-            for (int index = 0; index < expressions.size(); index++) {
-                DALNode expression = expressions.get(index);
+            for (int index = 0; index < expressions.size(); index++)
                 try {
-                    expression.evaluate(context);
+                    expressions.get(index).evaluate(context);
                 } catch (DalException dalException) {
                     throw new ElementAssertionFailure(index, dalException);
                 }
-            }
         else
             expressions.forEach(expression -> expression.evaluate(context));
         return true;

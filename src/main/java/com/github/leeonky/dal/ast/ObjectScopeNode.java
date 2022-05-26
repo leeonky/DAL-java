@@ -37,7 +37,7 @@ public class ObjectScopeNode extends DALNode {
     @Override
     protected boolean verify(Data data, DALOperator.Equal operator, DALRuntimeContext context, DALNode actualNode) {
         checkNull(data);
-        return context.newBlockScope(data, () -> {
+        return data.newBlockScope(() -> {
             expressions.forEach(expression -> expression.evaluate(context));
             Set<String> unexpectedFields = new LinkedHashSet<String>(data.getFieldNames()) {{
                 removeAll(collectFields(data));
@@ -54,7 +54,7 @@ public class ObjectScopeNode extends DALNode {
             throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
         }
         checkNull(data);
-        return context.newBlockScope(data, () -> {
+        return data.newBlockScope(() -> {
             expressions.forEach(expression -> expression.evaluate(context));
             return true;
         });

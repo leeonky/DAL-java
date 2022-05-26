@@ -346,7 +346,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         @Override
         public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
             try {
-                return context.newBlockScope(left.evaluateData(context), () -> right.evaluate(context));
+                return left.evaluateData(context).newBlockScope(() -> right.evaluate(context));
             } catch (IllegalStateException e) {
                 throw new RuntimeException(e.getMessage(), getPosition());
             }
