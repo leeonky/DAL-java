@@ -34,6 +34,7 @@ public class RegexNode extends DALNode {
     }
 
     @Override
+//    TODO remove
     public boolean equals(Object o) {
         return o instanceof RegexNode && ((RegexNode) o).pattern.toString().equals(pattern.toString());
     }
