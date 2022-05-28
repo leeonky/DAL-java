@@ -9,7 +9,7 @@ import static com.github.leeonky.dal.ast.SortSymbolNode.Type.ZA;
 import static com.github.leeonky.dal.compiler.Notations.*;
 
 public class SortSymbolNode extends DALNode {
-    private static Map<String, Type> types = new HashMap<String, Type>() {{
+    private static final Map<String, Type> types = new HashMap<String, Type>() {{
         put(SEQUENCE_AZ.getLabel(), AZ);
         put(SEQUENCE_AZ_2.getLabel(), AZ);
         put(SEQUENCE_ZA.getLabel(), ZA);

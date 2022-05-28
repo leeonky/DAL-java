@@ -2,22 +2,21 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class SchemaComposeNode extends DALNode {
-
     private final List<SchemaNode> schemas;
     private final boolean isList;
-    private final ObjectRef objectRef = new ObjectRef();
 
     public SchemaComposeNode(List<SchemaNode> schemas, boolean isList) {
         this.schemas = schemas;
@@ -26,46 +25,40 @@ public class SchemaComposeNode extends DALNode {
 
     @Override
     public String inspect() {
-        Collector<CharSequence, ?, String> joining = isList ? Collectors.joining(" / ", "[", "]") : Collectors.joining(" / ");
+        Collector<CharSequence, ?, String> joining = isList ? joining(" / ", "[", "]") : joining(" / ");
         return schemas.stream().map(SchemaNode::inspect).collect(joining);
     }
 
-    public Data verify(DALNode input, RuntimeContextBuilder.DALRuntimeContext context) {
+    public Data verify(DALNode input, DALRuntimeContext context) {
 
         try {
-            schemas.forEach(schemaNode -> verifyAndConvertAsSchemaType(context, schemaNode, objectRef, input));
-            return context.wrap(objectRef.instance, schemas.get(0).inspect(), isList);
+            List<Object> instanceBySchema = schemas.stream().map(schemaNode ->
+                    verifyAndConvertAsSchemaType(context, schemaNode, input)).collect(toList());
+            return context.wrap(instanceBySchema.get(instanceBySchema.size() - 1), schemas.get(0).inspect(), isList);
         } catch (IllegalStateException e) {
             throw new RuntimeException(e.getMessage(), getPositionBegin());
         }
     }
 
 
-    private void verifyAndConvertAsSchemaType(RuntimeContextBuilder.DALRuntimeContext context,
-                                              SchemaNode schemaNode, ObjectRef objectRef, DALNode input) {
+    private Object verifyAndConvertAsSchemaType(DALRuntimeContext context, SchemaNode schemaNode, DALNode input) {
         Data inputData = input.evaluateData(context);
         if (isList) {
             if (!inputData.isList())
                 throw new SyntaxException("Expecting a list but was " + inputData.inspect(), input.getPositionBegin());
             AtomicInteger index = new AtomicInteger(0);
-            objectRef.instance = inputData.getListObjects().stream().map(element -> convertViaSchema(context, schemaNode,
-                    element, format("%s[%d]", input.inspect(), index.getAndIncrement())))
-                    .collect(Collectors.toList());
+            return inputData.getListObjects().stream().map(element -> convertViaSchema(context, schemaNode,
+                    element, format("%s[%d]", input.inspect(), index.getAndIncrement()))).collect(toList());
         } else
-            objectRef.instance = convertViaSchema(context, schemaNode, inputData, input.inspect());
+            return convertViaSchema(context, schemaNode, inputData, input.inspect());
     }
 
-    private Object convertViaSchema(RuntimeContextBuilder.DALRuntimeContext context, SchemaNode schemaNode,
-                                    Data element, String input) {
+    private Object convertViaSchema(DALRuntimeContext context, SchemaNode schemaNode, Data element, String input) {
         try {
             return schemaNode.getConstructorViaSchema(context).apply(element);
         } catch (IllegalTypeException exception) {
             throw new AssertionFailure(exception.assertionFailureMessage(input.isEmpty() ? input : input + " ",
                     schemaNode), schemaNode.getPositionBegin());
         }
-    }
-
-    static class ObjectRef {
-        public Object instance;
     }
 }

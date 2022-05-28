@@ -52,7 +52,7 @@ public class TableNode extends DALNode {
         return nodes.stream().map(DALNode::inspect).collect(Collectors.joining(" | ", "| ", " |"));
     }
 
-    public TableRowNode dataRowSkipEllipsis(int indexSkipEllipsis) {
+    public TableRowNode fetchDataRowSkipEllipsis(int indexSkipEllipsis) {
         return tableBody.dataRowSkipEllipsis(indexSkipEllipsis);
     }
 }

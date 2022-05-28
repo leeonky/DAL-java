@@ -24,7 +24,7 @@ public class RowAssertionFailure extends java.lang.RuntimeException {
 
     public DalException columnPositionException(TransposedTableNode transposedTableNode) {
         dalException.clearPosition();
-        return transposedTableNode.transpose().dataRowSkipEllipsis(indexSkipEllipsis).getCells().stream()
+        return transposedTableNode.transpose().fetchDataRowSkipEllipsis(indexSkipEllipsis).getCells().stream()
                 .reduce(dalException, this::markPosition, notAllowParallelReduce());
     }
 

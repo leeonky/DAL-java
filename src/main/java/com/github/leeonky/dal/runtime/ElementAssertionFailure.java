@@ -14,12 +14,12 @@ public class ElementAssertionFailure extends RowAssertionFailure {
 
     @Override
     public DalException linePositionException(TableNode tableNode) {
-        return dalException.multiPosition(tableNode.dataRowSkipEllipsis(indexSkipEllipsis).getPositionBegin(), LINE);
+        return dalException.multiPosition(tableNode.fetchDataRowSkipEllipsis(indexSkipEllipsis).getPositionBegin(), LINE);
     }
 
     @Override
     public DalException columnPositionException(TransposedTableNode transposedTableNode) {
-        return transposedTableNode.transpose().dataRowSkipEllipsis(indexSkipEllipsis).getCells().stream()
+        return transposedTableNode.transpose().fetchDataRowSkipEllipsis(indexSkipEllipsis).getCells().stream()
                 .reduce(dalException, this::markPosition, notAllowParallelReduce());
     }
 }

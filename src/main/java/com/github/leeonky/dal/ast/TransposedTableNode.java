@@ -18,7 +18,8 @@ public class TransposedTableNode extends DALNode {
     @Override
     protected boolean verify(Data actual, DALOperator.Matcher operator, DALRuntimeContext context, DALNode actualNode) {
         try {
-            return transpose().convertToVerificationNode(actual, operator, context).verify(actual, operator, context, actualNode);
+            return transpose().convertToVerificationNode(actual, operator, context)
+                    .verify(actual, operator, context, actualNode);
         } catch (RowAssertionFailure rowAssertionFailure) {
             throw rowAssertionFailure.columnPositionException(this);
         }
@@ -27,7 +28,8 @@ public class TransposedTableNode extends DALNode {
     @Override
     protected boolean verify(Data actual, DALOperator.Equal operator, DALRuntimeContext context, DALNode actualNode) {
         try {
-            return transpose().convertToVerificationNode(actual, operator, context).verify(actual, operator, context, actualNode);
+            return transpose().convertToVerificationNode(actual, operator, context)
+                    .verify(actual, operator, context, actualNode);
         } catch (RowAssertionFailure rowAssertionFailure) {
             throw rowAssertionFailure.columnPositionException(this);
         }
@@ -41,10 +43,5 @@ public class TransposedTableNode extends DALNode {
     @Override
     public String inspect() {
         return tableHead.inspect() + tableBody.inspect();
-    }
-
-    @Override
-    public DALNode setPositionBegin(int positionBegin) {
-        return super.setPositionBegin(positionBegin);
     }
 }
