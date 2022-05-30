@@ -74,8 +74,17 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
         return enableSlashProperty;
     }
 
-    //    TODO refactor
-    public <T> T enableSlashProperty(Supplier<T> supplier) {
+    public static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> enableSlashProperty(
+            NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
+        return procedure -> procedure.enableSlashProperty(() -> nodeParser.parse(procedure));
+    }
+
+    public static NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> enableSlashProperty(
+            NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> mandatory) {
+        return procedure -> procedure.enableSlashProperty(() -> mandatory.parse(procedure));
+    }
+
+    private <T> T enableSlashProperty(Supplier<T> supplier) {
         enableSlashProperty = true;
         try {
             return supplier.get();
@@ -88,8 +97,17 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
         return enableRelaxProperty;
     }
 
-    //    TODO refactor
-    public <T> T enableRelaxProperty(Supplier<T> supplier) {
+    public static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> enableRelaxProperty(
+            NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
+        return procedure -> procedure.enableRelaxProperty(() -> nodeParser.parse(procedure));
+    }
+
+    public static NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> enableRelaxProperty(
+            NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> mandatory) {
+        return procedure -> procedure.enableRelaxProperty(() -> mandatory.parse(procedure));
+    }
+
+    private <T> T enableRelaxProperty(Supplier<T> supplier) {
         enableRelaxProperty = true;
         try {
             return supplier.get();

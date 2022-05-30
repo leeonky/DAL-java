@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 import static com.github.leeonky.dal.ast.DALNode.constNode;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
-import static com.github.leeonky.dal.compiler.DALProcedure.enableCommaAnd;
+import static com.github.leeonky.dal.compiler.DALProcedure.*;
 import static com.github.leeonky.dal.compiler.Notations.*;
 import static com.github.leeonky.interpreter.FunctionUtil.not;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
@@ -106,8 +106,7 @@ public class Compiler {
             DOT_SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_DOT_SYMBOL : Tokens.DOT_SYMBOL)
                     .nodeParser(DALNode::symbolNode).parse(procedure),
             PROPERTY_PATTERN = this::propertyPattern,
-            OPTIONAL_VERIFICATION_PROPERTY = procedure -> procedure.enableRelaxProperty(() ->
-                    procedure.enableSlashProperty(() -> OPTIONAL_PROPERTY_CHAIN.parse(procedure)));
+            OPTIONAL_VERIFICATION_PROPERTY = lazy(() -> enableSlashProperty(enableRelaxProperty(OPTIONAL_PROPERTY_CHAIN)));
 
     private Optional<DALNode> propertyPattern(DALProcedure dalProcedure) {
         ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> patternClause =
@@ -116,16 +115,14 @@ public class Compiler {
     }
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            PROPERTY_CHAIN, OPERAND, EXPRESSION,
+            PROPERTY_CHAIN, OPERAND, EXPRESSION, VERIFICATION_PROPERTY,
             SCHEMA_COMPOSE = OPENING_BRACKET.with(single(many(SCHEMA.mandatory("Expect a schema"))
                             .and(Syntax.Rules.splitBy(SCHEMA_AND)).as(DALNode::elementSchemas)).and(endWith(CLOSING_BRACKET)).as())
                     .or(many(SCHEMA.mandatory("Expect a schema")).and(Syntax.Rules.splitBy(SCHEMA_AND)).as(DALNode::schemas)),
             EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(DALNode::relaxString),
             OBJECT_SCOPE_RELAX_STRING = Tokens.OBJECT_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
             LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
-            TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(DALNode::relaxString),
-            VERIFICATION_PROPERTY = procedure -> procedure.enableRelaxProperty(() ->
-                    procedure.enableSlashProperty(() -> PROPERTY_CHAIN.parse(procedure)));
+            TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(DALNode::relaxString);
 
     public ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             ARITHMETIC_CLAUSE, VERIFICATION_CLAUSE,
@@ -154,7 +151,8 @@ public class Compiler {
         PROPERTY = lazy(() -> oneOf(GROUP_PROPERTY, oneOf(EXPLICIT_PROPERTY, IMPLICIT_PROPERTY).defaultInputNode(InputNode.INSTANCE)));
         OPTIONAL_PROPERTY_CHAIN = PROPERTY.recursive(EXPLICIT_PROPERTY);
         PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
-        OBJECT = lazy(() -> DALProcedure.disableCommaAnd(OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(CLOSING_BRACES))
+        VERIFICATION_PROPERTY = enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN));
+        OBJECT = lazy(() -> disableCommaAnd(OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(CLOSING_BRACES))
                 .as(ObjectScopeNode::new).or(many(VERIFICATION_PROPERTY.expression(shortVerificationClause(VERIFICATION_OPERATORS
                         .mandatory("Expect operator `:` or `=`"), SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING))))
                         .and(optionalSplitBy(COMMA)).and(endWith(CLOSING_BRACES)).as(ObjectScopeNode::new)))));
@@ -185,13 +183,13 @@ public class Compiler {
         SHORT_VERIFICATION_OPERAND = oneOf(VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND.recursive(oneOf(ARITHMETIC_CLAUSE)));
         CELL_VERIFICATION_OPERAND = single(oneOf(oneOf(REGEX, OBJECT, LIST, WILDCARD), VERIFICATION_VALUE_OPERAND
                 .recursive(oneOf(ARITHMETIC_CLAUSE)))).and(enabledBefore(COLUMN_SPLITTER)).as();
-        GROUP_PROPERTY = DALProcedure.disableCommaAnd(OPENING_GROUP.with(many(PROPERTY_CHAIN).and(optionalSplitBy(COMMA))
+        GROUP_PROPERTY = disableCommaAnd(OPENING_GROUP.with(many(PROPERTY_CHAIN).and(optionalSplitBy(COMMA))
                 .and(endWith(CLOSING_GROUP)).as(GroupNode::new)));
     }
 
     private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> pureList(
             Function<List<Clause<DALRuntimeContext, DALNode>>, DALNode> factory) {
-        return lazy(() -> DALProcedure.disableCommaAnd(OPENING_BRACKET.with(many(ELEMENT_ELLIPSIS.ignoreInput().or(
+        return lazy(() -> disableCommaAnd(OPENING_BRACKET.with(many(ELEMENT_ELLIPSIS.ignoreInput().or(
                 shortVerificationClause(VERIFICATION_OPERATORS.or(DEFAULT_VERIFICATION_OPERATOR),
                         SHORT_VERIFICATION_OPERAND.or(LIST_SCOPE_RELAX_STRING)))).and(optionalSplitBy(COMMA))
                 .and(endWith(CLOSING_BRACKET)).as(factory))));
