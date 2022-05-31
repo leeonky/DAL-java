@@ -15,7 +15,8 @@ public class Constants {
         add('.');
     }};
 
-    public static final Set<String> PROPERTY_DELIMITER_STRING = PROPERTY_DELIMITER.stream().map(Object::toString).collect(Collectors.toSet());
+    public static final Set<String> PROPERTY_DELIMITER_STRING = PROPERTY_DELIMITER.stream().map(Object::toString)
+            .collect(Collectors.toSet());
 
     public static final Set<Character> RELAX_PROPERTY_DELIMITER = new HashSet<Character>() {{
         addAll(PROPERTY_DELIMITER);

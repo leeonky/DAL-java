@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -11,7 +13,7 @@ import static java.util.Comparator.reverseOrder;
 import static java.util.stream.Collectors.toList;
 
 public class Calculator {
-    public static int compare(Object v1, Object v2, RuntimeContextBuilder.DALRuntimeContext context) {
+    public static int compare(Object v1, Object v2, DALRuntimeContext context) {
         if (v1 == null || v2 == null)
             throw new IllegalArgumentException(format("Can not compare [%s] and [%s]", v1, v2));
         if (v1 instanceof Number && v2 instanceof Number)
@@ -28,7 +30,7 @@ public class Calculator {
         return !v2.isNull() && Objects.equals(v1.getInstance(), v2.getInstance());
     }
 
-    public static Object plus(Object v1, Object v2, RuntimeContextBuilder.DALRuntimeContext context) {
+    public static Object plus(Object v1, Object v2, DALRuntimeContext context) {
         if (v1 instanceof Number && v2 instanceof Number)
             return context.getNumberType().plus((Number) v1, (Number) v2);
         if (v1 instanceof String)
@@ -38,17 +40,17 @@ public class Calculator {
         throw new IllegalArgumentException(format("Can not plus '%s' and '%s'", getClassName(v1), getClassName(v2)));
     }
 
-    public static Object subtract(Object v1, Object v2, RuntimeContextBuilder.DALRuntimeContext context) {
+    public static Object subtract(Object v1, Object v2, DALRuntimeContext context) {
         requireNumber(v1, v2);
         return context.getNumberType().subtract((Number) v1, (Number) v2);
     }
 
-    public static Object multiply(Object v1, Object v2, RuntimeContextBuilder.DALRuntimeContext context) {
+    public static Object multiply(Object v1, Object v2, DALRuntimeContext context) {
         requireNumber(v1, v2);
         return context.getNumberType().multiply((Number) v1, (Number) v2);
     }
 
-    public static Object divide(Object v1, Object v2, RuntimeContextBuilder.DALRuntimeContext context) {
+    public static Object divide(Object v1, Object v2, DALRuntimeContext context) {
         requireNumber(v1, v2);
         return context.getNumberType().divide((Number) v1, (Number) v2);
     }
@@ -92,24 +94,22 @@ public class Calculator {
     }
 
     @SuppressWarnings("unchecked")
-    public static Object negate(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
+    public static Object negate(Data data, DALRuntimeContext context) {
         Object value = data.getInstance();
         if (value instanceof Number)
             return context.getNumberType().negate((Number) value);
-
         if (data.isList())
-            return data.getListValues().stream().sorted((Comparator) reverseOrder()).collect(toList());
+            return data.getValueList().stream().sorted((Comparator) reverseOrder()).collect(toList());
         throw new IllegalArgumentException(format("Operands should be number but '%s'", getClassName(value)));
     }
 
     @SuppressWarnings("unchecked")
-    public static Object positive(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
+    public static Object positive(Data data, DALRuntimeContext context) {
         Object value = data.getInstance();
         if (value instanceof Number)
             return value;
-
         if (data.isList())
-            return data.getListValues().stream().sorted((Comparator) naturalOrder()).collect(toList());
+            return data.getValueList().stream().sorted((Comparator) naturalOrder()).collect(toList());
         throw new IllegalArgumentException(format("Operands should be List but '%s'", getClassName(value)));
     }
 }

@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.util.Map.Entry.comparingByKey;
+
 public class ClassKeyMap<T> extends LinkedHashMap<Class<?>, T> {
 
     public Optional<T> tryGetData(Object object) {
@@ -15,7 +17,7 @@ public class ClassKeyMap<T> extends LinkedHashMap<Class<?>, T> {
         if (data != null)
             return Optional.of(data);
         return entrySet().stream().filter(e -> e.getKey().isInstance(object))
-                .sorted(Map.Entry.comparingByKey(BeanClass::compareByExtends))
+                .sorted(comparingByKey(BeanClass::compareByExtends))
                 .map(Map.Entry::getValue).findFirst();
     }
 

@@ -142,7 +142,7 @@ public class ListScopeNode extends DALNode {
     private Object getElement(Data data, int elementIndex, Clause<DALRuntimeContext, DALNode> clause) {
         if (elementIndex == data.getListSize())
             throw new AssertionFailure("No such element", clause.expression(InputNode.INSTANCE).getOperandPosition());
-        return data.getListValues().get(elementIndex);
+        return data.getValueList().get(elementIndex);
     }
 
     private List<Clause<DALRuntimeContext, DALNode>> trimFirstEllipsis() {

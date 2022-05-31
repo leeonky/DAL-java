@@ -183,7 +183,7 @@ public class SchemaVerifier {
     }
 
     private boolean verifyCollection(String subPrefix, BeanClass<?> elementType, Object schemaProperties) {
-        List<Data> dataList = object.getListObjects();
+        List<Data> dataList = object.getDataList();
         if (schemaProperties == null)
             return range(0, dataList.size())
                     .allMatch(i -> dataList.get(i).createSchemaVerifier().verifySchemaInGenericType(

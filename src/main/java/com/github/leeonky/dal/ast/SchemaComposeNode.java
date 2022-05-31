@@ -47,7 +47,7 @@ public class SchemaComposeNode extends DALNode {
             if (!inputData.isList())
                 throw new SyntaxException("Expecting a list but was " + inputData.inspect(), input.getPositionBegin());
             AtomicInteger index = new AtomicInteger(0);
-            return inputData.getListObjects().stream().map(element -> convertViaSchema(context, schemaNode,
+            return inputData.getDataList().stream().map(element -> convertViaSchema(context, schemaNode,
                     element, format("%s[%d]", input.inspect(), index.getAndIncrement()))).collect(toList());
         } else
             return convertViaSchema(context, schemaNode, inputData, input.inspect());
