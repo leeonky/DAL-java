@@ -11,8 +11,8 @@ public class SchemaNode extends DALNode {
         this.schema = schema;
     }
 
-    public ConstructorViaSchema getConstructorViaSchema(RuntimeContextBuilder.DALRuntimeContext context) {
-        return context.searchConstructor(schema).orElseThrow(() ->
+    public ConstructorViaSchema getValueConstructorViaSchema(RuntimeContextBuilder.DALRuntimeContext context) {
+        return context.searchValueConstructor(schema).orElseThrow(() ->
                 new RuntimeException("Schema '" + schema + "' not registered", getPositionBegin()));
     }
 

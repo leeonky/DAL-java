@@ -28,13 +28,13 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
     private final ClassKeyMap<ListAccessor<Object>> listAccessors = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Object>> objectImplicitMapper = new ClassKeyMap<>();
-    private final Map<String, ConstructorViaSchema> constructors = new LinkedHashMap<>();
+    private final Map<String, ConstructorViaSchema> valueConstructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
     private Converter converter = Converter.getInstance();
     private final Set<Method> extensionMethods = new HashSet<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
-    private final ClassKeyMap<Function<Object, String>> singleDumpers = new ClassKeyMap<>();
+    private final ClassKeyMap<Function<Object, String>> valueDumpers = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Map<String, Object>>> objectDumpers = new ClassKeyMap<>();
 
     public RuntimeContextBuilder() {
@@ -57,10 +57,10 @@ public class RuntimeContextBuilder {
                 .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor())
         ;
 
-        registerSingleDumper(String.class, RuntimeContextBuilder::dumpString)
-                .registerSingleDumper(Number.class, Object::toString)
-                .registerSingleDumper(Boolean.class, Object::toString)
-                .registerSingleDumper(boolean.class, Object::toString)
+        registerValueDumper(String.class, RuntimeContextBuilder::dumpString)
+                .registerValueDumper(Number.class, Object::toString)
+                .registerValueDumper(Boolean.class, Object::toString)
+                .registerValueDumper(boolean.class, Object::toString)
         ;
 
         registerObjectDumper(UUID.class, Object::toString)
@@ -77,8 +77,8 @@ public class RuntimeContextBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> RuntimeContextBuilder registerSingleDumper(Class<T> key, Function<T, String> toString) {
-        singleDumpers.put(key, obj -> toString.apply((T) obj));
+    public <T> RuntimeContextBuilder registerValueDumper(Class<T> key, Function<T, String> toString) {
+        valueDumpers.put(key, obj -> toString.apply((T) obj));
         return this;
     }
 
@@ -106,7 +106,7 @@ public class RuntimeContextBuilder {
 
     @SuppressWarnings("unchecked")
     public RuntimeContextBuilder registerValueFormat(String name, Formatter<?, ?> formatter) {
-        constructors.put(name, o -> ((Formatter<Object, ?>) formatter).transform(o.getInstance()));
+        valueConstructors.put(name, o -> ((Formatter<Object, ?>) formatter).transform(o.getInstance()));
         return this;
     }
 
@@ -120,7 +120,7 @@ public class RuntimeContextBuilder {
     }
 
     public RuntimeContextBuilder registerSchema(String name, Function<Data, Boolean> predicate) {
-        constructors.put(name, (o) -> {
+        valueConstructors.put(name, (o) -> {
             if (predicate.apply(o))
                 return o.getInstance();
             throw new IllegalTypeException();
@@ -212,8 +212,8 @@ public class RuntimeContextBuilder {
             }
         }
 
-        public Optional<ConstructorViaSchema> searchConstructor(String type) {
-            return Optional.ofNullable(constructors.get(type));
+        public Optional<ConstructorViaSchema> searchValueConstructor(String type) {
+            return Optional.ofNullable(valueConstructors.get(type));
         }
 
         public boolean isSchemaRegistered(Class<?> fieldType) {
@@ -262,8 +262,7 @@ public class RuntimeContextBuilder {
         }
 
         public boolean isRegisteredList(Object instance) {
-            Optional<ListAccessor<Object>> objectListAccessor = listAccessors.tryGetData(instance);
-            return objectListAccessor.isPresent() && objectListAccessor.get().isList(instance);
+            return listAccessors.tryGetData(instance).map(listAccessor -> listAccessor.isList(instance)).orElse(false);
         }
 
         public Converter getConverter() {
@@ -324,7 +323,7 @@ public class RuntimeContextBuilder {
         }
 
         public Optional<Function<Object, String>> fetchSingleDumper(Object instance) {
-            return singleDumpers.tryGetData(instance);
+            return valueDumpers.tryGetData(instance);
         }
 
         public Optional<Function<Object, Map<String, Object>>> fetchObjectDumper(Object instance) {

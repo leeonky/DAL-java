@@ -68,27 +68,27 @@ public class Data {
     }
 
     public Data getValue(List<Object> propertyChain) {
-        if (propertyChain.isEmpty())
-            return this;
-        return getValue(propertyChain.get(0)).getValue(propertyChain.subList(1, propertyChain.size()));
+        return propertyChain.isEmpty() ? this :
+                getValue(propertyChain.get(0)).getValue(propertyChain.subList(1, propertyChain.size()));
     }
 
-    public Data getValue(Object property) {
+    public Data getValue(Object propertyChain) {
         try {
-            List<Object> propertyChain = schemaType.access(property).getPropertyChainBefore(schemaType);
-            if (propertyChain.size() == 1 && propertyChain.get(0).equals(property))
-                return new Data(getPropertyValue(property), dalRuntimeContext, propertySchema(property));
-            return getValue(propertyChain);
+            List<Object> chain = schemaType.access(propertyChain).getPropertyChainBefore(schemaType);
+            if (chain.size() == 1 && chain.get(0).equals(propertyChain))
+                return new Data(getPropertyValue(propertyChain), dalRuntimeContext, propertySchema(propertyChain));
+            return getValue(chain);
         } catch (IndexOutOfBoundsException ex) {
-            throw new PropertyAccessException(property, "Index out of bounds (" + ex.getMessage() + ")");
+            throw new PropertyAccessException("Index out of bounds (" + ex.getMessage() + ")");
         } catch (Exception e) {
-            throw new PropertyAccessException(property, format("Get property `%s` failed, property can be:\n" +
-                    "  1. public field\n" +
-                    "  2. public getter\n" +
-                    "  3. public no args method\n" +
-                    "  4. Map key value\n" +
-                    "  5. customized type getter\n" +
-                    "  6. static method extension\n%s%s", property, e.getMessage(), listMappingMessage(this, property)), e);
+            throw new PropertyAccessException(format("Get property `%s` failed, property can be:\n" +
+                            "  1. public field\n" +
+                            "  2. public getter\n" +
+                            "  3. public no args method\n" +
+                            "  4. Map key value\n" +
+                            "  5. customized type getter\n" +
+                            "  6. static method extension\n%s%s",
+                    propertyChain, e.getMessage(), listMappingMessage(this, propertyChain)), e);
         }
     }
 
@@ -98,10 +98,10 @@ public class Data {
     }
 
     private Object getPropertyValue(Object property) {
-        return isList() ? getValueFromList(property) : dalRuntimeContext.getPropertyValue(this, (String) property);
+        return isList() ? fetchFromList(property) : dalRuntimeContext.getPropertyValue(this, (String) property);
     }
 
-    private Object getValueFromList(Object property) {
+    private Object fetchFromList(Object property) {
         if ("size".equals(property))
             return getListSize();
         if (property instanceof String)
@@ -177,8 +177,8 @@ public class Data {
     private String dumpInstance(Object instance, String indentation, Map<Object, String> dumped, String path) {
         return isNull() ? "null" : oneOf(() -> dalRuntimeContext.fetchSingleDumper(instance)
                         .map(dumper -> dumper.apply(instance)),
-                () -> dalRuntimeContext.fetchObjectDumper(instance).map(dumper ->
-                        dumpSingleObject(dumper.apply(instance), indentation)))
+                () -> dalRuntimeContext.fetchObjectDumper(instance)
+                        .map(dumper -> dumpValueObject(dumper.apply(instance), indentation)))
                 .orElseGet(() -> dumpObject(indentation, dumped, path));
     }
 
@@ -192,7 +192,7 @@ public class Data {
         });
     }
 
-    private String dumpSingleObject(Map<String, Object> instance, String indentation) {
+    private String dumpValueObject(Map<String, Object> instance, String indentation) {
         String keyIndentation = indentation + "  ";
         return instance.entrySet().stream().map(entry -> format("%s\"%s\": %s", keyIndentation, entry.getKey(),
                         dumpInstance(entry.getValue(), keyIndentation, new HashMap<>(), entry.getKey())))
