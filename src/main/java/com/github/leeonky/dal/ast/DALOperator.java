@@ -56,12 +56,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         return needInspect;
     }
 
-    @Override
-//    TODO tobe removed
-    public boolean equals(Object obj) {
-        return getClass().isInstance(obj);
-    }
-
     public String inspect(String node1, String node2) {
         if (node1 == null || node1.isEmpty())
             return String.format("%s %s", label, node2);

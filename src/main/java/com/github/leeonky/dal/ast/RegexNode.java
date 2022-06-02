@@ -32,10 +32,4 @@ public class RegexNode extends DALNode {
     protected boolean verify(Data actual, DALOperator.Matcher operator, DALRuntimeContext context, DALNode actualNode) {
         return assertRegexMatches(pattern, (String) actual.convert(String.class).getInstance(), actual, getPositionBegin());
     }
-
-    @Override
-//    TODO remove
-    public boolean equals(Object o) {
-        return o instanceof RegexNode && ((RegexNode) o).pattern.toString().equals(pattern.toString());
-    }
 }

@@ -2,8 +2,6 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
-import java.util.Objects;
-
 public class ConstNode extends DALNode {
 
     private final Object value;
@@ -19,13 +17,6 @@ public class ConstNode extends DALNode {
     @Override
     public Object evaluate(RuntimeContextBuilder.DALRuntimeContext context) {
         return value;
-    }
-
-    @Override
-    @Deprecated
-//    TODO remove
-    public boolean equals(Object obj) {
-        return obj instanceof ConstNode && Objects.equals(value, ((ConstNode) obj).value);
     }
 
     @Override

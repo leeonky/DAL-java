@@ -8,7 +8,6 @@ import com.github.leeonky.interpreter.Expression;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class DALExpression extends DALNode implements Expression<DALRuntimeContext, DALNode, DALExpression, DALOperator> {
     private final DALNode left;
@@ -50,16 +49,6 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
         if (operator.isNeedInspect() && (result.getInstance() instanceof Boolean) && !(boolean) result.getInstance())
             System.err.println("Warning: Expression `" + inspect() + "` got false.");
         return result;
-    }
-
-    @Override
-    @Deprecated
-//    TODO remove
-    public boolean equals(Object obj) {
-        return obj instanceof DALExpression
-                && Objects.equals(left, ((DALExpression) obj).left)
-                && Objects.equals(right, ((DALExpression) obj).right)
-                && Objects.equals(operator, ((DALExpression) obj).operator);
     }
 
     @Override
