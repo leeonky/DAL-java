@@ -14,10 +14,11 @@ import static com.github.leeonky.dal.ast.DALNode.constNode;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
 import static com.github.leeonky.dal.compiler.DALProcedure.*;
 import static com.github.leeonky.dal.compiler.Notations.*;
+import static com.github.leeonky.interpreter.ClauseParser.lazyClause;
 import static com.github.leeonky.interpreter.FunctionUtil.not;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.NodeParser.Mandatory.clause;
-import static com.github.leeonky.interpreter.NodeParser.lazy;
+import static com.github.leeonky.interpreter.NodeParser.lazyNode;
 import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.Parser.oneOf;
 import static com.github.leeonky.interpreter.Syntax.Rules.*;
@@ -106,7 +107,7 @@ public class Compiler {
             DOT_SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_DOT_SYMBOL : Tokens.DOT_SYMBOL)
                     .nodeParser(DALNode::symbolNode).parse(procedure),
             PROPERTY_PATTERN = this::propertyPattern,
-            OPTIONAL_VERIFICATION_PROPERTY = lazy(() -> enableSlashProperty(enableRelaxProperty(OPTIONAL_PROPERTY_CHAIN)));
+            OPTIONAL_VERIFICATION_PROPERTY = lazyNode(() -> enableSlashProperty(enableRelaxProperty(OPTIONAL_PROPERTY_CHAIN)));
 
     private Optional<DALNode> propertyPattern(DALProcedure dalProcedure) {
         ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> patternClause =
@@ -127,7 +128,7 @@ public class Compiler {
     public ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             ARITHMETIC_CLAUSE, VERIFICATION_CLAUSE,
             SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE),
-            WHICH_CLAUSE = ClauseParser.lazy(() -> WHICH.clause(EXPRESSION)),
+            WHICH_CLAUSE = lazyClause(() -> WHICH.clause(EXPRESSION)),
             LIST_MAPPING = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
             IMPLICIT_PROPERTY = PROPERTY_IMPLICIT.clause(oneOf(PROPERTY_PATTERN, oneOf(STRING_PROPERTY, SYMBOL).concat(LIST_MAPPING))),
             EXPLICIT_PROPERTY = oneOf(PROPERTY_DOT.clause(PROPERTY_PATTERN.or(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING).mandatory(
@@ -146,13 +147,13 @@ public class Compiler {
             VERIFICATION_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN, WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN, EXPRESSION_CLAUSE;
 
     public Compiler() {
-        PARENTHESES = lazy(() -> enableCommaAnd(OPENING_PARENTHESES.with(single(EXPRESSION).and(endWith(CLOSING_PARENTHESES))
+        PARENTHESES = lazyNode(() -> enableCommaAnd(OPENING_PARENTHESES.with(single(EXPRESSION).and(endWith(CLOSING_PARENTHESES))
                 .as(DALNode::parenthesesNode))));
-        PROPERTY = lazy(() -> oneOf(GROUP_PROPERTY, oneOf(EXPLICIT_PROPERTY, IMPLICIT_PROPERTY).defaultInputNode(InputNode.INSTANCE)));
+        PROPERTY = lazyNode(() -> oneOf(GROUP_PROPERTY, oneOf(EXPLICIT_PROPERTY, IMPLICIT_PROPERTY).defaultInputNode(InputNode.INSTANCE)));
         OPTIONAL_PROPERTY_CHAIN = PROPERTY.recursive(EXPLICIT_PROPERTY);
         PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
         VERIFICATION_PROPERTY = enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN));
-        OBJECT = lazy(() -> disableCommaAnd(OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(CLOSING_BRACES))
+        OBJECT = lazyNode(() -> disableCommaAnd(OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(CLOSING_BRACES))
                 .as(ObjectScopeNode::new).or(many(VERIFICATION_PROPERTY.expression(shortVerificationClause(VERIFICATION_OPERATORS
                         .mandatory("Expect operator `:` or `=`"), SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING))))
                         .and(optionalSplitBy(COMMA)).and(endWith(CLOSING_BRACES)).as(ObjectScopeNode::new)))));
@@ -164,18 +165,18 @@ public class Compiler {
                         .as(TransposedTableHead::new)))).withStartPosition().expression(transposeTable()),
                 COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHeadRow::new)).withStartPosition().expression(TABLE_BODY_CLAUSE));
         VERIFICATION_SPECIAL_OPERAND = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
-        OPERAND = lazy(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
+        OPERAND = lazyNode(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
                 .mandatory("Expect a value or expression");
         VERIFICATION_VALUE_OPERAND = oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, EXPLICIT_PROPERTY.defaultInputNode(
                 InputNode.INSTANCE), PARENTHESES);
         ARITHMETIC_CLAUSE = BINARY_ARITHMETIC_OPERATORS.clause(OPERAND);
         VERIFICATION_CLAUSE = VERIFICATION_OPERATORS.clause(oneOf(VERIFICATION_SPECIAL_OPERAND,
                 VERIFICATION_VALUE_OPERAND).or(EXPRESSION_RELAX_STRING));
-        ARITHMETIC_CLAUSE_CHAIN = ClauseParser.lazy(() -> ARITHMETIC_CLAUSE.concat(EXPRESSION_CLAUSE));
-        VERIFICATION_CLAUSE_CHAIN = ClauseParser.lazy(() -> VERIFICATION_CLAUSE.concat(EXPRESSION_CLAUSE));
-        EXPLICIT_PROPERTY_CHAIN = ClauseParser.lazy(() -> EXPLICIT_PROPERTY.concat(EXPRESSION_CLAUSE));
-        WHICH_CLAUSE_CHAIN = ClauseParser.lazy(() -> WHICH_CLAUSE.concat(EXPRESSION_CLAUSE));
-        SCHEMA_CLAUSE_CHAIN = ClauseParser.lazy(() -> SCHEMA_CLAUSE.concat(oneOf(VERIFICATION_CLAUSE_CHAIN,
+        ARITHMETIC_CLAUSE_CHAIN = lazyClause(() -> ARITHMETIC_CLAUSE.concat(EXPRESSION_CLAUSE));
+        VERIFICATION_CLAUSE_CHAIN = lazyClause(() -> VERIFICATION_CLAUSE.concat(EXPRESSION_CLAUSE));
+        EXPLICIT_PROPERTY_CHAIN = lazyClause(() -> EXPLICIT_PROPERTY.concat(EXPRESSION_CLAUSE));
+        WHICH_CLAUSE_CHAIN = lazyClause(() -> WHICH_CLAUSE.concat(EXPRESSION_CLAUSE));
+        SCHEMA_CLAUSE_CHAIN = lazyClause(() -> SCHEMA_CLAUSE.concat(oneOf(VERIFICATION_CLAUSE_CHAIN,
                 WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN)));
         EXPRESSION_CLAUSE = oneOf(ARITHMETIC_CLAUSE_CHAIN, VERIFICATION_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN,
                 WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN);
@@ -189,7 +190,7 @@ public class Compiler {
 
     private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> pureList(
             Function<List<Clause<DALRuntimeContext, DALNode>>, DALNode> factory) {
-        return lazy(() -> disableCommaAnd(OPENING_BRACKET.with(many(ELEMENT_ELLIPSIS.ignoreInput().or(
+        return lazyNode(() -> disableCommaAnd(OPENING_BRACKET.with(many(ELEMENT_ELLIPSIS.ignoreInput().or(
                 shortVerificationClause(VERIFICATION_OPERATORS.or(DEFAULT_VERIFICATION_OPERATOR),
                         SHORT_VERIFICATION_OPERAND.or(LIST_SCOPE_RELAX_STRING)))).and(optionalSplitBy(COMMA))
                 .and(endWith(CLOSING_BRACKET)).as(factory))));

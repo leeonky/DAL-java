@@ -47,7 +47,7 @@ public class ObjectScopeNode extends DALNode {
     private Set<String> collectUnexpectedFields(Data data, DALRuntimeContext context) {
         return new LinkedHashSet<String>(data.getFieldNames()) {{
             removeAll(collectFields(data));
-            removeAll(context.removeFlattenProperties(data));
+            removeAll(context.removeVerifiedFlattenProperties(data));
         }};
     }
 

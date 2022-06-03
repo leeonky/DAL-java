@@ -8,7 +8,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.github.leeonky.interpreter.NodeParser.Mandatory.clause;
-import static com.github.leeonky.interpreter.NodeParser.lazy;
+import static com.github.leeonky.interpreter.NodeParser.lazyNode;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -26,7 +26,7 @@ class NodeParserTest extends BaseTest {
         when(nodeParser.parse(procedure)).thenReturn(of(node));
 
 
-        assertThat(lazy(() -> nodeParser).parse(procedure).get()).isSameAs(node);
+        assertThat(lazyNode(() -> nodeParser).parse(procedure).get()).isSameAs(node);
     }
 
     @Test

@@ -9,7 +9,7 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         ClauseParser.Mandatory<C, N, E, O, P>, Clause<C, N>> {
 
     static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> lazy(
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> lazyClause(
             Supplier<ClauseParser<C, N, E, O, P>> parser) {
         return procedure -> parser.get().parse(procedure);
     }
@@ -28,17 +28,17 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
 
     default ClauseParser<C, N, E, O, P> concat(ClauseParser<C, N, E, O, P> clause) {
         return procedure -> {
-            Optional<Clause<C, N>> optionalExpressionClause = parse(procedure);
-            if (optionalExpressionClause.isPresent()) {
+            Optional<Clause<C, N>> optionalClause = parse(procedure);
+            if (optionalClause.isPresent()) {
                 Optional<Clause<C, N>> nextOptionalClause = clause.parse(procedure);
                 if (nextOptionalClause.isPresent()) {
                     return Optional.of(previous -> {
-                        N input = optionalExpressionClause.get().expression(previous);
+                        N input = optionalClause.get().expression(previous);
                         return nextOptionalClause.get().expression(input).setPositionBegin(input.getPositionBegin());
                     });
                 }
             }
-            return optionalExpressionClause;
+            return optionalClause;
         };
     }
 

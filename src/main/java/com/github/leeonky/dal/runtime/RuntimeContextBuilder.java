@@ -302,7 +302,7 @@ public class RuntimeContextBuilder {
                     .filter(Objects::nonNull).findFirst();
         }
 
-        public void setFlattenProperty(Data parent, Object prefix, Data property) {
+        public void initFlattenPropertyStack(Data parent, Object prefix, Data property) {
             FlattenDataCollection flattenDataCollection = flattenDataMap.get(parent);
             if (flattenDataCollection == null)
                 flattenDataCollection = fetchFlattenData(parent).map(flattenData -> flattenData.children).orElse(null);
@@ -311,11 +311,12 @@ public class RuntimeContextBuilder {
             flattenDataCollection.initFlattenData(property, prefix);
         }
 
-        public Set<String> removeFlattenProperties(Data parent) {
+        public Set<String> removeVerifiedFlattenProperties(Data parent) {
             FlattenDataCollection flattenDataCollection = flattenDataMap.get(parent);
             if (flattenDataCollection != null)
                 return flattenDataCollection.removeFlattenProperties(parent);
-            return fetchFlattenData(parent).map(flattenData -> flattenData.children.removeFlattenProperties(parent)).orElse(emptySet());
+            return fetchFlattenData(parent).map(flattenData -> flattenData.children.removeFlattenProperties(parent))
+                    .orElse(emptySet());
         }
 
         public NumberType getNumberType() {
@@ -341,7 +342,8 @@ public class RuntimeContextBuilder {
         public FlattenData fetchFlattenData(Data data) {
             FlattenData flattenData = collection.get(data);
             if (flattenData == null)
-                flattenData = collection.values().stream().map(subFlattenData -> subFlattenData.children.fetchFlattenData(data))
+                flattenData = collection.values().stream()
+                        .map(subFlattenData -> subFlattenData.children.fetchFlattenData(data))
                         .filter(Objects::nonNull).findFirst().orElse(null);
             return flattenData;
         }
@@ -367,8 +369,7 @@ public class RuntimeContextBuilder {
             postfixes.addAll(children.removeFlattenProperties(instance));
             return postfixes.stream().map(property -> ((Flatten) instance.getInstance())
                             .removeExpectedField(data.getFieldNames(), prefix, property))
-                    .filter(Optional::isPresent).map(Optional::get)
-                    .collect(Collectors.toSet());
+                    .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toSet());
         }
     }
 

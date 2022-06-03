@@ -31,7 +31,7 @@ public class SymbolNode extends DALNode implements ExecutableNode {
                 context.appendFlattenProperty(data, symbol);
             Data value = data.getValue(symbol);
             if (value.getInstance() instanceof Flatten)
-                context.setFlattenProperty(data, symbol, value);
+                context.initFlattenPropertyStack(data, symbol, value);
             return value;
         } catch (PropertyAccessException e) {
             throw e.toDalError("", getPositionBegin());

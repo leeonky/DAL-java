@@ -9,7 +9,7 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         extends Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {
 
     static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> lazy(
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> lazyNode(
             Supplier<NodeParser<C, N, E, O, P>> parser) {
         return procedure -> parser.get().parse(procedure);
     }
