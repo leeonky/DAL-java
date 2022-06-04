@@ -8,7 +8,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.github.leeonky.interpreter.NodeParser.Mandatory.clause;
-import static com.github.leeonky.interpreter.NodeParser.lazyNode;
+import static com.github.leeonky.interpreter.Parser.lazyNode;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;

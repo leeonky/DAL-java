@@ -1,18 +1,11 @@
 package com.github.leeonky.interpreter;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
         extends Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
         ClauseParser.Mandatory<C, N, E, O, P>, Clause<C, N>> {
-
-    static <E extends Expression<C, N, E, O>, N extends Node<C, N>, C extends RuntimeContext<C>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser<C, N, E, O, P> lazyClause(
-            Supplier<ClauseParser<C, N, E, O, P>> parser) {
-        return procedure -> parser.get().parse(procedure);
-    }
 
     @Override
     default ClauseParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
@@ -27,40 +20,27 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
     }
 
     default ClauseParser<C, N, E, O, P> concat(ClauseParser<C, N, E, O, P> clause) {
-        return procedure -> {
-            Optional<Clause<C, N>> optionalClause = parse(procedure);
-            if (optionalClause.isPresent()) {
-                Optional<Clause<C, N>> nextOptionalClause = clause.parse(procedure);
-                if (nextOptionalClause.isPresent()) {
-                    return Optional.of(previous -> {
-                        N input = optionalClause.get().expression(previous);
-                        return nextOptionalClause.get().expression(input).setPositionBegin(input.getPositionBegin());
-                    });
-                }
-            }
-            return optionalClause;
-        };
+        return procedure -> parse(procedure).map(c1 -> clause.parse(procedure).<Clause<C, N>>map(c2 -> previous ->
+                c2.expression(c1.expression(previous))).orElse(c1));
     }
 
-    default NodeParser<C, N, E, O, P> defaultInputNode(N input) {
+    default NodeParser<C, N, E, O, P> toNode(N input) {
         return procedure -> parse(procedure).map(clause -> clause.expression(input));
     }
 
-    default Optional<N> combined(P procedure, N node) {
+    default Optional<N> parseAndMakeExpression(P procedure, N node) {
         return parse(procedure).map(clause -> clause.expression(node));
     }
 
-    default N concated(P procedure, N node) {
-        return parse(procedure).map(right -> right.expression(node)).orElse(node);
+    default N parseAndMakeExpressionOrInput(P procedure, N input) {
+        return parseAndMakeExpression(procedure, input).orElse(input);
     }
 
-    default N recursived(P procedure, N node) {
-        Optional<Clause<C, N>> optionalNode = parse(procedure);
-        while (optionalNode.isPresent()) {
-            node = optionalNode.get().expression(node);
-            optionalNode = parse(procedure);
-        }
-        return node;
+    default N parseAndMakeExpressionOrInputRecursively(P procedure, N node) {
+        N expression = parseAndMakeExpressionOrInput(procedure, node);
+        if (expression == node)
+            return expression;
+        return parseAndMakeExpressionOrInputRecursively(procedure, expression);
     }
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>,
@@ -74,7 +54,7 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             return parser::parse;
         }
 
-        default NodeParser.Mandatory<C, N, E, O, P> input(N node) {
+        default NodeParser.Mandatory<C, N, E, O, P> toNode(N node) {
             return procedure -> parse(procedure).expression(node);
         }
     }
