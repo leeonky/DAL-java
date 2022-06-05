@@ -100,7 +100,7 @@ class ClauseParserTest extends BaseTest {
                 return of(clause);
             };
 
-            assertThat(clauseParser.toNode(input).parse(testProcedure).get()).isSameAs(expression);
+            assertThat(clauseParser.implicitNode(input).parse(testProcedure).get()).isSameAs(expression);
         }
 
         @Test
@@ -111,7 +111,7 @@ class ClauseParserTest extends BaseTest {
                 return empty();
             };
 
-            assertThat(clauseParser.toNode(null).parse(testProcedure)).isEmpty();
+            assertThat(clauseParser.implicitNode(null).parse(testProcedure)).isEmpty();
         }
     }
 
@@ -128,7 +128,7 @@ class ClauseParserTest extends BaseTest {
             return clause;
         };
 
-        assertThat(mandatory.toNode(node).parse(testProcedure)).isSameAs(expression);
+        assertThat(mandatory.implicitNode(node).parse(testProcedure)).isSameAs(expression);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.github.leeonky.interpreter;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BinaryOperator;
 import java.util.function.Predicate;
@@ -7,8 +8,11 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class FunctionUtil {
-    public static <T> Predicate<T> not(Predicate<T> t) {
-        return t.negate();
+
+    @SuppressWarnings("unchecked")
+    public static <T> Predicate<T> not(Predicate<? extends T> t) {
+        Objects.requireNonNull(t);
+        return (Predicate<T>) t.negate();
     }
 
     @SuppressWarnings("unchecked")

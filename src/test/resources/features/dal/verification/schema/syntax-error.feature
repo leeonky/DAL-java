@@ -197,3 +197,18 @@ Feature: syntax-error
     is (String)
        ^
     """
+
+  Scenario: raise error when schema not register
+    When evaluate by:
+    """
+    is NotRegister
+    """
+    Then failed with the message:
+    """
+    Schema 'NotRegister' not registered
+    """
+    And got the following notation:
+    """
+    is NotRegister
+       ^
+    """

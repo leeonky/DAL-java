@@ -30,29 +30,6 @@ class NodeParserTest extends BaseTest {
     }
 
     @Test
-    void parse_ignore_input() {
-        TestProcedure testProcedure = givenProcedureWithCode("");
-        TestNode node = new TestNode();
-        NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
-            assertThat(procedure).isSameAs(testProcedure);
-            return of(node);
-        };
-
-        assertThat(nodeParser.ignoreInput().parse(testProcedure).get().expression(null)).isSameAs(node);
-    }
-
-    @Test
-    void parse_empty_in_ignore_input() {
-        TestProcedure testProcedure = givenProcedureWithCode("");
-        NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
-            assertThat(procedure).isSameAs(testProcedure);
-            return empty();
-        };
-
-        assertThat(nodeParser.ignoreInput().parse(testProcedure)).isEmpty();
-    }
-
-    @Test
     void parse_clause_parser() {
         TestProcedure testProcedure = givenProcedureWithCode("");
         TestNode node = new TestNode();

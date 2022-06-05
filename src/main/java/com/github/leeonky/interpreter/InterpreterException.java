@@ -25,11 +25,6 @@ public class InterpreterException extends RuntimeException {
         return (E) this;
     }
 
-    @Deprecated
-    public int getPosition() {
-        return positions.get(0).position;
-    }
-
     public String show(String code) {
         return show(code, 0);
     }

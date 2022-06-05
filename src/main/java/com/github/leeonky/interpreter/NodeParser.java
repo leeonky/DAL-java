@@ -19,10 +19,6 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return mandatory::parse;
     }
 
-    default ClauseParser<C, N, E, O, P> ignoreInput() {
-        return procedure -> parse(procedure).map(node -> p -> node);
-    }
-
     default ClauseParser<C, N, E, O, P> clauseParser(BiFunction<N, N, N> biFunction) {
         return procedure -> parse(procedure).map(n -> input -> biFunction.apply(input, n));
     }

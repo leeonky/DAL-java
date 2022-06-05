@@ -7,21 +7,19 @@ import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
 public class IfThenFactory {
-    public static IfTrue when(boolean bool) {
-        return new IfTrue(bool);
+    public static IfTrue when(boolean flag) {
+        return new IfTrue(flag);
     }
 
     public static class IfTrue {
-        private final boolean bool;
+        private final boolean flag;
 
-        private IfTrue(boolean bool) {
-            this.bool = bool;
+        private IfTrue(boolean flag) {
+            this.flag = flag;
         }
 
         public <T> Optional<T> optional(Supplier<T> supplier) {
-            if (bool)
-                return ofNullable(supplier.get());
-            return empty();
+            return flag ? ofNullable(supplier.get()) : empty();
         }
     }
 }
