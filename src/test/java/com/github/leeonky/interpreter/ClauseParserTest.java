@@ -84,53 +84,6 @@ class ClauseParserTest extends BaseTest {
         }
     }
 
-    @Nested
-    class ImplicitInput {
-
-        @Test
-        void present_clause_parser_with_input_node_should_be_present_node_parser() {
-            TestProcedure testProcedure = givenProcedureWithCode("");
-            TestNode input = new TestNode();
-            TestNode expression = new TestNode();
-
-            ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
-                assertThat(procedure).isSameAs(testProcedure);
-                Clause<TestContext, TestNode> clause = mock(Clause.class);
-                when(clause.expression(input)).thenReturn(expression);
-                return of(clause);
-            };
-
-            assertThat(clauseParser.implicitNode(input).parse(testProcedure).get()).isSameAs(expression);
-        }
-
-        @Test
-        void empty_default_input_should_parse_to_empty() {
-            TestProcedure testProcedure = givenProcedureWithCode("");
-            ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
-                assertThat(procedure).isSameAs(testProcedure);
-                return empty();
-            };
-
-            assertThat(clauseParser.implicitNode(null).parse(testProcedure)).isEmpty();
-        }
-    }
-
-    @Test
-    void mandatory_with_input() {
-        TestProcedure testProcedure = givenProcedureWithCode("");
-        TestNode node = new TestNode();
-        TestNode expression = new TestNode();
-
-        ClauseParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> mandatory = procedure -> {
-            assertThat(procedure).isSameAs(testProcedure);
-            Clause<TestContext, TestNode> clause = mock(Clause.class);
-            when(clause.expression(node)).thenReturn(expression);
-            return clause;
-        };
-
-        assertThat(mandatory.implicitNode(node).parse(testProcedure)).isSameAs(expression);
-    }
-
     @Test
     void convert_to_mandatory() {
         TestProcedure testProcedure = givenProcedureWithCode("");

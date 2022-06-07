@@ -39,7 +39,7 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return procedure -> procedure.positionOf(position -> parse(procedure).map(node -> node.setPositionBegin(position)));
     }
 
-    default NodeParser<C, N, E, O, P> and(ClauseParser<C, N, E, O, P> clauseParser) {
+    default NodeParser<C, N, E, O, P> with(ClauseParser<C, N, E, O, P> clauseParser) {
         return procedure -> procedure.getSourceCode().tryFetch(() -> parse(procedure)
                 .flatMap(node -> clauseParser.parseAndMakeExpression(procedure, node)));
     }
@@ -86,6 +86,20 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
                 Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser.Mandatory<C, N, E, O, P> clause(
                 Function<N, Mandatory<C, N, E, O, P>> mandatoryFactory) {
             return procedure -> input -> mandatoryFactory.apply(input).parse(procedure);
+        }
+
+        //        TODO need test
+        default NodeParser<C, N, E, O, P> with(ClauseParser<C, N, E, O, P> clauseParser) {
+            return procedure -> procedure.getSourceCode().tryFetch(() ->
+                    clauseParser.parseAndMakeExpression(procedure, parse(procedure)));
+        }
+
+        //        TODO need test
+        default NodeParser.Mandatory<C, N, E, O, P> with(ClauseParser.Mandatory<C, N, E, O, P> mandatory) {
+            return procedure -> {
+                N input = parse(procedure);
+                return mandatory.parse(procedure).expression(input);
+            };
         }
     }
 }

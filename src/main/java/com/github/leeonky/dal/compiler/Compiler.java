@@ -110,11 +110,12 @@ public class Compiler {
     private Optional<DALNode> propertyPattern(DALProcedure dalProcedure) {
         ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> patternClause =
                 notation("{}").clause((token, symbol) -> new PropertyPattern(symbol));
-        return oneOf(notation("{}").node(n -> new PropertyThis()), SYMBOL.and(patternClause)).parse(dalProcedure);
+        return oneOf(notation("{}").node(n -> new PropertyThis()), SYMBOL.with(patternClause)).parse(dalProcedure);
     }
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             PROPERTY_CHAIN, OPERAND, EXPRESSION, VERIFICATION_PROPERTY,
+            DEFAULT_INPUT = procedure -> InputNode.INSTANCE,
             SCHEMA_COMPOSE = OPENING_BRACKET.with(single(many(SCHEMA.mandatory("Expect a schema"))
                             .and(Syntax.Rules.splitBy(SCHEMA_AND)).as(DALNode::elementSchemas)).and(endWith(CLOSING_BRACKET)).as())
                     .or(many(SCHEMA.mandatory("Expect a schema")).and(Syntax.Rules.splitBy(SCHEMA_AND)).as(DALNode::schemas)),
@@ -148,8 +149,7 @@ public class Compiler {
     public Compiler() {
         PARENTHESES = lazyNode(() -> enableCommaAnd(OPENING_PARENTHESES.with(single(EXPRESSION).and(endWith(CLOSING_PARENTHESES))
                 .as(DALNode::parenthesesNode))));
-        PROPERTY = lazyNode(() -> oneOf(GROUP_PROPERTY,
-                oneOf(EXPLICIT_PROPERTY_CLAUSE, IMPLICIT_PROPERTY_CLAUSE).implicitNode(InputNode.INSTANCE)));
+        PROPERTY = lazyNode(() -> oneOf(GROUP_PROPERTY, DEFAULT_INPUT.with(oneOf(EXPLICIT_PROPERTY_CLAUSE, IMPLICIT_PROPERTY_CLAUSE))));
         OPTIONAL_PROPERTY_CHAIN = PROPERTY.recursive(EXPLICIT_PROPERTY_CLAUSE);
         PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
         VERIFICATION_PROPERTY = enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN));
@@ -160,15 +160,14 @@ public class Compiler {
         SORTED_LIST = oneOf(Operators.PLUS.before(pureList(ListScopeNode.NatureOrder::new)),
                 Operators.SUBTRACTION.before(pureList(ListScopeNode.ReverseOrder::new)));
         LIST = oneOf(pureList(ListScopeNode::new), SORTED_LIST);
-        TABLE = oneOf(TRANSPOSE_MARK.with(transposeTable().implicitNode(new EmptyTransposedTableHead())),
+        TABLE = oneOf(TRANSPOSE_MARK.with(EMPTY_TRANSPOSED_HEAD.with(transposeTable())),
                 COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(tableLine(ROW_PREFIX)
                         .as(TransposedTableHead::new)))).withStartPosition().expression(transposeTable()),
                 COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHeadRow::new)).withStartPosition().expression(TABLE_BODY_CLAUSE));
         VERIFICATION_SPECIAL_OPERAND = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         OPERAND = lazyNode(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
                 .mandatory("Expect a value or expression");
-        VERIFICATION_VALUE_OPERAND = oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, EXPLICIT_PROPERTY_CLAUSE.implicitNode(
-                InputNode.INSTANCE), PARENTHESES);
+        VERIFICATION_VALUE_OPERAND = oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, DEFAULT_INPUT.with(EXPLICIT_PROPERTY_CLAUSE), PARENTHESES);
         ARITHMETIC_CLAUSE = BINARY_ARITHMETIC_OPERATORS.clause(OPERAND);
         VERIFICATION_CLAUSE = VERIFICATION_OPERATORS.clause(oneOf(VERIFICATION_SPECIAL_OPERAND,
                 VERIFICATION_VALUE_OPERAND).or(EXPRESSION_RELAX_STRING));
@@ -229,7 +228,8 @@ public class Compiler {
             many(SEQUENCE_AZ).and(atLeast(1)).as(SortGroupNode::new),
             many(SEQUENCE_AZ_2).and(atLeast(1)).as(SortGroupNode::new),
             many(SEQUENCE_ZA).and(atLeast(1)).as(SortGroupNode::new),
-            many(SEQUENCE_ZA_2).and(atLeast(1)).as(SortGroupNode::new)).or(procedure -> SortGroupNode.noSequence());
+            many(SEQUENCE_ZA_2).and(atLeast(1)).as(SortGroupNode::new)).or(procedure -> SortGroupNode.noSequence()),
+            EMPTY_TRANSPOSED_HEAD = procedure -> new EmptyTransposedTableHead();
 
     private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             ROW_PREFIX = procedure -> new TableRowPrefixNode(ROW_KEY.parse(procedure), SCHEMA_CLAUSE.parse(procedure),
@@ -243,8 +243,8 @@ public class Compiler {
             COLUMN_SPLITTER.before(tableRow((TableHeadRow) head))))).and(endWithOptionalLine()).as(TableBody::new).parse(procedure));
 
     private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> singleCellRow(
-            NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> element_ellipsis) {
-        return single(single(element_ellipsis).and(endWith(COLUMN_SPLITTER)).as()).and(endWithLine()).as()
+            NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
+        return single(single(nodeParser).and(endWith(COLUMN_SPLITTER)).as()).and(endWithLine()).as()
                 .clauseParser(TableRowNode::new);
     }
 
@@ -256,9 +256,9 @@ public class Compiler {
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> cellVerificationExpression(TableRowPrefixNode rowPrefix, HeaderNode header) {
-        return shortVerificationClause(oneOf(VERIFICATION_OPERATORS, header.operator(), rowPrefix.operator())
-                .or(DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING))
-                .implicitNode(header.property());
+        return header.property().with(shortVerificationClause(oneOf(VERIFICATION_OPERATORS, header.operator(),
+                rowPrefix.operator()).or(DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND
+                .or(TABLE_CELL_RELAX_STRING)));
     }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(

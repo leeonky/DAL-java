@@ -24,10 +24,6 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
                 c2.expression(c1.expression(previous))).orElse(c1));
     }
 
-    default NodeParser<C, N, E, O, P> implicitNode(N input) {
-        return procedure -> parse(procedure).map(clause -> clause.expression(input));
-    }
-
     default Optional<N> parseAndMakeExpression(P procedure, N node) {
         return parse(procedure).map(clause -> clause.expression(node));
     }
@@ -43,19 +39,14 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return parseAndMakeExpressionOrInputRecursively(procedure, expression);
     }
 
-    interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>,
-            E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
-            extends Parser.Mandatory<C, N, E, O, P, ClauseParser<C, N, E, O, P>, ClauseParser.Mandatory<C, N, E, O, P>,
-            Clause<C, N>> {
+    interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser.Mandatory<C, N, E, O, P,
+            ClauseParser<C, N, E, O, P>, ClauseParser.Mandatory<C, N, E, O, P>, Clause<C, N>> {
 
         @Override
         default ClauseParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,
                 Mandatory<C, N, E, O, P>, Clause<C, N>> parser) {
             return parser::parse;
-        }
-
-        default NodeParser.Mandatory<C, N, E, O, P> implicitNode(N node) {
-            return procedure -> parse(procedure).expression(node);
         }
     }
 }
