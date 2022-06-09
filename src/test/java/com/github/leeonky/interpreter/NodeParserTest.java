@@ -3,11 +3,11 @@ package com.github.leeonky.interpreter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.HashMap;
 import java.util.function.Function;
 
 import static com.github.leeonky.interpreter.NodeParser.Mandatory.clause;
+import static com.github.leeonky.interpreter.NodeParser.positionNode;
 import static com.github.leeonky.interpreter.Parser.lazyNode;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
@@ -16,6 +16,124 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 class NodeParserTest extends BaseTest {
+
+    @Nested
+    class SavePosition {
+
+        @Test
+        void should_save_position_when_present_node() {
+            TestProcedure testProcedure = givenProcedureWithCode("ab");
+
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> charNode = procedure ->
+                    of(new TestNode(procedure.getSourceCode().popChar(new HashMap<>())));
+
+            assertThat(positionNode(charNode).parse(testProcedure).get().getPositionBegin()).isEqualTo(0);
+            assertThat(positionNode(charNode).parse(testProcedure).get().getPositionBegin()).isEqualTo(1);
+        }
+
+        @Test
+        void should_save_position() {
+            TestProcedure testProcedure = givenProcedureWithCode("ab");
+
+            NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> charNode = procedure ->
+                    new TestNode(procedure.getSourceCode().popChar(new HashMap<>()));
+
+            assertThat(positionNode(charNode).parse(testProcedure).getPositionBegin()).isEqualTo(0);
+            assertThat(positionNode(charNode).parse(testProcedure).getPositionBegin()).isEqualTo(1);
+        }
+    }
+
+    @Nested
+    class Concat {
+
+        @Nested
+        class MandatoryClauseParser {
+
+            @Test
+            void present_node_parser_concat_mandatory_clause_parser_should_be_present_node_parser_which_can_parse_expression_with_node_and_clause_by_given_parser() {
+                TestProcedure testProcedure = givenProcedureWithCode("");
+                TestNode node = new TestNode();
+                NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
+                    assertThat(procedure).isSameAs(testProcedure);
+                    return of(node);
+                };
+
+                TestNode expression = new TestNode();
+                ClauseParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> mandatory = procedure -> {
+                    assertThat(procedure).isSameAs(testProcedure);
+                    Clause<TestContext, TestNode> clause = mock(Clause.class);
+                    when(clause.expression(node)).thenReturn(expression);
+                    return clause;
+                };
+
+                assertThat(nodeParser.concat(mandatory).parse(testProcedure).get()).isSameAs(expression);
+            }
+
+            @Test
+            void empty_node_parser_concat_any_mandatory_clause_parser_should_be_empty_node_parser() {
+                TestProcedure testProcedure = givenProcedureWithCode("");
+
+                NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
+                    assertThat(procedure).isSameAs(testProcedure);
+                    return empty();
+                };
+
+                assertThat(nodeParser.concat((ClauseParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator,
+                        TestProcedure>) null).parse(testProcedure)).isEmpty();
+            }
+        }
+
+        @Nested
+        class ConcatClauseParser {
+
+            @Test
+            void present_node_parser_concat_present_clause_parser_should_be_present_node_parser_which_can_parse_expression_with_node_and_clause() {
+                TestProcedure testProcedure = givenProcedureWithCode("");
+                TestNode node = new TestNode();
+                NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
+                    assertThat(procedure).isSameAs(testProcedure);
+                    return of(node);
+                };
+
+                TestNode expression = new TestNode();
+                ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
+                    assertThat(procedure).isSameAs(testProcedure);
+                    Clause<TestContext, TestNode> clause = mock(Clause.class);
+                    when(clause.expression(node)).thenReturn(expression);
+                    return of(clause);
+                };
+
+                assertThat(nodeParser.concat(clauseParser).parse(testProcedure).get()).isSameAs(expression);
+            }
+
+            @Test
+            void empty_node_parser_concat_any_present_clause_parser_should_be_empty_node_parser() {
+                TestProcedure testProcedure = givenProcedureWithCode("");
+                NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> empty();
+                ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = mock(ClauseParser.class);
+
+                assertThat(nodeParser.concat(clauseParser).parse(testProcedure)).isEmpty();
+                verify(clauseParser, never()).parse(testProcedure);
+            }
+
+            @Test
+            void present_node_parser_concat_empty_clause_parser_should_return_present_node_parser_which_can_parse_node_by_given_node_parser() {
+                TestProcedure testProcedure = givenProcedureWithCode("");
+                TestNode node = new TestNode();
+                NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
+                    assertThat(procedure).isSameAs(testProcedure);
+                    return of(node);
+                };
+
+                ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
+                    assertThat(procedure).isSameAs(testProcedure);
+                    return empty();
+                };
+
+                assertThat(nodeParser.concat(clauseParser).parse(testProcedure).get()).isSameAs(node);
+            }
+        }
+    }
 
     @Test
     void lazy_parse() {
@@ -29,121 +147,11 @@ class NodeParserTest extends BaseTest {
         assertThat(lazyNode(() -> nodeParser).parse(procedure).get()).isSameAs(node);
     }
 
-    @Test
-    void parse_clause_parser() {
-        TestProcedure testProcedure = givenProcedureWithCode("");
-        TestNode node = new TestNode();
-        NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
-            assertThat(procedure).isSameAs(testProcedure);
-            return of(node);
-        };
-
-        BiFunction biFunction = mock(BiFunction.class);
-        TestNode input = new TestNode();
-        TestNode expression = new TestNode();
-        when(biFunction.apply(input, node)).thenReturn(expression);
-
-        Optional<Clause> optional = nodeParser.clauseParser(biFunction).parse(testProcedure);
-
-        assertThat(optional.get().expression(input)).isSameAs(expression);
-    }
-
-    @Test
-    void parse_empty_in_clause_parser() {
-        TestProcedure testProcedure = givenProcedureWithCode("");
-
-        NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
-            assertThat(procedure).isSameAs(testProcedure);
-            return empty();
-        };
-
-        assertThat(nodeParser.clauseParser(null).parse(testProcedure)).isEmpty();
-    }
-
-    @Test
-    void parse_expression() {
-        TestProcedure testProcedure = givenProcedureWithCode("");
-        TestNode node = new TestNode();
-        NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
-            assertThat(procedure).isSameAs(testProcedure);
-            return of(node);
-        };
-
-        Clause<TestContext, TestNode> clause = mock(Clause.class);
-        TestNode expression = new TestNode();
-        when(clause.expression(node)).thenReturn(expression);
-        ClauseParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> mandatory = procedure -> {
-            assertThat(procedure).isSameAs(testProcedure);
-            return clause;
-        };
-
-        assertThat(nodeParser.expression(mandatory).parse(testProcedure).get()).isSameAs(expression);
-    }
-
-    @Test
-    void parse_empty_expression() {
-        TestProcedure testProcedure = givenProcedureWithCode("");
-
-        NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
-            assertThat(procedure).isSameAs(testProcedure);
-            return empty();
-        };
-
-        assertThat(nodeParser.expression(null).parse(testProcedure)).isEmpty();
-    }
-
-    @Test
-    void concat_clause_parser() {
-        TestProcedure testProcedure = givenProcedureWithCode("");
-        TestNode node = new TestNode();
-        NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
-            assertThat(procedure).isSameAs(testProcedure);
-            return of(node);
-        };
-
-        Clause<TestContext, TestNode> clause = mock(Clause.class);
-        TestNode expression = new TestNode();
-        when(clause.expression(node)).thenReturn(expression);
-        ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
-            assertThat(procedure).isSameAs(testProcedure);
-            return of(clause);
-        };
-
-        assertThat(nodeParser.concat(clauseParser).parse(testProcedure).get()).isSameAs(expression);
-    }
-
-    @Test
-    void empty_concat_clause_parser_should_return_empty() {
-        TestProcedure testProcedure = givenProcedureWithCode("");
-        NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> empty();
-        ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = mock(ClauseParser.class);
-
-        assertThat(nodeParser.concat(clauseParser).parse(testProcedure)).isEmpty();
-        verify(clauseParser, never()).parse(testProcedure);
-    }
-
-    @Test
-    void concat_empty_clause_parser_should_return_self_node() {
-        TestProcedure testProcedure = givenProcedureWithCode("");
-        TestNode node = new TestNode();
-        NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
-            assertThat(procedure).isSameAs(testProcedure);
-            return of(node);
-        };
-
-        ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
-            assertThat(procedure).isSameAs(testProcedure);
-            return empty();
-        };
-
-        assertThat(nodeParser.concat(clauseParser).parse(testProcedure).get()).isSameAs(node);
-    }
-
     @Nested
-    class Recursive {
+    class ConcatAll {
 
         @Test
-        void empty_recursive_clause_parser() {
+        void empty_node_parser_concat_all_any_clause_parser_should_be_empty_node_parser() {
             TestProcedure testProcedure = givenProcedureWithCode("");
             NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
                 assertThat(procedure).isSameAs(testProcedure);
@@ -152,11 +160,11 @@ class NodeParserTest extends BaseTest {
 
             ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = mock(ClauseParser.class);
 
-            assertThat(nodeParser.recursive(clauseParser).parse(testProcedure)).isEmpty();
+            assertThat(nodeParser.concatAll(clauseParser).parse(testProcedure)).isEmpty();
         }
 
         @Test
-        void recursive_with_empty_clause_parser() {
+        void present_node_parser_concat_all_empty_clause_parser_should_return_present_node_parser_which_can_parse_node_by_given_node_parser() {
             TestProcedure testProcedure = givenProcedureWithCode("");
             TestNode node = new TestNode();
             NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
@@ -169,13 +177,13 @@ class NodeParserTest extends BaseTest {
                 return empty();
             };
 
-            assertThat(nodeParser.recursive(clauseParser).parse(testProcedure).get()).isSameAs(node);
+            assertThat(nodeParser.concatAll(clauseParser).parse(testProcedure).get()).isSameAs(node);
         }
 
         int recursiveTimes = 0;
 
         @Test
-        void recursive_with_clause_parser_once() {
+        void present_node_parser_concat_all_present_clause_parser_which_has_one_clause_should_return_present_node_parser_which_can_parse_expression_with_node_and_one_clause() {
             recursiveTimes = 1;
             TestProcedure testProcedure = givenProcedureWithCode("");
             TestNode node = new TestNode();
@@ -184,21 +192,22 @@ class NodeParserTest extends BaseTest {
                 return of(node);
             };
 
-            Clause<TestContext, TestNode> clause = mock(Clause.class);
             TestNode expression = new TestNode();
-            when(clause.expression(node)).thenReturn(expression);
             ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
                 assertThat(procedure).isSameAs(testProcedure);
-                if (recursiveTimes-- > 0)
+                if (recursiveTimes-- > 0) {
+                    Clause<TestContext, TestNode> clause = mock(Clause.class);
+                    when(clause.expression(node)).thenReturn(expression);
                     return of(clause);
+                }
                 return empty();
             };
 
-            assertThat(nodeParser.recursive(clauseParser).parse(testProcedure).get()).isSameAs(expression);
+            assertThat(nodeParser.concatAll(clauseParser).parse(testProcedure).get()).isSameAs(expression);
         }
 
         @Test
-        void recursive_with_clause_parser_twice() {
+        void present_node_parser_concat_all_present_clause_parser_which_has_two_clauses_should_return_present_node_parser_which_can_parse_expression_with_node_and_two_clause() {
             recursiveTimes = 2;
             TestProcedure testProcedure = givenProcedureWithCode("");
             TestNode node = new TestNode();
@@ -207,48 +216,30 @@ class NodeParserTest extends BaseTest {
                 return of(node);
             };
 
-            Clause<TestContext, TestNode> clause = mock(Clause.class);
-            TestNode expression = new TestNode();
-            when(clause.expression(node)).thenReturn(expression);
-
-            Clause<TestContext, TestNode> clause2 = mock(Clause.class);
-            TestNode expression2 = new TestNode();
-            when(clause2.expression(expression)).thenReturn(expression2);
-
+            TestNode lastExpression = new TestNode();
             ClauseParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> clauseParser = procedure -> {
                 assertThat(procedure).isSameAs(testProcedure);
+                TestNode expression = new TestNode();
                 switch (recursiveTimes--) {
                     case 2:
+                        Clause<TestContext, TestNode> clause = mock(Clause.class);
+                        when(clause.expression(node)).thenReturn(expression);
                         return of(clause);
                     case 1:
+                        Clause<TestContext, TestNode> clause2 = mock(Clause.class);
+                        when(clause2.expression(expression)).thenReturn(lastExpression);
                         return of(clause2);
                     default:
                         return empty();
                 }
             };
 
-            assertThat(nodeParser.recursive(clauseParser).parse(testProcedure).get()).isSameAs(expression2);
+            assertThat(nodeParser.concatAll(clauseParser).parse(testProcedure).get()).isSameAs(lastExpression);
         }
     }
 
     @Nested
     class Mandatory {
-
-        @Test
-        void map() {
-            TestProcedure testProcedure = givenProcedureWithCode("");
-            TestNode node = new TestNode();
-            NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeMandatory = procedure -> {
-                assertThat(procedure).isSameAs(testProcedure);
-                return node;
-            };
-
-            Function<TestNode, TestNode> mapper = mock(Function.class);
-            TestNode mappedNode = new TestNode();
-            when(mapper.apply(node)).thenReturn(mappedNode);
-
-            assertThat(nodeMandatory.map(mapper).parse(testProcedure)).isSameAs(mappedNode);
-        }
 
         @Test
         void expression() {
@@ -267,7 +258,7 @@ class NodeParserTest extends BaseTest {
                 return clause;
             };
 
-            assertThat(nodeMandatory.expression(mandatory).parse(testProcedure)).isSameAs(expression);
+            assertThat(nodeMandatory.concat(mandatory).parse(testProcedure)).isSameAs(expression);
         }
 
         @Test
@@ -287,7 +278,7 @@ class NodeParserTest extends BaseTest {
                 return of(clause);
             };
 
-            assertThat(nodeMandatory.combine(clauseParser).parse(testProcedure).get()).isSameAs(expression);
+            assertThat(nodeMandatory.with(clauseParser).parse(testProcedure).get()).isSameAs(expression);
         }
 
         @Test
@@ -305,7 +296,7 @@ class NodeParserTest extends BaseTest {
                 return empty();
             };
 
-            assertThat(nodeMandatory.combine(clauseParser).parse(testProcedure)).isEmpty();
+            assertThat(nodeMandatory.with(clauseParser).parse(testProcedure)).isEmpty();
             assertThat(testProcedure.getSourceCode().nextPosition()).isEqualTo(0);
         }
 
@@ -363,7 +354,7 @@ class NodeParserTest extends BaseTest {
                     return empty();
                 };
 
-                assertThat(nodeMandatory.recursive(clauseParser).parse(testProcedure)).isSameAs(node);
+                assertThat(nodeMandatory.concatAll(clauseParser).parse(testProcedure)).isSameAs(node);
             }
 
             int recursiveTimes = 0;
@@ -388,7 +379,7 @@ class NodeParserTest extends BaseTest {
                     return empty();
                 };
 
-                assertThat(nodeMandatory.recursive(clauseParser).parse(testProcedure)).isSameAs(expression);
+                assertThat(nodeMandatory.concatAll(clauseParser).parse(testProcedure)).isSameAs(expression);
             }
 
             @Test
@@ -421,7 +412,7 @@ class NodeParserTest extends BaseTest {
                     }
                 };
 
-                assertThat(nodeMandatory.recursive(clauseParser).parse(testProcedure)).isSameAs(expression2);
+                assertThat(nodeMandatory.concatAll(clauseParser).parse(testProcedure)).isSameAs(expression2);
             }
         }
     }

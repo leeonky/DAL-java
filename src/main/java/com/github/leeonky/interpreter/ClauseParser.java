@@ -32,11 +32,11 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         return parseAndMakeExpression(procedure, input).orElse(input);
     }
 
-    default N parseAndMakeExpressionOrInputRecursively(P procedure, N node) {
+    default N parseAndMakeExpressionOrInputContinuously(P procedure, N node) {
         N expression = parseAndMakeExpressionOrInput(procedure, node);
         if (expression == node)
             return expression;
-        return parseAndMakeExpressionOrInputRecursively(procedure, expression);
+        return parseAndMakeExpressionOrInputContinuously(procedure, expression);
     }
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
