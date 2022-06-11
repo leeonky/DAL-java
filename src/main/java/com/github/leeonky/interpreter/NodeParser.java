@@ -2,6 +2,8 @@ package com.github.leeonky.interpreter;
 
 import java.util.function.Function;
 
+import static java.util.Optional.ofNullable;
+
 public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
         extends Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {
@@ -48,11 +50,20 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
                 .flatMap(node -> clauseParser.parseAndMakeExpression(procedure, node)));
     }
 
-//    TODO with mandatory
+    default NodeParser<C, N, E, O, P> with(ClauseParser.Mandatory<C, N, E, O, P> mandatory) {
+        return procedure -> procedure.getSourceCode().tryFetch(() -> parse(procedure)
+                .flatMap(node -> ofNullable(mandatory.parse(procedure).expression(node))));
+    }
 
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends
             Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {
+
+        static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
+                Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser.Mandatory<C, N, E, O, P> clause(
+                Function<N, Mandatory<C, N, E, O, P>> mandatoryFactory) {
+            return procedure -> input -> mandatoryFactory.apply(input).parse(procedure);
+        }
 
         @Override
         default NodeParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,
@@ -75,18 +86,11 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
             return procedure -> clauseParser.parseAndMakeExpressionOrInputContinuously(procedure, parse(procedure));
         }
 
-        static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
-                Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser.Mandatory<C, N, E, O, P> clause(
-                Function<N, Mandatory<C, N, E, O, P>> mandatoryFactory) {
-            return procedure -> input -> mandatoryFactory.apply(input).parse(procedure);
-        }
-
         default NodeParser<C, N, E, O, P> with(ClauseParser<C, N, E, O, P> clauseParser) {
             return procedure -> procedure.getSourceCode().tryFetch(() ->
                     clauseParser.parseAndMakeExpression(procedure, parse(procedure)));
         }
 
-        //        TODO need test
         default NodeParser.Mandatory<C, N, E, O, P> with(ClauseParser.Mandatory<C, N, E, O, P> mandatory) {
             return procedure -> {
                 N input = parse(procedure);
