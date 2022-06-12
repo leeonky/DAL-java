@@ -240,5 +240,56 @@ class InterpreterExceptionTest {
                         , 3);
             }
         }
+
+        @Nested
+        class ClearPosition {
+
+            @Test
+            void clear_position_data_of_exception() {
+                InterpreterException interpreterException = new InterpreterException("", 7);
+                interpreterException.clearPosition();
+                assertShowCode(interpreterException, new StringBuilder()
+                                .append("a你c").append("\n")
+                                .append("d你你好")
+                        , new StringBuilder()
+                                .append("a你c").append("\n")
+                                .append("d你你好")
+                );
+            }
+        }
+
+        @Nested
+        class ChangePositionType {
+
+            @Test
+            void change_position_when_no_type_should_not_raise_any_error() {
+                InterpreterException interpreterException = new InterpreterException("", 7, CHAR);
+                interpreterException.clearPosition();
+                interpreterException.setType(LINE);
+                assertShowCode(interpreterException, new StringBuilder()
+                                .append("a你c").append("\n")
+                                .append("d你你好")
+                        , new StringBuilder()
+                                .append("a你c").append("\n")
+                                .append("d你你好")
+                );
+            }
+
+            @Test
+            void should_change_first_postion_line() {
+                InterpreterException interpreterException = new InterpreterException("", 1, CHAR);
+                interpreterException.multiPosition(4, CHAR);
+                interpreterException.setType(LINE);
+                assertShowCode(interpreterException, new StringBuilder()
+                                .append("a你c").append("\n")
+                                .append("d你你好")
+                        , new StringBuilder()
+                                .append("a你c").append("\n")
+                                .append("^^^^").append("\n")
+                                .append("d你你好").append("\n")
+                                .append("^")
+                );
+            }
+        }
     }
 }

@@ -1,6 +1,6 @@
 package com.github.leeonky.interpreter;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import static java.util.Optional.ofNullable;
 
@@ -55,15 +55,13 @@ public interface NodeParser<C extends RuntimeContext<C>, N extends Node<C, N>,
                 .flatMap(node -> ofNullable(mandatory.parse(procedure).expression(node))));
     }
 
+    default ClauseParser<C, N, E, O, P> clause(BiFunction<N, N, N> biFunction) {
+        return procedure -> parse(procedure).map(n -> input -> biFunction.apply(input, n));
+    }
+
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends
             Parser.Mandatory<C, N, E, O, P, NodeParser<C, N, E, O, P>, NodeParser.Mandatory<C, N, E, O, P>, N> {
-
-        static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
-                Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> ClauseParser.Mandatory<C, N, E, O, P> clause(
-                Function<N, Mandatory<C, N, E, O, P>> mandatoryFactory) {
-            return procedure -> input -> mandatoryFactory.apply(input).parse(procedure);
-        }
 
         @Override
         default NodeParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, NodeParser<C, N, E, O, P>,

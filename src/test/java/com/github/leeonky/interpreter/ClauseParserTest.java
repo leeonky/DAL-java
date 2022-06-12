@@ -3,6 +3,9 @@ package com.github.leeonky.interpreter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.Function;
+
+import static com.github.leeonky.interpreter.ClauseParser.Mandatory.clause;
 import static com.github.leeonky.interpreter.Parser.lazyClause;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
@@ -121,5 +124,25 @@ class ClauseParserTest extends BaseTest {
         };
 
         assertThat(clauseParser.or(mandatory).parse(testProcedure).expression(node)).isSameAs(expression);
+    }
+
+    @Test
+    void create_clause_mandatory_with_mandatory() {
+        TestProcedure testProcedure = givenProcedureWithCode("");
+        TestNode node = new TestNode();
+        NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeMandatory = procedure -> {
+            assertThat(procedure).isSameAs(testProcedure);
+            return node;
+        };
+
+        TestNode input = new TestNode();
+        Function<TestNode, NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>> function = inputNode -> {
+            assertThat(inputNode).isSameAs(input);
+            return nodeMandatory;
+        };
+
+        Clause<TestContext, TestNode> clause = clause(function).parse(testProcedure);
+
+        assertThat(clause.expression(input)).isSameAs(node);
     }
 }

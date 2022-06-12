@@ -44,18 +44,17 @@ public class Notation {
                 factory.apply(token.getContent()).setPositionBegin(token.getPosition()));
     }
 
-    //    TODO test
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> NodeParser<C, N, E, O, P> wordNode(
-            Function<String, N> factory, Set<String> Delimiter) {
+            Function<String, N> factory, Set<String> delimiter) {
         return procedure -> procedure.getSourceCode().tryFetch(() -> getToken(procedure).map(token ->
-                notAWord(Delimiter, procedure) ? null :
+                notAWord(delimiter, procedure) ? null :
                         factory.apply(token.getContent()).setPositionBegin(token.getPosition())));
     }
 
     private <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends Operator<C, N, O>,
-            P extends Procedure<C, N, E, O, P>> boolean notAWord(Set<String> Delimiter, P procedure) {
-        return procedure.getSourceCode().hasCode() && Delimiter.stream().noneMatch(s -> procedure.getSourceCode().startsWith(s));
+            P extends Procedure<C, N, E, O, P>> boolean notAWord(Set<String> delimiter, P procedure) {
+        return procedure.getSourceCode().hasCode() && delimiter.stream().noneMatch(s -> procedure.getSourceCode().startsWith(s));
     }
 
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
@@ -72,6 +71,7 @@ public class Notation {
     }
 
     //    TODO test
+    @SuppressWarnings("unchecked")
     public <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> OperatorParser<C, N, E, O, P> keywordOperator(
             Supplier<O> factory, Set<String> Delimiter) {

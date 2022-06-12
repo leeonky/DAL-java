@@ -19,4 +19,10 @@ class TokenTest {
     void raise_error_when_not_a_integer() {
         assertThrows(SyntaxException.class, () -> new Token(0).append("'100'").getInteger());
     }
+
+    @Test
+    void is_number() {
+        assertThat(new Token(0).append("1").isNumber()).isTrue();
+        assertThat(new Token(0).append("a").isNumber()).isFalse();
+    }
 }

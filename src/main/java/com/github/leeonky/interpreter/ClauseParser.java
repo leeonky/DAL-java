@@ -1,6 +1,7 @@
 package com.github.leeonky.interpreter;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
         E extends Expression<C, N, E, O>, O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>>
@@ -42,6 +43,12 @@ public interface ClauseParser<C extends RuntimeContext<C>, N extends Node<C, N>,
     interface Mandatory<C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
             O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> extends Parser.Mandatory<C, N, E, O, P,
             ClauseParser<C, N, E, O, P>, ClauseParser.Mandatory<C, N, E, O, P>, Clause<C, N>> {
+
+        static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>, O extends
+                Operator<C, N, O>, P extends Procedure<C, N, E, O, P>> Mandatory<C, N, E, O, P> clause(
+                Function<N, NodeParser.Mandatory<C, N, E, O, P>> mandatoryFactory) {
+            return procedure -> input -> mandatoryFactory.apply(input).parse(procedure);
+        }
 
         @Override
         default ClauseParser<C, N, E, O, P> castParser(Parser<C, N, E, O, P, ClauseParser<C, N, E, O, P>,

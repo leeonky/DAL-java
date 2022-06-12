@@ -230,10 +230,16 @@ class SourceCodeTest extends BaseTest {
 
         @Test
         void space_before_change_line() {
-            assertThat(BaseTest.createSourceCode("\n").isEndOfLine()).isTrue();
-            assertThat(BaseTest.createSourceCode(" \n").isEndOfLine()).isTrue();
-            assertThat(BaseTest.createSourceCode("\t\n").isEndOfLine()).isTrue();
-            assertThat(BaseTest.createSourceCode(" \t\r\n").isEndOfLine()).isTrue();
+            testEndOfLine("\n");
+            testEndOfLine(" \n");
+            testEndOfLine("\t\n");
+            testEndOfLine(" \t\r\n");
+        }
+
+        private void testEndOfLine(String s) {
+            SourceCode sourceCode = BaseTest.createSourceCode("a" + s);
+            sourceCode.popChar(new HashMap<>());
+            assertThat(sourceCode.isEndOfLine()).isTrue();
         }
     }
 
@@ -378,6 +384,17 @@ class SourceCodeTest extends BaseTest {
         void return_empty_when_no_code() {
             SourceCode sourceCode = createSourceCode("");
             assertThat(sourceCode.codeBefore(notation("x"))).isEqualTo("");
+        }
+    }
+
+    @Nested
+    class TrimStartComments {
+
+        @Test
+        void should_trim_start_comments() {
+            SourceCode sourceCode = SourceCode.createSourceCode("//comments\nx", asList(notation("//")));
+
+            assertThat(sourceCode.popChar(new HashMap<>())).isEqualTo('x');
         }
     }
 }

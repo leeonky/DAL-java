@@ -3,6 +3,9 @@ package com.github.leeonky.interpreter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Optional;
 
 import static com.github.leeonky.interpreter.Notation.notation;
@@ -41,7 +44,6 @@ class NotationTest extends BaseTest {
             assertThat(sourceCode.popChar(emptyMap())).isEqualTo('n');
         }
 
-
         @Test
         void return_node_when_matches() {
             SourceCode sourceCode = givenSourceCode("true");
@@ -62,6 +64,75 @@ class NotationTest extends BaseTest {
             assertThat(testNode.get().getPositionBegin()).isEqualTo(1 + START_POSITION);
             assertThat(testNode.get().getContent()).isEqualTo("true");
             assertThat(sourceCode.hasCode()).isFalse();
+        }
+    }
+
+    @Nested
+    class WordToken {
+        NodeParser<TestContext, TestNode, ?, ?, TestProcedure> nodeParser = notation("true")
+                .wordNode(TestNode::new, new HashSet<>(Arrays.asList("delimiter")));
+
+        @Test
+        void return_empty_and_keep_code_position_when_not_match() {
+            SourceCode sourceCode = givenSourceCode(" not match");
+
+            assertThat(nodeParser.parse(new TestProcedure(sourceCode))).isEmpty();
+
+            assertThat(sourceCode.popChar(emptyMap())).isEqualTo(' ');
+        }
+
+        @Test
+        void return_empty_and_keep_code_position_when_not_match_delimiter() {
+            SourceCode sourceCode = givenSourceCode(" trueunexpectedDelimiter");
+
+            assertThat(nodeParser.parse(new TestProcedure(sourceCode))).isEmpty();
+
+            assertThat(sourceCode.popChar(emptyMap())).isEqualTo(' ');
+        }
+
+        @Test
+        void return_node_when_matches() {
+            SourceCode sourceCode = givenSourceCode("truedelimiter");
+
+            Optional<TestNode> testNode = nodeParser.parse(new TestProcedure(sourceCode));
+
+            assertThat(testNode.get().getPositionBegin()).isEqualTo(0 + START_POSITION);
+            assertThat(testNode.get().getContent()).isEqualTo("true");
+            assertThat(sourceCode.popChar(new HashMap<>())).isEqualTo('d');
+        }
+    }
+
+    @Nested
+    class KeywordOperator {
+        OperatorParser<TestContext, TestNode, ?, TestOperator, TestProcedure> operatorParser = notation("and")
+                .keywordOperator(TestOperator::new, new HashSet<>(Arrays.asList("delimiter")));
+
+        @Test
+        void return_empty_and_keep_code_position_when_not_match() {
+            SourceCode sourceCode = givenSourceCode(" not match");
+
+            assertThat(operatorParser.parse(new TestProcedure(sourceCode))).isEmpty();
+
+            assertThat(sourceCode.popChar(emptyMap())).isEqualTo(' ');
+        }
+
+        @Test
+        void return_empty_and_keep_code_position_when_not_match_delimiter() {
+            SourceCode sourceCode = givenSourceCode(" andunexpectedDelimiter");
+
+            assertThat(operatorParser.parse(new TestProcedure(sourceCode))).isEmpty();
+
+            assertThat(sourceCode.popChar(emptyMap())).isEqualTo(' ');
+        }
+
+        @Test
+        void return_node_when_matches() {
+            SourceCode sourceCode = givenSourceCode("anddelimiter");
+
+            Optional<TestOperator> testOperator = operatorParser.parse(new TestProcedure(sourceCode));
+
+            assertThat(testOperator.get().getPosition()).isEqualTo(0 + START_POSITION);
+            assertThat(sourceCode.popChar(new HashMap<>())).isEqualTo('d');
         }
     }
 

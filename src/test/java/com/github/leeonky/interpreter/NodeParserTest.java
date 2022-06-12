@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
-import java.util.function.Function;
+import java.util.Optional;
+import java.util.function.BiFunction;
 
-import static com.github.leeonky.interpreter.NodeParser.Mandatory.clause;
 import static com.github.leeonky.interpreter.NodeParser.positionNode;
 import static com.github.leeonky.interpreter.Parser.lazyNode;
 import static java.util.Collections.emptyMap;
@@ -338,6 +338,44 @@ class NodeParserTest extends BaseTest {
     }
 
     @Nested
+    class ToClause {
+
+        @Test
+        void parse_clause_parser() {
+            TestProcedure testProcedure = givenProcedureWithCode("");
+            TestNode node = new TestNode();
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return of(node);
+            };
+
+            BiFunction biFunction = mock(BiFunction.class);
+            TestNode input = new TestNode();
+            TestNode expression = new TestNode();
+            when(biFunction.apply(input, node)).thenReturn(expression);
+
+            Optional<Clause> optional = nodeParser.clause(biFunction).parse(testProcedure);
+
+
+            assertThat(optional.get().expression(input)).isSameAs(expression);
+
+
+        }
+
+        @Test
+        void parse_empty_in_clause_parser() {
+            TestProcedure testProcedure = givenProcedureWithCode("");
+
+            NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
+                assertThat(procedure).isSameAs(testProcedure);
+                return empty();
+            };
+
+            assertThat(nodeParser.clause(null).parse(testProcedure)).isEmpty();
+        }
+    }
+
+    @Nested
     class Mandatory {
 
         @Nested
@@ -554,25 +592,5 @@ class NodeParserTest extends BaseTest {
                 assertThat(nodeMandatory.concatAll(clauseParser).parse(testProcedure)).isSameAs(lastExpression);
             }
         }
-    }
-
-    @Test
-    void clause_with_mandatory() {
-        TestProcedure testProcedure = givenProcedureWithCode("");
-        TestNode node = new TestNode();
-        NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeMandatory = procedure -> {
-            assertThat(procedure).isSameAs(testProcedure);
-            return node;
-        };
-
-        TestNode input = new TestNode();
-        Function<TestNode, NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure>> function = inputNode -> {
-            assertThat(inputNode).isSameAs(input);
-            return nodeMandatory;
-        };
-
-        Clause<TestContext, TestNode> clause = clause(function).parse(testProcedure);
-
-        assertThat(clause.expression(input)).isSameAs(node);
     }
 }

@@ -14,9 +14,9 @@ import static com.github.leeonky.dal.ast.DALNode.constNode;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
 import static com.github.leeonky.dal.compiler.DALProcedure.*;
 import static com.github.leeonky.dal.compiler.Notations.*;
+import static com.github.leeonky.interpreter.ClauseParser.Mandatory.clause;
 import static com.github.leeonky.interpreter.FunctionUtil.not;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
-import static com.github.leeonky.interpreter.NodeParser.Mandatory.clause;
 import static com.github.leeonky.interpreter.NodeParser.positionNode;
 import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.Parser.*;
@@ -245,8 +245,8 @@ public class Compiler {
 
     private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> singleCellRow(
             NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
-        return procedure -> single(single(nodeParser).and(endWith(COLUMN_SPLITTER)).as()).and(endWithLine()).as()
-                .parse(procedure).map(cell -> prefix -> new TableRowNode(prefix, cell));
+        return single(single(nodeParser).and(endWith(COLUMN_SPLITTER)).as()).and(endWithLine()).as()
+                .clause(TableRowNode::new);
     }
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
