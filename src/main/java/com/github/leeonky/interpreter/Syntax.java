@@ -308,33 +308,33 @@ public abstract class Syntax<C extends RuntimeContext<C>, N extends Node<C, N>, 
                 }
             };
         }
-    }
 
-    public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
-            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
-            Syntax<C, N, E, O, P, PA, MA, T, R, A>> endOfRow(Notation splitter) {
-        return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
-            private boolean isClose = false;
+        public static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+                O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+                MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
+                Syntax<C, N, E, O, P, PA, MA, T, R, A>> endOfRow(Notation splitter) {
+            return syntax -> new CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
+                private boolean isClose = false;
 
-            @Override
-            public boolean isClose(P procedure) {
-                isClose = procedure.getSourceCode().isEndOfLine() || !procedure.getSourceCode().hasCode();
-                if (isClose) {
-                    if (procedure.getSourceCode().hasCode())
-                        procedure.getSourceCode().popChar(Collections.emptyMap());
-                } else {
-                    String code = procedure.getSourceCode().codeBefore(splitter);
-                    isClose = code.contains("\r") || code.contains("\n");
+                @Override
+                public boolean isClose(P procedure) {
+                    isClose = procedure.getSourceCode().isEndOfLine() || !procedure.getSourceCode().hasCode();
+                    if (isClose) {
+                        if (procedure.getSourceCode().hasCode())
+                            procedure.getSourceCode().popChar(Collections.emptyMap());
+                    } else {
+                        String code = procedure.getSourceCode().codeBefore(splitter);
+                        isClose = code.contains("\r") || code.contains("\n");
+                    }
+                    return isClose;
                 }
-                return isClose;
-            }
 
-            @Override
-            public void close(P procedure) {
-                if (!isClose)
-                    throw procedure.getSourceCode().syntaxError("unexpected token", 0);
-            }
-        };
+                @Override
+                public void close(P procedure) {
+                    if (!isClose)
+                        throw procedure.getSourceCode().syntaxError("unexpected token", 0);
+                }
+            };
+        }
     }
 }

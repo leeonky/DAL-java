@@ -21,8 +21,7 @@ import static com.github.leeonky.interpreter.NodeParser.positionNode;
 import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.Parser.*;
 import static com.github.leeonky.interpreter.Syntax.Rules.*;
-import static com.github.leeonky.interpreter.Syntax.many;
-import static com.github.leeonky.interpreter.Syntax.single;
+import static com.github.leeonky.interpreter.Syntax.*;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -285,7 +284,7 @@ public class Compiler {
             DALExpression, DALOperator, DALProcedure>, DALNode, NodeParser.Mandatory<DALRuntimeContext, DALNode,
             DALExpression, DALOperator, DALProcedure>, List<DALNode>> tableLine(NodeParser.Mandatory<DALRuntimeContext,
             DALNode, DALExpression, DALOperator, DALProcedure> mandatory) {
-        return many(mandatory).and(Syntax.Rules.mandatorySplitBy(COLUMN_SPLITTER)).and(Syntax.endOfRow(COLUMN_SPLITTER));
+        return many(mandatory).and(Syntax.Rules.mandatorySplitBy(COLUMN_SPLITTER)).and(endOfRow(COLUMN_SPLITTER));
     }
 
     private Optional<DALNode> compileUserDefinedLiteral(DALProcedure dalProcedure) {

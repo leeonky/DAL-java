@@ -3,6 +3,7 @@ package com.github.leeonky.interpreter;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -14,17 +15,19 @@ import static com.github.leeonky.interpreter.Syntax.single;
 import static java.util.Collections.emptyMap;
 import static java.util.Optional.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class SyntaxTest extends BaseTest {
 
     @Nested
-    class SingleOP {
+    class SingleNodeParser {
 
         @Test
-        void return_empty_when_op_is_empty() {
+        void should_be_empty_node_parser_when_single_empty_node_parser_and_should_not_invoke_any_close_method() {
             TestProcedure testProcedure = givenProcedureWithCode("");
+
             NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
                 assertThat(procedure).isSameAs(testProcedure);
                 return empty();
@@ -41,7 +44,7 @@ class SyntaxTest extends BaseTest {
         }
 
         @Test
-        void return_single() {
+        void should_be_present_node_parser_when_single_present_node_parser_and_should_invoke_two_close_method() {
             TestProcedure testProcedure = givenProcedureWithCode("");
             TestNode node = new TestNode();
             NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
@@ -65,7 +68,7 @@ class SyntaxTest extends BaseTest {
     class SingleMA {
 
         @Test
-        void return_single() {
+        void should_be_mandatory_node_parser_when_single_mandatory_node_parser_and_should_invoke_two_close_method() {
             TestProcedure testProcedure = givenProcedureWithCode("");
             TestNode node = new TestNode();
             NodeParser.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = procedure -> {
@@ -481,8 +484,61 @@ class SyntaxTest extends BaseTest {
     }
 
     @Nested
-    class EndWithOptionalLine {
+    class EndOfRow {
+        NodeParser<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> nodeParser = mock(NodeParser.class);
 
+        Syntax<TestContext, TestNode, TestExpression, TestOperator, TestProcedure, NodeParser<TestContext, TestNode,
+                TestExpression, TestOperator, TestProcedure>, NodeParser.Mandatory<TestContext, TestNode,
+                TestExpression, TestOperator, TestProcedure>, TestNode, NodeParser.Mandatory<TestContext,
+                TestNode, TestExpression, TestOperator, TestProcedure>, List<TestNode>> syntax = many(nodeParser).and(endOfRow(notation("|")));
+
+        @Test
+        void should_raise_error_when_not_really_close() {
+            TestProcedure testProcedure = givenProcedureWithCode("\n");
+
+            assertThatThrownBy(() -> syntax.close(testProcedure));
+        }
+
+        @Test
+        void should_be_closed_when_end_of_line_and_can_move_code_to_new_line() {
+            TestProcedure testProcedure = givenProcedureWithCode("a \nnew line");
+            testProcedure.getSourceCode().popChar(new HashMap<>());
+
+            assertThat(syntax.isClose(testProcedure)).isTrue();
+            syntax.close(testProcedure);
+
+            assertThat(testProcedure.getSourceCode().popChar(new HashMap<>())).isEqualTo('n');
+        }
+
+        @Test
+        void should_be_closed_when_end_of_code_and_can_be_invoke_close() {
+            TestProcedure testProcedure = givenProcedureWithCode("");
+
+            assertThat(syntax.isClose(testProcedure)).isTrue();
+            syntax.close(testProcedure);
+        }
+
+        @Test
+        void should_be_closed_when_has_new_line_before_splitter_and_should_not_move_code() {
+            TestProcedure testProcedure = givenProcedureWithCode("a \n|");
+
+            assertThat(syntax.isClose(testProcedure)).isTrue();
+            syntax.close(testProcedure);
+            assertThat(testProcedure.getSourceCode().popChar(new HashMap<>())).isEqualTo('a');
+        }
+
+        @Test
+        void should_be_closed_when_has_mac_new_line_before_splitter_and_should_not_move_code() {
+            TestProcedure testProcedure = givenProcedureWithCode("a \r|");
+
+            assertThat(syntax.isClose(testProcedure)).isTrue();
+            syntax.close(testProcedure);
+            assertThat(testProcedure.getSourceCode().popChar(new HashMap<>())).isEqualTo('a');
+        }
+    }
+
+    @Nested
+    class EndWithOptionalLine {
 
         @Test
         void return_false_when_not_new_line() {

@@ -497,5 +497,4 @@ Feature: list
     """
 
 #  TODO contains not allow set index or key in table
-
-#    TODO try to support [1 ... 2] ?
+#  TODO try to support [1 ... 2] ?

@@ -397,4 +397,42 @@ class SourceCodeTest extends BaseTest {
             assertThat(sourceCode.popChar(new HashMap<>())).isEqualTo('x');
         }
     }
+
+    @Nested
+    class ToNodeParser {
+
+        @Test
+        void should_return_empty_node_parser_when_empty_token_scanner() {
+            TestProcedure procedure = givenProcedureWithCode("not match");
+
+            TokenScanner<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> scanner =
+                    SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(), false, ONE_CHAR_TOKEN, token -> true);
+
+            assertThat(scanner.nodeParser(t -> new TestNode(t.getContent())).parse(procedure)).isEmpty();
+        }
+
+        @Test
+        void should_return_present_node_parser_when_present_token_scanner_with_given_token_content_and_position() {
+            TestProcedure procedure = givenProcedureWithCode(" a");
+
+            TokenScanner<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> scanner =
+                    SourceCode.tokenScanner(c -> c.equals('a'), new HashSet<>(), false, ONE_CHAR_TOKEN, token -> true);
+
+            TestNode testNode = scanner.nodeParser(t -> new TestNode(t.getContent())).parse(procedure).get();
+            assertThat(testNode.getContent()).isEqualTo("a");
+            assertThat(testNode.getPositionBegin()).isEqualTo(1);
+        }
+
+        @Test
+        void should_return_mandatory_node_parser_when_mandatory_token_scanner_with_given_token_content_and_position() {
+            TestProcedure procedure = givenProcedureWithCode(" abc");
+
+            TokenScanner.Mandatory<TestContext, TestNode, TestExpression, TestOperator, TestProcedure> scanner =
+                    SourceCode.tokenScanner(false, (code, position, size) -> size == 1);
+
+            TestNode testNode = scanner.nodeParser(t -> new TestNode(t.getContent())).parse(procedure);
+            assertThat(testNode.getContent()).isEqualTo("a");
+            assertThat(testNode.getPositionBegin()).isEqualTo(1);
+        }
+    }
 }
