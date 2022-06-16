@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.github.leeonky.dal.ast.DALNode.constNode;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
 import static com.github.leeonky.dal.compiler.DALProcedure.*;
 import static com.github.leeonky.dal.compiler.Notations.*;
@@ -21,7 +20,8 @@ import static com.github.leeonky.interpreter.NodeParser.positionNode;
 import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.Parser.*;
 import static com.github.leeonky.interpreter.Syntax.Rules.*;
-import static com.github.leeonky.interpreter.Syntax.*;
+import static com.github.leeonky.interpreter.Syntax.many;
+import static com.github.leeonky.interpreter.Syntax.single;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -80,8 +80,8 @@ public class Compiler {
             PROPERTY, OBJECT, SORTED_LIST, LIST, PARENTHESES, VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND,
             TABLE, SHORT_VERIFICATION_OPERAND, CELL_VERIFICATION_OPERAND, GROUP_PROPERTY, OPTIONAL_PROPERTY_CHAIN,
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
-            NUMBER = Tokens.NUMBER.nodeParser(constNode(Token::getNumber)),
-            INTEGER = Tokens.INTEGER.nodeParser(constNode(Token::getInteger)),
+            NUMBER = Tokens.NUMBER.nodeParser(DALNode::constNumber),
+            INTEGER = Tokens.INTEGER.nodeParser(DALNode::constInteger),
             SINGLE_QUOTED_STRING = SINGLE_QUOTED.with(many(charNode(SINGLE_QUOTED_ESCAPES))
                     .and(endWith(SINGLE_QUOTED.getLabel())).as(DALNode::constString)),
             DOUBLE_QUOTED_STRING = DOUBLE_QUOTED.with(many(charNode(DOUBLE_QUOTED_ESCAPES))

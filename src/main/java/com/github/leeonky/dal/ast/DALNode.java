@@ -6,8 +6,11 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.NodeBase;
+import com.github.leeonky.interpreter.SyntaxException;
 import com.github.leeonky.interpreter.Token;
+import com.github.leeonky.util.NumberParser;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,6 +19,7 @@ import static com.github.leeonky.dal.ast.AssertionFailure.*;
 import static java.lang.String.format;
 
 public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
+    private static final NumberParser numberParser = new NumberParser();
 
     public static DALNode stringSymbol(DALNode dalNode) {
         return new SymbolNode(((ConstNode) dalNode).getValue(), SymbolNode.Type.STRING);
@@ -76,6 +80,22 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
 
     public static Function<Token, DALNode> constNode(Function<Token, ?> function) {
         return token -> new ConstNode(function.apply(token));
+    }
+
+    public static ConstNode constNumber(Token token) {
+        return new ConstNode(numberParser.parse(token.getContent()));
+    }
+
+    public static ConstNode constInteger(Token token) {
+        Number number = numberParser.parse(token.getContent());
+        if (number != null) {
+            Class<? extends Number> type = number.getClass();
+            if (type.equals(Integer.class) || type.equals(Long.class) || type.equals(Short.class)
+                    || type.equals(Byte.class) || type.equals(BigInteger.class)) {
+                return new ConstNode(number);
+            }
+        }
+        throw new SyntaxException("expect an integer", token.getPosition());
     }
 
     public Data evaluateData(DALRuntimeContext context) {

@@ -6,6 +6,7 @@ import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.Token;
 import com.github.leeonky.interpreter.TokenScanner;
+import com.github.leeonky.util.NumberParser;
 
 import java.util.List;
 
@@ -16,14 +17,20 @@ import static com.github.leeonky.interpreter.SourceCode.tokenScanner;
 import static java.util.Collections.emptySet;
 
 public class Tokens {
+    private static final NumberParser numberParser = new NumberParser();
+
+    private static boolean isNumber(Token token) {
+        return numberParser.parse(token.getContent()) != null;
+    }
+
     public static final TokenScanner<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            NUMBER = tokenScanner(DIGITAL::contains, emptySet(), false, Tokens::notNumber, Token::isNumber),
-            INTEGER = tokenScanner(DIGITAL_OR_MINUS::contains, emptySet(), false, Tokens::notNumber, Token::isNumber),
-            SYMBOL = tokenScanner(not(PROPERTY_DELIMITER::contains), Keywords.ALL_STRING, false, PROPERTY_DELIMITER, not(Token::isNumber)),
-            DOT_SYMBOL = tokenScanner(not(PROPERTY_DELIMITER::contains), emptySet(), false, PROPERTY_DELIMITER, not(Token::isNumber)),
-            RELAX_SYMBOL = tokenScanner(not(RELAX_PROPERTY_DELIMITER::contains), Keywords.ALL_STRING, false, RELAX_PROPERTY_DELIMITER, not(Token::isNumber)),
-            RELAX_DOT_SYMBOL = tokenScanner(not(RELAX_PROPERTY_DELIMITER::contains), emptySet(), false, RELAX_PROPERTY_DELIMITER, not(Token::isNumber)),
-            SCHEMA = tokenScanner(not(DELIMITER::contains), Keywords.ALL_STRING, false, DELIMITER, not(Token::isNumber));
+            NUMBER = tokenScanner(DIGITAL::contains, emptySet(), false, Tokens::notNumber, Tokens::isNumber),
+            INTEGER = tokenScanner(DIGITAL_OR_MINUS::contains, emptySet(), false, Tokens::notNumber, Tokens::isNumber),
+            SYMBOL = tokenScanner(not(PROPERTY_DELIMITER::contains), Keywords.ALL_STRING, false, PROPERTY_DELIMITER, not(Tokens::isNumber)),
+            DOT_SYMBOL = tokenScanner(not(PROPERTY_DELIMITER::contains), emptySet(), false, PROPERTY_DELIMITER, not(Tokens::isNumber)),
+            RELAX_SYMBOL = tokenScanner(not(RELAX_PROPERTY_DELIMITER::contains), Keywords.ALL_STRING, false, RELAX_PROPERTY_DELIMITER, not(Tokens::isNumber)),
+            RELAX_DOT_SYMBOL = tokenScanner(not(RELAX_PROPERTY_DELIMITER::contains), emptySet(), false, RELAX_PROPERTY_DELIMITER, not(Tokens::isNumber)),
+            SCHEMA = tokenScanner(not(DELIMITER::contains), Keywords.ALL_STRING, false, DELIMITER, not(Tokens::isNumber));
 
     public static final TokenScanner.Mandatory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression,
             DALOperator, DALProcedure>
