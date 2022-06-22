@@ -44,9 +44,10 @@ public class ObjectScopeNode extends DALNode {
         });
     }
 
-    private Set<String> collectUnexpectedFields(Data data, DALRuntimeContext context) {
-        return new LinkedHashSet<String>(data.getFieldNames()) {{
+    private Set<Object> collectUnexpectedFields(Data data, DALRuntimeContext context) {
+        return new LinkedHashSet<Object>(data.getFieldNames()) {{
             removeAll(collectFields(data));
+            //                    TODO object key *********************
             removeAll(context.removeVerifiedFlattenProperties(data));
         }};
     }
@@ -67,6 +68,7 @@ public class ObjectScopeNode extends DALNode {
             throw new AssertionFailure("The input value is null", getPositionBegin());
     }
 
+    //                    TODO object key *********************
     private Set<Object> collectFields(Data data) {
         return verificationExpressions.stream().flatMap(expression -> {
             DALNode keyNode = ((DALExpression) ((DALExpression) expression).getLeftOperand()).getRightOperand();

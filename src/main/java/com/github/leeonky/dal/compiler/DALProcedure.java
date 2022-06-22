@@ -24,9 +24,7 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
 
     private final LinkedList<Boolean> enableAndComma = new LinkedList<>(singleton(true));
 
-    private boolean enableSlashProperty = false;
-
-    private boolean enableRelaxProperty = false;
+    private boolean enableSlashProperty = false, enableRelaxProperty = false, enableNumberProperty = false;
 
     public DALProcedure(SourceCode sourceCode, DALRuntimeContext runtimeContext,
                         ExpressionFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator> expressionFactory) {
@@ -97,6 +95,25 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
 
     public boolean isEnableRelaxProperty() {
         return enableRelaxProperty;
+    }
+
+
+    public static NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> enableNumberProperty(
+            NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> mandatory) {
+        return procedure -> procedure.enableNumberProperty(() -> mandatory.parse(procedure));
+    }
+
+    private <T> T enableNumberProperty(Supplier<T> supplier) {
+        enableNumberProperty = true;
+        try {
+            return supplier.get();
+        } finally {
+            enableNumberProperty = false;
+        }
+    }
+
+    public boolean isEnableNumberProperty() {
+        return enableNumberProperty;
     }
 
     public static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> enableRelaxProperty(

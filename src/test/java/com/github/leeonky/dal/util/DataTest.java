@@ -31,12 +31,12 @@ class DataTest {
     void check_null_for_customer_schema() {
         RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder().registerPropertyAccessor(AlwaysNull.class, new PropertyAccessor<AlwaysNull>() {
             @Override
-            public Object getValue(AlwaysNull instance, String name) {
+            public Object getValue(AlwaysNull instance, Object name) {
                 return null;
             }
 
             @Override
-            public Set<String> getPropertyNames(AlwaysNull instance) {
+            public Set<Object> getPropertyNames(AlwaysNull instance) {
                 return null;
             }
 

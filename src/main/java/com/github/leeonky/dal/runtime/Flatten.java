@@ -6,8 +6,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface Flatten {
-    default Optional<String> removeExpectedField(Set<String> fields, Object prefix, Object postfix) {
-        List<String> removed = fields.stream().filter(field -> predicate(field, buildField(prefix, postfix)))
+    default Optional<String> removeExpectedField(Set<Object> fields, Object prefix, Object postfix) {
+        //                    TODO object key *********************
+        List<String> removed = fields.stream().map(Object::toString).filter(field -> predicate(field, buildField(prefix, postfix)))
                 .collect(Collectors.toList());
         if (removed.size() > 1)
             //        TODO need test

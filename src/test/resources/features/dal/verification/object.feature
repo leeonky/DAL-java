@@ -251,7 +251,7 @@ Feature: object
   Scenario: raise error when invalid verification expression
     When evaluate by:
     """
-    : { 1: 1 }
+    : { (: 1 }
     """
     Then failed with the message:
     """
@@ -259,7 +259,7 @@ Feature: object
     """
     And got the following notation:
     """
-    : { 1: 1 }
+    : { (: 1 }
         ^
     """
 

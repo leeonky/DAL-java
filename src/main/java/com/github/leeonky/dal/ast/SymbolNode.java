@@ -39,12 +39,7 @@ public class SymbolNode extends DALNode implements ExecutableNode {
     }
 
     public enum Type {
-        SYMBOL {
-            @Override
-            public String inspect(Object symbol) {
-                return (String) symbol;
-            }
-        }, BRACKET {
+        SYMBOL, NUMBER, BRACKET {
             @Override
             public String inspect(Object symbol) {
                 return symbol instanceof String ? format("['%s']", symbol) : format("[%s]", symbol);
@@ -56,7 +51,9 @@ public class SymbolNode extends DALNode implements ExecutableNode {
             }
         };
 
-        abstract public String inspect(Object symbol);
+        public String inspect(Object symbol) {
+            return symbol.toString();
+        }
     }
 
     @Override

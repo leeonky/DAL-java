@@ -11,6 +11,7 @@ import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyReader;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.util.BeanClass.arrayCollectionToStream;
@@ -45,7 +46,8 @@ public class SchemaVerifier {
     }
 
     public boolean verify(Class<?> clazz, Object schemaInstance, String subPrefix) {
-        Set<String> propertyReaderNames = object.getFieldNames();
+        //                    TODO object key *********************
+        Set<String> propertyReaderNames = object.getFieldNames().stream().map(Object::toString).collect(Collectors.toSet());
         BeanClass<Object> schemaType = getPolymorphicSchemaType(clazz);
         Object schema = schemaInstance == null ? schemaType.newInstance() : schemaInstance;
         return (clazz.getAnnotation(Partial.class) != null ||

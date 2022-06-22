@@ -171,19 +171,19 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    private static class MapPropertyAccessor implements PropertyAccessor<Map<String, ?>> {
+    private static class MapPropertyAccessor implements PropertyAccessor<Map<?, ?>> {
         @Override
-        public Object getValue(Map<String, ?> instance, String name) {
-            return instance.get(name);
+        public Object getValue(Map<?, ?> instance, Object property) {
+            return instance.get(property);
         }
 
         @Override
-        public Set<String> getPropertyNames(Map<String, ?> instance) {
-            return instance.keySet();
+        public Set<Object> getPropertyNames(Map<?, ?> instance) {
+            return new LinkedHashSet<>(instance.keySet());
         }
 
         @Override
-        public boolean isNull(Map<String, ?> instance) {
+        public boolean isNull(Map<?, ?> instance) {
             return instance == null;
         }
     }
@@ -220,7 +220,7 @@ public class RuntimeContextBuilder {
             return schemaSet.contains(fieldType);
         }
 
-        public Set<String> findPropertyReaderNames(Object instance) {
+        public Set<Object> findPropertyReaderNames(Object instance) {
             return propertyAccessors.getData(instance).getPropertyNames(instance);
         }
 
@@ -229,8 +229,8 @@ public class RuntimeContextBuilder {
                     .orElseGet(() -> Objects.equals(instance, null));
         }
 
-        public Object getPropertyValue(Data data, String name) {
-            return propertyAccessors.getData(data.getInstance()).getValueByData(data, name);
+        public Object getPropertyValue(Data data, Object property) {
+            return propertyAccessors.getData(data.getInstance()).getValueByData(data, property);
         }
 
         @SuppressWarnings("unchecked")
@@ -311,6 +311,7 @@ public class RuntimeContextBuilder {
             flattenDataCollection.initFlattenData(property, prefix);
         }
 
+        //                    TODO object key *********************
         public Set<String> removeVerifiedFlattenProperties(Data parent) {
             FlattenDataCollection flattenDataCollection = flattenDataMap.get(parent);
             if (flattenDataCollection != null)
@@ -357,7 +358,7 @@ public class RuntimeContextBuilder {
     static class FlattenData {
         final Data instance;
         final Object prefix;
-        final Set<Object> postfixes = new HashSet<>();
+        final Set<Object> postfixes = new LinkedHashSet<>();
         final FlattenDataCollection children = new FlattenDataCollection();
 
         public FlattenData(Data instance, Object prefix) {
@@ -368,6 +369,7 @@ public class RuntimeContextBuilder {
         public Set<String> removeFlattenProperties(Data data) {
             postfixes.addAll(children.removeFlattenProperties(instance));
             return postfixes.stream().map(property -> ((Flatten) instance.getInstance())
+//                    TODO object key *********************
                             .removeExpectedField(data.getFieldNames(), prefix, property))
                     .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toSet());
         }
@@ -408,8 +410,8 @@ public class RuntimeContextBuilder {
         }
 
         @Override
-        public Object getValueByData(Data data, String name) {
-            return data.mapList(name).getInstance();
+        public Object getValueByData(Data data, Object property) {
+            return data.mapList(property).getInstance();
         }
     }
 }

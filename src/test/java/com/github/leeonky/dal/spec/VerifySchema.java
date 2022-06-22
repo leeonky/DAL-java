@@ -29,18 +29,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class VerifySchema extends Base {
 
-    private static final Set<String> PROPERTY_NAMES = new HashSet<>(asList("f1", "f2"));
+    private static final Set<Object> PROPERTY_NAMES = new HashSet<>(asList("f1", "f2"));
 
     @Test
     void should_support_register_customer_object_type() throws JSONException {
         dal.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
             @Override
-            public Object getValue(JSONObject instance, String name) {
+            public Object getValue(JSONObject instance, Object name) {
                 return "mocked return value of " + name;
             }
 
             @Override
-            public Set<String> getPropertyNames(JSONObject instance) {
+            public Set<Object> getPropertyNames(JSONObject instance) {
                 return PROPERTY_NAMES;
             }
 

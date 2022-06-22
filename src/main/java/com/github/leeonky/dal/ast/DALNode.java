@@ -25,6 +25,10 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         return new SymbolNode(((ConstNode) dalNode).getValue(), SymbolNode.Type.STRING);
     }
 
+    public static DALNode numberSymbol(DALNode dalNode) {
+        return new SymbolNode(((ConstNode) dalNode).getValue(), SymbolNode.Type.NUMBER);
+    }
+
     public static SymbolNode symbolNode(Token token) {
         return new SymbolNode(token.getContent(), SymbolNode.Type.SYMBOL);
     }

@@ -66,3 +66,35 @@ Feature: access object property by ['xxx']
     null['any']
         ^
     """
+
+  Scenario: access number property via [111]
+    Given the following java class:
+    """
+    public class Data {
+      public java.util.Map<Number, String> data = new java.util.HashMap<Number, String>() {{
+        put(0, "str1");
+        put(2, "str2");
+      }};
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    data[0]= "str1" and data[2]= "str2"
+    """
+    And the inspect should:
+    """
+    data[0]= 'str1' and data[2]= 'str2'
+    """
+    And the following verification for the instance of java class "Data" should pass:
+    """
+    data= {
+      0= str1
+      2= str2
+    }
+    """
+    And the inspect should:
+    """
+    data= {0= 'str1', 2= 'str2'}
+    """
+
+#    TODO number keys:  =keys, sub prefix keys, table

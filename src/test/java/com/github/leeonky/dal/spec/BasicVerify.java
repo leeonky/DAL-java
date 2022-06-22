@@ -31,16 +31,16 @@ class BasicVerify extends Base {
         void should_support_register_customer_getter() throws JSONException {
             dal.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
                 @Override
-                public Object getValue(JSONObject instance, String name) {
+                public Object getValue(JSONObject instance, Object name) {
                     try {
-                        return instance.get(name);
+                        return instance.get((String) name);
                     } catch (JSONException e) {
                         throw new IllegalStateException(e);
                     }
                 }
 
                 @Override
-                public Set<String> getPropertyNames(JSONObject instance) {
+                public Set<Object> getPropertyNames(JSONObject instance) {
                     return null;
                 }
 

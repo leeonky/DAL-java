@@ -36,7 +36,7 @@ public class Data {
         return instance;
     }
 
-    public Set<String> getFieldNames() {
+    public Set<Object> getFieldNames() {
         return dalRuntimeContext.findPropertyReaderNames(instance);
     }
 
@@ -98,14 +98,14 @@ public class Data {
     }
 
     private Object getPropertyValue(Object property) {
-        return isList() ? fetchFromList(property) : dalRuntimeContext.getPropertyValue(this, (String) property);
+        return isList() ? fetchFromList(property) : dalRuntimeContext.getPropertyValue(this, property);
     }
 
     private Object fetchFromList(Object property) {
         if ("size".equals(property))
             return getListSize();
         if (property instanceof String)
-            return dalRuntimeContext.getPropertyValue(this, (String) property);
+            return dalRuntimeContext.getPropertyValue(this, property);
         if ((int) property < 0)
             return getValueList().get(getListSize() + (int) property);
         return getValueList().get((int) property - getListFirstIndex());
@@ -146,10 +146,11 @@ public class Data {
         }}, dalRuntimeContext, propertySchema(property));
     }
 
+    //                    TODO object key *********************
     public Data filter(String prefix) {
         FilteredObject filteredObject = new FilteredObject();
-        getFieldNames().stream().filter(fieldName -> fieldName.startsWith(prefix)).forEach(fieldName ->
-                filteredObject.put(trimPrefix(prefix, fieldName), getValue(fieldName).getInstance()));
+        getFieldNames().stream().filter(fieldName -> ((String) fieldName).startsWith(prefix)).forEach(fieldName ->
+                filteredObject.put(trimPrefix(prefix, (String) fieldName), getValue(fieldName).getInstance()));
         return new Data(filteredObject, dalRuntimeContext, schemaType).setListComparator(listComparator);
     }
 
@@ -200,7 +201,7 @@ public class Data {
     }
 
     private String dumpObject(String indentation, Map<Object, String> dumped, String path) {
-        Set<String> fieldNames = new LinkedHashSet<>(getFieldNames());
+        Set<Object> fieldNames = new LinkedHashSet<>(getFieldNames());
         return fieldNames.isEmpty() ? "{}" : fetchSameReference(dumped, path).orElseGet(() -> {
             String keyIndentation = indentation + "  ";
             List<String> strings = fieldNames.stream().map(fieldName -> dumpField(dumped, path, keyIndentation, fieldName))
@@ -211,8 +212,9 @@ public class Data {
         });
     }
 
-    private String dumpField(Map<Object, String> dumped, String path, String keyIndentation, String fieldName) {
+    private String dumpField(Map<Object, String> dumped, String path, String keyIndentation, Object fieldName) {
         try {
+            //                    TODO object key *********************
             return format("%s\"%s\": %s", keyIndentation, fieldName,
                     getValue(fieldName).dump(keyIndentation, dumped, path + "." + fieldName));
         } catch (PropertyAccessException e) {

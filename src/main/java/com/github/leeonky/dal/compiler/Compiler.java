@@ -100,6 +100,8 @@ public class Compiler {
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
             STRING_PROPERTY = procedure -> procedure.isEnableRelaxProperty() ? single(oneOf(SINGLE_QUOTED_STRING,
                     DOUBLE_QUOTED_STRING)).as(DALNode::stringSymbol).parse(procedure) : empty(),
+            NUMBER_PROPERTY = procedure -> procedure.isEnableRelaxProperty() ? single(NUMBER).as(DALNode::numberSymbol)
+                    .parse(procedure) : empty(),
             SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_SYMBOL : Tokens.SYMBOL).nodeParser(
                     DALNode::symbolNode).parse(procedure),
             DOT_SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_DOT_SYMBOL : Tokens.DOT_SYMBOL)
@@ -130,7 +132,7 @@ public class Compiler {
             WHICH_CLAUSE = lazyClause(() -> WHICH.clause(EXPRESSION)),
             ELEMENT_ELLIPSIS_CLAUSE = Operators.ELEMENT_ELLIPSIS.clause((token, input) -> new ListEllipsisNode()),
             LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
-            IMPLICIT_PROPERTY_CLAUSE = PROPERTY_IMPLICIT.clause(oneOf(PROPERTY_PATTERN, oneOf(STRING_PROPERTY, SYMBOL).concat(LIST_MAPPING_CLAUSE))),
+            IMPLICIT_PROPERTY_CLAUSE = PROPERTY_IMPLICIT.clause(oneOf(PROPERTY_PATTERN, oneOf(STRING_PROPERTY, NUMBER_PROPERTY, SYMBOL).concat(LIST_MAPPING_CLAUSE))),
             EXPLICIT_PROPERTY_CLAUSE = oneOf(PROPERTY_DOT.clause(PROPERTY_PATTERN.or(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING_CLAUSE).mandatory(
                     "Expect a symbol"))), PROPERTY_SLASH.clause(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING_CLAUSE).mandatory(
                     "Expect a symbol")), PROPERTY_IMPLICIT.clause(OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
@@ -154,7 +156,7 @@ public class Compiler {
         PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
         VERIFICATION_PROPERTY = enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN));
         OBJECT = lazyNode(() -> disableCommaAnd(OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(CLOSING_BRACES))
-                .as(ObjectScopeNode::new).or(many(VERIFICATION_PROPERTY.concat(shortVerificationClause(VERIFICATION_OPERATORS
+                .as(ObjectScopeNode::new).or(many(enableNumberProperty(VERIFICATION_PROPERTY).concat(shortVerificationClause(VERIFICATION_OPERATORS
                         .mandatory("Expect operator `:` or `=`"), SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING))))
                         .and(optionalSplitBy(COMMA)).and(endWith(CLOSING_BRACES)).as(ObjectScopeNode::new)))));
         SORTED_LIST = oneOf(Operators.PLUS.before(pureList(ListScopeNode.NatureOrder::new)),
