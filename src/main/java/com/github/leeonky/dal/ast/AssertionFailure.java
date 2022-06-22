@@ -63,10 +63,9 @@ public class AssertionFailure extends DalException {
 
     public static void assertUnexpectedFields(Set<Object> dataFields, String element, int position) {
         if (!dataFields.isEmpty())
-            //                    TODO object key *********************
             throw new AssertionFailure(format("Unexpected fields %s%s",
-                    dataFields.stream().map(s -> format("`%s`", s)).collect(joining(", ")),
-                    element.isEmpty() ? "" : " in " + element), position);
+                    dataFields.stream().map(s -> s instanceof String ? format("`%s`", s) : s.toString())
+                            .collect(joining(", ")), element.isEmpty() ? "" : " in " + element), position);
     }
 
     public static boolean assertEquals(Data expected, Data actual, int position) {

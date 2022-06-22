@@ -67,13 +67,14 @@ Feature: access object property by ['xxx']
         ^
     """
 
-  Scenario: access number property via [111]
+  Scenario: access number property via [number]
     Given the following java class:
     """
     public class Data {
-      public java.util.Map<Number, String> data = new java.util.HashMap<Number, String>() {{
+      public java.util.Map<Object, String> data = new java.util.HashMap<Object, String>() {{
         put(0, "str1");
         put(2, "str2");
+        put("a", "strA");
       }};
     }
     """
@@ -90,11 +91,12 @@ Feature: access object property by ['xxx']
     data= {
       0= str1
       2= str2
+      a= strA
     }
     """
     And the inspect should:
     """
-    data= {0= 'str1', 2= 'str2'}
+    data= {0= 'str1', 2= 'str2', a= 'strA'}
     """
 
-#    TODO number keys:  =keys, sub prefix keys, table
+#    TODO number keys:  =sub prefix keys, table

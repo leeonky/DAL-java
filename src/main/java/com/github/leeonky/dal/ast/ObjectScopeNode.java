@@ -68,7 +68,6 @@ public class ObjectScopeNode extends DALNode {
             throw new AssertionFailure("The input value is null", getPositionBegin());
     }
 
-    //                    TODO object key *********************
     private Set<Object> collectFields(Data data) {
         return verificationExpressions.stream().flatMap(expression -> {
             DALNode keyNode = ((DALExpression) ((DALExpression) expression).getLeftOperand()).getRightOperand();

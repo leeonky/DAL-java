@@ -294,7 +294,7 @@ public class RuntimeContextBuilder {
         }
 
         public void appendFlattenProperty(Data data, Object symbol) {
-            fetchFlattenData(data).map(flattenData -> flattenData.postfixes.add(symbol));
+            fetchFlattenData(data).map(flattenData -> flattenData.appendSymbol(symbol));
         }
 
         private Optional<FlattenData> fetchFlattenData(Data data) {
@@ -372,6 +372,10 @@ public class RuntimeContextBuilder {
 //                    TODO object key *********************
                             .removeExpectedField(data.getFieldNames(), prefix, property))
                     .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toSet());
+        }
+
+        public boolean appendSymbol(Object symbol) {
+            return postfixes.add(symbol);
         }
     }
 

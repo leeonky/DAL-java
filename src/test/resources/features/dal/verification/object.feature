@@ -157,6 +157,40 @@ Feature: object
      }
     """
 
+  Scenario: unexpected number key
+    Given the following java class:
+    """
+    public class Data {
+      public java.util.Map<Object, String> data = new java.util.HashMap<Object, String>() {{
+        put(0, "str1");
+        put(2, "str2");
+        put("a", "strA");
+      }};
+    }
+    """
+    When use a instance of java class "Data" to evaluate:
+    """
+    data= {
+      0= str1
+    }
+    """
+    Then failed with the message:
+    """
+    Unexpected fields `a`, 2 in data
+    """
+    When use a instance of java class "Data" to evaluate:
+    """
+    data= {
+      {}= {
+        0= str1
+      }
+    }
+    """
+    Then failed with the message:
+    """
+    Unexpected fields `a`, 2 in {}
+    """
+
   Scenario: property chain
     Given the following json:
     """
