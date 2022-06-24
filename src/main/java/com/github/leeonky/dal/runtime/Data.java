@@ -213,12 +213,12 @@ public class Data {
     }
 
     private String dumpField(Map<Object, String> dumped, String path, String keyIndentation, Object fieldName) {
+        String dumpedKey = fieldName instanceof String ? String.format("\"%s\"", fieldName) : fieldName.toString();
         try {
-            //                    TODO object key *********************
-            return format("%s\"%s\": %s", keyIndentation, fieldName,
-                    getValue(fieldName).dump(keyIndentation, dumped, path + "." + fieldName));
+            return format("%s%s: %s", keyIndentation, dumpedKey, getValue(fieldName).dump(keyIndentation, dumped,
+                    path + "." + fieldName));
         } catch (PropertyAccessException e) {
-            return format("%s\"%s\": \"%s\"", keyIndentation, fieldName, "** Got exception during dump: " + e.getCause());
+            return format("%s%s: \"%s\"", keyIndentation, dumpedKey, "** Got exception during dump: " + e.getCause());
         }
     }
 

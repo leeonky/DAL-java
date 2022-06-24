@@ -320,3 +320,23 @@ Feature: dump-data
       "__type": "Data"
     }
     """
+
+  Scenario: dump number key
+    Given the following java class:
+    """
+    public class Data {
+      public java.util.Map<Object, String> data = new java.util.HashMap<Object, String>() {{
+        put(0, "str1");
+      }};
+    }
+
+    """
+    Then dumped instance of java class "Data" should be:
+    """
+    {
+      "data": {
+        0: "str1"
+      },
+      "__type": "Data"
+    }
+    """
