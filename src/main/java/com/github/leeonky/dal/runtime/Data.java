@@ -213,13 +213,14 @@ public class Data {
     }
 
     private String dumpField(Map<Object, String> dumped, String path, String keyIndentation, Object fieldName) {
-        String dumpedKey = fieldName instanceof String ? String.format("\"%s\"", fieldName) : fieldName.toString();
+        String value;
         try {
-            return format("%s%s: %s", keyIndentation, dumpedKey, getValue(fieldName).dump(keyIndentation, dumped,
-                    path + "." + fieldName));
+            value = getValue(fieldName).dump(keyIndentation, dumped, path + "." + fieldName);
         } catch (PropertyAccessException e) {
-            return format("%s%s: \"%s\"", keyIndentation, dumpedKey, "** Got exception during dump: " + e.getCause());
+            value = "\"** Got exception during dump: " + e.getCause() + "\"";
         }
+        return format("%s%s: %s", keyIndentation, fieldName instanceof String ? String.format("\"%s\"", fieldName)
+                : fieldName.toString(), value);
     }
 
     private Optional<String> fetchSameReference(Map<Object, String> dumped, String path) {
