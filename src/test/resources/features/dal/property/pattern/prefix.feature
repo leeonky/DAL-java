@@ -68,5 +68,30 @@ Feature: prefix
     }
     """
 
+  Scenario: should not take number key as string key in prefix
+    Given the following json:
+    """
+    {
+      "value0": "A",
+      "value1": "B",
+      "value2": "C"
+    }
+    """
+    When evaluate by:
+    """
+    = {
+      value{}: {
+        0: null
+        1: null
+        2: null
+      }
+    }
+    """
+    Then failed with the message:
+    """
+    Unexpected fields `value0`, `value1`, `value2`
+    """
+
+
 #  TODO field alias not support yet
 #  TODO bracket string relax not support yet
