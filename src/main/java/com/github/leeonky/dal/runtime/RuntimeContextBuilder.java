@@ -30,12 +30,12 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<Function<Object, Object>> objectImplicitMapper = new ClassKeyMap<>();
     private final Map<String, ConstructorViaSchema> valueConstructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
-    private Converter converter = Converter.getInstance();
     private final Set<Method> extensionMethods = new HashSet<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final ClassKeyMap<Function<Object, String>> valueDumpers = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Map<String, Object>>> objectDumpers = new ClassKeyMap<>();
+    private Converter converter = Converter.getInstance();
 
     public RuntimeContextBuilder() {
         registerValueFormat(new Formatters.String())
@@ -76,6 +76,11 @@ public class RuntimeContextBuilder {
         ;
     }
 
+    private static String dumpString(Object o) {
+        return "\"" + o.toString().replace("\\", "\\\\").replace("\t", "\\t").replace("\b", "\\b").replace("\n", "\\n")
+                .replace("\r", "\\r").replace("\f", "\\f").replace("'", "\\'").replace("\"", "\\\"") + "\"";
+    }
+
     @SuppressWarnings("unchecked")
     public <T> RuntimeContextBuilder registerValueDumper(Class<T> key, Function<T, String> toString) {
         valueDumpers.put(key, obj -> toString.apply((T) obj));
@@ -89,11 +94,6 @@ public class RuntimeContextBuilder {
             put("__value", toString.apply((T) obj));
         }});
         return this;
-    }
-
-    private static String dumpString(Object o) {
-        return "\"" + o.toString().replace("\\", "\\\\").replace("\t", "\\t").replace("\b", "\\b").replace("\n", "\\n")
-                .replace("\r", "\\r").replace("\f", "\\f").replace("'", "\\'").replace("\"", "\\\"") + "\"";
     }
 
     public DALRuntimeContext build(Object inputValue) {
@@ -144,11 +144,6 @@ public class RuntimeContextBuilder {
         return registerSchema(nameStrategy.toName(schema), schema);
     }
 
-    public RuntimeContextBuilder setConverter(Converter converter) {
-        this.converter = converter;
-        return this;
-    }
-
     public RuntimeContextBuilder registerStaticMethodExtension(Class<?> staticMethodExtensionClass) {
         Stream.of(staticMethodExtensionClass.getMethods())
                 .filter(RuntimeContextBuilder.this::maybeExtensionMethods)
@@ -166,9 +161,43 @@ public class RuntimeContextBuilder {
         return converter;
     }
 
+    public RuntimeContextBuilder setConverter(Converter converter) {
+        this.converter = converter;
+        return this;
+    }
+
     public RuntimeContextBuilder registerUserDefinedLiterals(UserLiteralRule rule) {
         userDefinedLiterals.add(rule);
         return this;
+    }
+
+    public Object invokeExtensionMethod(Object instance, String name, String typeName) {
+        Optional<Method> optionalMethod = FunctionUtil.oneOf(() -> findExtensionMethod(instance, name, Object::equals),
+                () -> findExtensionMethod(instance, name, Class::isAssignableFrom));
+        if (optionalMethod.isPresent())
+            return Suppressor.get(() -> optionalMethod.get().invoke(null, instance));
+        Optional<Function<Object, Object>> mapper = objectImplicitMapper.tryGetData(instance);
+        if (mapper.isPresent())
+            return invokeExtensionMethod(mapper.get().apply(instance), name, typeName);
+        throw new IllegalStateException(format("Method or property `%s` does not exist in `%s`", name, typeName));
+    }
+
+    private Optional<Method> findExtensionMethod(Object instance, String name, BiPredicate<Class<?>, Class<?>> condition) {
+        Stream<Method> methodStream = extensionMethods.stream().filter(method -> method.getName().equals(name)
+                && condition.test(method.getParameterTypes()[0], instance.getClass()));
+        List<Method> methods = methodStream.collect(Collectors.toList());
+        if (methods.size() > 1)
+            throw new IllegalStateException("Ambiguous method call:\n"
+                    + methods.stream().map(Method::toString).collect(Collectors.joining("\n")));
+        return methods.stream().findFirst();
+    }
+
+    private boolean maybeExtensionMethods(Method method) {
+        return method.getParameterCount() == 1 && isMethod(method, STATIC) && isMethod(method, PUBLIC);
+    }
+
+    private boolean isMethod(Method method, int modifier) {
+        return (modifier & method.getModifiers()) != 0;
     }
 
     private static class MapPropertyAccessor implements PropertyAccessor<Map<?, ?>> {
@@ -188,15 +217,60 @@ public class RuntimeContextBuilder {
         }
     }
 
+    static class PartialPropertyStack {
+        private final Map<Data, PartialProperties> partials = new HashMap<>();
+
+        public void setupPartialProperties(Object prefix, Data partial) {
+            partials.put(partial, new PartialProperties(prefix, partial));
+        }
+
+        public PartialProperties fetchPartialProperties(Data instance) {
+            PartialProperties partialProperties = partials.get(instance);
+            if (partialProperties == null)
+                partialProperties = partials.values().stream()
+                        .map(sub -> sub.partialPropertyStack.fetchPartialProperties(instance))
+                        .filter(Objects::nonNull).findFirst().orElse(null);
+            return partialProperties;
+        }
+
+        public Set<String> collectPartialProperties(Data data) {
+            return partials.values().stream().flatMap(partialProperties ->
+                    partialProperties.collectPartialProperties(data).stream()).collect(Collectors.toSet());
+        }
+    }
+
+    static class PartialProperties {
+        final Object prefix;
+        final Data partialData;
+        final Set<Object> postfixes = new LinkedHashSet<>();
+        final PartialPropertyStack partialPropertyStack = new PartialPropertyStack();
+
+        public PartialProperties(Object prefix, Data partialData) {
+            this.prefix = prefix;
+            this.partialData = partialData;
+        }
+
+        public Set<String> collectPartialProperties(Data data) {
+            postfixes.addAll(partialPropertyStack.collectPartialProperties(partialData));
+            return postfixes.stream().map(property -> ((PartialObject) partialData.getInstance())
+                            .removeExpectedField(data.getFieldNames(), prefix, property))
+                    .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toSet());
+        }
+
+        public boolean appendPartialProperties(Object symbol) {
+            return postfixes.add(symbol);
+        }
+    }
+
     public class DALRuntimeContext implements RuntimeContext<DALRuntimeContext> {
         private final LinkedList<Data> stack = new LinkedList<>();
         private final Set<Class<?>> schemaSet;
-        private final Map<Data, FlattenDataCollection> flattenDataMap;
+        private final Map<Data, PartialPropertyStack> partialPropertyStacks;
 
         public DALRuntimeContext(Object inputValue) {
             schemaSet = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
             stack.push(wrap(inputValue));
-            flattenDataMap = new HashMap<>();
+            partialPropertyStacks = new HashMap<>();
         }
 
         public Data getThis() {
@@ -293,31 +367,28 @@ public class RuntimeContextBuilder {
                     .findFirst();
         }
 
-        public void appendFlattenProperty(Data data, Object symbol) {
-            fetchFlattenData(data).map(flattenData -> flattenData.appendSymbol(symbol));
+        public void appendPartialPropertyReference(Data data, Object symbol) {
+            fetchPartialProperties(data).map(partialProperties -> partialProperties.appendPartialProperties(symbol));
         }
 
-        private Optional<FlattenData> fetchFlattenData(Data data) {
-            return flattenDataMap.values().stream().map(flattenDataCollection -> flattenDataCollection.fetchFlattenData(data))
-                    .filter(Objects::nonNull).findFirst();
+        private Optional<PartialProperties> fetchPartialProperties(Data data) {
+            return partialPropertyStacks.values().stream().map(partialPropertyStack ->
+                    partialPropertyStack.fetchPartialProperties(data)).filter(Objects::nonNull).findFirst();
         }
 
-        public void initFlattenPropertyStack(Data parent, Object prefix, Data property) {
-            FlattenDataCollection flattenDataCollection = flattenDataMap.get(parent);
-            if (flattenDataCollection == null)
-                flattenDataCollection = fetchFlattenData(parent).map(flattenData -> flattenData.children).orElse(null);
-            if (flattenDataCollection == null)
-                flattenDataMap.put(parent, flattenDataCollection = new FlattenDataCollection());
-            flattenDataCollection.initFlattenData(property, prefix);
+        public void initPartialPropertyStack(Data instance, Object prefix, Data partial) {
+            partialPropertyStacks.computeIfAbsent(instance, _key -> fetchPartialProperties(instance)
+                    .map(partialProperties -> partialProperties.partialPropertyStack)
+                    .orElseGet(PartialPropertyStack::new)).setupPartialProperties(prefix, partial);
         }
 
         //                    TODO object key *********************
-        public Set<String> removeVerifiedFlattenProperties(Data parent) {
-            FlattenDataCollection flattenDataCollection = flattenDataMap.get(parent);
-            if (flattenDataCollection != null)
-                return flattenDataCollection.removeFlattenProperties(parent);
-            return fetchFlattenData(parent).map(flattenData -> flattenData.children.removeFlattenProperties(parent))
-                    .orElse(emptySet());
+        public Set<String> collectPartialProperties(Data instance) {
+            PartialPropertyStack partialPropertyStack = partialPropertyStacks.get(instance);
+            if (partialPropertyStack != null)
+                return partialPropertyStack.collectPartialProperties(instance);
+            return fetchPartialProperties(instance).map(partialProperties ->
+                    partialProperties.partialPropertyStack.collectPartialProperties(instance)).orElse(emptySet());
         }
 
         public NumberType getNumberType() {
@@ -331,81 +402,6 @@ public class RuntimeContextBuilder {
         public Optional<Function<Object, Map<String, Object>>> fetchObjectDumper(Object instance) {
             return objectDumpers.tryGetData(instance);
         }
-    }
-
-    static class FlattenDataCollection {
-        private final Map<Data, FlattenData> collection = new HashMap<>();
-
-        public void initFlattenData(Data instance, Object prefix) {
-            collection.put(instance, new FlattenData(instance, prefix));
-        }
-
-        public FlattenData fetchFlattenData(Data data) {
-            FlattenData flattenData = collection.get(data);
-            if (flattenData == null)
-                flattenData = collection.values().stream()
-                        .map(subFlattenData -> subFlattenData.children.fetchFlattenData(data))
-                        .filter(Objects::nonNull).findFirst().orElse(null);
-            return flattenData;
-        }
-
-        public Set<String> removeFlattenProperties(Data data) {
-            return collection.values().stream().flatMap(flattenData -> flattenData.removeFlattenProperties(data).stream())
-                    .collect(Collectors.toSet());
-        }
-    }
-
-    static class FlattenData {
-        final Data instance;
-        final Object prefix;
-        final Set<Object> postfixes = new LinkedHashSet<>();
-        final FlattenDataCollection children = new FlattenDataCollection();
-
-        public FlattenData(Data instance, Object prefix) {
-            this.instance = instance;
-            this.prefix = prefix;
-        }
-
-        public Set<String> removeFlattenProperties(Data data) {
-            postfixes.addAll(children.removeFlattenProperties(instance));
-            return postfixes.stream().map(property -> ((Flatten) instance.getInstance())
-//                    TODO object key *********************
-                            .removeExpectedField(data.getFieldNames(), prefix, property))
-                    .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toSet());
-        }
-
-        public boolean appendSymbol(Object symbol) {
-            return postfixes.add(symbol);
-        }
-    }
-
-    public Object invokeExtensionMethod(Object instance, String name, String typeName) {
-        Optional<Method> optionalMethod = FunctionUtil.oneOf(() -> findExtensionMethod(instance, name, Object::equals),
-                () -> findExtensionMethod(instance, name, Class::isAssignableFrom));
-        if (optionalMethod.isPresent())
-            return Suppressor.get(() -> optionalMethod.get().invoke(null, instance));
-        Optional<Function<Object, Object>> mapper = objectImplicitMapper.tryGetData(instance);
-        if (mapper.isPresent())
-            return invokeExtensionMethod(mapper.get().apply(instance), name, typeName);
-        throw new IllegalStateException(format("Method or property `%s` does not exist in `%s`", name, typeName));
-    }
-
-    private Optional<Method> findExtensionMethod(Object instance, String name, BiPredicate<Class<?>, Class<?>> condition) {
-        Stream<Method> methodStream = extensionMethods.stream().filter(method -> method.getName().equals(name)
-                && condition.test(method.getParameterTypes()[0], instance.getClass()));
-        List<Method> methods = methodStream.collect(Collectors.toList());
-        if (methods.size() > 1)
-            throw new IllegalStateException("Ambiguous method call:\n"
-                    + methods.stream().map(Method::toString).collect(Collectors.joining("\n")));
-        return methods.stream().findFirst();
-    }
-
-    private boolean maybeExtensionMethods(Method method) {
-        return method.getParameterCount() == 1 && isMethod(method, STATIC) && isMethod(method, PUBLIC);
-    }
-
-    private boolean isMethod(Method method, int modifier) {
-        return (modifier & method.getModifiers()) != 0;
     }
 
     private class AutoMappingListPropertyAccessor extends JavaClassPropertyAccessor<AutoMappingList> {

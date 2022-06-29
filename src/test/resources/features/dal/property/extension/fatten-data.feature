@@ -3,7 +3,7 @@ Feature: flatten-data
   Scenario: flatten-data property should map back to parent data
     Given the following java class:
     """
-    public class User implements com.github.leeonky.dal.runtime.Flatten {
+    public class User implements com.github.leeonky.dal.runtime.PartialObject {
       public String name;
       public int age;
     }
@@ -51,14 +51,14 @@ Feature: flatten-data
   Scenario: nested flatten-data property
     Given the following java class:
     """
-    public class User implements com.github.leeonky.dal.runtime.Flatten {
+    public class User implements com.github.leeonky.dal.runtime.PartialObject {
       public String name;
       public int age;
     }
     """
     And the following java class:
     """
-    public class Order implements com.github.leeonky.dal.runtime.Flatten {
+    public class Order implements com.github.leeonky.dal.runtime.PartialObject {
       public String userName;
       public int userAge;
       public String id;
@@ -73,7 +73,7 @@ Feature: flatten-data
     """
     And the following java class:
     """
-    public class Store implements com.github.leeonky.dal.runtime.Flatten {
+    public class Store implements com.github.leeonky.dal.runtime.PartialObject {
       public String orderUserName;
       public int orderUserAge;
       public String orderId;
@@ -137,14 +137,14 @@ Feature: flatten-data
   Scenario: root object is flatten-data
     Given the following java class:
     """
-    public class User implements com.github.leeonky.dal.runtime.Flatten {
+    public class User implements com.github.leeonky.dal.runtime.PartialObject {
       public String name;
       public int age;
     }
     """
     And the following java class:
     """
-    public class Order implements com.github.leeonky.dal.runtime.Flatten {
+    public class Order implements com.github.leeonky.dal.runtime.PartialObject {
       public String userName = "Tom";
       public int userAge = 18;
       public String id = "order1";

@@ -237,6 +237,6 @@ public class Data {
         return dalRuntimeContext.newBlockScope(this, supplier);
     }
 
-    private static class FilteredObject extends LinkedHashMap<String, Object> implements Flatten {
+    private static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
     }
 }

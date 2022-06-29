@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.Flatten;
+import com.github.leeonky.dal.runtime.PartialObject;
 import com.github.leeonky.dal.runtime.PropertyAccessException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
@@ -27,15 +27,25 @@ public class SymbolNode extends DALNode implements ExecutableNode {
     @Override
     public Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
         try {
-            if (data.getInstance() instanceof Flatten)
-                context.appendFlattenProperty(data, symbol);
+            if (data.getInstance() instanceof PartialObject)
+                context.appendPartialPropertyReference(data, symbol);
             Data value = data.getValue(symbol);
-            if (value.getInstance() instanceof Flatten)
-                context.initFlattenPropertyStack(data, symbol, value);
+            if (value.getInstance() instanceof PartialObject)
+                context.initPartialPropertyStack(data, symbol, value);
             return value;
         } catch (PropertyAccessException e) {
             throw e.toDalError("", getPositionBegin());
         }
+    }
+
+    @Override
+    public List<Object> propertyChain() {
+        return Collections.singletonList(symbol);
+    }
+
+    @Override
+    public Object getRootSymbolName() {
+        return symbol;
     }
 
     public enum Type {
@@ -54,15 +64,5 @@ public class SymbolNode extends DALNode implements ExecutableNode {
         public String inspect(Object symbol) {
             return symbol.toString();
         }
-    }
-
-    @Override
-    public List<Object> propertyChain() {
-        return Collections.singletonList(symbol);
-    }
-
-    @Override
-    public Object getRootSymbolName() {
-        return symbol;
     }
 }

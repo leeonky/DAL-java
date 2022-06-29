@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public interface Flatten {
+public interface PartialObject {
     default Optional<String> removeExpectedField(Set<Object> fields, Object prefix, Object postfix) {
         if (postfix instanceof String) {
             List<String> removed = fields.stream().filter(String.class::isInstance).map(Object::toString)
