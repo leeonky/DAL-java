@@ -100,7 +100,7 @@ public class Compiler {
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
             STRING_PROPERTY = procedure -> procedure.isEnableRelaxProperty() ? single(oneOf(SINGLE_QUOTED_STRING,
                     DOUBLE_QUOTED_STRING)).as(DALNode::stringSymbol).parse(procedure) : empty(),
-            NUMBER_PROPERTY = procedure -> procedure.isEnableRelaxProperty() ? single(NUMBER).as(DALNode::numberSymbol)
+            NUMBER_PROPERTY = procedure -> procedure.isEnableNumberProperty() ? single(NUMBER).as(DALNode::numberSymbol)
                     .parse(procedure) : empty(),
             SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_SYMBOL : Tokens.SYMBOL).nodeParser(
                     DALNode::symbolNode).parse(procedure),
@@ -237,7 +237,8 @@ public class Compiler {
             ROW_PREFIX = procedure -> new TableRowPrefixNode(ROW_KEY.parse(procedure), SCHEMA_CLAUSE.parse(procedure),
             VERIFICATION_OPERATORS.parse(procedure)),
             TABLE_HEADER = procedure -> new HeaderNode((SortGroupNode) SEQUENCE.parse(procedure),
-                    VERIFICATION_PROPERTY.concat(SCHEMA_CLAUSE).parse(procedure), VERIFICATION_OPERATORS.parse(procedure));
+                    enableNumberProperty(VERIFICATION_PROPERTY).concat(SCHEMA_CLAUSE).parse(procedure),
+                    VERIFICATION_OPERATORS.parse(procedure));
 
     private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHeadRow) head, (TableBody) many(ROW_PREFIX.with(oneOf(

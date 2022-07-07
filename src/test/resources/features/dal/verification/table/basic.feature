@@ -452,3 +452,20 @@ Feature: basic verification via table
       | 2   |
       | 3   |
     """
+
+  Scenario: number type key
+    Given the following java class:
+    """
+    public class Data {
+      public java.util.List<Object> data = java.util.Arrays.asList(new java.util.HashMap<Object, String>() {{
+        put(0, "str1");
+        put(2, "str2");
+        put("a", "strA");
+      }});
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    data: | 0    | 2    | a    |
+          | str1 | str2 | strA |
+    """

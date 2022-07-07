@@ -382,7 +382,6 @@ public class RuntimeContextBuilder {
                     .orElseGet(PartialPropertyStack::new)).setupPartialProperties(prefix, partial);
         }
 
-        //                    TODO object key *********************
         public Set<String> collectPartialProperties(Data instance) {
             PartialPropertyStack partialPropertyStack = partialPropertyStacks.get(instance);
             if (partialPropertyStack != null)
