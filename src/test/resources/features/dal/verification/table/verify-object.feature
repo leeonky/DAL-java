@@ -116,3 +116,32 @@ Feature: verify object
     : | >> | row0 |
     | col | col: 1 |
     """
+
+  Scenario: number is row key
+    Given the following java class:
+    """
+    public class Data {
+      public java.util.Map<Object, Object> data = new java.util.HashMap<Object, Object>() {{
+        put(0, new java.util.HashMap<Object, String>() {{
+          put("a", "0a");
+          put("b", "0b");
+        }});
+        put(1, new java.util.HashMap<Object, String>() {{
+          put("a", "1a");
+          put("b", "1b");
+        }});
+      }};
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    data:  | a    | b    |
+         0 | '0a' | '0b' |
+         1 | '1a' | '1b' |
+    """
+    And the inspect should:
+    """
+    data: | a | b |
+    0 | a: '0a' | b: '0b' |
+    1 | a: '1a' | b: '1b' |
+    """

@@ -81,9 +81,10 @@ class SpecifyIndexRowType extends RowType {
     @Override
     public DALNode constructVerificationNode(Data actual, Stream<Clause<DALRuntimeContext, DALNode>> rowClauses,
                                              Comparator<Object> comparator) {
-//            TODO to list or object
-        return new ListScopeNode(rowClauses.map(rowClause -> rowClause.expression(null))
-                .collect(toList()), true, ListScopeNode.Type.FIRST_N_ITEMS, comparator);
+        if (actual.isList())
+            return new ListScopeNode(rowClauses.map(rowClause -> rowClause.expression(null))
+                    .collect(toList()), true, ListScopeNode.Type.FIRST_N_ITEMS, comparator);
+        return new ObjectScopeNode(rowClauses.map(rowClause -> rowClause.expression(null)).collect(toList()));
     }
 
     @Override
