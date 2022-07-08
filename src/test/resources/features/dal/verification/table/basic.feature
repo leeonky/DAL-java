@@ -482,3 +482,11 @@ Feature: basic verification via table
     data: | 0    | 1    | 2    |
           | str1 | str2 | strA |
     """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    data: ^| str1 | str2 | strA |
+    """
+    And the inspect should:
+    """
+    data: ^| 0: 'str1' | 1: 'str2' | 2: 'strA' |
+    """

@@ -67,6 +67,7 @@ public class Notations {
             CLOSING_BRACES = notation("}"),
             COMMA = notation(","),
             COLUMN_SPLITTER = notation("|"),
+            MATRIX_COLUMN_SPLITTER = notation("^"),
             SEQUENCE_AZ = notation("+"),
             SEQUENCE_ZA = notation("-"),
             SEQUENCE_AZ_2 = notation("￪"),

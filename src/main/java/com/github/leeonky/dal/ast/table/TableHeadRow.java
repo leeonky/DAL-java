@@ -23,7 +23,7 @@ public class TableHeadRow extends DALNode {
 
     @Override
     public String inspect() {
-        return TableNode.printLine(headers);
+        return TableNode.printLine(headers) + "\n";
     }
 
     public Comparator<Object> collectComparator(RuntimeContextBuilder.DALRuntimeContext context) {

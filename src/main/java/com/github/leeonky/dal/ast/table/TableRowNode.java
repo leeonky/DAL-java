@@ -26,7 +26,7 @@ public class TableRowNode extends DALNode {
     public String inspect() {
         String prefix = rowPrefix.inspect();
         String data = TableNode.printLine(cells);
-        return "\n" + (prefix.isEmpty() ? data : prefix + " " + data);
+        return (prefix.isEmpty() ? data : prefix + " " + data);
     }
 
     public Clause<DALRuntimeContext, DALNode> constructVerificationClause(DALOperator operator, RowType rowType) {

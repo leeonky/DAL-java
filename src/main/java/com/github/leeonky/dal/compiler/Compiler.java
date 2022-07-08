@@ -124,7 +124,8 @@ public class Compiler {
             EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(DALNode::relaxString),
             OBJECT_SCOPE_RELAX_STRING = Tokens.OBJECT_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
             LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
-            TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(DALNode::relaxString);
+            TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(DALNode::relaxString),
+            DEFAULT_INDEX_HEADER = procedure -> new TableDefaultIndexHeadRow();
 
     public ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             ARITHMETIC_CLAUSE, VERIFICATION_CLAUSE,
@@ -165,7 +166,8 @@ public class Compiler {
         TABLE = oneOf(TRANSPOSE_MARK.with(EMPTY_TRANSPOSED_HEAD.with(transposeTable())),
                 positionNode(COLUMN_SPLITTER.before(TRANSPOSE_MARK.before(COLUMN_SPLITTER.before(tableLine(ROW_PREFIX)
                         .as(TransposedTableHead::new))))).concat(transposeTable()),
-                positionNode(COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHeadRow::new))).concat(TABLE_BODY_CLAUSE));
+                positionNode(COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHeadRow::new))).concat(TABLE_BODY_CLAUSE),
+                positionNode(MATRIX_COLUMN_SPLITTER.before(DEFAULT_INDEX_HEADER).concat(TABLE_BODY_CLAUSE)));
         VERIFICATION_SPECIAL_OPERAND = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         OPERAND = lazyNode(() -> oneOf(UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
                 .mandatory("Expect a value or expression");

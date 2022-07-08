@@ -45,7 +45,7 @@ public class TableNode extends DALNode {
 
     @Override
     public String inspect() {
-        return headRow.inspect() + tableBody.inspect();
+        return (headRow.inspect() + tableBody.inspect()).trim();
     }
 
     public static String printLine(List<? extends DALNode> nodes) {

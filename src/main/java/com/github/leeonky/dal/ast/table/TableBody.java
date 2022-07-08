@@ -40,7 +40,7 @@ public class TableBody extends DALNode {
 
     @Override
     public String inspect() {
-        return rows.stream().map(TableRowNode::inspect).collect(Collectors.joining());
+        return rows.stream().map(TableRowNode::inspect).collect(Collectors.joining("\n"));
     }
 
     public DALNode convertToVerificationNode(Data actual, DALOperator operator, Comparator<Object> comparator) {
