@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.SymbolNode.Type.BRACKET;
+import static com.github.leeonky.dal.ast.table.SpecifyIndexRowType.indexToExpression;
+import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static java.util.stream.Collectors.toList;
 
 abstract class RowType {
@@ -79,6 +81,11 @@ class SpecifyIndexRowType extends RowType {
     }
 
     @Override
+    protected RowType mergeBy(SpecifyPropertyRowType specifyPropertyRowType) {
+        return specifyPropertyRowType;
+    }
+
+    @Override
     public DALNode constructVerificationNode(Data actual, Stream<Clause<DALRuntimeContext, DALNode>> rowClauses,
                                              Comparator<Object> comparator) {
         if (actual.isList())
@@ -89,9 +96,12 @@ class SpecifyIndexRowType extends RowType {
 
     @Override
     public DALNode constructAccessingRowNode(DALNode input, Optional<DALNode> indexOrKey) {
-        return indexOrKey.map(node -> ((ConstNode) node).getValue()).map(i -> new DALExpression(
-                        InputNode.INSTANCE, new DALOperator.PropertyImplicit(), new SymbolNode(i, BRACKET)))
-                .orElseThrow(IllegalStateException::new);
+        return indexOrKey.flatMap(SpecifyIndexRowType::indexToExpression).orElseThrow(IllegalStateException::new);
+    }
+
+    static Optional<DALNode> indexToExpression(DALNode node) {
+        return when(node instanceof ConstNode).optional(() -> new DALExpression(InputNode.INSTANCE,
+                new DALOperator.PropertyImplicit(), new SymbolNode(((ConstNode) node).getValue(), BRACKET)));
     }
 }
 
@@ -132,7 +142,12 @@ class SpecifyPropertyRowType extends RowType {
     }
 
     @Override
+    protected RowType mergeBy(SpecifyIndexRowType specifyIndexRowType) {
+        return this;
+    }
+
+    @Override
     public DALNode constructAccessingRowNode(DALNode input, Optional<DALNode> indexOrKey) {
-        return indexOrKey.orElseThrow(IllegalStateException::new);
+        return indexOrKey.map(node -> indexToExpression(node).orElse(node)).orElseThrow(IllegalStateException::new);
     }
 }

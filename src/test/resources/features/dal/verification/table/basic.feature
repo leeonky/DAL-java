@@ -469,6 +469,11 @@ Feature: basic verification via table
     data: | 0    | 2    | a    |
           | str1 | str2 | strA |
     """
+    And the inspect should:
+    """
+    data: | 0 | 2 | a |
+    | 0: 'str1' | 2: 'str2' | a: 'strA' |
+    """
 
   Scenario: two-dimensional array
     Given the following java class:
@@ -489,4 +494,89 @@ Feature: basic verification via table
     And the inspect should:
     """
     data: ^| 0: 'str1' | 1: 'str2' | 2: 'strA' |
+    """
+
+  Scenario: number is row key
+    Given the following java class:
+    """
+    public class Data {
+      public java.util.Map<Object, Object> data = new java.util.HashMap<Object, Object>() {{
+        put(0, new java.util.HashMap<Object, String>() {{
+          put("a", "0a");
+          put("b", "0b");
+        }});
+        put(1, new java.util.HashMap<Object, String>() {{
+          put("a", "1a");
+          put("b", "1b");
+        }});
+      }};
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    data=  | a    | b    |
+         0 | '0a' | '0b' |
+         1 | '1a' | '1b' |
+    """
+    And the inspect should:
+    """
+    data= | a | b |
+    0 | a= '0a' | b= '0b' |
+    1 | a= '1a' | b= '1b' |
+    """
+    When use a instance of java class "Data" to evaluate:
+    """
+    data= | a    | b    |
+        1 | '1a' | '1b' |
+    """
+    Then failed with the message:
+    """
+    Unexpected fields 0 in data
+    """
+    And got the following notation:
+    """
+    data= | a    | b    |
+        ^
+        1 | '1a' | '1b' |
+    """
+
+  Scenario: mixed number and string property
+    Given the following java class:
+    """
+    public class Data {
+      public java.util.Map<Object, Object> data = new java.util.HashMap<Object, Object>() {{
+        put(0, new java.util.HashMap<Object, String>() {{
+          put("a", "0a");
+          put("b", "0b");
+        }});
+        put("1", new java.util.HashMap<Object, String>() {{
+          put("a", "1a");
+          put("b", "1b");
+        }});
+      }};
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    data: | a    | b    |
+        0 | '0a' | '0b' |
+      '1' | '1a' | '1b' |
+    """
+    And the inspect should:
+    """
+    data: | a | b |
+    0 | a: '0a' | b: '0b' |
+    '1' | a: '1a' | b: '1b' |
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    data: | a    | b    |
+      '1' | '1a' | '1b' |
+        0 | '0a' | '0b' |
+    """
+    And the inspect should:
+    """
+    data: | a | b |
+    '1' | a: '1a' | b: '1b' |
+    0 | a: '0a' | b: '0b' |
     """
