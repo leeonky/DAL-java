@@ -492,3 +492,17 @@ Feature: basic verification via table
             | 2 | str2 |
             | a | strA |
     """
+
+  Scenario: two-dimensional array
+    Given the following java class:
+    """
+    public class Data {
+      public java.util.List<Object> data = java.util.Arrays.asList(java.util.Arrays.asList("str1", "str2", "strA"));
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    data: >>| 0 | str1 |
+            | 1 | str2 |
+            | 2 | strA |
+    """

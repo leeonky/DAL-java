@@ -469,3 +469,16 @@ Feature: basic verification via table
     data: | 0    | 2    | a    |
           | str1 | str2 | strA |
     """
+
+  Scenario: two-dimensional array
+    Given the following java class:
+    """
+    public class Data {
+      public java.util.List<Object> data = java.util.Arrays.asList(java.util.Arrays.asList("str1", "str2", "strA"));
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    data: | 0    | 1    | 2    |
+          | str1 | str2 | strA |
+    """
