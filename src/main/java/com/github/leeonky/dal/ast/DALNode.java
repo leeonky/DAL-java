@@ -12,7 +12,6 @@ import com.github.leeonky.util.NumberParser;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.*;
@@ -80,10 +79,6 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
 
     public static DALNode constNull(String token) {
         return new ConstNode(null);
-    }
-
-    public static Function<Token, DALNode> constNode(Function<Token, ?> function) {
-        return token -> new ConstNode(function.apply(token));
     }
 
     public static ConstNode constNumber(Token token) {

@@ -3,7 +3,6 @@ package com.github.leeonky.dal;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.compiler.Compiler;
 import com.github.leeonky.dal.compiler.Notations;
-import com.github.leeonky.dal.runtime.AssertResult;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.SourceCode;
@@ -12,8 +11,6 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.github.leeonky.util.BeanClass.getClassName;
 
 public class DAL {
     private final Compiler compiler = new Compiler();
@@ -28,17 +25,6 @@ public class DAL {
 
     public RuntimeContextBuilder getRuntimeContextBuilder() {
         return runtimeContextBuilder;
-    }
-
-    /**
-     * Use evaluateAll instead
-     */
-    @Deprecated
-    public AssertResult assertTrue(Object actual, String expression) {
-        Object result = evaluate(actual, expression);
-        if (result instanceof Boolean)
-            return (boolean) result ? AssertResult.passedResult() : AssertResult.failedResult(actual, expression);
-        throw new IllegalStateException("Verification result should be boolean but '" + getClassName(result) + "'");
     }
 
     @SuppressWarnings("unchecked")

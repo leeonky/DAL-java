@@ -8,21 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 class BasicVerify extends Base {
-
-    @Nested
-    class Basic {
-
-        @Test
-        void verify_expression_return_type_should_be_boolean() {
-            IllegalStateException illegalStateException = assertThrows(IllegalStateException.class,
-                    () -> dal.assertTrue(1, ""));
-            assertThat(illegalStateException).hasMessage("Verification result should be boolean but 'java.lang.Integer'");
-        }
-    }
 
     @Nested
     class AccessProperty {
@@ -49,7 +35,7 @@ class BasicVerify extends Base {
                     return instance == null || instance.equals(JSONObject.NULL);
                 }
             });
-            assertTrue(new JSONObject("{\"field\": true}"), ".field");
+            assertPass(new JSONObject("{\"field\": true}"), ".field: true");
         }
     }
 }

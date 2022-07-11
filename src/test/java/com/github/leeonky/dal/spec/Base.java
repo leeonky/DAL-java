@@ -14,10 +14,6 @@ public class Base {
         return new DALExpression(instanceNode, new DALOperator.PropertyImplicit(), new SymbolNode(name, SymbolNode.Type.BRACKET));
     }
 
-    protected void assertTrue(Object input, String expression) {
-        assertThat(dal.assertTrue(input, expression).isPassed()).isTrue();
-    }
-
     protected void assertPass(Object input, String expression) {
         dal.evaluate(input, expression);
     }
