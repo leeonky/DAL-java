@@ -6,7 +6,6 @@ import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.ast.SortGroupNode;
 import com.github.leeonky.dal.compiler.DALProcedure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.OperatorParser;
 
 import java.util.Comparator;
@@ -29,9 +28,8 @@ public class HeaderNode extends DALNode {
         return sort.inspect() + operator.map(operator -> operator.inspect(property, "").trim()).orElse(property);
     }
 
-    //    TODO should return directly
-    public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> property() {
-        return procedure -> property;
+    public DALNode property() {
+        return property;
     }
 
     public OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> operator() {

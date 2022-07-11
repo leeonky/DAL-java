@@ -33,7 +33,8 @@ public class TransposedRowNode extends DALNode {
     public List<TableRowNode> transpose(TransposedTableHead transposedTableHead) {
         return new ArrayList<TableRowNode>() {{
             for (int i = 0; i < cellClauses.size(); i++)
-                add(new TableRowNode(transposedTableHead.getPrefix(i), singletonList(cellClauses.get(i)), new TableHeadRow(singletonList(headerNode))));
+                add(new TableRowNode(transposedTableHead.getPrefix(i), singletonList(cellClauses.get(i)),
+                        new TableHeadRow(singletonList(headerNode))));
         }};
     }
 

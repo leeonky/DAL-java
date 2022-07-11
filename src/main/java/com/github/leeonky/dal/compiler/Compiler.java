@@ -266,6 +266,7 @@ public class Compiler {
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
             DALNode rowPrefix, TableHeadRow head) {
+//        TODO use lambda remove parse
         return procedure -> procedure.positionOf(p -> setPosition(shortVerificationClause(oneOf(VERIFICATION_OPERATORS,
                 head.getHeader(procedure.getIndex()).operator(), ((TableRowPrefixNode) rowPrefix).operator()).or(
                 DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING)), p).parse(procedure));
@@ -278,6 +279,7 @@ public class Compiler {
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableCell(
             DALNode head, DALNode transposedTableHead) {
+//        TODO use lambda remove parse
         return procedure -> procedure.positionOf(p -> setPosition(oneOf(ELEMENT_ELLIPSIS_CLAUSE, ROW_WILDCARD_CLAUSE)
                 .or(shortVerificationClause(oneOf(VERIFICATION_OPERATORS, ((HeaderNode) head).operator(),
                         ((TransposedTableHead) transposedTableHead).getPrefix(procedure.getIndex()).operator())

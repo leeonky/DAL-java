@@ -69,7 +69,7 @@ public class TableRowNode extends DALNode {
     private List<DALNode> getCells() {
         return new ArrayList<DALNode>() {{
             for (int i = 0; i < cells.size(); i++)
-                add(cells.get(i).expression(tableHeadRow.getHeader(i).property().parse(null)));
+                add(cells.get(i).expression(tableHeadRow.getHeader(i).property()));
         }};
     }
 

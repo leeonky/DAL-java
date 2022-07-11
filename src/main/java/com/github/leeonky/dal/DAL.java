@@ -37,8 +37,7 @@ public class DAL {
     public AssertResult assertTrue(Object actual, String expression) {
         Object result = evaluate(actual, expression);
         if (result instanceof Boolean)
-            return (boolean) result ? AssertResult.passedResult()
-                    : AssertResult.failedResult(actual, expression);
+            return (boolean) result ? AssertResult.passedResult() : AssertResult.failedResult(actual, expression);
         throw new IllegalStateException("Verification result should be boolean but '" + getClassName(result) + "'");
     }
 
