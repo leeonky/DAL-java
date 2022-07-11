@@ -47,8 +47,11 @@ public class TableRowNode extends DALNode {
     }
 
     private DALNode expectedRow() {
-        return isRowWildcard() ? firstCell()
-                : new ObjectScopeNode(getCells()).setPositionBegin(firstCell().getOperandPosition());
+        if (isRowWildcard())
+            return firstCell();
+        if (tableHeadRow instanceof TableDefaultIndexHeadRow)
+            return new ListScopeNode(cellClauses, SortGroupNode.NOP_COMPARATOR, ListScopeNode.Style.ROW).setPositionBegin(getPositionBegin());
+        return new ObjectScopeNode(getCells()).setPositionBegin(getPositionBegin());
     }
 
     private DALNode firstCell() {

@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import static com.github.leeonky.dal.ast.AssertionFailure.assertListSize;
 import static com.github.leeonky.dal.ast.SymbolNode.Type.BRACKET;
 import static java.lang.String.format;
 import static java.util.Comparator.naturalOrder;
@@ -24,27 +23,37 @@ public class ListScopeNode extends DALNode {
     private List<DALNode> inputExpressions;
     private List<Clause<DALRuntimeContext, DALNode>> inputClauses;
     private final Type type;
-    private final boolean isTable;
+    private final Style style;
     private final Comparator<Object> comparator;
 
-    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> clauses, boolean isTable,
-                         Comparator<Object> comparator) {
+    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> clauses,
+                         Comparator<Object> comparator, Style style) {
         type = guessType(clauses);
         inputClauses = clauses;
-        this.isTable = isTable;
         this.comparator = comparator;
+        this.style = style;
     }
 
-    public ListScopeNode(List<DALNode> verificationExpressions, boolean isTable, Type type,
-                         Comparator<Object> comparator) {
+    public ListScopeNode(List<DALNode> verificationExpressions, Type type,
+                         Comparator<Object> comparator, Style style) {
         this.verificationExpressions = inputExpressions = new ArrayList<>(verificationExpressions);
-        this.isTable = isTable;
         this.type = type;
         this.comparator = comparator;
+        this.style = style;
     }
 
     public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> clauses) {
-        this(clauses, false, SortGroupNode.NOP_COMPARATOR);
+        this(clauses, SortGroupNode.NOP_COMPARATOR, Style.LIST);
+    }
+
+    private void assertListSize(int expected, int actual, int position) {
+        if (expected != actual) {
+            if (style == Style.ROW)
+                throw new DifferentCellSize(format("Different list size\nExpected: <%d>\nActual: <%d>", expected, actual),
+                        position);
+            throw new AssertionFailure(format("Different list size\nExpected: <%d>\nActual: <%d>", expected, actual),
+                    position);
+        }
     }
 
     private List<DALNode> getVerificationExpressions(int firstIndex) {
@@ -124,7 +133,7 @@ public class ListScopeNode extends DALNode {
             try {
                 while (!isElementPassedVerification(context, clause, getElement(data, elementIndex++, clause))) ;
             } catch (AssertionFailure exception) {
-                throw isTable ? new RowAssertionFailure(clauseIndex, exception) : exception;
+                throw style != Style.LIST ? new RowAssertionFailure(clauseIndex, exception) : exception;
             }
         }
         return true;
@@ -150,10 +159,12 @@ public class ListScopeNode extends DALNode {
     }
 
     private boolean assertElementExpressions(DALRuntimeContext context, List<DALNode> expressions) {
-        if (isTable)
+        if (style != Style.LIST)
             for (int index = 0; index < expressions.size(); index++)
                 try {
                     expressions.get(index).evaluate(context);
+                } catch (DifferentCellSize differentCellSize) {
+                    throw new RowAssertionFailure(index, differentCellSize);
                 } catch (DalException dalException) {
                     throw new ElementAssertionFailure(index, dalException);
                 }
@@ -180,11 +191,15 @@ public class ListScopeNode extends DALNode {
         }
     }
 
+    public enum Style {
+        LIST, TABLE, ROW
+    }
+
     public static class NatureOrder extends ListScopeNode {
 
         @SuppressWarnings("unchecked")
         public NatureOrder(List<Clause<DALRuntimeContext, DALNode>> clauses) {
-            super(clauses, false, (Comparator) naturalOrder());
+            super(clauses, (Comparator) naturalOrder(), Style.LIST);
         }
 
         @Override
@@ -197,12 +212,18 @@ public class ListScopeNode extends DALNode {
 
         @SuppressWarnings("unchecked")
         public ReverseOrder(List<Clause<DALRuntimeContext, DALNode>> clauses) {
-            super(clauses, false, (Comparator) reverseOrder());
+            super(clauses, (Comparator) reverseOrder(), Style.LIST);
         }
 
         @Override
         public String inspect() {
             return "-" + super.inspect();
+        }
+    }
+
+    static class DifferentCellSize extends AssertionFailure {
+        public DifferentCellSize(String format, int position) {
+            super(format, position);
         }
     }
 }

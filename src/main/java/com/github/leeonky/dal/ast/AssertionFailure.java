@@ -17,12 +17,6 @@ public class AssertionFailure extends DalException {
         super(message.trim(), position);
     }
 
-    public static void assertListSize(int expected, int actual, int position) {
-        if (expected != actual)
-            throw new AssertionFailure(format("Different list size\nExpected: <%d>\nActual: <%d>", expected, actual),
-                    position);
-    }
-
     public static boolean assertMatchNull(Data actual, int position) {
         if (!actual.isNull())
             throw new AssertionFailure(format("Expected to match: null\nActual: %s", actual.inspect()), position);

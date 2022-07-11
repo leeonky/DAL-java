@@ -64,7 +64,7 @@ class EmptyTableRowType extends RowType {
     @Override
     public DALNode constructVerificationNode(Data actual, Stream<Clause<DALRuntimeContext, DALNode>> rowClauses,
                                              Comparator<Object> comparator) {
-        return actual.isList() ? new ListScopeNode(rowClauses.collect(toList()), true, comparator)
+        return actual.isList() ? new ListScopeNode(rowClauses.collect(toList()), comparator, true ? ListScopeNode.Style.TABLE : ListScopeNode.Style.LIST)
                 : new ObjectScopeNode(Collections.emptyList());
     }
 }
@@ -90,7 +90,7 @@ class SpecifyIndexRowType extends RowType {
                                              Comparator<Object> comparator) {
         if (actual.isList())
             return new ListScopeNode(rowClauses.map(rowClause -> rowClause.expression(null))
-                    .collect(toList()), true, ListScopeNode.Type.FIRST_N_ITEMS, comparator);
+                    .collect(toList()), ListScopeNode.Type.FIRST_N_ITEMS, comparator, true ? ListScopeNode.Style.TABLE : ListScopeNode.Style.LIST);
         return new ObjectScopeNode(rowClauses.map(rowClause -> rowClause.expression(null)).collect(toList()));
     }
 
@@ -119,7 +119,7 @@ class DefaultIndexRowType extends RowType {
     @Override
     public DALNode constructVerificationNode(Data actual, Stream<Clause<DALRuntimeContext, DALNode>> rowClauses,
                                              Comparator<Object> comparator) {
-        return new ListScopeNode(rowClauses.collect(toList()), true, comparator);
+        return new ListScopeNode(rowClauses.collect(toList()), comparator, ListScopeNode.Style.TABLE);
     }
 }
 
