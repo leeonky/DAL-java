@@ -1,34 +1,30 @@
 package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
+import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static com.github.leeonky.interpreter.FunctionUtil.notAllowParallelReduce;
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.CHAR;
+import static java.util.Collections.singletonList;
 
 public class TableRowNode extends DALNode {
-    private final List<Clause<DALRuntimeContext, DALNode>> cellClauses;
+    private final List<Clause<DALRuntimeContext, DALNode>> cells;
     private final TableHeadRow tableHeadRow;
     private final TableRowPrefixNode rowPrefix;
 
     public TableRowNode(DALNode prefix, DALNode cell, TableHeadRow tableHeadRow) {
-        this(prefix, asList(n -> cell), tableHeadRow);
-    }
-
-    @Deprecated
-    public TableRowNode(DALNode prefix, List<DALNode> cells) {
-        rowPrefix = (TableRowPrefixNode) prefix;
-        setPositionBegin(cells.get(cells.size() - 1).getOperandPosition());
-        cellClauses = null;
-        tableHeadRow = null;
+        this(prefix, singletonList(n -> cell), tableHeadRow);
     }
 
     public TableRowNode(DALNode prefix, List<Clause<DALRuntimeContext, DALNode>> clauses, TableHeadRow tableHeadRow) {
         rowPrefix = (TableRowPrefixNode) prefix;
-        cellClauses = new ArrayList<>(clauses);
+        cells = new ArrayList<>(clauses);
         this.tableHeadRow = tableHeadRow;
 //        TODO move to clause
         setPositionBegin(clauses.get(clauses.size() - 1).expression(null).getOperandPosition());
@@ -50,35 +46,35 @@ public class TableRowNode extends DALNode {
         if (isRowWildcard())
             return firstCell();
         if (tableHeadRow instanceof TableDefaultIndexHeadRow)
-            return new ListScopeNode(cellClauses, SortGroupNode.NOP_COMPARATOR, ListScopeNode.Style.ROW).setPositionBegin(getPositionBegin());
+            return new ListScopeNode(cells, SortGroupNode.NOP_COMPARATOR, ListScopeNode.Style.ROW).setPositionBegin(getPositionBegin());
         return new ObjectScopeNode(getCells()).setPositionBegin(getPositionBegin());
     }
 
     private DALNode firstCell() {
-        return getCells().get(0);
+        return cells.get(0).expression(null);
     }
 
     private boolean isRowWildcard() {
-        return cellClauses.size() >= 1 && firstCell() instanceof WildcardNode;
+        return cells.size() >= 1 && firstCell() instanceof WildcardNode;
     }
 
     private boolean isEllipsis() {
-        return cellClauses.size() >= 1 && firstCell() instanceof ListEllipsisNode;
+        return cells.size() >= 1 && firstCell() instanceof ListEllipsisNode;
     }
 
+    @Deprecated
     public List<DALNode> getCells() {
-        final @Deprecated List<DALNode> cells;
+        final List<DALNode> cells;
         cells = new ArrayList<>();
-        for (int i = 0; i < cellClauses.size(); i++) {
-            cells.add(cellClauses.get(i).expression(tableHeadRow.getHeader(i).property().parse(null)));
-        }
+        for (int i = 0; i < this.cells.size(); i++)
+            cells.add(this.cells.get(i).expression(tableHeadRow.getHeader(i).property().parse(null)));
         return cells;
     }
 
     public TableRowNode merge(TableRowNode rowNode) {
         return (TableRowNode) new TableRowNode(rowPrefix, new ArrayList<Clause<DALRuntimeContext, DALNode>>() {{
-            addAll(cellClauses);
-            addAll(rowNode.cellClauses);
+            addAll(cells);
+            addAll(rowNode.cells);
         }}, tableHeadRow.merge(rowNode.tableHeadRow)).setPositionBegin(getPositionBegin());
     }
 
@@ -92,5 +88,16 @@ public class TableRowNode extends DALNode {
 
     public RowType mergeRowTypeBy(RowType rowType) {
         return rowType.merge(rowPrefix.resolveRowType());
+    }
+
+    void checkSize(int size) {
+        if (!specialRow() && cells.size() != size)
+//        TODO move to clause
+            throw new SyntaxException("Different cell size", cells.get(cells.size() - 1).expression(null).getOperandPosition());
+    }
+
+    public DalException markPositionOnCells(DalException dalException) {
+        return cells.stream().reduce(dalException, (e, cell) -> e.multiPosition(cell.expression(null).getPositionBegin(), CHAR),
+                notAllowParallelReduce());
     }
 }

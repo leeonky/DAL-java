@@ -26,16 +26,14 @@ public class ListScopeNode extends DALNode {
     private final Style style;
     private final Comparator<Object> comparator;
 
-    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> clauses,
-                         Comparator<Object> comparator, Style style) {
+    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> clauses, Comparator<Object> comparator, Style style) {
         type = guessType(clauses);
         inputClauses = clauses;
         this.comparator = comparator;
         this.style = style;
     }
 
-    public ListScopeNode(List<DALNode> verificationExpressions, Type type,
-                         Comparator<Object> comparator, Style style) {
+    public ListScopeNode(List<DALNode> verificationExpressions, Type type, Comparator<Object> comparator, Style style) {
         this.verificationExpressions = inputExpressions = new ArrayList<>(verificationExpressions);
         this.type = type;
         this.comparator = comparator;
@@ -48,11 +46,8 @@ public class ListScopeNode extends DALNode {
 
     private void assertListSize(int expected, int actual, int position) {
         if (expected != actual) {
-            if (style == Style.ROW)
-                throw new DifferentCellSize(format("Different list size\nExpected: <%d>\nActual: <%d>", expected, actual),
-                        position);
-            throw new AssertionFailure(format("Different list size\nExpected: <%d>\nActual: <%d>", expected, actual),
-                    position);
+            String message = format("Different list size\nExpected: <%d>\nActual: <%d>", expected, actual);
+            throw style == Style.ROW ? new DifferentCellSize(message, position) : new AssertionFailure(message, position);
         }
     }
 
@@ -133,7 +128,7 @@ public class ListScopeNode extends DALNode {
             try {
                 while (!isElementPassedVerification(context, clause, getElement(data, elementIndex++, clause))) ;
             } catch (AssertionFailure exception) {
-                throw style != Style.LIST ? new RowAssertionFailure(clauseIndex, exception) : exception;
+                throw style == Style.LIST ? exception : new RowAssertionFailure(clauseIndex, exception);
             }
         }
         return true;

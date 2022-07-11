@@ -5,7 +5,6 @@ import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.SortGroupNode;
 import com.github.leeonky.dal.ast.TableNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,9 +38,7 @@ public class TableHeadRow extends DALNode {
     }
 
     public void checkDataCellSize(TableRowNode rowNode) {
-        if (!rowNode.specialRow() && rowNode.getCells().size() != headers.size())
-            throw new SyntaxException("Different cell size",
-                    rowNode.getCells().get(rowNode.getCells().size() - 1).getOperandPosition());
+        rowNode.checkSize(headers.size());
     }
 
     public TableHeadRow merge(TableHeadRow tableHeadRow) {

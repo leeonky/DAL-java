@@ -7,6 +7,7 @@ import com.github.leeonky.interpreter.Clause;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -64,7 +65,7 @@ class EmptyTableRowType extends RowType {
     @Override
     public DALNode constructVerificationNode(Data actual, Stream<Clause<DALRuntimeContext, DALNode>> rowClauses,
                                              Comparator<Object> comparator) {
-        return actual.isList() ? new ListScopeNode(rowClauses.collect(toList()), comparator, true ? ListScopeNode.Style.TABLE : ListScopeNode.Style.LIST)
+        return actual.isList() ? new ListScopeNode(rowClauses.collect(toList()), comparator, ListScopeNode.Style.TABLE)
                 : new ObjectScopeNode(Collections.emptyList());
     }
 }
@@ -88,10 +89,11 @@ class SpecifyIndexRowType extends RowType {
     @Override
     public DALNode constructVerificationNode(Data actual, Stream<Clause<DALRuntimeContext, DALNode>> rowClauses,
                                              Comparator<Object> comparator) {
+        List<DALNode> rowNodes = rowClauses.map(rowClause -> rowClause.expression(null))
+                .collect(toList());
         if (actual.isList())
-            return new ListScopeNode(rowClauses.map(rowClause -> rowClause.expression(null))
-                    .collect(toList()), ListScopeNode.Type.FIRST_N_ITEMS, comparator, true ? ListScopeNode.Style.TABLE : ListScopeNode.Style.LIST);
-        return new ObjectScopeNode(rowClauses.map(rowClause -> rowClause.expression(null)).collect(toList()));
+            return new ListScopeNode(rowNodes, ListScopeNode.Type.FIRST_N_ITEMS, comparator, ListScopeNode.Style.TABLE);
+        return new ObjectScopeNode(rowNodes);
     }
 
     @Override
