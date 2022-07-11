@@ -1,9 +1,6 @@
 package com.github.leeonky.dal.ast.table;
 
-import com.github.leeonky.dal.ast.DALNode;
-import com.github.leeonky.dal.ast.ListEllipsisNode;
-import com.github.leeonky.dal.ast.TableNode;
-import com.github.leeonky.dal.ast.WildcardNode;
+import com.github.leeonky.dal.ast.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 
@@ -17,12 +14,6 @@ public class TransposedRowNode extends DALNode {
     private final HeaderNode headerNode;
     private final List<Clause<DALRuntimeContext, DALNode>> cellClauses;
 
-//    public TransposedRowNode(DALNode header, List<DALNode> cells) {
-//        headerNode = (HeaderNode) header;
-//        this.cells = cells;
-//        setPositionBegin(header.getPositionBegin());
-//    }
-
     public TransposedRowNode(DALNode header, List<Clause<DALRuntimeContext, DALNode>> clauses) {
         cellClauses = clauses;
         headerNode = (HeaderNode) header;
@@ -34,7 +25,7 @@ public class TransposedRowNode extends DALNode {
         return TableNode.printLine(new ArrayList<DALNode>() {{
             add(headerNode);
 //            TODO use clause
-            addAll(cellClauses.stream().map(clause -> clause.expression(headerNode.property().parse(null))).collect(Collectors.toList())
+            addAll(cellClauses.stream().map(clause -> clause.expression(InputNode.INSTANCE)).collect(Collectors.toList())
             );
         }});
     }

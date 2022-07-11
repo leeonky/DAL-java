@@ -114,5 +114,5 @@ Feature: verify object
     And the inspect should:
     """
     : | >> | row0 |
-    | col | col: 1 |
+    | col | : 1 |
     """

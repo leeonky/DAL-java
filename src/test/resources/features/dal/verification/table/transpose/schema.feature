@@ -45,7 +45,7 @@ Feature: schema in table
     """
     And the inspect should:
     """
-    is [IdZero]: >>| aliasOfName | aliasOfName: 'Tom' |
+    is [IdZero]: >>| aliasOfName | : 'Tom' |
     """
 
   Scenario: use schema in row
@@ -98,7 +98,7 @@ Feature: schema in table
     And the inspect should:
     """
     : | >> | is IdZero |
-    | aliasOfName | aliasOfName: 'Tom' |
+    | aliasOfName | : 'Tom' |
     """
 
   Scenario: use schema in header
@@ -151,7 +151,7 @@ Feature: schema in table
     """
     And the inspect should:
     """
-    : >>| obj is IdZero | obj is IdZero: {aliasOfName: 'Tom'} |
+    : >>| obj is IdZero | : {aliasOfName: 'Tom'} |
     """
 
   Scenario: use schema in cell
@@ -204,7 +204,7 @@ Feature: schema in table
     """
     And the inspect should:
     """
-    : >>| obj | obj is IdZero: {aliasOfName: 'Tom'} |
+    : >>| obj | is IdZero: {aliasOfName: 'Tom'} |
     """
 
   Scenario: use schema in header and cell
@@ -220,5 +220,5 @@ Feature: schema in table
     """
     And the inspect should:
     """
-    : >>| time is String | time is String is LocalDateTime: {year: 2000} |
+    : >>| time is String | is LocalDateTime: {year: 2000} |
     """

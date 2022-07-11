@@ -21,8 +21,8 @@ Feature: skip
     """
     And the inspect should:
     """
-    = >>| name | name= 'Tom' | *** | name= 'John' |
-    | age | age= 10 |  | age= 16 |
+    = >>| name | = 'Tom' | *** | = 'John' |
+    | age | = 10 |  | = 16 |
     """
     When evaluate by:
     """
@@ -106,8 +106,8 @@ Feature: skip
     """
     And the inspect should:
     """
-    = >>| name | name= 'Tom' | ... |
-    | age | age= 10 |  |
+    = >>| name | = 'Tom' | ... |
+    | age | = 10 |  |
     """
     When evaluate by:
     """
@@ -129,8 +129,8 @@ Feature: skip
     """
     And the inspect should:
     """
-    = >>| name | ... | name= 'Lily' |
-    | age |  | age= 15 |
+    = >>| name | ... | = 'Lily' |
+    | age |  | = 15 |
     """
     When evaluate by:
     """
@@ -169,8 +169,8 @@ Feature: skip
     And the inspect should:
     """
     = | >> | 0 | 2 |
-    | name | name= 'Tom' | name= 'Lily' |
-    | age | age= 10 | age= 15 |
+    | name | = 'Tom' | = 'Lily' |
+    | age | = 10 | = 15 |
     """
     When evaluate by:
     """
@@ -211,8 +211,8 @@ Feature: skip
     And the inspect should:
     """
     = | >> | -1 |
-    | name | name= 'Lily' |
-    | age | age= 15 |
+    | name | = 'Lily' |
+    | age | = 15 |
     """
     Then the following verification should pass:
     """
@@ -223,8 +223,8 @@ Feature: skip
     And the inspect should:
     """
     = | >> | 2 | -2 |
-    | name | name= 'Lily' | name= 'John' |
-    | age | age= 15 | age= 20 |
+    | name | = 'Lily' | = 'John' |
+    | age | = 15 | = 20 |
     """
     When evaluate by:
     """

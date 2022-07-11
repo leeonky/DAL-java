@@ -23,7 +23,7 @@ Feature: table-relax-string
     """
     And the inspect should:
     """
-    = >>| value | value= 'a<char>c' |
+    = >>| value | = 'a<char>c' |
     """
     Examples:
       | char |
@@ -61,7 +61,7 @@ Feature: table-relax-string
     """
     And the inspect should:
     """
-    = >>| value | value= '1 2' |
+    = >>| value | = '1 2' |
     """
 
   Scenario: split relax string
@@ -119,7 +119,7 @@ Feature: table-relax-string
     """
     And the inspect should:
     """
-    : >>| value1 | value1: '' | value1: 'a' |
+    : >>| value1 | : '' | : 'a' |
     """
 
   Scenario: relax string should not be user literal value

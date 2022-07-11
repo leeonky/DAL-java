@@ -92,7 +92,7 @@ Feature: basic verification via table
     """
     And the inspect should:
     """
-    : >>| name | name: 'Tom' |
+    : >>| name | : 'Tom' |
     """
     Given the following json:
     """
@@ -136,8 +136,8 @@ Feature: basic verification via table
     """
     And the inspect should:
     """
-    : >>| name | name: 'Tom' | name: 'Lucy' |
-    | age | age: 10 | age: 15 |
+    : >>| name | : 'Tom' | : 'Lucy' |
+    | age | : 10 | : 15 |
     """
     Given the following json:
     """
@@ -183,7 +183,7 @@ Feature: basic verification via table
     """
     And the inspect should:
     """
-    = >>| name | name= 'Tom' |
+    = >>| name | = 'Tom' |
     """
     Given the following json:
     """
@@ -222,7 +222,7 @@ Feature: basic verification via table
     And the inspect should:
     """
     : | >> | = |
-    | name | name= 'Tom' |
+    | name | = 'Tom' |
     """
     Given the following json:
     """
@@ -265,7 +265,7 @@ Feature: basic verification via table
     And the inspect should:
     """
     : | >> | : |
-    | user= | user= {name: 'Tom'} |
+    | user= | = {name: 'Tom'} |
     """
     Given the following json:
     """
@@ -310,7 +310,7 @@ Feature: basic verification via table
     And the inspect should:
     """
     : | >> | : |
-    | user: | user= {name: 'Tom'} |
+    | user: | = {name: 'Tom'} |
     """
     Given the following json:
     """
@@ -354,9 +354,9 @@ Feature: basic verification via table
     """
     And the inspect should:
     """
-    : [[0]: >>| name | name: 'Tom' |
-    | age | age: 10 |, [1]: >>| name | name: 'John' |
-    | age | age: 15 |]
+    : [[0]: >>| name | : 'Tom' |
+    | age | : 10 |, [1]: >>| name | : 'John' |
+    | age | : 15 |]
     """
     Then the following verification should pass:
     """
@@ -370,9 +370,9 @@ Feature: basic verification via table
     """
     And the inspect should:
     """
-    : [[0]: >>| name | name: 'Tom' |
-    | age | age: 10 |, [1]: >>| name | name: 'John' |
-    | age | age: 15 |]
+    : [[0]: >>| name | : 'Tom' |
+    | age | : 10 |, [1]: >>| name | : 'John' |
+    | age | : 15 |]
     """
     Then the following verification should pass:
     """
@@ -388,10 +388,10 @@ Feature: basic verification via table
     And the inspect should:
     """
     : [[0]: | >> | 0 |
-    | name | name: 'Tom' |
-    | age | age: 10 |, [1]: | >> | 0 |
-    | name | name: 'John' |
-    | age | age: 15 |]
+    | name | : 'Tom' |
+    | age | : 10 |, [1]: | >> | 0 |
+    | name | : 'John' |
+    | age | : 15 |]
     """
     Then the following verification should pass:
     """
@@ -407,10 +407,10 @@ Feature: basic verification via table
     And the inspect should:
     """
     : [[0]: | >> | 0 |
-    | name | name: 'Tom' |
-    | age | age: 10 |, [1]: | >> | 0 |
-    | name | name: 'John' |
-    | age | age: 15 |]
+    | name | : 'Tom' |
+    | age | : 10 |, [1]: | >> | 0 |
+    | name | : 'John' |
+    | age | : 15 |]
     """
     Then the following verification should pass:
     """
@@ -425,10 +425,10 @@ Feature: basic verification via table
     And the inspect should:
     """
     : [[0]: | >> | 0 |
-    | name | name: 'Tom' |
-    | age | age: 10 |, [1]: | >> | 0 |
-    | name | name: 'John' |
-    | age | age: 15 |]
+    | name | : 'Tom' |
+    | age | : 10 |, [1]: | >> | 0 |
+    | name | : 'John' |
+    | age | : 15 |]
     """
 
   Scenario Outline: property chain in header
@@ -446,7 +446,7 @@ Feature: basic verification via table
     """
     And the inspect should:
     """
-    : >>| user<opt>name | user<opt>name: 'Tom' |
+    : >>| user<opt>name | : 'Tom' |
     """
     Examples:
       | opt |
@@ -468,7 +468,7 @@ Feature: basic verification via table
     """
     And the inspect should:
     """
-    : >>| 'user'<opt>'name' | 'user'<opt>'name': 'Tom' |
+    : >>| 'user'<opt>'name' | : 'Tom' |
     """
     Examples:
       | opt |
