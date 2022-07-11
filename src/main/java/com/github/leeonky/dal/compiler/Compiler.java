@@ -132,6 +132,7 @@ public class Compiler {
             SCHEMA_CLAUSE = IS.clause(SCHEMA_COMPOSE),
             WHICH_CLAUSE = lazyClause(() -> WHICH.clause(EXPRESSION)),
             ELEMENT_ELLIPSIS_CLAUSE = Operators.ELEMENT_ELLIPSIS.clause((token, input) -> new ListEllipsisNode()),
+            ROW_WILDCARD_CLAUSE = Operators.ROW_WILDCARD.clause((token, input) -> new WildcardNode(token.getContent())),
             LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
             IMPLICIT_PROPERTY_CLAUSE = PROPERTY_IMPLICIT.clause(oneOf(PROPERTY_PATTERN, oneOf(STRING_PROPERTY, NUMBER_PROPERTY, SYMBOL).concat(LIST_MAPPING_CLAUSE))),
             EXPLICIT_PROPERTY_CLAUSE = oneOf(PROPERTY_DOT.clause(PROPERTY_PATTERN.or(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING_CLAUSE).mandatory(
@@ -244,21 +245,41 @@ public class Compiler {
 
     private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHeadRow) head, (TableBody) many(ROW_PREFIX.with(oneOf(
-            COLUMN_SPLITTER.before(singleCellRow(ELEMENT_ELLIPSIS)), COLUMN_SPLITTER.before(singleCellRow(ROW_WILDCARD)),
-            COLUMN_SPLITTER.before(tableRow((TableHeadRow) head))))).and(endWithOptionalLine()).as(TableBody::new).parse(procedure));
+            COLUMN_SPLITTER.before(singleCellRow(ELEMENT_ELLIPSIS, (TableHeadRow) head)),
+            COLUMN_SPLITTER.before(singleCellRow(ROW_WILDCARD, (TableHeadRow) head)),
+            COLUMN_SPLITTER.before(tableRow2((TableHeadRow) head))))).and(endWithOptionalLine()).as(TableBody::new).parse(procedure));
 
+    @Deprecated
     private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> singleCellRow(
-            NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
+            NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser, TableHeadRow head) {
         return single(single(nodeParser).and(endWith(COLUMN_SPLITTER)).as()).and(endWithLine()).as()
-                .clause(TableRowNode::new);
+                .clause((prefix, cell) -> new TableRowNode(prefix, cell, head));
     }
 
+    @Deprecated
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
             DALNode rowPrefix, TableHeadRow head) {
         return procedure -> positionNode(cellVerificationExpression((TableRowPrefixNode) rowPrefix,
                 head.getHeader(procedure.getIndex()))).parse(procedure);
     }
 
+    //    TODO move to syntax
+    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> setPosition(
+            ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> mandatory, int position) {
+        return procedure -> {
+            Clause<DALRuntimeContext, DALNode> clause = mandatory.parse(procedure);
+            return (Clause<DALRuntimeContext, DALNode>) input -> clause.expression(input).setPositionBegin(position);
+        };
+    }
+
+    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell2(
+            DALNode rowPrefix, TableHeadRow head) {
+        return procedure -> procedure.positionOf(p -> setPosition(shortVerificationClause(oneOf(VERIFICATION_OPERATORS, head.getHeader(procedure.getIndex()).operator(),
+                ((TableRowPrefixNode) rowPrefix).operator()).or(DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND
+                .or(TABLE_CELL_RELAX_STRING)), p).parse(procedure));
+    }
+
+    @Deprecated
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure> cellVerificationExpression(TableRowPrefixNode rowPrefix, HeaderNode header) {
         return header.property().with(shortVerificationClause(oneOf(VERIFICATION_OPERATORS, header.operator(),
@@ -266,9 +287,15 @@ public class Compiler {
                 .or(TABLE_CELL_RELAX_STRING)));
     }
 
+    @Deprecated
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
             TableHeadRow headRow) {
         return clause(rowPrefix -> tableLine(tableCell(rowPrefix, headRow)).as(cells -> new TableRowNode(rowPrefix, cells)));
+    }
+
+    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow2(
+            TableHeadRow headRow) {
+        return clause(rowPrefix -> tableLine(tableCell2(rowPrefix, headRow)).as(cells -> new TableRowNode(rowPrefix, cells, headRow)));
     }
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableCell(
@@ -277,10 +304,17 @@ public class Compiler {
                 ((TransposedTableHead) transposedTableHead).getPrefix(procedure.getIndex()), (HeaderNode) head))).parse(procedure);
     }
 
+    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableCell2(
+            DALNode head, DALNode transposedTableHead) {
+        return procedure -> procedure.positionOf(p -> setPosition(oneOf(ELEMENT_ELLIPSIS_CLAUSE, ROW_WILDCARD_CLAUSE).or(shortVerificationClause(oneOf(VERIFICATION_OPERATORS, ((HeaderNode) head).operator(),
+                ((TransposedTableHead) transposedTableHead).getPrefix(procedure.getIndex()).operator()).or(DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND
+                .or(TABLE_CELL_RELAX_STRING))), p).parse(procedure));
+    }
+
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
         return procedure -> prefixHead -> new TransposedTableNode(prefixHead, many(positionNode(COLUMN_SPLITTER.before(
                 single(TABLE_HEADER).and(endWith(COLUMN_SPLITTER)).as())).concat(clause(header -> tableLine(
-                transposeTableCell(header, prefixHead)).as(cells -> new TransposedRowNode(header, cells))))).and(atLeast(1))
+                transposeTableCell2(header, prefixHead)).as(cells -> new TransposedRowNode(header, cells))))).and(atLeast(1))
                 .and(endWithOptionalLine()).as(TransposedTableBody::new).mandatory("Expecting a table").parse(procedure));
     }
 
@@ -289,7 +323,15 @@ public class Compiler {
             DALExpression, DALOperator, DALProcedure>, DALNode, NodeParser.Mandatory<DALRuntimeContext, DALNode,
             DALExpression, DALOperator, DALProcedure>, List<DALNode>> tableLine(NodeParser.Mandatory<DALRuntimeContext,
             DALNode, DALExpression, DALOperator, DALProcedure> mandatory) {
-        return many(mandatory).and(Syntax.Rules.mandatorySplitBy(COLUMN_SPLITTER)).and(endOfRow(COLUMN_SPLITTER));
+        return many(mandatory).and(mandatorySplitBy(COLUMN_SPLITTER)).and(endOfRow(COLUMN_SPLITTER));
+    }
+
+    private static Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, ClauseParser<DALRuntimeContext,
+            DALNode, DALExpression, DALOperator, DALProcedure>, ClauseParser.Mandatory<DALRuntimeContext, DALNode,
+            DALExpression, DALOperator, DALProcedure>, Clause<DALRuntimeContext, DALNode>, NodeParser.Mandatory<DALRuntimeContext,
+            DALNode, DALExpression, DALOperator, DALProcedure>, List<Clause<DALRuntimeContext, DALNode>>> tableLine(ClauseParser.Mandatory<DALRuntimeContext,
+            DALNode, DALExpression, DALOperator, DALProcedure> mandatory) {
+        return many(mandatory).and(mandatorySplitBy(COLUMN_SPLITTER)).and(endOfRow(COLUMN_SPLITTER));
     }
 
     private Optional<DALNode> compileUserDefinedLiteral(DALProcedure dalProcedure) {

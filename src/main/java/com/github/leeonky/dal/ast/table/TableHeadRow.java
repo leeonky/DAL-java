@@ -7,6 +7,7 @@ import com.github.leeonky.dal.ast.TableNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.SyntaxException;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -41,5 +42,12 @@ public class TableHeadRow extends DALNode {
         if (!rowNode.specialRow() && rowNode.getCells().size() != headers.size())
             throw new SyntaxException("Different cell size",
                     rowNode.getCells().get(rowNode.getCells().size() - 1).getOperandPosition());
+    }
+
+    public TableHeadRow merge(TableHeadRow tableHeadRow) {
+        return new TableHeadRow(new ArrayList<DALNode>() {{
+            addAll(headers);
+            addAll(tableHeadRow.headers);
+        }});
     }
 }

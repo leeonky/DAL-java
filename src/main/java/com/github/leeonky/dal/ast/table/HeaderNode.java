@@ -29,6 +29,7 @@ public class HeaderNode extends DALNode {
         return sort.inspect() + operator.map(operator -> operator.inspect(property, "").trim()).orElse(property);
     }
 
+    //    TODO should return directly
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> property() {
         return procedure -> property;
     }
