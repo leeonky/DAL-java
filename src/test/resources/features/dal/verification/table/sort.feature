@@ -18,8 +18,8 @@ Feature: sort
     And the inspect should:
     """
     = | ￪ name |
-    | name= 'John' |
-    | name= 'Tom' |
+    | = 'John' |
+    | = 'Tom' |
     """
     Then the following verification should pass:
     """
@@ -30,8 +30,8 @@ Feature: sort
     And the inspect should:
     """
     = | + name |
-    | name= 'John' |
-    | name= 'Tom' |
+    | = 'John' |
+    | = 'Tom' |
     """
     When evaluate by:
     """
@@ -66,8 +66,8 @@ Feature: sort
     And the inspect should:
     """
     = | ￬ name |
-    | name= 'Tom' |
-    | name= 'John' |
+    | = 'Tom' |
+    | = 'John' |
     """
 
   Scenario: support sort list by multi headers before assertion
@@ -94,7 +94,7 @@ Feature: sort
     And the inspect should:
     """
     = | ￪ name | ￬￬ age |
-    | name= 'Tomas' | age= 20 |
-    | name= 'John' | age= 10 |
-    | name= 'Tom' | age= 10 |
+    | = 'Tomas' | = 20 |
+    | = 'John' | = 10 |
+    | = 'Tom' | = 10 |
     """

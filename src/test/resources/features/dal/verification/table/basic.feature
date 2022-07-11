@@ -89,7 +89,7 @@ Feature: basic verification via table
     And the inspect should:
     """
     : | name |
-    | name: 'Tom' |
+    | : 'Tom' |
     """
     Given the following json:
     """
@@ -137,8 +137,8 @@ Feature: basic verification via table
     And the inspect should:
     """
     : | name | age |
-    | name: 'Tom' | age: 10 |
-    | name: 'Lucy' | age: 15 |
+    | : 'Tom' | : 10 |
+    | : 'Lucy' | : 15 |
     """
     Given the following json:
     """
@@ -187,7 +187,7 @@ Feature: basic verification via table
     And the inspect should:
     """
     = | name |
-    | name= 'Tom' |
+    | = 'Tom' |
     """
     Given the following json:
     """
@@ -228,7 +228,7 @@ Feature: basic verification via table
     And the inspect should:
     """
     : | name |
-    = | name= 'Tom' |
+    = | = 'Tom' |
     """
     Given the following json:
     """
@@ -271,7 +271,7 @@ Feature: basic verification via table
     And the inspect should:
     """
     : | user= |
-    : | user= {name: 'Tom'} |
+    : | = {name: 'Tom'} |
     """
     Given the following json:
     """
@@ -316,7 +316,7 @@ Feature: basic verification via table
     And the inspect should:
     """
     : | user: |
-    : | user= {name: 'Tom'} |
+    : | = {name: 'Tom'} |
     """
     Given the following json:
     """
@@ -360,7 +360,7 @@ Feature: basic verification via table
     And the inspect should:
     """
     : [[0]: | name | age |
-    | name: 'Tom' | age: 10 |, [1] is String]
+    | : 'Tom' | : 10 |, [1] is String]
     """
 
   Scenario: two table
@@ -381,8 +381,8 @@ Feature: basic verification via table
     And the inspect should:
     """
     : [[0]: | name | age |
-    | name: 'Tom' | age: 10 |, [1]: | name | age |
-    | name: 'John' | age: 15 |]
+    | : 'Tom' | : 10 |, [1]: | name | age |
+    | : 'John' | : 15 |]
     """
     Then the following verification should pass:
     """
@@ -396,8 +396,8 @@ Feature: basic verification via table
     And the inspect should:
     """
     : [[0]: | name | age |
-    | name: 'Tom' | age: 10 |, [1]: | name | age |
-    | name: 'John' | age: 15 |]
+    | : 'Tom' | : 10 |, [1]: | name | age |
+    | : 'John' | : 15 |]
     """
     Then the following verification should pass:
     """
@@ -412,8 +412,8 @@ Feature: basic verification via table
     And the inspect should:
     """
     : [[0]: | name | age |
-    | name: 'Tom' | age: 10 |, [1]: | name | age |
-    | name: 'John' | age: 15 |]
+    | : 'Tom' | : 10 |, [1]: | name | age |
+    | : 'John' | : 15 |]
     """
 
   Scenario Outline: property chain in header
@@ -433,7 +433,7 @@ Feature: basic verification via table
     And the inspect should:
     """
     : | user<opt>name |
-    | user<opt>name: 'Tom' |
+    | : 'Tom' |
     """
     Examples:
       | opt |
@@ -472,7 +472,7 @@ Feature: basic verification via table
     And the inspect should:
     """
     data: | 0 | 2 | a |
-    | 0: 'str1' | 2: 'str2' | a: 'strA' |
+    | : 'str1' | : 'str2' | : 'strA' |
     """
 
   Scenario: number is row key
@@ -500,8 +500,8 @@ Feature: basic verification via table
     And the inspect should:
     """
     data= | a | b |
-    0 | a= '0a' | b= '0b' |
-    1 | a= '1a' | b= '1b' |
+    0 | = '0a' | = '0b' |
+    1 | = '1a' | = '1b' |
     """
     When use a instance of java class "Data" to evaluate:
     """
@@ -547,8 +547,8 @@ Feature: basic verification via table
     And the inspect should:
     """
     data: | a | b |
-    0 | a: '0a' | b: '0b' |
-    '1' | a: '1a' | b: '1b' |
+    0 | : '0a' | : '0b' |
+    '1' | : '1a' | : '1b' |
     """
     Then the following verification for the instance of java class "Data" should pass:
     """
@@ -559,6 +559,6 @@ Feature: basic verification via table
     And the inspect should:
     """
     data: | a | b |
-    '1' | a: '1a' | b: '1b' |
-    0 | a: '0a' | b: '0b' |
+    '1' | : '1a' | : '1b' |
+    0 | : '0a' | : '0b' |
     """

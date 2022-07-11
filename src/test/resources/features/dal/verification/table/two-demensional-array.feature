@@ -21,8 +21,8 @@ Feature: two demensional array
     """
     And the inspect should:
     """
-    data: ^| 0: 'str1' | 1: 'str2' | 2: 'strA' |
-    | 0: 'str3' | 1: 'str4' | 2: 'strB' |
+    data: ^| : 'str1' | : 'str2' | : 'strA' |
+    | : 'str3' | : 'str4' | : 'strB' |
     """
     When use a instance of java class "Data" to evaluate:
     """

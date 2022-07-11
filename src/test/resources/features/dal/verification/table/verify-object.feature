@@ -21,8 +21,8 @@ Feature: verify object
     And the inspect should:
     """
     : | col |
-    row0 | col: 1 |
-    row1 | col: 2 |
+    row0 | : 1 |
+    row1 | : 2 |
     """
 
   Scenario: invalid property key table

@@ -24,9 +24,9 @@ Feature: skip
     And the inspect should:
     """
     = | name | age |
-    | name= 'Tom' | age= 10 |
+    | = 'Tom' | = 10 |
     | *** |
-    | name= 'John' | age= 16 |
+    | = 'John' | = 16 |
     """
     When evaluate by:
     """
@@ -111,7 +111,7 @@ Feature: skip
     And the inspect should:
     """
     = | name | age |
-    | name= 'Tom' | age= 10 |
+    | = 'Tom' | = 10 |
     | ... |
     """
     When evaluate by:
@@ -138,7 +138,7 @@ Feature: skip
     """
     = | name | age |
     | ... |
-    | name= 'Lily' | age= 15 |
+    | = 'Lily' | = 15 |
     """
     When evaluate by:
     """
@@ -178,8 +178,8 @@ Feature: skip
     And the inspect should:
     """
     = | name | age |
-    0 | name= 'Tom' | age= 10 |
-    2 | name= 'Lily' | age= 15 |
+    0 | = 'Tom' | = 10 |
+    2 | = 'Lily' | = 15 |
     """
     When evaluate by:
     """
@@ -217,7 +217,7 @@ Feature: skip
     And the inspect should:
     """
     = | name | age |
-    -1 | name= 'Lily' | age= 15 |
+    -1 | = 'Lily' | = 15 |
     """
     Then the following verification should pass:
     """
@@ -228,8 +228,8 @@ Feature: skip
     And the inspect should:
     """
     = | name | age |
-    2 | name= 'Lily' | age= 15 |
-    -2 | name= 'John' | age= 20 |
+    2 | = 'Lily' | = 15 |
+    -2 | = 'John' | = 20 |
     """
     When evaluate by:
     """

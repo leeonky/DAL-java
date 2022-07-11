@@ -15,7 +15,7 @@ Feature: table-relax-string
     And the inspect should:
     """
     = | value |
-    | value= 'a<char>c' |
+    | = 'a<char>c' |
     """
     * the following verification should pass:
     """
@@ -53,7 +53,7 @@ Feature: table-relax-string
     And the inspect should:
     """
     = | value |
-    | value= '1 2' |
+    | = '1 2' |
     """
     * the following verification should pass:
     """
@@ -110,8 +110,8 @@ Feature: table-relax-string
     And the inspect should:
     """
     : | value1 | value2 |
-    | value1: '' | value2: 'b' |
-    | value1: 'a' | value2: 'c' |
+    | : '' | : 'b' |
+    | : 'a' | : 'c' |
     """
     Then the following verification should pass:
     """

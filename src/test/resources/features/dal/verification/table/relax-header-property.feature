@@ -17,7 +17,7 @@ Feature: relax header property
     And the inspect should:
     """
     : | 'user'<opt>'name' |
-    | 'user'<opt>'name': 'Tom' |
+    | : 'Tom' |
     """
     Examples:
       | opt |
@@ -41,7 +41,7 @@ Feature: relax header property
     And the inspect should:
     """
     : | %-+;<opt>%-+; |
-    | %-+;<opt>%-+;: 'Tom' |
+    | : 'Tom' |
     """
     Examples:
       | opt |

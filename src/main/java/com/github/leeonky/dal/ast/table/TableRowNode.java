@@ -9,9 +9,11 @@ import com.github.leeonky.interpreter.SyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.github.leeonky.dal.ast.TableNode.printLine;
 import static com.github.leeonky.interpreter.FunctionUtil.notAllowParallelReduce;
 import static com.github.leeonky.interpreter.InterpreterException.Position.Type.CHAR;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 
 public class TableRowNode extends DALNode {
     private final List<Clause<DALRuntimeContext, DALNode>> cells;
@@ -33,7 +35,7 @@ public class TableRowNode extends DALNode {
     @Override
     public String inspect() {
         String prefix = rowPrefix.inspect();
-        String data = TableNode.printLine(getCells());
+        String data = printLine(cells.stream().map(clause -> clause.expression(InputNode.INSTANCE)).collect(toList()));
         return (prefix.isEmpty() ? data : prefix + " " + data);
     }
 
@@ -62,13 +64,11 @@ public class TableRowNode extends DALNode {
         return cells.size() >= 1 && firstCell() instanceof ListEllipsisNode;
     }
 
-    @Deprecated
-    public List<DALNode> getCells() {
-        final List<DALNode> cells;
-        cells = new ArrayList<>();
-        for (int i = 0; i < this.cells.size(); i++)
-            cells.add(this.cells.get(i).expression(tableHeadRow.getHeader(i).property().parse(null)));
-        return cells;
+    private List<DALNode> getCells() {
+        return new ArrayList<DALNode>() {{
+            for (int i = 0; i < cells.size(); i++)
+                add(cells.get(i).expression(tableHeadRow.getHeader(i).property().parse(null)));
+        }};
     }
 
     public TableRowNode merge(TableRowNode rowNode) {
