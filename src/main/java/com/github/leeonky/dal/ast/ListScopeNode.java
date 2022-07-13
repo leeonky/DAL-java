@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import static com.github.leeonky.dal.ast.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.SymbolNode.Type.BRACKET;
 import static java.lang.String.format;
 import static java.util.Comparator.naturalOrder;
@@ -66,7 +67,7 @@ public class ListScopeNode extends DALNode {
     }
 
     private DALExpression getDalExpression(int index, int firstIndex) {
-        return new DALExpression(InputNode.INSTANCE, new PropertyImplicit(),
+        return new DALExpression(INPUT_NODE, new PropertyImplicit(),
                 new SymbolNode(type.indexOfNode(firstIndex, index, inputClauses.size()), BRACKET));
     }
 
@@ -90,7 +91,7 @@ public class ListScopeNode extends DALNode {
     @Override
     public String inspect() {
         if (type == Type.CONTAINS)
-            return inputClauses.stream().map(clause -> clause.expression(InputNode.INSTANCE).inspect())
+            return inputClauses.stream().map(clause -> clause.expression(INPUT_NODE).inspect())
                     .collect(joining(", ", "[", "]"));
         return buildVerificationExpressions(0).stream().map(DALNode::inspect).collect(joining(", ", "[", "]"));
     }
@@ -145,7 +146,7 @@ public class ListScopeNode extends DALNode {
 
     private Object getElement(Data data, int elementIndex, Clause<DALRuntimeContext, DALNode> clause) {
         if (elementIndex == data.getListSize())
-            throw new AssertionFailure("No such element", clause.expression(InputNode.INSTANCE).getOperandPosition());
+            throw new AssertionFailure("No such element", clause.expression(INPUT_NODE).getOperandPosition());
         return data.getValueList().get(elementIndex);
     }
 
@@ -169,7 +170,7 @@ public class ListScopeNode extends DALNode {
     }
 
     private boolean isListEllipsis(Clause<DALRuntimeContext, DALNode> clause) {
-        return clause.expression(InputNode.INSTANCE) instanceof ListEllipsisNode;
+        return clause.expression(INPUT_NODE) instanceof ListEllipsisNode;
     }
 
     public enum Type {

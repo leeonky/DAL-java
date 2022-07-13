@@ -10,10 +10,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.github.leeonky.dal.ast.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
 import static com.github.leeonky.dal.compiler.DALProcedure.*;
 import static com.github.leeonky.dal.compiler.Notations.*;
 import static com.github.leeonky.interpreter.ClauseParser.Mandatory.clause;
+import static com.github.leeonky.interpreter.ClauseParser.positionClause;
 import static com.github.leeonky.interpreter.FunctionUtil.not;
 import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.NodeParser.positionNode;
@@ -79,7 +81,7 @@ public class Compiler {
     NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             PROPERTY, OBJECT, SORTED_LIST, LIST, PARENTHESES, VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND,
             TABLE, SHORT_VERIFICATION_OPERAND, CELL_VERIFICATION_OPERAND, GROUP_PROPERTY, OPTIONAL_PROPERTY_CHAIN,
-            INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> InputNode.INSTANCE),
+            INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> INPUT_NODE),
             NUMBER = Tokens.NUMBER.nodeParser(DALNode::constNumber),
             INTEGER = Tokens.INTEGER.nodeParser(DALNode::constInteger),
             SINGLE_QUOTED_STRING = SINGLE_QUOTED.with(many(charNode(SINGLE_QUOTED_ESCAPES))
@@ -117,7 +119,7 @@ public class Compiler {
 
     public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
             PROPERTY_CHAIN, OPERAND, EXPRESSION, VERIFICATION_PROPERTY,
-            DEFAULT_INPUT = procedure -> InputNode.INSTANCE,
+            DEFAULT_INPUT = procedure -> INPUT_NODE,
             SCHEMA_COMPOSE = OPENING_BRACKET.with(single(many(SCHEMA.mandatory("Expect a schema"))
                             .and(Syntax.Rules.splitBy(SCHEMA_AND)).as(DALNode::elementSchemas)).and(endWith(CLOSING_BRACKET)).as())
                     .or(many(SCHEMA.mandatory("Expect a schema")).and(Syntax.Rules.splitBy(SCHEMA_AND)).as(DALNode::schemas)),
@@ -255,21 +257,12 @@ public class Compiler {
                 .clause((prefix, cell) -> new TableRowNode(prefix, cell, head));
     }
 
-    //    TODO move to syntax
-    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> setPosition(
-            ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> mandatory, int position) {
-        return procedure -> {
-            Clause<DALRuntimeContext, DALNode> clause = mandatory.parse(procedure);
-            return (Clause<DALRuntimeContext, DALNode>) input -> clause.expression(input).setPositionBegin(position);
-        };
-    }
-
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
             DALNode rowPrefix, TableHeadRow head) {
-//        TODO use lambda remove parse
-        return procedure -> procedure.positionOf(p -> setPosition(shortVerificationClause(oneOf(VERIFICATION_OPERATORS,
-                head.getHeader(procedure.getIndex()).operator(), ((TableRowPrefixNode) rowPrefix).operator()).or(
-                DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING)), p).parse(procedure));
+        return positionClause(ClauseParser.<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+                columnMandatory(column -> shortVerificationClause(oneOf(VERIFICATION_OPERATORS,
+                head.getHeader(column).operator(), ((TableRowPrefixNode) rowPrefix).operator()).or(
+                DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING))));
     }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
@@ -278,18 +271,18 @@ public class Compiler {
     }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableCell(
-            DALNode head, DALNode transposedTableHead) {
-//        TODO use lambda remove parse
-        return procedure -> procedure.positionOf(p -> setPosition(oneOf(ELEMENT_ELLIPSIS_CLAUSE, ROW_WILDCARD_CLAUSE)
-                .or(shortVerificationClause(oneOf(VERIFICATION_OPERATORS, ((HeaderNode) head).operator(),
-                        ((TransposedTableHead) transposedTableHead).getPrefix(procedure.getIndex()).operator())
-                        .or(DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING))), p).parse(procedure));
+            DALNode prefix, DALNode header) {
+        return positionClause(ClauseParser.<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+                columnMandatory(column -> oneOf(ELEMENT_ELLIPSIS_CLAUSE, ROW_WILDCARD_CLAUSE)
+                .or(shortVerificationClause(oneOf(VERIFICATION_OPERATORS, ((HeaderNode) prefix).operator(),
+                        ((TransposedTableHead) header).getPrefix(column).operator())
+                        .or(DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING)))));
     }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
-        return procedure -> prefixHead -> new TransposedTableNode(prefixHead, many(positionNode(COLUMN_SPLITTER.before(
-                single(TABLE_HEADER).and(endWith(COLUMN_SPLITTER)).as())).concat(clause(header -> tableLine(
-                transposeTableCell(header, prefixHead)).as(cells -> new TransposedRowNode(header, cells))))).and(atLeast(1))
+        return procedure -> header -> new TransposedTableNode(header, many(positionNode(COLUMN_SPLITTER.before(
+                single(TABLE_HEADER).and(endWith(COLUMN_SPLITTER)).as())).concat(clause(prefix -> tableLine(
+                transposeTableCell(prefix, header)).as(cells -> new TransposedRowNode(prefix, cells))))).and(atLeast(1))
                 .and(endWithOptionalLine()).as(TransposedTableBody::new).mandatory("Expecting a table").parse(procedure));
     }
 

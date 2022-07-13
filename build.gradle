@@ -48,7 +48,7 @@ repositories {
 
 dependencies {
     compile 'com.github.leeonky:bean-util:0.4.1'
-    compile 'com.github.leeonky:interpreter-core:0.0.1'
+    compile 'com.github.leeonky:interpreter-core:0.0.2'
 
     testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
     testImplementation 'org.assertj:assertj-core:3.21.0'

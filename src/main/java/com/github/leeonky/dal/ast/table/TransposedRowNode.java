@@ -1,6 +1,9 @@
 package com.github.leeonky.dal.ast.table;
 
-import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.ast.DALNode;
+import com.github.leeonky.dal.ast.ListEllipsisNode;
+import com.github.leeonky.dal.ast.TableNode;
+import com.github.leeonky.dal.ast.WildcardNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 
@@ -8,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.ast.InputNode.INPUT_NODE;
 import static java.util.Collections.singletonList;
 
 public class TransposedRowNode extends DALNode {
@@ -24,8 +28,7 @@ public class TransposedRowNode extends DALNode {
     public String inspect() {
         return TableNode.printLine(new ArrayList<DALNode>() {{
             add(headerNode);
-//            TODO use clause
-            addAll(cellClauses.stream().map(clause -> clause.expression(InputNode.INSTANCE)).collect(Collectors.toList())
+            addAll(cellClauses.stream().map(clause -> clause.expression(INPUT_NODE)).collect(Collectors.toList())
             );
         }});
     }
@@ -48,8 +51,7 @@ public class TransposedRowNode extends DALNode {
 
     public void replaceEmptyCell(TransposedRowNode firstRow) {
         for (int i = 0; i < firstRow.cellClauses.size(); i++) {
-//            TODO refactor
-            DALNode row = firstRow.cellClauses.get(i).expression(null);
+            DALNode row = firstRow.cellClauses.get(i).expression(INPUT_NODE);
             if (row instanceof WildcardNode || row instanceof ListEllipsisNode) {
                 cellClauses.set(i, node -> new EmptyCellNode());
             }

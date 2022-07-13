@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.ast.InputNode.INPUT_NODE;
 import static com.github.leeonky.interpreter.FunctionUtil.notAllowParallelReduce;
 
 public class GroupNode extends DALNode {
@@ -21,7 +22,7 @@ public class GroupNode extends DALNode {
     @Override
     public String inspect() {
         return elements.stream().map(DALNode::inspect).collect(Collectors.joining(", ", "<<", ">>"))
-                + makeVerificationExpression(InputNode.INSTANCE).inspect();
+                + makeVerificationExpression(INPUT_NODE).inspect();
     }
 
     @Override

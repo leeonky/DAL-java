@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class InputNode extends DALNode {
-    public static final InputNode INSTANCE = new InputNode();
+    public static final InputNode INPUT_NODE = new InputNode();
 
     @Override
     public Data evaluateData(RuntimeContextBuilder.DALRuntimeContext context) {

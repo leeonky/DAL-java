@@ -9,6 +9,7 @@ import com.github.leeonky.interpreter.SyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.github.leeonky.dal.ast.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.ListScopeNode.Style.ROW;
 import static com.github.leeonky.dal.ast.SortGroupNode.NOP_COMPARATOR;
 import static com.github.leeonky.dal.ast.TableNode.printLine;
@@ -30,14 +31,13 @@ public class TableRowNode extends DALNode {
         rowPrefix = (TableRowPrefixNode) prefix;
         cells = new ArrayList<>(clauses);
         this.tableHeadRow = tableHeadRow;
-//        TODO move to clause
-        setPositionBegin(clauses.get(clauses.size() - 1).expression(null).getOperandPosition());
+        setPositionBegin(clauses.get(clauses.size() - 1).getOperandPosition(INPUT_NODE));
     }
 
     @Override
     public String inspect() {
         String prefix = rowPrefix.inspect();
-        String data = printLine(cells.stream().map(clause -> clause.expression(InputNode.INSTANCE)).collect(toList()));
+        String data = printLine(cells.stream().map(clause -> clause.expression(INPUT_NODE)).collect(toList()));
         return (prefix.isEmpty() ? data : prefix + " " + data);
     }
 
@@ -94,9 +94,9 @@ public class TableRowNode extends DALNode {
 
     public void checkSize(int size) {
         if (!specialRow() && cells.size() != size)
-//        TODO move to clause
-            throw new SyntaxException("Different cell size", cells.get(cells.size() - 1).expression(null).getOperandPosition());
+            throw new SyntaxException("Different cell size", cells.get(cells.size() - 1).getOperandPosition(INPUT_NODE));
     }
+
 
     public DalException markPositionOnCells(DalException dalException) {
         return cells.stream().reduce(dalException, (e, cell) ->

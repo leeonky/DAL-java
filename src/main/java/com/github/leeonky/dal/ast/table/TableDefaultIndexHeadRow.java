@@ -2,10 +2,10 @@ package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALOperator.PropertyImplicit;
-import com.github.leeonky.dal.ast.InputNode;
 import com.github.leeonky.dal.ast.SortGroupNode;
 import com.github.leeonky.dal.ast.SymbolNode;
 
+import static com.github.leeonky.dal.ast.InputNode.INPUT_NODE;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 
@@ -17,7 +17,7 @@ public class TableDefaultIndexHeadRow extends TableHeadRow {
 
     @Override
     public HeaderNode getHeader(int index) {
-        return new HeaderNode(SortGroupNode.NO_SEQUENCE, new DALExpression(InputNode.INSTANCE, new PropertyImplicit(),
+        return new HeaderNode(SortGroupNode.NO_SEQUENCE, new DALExpression(INPUT_NODE, new PropertyImplicit(),
                 new SymbolNode(index, SymbolNode.Type.NUMBER)), empty());
     }
 
