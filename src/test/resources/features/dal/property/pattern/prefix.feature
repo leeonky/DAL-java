@@ -92,6 +92,26 @@ Feature: prefix
     Unexpected fields `value0`, `value1`, `value2`
     """
 
+  Scenario: should skip number key
+    Given the following java class:
+    """
+    public class Data {
+      public java.util.Map<Object, Object> data = new java.util.HashMap<Object, Object>() {{
+        put(0, 0);
+        put("ab", "b");
+        put("ac", "c");
+      }};
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    data: {
+      a{}= {
+        b: b
+        c: c
+      }
+    }
+    """
 
 #  TODO field alias not support yet
 #  TODO bracket string relax not support yet

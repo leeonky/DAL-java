@@ -146,11 +146,11 @@ public class Data {
         }}, dalRuntimeContext, propertySchema(property));
     }
 
-    //                    TODO object key *********************
     public Data filter(String prefix) {
         FilteredObject filteredObject = new FilteredObject();
-        getFieldNames().stream().filter(fieldName -> ((String) fieldName).startsWith(prefix)).forEach(fieldName ->
-                filteredObject.put(trimPrefix(prefix, (String) fieldName), getValue(fieldName).getInstance()));
+        getFieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
+                .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
+                        filteredObject.put(trimPrefix(prefix, fieldName), getValue(fieldName).getInstance()));
         return new Data(filteredObject, dalRuntimeContext, schemaType).setListComparator(listComparator);
     }
 
