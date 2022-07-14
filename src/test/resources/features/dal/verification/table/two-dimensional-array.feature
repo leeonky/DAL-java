@@ -1,4 +1,4 @@
-Feature: two demensional array
+Feature: two dimensional array
 
   Scenario: two-dimensional array
     Given the following java class:
@@ -43,9 +43,8 @@ Feature: two demensional array
     """
     When use a instance of java class "Data" to evaluate:
     """
-    data: | 0    | 1    | 2    |
-          | str1 | str2 | strA |
-          | error | str4 | strB |
+    data: ^| str1  | str2 | strA |
+           | error | str4 | strB |
     """
     Then failed with the message:
     """
@@ -56,9 +55,8 @@ Feature: two demensional array
     """
     And got the following notation:
     """
-    data: | 0    | 1    | 2    |
-          | str1 | str2 | strA |
-          | error | str4 | strB |
-            ^
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    data: ^| str1  | str2 | strA |
+           | error | str4 | strB |
+             ^
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     """
