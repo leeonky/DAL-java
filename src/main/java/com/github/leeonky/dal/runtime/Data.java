@@ -237,6 +237,10 @@ public class Data {
         return dalRuntimeContext.newBlockScope(this, supplier);
     }
 
+    public CurryingMethod findCurryingMethod(Object property) {
+        return null;
+    }
+
     private static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
     }
 }

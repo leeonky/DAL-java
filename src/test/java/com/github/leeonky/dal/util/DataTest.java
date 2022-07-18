@@ -158,4 +158,16 @@ class DataTest {
             assertThat(build.wrap(null).dump()).isEqualTo("null");
         }
     }
+
+    @Nested
+    class Currying {
+        private RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder().build(null);
+
+        @Test
+        void return_null_when_property_is_not_string() {
+            Data data = build.wrap(new Object());
+
+            assertThat(data.findCurryingMethod(1)).isNull();
+        }
+    }
 }

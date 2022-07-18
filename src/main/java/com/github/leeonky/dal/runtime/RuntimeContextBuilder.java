@@ -179,7 +179,7 @@ public class RuntimeContextBuilder {
         Optional<Function<Object, Object>> mapper = objectImplicitMapper.tryGetData(instance);
         if (mapper.isPresent())
             return invokeExtensionMethod(mapper.get().apply(instance), name, typeName);
-        throw new IllegalStateException(format("Method or property `%s` does not exist in `%s`", name, typeName));
+        throw new InvalidPropertyException(format("Method or property `%s` does not exist in `%s`", name, typeName));
     }
 
     private Optional<Method> findExtensionMethod(Object instance, String name, BiPredicate<Class<?>, Class<?>> condition) {
@@ -187,7 +187,7 @@ public class RuntimeContextBuilder {
                 && condition.test(method.getParameterTypes()[0], instance.getClass()));
         List<Method> methods = methodStream.collect(Collectors.toList());
         if (methods.size() > 1)
-            throw new IllegalStateException("Ambiguous method call:\n"
+            throw new InvalidPropertyException("Ambiguous method call:\n"
                     + methods.stream().map(Method::toString).collect(Collectors.joining("\n")));
         return methods.stream().findFirst();
     }
@@ -304,7 +304,14 @@ public class RuntimeContextBuilder {
         }
 
         public Object getPropertyValue(Data data, Object property) {
-            return propertyAccessors.getData(data.getInstance()).getValueByData(data, property);
+            try {
+                return propertyAccessors.getData(data.getInstance()).getValueByData(data, property);
+            } catch (InvalidPropertyException e) {
+                CurryingMethod method = data.findCurryingMethod(property);
+                if (method != null)
+                    return method;
+                throw e;
+            }
         }
 
         @SuppressWarnings("unchecked")
