@@ -193,11 +193,9 @@ public class RuntimeContextBuilder {
     }
 
     private boolean maybeExtensionMethods(Method method) {
-        return method.getParameterCount() == 1 && isMethod(method, STATIC) && isMethod(method, PUBLIC);
-    }
-
-    private boolean isMethod(Method method, int modifier) {
-        return (modifier & method.getModifiers()) != 0;
+        return method.getParameterCount() == 1
+                && (STATIC & method.getModifiers()) != 0
+                && (PUBLIC & method.getModifiers()) != 0;
     }
 
     private static class MapPropertyAccessor implements PropertyAccessor<Map<?, ?>> {

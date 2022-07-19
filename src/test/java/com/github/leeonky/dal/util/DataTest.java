@@ -160,7 +160,7 @@ class DataTest {
     }
 
     @Nested
-    class Currying {
+    class GetCurryingMethod {
         private RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder().build(null);
 
         @Test
@@ -168,6 +168,35 @@ class DataTest {
             Data data = build.wrap(new Object());
 
             assertThat(data.findCurryingMethod(1)).isNull();
+        }
+
+        @Test
+        void return_currying_method_with_property() {
+            Data data = build.wrap(new Currying());
+
+            assertThat(data.findCurryingMethod("currying1").call("hello")).isEqualTo("hello");
+        }
+
+        @Test
+        void currying_of_currying() {
+            Data data = build.wrap(new Currying());
+            data = build.wrap(data.findCurryingMethod("currying2"));
+
+            assertThat(data.findCurryingMethod(2).call("hello")).isEqualTo("hello2");
+        }
+    }
+
+    public static class Currying {
+        public Object unexpected(String str) {
+            return null;
+        }
+
+        public Object currying1(String str) {
+            return str;
+        }
+
+        public Object currying2(int i, String str) {
+            return str + i;
         }
     }
 }

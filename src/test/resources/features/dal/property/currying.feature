@@ -17,3 +17,8 @@ Feature: currying function
       c: C
     }
     """
+
+# TODO 1 level, 2 level
+# TODO args range for = {} verification
+# TODO Auto convert sub property to function args (property is string)
+# TODO error handling when curryingmethod not support sub args rang in object= / filter property /
