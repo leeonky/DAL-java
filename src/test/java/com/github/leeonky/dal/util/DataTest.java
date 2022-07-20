@@ -167,20 +167,20 @@ class DataTest {
         void return_null_when_property_is_not_string() {
             Data data = build.wrap(new Object());
 
-            assertThat(data.findCurryingMethod(1)).isNull();
+            assertThat(data.currying(1)).isNull();
         }
 
         @Test
         void return_currying_method_with_property() {
             Data data = build.wrap(new Currying());
 
-            assertThat(data.findCurryingMethod("currying1").call("hello")).isEqualTo("hello");
+            assertThat(data.currying("currying1").call("hello")).isEqualTo("hello");
         }
 
         @Test
         void currying_of_currying() {
             Data data = build.wrap(new Currying());
-            CurryingMethod currying = data.findCurryingMethod("currying2");
+            CurryingMethod currying = data.currying("currying2");
 
             assertThat(((CurryingMethod) currying.call(2)).call("hello")).isEqualTo("hello2");
         }

@@ -29,7 +29,6 @@ public class IntegrationTestContext {
     private String expression;
     private final List<String> schemas = new ArrayList<>();
     private final List<String> javaClasses = new ArrayList<>();
-
     private static final Compiler compiler = new Compiler();
     private static final Map<String, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure>> parserMap = new HashMap<String, NodeParser<DALRuntimeContext, DALNode, DALExpression,
@@ -42,6 +41,7 @@ public class IntegrationTestContext {
     }};
     private DALNode dalNode = null;
     private Map<String, Integer> firstIndexes = new HashMap<>();
+    private final List<Class<?>> classes = new ArrayList<>();
 
     private static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> optional(
             NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeFactory) {
@@ -83,15 +83,8 @@ public class IntegrationTestContext {
 
     @SneakyThrows
     public void givenJavaDataByClassName(String className) {
-        com.github.leeonky.dal.cucumber.Compiler compiler
-                = new com.github.leeonky.dal.cucumber.Compiler();
-        List<Class<?>> classes = compiler.compileToClasses(javaClasses.stream().map(s ->
-                "import java.math.*;\n" + s).collect(Collectors.toList()));
-        classes.forEach(dal.getRuntimeContextBuilder()::registerStaticMethodExtension);
-        Class type = classes.stream().filter(clazz -> clazz.getName().equals(className))
-                .findFirst().orElseThrow(() -> new IllegalArgumentException
-                        ("cannot find bean class: " + className + "\nclasses: " + classes));
-
+        compileAll();
+        Class type = getType(className);
         if (firstIndexes.containsKey(className)) {
             dal.getRuntimeContextBuilder().registerListAccessor(type, new ListAccessor<Object>() {
                 @Override
@@ -106,6 +99,22 @@ public class IntegrationTestContext {
             });
         }
         input = type.newInstance();
+    }
+
+    private Class getType(String className) {
+        Class type = classes.stream().filter(clazz -> clazz.getName().equals(className))
+                .findFirst().orElseThrow(() -> new IllegalArgumentException
+                        ("cannot find bean class: " + className + "\nclasses: " + classes));
+        return type;
+    }
+
+    private void compileAll() {
+        if (classes.isEmpty()) {
+            com.github.leeonky.dal.cucumber.Compiler compiler = new com.github.leeonky.dal.cucumber.Compiler();
+            classes.addAll(compiler.compileToClasses(javaClasses.stream().map(s ->
+                    "import java.math.*;\n" + s).collect(Collectors.toList())));
+            classes.forEach(dal.getRuntimeContextBuilder()::registerStaticMethodExtension);
+        }
     }
 
     public void shouldPass() {
@@ -247,5 +256,10 @@ public class IntegrationTestContext {
         RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(null);
 
         assertThat(runtimeContext.wrap(input).dump()).isEqualTo(verification);
+    }
+
+    public void setCurryingMethodArgRange(String type, String method, List<String> range) {
+        compileAll();
+        dal.getRuntimeContextBuilder().registerCurryingMethodRange(getType(type), method, args -> new ArrayList<>(range));
     }
 }

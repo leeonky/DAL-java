@@ -2,9 +2,12 @@ package com.github.leeonky.dal.cucumber;
 
 import com.github.leeonky.dal.compiler.IntegrationTestContext;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+
+import java.util.List;
 
 public class IntegrationSteps {
     private IntegrationTestContext integrationTestContext = new IntegrationTestContext();
@@ -178,5 +181,10 @@ public class IntegrationSteps {
     public void dumpedInstanceOfJavaClassShouldBe(String type, String verification) {
         integrationTestContext.givenJavaDataByClassName(type);
         integrationTestContext.verifyDumpedData(verification);
+    }
+
+    @And("args range of java class {string} method {string}:")
+    public void argsRangeOfJavaClassMethod(String type, String method, List<List<String>> range) {
+        integrationTestContext.setCurryingMethodArgRange(type, method, range.get(0));
     }
 }

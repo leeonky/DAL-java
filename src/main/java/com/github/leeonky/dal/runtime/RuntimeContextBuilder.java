@@ -11,6 +11,7 @@ import com.github.leeonky.util.Suppressor;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.time.*;
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -35,6 +36,7 @@ public class RuntimeContextBuilder {
     private final NumberType numberType = new NumberType();
     private final ClassKeyMap<Function<Object, String>> valueDumpers = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Map<String, Object>>> objectDumpers = new ClassKeyMap<>();
+    private final Map<Method, Function<List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
     private Converter converter = Converter.getInstance();
 
     public RuntimeContextBuilder() {
@@ -80,6 +82,12 @@ public class RuntimeContextBuilder {
     private static String dumpString(Object o) {
         return "\"" + o.toString().replace("\\", "\\\\").replace("\t", "\\t").replace("\b", "\\b").replace("\n", "\\n")
                 .replace("\r", "\\r").replace("\f", "\\f").replace("'", "\\'").replace("\"", "\\\"") + "\"";
+    }
+
+    static Optional<Method> findMethodToCurrying(Class<?> type, Object property) {
+        return Arrays.stream(type.getMethods()).filter(method -> Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers()))
+                .filter(method -> method.getName().equals(property))
+                .findFirst();
     }
 
     @SuppressWarnings("unchecked")
@@ -199,6 +207,12 @@ public class RuntimeContextBuilder {
                 && (PUBLIC & method.getModifiers()) != 0;
     }
 
+    public RuntimeContextBuilder registerCurryingMethodRange(Class<?> type, String methodName,
+                                                             Function<List<Object>, List<Object>> range) {
+        findMethodToCurrying(type, methodName).ifPresent(method -> curryingMethodArgRanges.put(method, range));
+        return this;
+    }
+
     private static class MapPropertyAccessor implements PropertyAccessor<Map<?, ?>> {
         @Override
         public Object getValue(Map<?, ?> instance, Object property) {
@@ -306,7 +320,7 @@ public class RuntimeContextBuilder {
             try {
                 return propertyAccessors.getData(data.getInstance()).getValueByData(data, property);
             } catch (InvalidPropertyException e) {
-                CurryingMethod curryingMethod = data.findCurryingMethod(property);
+                CurryingMethod curryingMethod = data.currying(property);
                 if (curryingMethod != null)
                     return curryingMethod;
                 throw e;
@@ -428,6 +442,14 @@ public class RuntimeContextBuilder {
         @Override
         public Object getValue(CurryingMethod curryingMethod, Object property) {
             return curryingMethod.call(property);
+        }
+
+        @Override
+        public Set<Object> getPropertyNames(CurryingMethod curryingMethod) {
+            Function<List<Object>, List<Object>> listListFunction = curryingMethodArgRanges.get(curryingMethod.getMethod());
+            if (listListFunction != null)
+                return new LinkedHashSet<>(listListFunction.apply(curryingMethod.getArgs()));
+            return emptySet();
         }
     }
 }

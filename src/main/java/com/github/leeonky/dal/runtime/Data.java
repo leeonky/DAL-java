@@ -4,7 +4,6 @@ import com.github.leeonky.dal.ast.SortGroupNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.BeanClass;
 
-import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -238,16 +237,11 @@ public class Data {
         return dalRuntimeContext.newBlockScope(this, supplier);
     }
 
-    public CurryingMethod findCurryingMethod(Object property) {
-        if (property instanceof String) {
-            Class<?> type = instance.getClass();
-            return Arrays.stream(type.getMethods()).filter(method -> Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers()))
-                    .filter(method -> method.getName().equals(property))
-                    .findFirst().map(method -> new CurryingMethod(instance, method)).orElse(null);
-        }
-        return null;
+    public CurryingMethod currying(Object property) {
+        return property instanceof String ? RuntimeContextBuilder.findMethodToCurrying(instance.getClass(), property)
+                .map(method -> new CurryingMethod(instance, method)).orElse(null) : null;
     }
 
-    private static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
+    static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
     }
 }

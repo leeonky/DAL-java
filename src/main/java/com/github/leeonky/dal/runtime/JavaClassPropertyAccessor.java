@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 
 public class JavaClassPropertyAccessor<T> implements PropertyAccessor<T> {
-    private final RuntimeContextBuilder runtimeContextBuilder;
+    protected final RuntimeContextBuilder runtimeContextBuilder;
     private final BeanClass<T> beanClass;
 
     public JavaClassPropertyAccessor(RuntimeContextBuilder runtimeContextBuilder, BeanClass<T> type) {

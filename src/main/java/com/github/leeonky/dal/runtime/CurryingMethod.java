@@ -17,9 +17,9 @@ public class CurryingMethod {
     }
 
     public Object call(Object arg) {
-        return method.getParameters().length != args.size() + 1 ? currying(arg)
+        return method.getParameters().length != getArgs().size() + 1 ? currying(arg)
                 : Suppressor.get(() -> method.invoke(instance, new ArrayList<Object>() {{
-            addAll(args);
+            addAll(getArgs());
             add(arg);
         }}.toArray()));
     }
@@ -29,5 +29,13 @@ public class CurryingMethod {
         curryingMethod.args.addAll(args);
         curryingMethod.args.add(arg);
         return curryingMethod;
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public List<Object> getArgs() {
+        return args;
     }
 }
