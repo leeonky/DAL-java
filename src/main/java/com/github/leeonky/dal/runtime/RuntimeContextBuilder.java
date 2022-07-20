@@ -55,6 +55,7 @@ public class RuntimeContextBuilder {
                 .registerListAccessor(Stream.class, stream -> stream::iterator)
                 .registerPropertyAccessor(Map.class, new MapPropertyAccessor())
                 .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor())
+                .registerPropertyAccessor(CurryingMethod.class, new CurryingMethodPropertyAccessor())
         ;
 
         registerValueDumper(String.class, RuntimeContextBuilder::dumpString)
@@ -305,9 +306,9 @@ public class RuntimeContextBuilder {
             try {
                 return propertyAccessors.getData(data.getInstance()).getValueByData(data, property);
             } catch (InvalidPropertyException e) {
-                CurryingMethod method = data.findCurryingMethod(property);
-                if (method != null)
-                    return method;
+                CurryingMethod curryingMethod = data.findCurryingMethod(property);
+                if (curryingMethod != null)
+                    return curryingMethod;
                 throw e;
             }
         }
@@ -416,6 +417,17 @@ public class RuntimeContextBuilder {
         @Override
         public Object getValueByData(Data data, Object property) {
             return data.mapList(property).getInstance();
+        }
+    }
+
+    private class CurryingMethodPropertyAccessor extends JavaClassPropertyAccessor<CurryingMethod> {
+        public CurryingMethodPropertyAccessor() {
+            super(RuntimeContextBuilder.this, BeanClass.create(CurryingMethod.class));
+        }
+
+        @Override
+        public Object getValue(CurryingMethod curryingMethod, Object property) {
+            return curryingMethod.call(property);
         }
     }
 }

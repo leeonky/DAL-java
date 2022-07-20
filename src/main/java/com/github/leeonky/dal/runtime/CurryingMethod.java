@@ -17,11 +17,14 @@ public class CurryingMethod {
     }
 
     public Object call(Object arg) {
-        if (method.getParameters().length == args.size() + 1) {
-            ArrayList<Object> args = new ArrayList<>(this.args);
-            args.add(arg);
-            return Suppressor.get(() -> method.invoke(instance, args.toArray()));
-        }
+        return method.getParameters().length != args.size() + 1 ? currying(arg)
+                : Suppressor.get(() -> method.invoke(instance, new ArrayList<Object>() {{
+            addAll(args);
+            add(arg);
+        }}.toArray()));
+    }
+
+    private CurryingMethod currying(Object arg) {
         CurryingMethod curryingMethod = new CurryingMethod(instance, method);
         curryingMethod.args.addAll(args);
         curryingMethod.args.add(arg);
