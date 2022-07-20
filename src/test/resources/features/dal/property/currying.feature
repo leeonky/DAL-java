@@ -67,7 +67,5 @@ Feature: currying function
     }
     """
 
-# TODO args range for = {} verification
 # TODO Auto convert sub property to function args (property is string)
-# TODO error handling when curryingmethod not support sub args rang in object= / filter property /
 # TODO override logic first max arg count

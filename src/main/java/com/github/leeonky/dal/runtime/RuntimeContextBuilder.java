@@ -449,6 +449,7 @@ public class RuntimeContextBuilder {
             Function<List<Object>, List<Object>> listListFunction = curryingMethodArgRanges.get(curryingMethod.getMethod());
             if (listListFunction != null)
                 return new LinkedHashSet<>(listListFunction.apply(curryingMethod.getArgs()));
+            System.err.printf("No arg range for %s, give the range or use `:`%n", curryingMethod.parameterInfo());
             return emptySet();
         }
     }

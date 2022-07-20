@@ -3,8 +3,13 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.util.Suppressor;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 public class CurryingMethod {
     private final Object instance;
@@ -37,5 +42,12 @@ public class CurryingMethod {
 
     public List<Object> getArgs() {
         return args;
+    }
+
+    public String parameterInfo() {
+        List<String> parameters = Arrays.stream(method.getParameters()).map(Parameter::toString).collect(toList());
+        if (parameters.size() > 0) parameters.set(args.size(), "> " + parameters.get(args.size()));
+        return parameters.stream().collect(Collectors.joining(",\n",
+                String.format("%s.%s(\n", method.getDeclaringClass().getName(), method.getName()), "\n)"));
     }
 }
