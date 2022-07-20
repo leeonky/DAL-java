@@ -180,9 +180,9 @@ class DataTest {
         @Test
         void currying_of_currying() {
             Data data = build.wrap(new Currying());
-            data = build.wrap(data.findCurryingMethod("currying2"));
+            CurryingMethod currying = data.findCurryingMethod("currying2");
 
-            assertThat(data.findCurryingMethod(2).call("hello")).isEqualTo("hello2");
+            assertThat(((CurryingMethod) currying.call(2)).call("hello")).isEqualTo("hello2");
         }
     }
 

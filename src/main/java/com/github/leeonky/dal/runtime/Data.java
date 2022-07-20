@@ -239,9 +239,6 @@ public class Data {
     }
 
     public CurryingMethod findCurryingMethod(Object property) {
-        if (instance instanceof CurryingMethod) {
-            return ((CurryingMethod) instance).currying(property);
-        }
         if (property instanceof String) {
             Class<?> type = instance.getClass();
             return Arrays.stream(type.getMethods()).filter(method -> Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers()))
