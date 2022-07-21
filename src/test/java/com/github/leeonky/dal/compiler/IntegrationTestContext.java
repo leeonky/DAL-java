@@ -252,14 +252,9 @@ public class IntegrationTestContext {
         assertThat(runtimeContext.wrap(input).dump()).isEqualTo(verification);
     }
 
-    public void verifyDumpedClass(String type, String verification) {
-        RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(null);
-
-        assertThat(runtimeContext.wrap(input).dump()).isEqualTo(verification);
-    }
-
     public void setCurryingMethodArgRange(String type, String method, List<String> range) {
         compileAll();
-        dal.getRuntimeContextBuilder().registerCurryingMethodRange(getType(type), method, args -> new ArrayList<>(range));
+        dal.getRuntimeContextBuilder().registerCurryingMethodRange(getType(type), method,
+                (instance, args) -> new ArrayList<>(range));
     }
 }

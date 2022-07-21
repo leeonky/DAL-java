@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.time.*;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -37,7 +38,7 @@ public class RuntimeContextBuilder {
     private final NumberType numberType = new NumberType();
     private final ClassKeyMap<Function<Object, String>> valueDumpers = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Map<String, Object>>> objectDumpers = new ClassKeyMap<>();
-    private final Map<Method, Function<List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
+    private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
     private Converter converter = Converter.getInstance();
 
     public RuntimeContextBuilder() {
@@ -178,7 +179,7 @@ public class RuntimeContextBuilder {
     }
 
     public RuntimeContextBuilder registerCurryingMethodRange(Class<?> type, String methodName,
-                                                             Function<List<Object>, List<Object>> range) {
+                                                             BiFunction<Object, List<Object>, List<Object>> range) {
         methodToCurrying(type, methodName).ifPresent(method -> curryingMethodArgRanges.put(method, range));
         return this;
     }
@@ -447,11 +448,7 @@ public class RuntimeContextBuilder {
 
         @Override
         public Set<Object> getPropertyNames(CurryingMethod curryingMethod) {
-            Function<List<Object>, List<Object>> listListFunction = curryingMethodArgRanges.get(curryingMethod.getMethod());
-            if (listListFunction != null)
-                return new LinkedHashSet<>(listListFunction.apply(curryingMethod.getArgs()));
-            System.err.printf("No arg range for %s, give the range or use `:`%n", curryingMethod.parameterInfo());
-            return emptySet();
+            return curryingMethod.fetchArgRange(curryingMethodArgRanges);
         }
     }
 }
