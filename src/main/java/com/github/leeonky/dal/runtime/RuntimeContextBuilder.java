@@ -58,8 +58,8 @@ public class RuntimeContextBuilder {
                 .registerListAccessor(Iterable.class, iterable -> iterable)
                 .registerListAccessor(Stream.class, stream -> stream::iterator)
                 .registerPropertyAccessor(Map.class, new MapPropertyAccessor())
-                .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor())
-                .registerPropertyAccessor(CurryingMethod.class, new CurryingMethodPropertyAccessor())
+                .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor(this))
+                .registerPropertyAccessor(CurryingMethod.class, new CurryingMethodPropertyAccessor(this))
         ;
 
         registerValueDumper(String.class, RuntimeContextBuilder::dumpString)
@@ -210,66 +210,8 @@ public class RuntimeContextBuilder {
                 .filter(method -> condition.test(method.getParameters()[0].getType(), type)));
     }
 
-    private static class MapPropertyAccessor implements PropertyAccessor<Map<?, ?>> {
-        @Override
-        public Object getValue(Map<?, ?> instance, Object property) {
-            return instance.get(property);
-        }
-
-        @Override
-        public Set<Object> getPropertyNames(Map<?, ?> instance) {
-            return new LinkedHashSet<>(instance.keySet());
-        }
-
-        @Override
-        public boolean isNull(Map<?, ?> instance) {
-            return instance == null;
-        }
-    }
-
-    static class PartialPropertyStack {
-        private final Map<Data, PartialProperties> partials = new HashMap<>();
-
-        public void setupPartialProperties(Object prefix, Data partial) {
-            partials.put(partial, new PartialProperties(prefix, partial));
-        }
-
-        public PartialProperties fetchPartialProperties(Data instance) {
-            PartialProperties partialProperties = partials.get(instance);
-            if (partialProperties == null)
-                partialProperties = partials.values().stream()
-                        .map(sub -> sub.partialPropertyStack.fetchPartialProperties(instance))
-                        .filter(Objects::nonNull).findFirst().orElse(null);
-            return partialProperties;
-        }
-
-        public Set<String> collectPartialProperties(Data data) {
-            return partials.values().stream().flatMap(partialProperties ->
-                    partialProperties.collectPartialProperties(data).stream()).collect(Collectors.toSet());
-        }
-    }
-
-    static class PartialProperties {
-        final Object prefix;
-        final Data partialData;
-        final Set<Object> postfixes = new LinkedHashSet<>();
-        final PartialPropertyStack partialPropertyStack = new PartialPropertyStack();
-
-        public PartialProperties(Object prefix, Data partialData) {
-            this.prefix = prefix;
-            this.partialData = partialData;
-        }
-
-        public Set<String> collectPartialProperties(Data data) {
-            postfixes.addAll(partialPropertyStack.collectPartialProperties(partialData));
-            return postfixes.stream().map(property -> ((PartialObject) partialData.getInstance())
-                            .removeExpectedField(data.getFieldNames(), prefix, property))
-                    .filter(Optional::isPresent).map(Optional::get).collect(Collectors.toSet());
-        }
-
-        public boolean appendPartialProperties(Object symbol) {
-            return postfixes.add(symbol);
-        }
+    BiFunction<Object, List<Object>, List<Object>> fetchCurryingMethodArgRange(Method method) {
+        return curryingMethodArgRanges.get(method);
     }
 
     public class DALRuntimeContext implements RuntimeContext<DALRuntimeContext> {
@@ -422,33 +364,6 @@ public class RuntimeContextBuilder {
 
         public Optional<Method> methodToCurrying(Class<?> type, Object methodName) {
             return RuntimeContextBuilder.this.methodToCurrying(type, methodName);
-        }
-    }
-
-    private class AutoMappingListPropertyAccessor extends JavaClassPropertyAccessor<AutoMappingList> {
-        public AutoMappingListPropertyAccessor() {
-            super(RuntimeContextBuilder.this, BeanClass.create(AutoMappingList.class));
-        }
-
-        @Override
-        public Object getValueByData(Data data, Object property) {
-            return data.mapList(property).getInstance();
-        }
-    }
-
-    private class CurryingMethodPropertyAccessor extends JavaClassPropertyAccessor<CurryingMethod> {
-        public CurryingMethodPropertyAccessor() {
-            super(RuntimeContextBuilder.this, BeanClass.create(CurryingMethod.class));
-        }
-
-        @Override
-        public Object getValue(CurryingMethod curryingMethod, Object property) {
-            return curryingMethod.call(property, getConverter());
-        }
-
-        @Override
-        public Set<Object> getPropertyNames(CurryingMethod curryingMethod) {
-            return curryingMethod.fetchArgRange(curryingMethodArgRanges);
         }
     }
 }

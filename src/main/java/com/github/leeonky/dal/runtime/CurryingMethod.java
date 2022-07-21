@@ -56,11 +56,12 @@ public class CurryingMethod {
         return Modifier.isStatic(method.getModifiers());
     }
 
-    public Set<Object> fetchArgRange(Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges) {
-        BiFunction<Object, List<Object>, List<Object>> rangeFactory = curryingMethodArgRanges.get(method);
+    public Set<Object> fetchArgRange(RuntimeContextBuilder runtimeContextBuilder) {
+        BiFunction<Object, List<Object>, List<Object>> rangeFactory = runtimeContextBuilder.fetchCurryingMethodArgRange(method);
         if (rangeFactory != null)
             return new LinkedHashSet<>(fetchArgRange(rangeFactory));
         System.err.printf("No arg range for %s, give the range or use `:`%n", parameterInfo());
         return emptySet();
     }
+
 }
