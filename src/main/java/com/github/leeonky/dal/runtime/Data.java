@@ -237,9 +237,20 @@ public class Data {
         return dalRuntimeContext.newBlockScope(this, supplier);
     }
 
+    //    TODO refactor
     public CurryingMethod currying(Object property) {
-        return property instanceof String ? RuntimeContextBuilder.findMethodToCurrying(instance.getClass(), property)
-                .map(method -> new CurryingMethod(instance, method)).orElse(null) : null;
+        return property instanceof String ? getCurryingMethod(instance, property) : null;
+    }
+
+    //    TODO refactor
+    private CurryingMethod getCurryingMethod(Object instance, Object property) {
+        return RuntimeContextBuilder.findMethodToCurrying(instance.getClass(), property)
+                .map(method -> new CurryingMethod(instance, method)).orElseGet(() -> {
+                    return dalRuntimeContext.findStaticMethodToCurrying(instance, property)
+                            .map(method -> new CurryingMethod(instance, method, 0)).orElseGet(() -> {
+                                return dalRuntimeContext.getImplicitObject(instance).map(implicitObj -> getCurryingMethod(implicitObj, property)).orElse(null);
+                            });
+                });
     }
 
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {

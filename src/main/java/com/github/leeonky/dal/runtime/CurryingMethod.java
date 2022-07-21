@@ -22,6 +22,12 @@ public class CurryingMethod {
         this.method = method;
     }
 
+    public CurryingMethod(Object instance, Method method, int i) {
+        this.instance = null;
+        this.method = method;
+        args.add(instance);
+    }
+
     public Object call(Object arg, Converter converter) {
         Object convertedArg = convertArg(arg, converter);
         return enoughArgs() ? Suppressor.get(() -> method.invoke(instance, new ArrayList<Object>() {{
@@ -58,5 +64,11 @@ public class CurryingMethod {
         if (parameters.size() > 0) parameters.set(args.size(), "> " + parameters.get(args.size()));
         return parameters.stream().collect(Collectors.joining(",\n",
                 String.format("%s.%s(\n", method.getDeclaringClass().getName(), method.getName()), "\n)"));
+    }
+
+    public Object resolve() {
+        if (args.size() == method.getParameterCount())
+            return Suppressor.get(() -> method.invoke(instance, args.toArray()));
+        return this;
     }
 }

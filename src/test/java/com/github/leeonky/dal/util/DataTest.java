@@ -24,6 +24,7 @@ import static com.github.leeonky.util.BeanClass.getConverter;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataTest {
@@ -161,7 +162,7 @@ class DataTest {
     }
 
     @Nested
-    class GetCurryingMethod {
+    class CurringMethodArgs {
         private RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder().build(null);
 
         @Test
@@ -195,7 +196,61 @@ class DataTest {
         }
     }
 
-    public static class Currying {
+    @Nested
+    class StaticCurringMethodArgs {
+        private RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder()
+                .registerStaticMethodExtension(StaticMethod.class).build(null);
+
+        @Test
+        void return_currying_method_with_property() {
+            Data data = build.wrap(new Currying());
+
+            assertThat(data.currying("staticCurrying1").call("hello", getConverter())).isEqualTo("hello");
+        }
+
+        @Test
+        void return_currying_method_with_property_in_super_instance_type() {
+            Data data = build.wrap(new Currying());
+
+            assertThat(data.currying("baseMatchCurrying").call("hello", getConverter())).isEqualTo("hello");
+        }
+
+        @Test
+        void currying_of_currying() {
+            Data data = build.wrap(new Currying());
+            CurryingMethod currying = data.currying("staticCurrying2");
+
+            assertThat(((CurryingMethod) currying.call(2, getConverter())).call("hello", getConverter())).isEqualTo("hello2");
+        }
+
+        @Test
+        void should_choose_max_parameter_size_method() {
+            Data data = build.wrap(new Currying());
+            CurryingMethod currying = data.currying("staticOverrideMethod");
+
+            assertThat(((CurryingMethod) currying.call(2, getConverter())).call("hello", getConverter())).isEqualTo("hello2");
+        }
+
+        @Test
+        void use_same_instance_type_first_when_more_than_one_candidate() {
+            Data data = build.wrap(new Currying());
+            CurryingMethod currying = data.currying("baseCurrying");
+
+            assertThat(currying.call("a", getConverter())).isEqualTo("A");
+        }
+
+        @Test
+        void raise_error_when_more_than_one_candidate() {
+            Data data = build.wrap(new Currying());
+            assertThatThrownBy(() -> data.currying("invalidCurrying")).isInstanceOf(InvalidPropertyException.class);
+        }
+    }
+
+    public static class BaseCurrying {
+
+    }
+
+    public static class Currying extends BaseCurrying {
         public Object unexpected(String str) {
             return null;
         }
@@ -214,6 +269,44 @@ class DataTest {
 
         public Object overrideMethod(int i) {
             return i;
+        }
+    }
+
+    public static class StaticMethod {
+        public static Object staticCurrying1(Currying currying, String str) {
+            return str;
+        }
+
+        public static Object staticCurrying2(Currying currying, int i, String str) {
+            return str + i;
+        }
+
+        public static Object staticOverrideMethod(Currying currying, int i, String str) {
+            return str + i;
+        }
+
+        public static Object staticOverrideMethod(Currying currying, int i) {
+            return i;
+        }
+
+        public static Object baseCurrying(Currying currying, String str) {
+            return str.toUpperCase();
+        }
+
+        public static Object baseCurrying(BaseCurrying currying, String str) {
+            return str;
+        }
+
+        public static Object invalidCurrying(Currying currying, String str) {
+            return null;
+        }
+
+        public static Object invalidCurrying(Currying currying, int str) {
+            return null;
+        }
+
+        public static Object baseMatchCurrying(BaseCurrying currying, String str) {
+            return str;
         }
     }
 }

@@ -81,4 +81,25 @@ Feature: currying function
     upperCase[1]= '1'
     """
 
-# TODO static extension currying
+  Scenario: static method currying
+    Given the following java class:
+    """
+    public class Data {
+    }
+    """
+    And the following java class:
+    """
+    public class DataMethods {
+      public static String property(Data data, String str) {
+        return str.toUpperCase();
+      }
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    property: {
+      a: A
+    }
+    """
+
+# TODO input is null

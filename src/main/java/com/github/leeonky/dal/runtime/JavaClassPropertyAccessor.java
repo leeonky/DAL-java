@@ -7,6 +7,8 @@ import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import static java.lang.String.format;
+
 public class JavaClassPropertyAccessor<T> implements PropertyAccessor<T> {
     protected final RuntimeContextBuilder runtimeContextBuilder;
     private final BeanClass<T> beanClass;
@@ -21,14 +23,7 @@ public class JavaClassPropertyAccessor<T> implements PropertyAccessor<T> {
         try {
             return beanClass.getPropertyValue(instance, (String) property);
         } catch (NoSuchAccessorException ignore) {
-            try {
-                return beanClass.getType().getMethod((String) property).invoke(instance);
-            } catch (IllegalAccessException | NoSuchMethodException e) {
-                return runtimeContextBuilder.invokeExtensionMethod(instance, (String) property,
-                        instance.getClass().getName());
-            } catch (Exception e) {
-                throw new IllegalStateException(e);
-            }
+            throw new InvalidPropertyException(format("Method or property `%s` does not exist in `%s`", property, instance.getClass().getName()));
         }
     }
 

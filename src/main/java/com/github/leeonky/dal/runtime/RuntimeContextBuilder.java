@@ -2,12 +2,10 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
-import com.github.leeonky.interpreter.FunctionUtil;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.NumberType;
-import com.github.leeonky.util.Suppressor;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -20,7 +18,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
@@ -32,7 +29,10 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<Function<Object, Object>> objectImplicitMapper = new ClassKeyMap<>();
     private final Map<String, ConstructorViaSchema> valueConstructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
+    //    TODO to be remove
     private final Set<Method> extensionMethods = new HashSet<>();
+    //    TODO rename
+    private final Set<Method> extensionMethods2 = new HashSet<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final ClassKeyMap<Function<Object, String>> valueDumpers = new ClassKeyMap<>();
@@ -159,6 +159,11 @@ public class RuntimeContextBuilder {
         Stream.of(staticMethodExtensionClass.getMethods())
                 .filter(RuntimeContextBuilder.this::maybeExtensionMethods)
                 .forEach(extensionMethods::add);
+        Stream.of(staticMethodExtensionClass.getMethods())
+                .filter(method -> method.getParameterCount() >= 1
+                        && (STATIC & method.getModifiers()) != 0
+                        && (PUBLIC & method.getModifiers()) != 0)
+                .forEach(extensionMethods2::add);
         return this;
     }
 
@@ -180,27 +185,6 @@ public class RuntimeContextBuilder {
     public RuntimeContextBuilder registerUserDefinedLiterals(UserLiteralRule rule) {
         userDefinedLiterals.add(rule);
         return this;
-    }
-
-    public Object invokeExtensionMethod(Object instance, String name, String typeName) {
-        Optional<Method> optionalMethod = FunctionUtil.oneOf(() -> findExtensionMethod(instance, name, Object::equals),
-                () -> findExtensionMethod(instance, name, Class::isAssignableFrom));
-        if (optionalMethod.isPresent())
-            return Suppressor.get(() -> optionalMethod.get().invoke(null, instance));
-        Optional<Function<Object, Object>> mapper = objectImplicitMapper.tryGetData(instance);
-        if (mapper.isPresent())
-            return invokeExtensionMethod(mapper.get().apply(instance), name, typeName);
-        throw new InvalidPropertyException(format("Method or property `%s` does not exist in `%s`", name, typeName));
-    }
-
-    private Optional<Method> findExtensionMethod(Object instance, String name, BiPredicate<Class<?>, Class<?>> condition) {
-        Stream<Method> methodStream = extensionMethods.stream().filter(method -> method.getName().equals(name)
-                && condition.test(method.getParameterTypes()[0], instance.getClass()));
-        List<Method> methods = methodStream.collect(Collectors.toList());
-        if (methods.size() > 1)
-            throw new InvalidPropertyException("Ambiguous method call:\n"
-                    + methods.stream().map(Method::toString).collect(Collectors.joining("\n")));
-        return methods.stream().findFirst();
     }
 
     private boolean maybeExtensionMethods(Method method) {
@@ -324,7 +308,8 @@ public class RuntimeContextBuilder {
             } catch (InvalidPropertyException e) {
                 CurryingMethod curryingMethod = data.currying(property);
                 if (curryingMethod != null)
-                    return curryingMethod;
+                    return curryingMethod.resolve();
+//                TODO return value when currying is method call
                 throw e;
             }
         }
@@ -422,6 +407,31 @@ public class RuntimeContextBuilder {
 
         public Optional<Function<Object, Map<String, Object>>> fetchObjectDumper(Object instance) {
             return objectDumpers.tryGetData(instance);
+        }
+
+        //        TODO refactor
+        public Optional<Method> findStaticMethodToCurrying(Object instance, Object property) {
+            return Optional.ofNullable(getMethod(instance, property, Object::equals)
+                    .orElseGet(() -> getMethod(instance, property, Class::isAssignableFrom).orElse(null)));
+        }
+
+        //        TODO refactor
+        private Optional<Method> getMethod(Object instance, Object property, BiPredicate<Class<?>, Class<?>> condition) {
+            List<Method> collect = extensionMethods2.stream()
+                    .filter(method -> method.getName().equals(property))
+                    .filter(method -> condition.test(method.getParameters()[0].getType(), instance.getClass()))
+                    .sorted(Comparator.comparingInt(Method::getParameterCount).reversed()).collect(Collectors.toList());
+            if (collect.size() > 1) {
+                if (collect.get(0).getParameterCount() != collect.get(1).getParameterCount())
+                    return collect.stream().findFirst();
+                throw new InvalidPropertyException("Ambiguous method call:\n"
+                        + collect.stream().map(Method::toString).collect(Collectors.joining("\n")));
+            }
+            return collect.stream().findFirst();
+        }
+
+        public Optional<Object> getImplicitObject(Object obj) {
+            return objectImplicitMapper.tryGetData(obj).map(mapper -> mapper.apply(obj));
         }
     }
 
