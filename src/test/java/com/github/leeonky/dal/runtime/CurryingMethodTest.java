@@ -5,41 +5,45 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.github.leeonky.util.BeanClass.getConverter;
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 class CurryingMethodTest {
 
     @Nested
     class GetArgRanges {
-        private RuntimeContextBuilder.DALRuntimeContext build = new RuntimeContextBuilder()
-                .registerStaticMethodExtension(StaticMethod.class).build(null);
+        RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder().registerStaticMethodExtension(StaticMethod.class);
 
         @Test
         void get_range_from_instance_method() {
             Currying instance = new Currying();
-            Data data = build.wrap(instance);
-            List list = mock(List.class);
+            List<Object> list = asList("fake", "range");
 
-            assertThat(((CurryingMethod) data.currying("instanceMethod").get().call("arg1", getConverter())).fetchArgRange((o, objects) -> {
+            runtimeContextBuilder.registerCurryingMethodRange(Currying.class, "instanceMethod", (o, objects) -> {
                 assertThat(o).isSameAs(instance);
                 assertThat(objects).containsExactly("arg1");
                 return list;
-            })).isSameAs(list);
+            });
+
+            Data data = runtimeContextBuilder.build(null).wrap(instance);
+
+            assertThat(data.getValue("instanceMethod").getValue("arg1").getFieldNames()).containsExactly("fake", "range");
         }
 
         @Test
         void get_range_from_static_method() {
             Currying instance = new Currying();
-            Data data = build.wrap(instance);
-            List list = mock(List.class);
+            List<Object> list = asList("fake", "range");
 
-            assertThat(((CurryingMethod) data.currying("staticMethod").get().call("arg1", getConverter())).fetchArgRange((o, objects) -> {
+            runtimeContextBuilder.registerCurryingMethodRange(Currying.class, "staticMethod", (o, objects) -> {
                 assertThat(o).isSameAs(instance);
                 assertThat(objects).containsExactly("arg1");
                 return list;
-            })).isSameAs(list);
+            });
+
+            Data data = runtimeContextBuilder.build(null).wrap(instance);
+
+            assertThat(data.getValue("staticMethod").getValue("arg1").getFieldNames()).containsExactly("fake", "range");
         }
     }
 
