@@ -68,4 +68,3 @@ Feature: currying function
     """
 
 # TODO Auto convert sub property to function args (property is string)
-# TODO override logic first max arg count

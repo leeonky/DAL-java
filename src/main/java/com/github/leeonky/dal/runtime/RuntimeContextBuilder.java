@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
+import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 
 public class RuntimeContextBuilder {
@@ -85,9 +86,10 @@ public class RuntimeContextBuilder {
     }
 
     static Optional<Method> findMethodToCurrying(Class<?> type, Object property) {
-        return Arrays.stream(type.getMethods()).filter(method -> Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers()))
+        return stream(type.getMethods()).filter(method -> Modifier.isPublic(method.getModifiers())
+                        && !Modifier.isStatic(method.getModifiers()))
                 .filter(method -> method.getName().equals(property))
-                .findFirst();
+                .max(Comparator.comparingInt(method -> method.getParameters().length));
     }
 
     @SuppressWarnings("unchecked")

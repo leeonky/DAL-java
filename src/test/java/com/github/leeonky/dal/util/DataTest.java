@@ -184,6 +184,14 @@ class DataTest {
 
             assertThat(((CurryingMethod) currying.call(2)).call("hello")).isEqualTo("hello2");
         }
+
+        @Test
+        void should_choose_max_parameter_size_method() {
+            Data data = build.wrap(new Currying());
+            CurryingMethod currying = data.currying("overrideMethod");
+
+            assertThat(((CurryingMethod) currying.call(2)).call("hello")).isEqualTo("hello2");
+        }
     }
 
     public static class Currying {
@@ -197,6 +205,14 @@ class DataTest {
 
         public Object currying2(int i, String str) {
             return str + i;
+        }
+
+        public Object overrideMethod(int i, String str) {
+            return str + i;
+        }
+
+        public Object overrideMethod(int i) {
+            return i;
         }
     }
 }
