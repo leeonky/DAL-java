@@ -102,4 +102,36 @@ Feature: currying function
     }
     """
 
-# TODO static currying arg range
+  Scenario: support args range in static method currying
+    Given the following java class:
+    """
+    public class Data {
+    }
+    """
+    And the following java class:
+    """
+    public class DataMethods {
+      public static String upperCase(Data data, String input) {
+        return input.toUpperCase();
+      }
+    }
+    """
+    And args range of java class "Data" method "upperCase":
+      | a | b | c |
+    When use a instance of java class "Data" to evaluate:
+    """
+    upperCase= {
+      a: A
+    }
+    """
+    Then failed with the message:
+    """
+    Unexpected fields `b`, `c` in upperCase
+    """
+    And got the following notation:
+    """
+    upperCase= {
+             ^
+      a: A
+    }
+    """

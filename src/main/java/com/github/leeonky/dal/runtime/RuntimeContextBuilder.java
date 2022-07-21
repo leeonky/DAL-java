@@ -85,20 +85,6 @@ public class RuntimeContextBuilder {
                 .replace("\r", "\\r").replace("\f", "\\f").replace("'", "\\'").replace("\"", "\\\"") + "\"";
     }
 
-    static Optional<Method> methodToCurrying(Class<?> type, Object property) {
-        return methodToCurrying(stream(type.getMethods())
-                .filter(method -> Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers()))
-                .filter(method -> method.getName().equals(property)));
-    }
-
-    private static Optional<Method> methodToCurrying(Stream<Method> methodStream) {
-        List<Method> methods = methodStream.sorted(comparingInt(Method::getParameterCount).reversed()).collect(toList());
-        if (methods.size() > 1 && methods.get(0).getParameterCount() == methods.get(1).getParameterCount())
-            throw new InvalidPropertyException("Ambiguous method call:\n"
-                    + methods.stream().map(Method::toString).collect(Collectors.joining("\n")));
-        return methods.stream().findFirst();
-    }
-
     @SuppressWarnings("unchecked")
     public <T> RuntimeContextBuilder registerValueDumper(Class<T> key, Function<T, String> toString) {
         valueDumpers.put(key, obj -> toString.apply((T) obj));
@@ -191,16 +177,36 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    private boolean maybeExtensionMethods(Method method) {
-        return method.getParameterCount() == 1
-                && (STATIC & method.getModifiers()) != 0
-                && (PUBLIC & method.getModifiers()) != 0;
-    }
-
     public RuntimeContextBuilder registerCurryingMethodRange(Class<?> type, String methodName,
                                                              Function<List<Object>, List<Object>> range) {
         methodToCurrying(type, methodName).ifPresent(method -> curryingMethodArgRanges.put(method, range));
         return this;
+    }
+
+    private Optional<Method> methodToCurrying(Class<?> type, Object methodName) {
+        return oneOf(() -> instanceMethodToCurrying(type, methodName),
+                () -> staticMethodToCurrying(type, methodName, Object::equals),
+                () -> staticMethodToCurrying(type, methodName, Class::isAssignableFrom));
+    }
+
+    static Optional<Method> instanceMethodToCurrying(Class<?> type, Object property) {
+        return getMaxParameterCountMethod(stream(type.getMethods())
+                .filter(method -> Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers()))
+                .filter(method -> method.getName().equals(property)));
+    }
+
+    private static Optional<Method> getMaxParameterCountMethod(Stream<Method> methodStream) {
+        List<Method> methods = methodStream.sorted(comparingInt(Method::getParameterCount).reversed()).collect(toList());
+        if (methods.size() > 1 && methods.get(0).getParameterCount() == methods.get(1).getParameterCount())
+            throw new InvalidPropertyException("Ambiguous method call:\n"
+                    + methods.stream().map(Method::toString).collect(Collectors.joining("\n")));
+        return methods.stream().findFirst();
+    }
+
+    private Optional<Method> staticMethodToCurrying(Class<?> type, Object property,
+                                                    BiPredicate<Class<?>, Class<?>> condition) {
+        return getMaxParameterCountMethod(extensionMethods.stream().filter(method -> method.getName().equals(property))
+                .filter(method -> condition.test(method.getParameters()[0].getType(), type)));
     }
 
     private static class MapPropertyAccessor implements PropertyAccessor<Map<?, ?>> {
@@ -409,19 +415,12 @@ public class RuntimeContextBuilder {
             return objectDumpers.tryGetData(instance);
         }
 
-        public Optional<Method> staticMethodToCurrying(Object instance, Object property) {
-            return oneOf(() -> staticMethodToCurrying(instance, property, Object::equals),
-                    () -> staticMethodToCurrying(instance, property, Class::isAssignableFrom));
-        }
-
-        private Optional<Method> staticMethodToCurrying(Object instance, Object property,
-                                                        BiPredicate<Class<?>, Class<?>> condition) {
-            return methodToCurrying(extensionMethods.stream().filter(method -> method.getName().equals(property))
-                    .filter(method -> condition.test(method.getParameters()[0].getType(), instance.getClass())));
-        }
-
         public Optional<Object> getImplicitObject(Object obj) {
             return objectImplicitMapper.tryGetData(obj).map(mapper -> mapper.apply(obj));
+        }
+
+        public Optional<Method> methodToCurrying(Class<?> type, Object methodName) {
+            return RuntimeContextBuilder.this.methodToCurrying(type, methodName);
         }
     }
 

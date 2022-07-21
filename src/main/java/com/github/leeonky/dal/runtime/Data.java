@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.runtime.RuntimeContextBuilder.methodToCurrying;
 import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
@@ -243,8 +242,8 @@ public class Data {
     }
 
     private Optional<CurryingMethod> currying(Object instance, Object property) {
-        return oneOf(() -> oneOf(() -> methodToCurrying(instance.getClass(), property), () -> dalRuntimeContext
-                        .staticMethodToCurrying(instance, property)).map(method -> new CurryingMethod(instance, method)),
+        return oneOf(() -> dalRuntimeContext.methodToCurrying(instance.getClass(), property)
+                        .map(method -> new CurryingMethod(instance, method)),
                 () -> dalRuntimeContext.getImplicitObject(instance).flatMap(obj -> currying(obj, property)));
     }
 
