@@ -18,10 +18,13 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
+import static java.util.Comparator.comparingInt;
+import static java.util.stream.Collectors.toList;
 
 public class RuntimeContextBuilder {
     private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
@@ -29,10 +32,7 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<Function<Object, Object>> objectImplicitMapper = new ClassKeyMap<>();
     private final Map<String, ConstructorViaSchema> valueConstructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
-    //    TODO to be remove
     private final Set<Method> extensionMethods = new HashSet<>();
-    //    TODO rename
-    private final Set<Method> extensionMethods2 = new HashSet<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final ClassKeyMap<Function<Object, String>> valueDumpers = new ClassKeyMap<>();
@@ -85,11 +85,18 @@ public class RuntimeContextBuilder {
                 .replace("\r", "\\r").replace("\f", "\\f").replace("'", "\\'").replace("\"", "\\\"") + "\"";
     }
 
-    static Optional<Method> findMethodToCurrying(Class<?> type, Object property) {
-        return stream(type.getMethods()).filter(method -> Modifier.isPublic(method.getModifiers())
-                        && !Modifier.isStatic(method.getModifiers()))
-                .filter(method -> method.getName().equals(property))
-                .max(Comparator.comparingInt(method -> method.getParameters().length));
+    static Optional<Method> methodToCurrying(Class<?> type, Object property) {
+        return methodToCurrying(stream(type.getMethods())
+                .filter(method -> Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers()))
+                .filter(method -> method.getName().equals(property)));
+    }
+
+    private static Optional<Method> methodToCurrying(Stream<Method> methodStream) {
+        List<Method> methods = methodStream.sorted(comparingInt(Method::getParameterCount).reversed()).collect(toList());
+        if (methods.size() > 1 && methods.get(0).getParameterCount() == methods.get(1).getParameterCount())
+            throw new InvalidPropertyException("Ambiguous method call:\n"
+                    + methods.stream().map(Method::toString).collect(Collectors.joining("\n")));
+        return methods.stream().findFirst();
     }
 
     @SuppressWarnings("unchecked")
@@ -157,13 +164,10 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerStaticMethodExtension(Class<?> staticMethodExtensionClass) {
         Stream.of(staticMethodExtensionClass.getMethods())
-                .filter(RuntimeContextBuilder.this::maybeExtensionMethods)
-                .forEach(extensionMethods::add);
-        Stream.of(staticMethodExtensionClass.getMethods())
                 .filter(method -> method.getParameterCount() >= 1
                         && (STATIC & method.getModifiers()) != 0
                         && (PUBLIC & method.getModifiers()) != 0)
-                .forEach(extensionMethods2::add);
+                .forEach(extensionMethods::add);
         return this;
     }
 
@@ -195,7 +199,7 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerCurryingMethodRange(Class<?> type, String methodName,
                                                              Function<List<Object>, List<Object>> range) {
-        findMethodToCurrying(type, methodName).ifPresent(method -> curryingMethodArgRanges.put(method, range));
+        methodToCurrying(type, methodName).ifPresent(method -> curryingMethodArgRanges.put(method, range));
         return this;
     }
 
@@ -306,11 +310,7 @@ public class RuntimeContextBuilder {
             try {
                 return propertyAccessors.getData(data.getInstance()).getValueByData(data, property);
             } catch (InvalidPropertyException e) {
-                CurryingMethod curryingMethod = data.currying(property);
-                if (curryingMethod != null)
-                    return curryingMethod.resolve();
-//                TODO return value when currying is method call
-                throw e;
+                return data.currying(property).orElseThrow(() -> e).resolve();
             }
         }
 
@@ -409,25 +409,15 @@ public class RuntimeContextBuilder {
             return objectDumpers.tryGetData(instance);
         }
 
-        //        TODO refactor
-        public Optional<Method> findStaticMethodToCurrying(Object instance, Object property) {
-            return Optional.ofNullable(getMethod(instance, property, Object::equals)
-                    .orElseGet(() -> getMethod(instance, property, Class::isAssignableFrom).orElse(null)));
+        public Optional<Method> staticMethodToCurrying(Object instance, Object property) {
+            return oneOf(() -> staticMethodToCurrying(instance, property, Object::equals),
+                    () -> staticMethodToCurrying(instance, property, Class::isAssignableFrom));
         }
 
-        //        TODO refactor
-        private Optional<Method> getMethod(Object instance, Object property, BiPredicate<Class<?>, Class<?>> condition) {
-            List<Method> collect = extensionMethods2.stream()
-                    .filter(method -> method.getName().equals(property))
-                    .filter(method -> condition.test(method.getParameters()[0].getType(), instance.getClass()))
-                    .sorted(Comparator.comparingInt(Method::getParameterCount).reversed()).collect(Collectors.toList());
-            if (collect.size() > 1) {
-                if (collect.get(0).getParameterCount() != collect.get(1).getParameterCount())
-                    return collect.stream().findFirst();
-                throw new InvalidPropertyException("Ambiguous method call:\n"
-                        + collect.stream().map(Method::toString).collect(Collectors.joining("\n")));
-            }
-            return collect.stream().findFirst();
+        private Optional<Method> staticMethodToCurrying(Object instance, Object property,
+                                                        BiPredicate<Class<?>, Class<?>> condition) {
+            return methodToCurrying(extensionMethods.stream().filter(method -> method.getName().equals(property))
+                    .filter(method -> condition.test(method.getParameters()[0].getType(), instance.getClass())));
         }
 
         public Optional<Object> getImplicitObject(Object obj) {

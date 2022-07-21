@@ -169,20 +169,20 @@ class DataTest {
         void return_null_when_property_is_not_string() {
             Data data = build.wrap(new Object());
 
-            assertThat(data.currying(1)).isNull();
+            assertThat(data.currying(1)).isEmpty();
         }
 
         @Test
         void return_currying_method_with_property() {
             Data data = build.wrap(new Currying());
 
-            assertThat(data.currying("currying1").call("hello", getConverter())).isEqualTo("hello");
+            assertThat(data.currying("currying1").get().call("hello", getConverter())).isEqualTo("hello");
         }
 
         @Test
         void currying_of_currying() {
             Data data = build.wrap(new Currying());
-            CurryingMethod currying = data.currying("currying2");
+            CurryingMethod currying = data.currying("currying2").get();
 
             assertThat(((CurryingMethod) currying.call(2, getConverter())).call("hello", getConverter())).isEqualTo("hello2");
         }
@@ -190,9 +190,15 @@ class DataTest {
         @Test
         void should_choose_max_parameter_size_method() {
             Data data = build.wrap(new Currying());
-            CurryingMethod currying = data.currying("overrideMethod");
+            CurryingMethod currying = data.currying("overrideMethod").get();
 
             assertThat(((CurryingMethod) currying.call(2, getConverter())).call("hello", getConverter())).isEqualTo("hello2");
+        }
+
+        @Test
+        void raise_error_when_more_than_one_candidate() {
+            Data data = build.wrap(new Currying());
+            assertThatThrownBy(() -> data.currying("invalidCurrying").get()).isInstanceOf(InvalidPropertyException.class);
         }
     }
 
@@ -205,20 +211,20 @@ class DataTest {
         void return_currying_method_with_property() {
             Data data = build.wrap(new Currying());
 
-            assertThat(data.currying("staticCurrying1").call("hello", getConverter())).isEqualTo("hello");
+            assertThat(data.currying("staticCurrying1").get().call("hello", getConverter())).isEqualTo("hello");
         }
 
         @Test
         void return_currying_method_with_property_in_super_instance_type() {
             Data data = build.wrap(new Currying());
 
-            assertThat(data.currying("baseMatchCurrying").call("hello", getConverter())).isEqualTo("hello");
+            assertThat(data.currying("baseMatchCurrying").get().call("hello", getConverter())).isEqualTo("hello");
         }
 
         @Test
         void currying_of_currying() {
             Data data = build.wrap(new Currying());
-            CurryingMethod currying = data.currying("staticCurrying2");
+            CurryingMethod currying = data.currying("staticCurrying2").get();
 
             assertThat(((CurryingMethod) currying.call(2, getConverter())).call("hello", getConverter())).isEqualTo("hello2");
         }
@@ -226,7 +232,7 @@ class DataTest {
         @Test
         void should_choose_max_parameter_size_method() {
             Data data = build.wrap(new Currying());
-            CurryingMethod currying = data.currying("staticOverrideMethod");
+            CurryingMethod currying = data.currying("staticOverrideMethod").get();
 
             assertThat(((CurryingMethod) currying.call(2, getConverter())).call("hello", getConverter())).isEqualTo("hello2");
         }
@@ -234,7 +240,7 @@ class DataTest {
         @Test
         void use_same_instance_type_first_when_more_than_one_candidate() {
             Data data = build.wrap(new Currying());
-            CurryingMethod currying = data.currying("baseCurrying");
+            CurryingMethod currying = data.currying("baseCurrying").get();
 
             assertThat(currying.call("a", getConverter())).isEqualTo("A");
         }
@@ -242,7 +248,7 @@ class DataTest {
         @Test
         void raise_error_when_more_than_one_candidate() {
             Data data = build.wrap(new Currying());
-            assertThatThrownBy(() -> data.currying("invalidCurrying")).isInstanceOf(InvalidPropertyException.class);
+            assertThatThrownBy(() -> data.currying("invalidStaticCurrying").get()).isInstanceOf(InvalidPropertyException.class);
         }
     }
 
@@ -269,6 +275,14 @@ class DataTest {
 
         public Object overrideMethod(int i) {
             return i;
+        }
+
+        public Object invalidCurrying(String str) {
+            return null;
+        }
+
+        public Object invalidCurrying(int str) {
+            return null;
         }
     }
 
@@ -297,11 +311,11 @@ class DataTest {
             return str;
         }
 
-        public static Object invalidCurrying(Currying currying, String str) {
+        public static Object invalidStaticCurrying(Currying currying, String str) {
             return null;
         }
 
-        public static Object invalidCurrying(Currying currying, int str) {
+        public static Object invalidStaticCurrying(Currying currying, int str) {
             return null;
         }
 

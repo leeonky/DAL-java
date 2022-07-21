@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.runtime.RuntimeContextBuilder.methodToCurrying;
 import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
@@ -237,20 +238,14 @@ public class Data {
         return dalRuntimeContext.newBlockScope(this, supplier);
     }
 
-    //    TODO refactor
-    public CurryingMethod currying(Object property) {
-        return property instanceof String ? getCurryingMethod(instance, property) : null;
+    public Optional<CurryingMethod> currying(Object property) {
+        return currying(instance, property);
     }
 
-    //    TODO refactor
-    private CurryingMethod getCurryingMethod(Object instance, Object property) {
-        return RuntimeContextBuilder.findMethodToCurrying(instance.getClass(), property)
-                .map(method -> new CurryingMethod(instance, method)).orElseGet(() -> {
-                    return dalRuntimeContext.findStaticMethodToCurrying(instance, property)
-                            .map(method -> new CurryingMethod(instance, method, 0)).orElseGet(() -> {
-                                return dalRuntimeContext.getImplicitObject(instance).map(implicitObj -> getCurryingMethod(implicitObj, property)).orElse(null);
-                            });
-                });
+    private Optional<CurryingMethod> currying(Object instance, Object property) {
+        return oneOf(() -> oneOf(() -> methodToCurrying(instance.getClass(), property), () -> dalRuntimeContext
+                        .staticMethodToCurrying(instance, property)).map(method -> new CurryingMethod(instance, method)),
+                () -> dalRuntimeContext.getImplicitObject(instance).flatMap(obj -> currying(obj, property)));
     }
 
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {

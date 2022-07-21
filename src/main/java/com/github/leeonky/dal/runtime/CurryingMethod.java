@@ -1,15 +1,16 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.util.Converter;
-import com.github.leeonky.util.Suppressor;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.util.Suppressor.get;
 import static java.util.stream.Collectors.toList;
 
 public class CurryingMethod {
@@ -18,37 +19,20 @@ public class CurryingMethod {
     private final List<Object> args = new ArrayList<>();
 
     public CurryingMethod(Object instance, Method method) {
-        this.instance = instance;
         this.method = method;
-    }
-
-    public CurryingMethod(Object instance, Method method, int i) {
-        this.instance = null;
-        this.method = method;
-        args.add(instance);
+        if (Modifier.isStatic(method.getModifiers())) {
+            this.instance = null;
+            args.add(instance);
+        } else
+            this.instance = instance;
     }
 
     public Object call(Object arg, Converter converter) {
-        Object convertedArg = convertArg(arg, converter);
-        return enoughArgs() ? Suppressor.get(() -> method.invoke(instance, new ArrayList<Object>() {{
-            addAll(getArgs());
-            add(convertedArg);
-        }}.toArray())) : currying(convertedArg);
-    }
-
-    private boolean enoughArgs() {
-        return method.getParameters().length == getArgs().size() + 1;
-    }
-
-    private CurryingMethod currying(Object arg) {
         CurryingMethod curryingMethod = new CurryingMethod(instance, method);
+        curryingMethod.args.clear();
         curryingMethod.args.addAll(args);
-        curryingMethod.args.add(arg);
-        return curryingMethod;
-    }
-
-    private Object convertArg(Object arg, Converter converter) {
-        return converter.tryConvert(method.getParameters()[args.size()].getType(), arg);
+        curryingMethod.args.add(converter.tryConvert(method.getParameters()[args.size()].getType(), arg));
+        return curryingMethod.resolve();
     }
 
     public Method getMethod() {
@@ -67,8 +51,6 @@ public class CurryingMethod {
     }
 
     public Object resolve() {
-        if (args.size() == method.getParameterCount())
-            return Suppressor.get(() -> method.invoke(instance, args.toArray()));
-        return this;
+        return args.size() == method.getParameterCount() ? get(() -> method.invoke(instance, args.toArray())) : this;
     }
 }

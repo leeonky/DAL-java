@@ -102,4 +102,4 @@ Feature: currying function
     }
     """
 
-# TODO input is null
+# TODO static currying arg range
