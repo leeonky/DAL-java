@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.Suppressor;
 
 import java.lang.reflect.Method;
@@ -21,12 +22,16 @@ public class CurryingMethod {
         this.method = method;
     }
 
-    public Object call(Object arg) {
-        return method.getParameters().length != getArgs().size() + 1 ? currying(arg)
-                : Suppressor.get(() -> method.invoke(instance, new ArrayList<Object>() {{
+    public Object call(Object arg, Converter converter) {
+        Object convertedArg = convertArg(arg, converter);
+        return enoughArgs() ? Suppressor.get(() -> method.invoke(instance, new ArrayList<Object>() {{
             addAll(getArgs());
-            add(arg);
-        }}.toArray()));
+            add(convertedArg);
+        }}.toArray())) : currying(convertedArg);
+    }
+
+    private boolean enoughArgs() {
+        return method.getParameters().length == getArgs().size() + 1;
     }
 
     private CurryingMethod currying(Object arg) {
@@ -34,6 +39,10 @@ public class CurryingMethod {
         curryingMethod.args.addAll(args);
         curryingMethod.args.add(arg);
         return curryingMethod;
+    }
+
+    private Object convertArg(Object arg, Converter converter) {
+        return converter.tryConvert(method.getParameters()[args.size()].getType(), arg);
     }
 
     public Method getMethod() {

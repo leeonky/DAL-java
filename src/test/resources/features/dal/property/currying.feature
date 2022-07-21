@@ -67,4 +67,18 @@ Feature: currying function
     }
     """
 
-# TODO Auto convert sub property to function args (property is string)
+  Scenario: convent arg to proper type
+    Given the following java class:
+    """
+    public class Data {
+      public String upperCase(String input) {
+        return input.toUpperCase();
+      }
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    upperCase[1]= '1'
+    """
+
+# TODO static extension currying

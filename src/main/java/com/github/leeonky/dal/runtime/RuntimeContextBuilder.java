@@ -443,7 +443,7 @@ public class RuntimeContextBuilder {
 
         @Override
         public Object getValue(CurryingMethod curryingMethod, Object property) {
-            return curryingMethod.call(property);
+            return curryingMethod.call(property, getConverter());
         }
 
         @Override
