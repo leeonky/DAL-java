@@ -218,9 +218,8 @@ Feature: verify list
     """
     Then failed with the following message:
     """
-    Cannot compare java.lang.Integer
+    Invalid input value, expect a List but: java.lang.Integer
     <1>
-    and list
     """
     And got the following source code information:
     """
@@ -233,9 +232,8 @@ Feature: verify list
     """
     Then failed with the following message:
     """
-    Cannot compare java.lang.Integer
+    Invalid input value, expect a List but: java.lang.Integer
     <1>
-    and list
     """
     And got the following source code information:
     """
@@ -277,16 +275,6 @@ Feature: verify list
     And the following assertion should pass:
     """
       list: { data[].value: ['v1' 'v2'] }
-    """
-
-  Scenario: use size[] to mapping sub list size ot new list
-    Given the following input data:
-    """
-      {"list": [[1,2], [1,2,3]]}
-    """
-    Then the following assertion should pass:
-    """
-      list::size[] = [2 3]
     """
 
   Scenario: use mandatory [] after [xx] to mapping sub list element ot new list

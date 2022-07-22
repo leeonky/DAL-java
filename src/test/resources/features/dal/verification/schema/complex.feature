@@ -119,7 +119,7 @@ Feature: multiple schema and list schema
     """
     Then failed with the message:
     """
-    Expecting a list but was java.lang.Integer
+    Invalid input value, expect a List but: java.lang.Integer
     <1>
     """
     And got the following notation:

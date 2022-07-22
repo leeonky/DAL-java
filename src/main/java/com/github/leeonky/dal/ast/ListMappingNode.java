@@ -3,10 +3,6 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ElementAccessException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.dal.runtime.RuntimeException;
-
-import static com.github.leeonky.util.BeanClass.createFrom;
-import static java.lang.String.format;
 
 public class ListMappingNode extends DALNode implements ExecutableNode {
     private final SymbolNode symbolNode;
@@ -24,10 +20,7 @@ public class ListMappingNode extends DALNode implements ExecutableNode {
     @Override
     public Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
         try {
-            if (data.isList())
-                return data.mapList(symbolNode.getRootSymbolName());
-            throw new RuntimeException(format("The instance of '%s' is not a list",
-                    createFrom(data.getInstance()).getName()), getPositionBegin());
+            return data.requireList(getPositionBegin()).mapList(symbolNode.getRootSymbolName());
         } catch (ElementAccessException e) {
             throw e.toDalError(symbolNode.getPositionBegin());
         }

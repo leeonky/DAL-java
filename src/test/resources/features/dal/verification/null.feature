@@ -88,7 +88,7 @@ Feature: compare null
     """
     Then failed with the message:
     """
-    Cannot compare null and list
+    Invalid input value, expect a List but: null
     """
     And got the following notation:
     """

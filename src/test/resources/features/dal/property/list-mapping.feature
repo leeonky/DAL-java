@@ -168,7 +168,7 @@ Feature: list mapping
     Given the following java class:
     """
     public class Data {
-      public Object list = new Object();
+      public String list = "not list";
     }
     """
     When use a instance of java class "Data" to evaluate:
@@ -177,7 +177,8 @@ Feature: list mapping
     """
     Then failed with the message:
     """
-    The instance of 'java.lang.Object' is not a list
+    Invalid input value, expect a List but: java.lang.String
+    <not list>
     """
     And got the following notation:
     """

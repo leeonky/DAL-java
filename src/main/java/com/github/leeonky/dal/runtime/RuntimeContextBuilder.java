@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
+import static com.github.leeonky.util.BeanClass.createFrom;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
@@ -383,13 +384,15 @@ public class RuntimeContextBuilder {
                 throw new RuntimeException(format("Meta property `%s` not found", property.getRootSymbolName()), property.getPositionBegin());
             DALRuntimeContext context = this;
             if (property instanceof ListMappingNode) {
+                Data list = metaDataNode.evaluateData(context);
+                if (!list.isList())
+                    throw new RuntimeException(format("The instance of '%s' is not a list",
+                            createFrom(list.getInstance()).getName()), metaDataNode.getPositionBegin());
                 return wrap(new AutoMappingList() {{
-                    Data list = metaDataNode.evaluateData(context);
                     for (int i = 0; i < list.getListSize(); i++)
                         add(function.apply(new MetaData(new ConstNode(list.getValue(i).getInstance()), property, context)));
                 }});
-//                TODO first index not 0
-//                TODO raise error not list
+//                TODO first index not 0 ********************
             } else
                 return wrap(function.apply(new MetaData(metaDataNode, property, context)));
         }

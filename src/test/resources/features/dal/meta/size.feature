@@ -1,4 +1,4 @@
-Feature: access object meta property by ::xxx
+Feature: meta ::size
 
   Scenario: access list size
     Given the following json:
@@ -39,25 +39,15 @@ Feature: access object meta property by ::xxx
     ^
     """
 
-  Scenario: raise error when un-register meta property
-    Given the following json:
+  Scenario: use size[] to mapping sub list size ot new list
+    Given the following input data:
     """
-      {
-        "data": "not list"
-      }
+      {"list": [[1,2], [1,2,3]]}
     """
-    When evaluate by:
+    Then the following assertion should pass:
     """
-    data::unRegister
-    """
-    Then failed with the message:
-    """
-    Meta property `unRegister` not found
-    """
-    And got the following notation:
-    """
-    data::unRegister
-          ^
+      list::size[] = [2 3]
     """
 
-#  TODO in table row / cell
+
+#  TODO in table row / cell*******************

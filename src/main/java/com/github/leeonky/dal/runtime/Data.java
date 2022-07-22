@@ -139,6 +139,7 @@ public class Data {
                 try {
                     add(list.get(i).getValue(property).getInstance());
                 } catch (PropertyAccessException e) {
+//                    TODO first index maybe 1
                     throw new ElementAccessException(i, e);
                 }
         }}, dalRuntimeContext, propertySchema(property));
@@ -243,6 +244,12 @@ public class Data {
         return oneOf(() -> dalRuntimeContext.methodToCurrying(instance.getClass(), property)
                         .map(method -> new CurryingMethod(instance, method)),
                 () -> dalRuntimeContext.getImplicitObject(instance).flatMap(obj -> currying(obj, property)));
+    }
+
+    public Data requireList(int position) {
+        if (isList())
+            return this;
+        throw new RuntimeException(format("Invalid input value, expect a List but: %s", inspect()), position);
     }
 
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {

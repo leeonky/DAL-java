@@ -1,8 +1,10 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.ast.DALOperator.PropertyImplicit;
-import com.github.leeonky.dal.runtime.*;
-import com.github.leeonky.dal.runtime.RuntimeException;
+import com.github.leeonky.dal.runtime.DalException;
+import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.ElementAssertionFailure;
+import com.github.leeonky.dal.runtime.RowAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.SyntaxException;
@@ -107,9 +109,7 @@ public class ListScopeNode extends DALNode {
     }
 
     private boolean verify(DALRuntimeContext context, Data data) {
-        if (!data.isList())
-            throw new RuntimeException(format("Cannot compare %sand list", data.inspect()), getPositionBegin());
-        data.setListComparator(comparator);
+        data.requireList(getPositionBegin()).setListComparator(comparator);
         return type == Type.CONTAINS ? verifyContainElement(context, data) : verifyCorrespondingElement(context, data);
     }
 

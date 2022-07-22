@@ -4,7 +4,6 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
-import com.github.leeonky.interpreter.SyntaxException;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,11 +43,10 @@ public class SchemaComposeNode extends DALNode {
     private Object verifyAndConvertAsSchemaType(DALRuntimeContext context, SchemaNode schemaNode, DALNode input) {
         Data inputData = input.evaluateData(context);
         if (isList) {
-            if (!inputData.isList())
-                throw new SyntaxException("Expecting a list but was " + inputData.inspect(), input.getPositionBegin());
             AtomicInteger index = new AtomicInteger(0);
-            return inputData.getDataList().stream().map(element -> convertViaSchema(context, schemaNode,
-                    element, format("%s[%d]", input.inspect(), index.getAndIncrement()))).collect(toList());
+            return inputData.requireList(input.getPositionBegin()).getDataList().stream().map(element ->
+                    convertViaSchema(context, schemaNode, element,
+                            format("%s[%d]", input.inspect(), index.getAndIncrement()))).collect(toList());
         } else
             return convertViaSchema(context, schemaNode, inputData, input.inspect());
     }
