@@ -96,9 +96,9 @@ class DataTest {
 
         @Test
         void get_list_size() {
-            assertDataAccess(emptyList(), 0, "size");
-            assertDataAccess(new String[]{"a"}, 1, "size");
-            assertDataAccess(new JSONArray().put(100).put(200), 2, "size");
+            assertListSize(emptyList(), 0);
+            assertListSize(new String[]{"a"}, 1);
+            assertListSize(new JSONArray().put(100).put(200), 2);
         }
 
         @Test
@@ -134,7 +134,7 @@ class DataTest {
 
         @Test
         void support_stream_size_as_list() {
-            assertDataAccess(Stream.of(1, 2), 2, "size");
+            assertListSize(Stream.of(1, 2), 2);
         }
 
         @Test
@@ -148,6 +148,10 @@ class DataTest {
         private void assertDataAccess(Object object, Object expected, Object... properties) {
             assertThat(runtimeContextBuilder.build(null).wrap(object).getValue(asList(properties)).getInstance())
                     .isEqualTo(expected);
+        }
+
+        private void assertListSize(Object object, int size) {
+            assertThat(runtimeContextBuilder.build(null).wrap(object).getListSize()).isEqualTo(size);
         }
     }
 

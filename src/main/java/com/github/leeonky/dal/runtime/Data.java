@@ -102,8 +102,6 @@ public class Data {
     }
 
     private Object fetchFromList(Object property) {
-        if ("size".equals(property))
-            return getListSize();
         if (property instanceof String)
             return dalRuntimeContext.getPropertyValue(this, property);
         if ((int) property < 0)
@@ -116,7 +114,7 @@ public class Data {
     }
 
     private SchemaType propertySchema(Object property) {
-        if (isList() && property instanceof String && !"size".equals(property))
+        if (isList() && property instanceof String)
             return schemaType.mappingAccess(property);
         return schemaType.access(property);
     }

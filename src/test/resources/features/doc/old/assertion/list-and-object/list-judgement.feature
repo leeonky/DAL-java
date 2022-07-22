@@ -279,15 +279,15 @@ Feature: verify list
       list: { data[].value: ['v1' 'v2'] }
     """
 
-  Scenario: use size[] to mapping sub list size ot new list
-    Given the following input data:
-    """
-      {"list": [[1,2], [1,2,3]]}
-    """
-    Then the following assertion should pass:
-    """
-      list.size[] = [2 3]
-    """
+#  Scenario: use size[] to mapping sub list size ot new list
+#    Given the following input data:
+#    """
+#      {"list": [[1,2], [1,2,3]]}
+#    """
+#    Then the following assertion should pass:
+#    """
+#      list::size[] = [2 3]
+#    """
 
   Scenario: use mandatory [] after [xx] to mapping sub list element ot new list
     Given the following input data:

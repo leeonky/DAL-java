@@ -35,8 +35,8 @@ class VerifyList extends Base {
 
     @Test
     void should_support_get_size() {
-        assertPass(new Object[]{1}, ".size = 1");
-        assertPass(asList("hello"), ".size = 1");
+        assertPass(new Object[]{1}, "::size = 1");
+        assertPass(asList("hello"), "::size = 1");
     }
 
     @Test
@@ -57,6 +57,6 @@ class VerifyList extends Base {
             }
         });
 
-        assertPass(new JSONArray("[2]"), "is List which .size = 1 and [0] = 2");
+        assertPass(new JSONArray("[2]"), "is List which ::size = 1 and [0] = 2");
     }
 }
