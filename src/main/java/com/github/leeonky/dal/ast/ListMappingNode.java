@@ -32,4 +32,9 @@ public class ListMappingNode extends DALNode implements ExecutableNode {
             throw e.toDalError(symbolNode.getPositionBegin());
         }
     }
+
+    @Override
+    public Object getRootSymbolName() {
+        return symbolNode.getRootSymbolName();
+    }
 }

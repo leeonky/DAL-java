@@ -60,5 +60,4 @@ Feature: access object meta property by ::xxx
           ^
     """
 
-#  TODO list map
 #  TODO in table row / cell

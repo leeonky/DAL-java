@@ -1,6 +1,8 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.ast.ConstNode;
 import com.github.leeonky.dal.ast.DALNode;
+import com.github.leeonky.dal.ast.ListMappingNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.interpreter.RuntimeContext;
@@ -379,7 +381,17 @@ public class RuntimeContextBuilder {
             Function<MetaData, Object> function = metaProperties.get(property.getRootSymbolName());
             if (function == null)
                 throw new RuntimeException(format("Meta property `%s` not found", property.getRootSymbolName()), property.getPositionBegin());
-            return wrap(function.apply(new MetaData(metaDataNode, property, this)));
+            DALRuntimeContext context = this;
+            if (property instanceof ListMappingNode) {
+                return wrap(new AutoMappingList() {{
+                    Data list = metaDataNode.evaluateData(context);
+                    for (int i = 0; i < list.getListSize(); i++)
+                        add(function.apply(new MetaData(new ConstNode(list.getValue(i).getInstance()), property, context)));
+                }});
+//                TODO first index not 0
+//                TODO raise error not list
+            } else
+                return wrap(function.apply(new MetaData(metaDataNode, property, context)));
         }
     }
 }
