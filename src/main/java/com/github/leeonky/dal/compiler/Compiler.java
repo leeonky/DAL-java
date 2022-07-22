@@ -99,12 +99,19 @@ public class Compiler {
             LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
             IMPLICIT_PROPERTY_CLAUSE = Operators.PROPERTY_IMPLICIT.clause(oneOf(PROPERTY_PATTERN,
                     oneOf(STRING_PROPERTY, NUMBER_PROPERTY, SYMBOL).concat(LIST_MAPPING_CLAUSE))),
-            EXPLICIT_PROPERTY_CLAUSE = oneOf(Operators.PROPERTY_DOT.clause(PROPERTY_PATTERN.or(
-                            oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING_CLAUSE).mandatory("Expect a symbol"))),
-                    Operators.PROPERTY_SLASH.clause(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING_CLAUSE).mandatory("Expect a symbol")),
+            EXPLICIT_PROPERTY_CLAUSE = oneOf(Operators.PROPERTY_DOT.clause(PROPERTY_PATTERN
+                            .or(symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING_CLAUSE)))),
+                    Operators.PROPERTY_SLASH.clause(symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL)
+                            .concat(LIST_MAPPING_CLAUSE))),
                     Operators.PROPERTY_IMPLICIT.clause(Notations.OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
                             "Should given one property or array index in `[]`")).and(endWith(Notations.CLOSING_BRACKET))
-                            .as(DALNode::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE))));
+                            .as(DALNode::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE))),
+                    Operators.PROPERTY_META.clause(symbolClause(DOT_SYMBOL.concat(LIST_MAPPING_CLAUSE))));
+
+    private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> symbolClause(
+            NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
+        return nodeParser.mandatory("Expect a symbol");
+    }
 
     private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> shortVerificationClause(
             OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> operatorMandatory,

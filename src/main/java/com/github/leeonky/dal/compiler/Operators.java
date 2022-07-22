@@ -24,6 +24,7 @@ public class Operators {
             PROPERTY_DOT = Notations.Operators.DOT.operator(DALOperator.PropertyDot::new, not(DALProcedure::mayBeElementEllipsis)),
             PROPERTY_SLASH = procedure -> procedure.isEnableSlashProperty() ? MAYBE_PROPERTY_SLASH.parse(procedure) : empty(),
             PROPERTY_IMPLICIT = procedure -> of(new DALOperator.PropertyImplicit()),
+            PROPERTY_META = Notations.Operators.META.operator(DALOperator.PropertyMeta::new),
             BINARY_ARITHMETIC_OPERATORS = oneOf(
                     Notations.Operators.AND.operator(DALOperator::operatorAnd),
                     Notations.Operators.OR.operator(DALOperator::operatorOr),
@@ -43,7 +44,7 @@ public class Operators {
                     Notations.Operators.PLUS.operator(DALOperator.Positive::new, not(DALProcedure::isCodeBeginning)),
                     Notations.Operators.NOT.operator(DALOperator.Not::new, not(DALProcedure::mayBeUnEqual))),
             VERIFICATION_OPERATORS = oneOf(Notations.Operators.MATCHER.<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-                            operator(DALOperator.Matcher::new),
+                            operator(DALOperator.Matcher::new, not(DALProcedure::mayBeMetaProperty)),
                     Notations.Operators.EQUAL.operator(DALOperator.Equal::new));
 
     static final OperatorParser.Mandatory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>

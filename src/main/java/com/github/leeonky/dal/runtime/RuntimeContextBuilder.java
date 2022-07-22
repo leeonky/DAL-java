@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.interpreter.RuntimeContext;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
+import static java.lang.String.format;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
@@ -34,6 +36,7 @@ public class RuntimeContextBuilder {
     private final Map<String, ConstructorViaSchema> valueConstructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
     private final Set<Method> extensionMethods = new HashSet<>();
+    private final Map<Object, Function<MetaData, Object>> metaProperties = new HashMap<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final ClassKeyMap<Function<Object, String>> valueDumpers = new ClassKeyMap<>();
@@ -79,6 +82,13 @@ public class RuntimeContextBuilder {
                 .registerObjectDumper(YearMonth.class, YearMonth::toString)
                 .registerObjectDumper(Class.class, Class::getName)
         ;
+
+        registerMetaProperty("size", BuildInMetaProperty::size);
+    }
+
+    public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
+        metaProperties.put(property, function);
+        return this;
     }
 
     private static String dumpString(Object o) {
@@ -150,8 +160,7 @@ public class RuntimeContextBuilder {
     }
 
     public RuntimeContextBuilder registerStaticMethodExtension(Class<?> staticMethodExtensionClass) {
-        Stream.of(staticMethodExtensionClass.getMethods())
-                .filter(method -> method.getParameterCount() >= 1
+        Stream.of(staticMethodExtensionClass.getMethods()).filter(method -> method.getParameterCount() >= 1
                         && (STATIC & method.getModifiers()) != 0
                         && (PUBLIC & method.getModifiers()) != 0)
                 .forEach(extensionMethods::add);
@@ -364,6 +373,13 @@ public class RuntimeContextBuilder {
 
         public Optional<Method> methodToCurrying(Class<?> type, Object methodName) {
             return RuntimeContextBuilder.this.methodToCurrying(type, methodName);
+        }
+
+        public Data metaProperty(DALNode metaDataNode, DALNode property) {
+            Function<MetaData, Object> function = metaProperties.get(property.getRootSymbolName());
+            if (function == null)
+                throw new RuntimeException(format("Meta property `%s` not found", property.getRootSymbolName()), property.getPositionBegin());
+            return wrap(function.apply(new MetaData(metaDataNode, property, this)));
         }
     }
 }

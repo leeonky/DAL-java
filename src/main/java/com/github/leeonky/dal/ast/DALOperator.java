@@ -216,7 +216,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     }
 
     public static class Minus extends DALOperator {
-
         public Minus() {
             super(PRECEDENCE_UNARY_OPERATION, "-", false);
         }
@@ -233,7 +232,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     }
 
     public static class Positive extends DALOperator {
-
         public Positive() {
             super(PRECEDENCE_UNARY_OPERATION, "+", false);
         }
@@ -250,7 +248,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     }
 
     public static class Matcher extends DALOperator {
-
         public Matcher() {
             super(PRECEDENCE_COMPARISON, Notations.Operators.MATCHER.getLabel(), true);
         }
@@ -297,7 +294,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     }
 
     public static class PropertyDot extends Property {
-
         public PropertyDot() {
             super(PRECEDENCE_PROPERTY, ".", false);
         }
@@ -309,7 +305,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     }
 
     public static class PropertySlash extends Property {
-
         public PropertySlash() {
             super(PRECEDENCE_PROPERTY, "/", false);
         }
@@ -321,7 +316,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     }
 
     public static class PropertyImplicit extends Property {
-
         public PropertyImplicit() {
             super(PRECEDENCE_PROPERTY, "", false);
         }
@@ -329,6 +323,23 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         @Override
         public String inspect(String node1, String node2) {
             return String.format("%s%s", node1, node2);
+        }
+    }
+
+    public static class PropertyMeta extends Property {
+        public PropertyMeta() {
+            super(PRECEDENCE_PROPERTY, "::", false);
+
+        }
+
+        @Override
+        public String inspect(String node1, String node2) {
+            return String.format("%s%s%s", node1, label, node2);
+        }
+
+        @Override
+        public Data calculateData(DALNode left, DALNode right, DALRuntimeContext context) {
+            return context.metaProperty(left, right);
         }
     }
 

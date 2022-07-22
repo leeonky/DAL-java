@@ -74,6 +74,10 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
         return enableSlashProperty;
     }
 
+    public boolean mayBeMetaProperty() {
+        return getSourceCode().startsWith("::");
+    }
+
     public static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> enableSlashProperty(
             NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
         return procedure -> procedure.enableSlashProperty(() -> nodeParser.parse(procedure));
