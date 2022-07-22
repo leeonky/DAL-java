@@ -188,11 +188,11 @@ class DataTest {
         }
 
         @Test
-        void should_choose_max_parameter_size_method() {
+        void should_choose_min_parameter_size_method() {
             Data data = build.wrap(new Currying());
             CurryingMethod currying = data.currying("overrideMethod").get();
 
-            assertThat(((CurryingMethod) currying.call(2, getConverter())).call("hello", getConverter())).isEqualTo("hello2");
+            assertThat(currying.call(2, getConverter())).isEqualTo(2);
         }
 
         @Test
@@ -230,11 +230,11 @@ class DataTest {
         }
 
         @Test
-        void should_choose_max_parameter_size_method() {
+        void should_choose_min_parameter_size_method() {
             Data data = build.wrap(new Currying());
             CurryingMethod currying = data.currying("staticOverrideMethod").get();
 
-            assertThat(((CurryingMethod) currying.call(2, getConverter())).call("hello", getConverter())).isEqualTo("hello2");
+            assertThat(currying.call(2, getConverter())).isEqualTo(2);
         }
 
         @Test

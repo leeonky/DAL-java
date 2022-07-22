@@ -197,7 +197,7 @@ public class RuntimeContextBuilder {
     }
 
     private static Optional<Method> getMaxParameterCountMethod(Stream<Method> methodStream) {
-        List<Method> methods = methodStream.sorted(comparingInt(Method::getParameterCount).reversed()).collect(toList());
+        List<Method> methods = methodStream.sorted(comparingInt(Method::getParameterCount)).collect(toList());
         if (methods.size() > 1 && methods.get(0).getParameterCount() == methods.get(1).getParameterCount())
             throw new InvalidPropertyException("Ambiguous method call:\n"
                     + methods.stream().map(Method::toString).collect(Collectors.joining("\n")));
