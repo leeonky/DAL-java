@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.runtime.ListAccessor.changeFirstIndex;
 import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.PUBLIC;
@@ -62,17 +63,7 @@ public class RuntimeContextBuilder {
                 .registerSchema("List", Data::isList)
                 .registerListAccessor(Iterable.class, iterable -> iterable)
                 .registerListAccessor(Stream.class, stream -> stream::iterator)
-                .registerListAccessor(AutoMappingList.class, new ListAccessor<AutoMappingList>() {
-                    @Override
-                    public Iterable<?> toIterable(AutoMappingList instance) {
-                        return instance;
-                    }
-
-                    @Override
-                    public int firstIndex(AutoMappingList instance) {
-                        return instance.getFirstIndex();
-                    }
-                })
+                .registerListAccessor(AutoMappingList.class, changeFirstIndex(AutoMappingList::firstIndex))
                 .registerPropertyAccessor(Map.class, new MapPropertyAccessor())
                 .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor(this))
                 .registerPropertyAccessor(CurryingMethod.class, new CurryingMethodPropertyAccessor(this))

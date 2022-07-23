@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.runtime;
 
+import java.util.function.Function;
+
 public interface ListAccessor<T> {
     Iterable<?> toIterable(T instance);
 
@@ -9,5 +11,19 @@ public interface ListAccessor<T> {
 
     default boolean isList(T instance) {
         return true;
+    }
+
+    static <T extends Iterable<?>> ListAccessor<T> changeFirstIndex(Function<T, Integer> indexFunction) {
+        return new ListAccessor<T>() {
+            @Override
+            public Iterable<?> toIterable(T instance) {
+                return instance;
+            }
+
+            @Override
+            public int firstIndex(T instance) {
+                return indexFunction.apply(instance);
+            }
+        };
     }
 }

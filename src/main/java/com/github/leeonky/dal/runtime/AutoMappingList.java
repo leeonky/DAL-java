@@ -20,9 +20,7 @@ public class AutoMappingList extends ArrayList<Object> {
         });
     }
 
-    public int getFirstIndex() {
+    public int firstIndex() {
         return firstIndex;
     }
-
-    //    TODO should inherit first index config *****************
 }
