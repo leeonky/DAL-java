@@ -34,10 +34,13 @@ Feature: commons
     """
     Then failed with the message:
     """
-    The instance of 'java.lang.String' is not a list
+    Invalid input value, expect a List but: java.lang.String
+    <not list>
     """
     And got the following notation:
     """
     data::size[]
-    ^
+              ^
     """
+
+#    TODO meta throw **************************

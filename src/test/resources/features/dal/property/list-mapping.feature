@@ -138,17 +138,25 @@ Feature: list mapping
   Scenario: raise error when access invalid property
     Given the following java class:
     """
-    public class Data {
-      public Object[] list = {new Object()};
+    public class DataItem extends java.util.ArrayList<Object>{
     }
     """
+    Given the following java class:
+    """
+    public class Data {
+      public DataItem list = new DataItem() {{
+        add("item0");
+      }};
+    }
+    """
+    And set the first element index to 1 of list "DataItem"
     When use a instance of java class "Data" to evaluate:
     """
       list.invalid[]
     """
     Then failed with the message:
     """
-    Mapping element[0]:
+    Mapping element[1]:
     Get property `invalid` failed, property can be:
       1. public field
       2. public getter
@@ -156,7 +164,7 @@ Feature: list mapping
       4. Map key value
       5. customized type getter
       6. static method extension
-    Method or property `invalid` does not exist in `java.lang.Object`
+    Method or property `invalid` does not exist in `java.lang.String`
     """
     And got the following notation:
     """

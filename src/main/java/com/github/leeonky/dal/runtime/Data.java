@@ -133,16 +133,8 @@ public class Data {
     }
 
     public Data mapList(Object property) {
-        return new Data(new AutoMappingList() {{
-            List<Data> list = getDataList();
-            for (int i = 0; i < list.size(); i++)
-                try {
-                    add(list.get(i).getValue(property).getInstance());
-                } catch (PropertyAccessException e) {
-//                    TODO first index maybe 1 ****************************
-                    throw new ElementAccessException(i, e);
-                }
-        }}, dalRuntimeContext, propertySchema(property));
+        return new Data(new AutoMappingList(getListFirstIndex(), getDataList(),
+                data -> data.getValue(property).getInstance()), dalRuntimeContext, propertySchema(property));
     }
 
     public Data filter(String prefix) {

@@ -85,19 +85,17 @@ public class IntegrationTestContext {
     public void givenJavaDataByClassName(String className) {
         compileAll();
         Class type = getType(className);
-        if (firstIndexes.containsKey(className)) {
-            dal.getRuntimeContextBuilder().registerListAccessor(type, new ListAccessor<Object>() {
-                @Override
-                public Iterable<?> toIterable(Object instance) {
-                    return (Iterable<?>) instance;
-                }
+        firstIndexes.forEach((t, i) -> dal.getRuntimeContextBuilder().registerListAccessor(getType(t), new ListAccessor<Object>() {
+            @Override
+            public Iterable<?> toIterable(Object instance) {
+                return (Iterable<?>) instance;
+            }
 
-                @Override
-                public int firstIndex() {
-                    return firstIndexes.get(className);
-                }
-            });
-        }
+            @Override
+            public int firstIndex() {
+                return i;
+            }
+        }));
         input = type.newInstance();
     }
 

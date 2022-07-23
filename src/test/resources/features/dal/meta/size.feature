@@ -41,14 +41,48 @@ Feature: meta ::size
     """
 
   Scenario: use size[] to mapping sub list size ot new list
-    Given the following input data:
+    Given the following json:
     """
       {"list": [[1,2], [1,2,3]]}
     """
-    Then the following assertion should pass:
+    Then the following verification should pass:
+    """
+      list::size[]= [2 3]
+    """
+    And the inspect should:
+    """
+    list::size[]= [[0]= 2, [1]= 3]
+    """
+    Then the following verification should pass:
+    """
+    list: | ::size |
+          | 2      |
+          | 3      |
+    """
+    And the inspect should:
+    """
+    list: | ::size |
+    | : 2 |
+    | : 3 |
+    """
+
+  Scenario: raise error when meta property error
+    Given the following json:
+    """
+      {"list": [[1,2], "not list"]}
+    """
+    When evaluate by:
     """
       list::size[] = [2 3]
     """
-
-
-#  TODO in table row / cell*******************
+    Then failed with the message:
+    """
+    Mapping element[1]:
+    Invalid meta property `size` for: java.lang.String
+    <not list>
+    """
+    And got the following notation:
+    """
+      list::size[] = [2 3]
+                ^
+    """

@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
-import static com.github.leeonky.util.BeanClass.createFrom;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
@@ -284,8 +283,7 @@ public class RuntimeContextBuilder {
         }
 
         public int getListFirstIndex(Object instance) {
-            return listAccessors.tryGetData(instance).map(ListAccessor::firstIndex)
-                    .orElse(0);
+            return listAccessors.tryGetData(instance).map(ListAccessor::firstIndex).orElse(0);
         }
 
         private Iterable<Object> arrayIterable(Object instance) {
@@ -383,21 +381,19 @@ public class RuntimeContextBuilder {
         public Data metaProperty(DALNode metaDataNode, DALNode property) {
             Function<MetaData, Object> function = metaProperties.get(property.getRootSymbolName());
             if (function == null)
-                throw new RuntimeException(format("Meta property `%s` not found", property.getRootSymbolName()), property.getPositionBegin());
-            DALRuntimeContext context = this;
+                throw new RuntimeException(format("Meta property `%s` not found", property.getRootSymbolName()),
+                        property.getPositionBegin());
             if (property instanceof ListMappingNode) {
-                Data list = metaDataNode.evaluateData(context);
-                if (!list.isList())
-                    throw new RuntimeException(format("The instance of '%s' is not a list",
-                            createFrom(list.getInstance()).getName()), metaDataNode.getPositionBegin());
-                return wrap(new AutoMappingList() {{
-                    for (int i = 0; i < list.getListSize(); i++)
-                        add(function.apply(new MetaData(new ConstNode(list.getValue(i).getInstance()), property, context)));
-                }});
-//                TODO first index not 0 ********************
+                Data list = metaDataNode.evaluateData(this).requireList(property.getPositionBegin());
+                try {
+                    return wrap(new AutoMappingList(list.getListFirstIndex(), list.getValueList(),
+                            o -> function.apply(new MetaData(new ConstNode(o), property, this))));
+                } catch (ElementAccessException e) {
+                    throw e.toDalError(property.getPositionBegin());
+                }
             } else
                 try {
-                    return wrap(function.apply(new MetaData(metaDataNode, property, context)));
+                    return wrap(function.apply(new MetaData(metaDataNode, property, this)));
                 } catch (Exception e) {
                     throw new RuntimeException(e.getMessage(), property.getPositionBegin());
                 }
