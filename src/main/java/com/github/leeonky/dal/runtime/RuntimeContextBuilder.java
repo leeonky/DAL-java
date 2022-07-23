@@ -163,6 +163,7 @@ public class RuntimeContextBuilder {
     }
 
     public RuntimeContextBuilder registerStaticMethodExtension(Class<?> staticMethodExtensionClass) {
+//        TODO need test
         Stream.of(staticMethodExtensionClass.getMethods()).filter(method -> method.getParameterCount() >= 1
                         && (STATIC & method.getModifiers()) != 0
                         && (PUBLIC & method.getModifiers()) != 0)
@@ -203,6 +204,7 @@ public class RuntimeContextBuilder {
     }
 
     static Optional<Method> instanceMethodToCurrying(Class<?> type, Object property) {
+//        TODO need test *******************
         return getMaxParameterCountMethod(stream(type.getMethods())
                 .filter(method -> Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers()))
                 .filter(method -> method.getName().equals(property)));
@@ -394,7 +396,11 @@ public class RuntimeContextBuilder {
                 }});
 //                TODO first index not 0 ********************
             } else
-                return wrap(function.apply(new MetaData(metaDataNode, property, context)));
+                try {
+                    return wrap(function.apply(new MetaData(metaDataNode, property, context)));
+                } catch (Exception e) {
+                    throw new RuntimeException(e.getMessage(), property.getPositionBegin());
+                }
         }
     }
 }

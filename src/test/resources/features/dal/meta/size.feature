@@ -31,12 +31,13 @@ Feature: meta ::size
     """
     Then failed with the message:
     """
-    Input value is not list, only List support `size` meta property
+    Invalid meta property `size` for: java.lang.String
+    <not list>
     """
     And got the following notation:
     """
     data::size
-    ^
+          ^
     """
 
   Scenario: use size[] to mapping sub list size ot new list
