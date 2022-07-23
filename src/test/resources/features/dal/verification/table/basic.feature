@@ -519,9 +519,6 @@ Feature: basic verification via table
         1 | '1a' | '1b' |
     """
 
-#    TODO row is list
-#    TODO row is object
-
   Scenario: mixed number and string property
     Given the following java class:
     """

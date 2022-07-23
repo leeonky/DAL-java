@@ -27,7 +27,7 @@ class PropertyNodeTest {
                     }
 
                     @Override
-                    public int firstIndex() {
+                    public int firstIndex(ArrayList<?> instance) {
                         return 1;
                     }
                 }).build(new ArrayList<>(Arrays.asList(1, 2)));

@@ -3,7 +3,7 @@ package com.github.leeonky.dal.runtime;
 public interface ListAccessor<T> {
     Iterable<?> toIterable(T instance);
 
-    default int firstIndex() {
+    default int firstIndex(T instance) {
         return 0;
     }
 

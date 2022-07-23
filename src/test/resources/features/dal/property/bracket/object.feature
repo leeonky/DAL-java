@@ -98,5 +98,3 @@ Feature: access object property by ['xxx']
     """
     data= {0= 'str1', 2= 'str2', a= 'strA'}
     """
-
-#    TODO number keys:  =sub prefix keys, table

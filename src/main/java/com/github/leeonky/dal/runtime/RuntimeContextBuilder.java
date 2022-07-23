@@ -62,6 +62,17 @@ public class RuntimeContextBuilder {
                 .registerSchema("List", Data::isList)
                 .registerListAccessor(Iterable.class, iterable -> iterable)
                 .registerListAccessor(Stream.class, stream -> stream::iterator)
+                .registerListAccessor(AutoMappingList.class, new ListAccessor<AutoMappingList>() {
+                    @Override
+                    public Iterable<?> toIterable(AutoMappingList instance) {
+                        return instance;
+                    }
+
+                    @Override
+                    public int firstIndex(AutoMappingList instance) {
+                        return instance.getFirstIndex();
+                    }
+                })
                 .registerPropertyAccessor(Map.class, new MapPropertyAccessor())
                 .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor(this))
                 .registerPropertyAccessor(CurryingMethod.class, new CurryingMethodPropertyAccessor(this))
@@ -283,7 +294,7 @@ public class RuntimeContextBuilder {
         }
 
         public int getListFirstIndex(Object instance) {
-            return listAccessors.tryGetData(instance).map(ListAccessor::firstIndex).orElse(0);
+            return listAccessors.tryGetData(instance).map(listAccessor -> listAccessor.firstIndex(instance)).orElse(0);
         }
 
         private Iterable<Object> arrayIterable(Object instance) {
@@ -378,6 +389,7 @@ public class RuntimeContextBuilder {
             return RuntimeContextBuilder.this.methodToCurrying(type, methodName);
         }
 
+        //        TODO refactor *****************************
         public Data metaProperty(DALNode metaDataNode, DALNode property) {
             Function<MetaData, Object> function = metaProperties.get(property.getRootSymbolName());
             if (function == null)

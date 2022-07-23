@@ -79,7 +79,7 @@ public class Data {
                 return new Data(getPropertyValue(propertyChain), dalRuntimeContext, propertySchema(propertyChain));
             return getValue(chain);
         } catch (IndexOutOfBoundsException ex) {
-            throw new PropertyAccessException("Index out of bounds (" + ex.getMessage() + ")");
+            throw new PropertyAccessException("Index out of bounds (" + ex.getMessage() + "), first index is: " + getListFirstIndex());
         } catch (Exception e) {
             throw new PropertyAccessException(format("Get property `%s` failed, property can be:\n" +
                             "  1. public field\n" +

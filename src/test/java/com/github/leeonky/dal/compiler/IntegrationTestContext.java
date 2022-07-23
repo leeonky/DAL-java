@@ -92,7 +92,7 @@ public class IntegrationTestContext {
             }
 
             @Override
-            public int firstIndex() {
+            public int firstIndex(Object instance) {
                 return i;
             }
         }));

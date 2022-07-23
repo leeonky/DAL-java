@@ -193,3 +193,33 @@ Feature: list mapping
       list.invalid[]
                   ^
     """
+
+  Scenario: should inherit first index in list mapping
+    Given the following java class:
+    """
+    public class DataItem extends java.util.ArrayList<Object>{
+    }
+    """
+    Given the following java class:
+    """
+    public class Data {
+      public DataItem list = new DataItem() {{
+        add(new java.util.HashMap<Object, Object>() {{
+          put("key1", new java.util.HashMap<Object, Object>() {{
+            put("key2", 100);
+          }});
+        }});
+      }};
+    }
+    """
+    And set the first element index to 1 of list "DataItem"
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    : {
+      list[1].key1.key2= 100
+      list.key1[]= [{key2= 100}]
+      list.key1[][1].key2= 100
+      list.key1[].key2[1]= 100
+      list.key1[].key2= [100]
+    }
+    """

@@ -148,7 +148,7 @@ public class CucumberContextBak {
                     }
 
                     @Override
-                    public int firstIndex() {
+                    public int firstIndex(Object instance) {
                         return firstIndexes.get(className);
                     }
                 });
