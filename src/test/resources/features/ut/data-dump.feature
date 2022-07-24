@@ -316,7 +316,7 @@ Feature: dump-data
     """
     {
       "value": 2,
-      "error": "** Got exception during dump: java.lang.IllegalStateException: java.lang.RuntimeException: error",
+      "error": "** Got exception during dump: com.github.leeonky.util.InvocationException: java.lang.RuntimeException: error",
       "__type": "Data"
     }
     """

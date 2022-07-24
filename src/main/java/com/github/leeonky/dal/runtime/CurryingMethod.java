@@ -63,5 +63,4 @@ public class CurryingMethod {
         System.err.printf("No arg range for %s, give the range or use `:`%n", parameterInfo());
         return emptySet();
     }
-
 }

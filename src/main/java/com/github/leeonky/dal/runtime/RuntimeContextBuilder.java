@@ -86,6 +86,7 @@ public class RuntimeContextBuilder {
         ;
 
         registerMetaProperty("size", BuildInMetaProperty::size);
+        registerMetaProperty("throw", BuildInMetaProperty::throw_);
     }
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
