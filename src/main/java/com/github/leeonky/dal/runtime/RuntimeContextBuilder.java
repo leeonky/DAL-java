@@ -1,8 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.dal.ast.ConstNode;
 import com.github.leeonky.dal.ast.DALNode;
-import com.github.leeonky.dal.ast.ListMappingNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.interpreter.RuntimeContext;
@@ -380,26 +378,11 @@ public class RuntimeContextBuilder {
             return RuntimeContextBuilder.this.methodToCurrying(type, methodName);
         }
 
-        //        TODO refactor *****************************
-        public Data metaProperty(DALNode metaDataNode, DALNode property) {
-            Function<MetaData, Object> function = metaProperties.get(property.getRootSymbolName());
-            if (function == null)
+        public Function<MetaData, Object> fetchMetaFunction(DALNode property) {
+            return metaProperties.computeIfAbsent(property.getRootSymbolName(), k -> {
                 throw new RuntimeException(format("Meta property `%s` not found", property.getRootSymbolName()),
                         property.getPositionBegin());
-            if (property instanceof ListMappingNode) {
-                Data list = metaDataNode.evaluateData(this).requireList(property.getPositionBegin());
-                try {
-                    return wrap(new AutoMappingList(list.getListFirstIndex(), list.getValueList(),
-                            o -> function.apply(new MetaData(new ConstNode(o), property, this))));
-                } catch (ElementAccessException e) {
-                    throw e.toDalError(property.getPositionBegin());
-                }
-            } else
-                try {
-                    return wrap(function.apply(new MetaData(metaDataNode, property, this)));
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage(), property.getPositionBegin());
-                }
+            });
         }
     }
 }

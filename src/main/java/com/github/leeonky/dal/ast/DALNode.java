@@ -32,6 +32,10 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         return new SymbolNode(token.getContent(), SymbolNode.Type.SYMBOL);
     }
 
+    public static SymbolNode metaSymbolNode(Token token) {
+        return new MetaSymbolNode(token.getContent());
+    }
+
     public static SchemaComposeNode schemas(List<DALNode> nodes) {
         return new SchemaComposeNode(nodes.stream().map(SchemaNode.class::cast).collect(Collectors.toList()), false);
     }

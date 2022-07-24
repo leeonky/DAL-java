@@ -68,6 +68,7 @@ public class Compiler {
                     DALNode::symbolNode).parse(procedure),
             DOT_SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_DOT_SYMBOL : Tokens.DOT_SYMBOL)
                     .nodeParser(DALNode::symbolNode).parse(procedure),
+            META_SYMBOL = Tokens.DOT_SYMBOL.nodeParser(DALNode::metaSymbolNode),
             PROPERTY_PATTERN = this::propertyPattern,
             OPTIONAL_VERIFICATION_PROPERTY = lazyNode(() -> enableSlashProperty(enableRelaxProperty(OPTIONAL_PROPERTY_CHAIN)));
 
@@ -97,6 +98,7 @@ public class Compiler {
             ELEMENT_ELLIPSIS_CLAUSE = Notations.Operators.ELEMENT_ELLIPSIS.clause((token, input) -> new ListEllipsisNode()),
             ROW_WILDCARD_CLAUSE = Notations.Operators.ROW_WILDCARD.clause((token, input) -> new WildcardNode(token.getContent())),
             LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
+            META_LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNodeMeta(symbolNode)),
             IMPLICIT_PROPERTY_CLAUSE = Operators.PROPERTY_IMPLICIT.clause(oneOf(PROPERTY_PATTERN,
                     oneOf(STRING_PROPERTY, NUMBER_PROPERTY, SYMBOL).concat(LIST_MAPPING_CLAUSE))),
             EXPLICIT_PROPERTY_CLAUSE = oneOf(Operators.PROPERTY_DOT.clause(PROPERTY_PATTERN
@@ -106,7 +108,7 @@ public class Compiler {
                     Operators.PROPERTY_IMPLICIT.clause(Notations.OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
                             "Should given one property or array index in `[]`")).and(endWith(Notations.CLOSING_BRACKET))
                             .as(DALNode::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE))),
-                    Operators.PROPERTY_META.clause(symbolClause(DOT_SYMBOL.concat(LIST_MAPPING_CLAUSE))));
+                    Operators.PROPERTY_META.clause(symbolClause(META_SYMBOL.concat(META_LIST_MAPPING_CLAUSE))));
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> symbolClause(
             NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {

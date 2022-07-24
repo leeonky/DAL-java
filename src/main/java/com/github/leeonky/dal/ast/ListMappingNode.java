@@ -20,7 +20,7 @@ public class ListMappingNode extends DALNode implements ExecutableNode {
     @Override
     public Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
         try {
-            return data.requireList(getPositionBegin()).mapList(symbolNode.getRootSymbolName());
+            return data.requireList(getPositionBegin()).listMap(symbolNode.getRootSymbolName());
         } catch (ElementAccessException e) {
             throw e.toDalError(symbolNode.getPositionBegin());
         }

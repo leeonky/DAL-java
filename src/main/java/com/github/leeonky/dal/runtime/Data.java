@@ -6,6 +6,7 @@ import com.github.leeonky.util.BeanClass;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -132,9 +133,12 @@ public class Data {
         return this;
     }
 
-    public Data mapList(Object property) {
-        return new Data(new AutoMappingList(getListFirstIndex(), getDataList(),
-                data -> data.getValue(property).getInstance()), dalRuntimeContext, propertySchema(property));
+    public Data listMap(Object property) {
+        return new Data(listMap(data -> data.getValue(property).getInstance()), dalRuntimeContext, propertySchema(property));
+    }
+
+    public AutoMappingList listMap(Function<Data, Object> mapper) {
+        return new AutoMappingList(getListFirstIndex(), getDataList(), mapper);
     }
 
     public Data filter(String prefix) {
