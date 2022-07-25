@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.ast.AssertionFailure;
 import com.github.leeonky.util.InvocationException;
 
 import static java.lang.String.format;
@@ -16,7 +17,8 @@ public class BuildInMetaProperty {
     public static Object throw_(MetaData metaData) {
         try {
             metaData.evaluateInput();
-            return null;
+            throw new AssertionFailure("Expecting an error to be thrown, but nothing was thrown",
+                    metaData.getSymbolNode().getPositionBegin());
         } catch (RuntimeException e) {
             if (e.getCause() instanceof InvocationException)
                 return e.getCause().getCause();

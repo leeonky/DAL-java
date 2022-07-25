@@ -42,5 +42,3 @@ Feature: commons
     data::size[]
               ^
     """
-
-#    TODO meta throw **************************

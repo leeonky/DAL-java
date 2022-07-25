@@ -165,9 +165,8 @@ public class RuntimeContextBuilder {
     public RuntimeContextBuilder registerStaticMethodExtension(Class<?> staticMethodExtensionClass) {
 //        TODO need test
         Stream.of(staticMethodExtensionClass.getMethods()).filter(method -> method.getParameterCount() >= 1
-                        && (STATIC & method.getModifiers()) != 0
-                        && (PUBLIC & method.getModifiers()) != 0)
-                .forEach(extensionMethods::add);
+                && (STATIC & method.getModifiers()) != 0
+                && (PUBLIC & method.getModifiers()) != 0).forEach(extensionMethods::add);
         return this;
     }
 
