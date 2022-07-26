@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 import static com.github.leeonky.dal.runtime.ListAccessor.changeFirstIndex;
 import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
 import static java.lang.String.format;
-import static java.lang.reflect.Modifier.PUBLIC;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
@@ -163,10 +162,8 @@ public class RuntimeContextBuilder {
     }
 
     public RuntimeContextBuilder registerStaticMethodExtension(Class<?> staticMethodExtensionClass) {
-//        TODO need test
         Stream.of(staticMethodExtensionClass.getMethods()).filter(method -> method.getParameterCount() >= 1
-                && (STATIC & method.getModifiers()) != 0
-                && (PUBLIC & method.getModifiers()) != 0).forEach(extensionMethods::add);
+                && (STATIC & method.getModifiers()) != 0).forEach(extensionMethods::add);
         return this;
     }
 
@@ -203,9 +200,8 @@ public class RuntimeContextBuilder {
     }
 
     static Optional<Method> instanceMethodToCurrying(Class<?> type, Object property) {
-//        TODO need test *******************
         return getMaxParameterCountMethod(stream(type.getMethods())
-                .filter(method -> Modifier.isPublic(method.getModifiers()) && !Modifier.isStatic(method.getModifiers()))
+                .filter(method -> !Modifier.isStatic(method.getModifiers()))
                 .filter(method -> method.getName().equals(property)));
     }
 

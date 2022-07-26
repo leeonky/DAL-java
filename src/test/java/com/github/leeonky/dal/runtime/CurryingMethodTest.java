@@ -45,6 +45,14 @@ class CurryingMethodTest {
 
             assertThat(data.getValue("staticMethod").getValue("arg1").getFieldNames()).containsExactly("fake", "range");
         }
+
+        @Test
+        void currying_method_to_string() {
+            String str = "hello";
+            assertThat(runtimeContextBuilder.build(null).wrap(str).currying("charAt").get().toString()).isEqualTo("instance: hello\n" +
+                    "method: public char java.lang.String.charAt(int)\n" +
+                    "args: []");
+        }
     }
 
     public static class Currying {

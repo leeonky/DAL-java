@@ -254,14 +254,6 @@ class DataTest {
             Data data = build.wrap(new Currying());
             assertThatThrownBy(() -> data.currying("invalidStaticCurrying").get()).isInstanceOf(InvalidPropertyException.class);
         }
-
-        @Test
-        void currying_method_to_string() {
-            String str = "hello";
-            assertThat(build.wrap(str).currying("charAt").get().toString()).isEqualTo("instance: hello\n" +
-                    "method: public char java.lang.String.charAt(int)\n" +
-                    "args: []");
-        }
     }
 
     public static class BaseCurrying {

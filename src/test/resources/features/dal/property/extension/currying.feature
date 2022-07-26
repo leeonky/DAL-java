@@ -135,3 +135,28 @@ Feature: currying function
       a: A
     }
     """
+
+  Scenario: should not use instance static method in currying
+    Given the following java class:
+    """
+    public class Data {
+      public static String upperCase(String input) {
+        return input.toUpperCase();
+      }
+    }
+    """
+    When use a instance of java class "Data" to evaluate:
+    """
+    upperCase[1]= '1'
+    """
+    Then failed with the message:
+    """
+    Get property `upperCase` failed, property can be:
+      1. public field
+      2. public getter
+      3. public no args method
+      4. Map key value
+      5. customized type getter
+      6. static method extension
+    Method or property `upperCase` does not exist in `Data`
+    """
