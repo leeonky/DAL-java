@@ -238,7 +238,7 @@ public class Data {
 
     private Optional<CurryingMethod> currying(Object instance, Object property) {
         return oneOf(() -> dalRuntimeContext.methodToCurrying(instance.getClass(), property)
-                        .map(method -> new CurryingMethod(instance, method)),
+                        .map(method -> CurryingMethod.createCurryingMethod(instance, method)),
                 () -> dalRuntimeContext.getImplicitObject(instance).flatMap(obj -> currying(obj, property)));
     }
 
