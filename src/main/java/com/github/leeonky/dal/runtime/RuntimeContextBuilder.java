@@ -3,6 +3,7 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
+import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
@@ -215,8 +216,14 @@ public class RuntimeContextBuilder {
 
     private Optional<Method> staticMethodToCurrying(Class<?> type, Object property,
                                                     BiPredicate<Class<?>, Class<?>> condition) {
-        return getMaxParameterCountMethod(extensionMethods.stream().filter(method -> method.getName().equals(property))
+        return getMaxParameterCountMethod(extensionMethods.stream()
+                .filter(method -> staticExtensionMethodName(method).equals(property))
                 .filter(method -> condition.test(method.getParameters()[0].getType(), type)));
+    }
+
+    static String staticExtensionMethodName(Method method) {
+        ExtensionName extensionName = method.getAnnotation(ExtensionName.class);
+        return extensionName != null ? extensionName.value() : method.getName();
     }
 
     BiFunction<Object, List<Object>, List<Object>> fetchCurryingMethodArgRange(Method method) {

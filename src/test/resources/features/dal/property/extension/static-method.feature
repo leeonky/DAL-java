@@ -83,3 +83,24 @@ Feature: static method
     """
     property: null
     """
+
+  Scenario: use customized method name
+    Given the following java class:
+    """
+    public class Data {
+    }
+    """
+    And the following java class:
+    """
+    public class DataMethods {
+
+      @ExtensionName("int")
+      public static int property(Data data) {
+        return 0;
+      }
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    int: 0
+    """

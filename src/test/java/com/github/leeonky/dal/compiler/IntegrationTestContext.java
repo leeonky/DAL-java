@@ -110,7 +110,8 @@ public class IntegrationTestContext {
         if (classes.isEmpty()) {
             com.github.leeonky.dal.cucumber.Compiler compiler = new com.github.leeonky.dal.cucumber.Compiler();
             classes.addAll(compiler.compileToClasses(javaClasses.stream().map(s ->
-                    "import java.math.*;\n" + s).collect(Collectors.toList())));
+                    "import com.github.leeonky.dal.type.*;\n" +
+                            "import java.math.*;\n" + s).collect(Collectors.toList())));
             classes.forEach(dal.getRuntimeContextBuilder()::registerStaticMethodExtension);
         }
     }
