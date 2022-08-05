@@ -1,5 +1,5 @@
 # DAL-java
-[![travis-ci](https://travis-ci.com/leeonky/DAL-java.svg?branch=master)](https://travis-ci.com/github/leeonky/DAL-java)
+[![CircleCI](https://dl.circleci.com/status-badge/img/gh/leeonky/DAL-java/tree/master.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/leeonky/DAL-java/tree/master)
 [![coveralls](https://img.shields.io/coveralls/github/leeonky/DAL-java.svg)](https://coveralls.io/github/leeonky/DAL-java)
 [![Lost commit](https://img.shields.io/github/last-commit/leeonky/DAL-java.svg)](https://github.com/leeonky/DAL-java)
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.leeonky/DAL-java.svg)](https://search.maven.org/artifact/com.github.leeonky/DAL-java)
