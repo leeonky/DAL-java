@@ -13,8 +13,8 @@ import com.github.leeonky.util.PropertyReader;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.util.BeanClass.arrayCollectionToStream;
 import static com.github.leeonky.util.BeanClass.getClassName;
+import static com.github.leeonky.util.CollectionHelper.toStream;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -95,8 +95,8 @@ public class SchemaVerifier {
     }
 
     private <T> boolean shouldNotContainsUnexpectedField(BeanClass<T> polymorphicBeanClass, Set<String> expectedFields, String f) {
-        return expectedFields.contains(f)
-                || errorLog("Unexpected field `%s` for schema %s[%s]", f, polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
+        return expectedFields.contains(f) || errorLog("Unexpected field `%s` for schema %s[%s]", f,
+                polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
     private <T> boolean shouldContainsField(Set<String> actualFields, BeanClass<T> polymorphicBeanClass, PropertyReader<T> propertyReader) {
@@ -187,13 +187,11 @@ public class SchemaVerifier {
     private boolean verifyCollection(String subPrefix, BeanClass<?> elementType, Object schemaProperties) {
         List<Data> dataList = object.getDataList();
         if (schemaProperties == null)
-            return range(0, dataList.size())
-                    .allMatch(i -> dataList.get(i).createSchemaVerifier().verifySchemaInGenericType(
-                            format("%s[%d]", subPrefix, i), elementType, null));
+            return range(0, dataList.size()).allMatch(i -> dataList.get(i).createSchemaVerifier()
+                    .verifySchemaInGenericType(format("%s[%d]", subPrefix, i), elementType, null));
         else {
-            List<Object> schemaPropertyList = arrayCollectionToStream(schemaProperties).collect(toList());
-            return shouldBeSameSize(subPrefix, dataList, schemaPropertyList)
-                    && range(0, dataList.size())
+            List<Object> schemaPropertyList = toStream(schemaProperties).collect(toList());
+            return shouldBeSameSize(subPrefix, dataList, schemaPropertyList) && range(0, dataList.size())
                     .allMatch(i -> dataList.get(i).createSchemaVerifier().verifySchemaInGenericType(
                             format("%s[%d]", subPrefix, i), elementType, schemaPropertyList.get(i)));
         }
