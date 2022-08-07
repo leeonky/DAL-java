@@ -187,4 +187,10 @@ public class IntegrationSteps {
     public void argsRangeOfJavaClassMethod(String type, String method, List<List<String>> range) {
         integrationTestContext.setCurryingMethodArgRange(type, method, range.get(0));
     }
+
+
+    @And("args range of java class {string} static method {string}::{string}:")
+    public void argsRangeOfJavaClassStaticMethod(String type, String methodType, String method, List<List<String>> range) {
+        integrationTestContext.setCurryingStaticMethodArgRange(type, methodType, method, range.get(0));
+    }
 }

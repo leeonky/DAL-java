@@ -253,7 +253,16 @@ public class IntegrationTestContext {
 
     public void setCurryingMethodArgRange(String type, String method, List<String> range) {
         compileAll();
-        dal.getRuntimeContextBuilder().registerCurryingMethodRange(getType(type), method,
+        dal.getRuntimeContextBuilder().registerCurryingMethodRange(
+                Arrays.stream(getType(type).getMethods()).filter(m -> m.getName().equals(method)).findFirst().get(),
+                (instance, args) -> new ArrayList<>(range));
+    }
+
+    public void setCurryingStaticMethodArgRange(String type, String methodType, String method, List<String> range) {
+        compileAll();
+        dal.getRuntimeContextBuilder().registerCurryingMethodRange(
+                Arrays.stream(getType(methodType).getMethods()).filter(m -> m.getName().equals(method)
+                        && m.getParameters()[0].getType().equals(getType(type))).findFirst().get(),
                 (instance, args) -> new ArrayList<>(range));
     }
 }

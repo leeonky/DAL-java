@@ -116,7 +116,7 @@ Feature: currying function
       }
     }
     """
-    And args range of java class "Data" method "upperCase":
+    And args range of java class "Data" static method "DataMethods"::"upperCase":
       | a | b | c |
     When use a instance of java class "Data" to evaluate:
     """

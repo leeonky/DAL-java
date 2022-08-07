@@ -188,9 +188,9 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerCurryingMethodRange(Class<?> type, String methodName,
+    public RuntimeContextBuilder registerCurryingMethodRange(Method method,
                                                              BiFunction<Object, List<Object>, List<Object>> range) {
-        methodToCurrying(type, methodName).ifPresent(method -> curryingMethodArgRanges.put(method, range));
+        curryingMethodArgRanges.put(method, range);
         return this;
     }
 

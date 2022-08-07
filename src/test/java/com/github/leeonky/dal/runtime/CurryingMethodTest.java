@@ -15,11 +15,11 @@ class CurryingMethodTest {
         RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder().registerStaticMethodExtension(StaticMethod.class);
 
         @Test
-        void get_range_from_instance_method() {
+        void get_range_from_instance_method() throws NoSuchMethodException {
             Currying instance = new Currying();
             List<Object> list = asList("fake", "range");
 
-            runtimeContextBuilder.registerCurryingMethodRange(Currying.class, "instanceMethod", (o, objects) -> {
+            runtimeContextBuilder.registerCurryingMethodRange(Currying.class.getMethod("instanceMethod", String.class, String.class), (o, objects) -> {
                 assertThat(o).isSameAs(instance);
                 assertThat(objects).containsExactly("arg1");
                 return list;
@@ -31,11 +31,11 @@ class CurryingMethodTest {
         }
 
         @Test
-        void get_range_from_static_method() {
+        void get_range_from_static_method() throws NoSuchMethodException {
             Currying instance = new Currying();
             List<Object> list = asList("fake", "range");
 
-            runtimeContextBuilder.registerCurryingMethodRange(Currying.class, "staticMethod", (o, objects) -> {
+            runtimeContextBuilder.registerCurryingMethodRange(StaticMethod.class.getMethod("staticMethod", Currying.class, String.class, String.class), (o, objects) -> {
                 assertThat(o).isSameAs(instance);
                 assertThat(objects).containsExactly("arg1");
                 return list;
