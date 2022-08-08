@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-class StaticCurryingMethod extends CurryingMethod {
+class StaticCurryingMethod extends InstanceCurryingMethod {
     public StaticCurryingMethod(Object instance, Method method) {
         super(instance, method);
     }
@@ -15,5 +15,10 @@ class StaticCurryingMethod extends CurryingMethod {
             add(instance);
             addAll(StaticCurryingMethod.super.args());
         }};
+    }
+
+    @Override
+    protected InstanceCurryingMethod clone() {
+        return new StaticCurryingMethod(instance, method);
     }
 }

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -221,7 +222,7 @@ public class Data {
     private Optional<String> fetchSameReference(Map<Object, String> dumped, String path) {
         String reference = dumped.get(instance);
         if (reference != null)
-            return Optional.of(format("\"** same with %s\"", reference.isEmpty() ? "root" : reference));
+            return of(format("\"** same with %s\"", reference.isEmpty() ? "root" : reference));
         else {
             dumped.put(instance, path);
             return Optional.empty();
@@ -237,9 +238,12 @@ public class Data {
     }
 
     private Optional<CurryingMethod> currying(Object instance, Object property) {
-        return oneOf(() -> dalRuntimeContext.methodToCurrying(instance.getClass(), property)
-                        .map(method -> CurryingMethod.createCurryingMethod(instance, method)),
-                () -> dalRuntimeContext.getImplicitObject(instance).flatMap(obj -> currying(obj, property)));
+        List<CurryingMethod> methods = new ArrayList<>();
+        dalRuntimeContext.methodToCurrying(instance.getClass(), property)
+                .ifPresent(method -> methods.add(CurryingMethod.createCurryingMethod(instance, method)));
+        if (!methods.isEmpty())
+            return of(new CurryingMethodGroup(null, methods));
+        return dalRuntimeContext.getImplicitObject(instance).flatMap(obj -> currying(obj, property));
     }
 
     public Data requireList(int position) {
