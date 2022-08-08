@@ -108,6 +108,7 @@ class InstanceCurryingMethod implements CurryingMethod {
         return args;
     }
 
+    //    TODO arg range for type instant ******************************
     @Override
     public Set<Object> fetchArgRange(RuntimeContextBuilder runtimeContextBuilder) {
         BiFunction<Object, List<Object>, List<Object>> rangeFactory = runtimeContextBuilder.fetchCurryingMethodArgRange(method);

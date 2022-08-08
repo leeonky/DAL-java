@@ -218,3 +218,61 @@ Feature: currying function
     """
     method[100]= string
     """
+
+  Scenario: should use same arg type of method in static method currying
+    Given the following java class:
+    """
+    public class Data {
+      public static String method(Data data, String input) {
+        return "string";
+      }
+      public static String method(Data data, CharSequence chars) {
+        return "chars";
+      }
+      public static String method(Data data, int input) {
+        return "int";
+      }
+    }
+    """
+    And the following verification for the instance of java class "Data" should pass:
+    """
+    method.hello= string
+    """
+    And the following verification for the instance of java class "Data" should pass:
+    """
+    method[1]= int
+    """
+
+  Scenario: should use base arg type of method in instance method currying
+    Given the following java class:
+    """
+    public class Data {
+      public static String method(Data data, CharSequence chars) {
+        return "chars";
+      }
+      public static String method(Data data, int input) {
+        return "int";
+      }
+    }
+    """
+    And the following verification for the instance of java class "Data" should pass:
+    """
+    method['100']= chars
+    """
+
+  Scenario: should use convertible arg type of method in instance method currying
+    Given the following java class:
+    """
+    public class Data {
+      public static String method(Data data, String str) {
+        return "string";
+      }
+      public static String method(Data data, java.io.File file) {
+        return "file";
+      }
+    }
+    """
+    And the following verification for the instance of java class "Data" should pass:
+    """
+    method[100]= string
+    """

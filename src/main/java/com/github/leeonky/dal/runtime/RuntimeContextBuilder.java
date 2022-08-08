@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.ListAccessor.changeFirstIndex;
-import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
@@ -194,20 +193,26 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    //    TODO refactor **************************
     private List<Method> methodToCurrying(Class<?> type, Object methodName) {
         List<Method> method1 = stream(type.getMethods())
                 .filter(method2 -> !Modifier.isStatic(method2.getModifiers()))
                 .filter(method2 -> method2.getName().equals(methodName)).collect(toList());
+
         if (!method1.isEmpty()) {
             return method1;
         }
 
-        Optional<Method> method = oneOf(
-                () -> staticMethodToCurrying(type, methodName, Object::equals),
-                () -> staticMethodToCurrying(type, methodName, Class::isAssignableFrom));
-        List<Method> methods = new ArrayList<>();
-        method.ifPresent(methods::add);
-        return methods;
+        method1.addAll(staticMethodToCurryings(type, methodName, Object::equals));
+        method1.addAll(staticMethodToCurryings(type, methodName, Class::isAssignableFrom));
+        return method1;
+//
+//        Optional<Method> method = oneOf(
+//                () -> staticMethodToCurrying(type, methodName, Object::equals),
+//                () -> staticMethodToCurrying(type, methodName, Class::isAssignableFrom));
+//        List<Method> methods = new ArrayList<>();
+//        method.ifPresent(methods::add);
+//        return methods;
     }
 
     private static Optional<Method> getMaxParameterCountMethod(Stream<Method> methodStream) {
@@ -223,6 +228,13 @@ public class RuntimeContextBuilder {
         return getMaxParameterCountMethod(extensionMethods.stream()
                 .filter(method -> staticExtensionMethodName(method).equals(property))
                 .filter(method -> condition.test(method.getParameters()[0].getType(), type)));
+    }
+
+    private List<Method> staticMethodToCurryings(Class<?> type, Object property,
+                                                 BiPredicate<Class<?>, Class<?>> condition) {
+        return extensionMethods.stream()
+                .filter(method -> staticExtensionMethodName(method).equals(property))
+                .filter(method -> condition.test(method.getParameters()[0].getType(), type)).collect(toList());
     }
 
     static String staticExtensionMethodName(Method method) {

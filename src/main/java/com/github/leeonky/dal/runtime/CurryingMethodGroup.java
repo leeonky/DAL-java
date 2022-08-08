@@ -39,10 +39,7 @@ class CurryingMethodGroup implements CurryingMethod {
                 .filter(instanceCurryingMethod -> instanceCurryingMethod.allParamsConvertible(converter)).findFirst();
         if (converted.isPresent())
             return converted.get().resolve(converter);
-
-//        TODO  **********************
-        Object resolve = curryingMethods.get(0).resolve(converter);
-        return resolve instanceof CurryingMethod ? this : resolve;
+        return this;
     }
 
     @Override
