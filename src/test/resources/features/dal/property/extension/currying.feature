@@ -160,3 +160,24 @@ Feature: currying function
       6. static method extension
     Method or property `upperCase` does not exist in `Data`
     """
+
+  Scenario: should not use right type of method in instance method currying
+    Given the following java class:
+    """
+    public class Data {
+      public String method(String input) {
+        return "string";
+      }
+      public String method(int input) {
+        return "int";
+      }
+    }
+    """
+    And the following verification for the instance of java class "Data" should pass:
+    """
+    method.hello= string
+    """
+    And the following verification for the instance of java class "Data" should pass:
+    """
+    method[1]= int
+    """

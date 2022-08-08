@@ -3,14 +3,15 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.util.Converter;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 class CurryingMethodGroup implements CurryingMethod {
     private final CurryingMethodGroup parent;
-    private final List<CurryingMethod> curryingMethods;
+    private final List<InstanceCurryingMethod> curryingMethods;
 
-    CurryingMethodGroup(CurryingMethodGroup parent, List<CurryingMethod> curryingMethods) {
+    CurryingMethodGroup(CurryingMethodGroup parent, List<InstanceCurryingMethod> curryingMethods) {
         this.parent = parent;
         this.curryingMethods = curryingMethods;
     }
@@ -22,9 +23,14 @@ class CurryingMethodGroup implements CurryingMethod {
     }
 
     @Override
-    public Object resolve() {
+//    TODO refactor *****************************
+    public Object resolve(Converter converter) {
+        Optional<InstanceCurryingMethod> instanceCurryingMethod = curryingMethods.stream()
+                .filter(curryingMethod -> curryingMethod.allParamsTypeMatches(converter)).findFirst();
+        if (instanceCurryingMethod.isPresent())
+            return instanceCurryingMethod.get().resolve(converter);
 //        TODO  **********************
-        Object resolve = curryingMethods.get(0).resolve();
+        Object resolve = curryingMethods.get(0).resolve(converter);
         return resolve instanceof CurryingMethod ? this : resolve;
     }
 

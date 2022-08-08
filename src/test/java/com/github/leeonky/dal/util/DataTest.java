@@ -7,6 +7,7 @@ import com.github.leeonky.dal.type.FieldAlias;
 import com.github.leeonky.dal.type.FieldAliases;
 import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Converter;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -28,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataTest {
+    private final Converter converter = Converter.getInstance();
 
     @Test
     void check_null_for_customer_schema() {
@@ -180,7 +182,7 @@ class DataTest {
         void return_currying_method_with_property() {
             Data data = build.wrap(new Currying());
 
-            assertThat(data.currying("currying1").get().call("hello", getConverter()).resolve()).isEqualTo("hello");
+            assertThat(data.currying("currying1").get().call("hello", getConverter()).resolve(converter)).isEqualTo("hello");
         }
 
         @Test
@@ -188,7 +190,7 @@ class DataTest {
             Data data = build.wrap(new Currying());
             CurryingMethod currying = data.currying("currying2").get();
 
-            assertThat(((CurryingMethod) currying.call(2, getConverter()).resolve()).call("hello", getConverter()).resolve()).isEqualTo("hello2");
+            assertThat(((CurryingMethod) currying.call(2, getConverter()).resolve(converter)).call("hello", getConverter()).resolve(converter)).isEqualTo("hello2");
         }
 
         @Test
@@ -196,10 +198,10 @@ class DataTest {
             Data data = build.wrap(new Currying());
             CurryingMethod currying = data.currying("overrideMethod").get();
 
-            assertThat(currying.call(2, getConverter()).resolve()).isEqualTo(2);
+            assertThat(currying.call(2, getConverter()).resolve(converter)).isEqualTo(2);
         }
 
-        @Test
+        //        TODO ****************** two base arg type
         void raise_error_when_more_than_one_candidate() {
             Data data = build.wrap(new Currying());
             assertThatThrownBy(() -> data.currying("invalidCurrying").get()).isInstanceOf(InvalidPropertyException.class);
@@ -215,14 +217,14 @@ class DataTest {
         void return_currying_method_with_property() {
             Data data = build.wrap(new Currying());
 
-            assertThat(data.currying("staticCurrying1").get().call("hello", getConverter()).resolve()).isEqualTo("hello");
+            assertThat(data.currying("staticCurrying1").get().call("hello", getConverter()).resolve(converter)).isEqualTo("hello");
         }
 
         @Test
         void return_currying_method_with_property_in_super_instance_type() {
             Data data = build.wrap(new Currying());
 
-            assertThat(data.currying("baseMatchCurrying").get().call("hello", getConverter()).resolve()).isEqualTo("hello");
+            assertThat(data.currying("baseMatchCurrying").get().call("hello", getConverter()).resolve(converter)).isEqualTo("hello");
         }
 
         @Test
@@ -230,7 +232,7 @@ class DataTest {
             Data data = build.wrap(new Currying());
             CurryingMethod currying = data.currying("staticCurrying2").get();
 
-            assertThat(((CurryingMethod) currying.call(2, getConverter()).resolve()).call("hello", getConverter()).resolve()).isEqualTo("hello2");
+            assertThat(((CurryingMethod) currying.call(2, getConverter()).resolve(converter)).call("hello", getConverter()).resolve(converter)).isEqualTo("hello2");
         }
 
         @Test
@@ -238,7 +240,7 @@ class DataTest {
             Data data = build.wrap(new Currying());
             CurryingMethod currying = data.currying("staticOverrideMethod").get();
 
-            assertThat(currying.call(2, getConverter()).resolve()).isEqualTo(2);
+            assertThat(currying.call(2, getConverter()).resolve(converter)).isEqualTo(2);
         }
 
         @Test
@@ -246,7 +248,7 @@ class DataTest {
             Data data = build.wrap(new Currying());
             CurryingMethod currying = data.currying("baseCurrying").get();
 
-            assertThat(currying.call("a", getConverter()).resolve()).isEqualTo("A");
+            assertThat(currying.call("a", getConverter()).resolve(converter)).isEqualTo("A");
         }
 
         @Test

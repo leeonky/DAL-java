@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.NumberType;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -24,18 +25,16 @@ class InstanceCurryingMethod implements CurryingMethod {
     }
 
     @Override
-    public CurryingMethod call(Object arg, Converter converter) {
+    public InstanceCurryingMethod call(Object arg, Converter converter) {
         InstanceCurryingMethod curryingMethod = clone();
         curryingMethod.args.addAll(args);
-        curryingMethod.args.add(converter.tryConvert(method.getParameters()[args().size()].getType(), arg));
+        curryingMethod.args.add(arg);
         return curryingMethod;
     }
 
     @Override
     protected InstanceCurryingMethod clone() {
-        InstanceCurryingMethod curryingMethod;
-        curryingMethod = new InstanceCurryingMethod(instance, method);
-        return curryingMethod;
+        return new InstanceCurryingMethod(instance, method);
     }
 
     private String parameterInfo() {
@@ -46,10 +45,31 @@ class InstanceCurryingMethod implements CurryingMethod {
                 method.getName()), "\n)"));
     }
 
-    @Override
-    public Object resolve() {
+    //    TODO refactor ******************************************
+    public boolean allParamsTypeMatches(Converter converter) {
         List<Object> args = args();
-        return args.size() == method.getParameterCount() ? get(() -> method.invoke(instance, args.toArray())) : this;
+        if (args.size() == method.getParameterCount()) {
+            for (int i = 0; i < args.size(); i++) {
+                if (!(args.get(i) != null &&
+                        NumberType.boxedClass(args.get(i).getClass()).equals(NumberType.boxedClass(method.getParameters()[i].getType())))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+//    TODO refactor ****************************************
+    public Object resolve(Converter converter) {
+        List<Object> args = args();
+        if (args.size() == method.getParameterCount()) {
+            for (int i = 0; i < args.size(); i++)
+                args.set(i, converter.tryConvert(method.getParameters()[i].getType(), args.get(i)));
+            return get(() -> method.invoke(instance, args.toArray()));
+        }
+        return this;
     }
 
     protected List<Object> args() {

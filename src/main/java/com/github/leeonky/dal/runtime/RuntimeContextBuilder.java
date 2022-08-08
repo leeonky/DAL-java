@@ -194,16 +194,20 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    private Optional<Method> methodToCurrying(Class<?> type, Object methodName) {
-        return oneOf(() -> instanceMethodToCurrying(type, methodName),
+    private List<Method> methodToCurrying(Class<?> type, Object methodName) {
+        List<Method> method1 = stream(type.getMethods())
+                .filter(method2 -> !Modifier.isStatic(method2.getModifiers()))
+                .filter(method2 -> method2.getName().equals(methodName)).collect(toList());
+        if (!method1.isEmpty()) {
+            return method1;
+        }
+
+        Optional<Method> method = oneOf(
                 () -> staticMethodToCurrying(type, methodName, Object::equals),
                 () -> staticMethodToCurrying(type, methodName, Class::isAssignableFrom));
-    }
-
-    static Optional<Method> instanceMethodToCurrying(Class<?> type, Object property) {
-        return getMaxParameterCountMethod(stream(type.getMethods())
-                .filter(method -> !Modifier.isStatic(method.getModifiers()))
-                .filter(method -> method.getName().equals(property)));
+        List<Method> methods = new ArrayList<>();
+        method.ifPresent(methods::add);
+        return methods;
     }
 
     private static Optional<Method> getMaxParameterCountMethod(Stream<Method> methodStream) {
@@ -275,7 +279,7 @@ public class RuntimeContextBuilder {
             try {
                 return propertyAccessors.getData(data.getInstance()).getValueByData(data, property);
             } catch (InvalidPropertyException e) {
-                return data.currying(property).orElseThrow(() -> e).resolve();
+                return data.currying(property).orElseThrow(() -> e).resolve(converter);
             }
         }
 
@@ -377,7 +381,7 @@ public class RuntimeContextBuilder {
             return objectImplicitMapper.tryGetData(obj).map(mapper -> mapper.apply(obj));
         }
 
-        public Optional<Method> methodToCurrying(Class<?> type, Object methodName) {
+        public List<Method> methodToCurrying(Class<?> type, Object methodName) {
             return RuntimeContextBuilder.this.methodToCurrying(type, methodName);
         }
 
