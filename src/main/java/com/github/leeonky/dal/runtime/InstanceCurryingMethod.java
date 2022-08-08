@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.util.ConvertException;
 import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.NumberType;
 
@@ -46,7 +47,7 @@ class InstanceCurryingMethod implements CurryingMethod {
     }
 
     //    TODO refactor ******************************************
-    public boolean allParamsTypeMatches(Converter converter) {
+    public boolean allParamsSameType() {
         List<Object> args = args();
         if (args.size() == method.getParameterCount()) {
             for (int i = 0; i < args.size(); i++) {
@@ -60,8 +61,39 @@ class InstanceCurryingMethod implements CurryingMethod {
         return false;
     }
 
+    //    TODO refactor ******************************************
+    public boolean allParamsBaseType() {
+        List<Object> args = args();
+        if (args.size() == method.getParameterCount()) {
+            for (int i = 0; i < args.size(); i++) {
+                if (!(args.get(i) != null &&
+                        NumberType.boxedClass(method.getParameters()[i].getType()).isInstance(args.get(i)))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    //    TODO refactor ******************************************
+    public boolean allParamsConvertible(Converter converter) {
+        List<Object> args = args();
+        if (args.size() == method.getParameterCount()) {
+            for (int i = 0; i < args.size(); i++) {
+                try {
+                    converter.convert(method.getParameters()[i].getType(), args.get(i));
+                } catch (ConvertException ignore) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    //    TODO refactor ****************************************
     @Override
-//    TODO refactor ****************************************
     public Object resolve(Converter converter) {
         List<Object> args = args();
         if (args.size() == method.getParameterCount()) {

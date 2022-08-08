@@ -161,12 +161,15 @@ Feature: currying function
     Method or property `upperCase` does not exist in `Data`
     """
 
-  Scenario: should not use right type of method in instance method currying
+  Scenario: should use same arg type of method in instance method currying
     Given the following java class:
     """
     public class Data {
       public String method(String input) {
         return "string";
+      }
+      public String method(CharSequence chars) {
+        return "chars";
       }
       public String method(int input) {
         return "int";
@@ -180,4 +183,38 @@ Feature: currying function
     And the following verification for the instance of java class "Data" should pass:
     """
     method[1]= int
+    """
+
+  Scenario: should use base arg type of method in instance method currying
+    Given the following java class:
+    """
+    public class Data {
+      public String method(CharSequence chars) {
+        return "chars";
+      }
+      public String method(int input) {
+        return "int";
+      }
+    }
+    """
+    And the following verification for the instance of java class "Data" should pass:
+    """
+    method['100']= chars
+    """
+
+  Scenario: should use convertible arg type of method in instance method currying
+    Given the following java class:
+    """
+    public class Data {
+      public String method(String str) {
+        return "string";
+      }
+      public String method(java.io.File file) {
+        return "file";
+      }
+    }
+    """
+    And the following verification for the instance of java class "Data" should pass:
+    """
+    method[100]= string
     """

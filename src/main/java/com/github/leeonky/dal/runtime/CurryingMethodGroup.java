@@ -25,10 +25,21 @@ class CurryingMethodGroup implements CurryingMethod {
     @Override
 //    TODO refactor *****************************
     public Object resolve(Converter converter) {
-        Optional<InstanceCurryingMethod> instanceCurryingMethod = curryingMethods.stream()
-                .filter(curryingMethod -> curryingMethod.allParamsTypeMatches(converter)).findFirst();
-        if (instanceCurryingMethod.isPresent())
-            return instanceCurryingMethod.get().resolve(converter);
+        Optional<InstanceCurryingMethod> sameType = curryingMethods.stream()
+                .filter(InstanceCurryingMethod::allParamsSameType).findFirst();
+        if (sameType.isPresent())
+            return sameType.get().resolve(converter);
+
+        Optional<InstanceCurryingMethod> baseType = curryingMethods.stream()
+                .filter(InstanceCurryingMethod::allParamsBaseType).findFirst();
+        if (baseType.isPresent())
+            return baseType.get().resolve(converter);
+
+        Optional<InstanceCurryingMethod> converted = curryingMethods.stream()
+                .filter(instanceCurryingMethod -> instanceCurryingMethod.allParamsConvertible(converter)).findFirst();
+        if (converted.isPresent())
+            return converted.get().resolve(converter);
+
 //        TODO  **********************
         Object resolve = curryingMethods.get(0).resolve(converter);
         return resolve instanceof CurryingMethod ? this : resolve;
