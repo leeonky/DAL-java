@@ -8,18 +8,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 class CurryingMethodGroup implements CurryingMethod {
-    private final CurryingMethodGroup parent;
     private final List<InstanceCurryingMethod> curryingMethods;
 
-    CurryingMethodGroup(CurryingMethodGroup parent, List<InstanceCurryingMethod> curryingMethods) {
-        this.parent = parent;
+    CurryingMethodGroup(List<InstanceCurryingMethod> curryingMethods) {
         this.curryingMethods = curryingMethods;
     }
 
     @Override
-    public CurryingMethodGroup call(Object arg, Converter converter) {
-        return new CurryingMethodGroup(this, curryingMethods.stream().map(curryingMethod ->
-                curryingMethod.call(arg, converter)).collect(Collectors.toList()));
+    public CurryingMethodGroup call(Object arg) {
+        return new CurryingMethodGroup(curryingMethods.stream().map(curryingMethod ->
+                curryingMethod.call(arg)).collect(Collectors.toList()));
     }
 
     @Override

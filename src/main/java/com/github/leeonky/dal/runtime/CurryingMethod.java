@@ -7,13 +7,13 @@ import java.lang.reflect.Modifier;
 import java.util.Set;
 
 public interface CurryingMethod {
-    static InstanceCurryingMethod createCurryingMethod(Object instance, Method method) {
+    static InstanceCurryingMethod createCurryingMethod(Object instance, Method method, Converter converter) {
         if (Modifier.isStatic(method.getModifiers()))
-            return new StaticCurryingMethod(instance, method);
-        return new InstanceCurryingMethod(instance, method);
+            return new StaticCurryingMethod(instance, method, converter);
+        return new InstanceCurryingMethod(instance, method, converter);
     }
 
-    CurryingMethod call(Object arg, Converter converter);
+    CurryingMethod call(Object arg);
 
     Object resolve(Converter converter);
 

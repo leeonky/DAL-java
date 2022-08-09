@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
 import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
@@ -239,9 +240,9 @@ public class Data {
 
     private Optional<CurryingMethod> currying(Object instance, Object property) {
         List<InstanceCurryingMethod> methods = dalRuntimeContext.methodToCurrying(instance.getClass(), property).stream()
-                .map(method -> CurryingMethod.createCurryingMethod(instance, method)).collect(toList());
+                .map(method -> createCurryingMethod(instance, method, dalRuntimeContext.getConverter())).collect(toList());
         if (!methods.isEmpty())
-            return of(new CurryingMethodGroup(null, methods));
+            return of(new CurryingMethodGroup(methods));
         return dalRuntimeContext.getImplicitObject(instance).flatMap(obj -> currying(obj, property));
     }
 

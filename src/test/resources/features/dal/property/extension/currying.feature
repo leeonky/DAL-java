@@ -243,7 +243,7 @@ Feature: currying function
     method[1]= int
     """
 
-  Scenario: should use base arg type of method in instance method currying
+  Scenario: should use base arg type of method in static method currying
     Given the following java class:
     """
     public class Data {
@@ -260,7 +260,7 @@ Feature: currying function
     method['100']= chars
     """
 
-  Scenario: should use convertible arg type of method in instance method currying
+  Scenario: should use convertible arg type of method in static method currying
     Given the following java class:
     """
     public class Data {

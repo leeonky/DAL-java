@@ -26,7 +26,6 @@ import static java.lang.String.format;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
-import static java.util.Comparator.comparingInt;
 import static java.util.stream.Collectors.toList;
 
 public class RuntimeContextBuilder {
@@ -193,48 +192,19 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    //    TODO refactor **************************
     private List<Method> methodToCurrying(Class<?> type, Object methodName) {
-        List<Method> method1 = stream(type.getMethods())
-                .filter(method2 -> !Modifier.isStatic(method2.getModifiers()))
-                .filter(method2 -> method2.getName().equals(methodName)).collect(toList());
-
-        if (!method1.isEmpty()) {
-            return method1;
-        }
-
-        method1.addAll(staticMethodToCurryings(type, methodName, Object::equals));
-        method1.addAll(staticMethodToCurryings(type, methodName, Class::isAssignableFrom));
-        return method1;
-//
-//        Optional<Method> method = oneOf(
-//                () -> staticMethodToCurrying(type, methodName, Object::equals),
-//                () -> staticMethodToCurrying(type, methodName, Class::isAssignableFrom));
-//        List<Method> methods = new ArrayList<>();
-//        method.ifPresent(methods::add);
-//        return methods;
+        return Stream.of(stream(type.getMethods()).filter(method2 -> !Modifier.isStatic(method2.getModifiers()))
+                                .filter(method2 -> method2.getName().equals(methodName)),
+                        staticMethodsToCurrying(type, methodName, Object::equals),
+                        staticMethodsToCurrying(type, methodName, Class::isAssignableFrom))
+                .flatMap(Function.identity()).collect(toList());
     }
 
-    private static Optional<Method> getMaxParameterCountMethod(Stream<Method> methodStream) {
-        List<Method> methods = methodStream.sorted(comparingInt(Method::getParameterCount)).collect(toList());
-        if (methods.size() > 1 && methods.get(0).getParameterCount() == methods.get(1).getParameterCount())
-            throw new InvalidPropertyException("Ambiguous method call:\n"
-                    + methods.stream().map(Method::toString).collect(Collectors.joining("\n")));
-        return methods.stream().findFirst();
-    }
-
-    private Optional<Method> staticMethodToCurrying(Class<?> type, Object property,
-                                                    BiPredicate<Class<?>, Class<?>> condition) {
-        return getMaxParameterCountMethod(extensionMethods.stream()
-                .filter(method -> staticExtensionMethodName(method).equals(property))
-                .filter(method -> condition.test(method.getParameters()[0].getType(), type)));
-    }
-
-    private List<Method> staticMethodToCurryings(Class<?> type, Object property,
-                                                 BiPredicate<Class<?>, Class<?>> condition) {
+    private Stream<Method> staticMethodsToCurrying(Class<?> type, Object property,
+                                                   BiPredicate<Class<?>, Class<?>> condition) {
         return extensionMethods.stream()
                 .filter(method -> staticExtensionMethodName(method).equals(property))
-                .filter(method -> condition.test(method.getParameters()[0].getType(), type)).collect(toList());
+                .filter(method -> condition.test(method.getParameters()[0].getType(), type));
     }
 
     static String staticExtensionMethodName(Method method) {
