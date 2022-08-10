@@ -181,7 +181,7 @@ class DataTest {
         void return_currying_method_with_property() {
             Data data = build.wrap(new Currying());
 
-            assertThat(data.currying("currying1").get().call("hello").resolve(converter)).isEqualTo("hello");
+            assertThat(data.currying("currying1").get().call("hello").resolve()).isEqualTo("hello");
         }
 
         @Test
@@ -189,7 +189,7 @@ class DataTest {
             Data data = build.wrap(new Currying());
             CurryingMethod currying = data.currying("currying2").get();
 
-            assertThat(((CurryingMethod) currying.call(2).resolve(converter)).call("hello").resolve(converter)).isEqualTo("hello2");
+            assertThat(((CurryingMethod) currying.call(2).resolve()).call("hello").resolve()).isEqualTo("hello2");
         }
 
         @Test
@@ -197,7 +197,7 @@ class DataTest {
             Data data = build.wrap(new Currying());
             CurryingMethod currying = data.currying("overrideMethod").get();
 
-            assertThat(currying.call(2).resolve(converter)).isEqualTo(2);
+            assertThat(currying.call(2).resolve()).isEqualTo(2);
         }
 
         //        TODO ****************** two base arg type
@@ -216,14 +216,14 @@ class DataTest {
         void return_currying_method_with_property() {
             Data data = build.wrap(new Currying());
 
-            assertThat(data.currying("staticCurrying1").get().call("hello").resolve(converter)).isEqualTo("hello");
+            assertThat(data.currying("staticCurrying1").get().call("hello").resolve()).isEqualTo("hello");
         }
 
         @Test
         void return_currying_method_with_property_in_super_instance_type() {
             Data data = build.wrap(new Currying());
 
-            assertThat(data.currying("baseMatchCurrying").get().call("hello").resolve(converter)).isEqualTo("hello");
+            assertThat(data.currying("baseMatchCurrying").get().call("hello").resolve()).isEqualTo("hello");
         }
 
         @Test
@@ -231,7 +231,7 @@ class DataTest {
             Data data = build.wrap(new Currying());
             CurryingMethod currying = data.currying("staticCurrying2").get();
 
-            assertThat(((CurryingMethod) currying.call(2).resolve(converter)).call("hello").resolve(converter)).isEqualTo("hello2");
+            assertThat(((CurryingMethod) currying.call(2).resolve()).call("hello").resolve()).isEqualTo("hello2");
         }
 
         @Test
@@ -239,7 +239,7 @@ class DataTest {
             Data data = build.wrap(new Currying());
             CurryingMethod currying = data.currying("staticOverrideMethod").get();
 
-            assertThat(currying.call(2).resolve(converter)).isEqualTo(2);
+            assertThat(currying.call(2).resolve()).isEqualTo(2);
         }
 
         @Test
@@ -247,7 +247,7 @@ class DataTest {
             Data data = build.wrap(new Currying());
             CurryingMethod currying = data.currying("baseCurrying").get();
 
-            assertThat(currying.call("a").resolve(converter)).isEqualTo("A");
+            assertThat(currying.call("a").resolve()).isEqualTo("A");
         }
 
         //        @Test

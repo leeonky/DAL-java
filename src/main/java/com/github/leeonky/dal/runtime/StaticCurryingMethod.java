@@ -24,7 +24,7 @@ class StaticCurryingMethod extends InstanceCurryingMethod {
     }
 
     @Override
-    public Object resolve(Converter converter) {
+    public Object resolve() {
         return get(() -> method.invoke(null, parameterValues.stream().map(parameterValue -> parameterValue.getArg(converter))
                 .collect(Collectors.toCollection(() -> new ArrayList<Object>() {{
                     add(instance);

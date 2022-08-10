@@ -1,7 +1,5 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.util.Converter;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -22,21 +20,21 @@ class CurryingMethodGroup implements CurryingMethod {
 
     @Override
 //    TODO refactor *****************************
-    public Object resolve(Converter converter) {
+    public Object resolve() {
         Optional<InstanceCurryingMethod> sameType = curryingMethods.stream()
                 .filter(InstanceCurryingMethod::allParamsSameType).findFirst();
         if (sameType.isPresent())
-            return sameType.get().resolve(converter);
+            return sameType.get().resolve();
 
         Optional<InstanceCurryingMethod> baseType = curryingMethods.stream()
                 .filter(InstanceCurryingMethod::allParamsBaseType).findFirst();
         if (baseType.isPresent())
-            return baseType.get().resolve(converter);
+            return baseType.get().resolve();
 
         Optional<InstanceCurryingMethod> converted = curryingMethods.stream()
-                .filter(instanceCurryingMethod -> instanceCurryingMethod.allParamsConvertible(converter)).findFirst();
+                .filter(InstanceCurryingMethod::allParamsConvertible).findFirst();
         if (converted.isPresent())
-            return converted.get().resolve(converter);
+            return converted.get().resolve();
         return this;
     }
 

@@ -17,6 +17,7 @@ import static java.util.stream.Collectors.toList;
 class InstanceCurryingMethod implements CurryingMethod {
     protected final Object instance;
     protected final Method method;
+    protected final Converter converter;
     @Deprecated
     private final List<Object> args = new ArrayList<>();
     protected final List<ParameterValue> parameterValues = new ArrayList<>();
@@ -24,6 +25,7 @@ class InstanceCurryingMethod implements CurryingMethod {
     protected InstanceCurryingMethod(Object instance, Method method, Converter converter) {
         this.method = method;
         this.instance = instance;
+        this.converter = converter;
     }
 
     @Override
@@ -70,12 +72,12 @@ class InstanceCurryingMethod implements CurryingMethod {
         return testParameterTypes(ParameterValue::isSuperType);
     }
 
-    public boolean allParamsConvertible(Converter converter) {
+    public boolean allParamsConvertible() {
         return testParameterTypes(parameterValue -> parameterValue.isConvertibleType(converter));
     }
 
     @Override
-    public Object resolve(Converter converter) {
+    public Object resolve() {
         return get(() -> method.invoke(instance, parameterValues.stream().map(parameterValue ->
                 parameterValue.getArg(converter)).collect(toList()).toArray()));
     }

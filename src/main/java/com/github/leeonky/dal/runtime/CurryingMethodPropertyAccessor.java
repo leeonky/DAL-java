@@ -12,7 +12,7 @@ class CurryingMethodPropertyAccessor extends JavaClassPropertyAccessor<CurryingM
 
     @Override
     public Object getValue(CurryingMethod curryingMethod, Object property) {
-        return curryingMethod.call(property).resolve(runtimeContextBuilder.getConverter());
+        return curryingMethod.call(property).resolve();
     }
 
     @Override

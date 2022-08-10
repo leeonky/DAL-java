@@ -261,7 +261,7 @@ public class RuntimeContextBuilder {
             try {
                 return propertyAccessors.getData(data.getInstance()).getValueByData(data, property);
             } catch (InvalidPropertyException e) {
-                return data.currying(property).orElseThrow(() -> e).resolve(converter);
+                return data.currying(property).orElseThrow(() -> e).resolve();
             }
         }
 

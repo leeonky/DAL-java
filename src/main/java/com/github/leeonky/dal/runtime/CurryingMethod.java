@@ -15,7 +15,7 @@ public interface CurryingMethod {
 
     CurryingMethod call(Object arg);
 
-    Object resolve(Converter converter);
+    Object resolve();
 
     Set<Object> fetchArgRange(RuntimeContextBuilder runtimeContextBuilder);
 }
