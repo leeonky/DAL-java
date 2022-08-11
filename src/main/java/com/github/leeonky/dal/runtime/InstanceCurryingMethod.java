@@ -98,6 +98,6 @@ class InstanceCurryingMethod implements CurryingMethod {
 
     @Override
     public String toString() {
-        return String.format("instance: %s\nmethod: %s\nargs: %s", instance, method, args());
+        return method.toString();
     }
 }

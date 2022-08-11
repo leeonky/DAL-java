@@ -276,3 +276,38 @@ Feature: currying function
     """
     method[100]= string
     """
+
+  Scenario: raise error when more than one base arg type of method in instance method currying
+    Given the following java class:
+    """
+    public class Data {
+      public String method(CharSequence chars) {
+        return "chars";
+      }
+      public String method(Object input) {
+        return "object";
+      }
+    }
+    """
+    When use a instance of java class "Data" to evaluate:
+    """
+    method.str
+    """
+    Then failed with the message:
+    """
+    Get property `str` failed, property can be:
+      1. public field
+      2. public getter
+      3. public no args method
+      4. Map key value
+      5. customized type getter
+      6. static method extension
+    More than one currying method:
+      public java.lang.String Data.method(java.lang.CharSequence)
+      public java.lang.String Data.method(java.lang.Object)
+    """
+    And got the following notation:
+    """
+    method.str
+           ^
+    """

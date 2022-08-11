@@ -26,7 +26,6 @@ import static java.lang.String.format;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.toList;
 
 public class RuntimeContextBuilder {
     private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
@@ -192,12 +191,12 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    private List<Method> methodToCurrying(Class<?> type, Object methodName) {
-        return Stream.of(stream(type.getMethods()).filter(method2 -> !Modifier.isStatic(method2.getModifiers()))
-                                .filter(method2 -> method2.getName().equals(methodName)),
+    private Set<Method> methodToCurrying(Class<?> type, Object methodName) {
+        return Stream.of(stream(type.getMethods()).filter(method -> !Modifier.isStatic(method.getModifiers()))
+                                .filter(method -> method.getName().equals(methodName)),
                         staticMethodsToCurrying(type, methodName, Object::equals),
                         staticMethodsToCurrying(type, methodName, Class::isAssignableFrom))
-                .flatMap(Function.identity()).collect(toList());
+                .flatMap(Function.identity()).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     private Stream<Method> staticMethodsToCurrying(Class<?> type, Object property,
@@ -363,7 +362,7 @@ public class RuntimeContextBuilder {
             return objectImplicitMapper.tryGetData(obj).map(mapper -> mapper.apply(obj));
         }
 
-        public List<Method> methodToCurrying(Class<?> type, Object methodName) {
+        public Set<Method> methodToCurrying(Class<?> type, Object methodName) {
             return RuntimeContextBuilder.this.methodToCurrying(type, methodName);
         }
 

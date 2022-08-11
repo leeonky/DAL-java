@@ -1,9 +1,14 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.interpreter.FunctionUtil;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.joining;
 
 class CurryingMethodGroup implements CurryingMethod {
     private final List<InstanceCurryingMethod> curryingMethods;
@@ -19,23 +24,20 @@ class CurryingMethodGroup implements CurryingMethod {
     }
 
     @Override
-//    TODO refactor *****************************
     public Object resolve() {
-        Optional<InstanceCurryingMethod> sameType = curryingMethods.stream()
-                .filter(InstanceCurryingMethod::allParamsSameType).findFirst();
-        if (sameType.isPresent())
-            return sameType.get().resolve();
+        Optional<InstanceCurryingMethod> curryingMethod = FunctionUtil.oneOf(
+                () -> selectCurryingMethod(InstanceCurryingMethod::allParamsSameType),
+                () -> selectCurryingMethod(InstanceCurryingMethod::allParamsBaseType),
+                () -> selectCurryingMethod(InstanceCurryingMethod::allParamsConvertible));
+        return curryingMethod.isPresent() ? curryingMethod.get().resolve() : this;
+    }
 
-        Optional<InstanceCurryingMethod> baseType = curryingMethods.stream()
-                .filter(InstanceCurryingMethod::allParamsBaseType).findFirst();
-        if (baseType.isPresent())
-            return baseType.get().resolve();
-
-        Optional<InstanceCurryingMethod> converted = curryingMethods.stream()
-                .filter(InstanceCurryingMethod::allParamsConvertible).findFirst();
-        if (converted.isPresent())
-            return converted.get().resolve();
-        return this;
+    private Optional<InstanceCurryingMethod> selectCurryingMethod(Predicate<InstanceCurryingMethod> predicate) {
+        List<InstanceCurryingMethod> methods = curryingMethods.stream().filter(predicate).collect(Collectors.toList());
+        if (methods.size() > 1)
+            throw new IllegalStateException("More than one currying method:\n" + methods.stream().map(
+                    instanceCurryingMethod -> "  " + instanceCurryingMethod.toString()).collect(joining("\n")));
+        return methods.stream().findFirst();
     }
 
     @Override
