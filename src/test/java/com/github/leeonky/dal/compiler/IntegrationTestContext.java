@@ -11,8 +11,11 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.SyntaxException;
+import com.github.leeonky.util.Converter;
 import lombok.SneakyThrows;
 
+import java.lang.RuntimeException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -264,5 +267,25 @@ public class IntegrationTestContext {
                 Arrays.stream(getType(methodType).getMethods()).filter(m -> m.getName().equals(method)
                         && m.getParameters()[0].getType().equals(getType(type))).findFirst().get(),
                 (instance, args) -> new ArrayList<>(range));
+    }
+
+    @SneakyThrows
+    public void setCurryingMethodArgRange2(String type, String methodName, List<Map<String, List<?>>> rangeList) {
+        compileAll();
+        Method method = getType(type).getMethod(methodName, rangeList.stream().map(m -> m.keySet().iterator().next())
+                .map(s -> getClass(s)).toArray(Class[]::new));
+        dal.getRuntimeContextBuilder().registerCurryingMethodRange(method, (instance, args) -> {
+            Map<String, List<?>> stringListMap = rangeList.get(args.size());
+            return stringListMap.values().iterator().next().stream().map(a -> Converter.getInstance()
+                    .convert(getClass(stringListMap.keySet().iterator().next()), a)).collect(Collectors.toList());
+        });
+    }
+
+    private Class<?> getClass(String s) {
+        try {
+            return Class.forName(s);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

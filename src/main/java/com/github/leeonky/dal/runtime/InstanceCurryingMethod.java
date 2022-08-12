@@ -82,8 +82,9 @@ class InstanceCurryingMethod implements CurryingMethod {
                 parameterValue.getArg(converter)).collect(toList()).toArray()));
     }
 
+    //    TODO refactor
     protected List<Object> args() {
-        return args;
+        return parameterValues.stream().map(parameterValue -> parameterValue.value).collect(toList());
     }
 
     //    TODO arg range for type instant ******************************

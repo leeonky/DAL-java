@@ -242,7 +242,7 @@ public class Data {
         List<InstanceCurryingMethod> methods = dalRuntimeContext.methodToCurrying(instance.getClass(), property).stream()
                 .map(method -> createCurryingMethod(instance, method, dalRuntimeContext.getConverter())).collect(toList());
         if (!methods.isEmpty())
-            return of(new CurryingMethodGroup(methods));
+            return of(new CurryingMethodGroup(methods, null));
         return dalRuntimeContext.getImplicitObject(instance).flatMap(obj -> currying(obj, property));
     }
 

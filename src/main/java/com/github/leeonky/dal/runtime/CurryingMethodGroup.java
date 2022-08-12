@@ -2,25 +2,30 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.interpreter.FunctionUtil;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.joining;
 
 class CurryingMethodGroup implements CurryingMethod {
+    private final Optional<CurryingMethodGroup> parent;
     private final List<InstanceCurryingMethod> curryingMethods;
+    private Optional<InstanceCurryingMethod> resolvedCurryingMethod = Optional.empty();
 
-    CurryingMethodGroup(List<InstanceCurryingMethod> curryingMethods) {
+    CurryingMethodGroup(List<InstanceCurryingMethod> curryingMethods, CurryingMethodGroup parent) {
         this.curryingMethods = curryingMethods;
+        this.parent = Optional.ofNullable(parent);
     }
 
     @Override
     public CurryingMethodGroup call(Object arg) {
         return new CurryingMethodGroup(curryingMethods.stream().map(curryingMethod ->
-                curryingMethod.call(arg)).collect(Collectors.toList()));
+                curryingMethod.call(arg)).collect(Collectors.toList()), this);
     }
 
     @Override
@@ -29,7 +34,13 @@ class CurryingMethodGroup implements CurryingMethod {
                 () -> selectCurryingMethod(InstanceCurryingMethod::allParamsSameType),
                 () -> selectCurryingMethod(InstanceCurryingMethod::allParamsBaseType),
                 () -> selectCurryingMethod(InstanceCurryingMethod::allParamsConvertible));
-        return curryingMethod.isPresent() ? curryingMethod.get().resolve() : this;
+        return curryingMethod.isPresent() ? setResolveCurryingMethod(curryingMethod.get()).resolve() : this;
+    }
+
+    private InstanceCurryingMethod setResolveCurryingMethod(InstanceCurryingMethod curryingMethod) {
+        parent.ifPresent(p -> p.setResolveCurryingMethod(curryingMethod));
+        resolvedCurryingMethod = of(curryingMethod);
+        return curryingMethod;
     }
 
     private Optional<InstanceCurryingMethod> selectCurryingMethod(Predicate<InstanceCurryingMethod> predicate) {
@@ -47,13 +58,8 @@ class CurryingMethodGroup implements CurryingMethod {
 
     @Override
     public Set<Object> fetchArgRange(RuntimeContextBuilder runtimeContextBuilder) {
-//        TODO  **********************
-        return curryingMethods.get(0).fetchArgRange(runtimeContextBuilder);
-    }
-
-    @Override
-    public String toString() {
-//        TODO  **********************
-        return curryingMethods.get(0).toString();
+        return resolvedCurryingMethod.flatMap(m -> curryingMethods.stream()
+                .filter(method -> method.method.equals(m.method)).findFirst()
+                .map(method -> method.fetchArgRange(runtimeContextBuilder))).orElseGet(Collections::emptySet);
     }
 }
