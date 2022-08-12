@@ -311,3 +311,25 @@ Feature: currying function
     method.str
            ^
     """
+
+  Scenario: should use same instance type of method in static method currying
+    Given the following java class:
+    """
+    public class BaseData {
+    }
+    """
+    Given the following java class:
+    """
+    public class Data extends BaseData {
+      public static String method(BaseData data, String input) {
+        return "super";
+      }
+      public static String method(Data data, String input) {
+        return "sub";
+      }
+    }
+    """
+    And the following verification for the instance of java class "Data" should pass:
+    """
+    method.hello= sub
+    """

@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.NumberType;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -29,5 +30,10 @@ class StaticCurryingMethod extends InstanceCurryingMethod {
                 .collect(Collectors.toCollection(() -> new ArrayList<Object>() {{
                     add(instance);
                 }})).toArray()));
+    }
+
+    @Override
+    public boolean isSameInstanceType() {
+        return method.getParameters()[0].getType().equals(NumberType.boxedClass(instance.getClass()));
     }
 }

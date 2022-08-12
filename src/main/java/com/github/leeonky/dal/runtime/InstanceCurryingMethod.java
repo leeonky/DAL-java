@@ -100,4 +100,8 @@ class InstanceCurryingMethod implements CurryingMethod {
     public String toString() {
         return method.toString();
     }
+
+    public boolean isSameInstanceType() {
+        return true;
+    }
 }

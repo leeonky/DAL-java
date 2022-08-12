@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataTest {
@@ -199,12 +198,6 @@ class DataTest {
 
             assertThat(currying.call(2).resolve()).isEqualTo(2);
         }
-
-        //        TODO ****************** two base arg type
-        void raise_error_when_more_than_one_candidate() {
-            Data data = build.wrap(new Currying());
-            assertThatThrownBy(() -> data.currying("invalidCurrying").get()).isInstanceOf(InvalidPropertyException.class);
-        }
     }
 
     @Nested
@@ -242,20 +235,12 @@ class DataTest {
             assertThat(currying.call(2).resolve()).isEqualTo(2);
         }
 
-        //        @Test
-//        TODO ****************** static method same type/ base type
+        @Test
         void use_same_instance_type_first_when_more_than_one_candidate() {
             Data data = build.wrap(new Currying());
             CurryingMethod currying = data.currying("baseCurrying").get();
 
             assertThat(currying.call("a").resolve()).isEqualTo("A");
-        }
-
-        //        @Test
-        //        TODO ****************** two base arg type
-        void raise_error_when_more_than_one_candidate() {
-            Data data = build.wrap(new Currying());
-            assertThatThrownBy(() -> data.currying("invalidStaticCurrying").get()).isInstanceOf(InvalidPropertyException.class);
         }
     }
 

@@ -120,14 +120,12 @@ class PropertyNodeTest {
             assertThat(Base.createPropertyNode(INPUT_NODE, "getIntFromBase").evaluate(DALRuntimeContext)).isEqualTo(200);
         }
 
-        //        @Test
-//        TODO ****************** static method same type/ base type
+        @Test
         void should_invoke_by_instance_type() {
             assertThat(Base.createPropertyNode(INPUT_NODE, "getInt").evaluate(DALRuntimeContext)).isEqualTo(300);
         }
 
-        //        @Test
-        //        TODO ****************** two base arg type
+        @Test
         void raise_error_when_more_than_one_method() {
             RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
                     .registerStaticMethodExtension(BeanMethods.class)
