@@ -207,4 +207,3 @@ Feature: arg range in currying
       }
     }
     """
-

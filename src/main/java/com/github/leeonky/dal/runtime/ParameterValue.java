@@ -9,7 +9,7 @@ import static com.github.leeonky.util.NumberType.boxedClass;
 
 class ParameterValue {
     private final Parameter parameter;
-    final Object value;
+    private final Object value;
 
     public ParameterValue(Parameter parameter, Object value) {
         this.parameter = parameter;

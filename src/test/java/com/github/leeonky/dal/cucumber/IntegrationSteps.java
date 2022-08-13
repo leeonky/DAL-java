@@ -187,6 +187,8 @@ public class IntegrationSteps {
     }
 
     @And("args range of java class {string} method {string}:")
+//    TODO remove *******************************
+    @Deprecated
     public void argsRangeOfJavaClassMethod(String type, String method, List<List<String>> range) {
         integrationTestContext.setCurryingMethodArgRange(type, method, range.get(0));
     }

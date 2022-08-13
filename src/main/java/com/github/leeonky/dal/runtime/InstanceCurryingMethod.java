@@ -84,10 +84,9 @@ class InstanceCurryingMethod implements CurryingMethod {
 
     //    TODO refactor
     protected List<Object> args() {
-        return parameterValues.stream().map(parameterValue -> parameterValue.value).collect(toList());
+        return parameterValues.stream().map(parameterValue -> parameterValue.getArg(converter)).collect(toList());
     }
 
-    //    TODO arg range for type instant ******************************
     @Override
     public Set<Object> fetchArgRange(RuntimeContextBuilder runtimeContextBuilder) {
         BiFunction<Object, List<Object>, List<Object>> rangeFactory = runtimeContextBuilder.fetchCurryingMethodArgRange(method);
