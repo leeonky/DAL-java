@@ -19,6 +19,7 @@ class InstanceCurryingMethod implements CurryingMethod {
     protected final Method method;
     protected final Converter converter;
     @Deprecated
+//    TODO remove *************************
     private final List<Object> args = new ArrayList<>();
     protected final List<ParameterValue> parameterValues = new ArrayList<>();
 
@@ -34,8 +35,12 @@ class InstanceCurryingMethod implements CurryingMethod {
         curryingMethod.args.addAll(args);
         curryingMethod.args.add(arg);
         curryingMethod.parameterValues.addAll(parameterValues);
-        curryingMethod.parameterValues.add(new ParameterValue(method.getParameters()[parameterValues.size() + parameterOffset()], arg));
+        curryingMethod.parameterValues.add(new ParameterValue(currentPositionParameter(), arg));
         return curryingMethod;
+    }
+
+    private Parameter currentPositionParameter() {
+        return method.getParameters()[parameterValues.size() + parameterOffset()];
     }
 
     protected int parameterOffset() {
@@ -103,5 +108,10 @@ class InstanceCurryingMethod implements CurryingMethod {
 
     public boolean isSameInstanceType() {
         return true;
+    }
+
+    @Override
+    public Object convertToArgType(Object obj) {
+        return converter.convert(currentPositionParameter().getType(), obj);
     }
 }

@@ -15,6 +15,7 @@ import static java.util.stream.Collectors.joining;
 class CurryingMethodGroup implements CurryingMethod {
     private final Optional<CurryingMethodGroup> parent;
     private final List<InstanceCurryingMethod> curryingMethods;
+    //    TODO do not use optional ****************************
     private Optional<InstanceCurryingMethod> resolvedCurryingMethod = Optional.empty();
 
     CurryingMethodGroup(List<InstanceCurryingMethod> curryingMethods, CurryingMethodGroup parent) {
@@ -61,5 +62,12 @@ class CurryingMethodGroup implements CurryingMethod {
         return resolvedCurryingMethod.flatMap(m -> curryingMethods.stream()
                 .filter(method -> method.method.equals(m.method)).findFirst()
                 .map(method -> method.fetchArgRange(runtimeContextBuilder))).orElseGet(Collections::emptySet);
+    }
+
+    @Override
+    public Object convertToArgType(Object obj) {
+        Optional<InstanceCurryingMethod> instanceCurryingMethod = resolvedCurryingMethod.flatMap(m -> curryingMethods.stream()
+                .filter(method -> method.method.equals(m.method)).findFirst());
+        return instanceCurryingMethod.map(method -> method.convertToArgType(obj)).orElse(obj);
     }
 }

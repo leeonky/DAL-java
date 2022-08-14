@@ -18,4 +18,6 @@ public interface CurryingMethod {
     Object resolve();
 
     Set<Object> fetchArgRange(RuntimeContextBuilder runtimeContextBuilder);
+
+    Object convertToArgType(Object obj);
 }

@@ -207,3 +207,56 @@ Feature: arg range in currying
       }
     }
     """
+
+  Scenario: auto convent to right type in args range
+    Given the following java class:
+    """
+    public class Data {
+      public Object time(java.time.Instant instant, java.lang.Integer second) {
+        return instant.plusSeconds(second);
+      }
+    }
+    """
+    And args range of java class "Data" method "time" xx:
+    """
+    [
+      {"java.time.Instant": ["1999-10-11T20:00:00Z", "2000-10-11T20:00:00Z"]},
+      {"java.lang.Integer": [0, 1]}
+    ]
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    time= {
+      '1999-10-11T20:00:00Z'= {
+        0: '1999-10-11T20:00:00Z'
+        1: '1999-10-11T20:00:01Z'
+      }
+      '2000-10-11T20:00:00Z'= {
+        0: '2000-10-11T20:00:00Z'
+        1: '2000-10-11T20:00:01Z'
+      }
+    }
+    """
+    When use a instance of java class "Data" to evaluate:
+    """
+    time= {
+      '1999-10-11T20:00:00Z'= {
+        0: '1999-10-11T20:00:00Z'
+        1: '1999-10-11T20:00:01Z'
+      }
+    }
+    """
+    Then failed with the message:
+    """
+    Unexpected fields 2000-10-11T20:00:00Z in time
+    """
+    And got the following notation:
+    """
+    time= {
+        ^
+      '1999-10-11T20:00:00Z'= {
+        0: '1999-10-11T20:00:00Z'
+        1: '1999-10-11T20:00:01Z'
+      }
+    }
+    """

@@ -1,13 +1,11 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.runtime.CurryingMethod;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,11 +42,18 @@ public class ObjectScopeNode extends DALNode {
         });
     }
 
+    //    TODO ***************refactor
     private Set<Object> collectUnexpectedFields(Data data, DALRuntimeContext context) {
-        return new LinkedHashSet<Object>(data.getFieldNames()) {{
-            removeAll(collectFields(data));
-            removeAll(context.collectPartialProperties(data));
+        Set<Object> collected = new HashSet<Object>() {{
+            addAll(collectFields(data));
+            addAll(context.collectPartialProperties(data));
         }};
+        if (data.getInstance() instanceof CurryingMethod) {
+            collected = collected.stream().map(obj -> ((CurryingMethod) data.getInstance()).convertToArgType(obj)).collect(Collectors.toSet());
+        }
+        LinkedHashSet<Object> objects = new LinkedHashSet<>(data.getFieldNames());
+        objects.removeAll(collected);
+        return objects;
     }
 
     @Override
