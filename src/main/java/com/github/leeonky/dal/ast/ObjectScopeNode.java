@@ -5,7 +5,10 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,18 +45,15 @@ public class ObjectScopeNode extends DALNode {
         });
     }
 
-    //    TODO ***************refactor
     private Set<Object> collectUnexpectedFields(Data data, DALRuntimeContext context) {
-        Set<Object> collected = new HashSet<Object>() {{
-            addAll(collectFields(data));
-            addAll(context.collectPartialProperties(data));
+        return new LinkedHashSet<Object>(data.getFieldNames()) {{
+            Stream.concat(collectFields(data).stream(), context.collectPartialProperties(data).stream())
+                    .map(obj -> convertFiled(data, obj)).forEach(this::remove);
         }};
-        if (data.getInstance() instanceof CurryingMethod) {
-            collected = collected.stream().map(obj -> ((CurryingMethod) data.getInstance()).convertToArgType(obj)).collect(Collectors.toSet());
-        }
-        LinkedHashSet<Object> objects = new LinkedHashSet<>(data.getFieldNames());
-        objects.removeAll(collected);
-        return objects;
+    }
+
+    private Object convertFiled(Data data, Object obj) {
+        return data.getInstance() instanceof CurryingMethod ? ((CurryingMethod) data.getInstance()).convertToArgType(obj) : obj;
     }
 
     @Override

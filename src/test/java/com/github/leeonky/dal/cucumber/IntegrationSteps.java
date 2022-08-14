@@ -186,22 +186,14 @@ public class IntegrationSteps {
         integrationTestContext.verifyDumpedData(verification);
     }
 
-    @And("args range of java class {string} method {string}:")
-//    TODO remove *******************************
-    @Deprecated
-    public void argsRangeOfJavaClassMethod(String type, String method, List<List<String>> range) {
-        integrationTestContext.setCurryingMethodArgRange(type, method, range.get(0));
-    }
-
-
     @And("args range of java class {string} static method {string}::{string}:")
     public void argsRangeOfJavaClassStaticMethod(String type, String methodType, String method, List<List<String>> range) {
         integrationTestContext.setCurryingStaticMethodArgRange(type, methodType, method, range.get(0));
     }
 
     @SneakyThrows
-    @And("args range of java class {string} method {string} xx:")
-    public void argsRangeOfJavaClassMethodXx(String type, String method, String ranges) {
+    @And("args range of java class {string} method {string}:")
+    public void argsRangeOfJavaClassMethod(String type, String method, String ranges) {
         List<Map<String, List<?>>> rangeList = new ObjectMapper().readValue(ranges, List.class);
         integrationTestContext.setCurryingMethodArgRange2(type, method, rangeList);
     }

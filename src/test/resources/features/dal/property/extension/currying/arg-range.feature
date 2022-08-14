@@ -10,7 +10,11 @@ Feature: arg range in currying
     }
     """
     And args range of java class "Data" method "upperCase":
-      | a | b | c |
+    """
+    [
+      {"java.lang.String": ["a", "b", "c"]}
+    ]
+    """
     When use a instance of java class "Data" to evaluate:
     """
     upperCase= {
@@ -76,7 +80,7 @@ Feature: arg range in currying
       }
     }
     """
-    And args range of java class "Data" method "upperCase" xx:
+    And args range of java class "Data" method "upperCase":
     """
     [{
       "java.lang.String": ["a", "b", "c"]
@@ -109,7 +113,7 @@ Feature: arg range in currying
       }
     }
     """
-    And args range of java class "Data" method "upperCase" xx:
+    And args range of java class "Data" method "upperCase":
     """
     [
       {"java.lang.String": ["a", "b", "c"]},
@@ -217,7 +221,7 @@ Feature: arg range in currying
       }
     }
     """
-    And args range of java class "Data" method "time" xx:
+    And args range of java class "Data" method "time":
     """
     [
       {"java.time.Instant": ["1999-10-11T20:00:00Z", "2000-10-11T20:00:00Z"]},

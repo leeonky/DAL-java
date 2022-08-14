@@ -9,18 +9,16 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.of;
 import static java.util.stream.Collectors.joining;
 
 class CurryingMethodGroup implements CurryingMethod {
-    private final Optional<CurryingMethodGroup> parent;
+    private final CurryingMethodGroup parent;
     private final List<InstanceCurryingMethod> curryingMethods;
-    //    TODO do not use optional ****************************
-    private Optional<InstanceCurryingMethod> resolvedCurryingMethod = Optional.empty();
+    private InstanceCurryingMethod resolvedCurryingMethod;
 
     CurryingMethodGroup(List<InstanceCurryingMethod> curryingMethods, CurryingMethodGroup parent) {
         this.curryingMethods = curryingMethods;
-        this.parent = Optional.ofNullable(parent);
+        this.parent = parent;
     }
 
     @Override
@@ -39,8 +37,9 @@ class CurryingMethodGroup implements CurryingMethod {
     }
 
     private InstanceCurryingMethod setResolveCurryingMethod(InstanceCurryingMethod curryingMethod) {
-        parent.ifPresent(p -> p.setResolveCurryingMethod(curryingMethod));
-        resolvedCurryingMethod = of(curryingMethod);
+        if (parent != null)
+            parent.setResolveCurryingMethod(curryingMethod);
+        resolvedCurryingMethod = curryingMethod;
         return curryingMethod;
     }
 
@@ -59,15 +58,16 @@ class CurryingMethodGroup implements CurryingMethod {
 
     @Override
     public Set<Object> fetchArgRange(RuntimeContextBuilder runtimeContextBuilder) {
-        return resolvedCurryingMethod.flatMap(m -> curryingMethods.stream()
-                .filter(method -> method.method.equals(m.method)).findFirst()
-                .map(method -> method.fetchArgRange(runtimeContextBuilder))).orElseGet(Collections::emptySet);
+        return queryResolvedMethod().map(method ->
+                method.fetchArgRange(runtimeContextBuilder)).orElseGet(Collections::emptySet);
+    }
+
+    private Optional<InstanceCurryingMethod> queryResolvedMethod() {
+        return curryingMethods.stream().filter(method -> method.method.equals(resolvedCurryingMethod.method)).findFirst();
     }
 
     @Override
     public Object convertToArgType(Object obj) {
-        Optional<InstanceCurryingMethod> instanceCurryingMethod = resolvedCurryingMethod.flatMap(m -> curryingMethods.stream()
-                .filter(method -> method.method.equals(m.method)).findFirst());
-        return instanceCurryingMethod.map(method -> method.convertToArgType(obj)).orElse(obj);
+        return queryResolvedMethod().map(method -> method.convertToArgType(obj)).orElse(obj);
     }
 }

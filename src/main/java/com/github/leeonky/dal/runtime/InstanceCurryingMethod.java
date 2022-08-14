@@ -18,9 +18,6 @@ class InstanceCurryingMethod implements CurryingMethod {
     protected final Object instance;
     protected final Method method;
     protected final Converter converter;
-    @Deprecated
-//    TODO remove *************************
-    private final List<Object> args = new ArrayList<>();
     protected final List<ParameterValue> parameterValues = new ArrayList<>();
 
     protected InstanceCurryingMethod(Object instance, Method method, Converter converter) {
@@ -32,8 +29,6 @@ class InstanceCurryingMethod implements CurryingMethod {
     @Override
     public InstanceCurryingMethod call(Object arg) {
         InstanceCurryingMethod curryingMethod = clone();
-        curryingMethod.args.addAll(args);
-        curryingMethod.args.add(arg);
         curryingMethod.parameterValues.addAll(parameterValues);
         curryingMethod.parameterValues.add(new ParameterValue(currentPositionParameter(), arg));
         return curryingMethod;
@@ -87,16 +82,12 @@ class InstanceCurryingMethod implements CurryingMethod {
                 parameterValue.getArg(converter)).collect(toList()).toArray()));
     }
 
-    //    TODO refactor
-    protected List<Object> args() {
-        return parameterValues.stream().map(parameterValue -> parameterValue.getArg(converter)).collect(toList());
-    }
-
     @Override
     public Set<Object> fetchArgRange(RuntimeContextBuilder runtimeContextBuilder) {
         BiFunction<Object, List<Object>, List<Object>> rangeFactory = runtimeContextBuilder.fetchCurryingMethodArgRange(method);
         if (rangeFactory != null)
-            return new LinkedHashSet<>(rangeFactory.apply(instance, args()));
+            return new LinkedHashSet<>(rangeFactory.apply(instance, parameterValues.stream()
+                    .map(parameterValue -> parameterValue.getArg(converter)).collect(toList())));
         System.err.printf("No arg range for %s, give the range or use `:`%n", parameterInfo());
         return emptySet();
     }
