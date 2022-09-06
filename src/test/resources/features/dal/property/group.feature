@@ -85,3 +85,29 @@ Feature: group
       | opt | text        |
       | :   | match       |
       | =   | be equal to |
+
+  Scenario: group node as left operand of expression
+    Given the following json:
+    """
+    {
+      "a": "hello",
+      "b": "hello"
+    }
+    """
+    Then the following verification should pass:
+    """
+    <<a b>> + 'World'= helloWorld
+    """
+
+#  Scenario: group node as right operand of expression
+#    Given the following json:
+#    """
+#    {
+#      "a": "World",
+#      "b": "World"
+#    }
+#    """
+#    Then the following verification should pass:
+#    """
+#    'hello' + <<a b>>= helloWorld
+#    """

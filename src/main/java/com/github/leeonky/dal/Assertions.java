@@ -4,11 +4,12 @@ import com.github.leeonky.interpreter.InterpreterException;
 
 public class Assertions {
     private final Object input;
-    private static DAL dal = DAL.getInstance();
+    private static DAL staticDal = DAL.getInstance();
     public static boolean dumpInput = true;
+    private DAL dal;
 
     public static void setDal(DAL dal) {
-        Assertions.dal = dal;
+        Assertions.staticDal = dal;
     }
 
     public static void dumpInput(boolean enable) {
@@ -17,6 +18,12 @@ public class Assertions {
 
     private Assertions(Object input) {
         this.input = input;
+        dal = staticDal;
+    }
+
+    public Assertions use(DAL dal) {
+        this.dal = dal;
+        return this;
     }
 
     public static Assertions expect(Object input) {
