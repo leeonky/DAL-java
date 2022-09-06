@@ -163,7 +163,7 @@ public class Compiler {
         CELL_VERIFICATION_OPERAND = single(oneOf(oneOf(REGEX, OBJECT, LIST, WILDCARD), VERIFICATION_VALUE_OPERAND
                 .concatAll(oneOf(ARITHMETIC_CLAUSE)))).and(enabledBefore(Notations.COLUMN_SPLITTER)).as();
         GROUP_PROPERTY = disableCommaAnd(Notations.OPENING_GROUP.with(many(PROPERTY_CHAIN).and(optionalSplitBy(Notations.COMMA))
-                .and(endWith(Notations.CLOSING_GROUP)).as(GroupNode::new)));
+                .and(endWith(Notations.CLOSING_GROUP)).as(GroupExpression::new)));
     }
 
     private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> pureList(

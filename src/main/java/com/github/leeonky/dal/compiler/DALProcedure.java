@@ -3,9 +3,7 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
-import com.github.leeonky.dal.ast.DALOperator.Equal;
-import com.github.leeonky.dal.ast.DALOperator.Matcher;
-import com.github.leeonky.dal.ast.GroupNode;
+import com.github.leeonky.dal.ast.GroupExpression;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.ExpressionFactory;
 import com.github.leeonky.interpreter.NodeParser;
@@ -141,10 +139,8 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
 
     @Override
     public DALNode createExpression(DALNode left, DALOperator operator, DALNode right) {
-        if (left instanceof GroupNode) {
-            if (!(operator instanceof Matcher || operator instanceof Equal))
-                return ((GroupNode) left).appendClauseChain(n -> createExpression(n, operator, right));
-        }
+        if (left instanceof GroupExpression)
+            return ((GroupExpression) left).appendClauseChain(n -> createExpression(n, operator, right));
         return super.createExpression(left, operator, right);
     }
 }

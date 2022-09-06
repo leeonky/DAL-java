@@ -75,12 +75,6 @@ Feature: group
     Actual: java.lang.Integer
     <2>
     """
-    And got the following notation:
-    """
-    <<a, c>>.value<opt> 1
-         ^
-                    ^
-    """
     Examples:
       | opt | text        |
       | :   | match       |
@@ -96,7 +90,7 @@ Feature: group
     """
     Then the following verification should pass:
     """
-    <<a b>> + 'World'= helloWorld
+    <<a b>> + 'World' + '!'= helloWorld!
     """
 
 #  Scenario: group node as right operand of expression
@@ -108,6 +102,10 @@ Feature: group
 #    }
 #    """
 #    Then the following verification should pass:
+#    """
+#    'hello' + <<a b>>= helloWorld
+#    """
+#    And the inspect should:
 #    """
 #    'hello' + <<a b>>= helloWorld
 #    """
