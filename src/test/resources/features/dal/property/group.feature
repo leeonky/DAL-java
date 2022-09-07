@@ -153,3 +153,40 @@ Feature: group
     """
     1 + <<a, b>> * 2= 3
     """
+
+  Scenario: group node combine group node
+    Given the following json:
+    """
+    {
+      "a": 1,
+      "b": 1,
+      "c": 2,
+      "d": 2
+    }
+    """
+    Then the following verification should pass:
+    """
+    <<a b>> + <<c d>>= 3
+    """
+    And the inspect should:
+    """
+    <<a, b>> + <<c, d>>= 3
+    """
+    When evaluate by:
+    """
+    <<a b>> + <<c a>>= 3
+    """
+    Then failed with the message:
+    """
+    Expected to be equal to: java.lang.Integer
+    <3>
+    Actual: java.lang.Integer
+    <2>
+    """
+    And got the following notation:
+    """
+    <<a b>> + <<c a>>= 3
+      ^
+                  ^
+                       ^
+    """

@@ -2,23 +2,29 @@ package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.compiler.DALProcedure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.InterpreterException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
 public class GroupExpression extends DALNode {
-    private final GroupNode groupNode;
-    private List<DALNode> expressions = new ArrayList<>();
-    private String inspect;
+    private final List<DALNode> group = new ArrayList<>();
+    private final List<DALNode> expressions = new ArrayList<>();
+    private final String inspect;
 
     public GroupExpression(List<DALNode> group) {
-        groupNode = new GroupNode(group);
+        this.group.addAll(group);
         expressions.addAll(group);
-        inspect = groupNode.inspect();
+        inspect = this.group.stream().map(DALNode::inspect).collect(Collectors.joining(", ", "<<", ">>"));
+    }
+
+    public GroupExpression(List<DALNode> group, List<DALNode> expressions, String inspect) {
+        this.group.addAll(group);
+        this.expressions.addAll(expressions);
+        this.inspect = inspect;
     }
 
     @Override
@@ -33,7 +39,7 @@ public class GroupExpression extends DALNode {
         try {
             return expression.evaluate(context);
         } catch (InterpreterException e) {
-            throw e.multiPosition(groupNode.elements.get(index).getOperandPosition(),
+            throw e.multiPosition(group.get(index).getOperandPosition(),
                     InterpreterException.Position.Type.CHAR);
         }
     }
@@ -44,15 +50,14 @@ public class GroupExpression extends DALNode {
     }
 
     public DALNode append(DALOperator operator, DALNode right, DALProcedure dalProcedure) {
-        Clause<DALRuntimeContext, DALNode> clause = n -> dalProcedure.createExpression(n, operator, right);
-        expressions = expressions.stream().map(clause::expression).collect(toList());
-        inspect = operator.inspect(inspect, right.inspect());
-        return this;
+        return new GroupExpression(group, expressions.stream()
+                .map(e -> dalProcedure.createExpression(e, operator, right)).collect(toList()),
+                operator.inspect(inspect, right.inspect()));
     }
 
     public DALNode insert(DALNode left, DALOperator operator, DALProcedure dalProcedure) {
-        expressions = expressions.stream().map(e -> dalProcedure.createExpression(left, operator, e)).collect(toList());
-        inspect = operator.inspect(left.inspect(), inspect);
-        return this;
+        return new GroupExpression(group, expressions.stream()
+                .map(e -> dalProcedure.createExpression(left, operator, e)).collect(toList()),
+                operator.inspect(left.inspect(), inspect));
     }
 }
