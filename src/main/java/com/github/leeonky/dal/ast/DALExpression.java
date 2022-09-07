@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class DALExpression extends DALNode implements Expression<DALRuntimeContext, DALNode, DALExpression, DALOperator> {
+public class DALExpression extends DALNode implements Expression<DALRuntimeContext, DALNode, DALExpression, DALOperator>,
+        ExecutableNode {
     private final DALNode left;
     private final DALOperator operator;
     private final DALNode right;
@@ -85,5 +86,10 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
             if (getRightOperand() instanceof ObjectScopeNode)
                 return getRightOperand().collectFields(data);
         return super.collectFields(data);
+    }
+
+    @Override
+    public Data getValue(Data data, DALRuntimeContext context) {
+        return context.newBlockScope(data, () -> evaluateData(context));
     }
 }

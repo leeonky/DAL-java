@@ -101,14 +101,16 @@ public class Compiler {
             META_LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNodeMeta(symbolNode)),
             IMPLICIT_PROPERTY_CLAUSE = Operators.PROPERTY_IMPLICIT.clause(oneOf(PROPERTY_PATTERN,
                     oneOf(STRING_PROPERTY, NUMBER_PROPERTY, SYMBOL).concat(LIST_MAPPING_CLAUSE))),
-            EXPLICIT_PROPERTY_CLAUSE = oneOf(Operators.PROPERTY_DOT.clause(PROPERTY_PATTERN
-                            .or(symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL).concat(LIST_MAPPING_CLAUSE)))),
-                    Operators.PROPERTY_SLASH.clause(symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL)
-                            .concat(LIST_MAPPING_CLAUSE))),
+            EXPLICIT_PROPERTY_CLAUSE = oneOf(Operators.PROPERTY_DOT.clause(PROPERTY_PATTERN.or(propertyChainNode())),
+                    Operators.PROPERTY_SLASH.clause(propertyChainNode()),
                     Operators.PROPERTY_IMPLICIT.clause(Notations.OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
                             "Should given one property or array index in `[]`")).and(endWith(Notations.CLOSING_BRACKET))
                             .as(DALNode::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE))),
                     Operators.PROPERTY_META.clause(symbolClause(META_SYMBOL.concat(META_LIST_MAPPING_CLAUSE))));
+
+    private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> propertyChainNode() {
+        return symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL, lazyNode(() -> GROUP_PROPERTY)).concat(LIST_MAPPING_CLAUSE));
+    }
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> symbolClause(
             NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
@@ -130,9 +132,9 @@ public class Compiler {
         PROPERTY = lazyNode(() -> oneOf(GROUP_PROPERTY, DEFAULT_INPUT.with(oneOf(EXPLICIT_PROPERTY_CLAUSE, IMPLICIT_PROPERTY_CLAUSE))));
         OPTIONAL_PROPERTY_CHAIN = PROPERTY.concatAll(EXPLICIT_PROPERTY_CLAUSE);
         PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
-        VERIFICATION_PROPERTY = enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN));
+        VERIFICATION_PROPERTY = enableNumberProperty(enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN)));
         OBJECT = lazyNode(() -> disableCommaAnd(Notations.OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(Notations.CLOSING_BRACES))
-                .as(ObjectScopeNode::new).or(many(enableNumberProperty(VERIFICATION_PROPERTY).concat(shortVerificationClause(Operators.VERIFICATION_OPERATORS
+                .as(ObjectScopeNode::new).or(many(VERIFICATION_PROPERTY.concat(shortVerificationClause(Operators.VERIFICATION_OPERATORS
                         .mandatory("Expect operator `:` or `=`"), SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING))))
                         .and(optionalSplitBy(Notations.COMMA)).and(endWith(Notations.CLOSING_BRACES)).as(ObjectScopeNode::new)))));
         SORTED_LIST = oneOf(Notations.Operators.PLUS.before(pureList(ListScopeNode.NatureOrder::new)),
@@ -162,8 +164,8 @@ public class Compiler {
         SHORT_VERIFICATION_OPERAND = oneOf(VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND.concatAll(oneOf(ARITHMETIC_CLAUSE)));
         CELL_VERIFICATION_OPERAND = single(oneOf(oneOf(REGEX, OBJECT, LIST, WILDCARD), VERIFICATION_VALUE_OPERAND
                 .concatAll(oneOf(ARITHMETIC_CLAUSE)))).and(enabledBefore(Notations.COLUMN_SPLITTER)).as();
-        GROUP_PROPERTY = disableCommaAnd(Notations.OPENING_GROUP.with(many(PROPERTY_CHAIN).and(optionalSplitBy(Notations.COMMA))
-                .and(endWith(Notations.CLOSING_GROUP)).as(GroupExpression::new)));
+        GROUP_PROPERTY = disableCommaAnd(Notations.OPENING_GROUP.with(many(VERIFICATION_PROPERTY)
+                .and(optionalSplitBy(Notations.COMMA)).and(endWith(Notations.CLOSING_GROUP)).as(GroupExpression::new)));
     }
 
     private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> pureList(
@@ -214,7 +216,7 @@ public class Compiler {
             ROW_PREFIX = procedure -> new TableRowPrefixNode(ROW_KEY.parse(procedure), SCHEMA_CLAUSE.parse(procedure),
             Operators.VERIFICATION_OPERATORS.parse(procedure)),
             TABLE_HEADER = procedure -> new HeaderNode((SortGroupNode) SEQUENCE.parse(procedure),
-                    enableNumberProperty(VERIFICATION_PROPERTY).concat(SCHEMA_CLAUSE).parse(procedure),
+                    VERIFICATION_PROPERTY.concat(SCHEMA_CLAUSE).parse(procedure),
                     Operators.VERIFICATION_OPERATORS.parse(procedure));
 
     private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>

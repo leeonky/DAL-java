@@ -191,6 +191,34 @@ Feature: group
                        ^
     """
 
+  Scenario: group node in property chain and convert to currying method arg type
+    Given the following json:
+    """
+    {
+      "list": [{
+        "value": 100
+      }, {
+        "value": 100
+      }]
+    }
+    """
+    Then the following verification should pass:
+    """
+    list.<<0 1>>.value= 100
+    """
+    And the inspect should:
+    """
+    list.<<0, 1>>.value= 100
+    """
+    Then the following verification should pass:
+    """
+    list.<<'0' '1'>>.value= 100
+    """
+    And the inspect should:
+    """
+    list.<<'0', '1'>>.value= 100
+    """
+
   Rule: in object scope
 
     Scenario: use group node in object scope verification

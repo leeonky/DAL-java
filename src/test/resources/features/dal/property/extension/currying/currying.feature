@@ -51,6 +51,12 @@ Feature: currying function
     """
     upperCase[1]= '1'
     """
+    And the following verification for the instance of java class "Data" should pass:
+    """
+    upperCase: {
+      1= '1'
+    }
+    """
 
   Scenario: static method currying
     Given the following java class:
