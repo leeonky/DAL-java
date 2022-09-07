@@ -140,7 +140,9 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
     @Override
     public DALNode createExpression(DALNode left, DALOperator operator, DALNode right) {
         if (left instanceof GroupExpression)
-            return ((GroupExpression) left).appendClauseChain(n -> createExpression(n, operator, right));
+            return ((GroupExpression) left).append(operator, right, this);
+        if (right instanceof GroupExpression)
+            return ((GroupExpression) right).insert(left, operator, this);
         return super.createExpression(left, operator, right);
     }
 }
