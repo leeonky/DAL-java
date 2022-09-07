@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.assertUnexpectedFields;
@@ -47,13 +46,14 @@ public class ObjectScopeNode extends DALNode {
 
     private Set<Object> collectUnexpectedFields(Data data, DALRuntimeContext context) {
         return new LinkedHashSet<Object>(data.getFieldNames()) {{
-            Stream.concat(collectFields(data).stream(), context.collectPartialProperties(data).stream())
+            Stream.concat(collectFields(data), context.collectPartialProperties(data).stream())
                     .map(obj -> convertFiled(data, obj)).forEach(this::remove);
         }};
     }
 
     private Object convertFiled(Data data, Object obj) {
-        return data.getInstance() instanceof CurryingMethod ? ((CurryingMethod) data.getInstance()).convertToArgType(obj) : obj;
+        return data.getInstance() instanceof CurryingMethod ?
+                ((CurryingMethod) data.getInstance()).convertToArgType(obj) : obj;
     }
 
     @Override
@@ -72,15 +72,8 @@ public class ObjectScopeNode extends DALNode {
             throw new AssertionFailure("The input value is null", getPositionBegin());
     }
 
-    private Set<Object> collectFields(Data data) {
-        return verificationExpressions.stream().flatMap(expression -> {
-            DALNode keyNode = ((DALExpression) ((DALExpression) expression).getLeftOperand()).getRightOperand();
-            if (keyNode instanceof PropertyThis) {
-                DALNode expectedNode = ((DALExpression) expression).getRightOperand();
-                if (expectedNode instanceof ObjectScopeNode)
-                    return ((ObjectScopeNode) expectedNode).collectFields(data).stream();
-            }
-            return Stream.of(data.firstFieldFromAlias(expression.getRootSymbolName()));
-        }).collect(Collectors.toSet());
+    @Override
+    public Stream<Object> collectFields(Data data) {
+        return verificationExpressions.stream().flatMap(expression -> expression.collectFields(data));
     }
 }

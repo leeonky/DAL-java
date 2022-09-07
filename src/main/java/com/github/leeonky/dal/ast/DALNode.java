@@ -13,6 +13,7 @@ import com.github.leeonky.util.NumberParser;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.AssertionFailure.*;
 import static java.lang.String.format;
@@ -158,5 +159,9 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
 
     public List<Object> propertyChain() {
         throw new IllegalStateException();
+    }
+
+    public Stream<Object> collectFields(Data data) {
+        return Stream.of(data.firstFieldFromAlias(getRootSymbolName()));
     }
 }

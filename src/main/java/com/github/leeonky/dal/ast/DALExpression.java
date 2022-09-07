@@ -8,6 +8,7 @@ import com.github.leeonky.interpreter.Expression;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class DALExpression extends DALNode implements Expression<DALRuntimeContext, DALNode, DALExpression, DALOperator> {
     private final DALNode left;
@@ -76,5 +77,13 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
             addAll(left.propertyChain());
             addAll(right.propertyChain());
         }};
+    }
+
+    @Override
+    public Stream<Object> collectFields(Data data) {
+        if (((DALExpression) getLeftOperand()).getRightOperand() instanceof PropertyThis)
+            if (getRightOperand() instanceof ObjectScopeNode)
+                return getRightOperand().collectFields(data);
+        return super.collectFields(data);
     }
 }

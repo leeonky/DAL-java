@@ -1,18 +1,20 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.compiler.DALProcedure;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.InterpreterException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
 public class GroupExpression extends DALNode {
     private final List<DALNode> group = new ArrayList<>();
-    private final List<DALNode> expressions = new ArrayList<>();
+    final List<DALNode> expressions = new ArrayList<>();
     private final String inspect;
 
     public GroupExpression(List<DALNode> group) {
@@ -59,5 +61,10 @@ public class GroupExpression extends DALNode {
         return new GroupExpression(group, expressions.stream()
                 .map(e -> dalProcedure.createExpression(left, operator, e)).collect(toList()),
                 operator.inspect(left.inspect(), inspect));
+    }
+
+    @Override
+    public Stream<Object> collectFields(Data data) {
+        return expressions.stream().map(e -> data.firstFieldFromAlias(e.getRootSymbolName()));
     }
 }

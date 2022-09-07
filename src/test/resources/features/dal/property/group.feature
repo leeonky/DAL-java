@@ -190,3 +190,87 @@ Feature: group
                   ^
                        ^
     """
+
+  Rule: in object scope
+
+    Scenario: use group node in object scope verification
+      Given the following json:
+      """
+      {
+        "value": {
+          "a": 1,
+          "b": 1,
+          "c": 2
+        }
+      }
+      """
+      Then the following verification should pass:
+      """
+      value: {
+        <<a b>>: 1
+      }
+      """
+      And the inspect should:
+      """
+      value: {<<a, b>>: 1}
+      """
+      When evaluate by:
+      """
+      value: {
+        <<a c>>: 1
+      }
+      """
+      Then failed with the message:
+      """
+      Expected to match: java.lang.Integer
+      <1>
+      Actual: java.lang.Integer
+      <2>
+      """
+      And got the following notation:
+      """
+      value: {
+        <<a c>>: 1
+            ^
+                 ^
+      }
+      """
+
+    Scenario: group node in = object scope verification
+      Given the following json:
+      """
+      {
+        "value": {
+          "a": 1,
+          "b": 1,
+          "c": 1
+        }
+      }
+      """
+      Then the following verification should pass:
+      """
+      value= {
+        <<a b c>>: 1
+      }
+      """
+      And the inspect should:
+      """
+      value= {<<a, b, c>>: 1}
+      """
+      When evaluate by:
+      """
+      value= {
+        <<a b>>: 1
+      }
+      """
+      Then failed with the message:
+      """
+      Unexpected fields `c` in value
+      """
+      And got the following notation:
+      """
+      value= {
+           ^
+        <<a b>>: 1
+      }
+      """
