@@ -219,6 +219,69 @@ Feature: group
     list.<<'0', '1'>>.value= 100
     """
 
+  Scenario: group node should return value as a list
+    Given the following json:
+    """
+    {
+      "a": 1,
+      "b": 2,
+      "c": 3,
+      "d": 4
+    }
+    """
+    When evaluate by:
+    """
+    <<a b>>
+    """
+    Then the result should:
+    """
+    :[1 2]
+    """
+    When evaluate by:
+    """
+    <<a b>> + <<c d>>
+    """
+    Then the result should:
+    """
+    :[[4 5] [5 6]]
+    """
+
+  Scenario: which / is after group
+    Given the following json:
+    """
+    {
+      "a": 1,
+      "b": 2,
+      "c": "str"
+    }
+    """
+    When evaluate by:
+    """
+    <<a b>> which toString
+    """
+    Then the result should:
+    """
+    :['1' '2']
+    """
+    Then the following verification should pass:
+    """
+    <<a b>> is Number
+    """
+    When evaluate by:
+    """
+    <<a c>> is Number
+    """
+    Then failed with the message:
+    """
+    Expecting c to match schema `Number` but was not
+    """
+    And got the following notation:
+    """
+    <<a c>> is Number
+        ^
+               ^
+    """
+
   Rule: in object scope
 
     Scenario: use group node in object scope verification
@@ -301,4 +364,26 @@ Feature: group
            ^
         <<a b>>: 1
       }
+      """
+
+    Scenario: could ignore << >> in key
+      Given the following json:
+      """
+      {
+        "value": {
+          "a": 1,
+          "b": 1,
+          "c": 1
+        }
+      }
+      """
+      Then the following verification should pass:
+      """
+      value= {
+        a, b c: 1
+      }
+      """
+      And the inspect should:
+      """
+      value= {<<a, b, c>>: 1}
       """

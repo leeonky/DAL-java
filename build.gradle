@@ -36,7 +36,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.3.4' + System.env.VERSION_SCOPE
+version = '0.3.5' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -52,7 +52,7 @@ repositories {
 
 dependencies {
     compile 'com.github.leeonky:bean-util:0.5.1'
-    compile 'com.github.leeonky:interpreter-core:0.0.3'
+    compile 'com.github.leeonky:interpreter-core:0.0.4'
 
     testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
     testImplementation 'org.assertj:assertj-core:3.21.0'

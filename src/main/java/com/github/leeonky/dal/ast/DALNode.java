@@ -102,6 +102,12 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         throw new SyntaxException("expect an integer", token.getPosition());
     }
 
+    public static DALNode createVerificationGroup(List<DALNode> list) {
+        if (list.size() == 1)
+            return list.get(0);
+        return new GroupExpression(list);
+    }
+
     public Data evaluateData(DALRuntimeContext context) {
         return context.wrap(evaluate(context));
     }

@@ -300,30 +300,30 @@ Feature: object
   Scenario: raise error when not verification expression
     When evaluate by:
     """
-    : { a + 1 }
+    : { a * 1 }
     """
     Then failed with the message:
     """
-    Expect operator `:` or `=`
+    Expect a object property
     """
     And got the following notation:
     """
-    : { a + 1 }
+    : { a * 1 }
           ^
     """
 
   Scenario: raise error when missing verification operator
     When evaluate by:
     """
-    : { a 1 }
+    : { a }
     """
     Then failed with the message:
     """
-    Expect operator `:` or `=`
+    Expect a object property
     """
     And got the following notation:
     """
-    : { a 1 }
+    : { a }
           ^
     """
 
