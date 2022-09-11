@@ -8,14 +8,14 @@ import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.Operator;
 
 public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, DALOperator> {
-    private static final int PRECEDENCE_WHICH = 100;
-    private static final int PRECEDENCE_LOGICAL = 200;
-    private static final int PRECEDENCE_COMPARISON = 210;
-    private static final int PRECEDENCE_PLUS_SUB = 300;
-    private static final int PRECEDENCE_MUL_DIV = 400;
-    private static final int PRECEDENCE_UNARY_OPERATION = 500;
-    private static final int PRECEDENCE_PROPERTY = 501;
-    private static final int PRECEDENCE_PARENTHESES = Integer.MAX_VALUE;
+    static final int PRECEDENCE_WHICH = 100;
+    static final int PRECEDENCE_LOGICAL = 200;
+    static final int PRECEDENCE_COMPARISON = 210;
+    static final int PRECEDENCE_PLUS_SUB = 300;
+    static final int PRECEDENCE_MUL_DIV = 400;
+    static final int PRECEDENCE_UNARY_OPERATION = 500;
+    static final int PRECEDENCE_PROPERTY = 501;
+    static final int PRECEDENCE_PARENTHESES = Integer.MAX_VALUE;
     private final boolean needInspect;
 
     protected DALOperator(int precedence, String label, boolean needInspect) {
@@ -30,26 +30,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     @Override
     public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
         return calculateData(left, right, context).getInstance();
-    }
-
-    public static And operatorAnd() {
-        return new And(Notations.Operators.AND.getLabel());
-    }
-
-    public static Or operatorOr() {
-        return new Or(Notations.Operators.OR.getLabel());
-    }
-
-    public static And keywordAnd() {
-        return new And(Notations.Keywords.AND.getLabel());
-    }
-
-    public static And commaAnd() {
-        return new And(",");
-    }
-
-    public static Or keywordOr() {
-        return new Or(Notations.Keywords.OR.getLabel());
     }
 
     public boolean isNeedInspect() {
@@ -174,28 +154,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         @Override
         public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
             return Calculator.divide(left.evaluate(context), right.evaluate(context), context);
-        }
-    }
-
-    public static class And extends DALOperator {
-        public And(String inspect) {
-            super(PRECEDENCE_LOGICAL, inspect, true);
-        }
-
-        @Override
-        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-            return Calculator.and(() -> left.evaluate(context), () -> right.evaluate(context));
-        }
-    }
-
-    public static class Or extends DALOperator {
-        public Or(String inspect) {
-            super(PRECEDENCE_LOGICAL, inspect, true);
-        }
-
-        @Override
-        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-            return Calculator.or(() -> left.evaluate(context), () -> right.evaluate(context));
         }
     }
 

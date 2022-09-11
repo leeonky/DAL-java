@@ -3,6 +3,7 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
+import com.github.leeonky.dal.ast.OperatorFactory;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.OperatorParser;
 import com.github.leeonky.interpreter.Procedure;
@@ -26,17 +27,17 @@ public class Operators {
             PROPERTY_IMPLICIT = procedure -> of(new DALOperator.PropertyImplicit()),
             PROPERTY_META = Notations.Operators.META.operator(DALOperator.PropertyMeta::new),
             BINARY_ARITHMETIC_OPERATORS = oneOf(
-                    Notations.Operators.AND.operator(DALOperator::operatorAnd),
-                    Notations.Operators.OR.operator(DALOperator::operatorOr),
-                    Notations.Keywords.AND.keywordOperator(DALOperator::keywordAnd, PROPERTY_DELIMITER_STRING),
-                    Notations.Operators.COMMA.operator(DALOperator::commaAnd, DALProcedure::isEnableCommaAnd),
+                    Notations.Operators.AND.operator(OperatorFactory::operatorAnd),
+                    Notations.Operators.OR.operator(OperatorFactory::operatorOr),
+                    Notations.Keywords.AND.keywordOperator(OperatorFactory::keywordAnd, PROPERTY_DELIMITER_STRING),
+                    Notations.Operators.COMMA.operator(OperatorFactory::commaAnd, DALProcedure::isEnableCommaAnd),
                     Notations.Operators.NOT_EQUAL.operator(DALOperator.NotEqual::new),
-                    Notations.Keywords.OR.keywordOperator(DALOperator::keywordOr, PROPERTY_DELIMITER_STRING),
+                    Notations.Keywords.OR.keywordOperator(OperatorFactory::keywordOr, PROPERTY_DELIMITER_STRING),
                     Notations.Operators.GREATER_OR_EQUAL.operator(DALOperator.GreaterOrEqual::new),
                     Notations.Operators.LESS_OR_EQUAL.operator(DALOperator.LessOrEqual::new),
                     Notations.Operators.GREATER.operator(DALOperator.Greater::new),
                     Notations.Operators.LESS.operator(DALOperator.Less::new, not(DALProcedure::mayBeOpeningGroup)),
-                    Notations.Operators.PLUS.operator(DALOperator.Plus::new),
+                    Notations.Operators.PLUS.operator(OperatorFactory::plus),
                     Notations.Operators.SUBTRACTION.operator(DALOperator.Subtraction::new),
                     Notations.Operators.MULTIPLICATION.operator(DALOperator.Multiplication::new),
                     Notations.Operators.DIVISION.operator(DALOperator.Division::new)),
