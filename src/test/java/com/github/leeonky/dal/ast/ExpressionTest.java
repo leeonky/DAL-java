@@ -3,8 +3,6 @@ package com.github.leeonky.dal.ast;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ExpressionTest {
@@ -38,7 +36,7 @@ class ExpressionTest {
 
 //        assertCalculate(6, Operators.divide(), 3, 2);
 
-        assertCalculate(1, new DALOperator.Minus(), new BigDecimal(2), new BigDecimal(-2));
+//        assertCalculate(1, new DALOperator.Minus(), new BigDecimal(2), new BigDecimal(-2));
     }
 
     @Test
@@ -47,7 +45,7 @@ class ExpressionTest {
 
 //        assertCalculate(true, Operators.operatorOr(), false, true);
 
-        assertCalculate(null, new DALOperator.Not(), true, false);
+//        assertCalculate(null, new DALOperator.Not(), true, false);
     }
 
     @Test

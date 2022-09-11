@@ -69,54 +69,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         }
     }
 
-    public static class Not extends DALOperator {
-        public Not() {
-            super(PRECEDENCE_UNARY_OPERATION, "!", true);
-        }
-
-        @Override
-        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-            return Calculator.not(right.evaluate(context));
-        }
-
-        @Override
-        public String inspect(String node1, String node2) {
-            return "!" + node2;
-        }
-    }
-
-    public static class Minus extends DALOperator {
-        public Minus() {
-            super(PRECEDENCE_UNARY_OPERATION, "-", false);
-        }
-
-        @Override
-        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-            return Calculator.negate(right.evaluateData(context), context);
-        }
-
-        @Override
-        public String inspect(String node1, String node2) {
-            return "-" + node2;
-        }
-    }
-
-    public static class Positive extends DALOperator {
-        public Positive() {
-            super(PRECEDENCE_UNARY_OPERATION, "+", false);
-        }
-
-        @Override
-        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-            return Calculator.positive(right.evaluateData(context), context);
-        }
-
-        @Override
-        public String inspect(String node1, String node2) {
-            return "+" + node2;
-        }
-    }
-
     public static class Matcher extends DALOperator {
         public Matcher() {
             super(PRECEDENCE_COMPARISON, Notations.Operators.MATCHER.getLabel(), true);
@@ -130,22 +82,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         @Override
         public String inspect(String node1, String node2) {
             return String.format("%s%s %s", node1, label, node2);
-        }
-    }
-
-    public static class Parentheses extends DALOperator {
-        public Parentheses() {
-            super(PRECEDENCE_PARENTHESES, "", false);
-        }
-
-        @Override
-        public Data calculateData(DALNode left, DALNode right, DALRuntimeContext context) {
-            return right.evaluateData(context);
-        }
-
-        @Override
-        public String inspect(String node1, String node2) {
-            return String.format("(%s)", node2);
         }
     }
 

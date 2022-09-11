@@ -56,7 +56,7 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     }
 
     public static DALNode parenthesesNode(DALNode node) {
-        return new DALExpression(null, new DALOperator.Parentheses(), node);
+        return new DALExpression(null, Operators.parentheses(), node);
     }
 
     public static DALNode constString(List<DALNode> nodes) {

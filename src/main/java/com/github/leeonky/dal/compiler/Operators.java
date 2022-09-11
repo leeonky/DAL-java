@@ -3,6 +3,7 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
+import com.github.leeonky.dal.compiler.Notations.Keywords;
 import com.github.leeonky.dal.runtime.Calculator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.OperatorParser;
@@ -30,25 +31,24 @@ public class Operators {
             PROPERTY_IMPLICIT = procedure -> of(new DALOperator.PropertyImplicit()),
             PROPERTY_META = Notations.Operators.META.operator(DALOperator.PropertyMeta::new),
             BINARY_ARITHMETIC_OPERATORS = oneOf(
-                    Notations.Operators.AND.operator(() -> logical(AND, Calculator::and)),
-                    Notations.Operators.OR.operator(() -> logical(OR, Calculator::or)),
-                    Notations.Keywords.AND.keywordOperator(() -> logical(Notations.Keywords.AND, Calculator::and), PROPERTY_DELIMITER_STRING),
-                    Notations.Operators.COMMA.operator(() -> logical(COMMA, Calculator::and), DALProcedure::isEnableCommaAnd),
+                    AND.operator(() -> logical(AND, Calculator::and)),
+                    OR.operator(() -> logical(OR, Calculator::or)),
+                    Keywords.AND.keywordOperator(() -> logical(Keywords.AND, Calculator::and), PROPERTY_DELIMITER_STRING),
+                    COMMA.operator(() -> logical(COMMA, Calculator::and), DALProcedure::isEnableCommaAnd),
                     Notations.Operators.NOT_EQUAL.operator(DALOperator.NotEqual::new),
-                    Notations.Keywords.OR.keywordOperator(() -> logical(Notations.Keywords.OR, Calculator::or), PROPERTY_DELIMITER_STRING),
-                    Notations.Operators.GREATER_OR_EQUAL.operator(() -> comparator(GREATER_OR_EQUAL, Calculator::greaterOrEqual)),
-                    Notations.Operators.LESS_OR_EQUAL.operator(() -> comparator(LESS_OR_EQUAL, Calculator::lessOrEqual)),
-                    Notations.Operators.GREATER.operator(() -> comparator(GREATER, Calculator::greater)),
-                    Notations.Operators.LESS.operator(() -> comparator(LESS, Calculator::less), not(DALProcedure::mayBeOpeningGroup)),
-                    Notations.Operators.PLUS.operator(() -> plusSub(PLUS, Calculator::plus)),
-                    Notations.Operators.SUBTRACTION.operator(() -> plusSub(SUBTRACTION, Calculator::subtract)),
-                    Notations.Operators.MULTIPLICATION.operator(() -> mulDiv(MULTIPLICATION, Calculator::multiply)),
-                    Notations.Operators.DIVISION.operator(() -> mulDiv(DIVISION, Calculator::divide))),
-            UNARY_OPERATORS = oneOf(Notations.Operators.MINUS.operator(DALOperator.Minus::new, not(DALProcedure::isCodeBeginning)),
-                    Notations.Operators.PLUS.operator(DALOperator.Positive::new, not(DALProcedure::isCodeBeginning)),
-                    Notations.Operators.NOT.operator(DALOperator.Not::new, not(DALProcedure::mayBeUnEqual))),
-            VERIFICATION_OPERATORS = oneOf(Notations.Operators.MATCHER.<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-                            operator(DALOperator.Matcher::new, not(DALProcedure::mayBeMetaProperty)),
+                    Keywords.OR.keywordOperator(() -> logical(Keywords.OR, Calculator::or), PROPERTY_DELIMITER_STRING),
+                    GREATER_OR_EQUAL.operator(() -> comparator(GREATER_OR_EQUAL, adapt(Calculator::greaterOrEqual))),
+                    LESS_OR_EQUAL.operator(() -> comparator(LESS_OR_EQUAL, adapt(Calculator::lessOrEqual))),
+                    GREATER.operator(() -> comparator(GREATER, adapt(Calculator::greater))),
+                    LESS.operator(() -> comparator(LESS, adapt(Calculator::less)), not(DALProcedure::mayBeOpeningGroup)),
+                    PLUS.operator(() -> plusSub(PLUS, Calculator::plus)),
+                    SUBTRACTION.operator(() -> plusSub(SUBTRACTION, Calculator::subtract)),
+                    MULTIPLICATION.operator(() -> mulDiv(MULTIPLICATION, Calculator::multiply)),
+                    DIVISION.operator(() -> mulDiv(DIVISION, Calculator::divide))),
+            UNARY_OPERATORS = oneOf(MINUS.operator(() -> unaryOpt(MINUS, unary(Calculator::negate)), not(DALProcedure::isCodeBeginning)),
+                    PLUS.operator(() -> unaryOpt(PLUS, unary(Calculator::positive)), not(DALProcedure::isCodeBeginning)),
+                    NOT.operator(() -> unaryOpt(NOT, unary(Calculator::not)), not(DALProcedure::mayBeUnEqual))),
+            VERIFICATION_OPERATORS = oneOf(Notations.Operators.MATCHER.operator(DALOperator.Matcher::new, not(DALProcedure::mayBeMetaProperty)),
                     Notations.Operators.EQUAL.operator(DALOperator.Equal::new));
 
     static final OperatorParser.Mandatory<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
