@@ -22,11 +22,13 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     private static final NumberParser numberParser = new NumberParser();
 
     public static DALNode stringSymbol(DALNode dalNode) {
-        return new SymbolNode(((ConstNode) dalNode).getValue(), SymbolNode.Type.STRING);
+        return new SymbolNode(((ConstNode) dalNode).getValue(), SymbolNode.Type.STRING)
+                .setPositionBegin(dalNode.getPositionBegin());
     }
 
     public static DALNode numberSymbol(DALNode dalNode) {
-        return new SymbolNode(((ConstNode) dalNode).getValue(), SymbolNode.Type.NUMBER);
+        return new SymbolNode(((ConstNode) dalNode).getValue(), SymbolNode.Type.NUMBER)
+                .setPositionBegin(dalNode.getPositionBegin());
     }
 
     public static SymbolNode symbolNode(Token token) {

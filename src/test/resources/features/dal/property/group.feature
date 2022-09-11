@@ -308,7 +308,7 @@ Feature: group
       When evaluate by:
       """
       value: {
-        <<a c>>: 1
+        <<c a>>: 1
       }
       """
       Then failed with the message:
@@ -321,7 +321,46 @@ Feature: group
       And got the following notation:
       """
       value: {
-        <<a c>>: 1
+        <<c a>>: 1
+          ^
+                 ^
+      }
+      """
+
+    Scenario: use group node in object scope verification for collection input
+      Given the following json:
+      """
+      {
+        "list": [1, 1, 2]
+      }
+      """
+      Then the following verification should pass:
+      """
+      list: {
+        <<0 1>>: 1
+      }
+      """
+      And the inspect should:
+      """
+      list: {<<0, 1>>: 1}
+      """
+      When evaluate by:
+      """
+      list: {
+        <<1 2>>: 1
+      }
+      """
+      Then failed with the message:
+      """
+      Expected to match: java.lang.Integer
+      <1>
+      Actual: java.lang.Integer
+      <2>
+      """
+      And got the following notation:
+      """
+      list: {
+        <<1 2>>: 1
             ^
                  ^
       }
