@@ -3,12 +3,15 @@ package com.github.leeonky.dal.compiler;
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
 import com.github.leeonky.dal.ast.DALOperator;
-import com.github.leeonky.dal.ast.OperatorFactory;
+import com.github.leeonky.dal.runtime.Calculator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.OperatorParser;
 import com.github.leeonky.interpreter.Procedure;
 
+import static com.github.leeonky.dal.ast.Operators.*;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
+import static com.github.leeonky.dal.compiler.Notations.COMMA;
+import static com.github.leeonky.dal.compiler.Notations.Operators.*;
 import static com.github.leeonky.interpreter.FunctionUtil.not;
 import static com.github.leeonky.interpreter.Parser.oneOf;
 import static java.util.Optional.empty;
@@ -27,20 +30,20 @@ public class Operators {
             PROPERTY_IMPLICIT = procedure -> of(new DALOperator.PropertyImplicit()),
             PROPERTY_META = Notations.Operators.META.operator(DALOperator.PropertyMeta::new),
             BINARY_ARITHMETIC_OPERATORS = oneOf(
-                    Notations.Operators.AND.operator(OperatorFactory::operatorAnd),
-                    Notations.Operators.OR.operator(OperatorFactory::operatorOr),
-                    Notations.Keywords.AND.keywordOperator(OperatorFactory::keywordAnd, PROPERTY_DELIMITER_STRING),
-                    Notations.Operators.COMMA.operator(OperatorFactory::commaAnd, DALProcedure::isEnableCommaAnd),
+                    Notations.Operators.AND.operator(() -> logical(AND, Calculator::and)),
+                    Notations.Operators.OR.operator(() -> logical(OR, Calculator::or)),
+                    Notations.Keywords.AND.keywordOperator(() -> logical(Notations.Keywords.AND, Calculator::and), PROPERTY_DELIMITER_STRING),
+                    Notations.Operators.COMMA.operator(() -> logical(COMMA, Calculator::and), DALProcedure::isEnableCommaAnd),
                     Notations.Operators.NOT_EQUAL.operator(DALOperator.NotEqual::new),
-                    Notations.Keywords.OR.keywordOperator(OperatorFactory::keywordOr, PROPERTY_DELIMITER_STRING),
-                    Notations.Operators.GREATER_OR_EQUAL.operator(DALOperator.GreaterOrEqual::new),
-                    Notations.Operators.LESS_OR_EQUAL.operator(DALOperator.LessOrEqual::new),
-                    Notations.Operators.GREATER.operator(DALOperator.Greater::new),
-                    Notations.Operators.LESS.operator(DALOperator.Less::new, not(DALProcedure::mayBeOpeningGroup)),
-                    Notations.Operators.PLUS.operator(OperatorFactory::plus),
-                    Notations.Operators.SUBTRACTION.operator(DALOperator.Subtraction::new),
-                    Notations.Operators.MULTIPLICATION.operator(DALOperator.Multiplication::new),
-                    Notations.Operators.DIVISION.operator(DALOperator.Division::new)),
+                    Notations.Keywords.OR.keywordOperator(() -> logical(Notations.Keywords.OR, Calculator::or), PROPERTY_DELIMITER_STRING),
+                    Notations.Operators.GREATER_OR_EQUAL.operator(() -> comparator(GREATER_OR_EQUAL, Calculator::greaterOrEqual)),
+                    Notations.Operators.LESS_OR_EQUAL.operator(() -> comparator(LESS_OR_EQUAL, Calculator::lessOrEqual)),
+                    Notations.Operators.GREATER.operator(() -> comparator(GREATER, Calculator::greater)),
+                    Notations.Operators.LESS.operator(() -> comparator(LESS, Calculator::less), not(DALProcedure::mayBeOpeningGroup)),
+                    Notations.Operators.PLUS.operator(() -> plusSub(PLUS, Calculator::plus)),
+                    Notations.Operators.SUBTRACTION.operator(() -> plusSub(SUBTRACTION, Calculator::subtract)),
+                    Notations.Operators.MULTIPLICATION.operator(() -> mulDiv(MULTIPLICATION, Calculator::multiply)),
+                    Notations.Operators.DIVISION.operator(() -> mulDiv(DIVISION, Calculator::divide))),
             UNARY_OPERATORS = oneOf(Notations.Operators.MINUS.operator(DALOperator.Minus::new, not(DALProcedure::isCodeBeginning)),
                     Notations.Operators.PLUS.operator(DALOperator.Positive::new, not(DALProcedure::isCodeBeginning)),
                     Notations.Operators.NOT.operator(DALOperator.Not::new, not(DALProcedure::mayBeUnEqual))),

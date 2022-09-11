@@ -58,39 +58,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         }
     }
 
-    public static class Less extends DALOperator {
-        public Less() {
-            super(PRECEDENCE_COMPARISON, "<", true);
-        }
-
-        @Override
-        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-            return Calculator.compare(left.evaluate(context), right.evaluate(context), context) < 0;
-        }
-    }
-
-    public static class GreaterOrEqual extends DALOperator {
-        public GreaterOrEqual() {
-            super(PRECEDENCE_COMPARISON, ">=", true);
-        }
-
-        @Override
-        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-            return Calculator.compare(left.evaluate(context), right.evaluate(context), context) >= 0;
-        }
-    }
-
-    public static class LessOrEqual extends DALOperator {
-        public LessOrEqual() {
-            super(PRECEDENCE_COMPARISON, "<=", true);
-        }
-
-        @Override
-        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-            return Calculator.compare(left.evaluate(context), right.evaluate(context), context) <= 0;
-        }
-    }
-
     public static class NotEqual extends DALOperator {
         public NotEqual() {
             super(PRECEDENCE_COMPARISON, "!=", true);
@@ -99,61 +66,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         @Override
         public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
             return !Calculator.equals(left.evaluateData(context), right.evaluateData(context));
-        }
-    }
-
-    public static class Plus extends DALOperator {
-        public Plus() {
-            super(PRECEDENCE_PLUS_SUB, "+", false);
-        }
-
-        @Override
-        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-            return Calculator.plus(left.evaluate(context), right.evaluate(context), context);
-        }
-    }
-
-    public static class Greater extends DALOperator {
-        public Greater() {
-            super(PRECEDENCE_COMPARISON, ">", true);
-        }
-
-        @Override
-        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-            return Calculator.compare(left.evaluate(context), right.evaluate(context), context) > 0;
-        }
-    }
-
-    public static class Subtraction extends DALOperator {
-        public Subtraction() {
-            super(PRECEDENCE_PLUS_SUB, "-", false);
-        }
-
-        @Override
-        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-            return Calculator.subtract(left.evaluate(context), right.evaluate(context), context);
-        }
-    }
-
-    public static class Multiplication extends DALOperator {
-        public Multiplication() {
-            super(PRECEDENCE_MUL_DIV, "*", false);
-        }
-
-        @Override
-        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-            return Calculator.multiply(left.evaluate(context), right.evaluate(context), context);
-        }
-    }
-
-    public static class Division extends DALOperator {
-        public Division() {
-            super(PRECEDENCE_MUL_DIV, "/", false);
-        }
-
-        @Override
-        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-            return Calculator.divide(left.evaluate(context), right.evaluate(context), context);
         }
     }
 
@@ -284,7 +196,6 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
     public static class PropertyMeta extends Property {
         public PropertyMeta() {
             super(PRECEDENCE_PROPERTY, "::", false);
-
         }
 
         @Override

@@ -15,45 +15,45 @@ class ExpressionTest {
 
         assertPassed("a", "b", new DALOperator.NotEqual());
 
-        assertPassed("b", "a", new DALOperator.Greater());
+//        assertPassed("b", "a", Operators.greater());
 
-        assertPassed("a", "b", new DALOperator.Less());
+//        assertPassed("a", "b", Operators.less());
 
-        assertPassed("b", "a", new DALOperator.GreaterOrEqual());
-        assertPassed("b", "b", new DALOperator.GreaterOrEqual());
+//        assertPassed("b", "a", Operators.greaterOrEqual());
+//        assertPassed("b", "b", Operators.greaterOrEqual());
 
-        assertPassed("a", "b", new DALOperator.LessOrEqual());
-        assertPassed("b", "b", new DALOperator.LessOrEqual());
+//        assertPassed("a", "b", Operators.lessOrEqual());
+//        assertPassed("b", "b", Operators.lessOrEqual());
     }
 
     @Test
     void assert_simple_calculate() {
-        assertCalculate(1, OperatorFactory.plus(), new BigDecimal(2), new BigDecimal(3));
+//        assertCalculate(1, Operators.plus(), new BigDecimal(2), new BigDecimal(3));
 
-        assertCalculate("1", OperatorFactory.plus(), "2", "12");
+//        assertCalculate("1", Operators.plus(), "2", "12");
 
-        assertCalculate(2, new DALOperator.Subtraction(), 1, 1);
+//        assertCalculate(2, Operators.subtract(), 1, 1);
 
-        assertCalculate(2, new DALOperator.Multiplication(), 3, 6);
+//        assertCalculate(2, Operators.multiply(), 3, 6);
 
-        assertCalculate(6, new DALOperator.Division(), 3, 2);
+//        assertCalculate(6, Operators.divide(), 3, 2);
 
         assertCalculate(1, new DALOperator.Minus(), new BigDecimal(2), new BigDecimal(-2));
     }
 
     @Test
     void assert_logic_combination() {
-//        assertCalculate(true, new OperatorFactory.And("&&"), true, true);
+//        assertCalculate(true, Operators.logical(AND, Calculator::and), true, true);
 
-//        assertCalculate(true, new OperatorFactory.Or("||"), false, true);
+//        assertCalculate(true, Operators.operatorOr(), false, true);
 
         assertCalculate(null, new DALOperator.Not(), true, false);
     }
 
     @Test
     void should_support_short_circuit_expression() {
-//        assertTrue((boolean) new DALExpression(new ConstNode(true), new OperatorFactory.Or("||"), new ConstNode(null)).evaluate(new RuntimeContextBuilder().build(null)));
-//        assertFalse((boolean) new DALExpression(new ConstNode(false), new OperatorFactory.And("&&"), new ConstNode(null)).evaluate(new RuntimeContextBuilder().build(null)));
+//        assertTrue((boolean) new DALExpression(new ConstNode(true), Operators.operatorOr(), new ConstNode(null)).evaluate(new RuntimeContextBuilder().build(null)));
+//        assertFalse((boolean) new DALExpression(new ConstNode(false), Operators.logical(AND, Calculator::and), new ConstNode(null)).evaluate(new RuntimeContextBuilder().build(null)));
     }
 
     private void assertCalculate(Object v1, DALOperator operator, Object v2, Object expected) {

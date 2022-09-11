@@ -112,4 +112,20 @@ public class Calculator {
             return data.getValueList().stream().sorted((Comparator) naturalOrder()).collect(toList());
         throw new IllegalArgumentException(format("Operands should be List but '%s'", getClassName(value)));
     }
+
+    public static boolean less(Object left, Object right, DALRuntimeContext context) {
+        return compare(left, right, context) < 0;
+    }
+
+    public static boolean greaterOrEqual(Object left, Object right, DALRuntimeContext context) {
+        return compare(left, right, context) >= 0;
+    }
+
+    public static boolean lessOrEqual(Object left, Object rgiht, DALRuntimeContext context) {
+        return compare(left, rgiht, context) <= 0;
+    }
+
+    public static boolean greater(Object left, Object right, DALRuntimeContext context) {
+        return compare(left, right, context) > 0;
+    }
 }

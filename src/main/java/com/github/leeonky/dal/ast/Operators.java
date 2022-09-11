@@ -1,49 +1,29 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.compiler.Notations.Keywords;
-import com.github.leeonky.dal.compiler.Notations.Operators;
-import com.github.leeonky.dal.runtime.Calculator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Notation;
 
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import static com.github.leeonky.dal.ast.DALOperator.PRECEDENCE_LOGICAL;
-import static com.github.leeonky.dal.ast.DALOperator.PRECEDENCE_PLUS_SUB;
-import static com.github.leeonky.dal.compiler.Notations.COMMA;
+import static com.github.leeonky.dal.ast.DALOperator.*;
 
-public class OperatorFactory {
-    public static DALOperator operatorAnd() {
-        return and(Operators.AND);
+public class Operators {
+
+    public static DALOperator logical(Notation notation, BiFunction<Supplier<Object>, Supplier<Object>, Object> logical) {
+        return new BaseOperator(PRECEDENCE_LOGICAL, notation, biOperator(logical), true);
     }
 
-    public static DALOperator keywordAnd() {
-        return and(Keywords.AND);
+    public static BaseOperator plusSub(Notation notation, TriFunction<Object, Object, DALRuntimeContext, Object> plusSub) {
+        return new BaseOperator(PRECEDENCE_PLUS_SUB, notation, biOperator(plusSub), false);
     }
 
-    public static DALOperator commaAnd() {
-        return and(COMMA);
+    public static BaseOperator mulDiv(Notation notation, TriFunction<Object, Object, DALRuntimeContext, Object> mulDiv) {
+        return new BaseOperator(PRECEDENCE_MUL_DIV, notation, biOperator(mulDiv), false);
     }
 
-    private static DALOperator and(Notation notation) {
-        return new BaseOperator(PRECEDENCE_LOGICAL, notation, logical(Calculator::and), true);
-    }
-
-    public static DALOperator operatorOr() {
-        return or(Operators.OR);
-    }
-
-    public static DALOperator keywordOr() {
-        return or(Keywords.OR);
-    }
-
-    private static DALOperator or(Notation or) {
-        return new BaseOperator(PRECEDENCE_LOGICAL, or, logical(Calculator::or), true);
-    }
-
-    public static DALOperator plus() {
-        return new BaseOperator(PRECEDENCE_PLUS_SUB, Operators.PLUS, arithmetical(Calculator::plus), false);
+    public static BaseOperator comparator(Notation notation, TriFunction<Object, Object, DALRuntimeContext, Object> comparator) {
+        return new BaseOperator(PRECEDENCE_COMPARISON, notation, biOperator(comparator), true);
     }
 
     private static class BaseOperator extends DALOperator {
@@ -61,16 +41,16 @@ public class OperatorFactory {
         }
     }
 
-    interface TriFunction<T1, T2, T3, R> {
+    public interface TriFunction<T1, T2, T3, R> {
         R apply(T1 obj1, T2 obj2, T3 obj3);
     }
 
-    private static TriFunction<DALNode, DALNode, DALRuntimeContext, Object> logical(BiFunction<Supplier<Object>,
+    public static TriFunction<DALNode, DALNode, DALRuntimeContext, Object> biOperator(BiFunction<Supplier<Object>,
             Supplier<Object>, Object> operation) {
         return (left, right, context) -> operation.apply(() -> left.evaluate(context), () -> right.evaluate(context));
     }
 
-    private static TriFunction<DALNode, DALNode, DALRuntimeContext, Object> arithmetical(
+    public static TriFunction<DALNode, DALNode, DALRuntimeContext, Object> biOperator(
             TriFunction<Object, Object, DALRuntimeContext, Object> operation) {
         return (left, right, context) -> operation.apply(left.evaluate(context), right.evaluate(context), context);
     }
