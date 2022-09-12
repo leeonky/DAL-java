@@ -52,9 +52,9 @@ public class SchemaVerifier {
         Object schema = schemaInstance == null ? schemaType.newInstance() : schemaInstance;
         return (clazz.getAnnotation(Partial.class) != null ||
                 noMoreUnexpectedField(schemaType, schemaType.getPropertyReaders().keySet(), propertyReaderNames))
-                && allMandatoryPropertyShouldBeExist(schemaType, propertyReaderNames)
-                && allPropertyValueShouldBeValid(subPrefix, schemaType, schema)
-                && schemaVerificationShouldPass(schema);
+               && allMandatoryPropertyShouldBeExist(schemaType, propertyReaderNames)
+               && allPropertyValueShouldBeValid(subPrefix, schemaType, schema)
+               && schemaVerificationShouldPass(schema);
     }
 
     private boolean schemaVerificationShouldPass(Object schema) {
@@ -84,9 +84,9 @@ public class SchemaVerifier {
                 .allMatch(propertyReader -> {
                     Data wrappedPropertyValue = object.getValue(propertyReader.getName());
                     return allowNullAndIsNull(propertyReader, wrappedPropertyValue)
-                            || wrappedPropertyValue.createSchemaVerifier()
-                            .verifySchemaInGenericType(subPrefix + "." + propertyReader.getName(),
-                                    propertyReader.getType(), propertyReader.getValue(schemaInstance));
+                           || wrappedPropertyValue.createSchemaVerifier()
+                                   .verifySchemaInGenericType(subPrefix + "." + propertyReader.getName(),
+                                           propertyReader.getType(), propertyReader.getValue(schemaInstance));
                 });
     }
 
@@ -101,7 +101,7 @@ public class SchemaVerifier {
 
     private <T> boolean shouldContainsField(Set<String> actualFields, BeanClass<T> polymorphicBeanClass, PropertyReader<T> propertyReader) {
         return actualFields.contains(propertyReader.getName())
-                || errorLog("Expecting field `%s` to be in type %s[%s], but does not exist", propertyReader.getName(),
+               || errorLog("Expecting field `%s` to be in type %s[%s], but does not exist", propertyReader.getName(),
                 polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
@@ -120,10 +120,10 @@ public class SchemaVerifier {
             return verifyCollection(subPrefix, type.getElementType(), schemaProperty);
         else if (Map.class.isAssignableFrom(fieldType))
             return verifyMap(subPrefix, type, (Map<?, Object>) schemaProperty);
-        else if (Type.class.isAssignableFrom(fieldType))
-            return verifyWrappedType(subPrefix, (Type<Object>) schemaProperty, type);
         else if (Value.class.isAssignableFrom(fieldType))
             return verifyWrappedValue(subPrefix, (Value<Object>) schemaProperty, type);
+        else if (Type.class.isAssignableFrom(fieldType))
+            return verifyWrappedType(subPrefix, (Type<Object>) schemaProperty, type);
         else
             return verifyType(subPrefix, schemaProperty, fieldType);
     }
@@ -153,7 +153,7 @@ public class SchemaVerifier {
     private boolean verifyByValue(String subPrefix, Value<Object> schemaProperty, BeanClass<?> type) {
         try {
             return schemaProperty.verify(schemaProperty.convertAs(DALRuntimeContext, object.getInstance(), type))
-                    || errorLog(schemaProperty.errorMessage(subPrefix, object.getInstance()));
+                   || errorLog(schemaProperty.errorMessage(subPrefix, object.getInstance()));
         } catch (IllegalFieldException ignore) {
             throw illegalStateException(subPrefix);
         }
@@ -166,21 +166,21 @@ public class SchemaVerifier {
     private boolean verifyWrappedType(String subPrefix, Type<Object> schemaProperty, BeanClass<?> genericType) {
         if (schemaProperty != null)
             return schemaProperty.verify(object.getInstance())
-                    || errorLog(schemaProperty.errorMessage(subPrefix, object.getInstance()));
+                   || errorLog(schemaProperty.errorMessage(subPrefix, object.getInstance()));
         Class<?> rawType = genericType.getTypeArguments(0)
                 .orElseThrow(() -> illegalStateException(subPrefix)).getType();
         return rawType.isInstance(object.getInstance())
-                || errorLog("Expecting field `%s` to be type [%s], but was [%s]", subPrefix,
+               || errorLog("Expecting field `%s` to be type [%s], but was [%s]", subPrefix,
                 rawType.getName(), getClassName(object.getInstance()));
     }
 
     private boolean verifyType(String subPrefix, Object schemaProperty, Class<?> fieldType) {
         if (schemaProperty != null)
             return Objects.equals(schemaProperty, object.getInstance())
-                    || errorLog("Expecting field `%s` to be %s[%s], but was %s[%s]", subPrefix,
+                   || errorLog("Expecting field `%s` to be %s[%s], but was %s[%s]", subPrefix,
                     getClassName(schemaProperty), schemaProperty, getClassName(object.getInstance()), object.getInstance());
         return fieldType.isInstance(object.getInstance())
-                || errorLog("Expecting field `%s` to be type [%s], but was [%s]", subPrefix,
+               || errorLog("Expecting field `%s` to be type [%s], but was [%s]", subPrefix,
                 fieldType.getName(), getClassName(object.getInstance()));
     }
 
@@ -215,20 +215,20 @@ public class SchemaVerifier {
                     .allMatch(key -> object.getValue(key).createSchemaVerifier()
                             .verifySchemaInGenericType(subPrefix + "." + key, subGenericType, null));
         return shouldBeSameSize(subPrefix, object.getFieldNames(), schemaProperty.values())
-                && object.getFieldNames().stream()
-                .allMatch(key -> object.getValue(key).createSchemaVerifier()
-                        .verifySchemaInGenericType(subPrefix + "." + key, subGenericType, schemaProperty.get(key)));
+               && object.getFieldNames().stream()
+                       .allMatch(key -> object.getValue(key).createSchemaVerifier()
+                               .verifySchemaInGenericType(subPrefix + "." + key, subGenericType, schemaProperty.get(key)));
     }
 
     private boolean shouldBeSameSize(String subPrefix, Collection<?> wrappedObjectList, Collection<?> schemaPropertyList) {
         return wrappedObjectList.size() == schemaPropertyList.size()
-                || errorLog("Expecting field `%s` to be size [%d], but was size [%d]", subPrefix,
+               || errorLog("Expecting field `%s` to be size [%d], but was size [%d]", subPrefix,
                 schemaPropertyList.size(), wrappedObjectList.size());
     }
 
     private boolean verifyFormatterValue(String subPrefix, Formatter<Object, Object> formatter) {
         return formatter.isValid(object.getInstance())
-                || errorLog("Expecting field `%s` to be in `%s`, but was [%s]", subPrefix,
+               || errorLog("Expecting field `%s` to be in `%s`, but was [%s]", subPrefix,
                 formatter.getFormatterName(), object.getInstance());
     }
 }

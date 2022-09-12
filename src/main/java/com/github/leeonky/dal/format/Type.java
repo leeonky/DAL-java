@@ -52,20 +52,32 @@ public interface Type<T> {
     }
 
     static <T extends Comparable<T>> Type<T> compare(T value, Comparator<Integer> comparator, String message) {
-        return new Type<T>() {
-            @Override
-            public boolean verify(T actual) {
-                return comparator.compareTo(Objects.requireNonNull(actual).compareTo(value));
-            }
-
-            @Override
-            public String errorMessage(String field, Object actual) {
-                return format("Expecting field `%s` [%s] to be %s [%s], but was not.", field, actual, message, value);
-            }
-        };
+        return new ComparableType<>(comparator, value, message);
     }
 
     boolean verify(T value);
 
     String errorMessage(String field, Object actual);
+
+    class ComparableType<T extends Comparable<T>> implements Type<T> {
+        private final Comparator<Integer> comparator;
+        private final T value;
+        private final String message;
+
+        public ComparableType(Comparator<Integer> comparator, T value, String message) {
+            this.comparator = comparator;
+            this.value = value;
+            this.message = message;
+        }
+
+        @Override
+        public boolean verify(T actual) {
+            return comparator.compareTo(Objects.requireNonNull(actual).compareTo(value));
+        }
+
+        @Override
+        public String errorMessage(String field, Object actual) {
+            return format("Expecting field `%s` [%s] to be %s [%s], but was not.", field, actual, message, value);
+        }
+    }
 }

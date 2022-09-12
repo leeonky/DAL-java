@@ -9,8 +9,7 @@ import java.util.Objects;
 
 import static java.lang.String.format;
 
-//TODO formatter/ type / value refactor
-public interface Value<T> {
+public interface Value<T> extends Type<T> {
 
     static <T> Value<T> equalTo(T value) {
         return new Value<T>() {
@@ -57,17 +56,7 @@ public interface Value<T> {
     }
 
     static <T extends Comparable<T>> Value<T> compare(T value, Comparator<Integer> comparator, String valueName) {
-        return new Value<T>() {
-            @Override
-            public boolean verify(T actual) {
-                return comparator.compareTo(Objects.requireNonNull(actual).compareTo(value));
-            }
-
-            @Override
-            public String errorMessage(String field, Object actual) {
-                return format("Expecting field `%s` [%s] to be %s [%s], but was not.", field, actual, valueName, value);
-            }
-        };
+        return new ComparableValue<>(comparator, value, valueName);
     }
 
     @SuppressWarnings("unchecked")
@@ -77,9 +66,17 @@ public interface Value<T> {
         return (T) DALRuntimeContext.getConverter().tryConvert(type.getType(), instance);
     }
 
+    @Override
     boolean verify(T actual);
 
+    @Override
     default String errorMessage(String field, Object actual) {
         return format("Field `%s` is invalid", field);
+    }
+
+    class ComparableValue<T extends Comparable<T>> extends ComparableType<T> implements Value<T> {
+        public ComparableValue(Comparator<Integer> comparator, T value, String valueName) {
+            super(comparator, value, valueName);
+        }
     }
 }
