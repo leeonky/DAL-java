@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import java.time.format.DateTimeParseException;
 
 import static java.lang.Enum.valueOf;
+import static java.lang.String.format;
 
 public class Formatters {
     /**
@@ -35,7 +36,7 @@ public class Formatters {
 
                 @Override
                 public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Instant now[%s] +/- %dms", now, errorMs);
+                    return format("Instant now[%s] +/- %dms", now, errorMs);
                 }
             };
         }
@@ -100,7 +101,7 @@ public class Formatters {
 
                 @Override
                 public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Integer " + formatterName + " [%d]", expect);
+                    return format("Integer %s [%d]", formatterName, expect);
                 }
             };
         }
@@ -172,7 +173,7 @@ public class Formatters {
 
                 @Override
                 public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Number " + formatterName + " [%s]", expect);
+                    return format("Number %s [%s]", formatterName, expect);
                 }
             };
         }

@@ -4,6 +4,8 @@ import com.github.leeonky.util.Comparator;
 
 import java.util.Objects;
 
+import static java.lang.String.format;
+
 public interface Type<T> {
     static <T> Type<T> equalTo(T expect) {
         return new Type<T>() {
@@ -14,7 +16,7 @@ public interface Type<T> {
 
             @Override
             public String errorMessage(String field, Object actual) {
-                return String.format("Expecting field `%s` [%s] to be equal to [%s], but was not.", field, actual, expect);
+                return format("Expecting field `%s` [%s] to be equal to [%s], but was not.", field, actual, expect);
             }
         };
     }
@@ -28,27 +30,13 @@ public interface Type<T> {
 
             @Override
             public String errorMessage(String field, Object actual) {
-                return String.format("Expecting field `%s` [%s] to be null, but was not.", field, actual);
+                return format("Expecting field `%s` [%s] to be null, but was not.", field, actual);
             }
         };
     }
 
     static <T extends Comparable<T>> Type<T> lessThan(T value) {
         return compare(value, Comparator.lessThan(0), "less than");
-    }
-
-    static <T extends Comparable<T>> Type<T> compare(T value, Comparator<Integer> comparator, String message) {
-        return new Type<T>() {
-            @Override
-            public boolean verify(T actual) {
-                return comparator.compareTo(Objects.requireNonNull(actual).compareTo(value));
-            }
-
-            @Override
-            public String errorMessage(String field, Object actual) {
-                return String.format("Expecting field `%s` [%s] to be " + message + " [%s], but was not.", field, actual, value);
-            }
-        };
     }
 
     static <T extends Comparable<T>> Type<T> greaterThan(T value) {
@@ -61,6 +49,20 @@ public interface Type<T> {
 
     static <T extends Comparable<T>> Type<T> greaterOrEqualTo(T value) {
         return compare(value, Comparator.greaterOrEqualTo(0), "greater or equal to");
+    }
+
+    static <T extends Comparable<T>> Type<T> compare(T value, Comparator<Integer> comparator, String message) {
+        return new Type<T>() {
+            @Override
+            public boolean verify(T actual) {
+                return comparator.compareTo(Objects.requireNonNull(actual).compareTo(value));
+            }
+
+            @Override
+            public String errorMessage(String field, Object actual) {
+                return format("Expecting field `%s` [%s] to be %s [%s], but was not.", field, actual, message, value);
+            }
+        };
     }
 
     boolean verify(T value);
