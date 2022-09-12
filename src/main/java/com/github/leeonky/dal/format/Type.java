@@ -1,7 +1,8 @@
 package com.github.leeonky.dal.format;
 
+import com.github.leeonky.util.Comparator;
+
 import java.util.Objects;
-import java.util.function.Function;
 
 public interface Type<T> {
     static <T> Type<T> equalTo(T expect) {
@@ -33,14 +34,14 @@ public interface Type<T> {
     }
 
     static <T extends Comparable<T>> Type<T> lessThan(T value) {
-        return compare(value, i -> i < 0, "less than");
+        return compare(value, Comparator.lessThan(0), "less than");
     }
 
-    static <T extends Comparable<T>> Type<T> compare(T value, Function<Integer, Boolean> comparator, String message) {
+    static <T extends Comparable<T>> Type<T> compare(T value, Comparator<Integer> comparator, String message) {
         return new Type<T>() {
             @Override
             public boolean verify(T actual) {
-                return comparator.apply(Objects.requireNonNull(actual).compareTo(value));
+                return comparator.compareTo(Objects.requireNonNull(actual).compareTo(value));
             }
 
             @Override
@@ -51,15 +52,15 @@ public interface Type<T> {
     }
 
     static <T extends Comparable<T>> Type<T> greaterThan(T value) {
-        return compare(value, i -> i > 0, "greater than");
+        return compare(value, Comparator.greaterThan(0), "greater than");
     }
 
     static <T extends Comparable<T>> Type<T> lessOrEqualTo(T value) {
-        return compare(value, i -> i <= 0, "less or equal to");
+        return compare(value, Comparator.lessOrEqualTo(0), "less or equal to");
     }
 
     static <T extends Comparable<T>> Type<T> greaterOrEqualTo(T value) {
-        return compare(value, i -> i >= 0, "greater or equal to");
+        return compare(value, Comparator.greaterOrEqualTo(0), "greater or equal to");
     }
 
     boolean verify(T value);
