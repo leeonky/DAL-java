@@ -128,4 +128,8 @@ public class Calculator {
     public static boolean greater(Object left, Object right, DALRuntimeContext context) {
         return compare(left, right, context) > 0;
     }
+
+    public static boolean notEqual(Data left, Data right) {
+        return !equals(left, right);
+    }
 }

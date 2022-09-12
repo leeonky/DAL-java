@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.ast.opt.Equal;
+import com.github.leeonky.dal.ast.opt.Matcher;
 import com.github.leeonky.dal.runtime.CurryingMethod;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -35,7 +37,7 @@ public class ObjectScopeNode extends DALNode {
     }
 
     @Override
-    protected boolean verify(Data data, DALOperator.Equal operator, DALRuntimeContext context, DALNode actualNode) {
+    protected boolean verify(Data data, Equal operator, DALRuntimeContext context, DALNode actualNode) {
         checkNull(data);
         return data.newBlockScope(() -> {
             verificationExpressions.forEach(expression -> expression.evaluate(context));
@@ -57,7 +59,7 @@ public class ObjectScopeNode extends DALNode {
     }
 
     @Override
-    protected boolean verify(Data data, DALOperator.Matcher operator, DALRuntimeContext context, DALNode actualNode) {
+    protected boolean verify(Data data, Matcher operator, DALRuntimeContext context, DALNode actualNode) {
         if (verificationExpressions.isEmpty() && !isObjectWildcard)
             throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
         checkNull(data);

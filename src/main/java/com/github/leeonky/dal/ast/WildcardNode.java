@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.ast.opt.Equal;
+import com.github.leeonky.dal.ast.opt.Matcher;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 public class WildcardNode extends DALNode {
@@ -10,12 +12,12 @@ public class WildcardNode extends DALNode {
     }
 
     @Override
-    public boolean verify(DALNode actualNode, DALOperator.Equal operator, DALRuntimeContext context) {
+    public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
         return true;
     }
 
     @Override
-    public boolean verify(DALNode actualNode, DALOperator.Matcher operator, DALRuntimeContext context) {
+    public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
         return true;
     }
 

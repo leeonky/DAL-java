@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.ast.DALOperator.Equal;
+import com.github.leeonky.dal.ast.opt.Equal;
+import com.github.leeonky.dal.ast.opt.Matcher;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class ObjectScopeNodeTest {
 
     public static final Equal EQUAL = new Equal();
-    public static final DALOperator.Matcher MATCHER = new DALOperator.Matcher();
+    public static final Matcher MATCHER = new Matcher();
 
     @Nested
     class EqualTo {

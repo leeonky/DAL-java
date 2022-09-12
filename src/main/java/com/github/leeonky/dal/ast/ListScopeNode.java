@@ -1,6 +1,9 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.ast.DALOperator.PropertyImplicit;
+import com.github.leeonky.dal.ast.opt.Equal;
+import com.github.leeonky.dal.ast.opt.Factory;
+import com.github.leeonky.dal.ast.opt.Matcher;
+import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ElementAssertionFailure;
@@ -69,7 +72,7 @@ public class ListScopeNode extends DALNode {
     }
 
     private DALExpression getDalExpression(int index, int firstIndex) {
-        return new DALExpression(INPUT_NODE, new PropertyImplicit(),
+        return new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
                 new SymbolNode(type.indexOfNode(firstIndex, index, inputClauses.size()), BRACKET));
     }
 
@@ -99,12 +102,12 @@ public class ListScopeNode extends DALNode {
     }
 
     @Override
-    protected boolean verify(Data actual, DALOperator.Equal operator, DALRuntimeContext context, DALNode actualNode) {
+    protected boolean verify(Data actual, Equal operator, DALRuntimeContext context, DALNode actualNode) {
         return verify(context, actual);
     }
 
     @Override
-    protected boolean verify(Data actual, DALOperator.Matcher operator, DALRuntimeContext context, DALNode actualNode) {
+    protected boolean verify(Data actual, Matcher operator, DALRuntimeContext context, DALNode actualNode) {
         return verify(context, actual);
     }
 

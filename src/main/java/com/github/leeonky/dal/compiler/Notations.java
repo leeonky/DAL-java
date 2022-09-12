@@ -11,7 +11,6 @@ import static com.github.leeonky.interpreter.Notation.notation;
 import static java.util.Arrays.asList;
 
 public class Notations {
-
     public static class Keywords {
         public static final Notation
                 WHICH = notation("which"),
@@ -78,7 +77,8 @@ public class Notations {
             LINE_COMMENT2 = notation("//"),
             LIST_MAPPING = notation("[]"),
             OPENING_GROUP = notation("<<"),
-            CLOSING_GROUP = notation(">>");
+            CLOSING_GROUP = notation(">>"),
+            EMPTY = notation("");
 
     public final static List<Notation> LINE_COMMENTS = asList(LINE_COMMENT1, LINE_COMMENT2);
 }

@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.ast.DALOperator.PropertyImplicit;
+import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
@@ -20,7 +20,7 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
         this.left = left;
         this.right = right;
         this.operator = operator;
-        setPositionBegin(operator instanceof PropertyImplicit ? right.getPositionBegin() : operator.getPosition());
+        setPositionBegin(operator.getPosition());
     }
 
     @Override

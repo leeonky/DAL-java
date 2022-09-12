@@ -1,6 +1,8 @@
 package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.ast.opt.Factory;
+import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
@@ -104,7 +106,7 @@ class SpecifyIndexRowType extends RowType {
 
     static Optional<DALNode> indexToExpression(DALNode node) {
         return when(node instanceof ConstNode).optional(() -> new DALExpression(INPUT_NODE,
-                new DALOperator.PropertyImplicit(), new SymbolNode(((ConstNode) node).getValue(), BRACKET)));
+                Factory.executable(Notations.EMPTY), new SymbolNode(((ConstNode) node).getValue(), BRACKET)));
     }
 }
 

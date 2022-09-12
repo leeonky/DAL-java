@@ -1,5 +1,8 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.ast.opt.DALOperator;
+import com.github.leeonky.dal.ast.opt.Equal;
+import com.github.leeonky.dal.ast.opt.Matcher;
 import com.github.leeonky.dal.ast.table.TableBody;
 import com.github.leeonky.dal.ast.table.TableHeadRow;
 import com.github.leeonky.dal.ast.table.TableRowNode;
@@ -21,7 +24,7 @@ public class TableNode extends DALNode {
     }
 
     @Override
-    protected boolean verify(Data actual, DALOperator.Equal operator, DALRuntimeContext context, DALNode actualNode) {
+    protected boolean verify(Data actual, Equal operator, DALRuntimeContext context, DALNode actualNode) {
         try {
             return convertToVerificationNode(actual, operator, context).verify(actual, operator, context, actualNode);
         } catch (RowAssertionFailure rowAssertionFailure) {
@@ -30,7 +33,7 @@ public class TableNode extends DALNode {
     }
 
     @Override
-    protected boolean verify(Data actual, DALOperator.Matcher operator, DALRuntimeContext context, DALNode actualNode) {
+    protected boolean verify(Data actual, Matcher operator, DALRuntimeContext context, DALNode actualNode) {
         try {
             return convertToVerificationNode(actual, operator, context).verify(actual, operator, context, actualNode);
         } catch (RowAssertionFailure rowAssertionFailure) {

@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.ast.table;
 
 import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;

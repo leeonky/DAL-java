@@ -2,8 +2,8 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.DALExpression;
 import com.github.leeonky.dal.ast.DALNode;
-import com.github.leeonky.dal.ast.DALOperator;
 import com.github.leeonky.dal.ast.GroupExpression;
+import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.ExpressionFactory;
 import com.github.leeonky.interpreter.NodeParser;

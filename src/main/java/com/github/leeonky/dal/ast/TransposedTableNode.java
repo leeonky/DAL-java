@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.ast.opt.Equal;
+import com.github.leeonky.dal.ast.opt.Matcher;
 import com.github.leeonky.dal.ast.table.TransposedTableBody;
 import com.github.leeonky.dal.ast.table.TransposedTableHead;
 import com.github.leeonky.dal.runtime.Data;
@@ -16,7 +18,7 @@ public class TransposedTableNode extends DALNode {
     }
 
     @Override
-    protected boolean verify(Data actual, DALOperator.Matcher operator, DALRuntimeContext context, DALNode actualNode) {
+    protected boolean verify(Data actual, Matcher operator, DALRuntimeContext context, DALNode actualNode) {
         try {
             return transpose().convertToVerificationNode(actual, operator, context)
                     .verify(actual, operator, context, actualNode);
@@ -26,7 +28,7 @@ public class TransposedTableNode extends DALNode {
     }
 
     @Override
-    protected boolean verify(Data actual, DALOperator.Equal operator, DALRuntimeContext context, DALNode actualNode) {
+    protected boolean verify(Data actual, Equal operator, DALRuntimeContext context, DALNode actualNode) {
         try {
             return transpose().convertToVerificationNode(actual, operator, context)
                     .verify(actual, operator, context, actualNode);
