@@ -1,9 +1,9 @@
-package com.github.leeonky.dal.runtime;
+package com.github.leeonky.dal.runtime.verifier;
 
 import com.github.leeonky.dal.compiler.Compiler;
-import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
+import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.dal.type.SubType;
@@ -105,27 +105,30 @@ public class SchemaVerifier {
                 polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
-    private boolean errorLog(String format, Object... params) {
+    static boolean errorLog(String format, Object... params) {
         throw new IllegalTypeException(String.format(format, params));
     }
 
     @SuppressWarnings("unchecked")
     private boolean verifySchemaInGenericType(String subPrefix, BeanClass<?> type, Object schemaProperty) {
-        Class<?> fieldType = type.getType();
-        if (Formatter.class.isAssignableFrom(fieldType)) {
-            return verifyFormatterValue(subPrefix, getOrCreateFormatter(schemaProperty, type));
-        } else if (DALRuntimeContext.isSchemaRegistered(fieldType))
-            return object.createSchemaVerifier().verify(fieldType, schemaProperty, subPrefix);
-        else if (type.isCollection())
-            return verifyCollection(subPrefix, type.getElementType(), schemaProperty);
-        else if (Map.class.isAssignableFrom(fieldType))
-            return verifyMap(subPrefix, type, (Map<?, Object>) schemaProperty);
-        else if (Value.class.isAssignableFrom(fieldType))
-            return verifyWrappedValue(subPrefix, (Value<Object>) schemaProperty, type);
-        else if (Type.class.isAssignableFrom(fieldType))
-            return verifyWrappedType(subPrefix, (Type<Object>) schemaProperty, type);
-        else
-            return verifyType(subPrefix, schemaProperty, fieldType);
+        Optional<FieldVerifier> fieldVerifier = FormatterVerifier.createFormatterVerifier(subPrefix, type, schemaProperty);
+
+        if (fieldVerifier.isPresent()) {
+            return fieldVerifier.get().verify(object);
+        } else {
+            if (DALRuntimeContext.isSchemaRegistered(type.getType()))
+                return object.createSchemaVerifier().verify(type.getType(), schemaProperty, subPrefix);
+            else if (type.isCollection())
+                return verifyCollection(subPrefix, type.getElementType(), schemaProperty);
+            else if (Map.class.isAssignableFrom(type.getType()))
+                return verifyMap(subPrefix, type, (Map<?, Object>) schemaProperty);
+            else if (Value.class.isAssignableFrom(type.getType()))
+                return verifyWrappedValue(subPrefix, (Value<Object>) schemaProperty, type);
+            else if (Type.class.isAssignableFrom(type.getType()))
+                return verifyWrappedType(subPrefix, (Type<Object>) schemaProperty, type);
+            else
+                return verifyType(subPrefix, schemaProperty, type.getType());
+        }
     }
 
     private boolean verifyWrappedValue(String subPrefix, Value<Object> schemaProperty, BeanClass<?> genericType) {
@@ -197,16 +200,6 @@ public class SchemaVerifier {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private Formatter<Object, Object> getOrCreateFormatter(Object schemaProperty, BeanClass<?> genericType) {
-        if (schemaProperty != null)
-            return (Formatter<Object, Object>) schemaProperty;
-        Class<Object> fieldType = (Class<Object>) genericType.getType();
-        return (Formatter<Object, Object>) genericType.getTypeArguments(0)
-                .map(t -> BeanClass.newInstance(fieldType, t.getType()))
-                .orElseGet(() -> BeanClass.newInstance(fieldType));
-    }
-
     private boolean verifyMap(String subPrefix, BeanClass<?> genericType, Map<?, Object> schemaProperty) {
         BeanClass<?> subGenericType = genericType.getTypeArguments(1).orElseThrow(() ->
                 new IllegalArgumentException(format("`%s` should be generic type", subPrefix)));
@@ -226,9 +219,4 @@ public class SchemaVerifier {
                 schemaPropertyList.size(), wrappedObjectList.size());
     }
 
-    private boolean verifyFormatterValue(String subPrefix, Formatter<Object, Object> formatter) {
-        return formatter.isValid(object.getInstance())
-               || errorLog("Expecting field `%s` to be in `%s`, but was [%s]", subPrefix,
-                formatter.getFormatterName(), object.getInstance());
-    }
 }
