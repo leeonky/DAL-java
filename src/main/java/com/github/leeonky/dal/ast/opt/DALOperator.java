@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast.opt;
 
-import com.github.leeonky.dal.ast.DALNode;
+import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Operator;

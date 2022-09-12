@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.dal.ast.SortGroupNode;
+import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.BeanClass;
 

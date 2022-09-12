@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.dal.ast.SchemaNode;
+import com.github.leeonky.dal.ast.node.SchemaNode;
 
 import static java.lang.String.format;
 

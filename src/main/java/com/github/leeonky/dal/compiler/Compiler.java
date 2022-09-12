@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.compiler;
 
-import com.github.leeonky.dal.ast.*;
+import com.github.leeonky.dal.ast.node.*;
+import com.github.leeonky.dal.ast.node.table.*;
 import com.github.leeonky.dal.ast.opt.DALOperator;
-import com.github.leeonky.dal.ast.table.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.*;
 
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static com.github.leeonky.dal.ast.InputNode.INPUT_NODE;
+import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
 import static com.github.leeonky.dal.compiler.DALProcedure.*;
 import static com.github.leeonky.interpreter.ClauseParser.Mandatory.clause;

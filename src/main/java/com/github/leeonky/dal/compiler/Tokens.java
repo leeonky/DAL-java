@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.compiler;
 
-import com.github.leeonky.dal.ast.DALExpression;
-import com.github.leeonky.dal.ast.DALNode;
+import com.github.leeonky.dal.ast.node.DALExpression;
+import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.interpreter.Token;

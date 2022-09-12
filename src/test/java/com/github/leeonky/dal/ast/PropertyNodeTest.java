@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.github.leeonky.dal.ast.InputNode.INPUT_NODE;
+import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;

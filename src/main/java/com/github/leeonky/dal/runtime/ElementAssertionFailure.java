@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.dal.ast.TableNode;
-import com.github.leeonky.dal.ast.TransposedTableNode;
+import com.github.leeonky.dal.ast.node.TableNode;
+import com.github.leeonky.dal.ast.node.TransposedTableNode;
 
 import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
 

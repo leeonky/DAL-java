@@ -1,11 +1,11 @@
 package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.ast.AssertionFailure;
-import com.github.leeonky.dal.ast.DALExpression;
-import com.github.leeonky.dal.ast.DALNode;
-import com.github.leeonky.dal.ast.SymbolNode;
+import com.github.leeonky.dal.ast.node.DALExpression;
+import com.github.leeonky.dal.ast.node.DALNode;
+import com.github.leeonky.dal.ast.node.SymbolNode;
 import com.github.leeonky.dal.compiler.Notations;
+import com.github.leeonky.dal.runtime.AssertionFailure;
 import com.github.leeonky.dal.runtime.DalException;
 
 import static com.github.leeonky.dal.ast.opt.Factory.executable;

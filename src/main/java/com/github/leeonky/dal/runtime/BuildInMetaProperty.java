@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.dal.ast.AssertionFailure;
 import com.github.leeonky.util.InvocationException;
 
 import static java.lang.String.format;
