@@ -446,3 +446,17 @@ Feature: object
     """
     : {user/name: 'Tom'}
     """
+
+  Scenario: support slash number property
+    Given the following json:
+    """
+    {
+      "list": [["hello"]]
+    }
+    """
+    Then the following verification should pass:
+    """
+    list: {
+      0 / 0: hello
+    }
+    """

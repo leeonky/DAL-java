@@ -110,7 +110,7 @@ public class Compiler {
                     Operators.PROPERTY_META.clause(symbolClause(META_SYMBOL.concat(META_LIST_MAPPING_CLAUSE))));
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> propertyChainNode() {
-        return symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL, lazyNode(() -> GROUP_PROPERTY)).concat(LIST_MAPPING_CLAUSE));
+        return symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL, NUMBER_PROPERTY, lazyNode(() -> GROUP_PROPERTY)).concat(LIST_MAPPING_CLAUSE));
     }
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> symbolClause(
