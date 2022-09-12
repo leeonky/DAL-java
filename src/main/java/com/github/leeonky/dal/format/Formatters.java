@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.format;
 
 import com.github.leeonky.dal.runtime.IllegalTypeException;
+import com.github.leeonky.util.Comparator;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -62,17 +63,7 @@ public class Formatters {
     //TODO  keep origin type, 1.0 => should integer
     public static class Integer extends BaseFormatter<java.lang.Number, BigInteger> {
         public static Integer equalTo(long expect) {
-            return new Integer() {
-                @Override
-                public boolean isValidValue(BigInteger value) {
-                    return value.compareTo(BigInteger.valueOf(expect)) == 0;
-                }
-
-                @Override
-                public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Integer equal to [%d]", expect);
-                }
-            };
+            return compare(expect, Comparator.equalTo(0), "equal to");
         }
 
         public static Integer positive() {
@@ -80,31 +71,11 @@ public class Formatters {
         }
 
         public static Integer greaterThan(long expect) {
-            return new Integer() {
-                @Override
-                public boolean isValidValue(BigInteger value) {
-                    return value.compareTo(BigInteger.valueOf(expect)) > 0;
-                }
-
-                @Override
-                public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Integer greater than [%d]", expect);
-                }
-            };
+            return compare(expect, Comparator.greaterThan(0), "greater than");
         }
 
         public static Integer lessThan(long expect) {
-            return new Integer() {
-                @Override
-                public boolean isValidValue(BigInteger value) {
-                    return value.compareTo(BigInteger.valueOf(expect)) < 0;
-                }
-
-                @Override
-                public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Integer less than [%d]", expect);
-                }
-            };
+            return compare(expect, Comparator.lessThan(0), "less than");
         }
 
         public static Integer negative() {
@@ -112,29 +83,24 @@ public class Formatters {
         }
 
         public static Integer greaterOrEqualTo(long expect) {
-            return new Integer() {
-                @Override
-                public boolean isValidValue(BigInteger value) {
-                    return value.compareTo(BigInteger.valueOf(expect)) >= 0;
-                }
-
-                @Override
-                public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Integer greater or equal to [%d]", expect);
-                }
-            };
+            return compare(expect, Comparator.greaterOrEqualTo(0), "greater or equal to");
         }
 
         public static Integer lessOrEqualTo(long expect) {
+            return compare(expect, Comparator.lessOrEqualTo(0), "less or equal to");
+        }
+
+        public static Integer compare(long expect, Comparator<java.lang.Integer> comparator,
+                                      java.lang.String formatterName) {
             return new Integer() {
                 @Override
                 public boolean isValidValue(BigInteger value) {
-                    return value.compareTo(BigInteger.valueOf(expect)) <= 0;
+                    return comparator.compareTo(value.compareTo(BigInteger.valueOf(expect)));
                 }
 
                 @Override
                 public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Integer less or equal to [%d]", expect);
+                    return java.lang.String.format("Integer " + formatterName + " [%d]", expect);
                 }
             };
         }
@@ -142,8 +108,8 @@ public class Formatters {
         @Override
         public BigInteger convert(java.lang.Number input) {
             if (input instanceof Double
-                    || input instanceof Float
-                    || (input instanceof BigDecimal && ((BigDecimal) input).scale() != 0)) {
+                || input instanceof Float
+                || (input instanceof BigDecimal && ((BigDecimal) input).scale() != 0)) {
                 throw new IllegalTypeException();
             }
             return new BigInteger(input.toString());
@@ -193,15 +159,20 @@ public class Formatters {
     public static class Number extends BaseFormatter<java.lang.Number, java.math.BigDecimal> {
 
         public static Number equalTo(java.lang.Number expect) {
+            return compare(expect, Comparator.equalTo(0), "equal to");
+        }
+
+        public static Number compare(java.lang.Number expect, Comparator<java.lang.Integer> comparator,
+                                     java.lang.String formatterName) {
             return new Number() {
                 @Override
                 public boolean isValidValue(BigDecimal value) {
-                    return value.compareTo(new BigDecimal(expect.toString())) == 0;
+                    return comparator.compareTo(value.compareTo(new BigDecimal(expect.toString())));
                 }
 
                 @Override
                 public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Number equal to [%s]", expect);
+                    return java.lang.String.format("Number " + formatterName + " [%s]", expect);
                 }
             };
         }
@@ -211,17 +182,7 @@ public class Formatters {
         }
 
         public static Number greaterThan(java.lang.Number expect) {
-            return new Number() {
-                @Override
-                public boolean isValidValue(BigDecimal value) {
-                    return value.compareTo(new BigDecimal(expect.toString())) > 0;
-                }
-
-                @Override
-                public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Number greater than [%s]", expect);
-                }
-            };
+            return compare(expect, Comparator.greaterThan(0), "greater than");
         }
 
         public static Number negative() {
@@ -229,45 +190,15 @@ public class Formatters {
         }
 
         public static Number lessThan(java.lang.Number expect) {
-            return new Number() {
-                @Override
-                public boolean isValidValue(BigDecimal value) {
-                    return value.compareTo(new BigDecimal(expect.toString())) < 0;
-                }
-
-                @Override
-                public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Number less than [%s]", expect);
-                }
-            };
+            return compare(expect, Comparator.lessThan(0), "less than");
         }
 
         public static Number greaterOrEqualTo(java.lang.Number expect) {
-            return new Number() {
-                @Override
-                public boolean isValidValue(BigDecimal value) {
-                    return value.compareTo(new BigDecimal(expect.toString())) >= 0;
-                }
-
-                @Override
-                public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Number greater or equal to [%s]", expect);
-                }
-            };
+            return compare(expect, Comparator.greaterOrEqualTo(0), "greater or equal to");
         }
 
         public static Number lessOrEqualTo(java.lang.Number expect) {
-            return new Number() {
-                @Override
-                public boolean isValidValue(BigDecimal value) {
-                    return value.compareTo(new BigDecimal(expect.toString())) <= 0;
-                }
-
-                @Override
-                public java.lang.String getFormatterName() {
-                    return java.lang.String.format("Number less or equal to [%s]", expect);
-                }
-            };
+            return compare(expect, Comparator.lessOrEqualTo(0), "less or equal to");
         }
 
         @Override
