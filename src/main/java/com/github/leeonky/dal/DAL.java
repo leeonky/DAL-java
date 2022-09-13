@@ -5,22 +5,24 @@ import com.github.leeonky.dal.compiler.Compiler;
 import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.interpreter.SourceCode;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.interpreter.SourceCode.createSourceCode;
+
 public class DAL {
     private final Compiler compiler = new Compiler();
     private final RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder();
-    private static DAL instance;
+    private static final ThreadLocal<DAL> instance = new ThreadLocal<>();
 
-    public static DAL getInstance() {
-        if (instance == null)
-            instance = DALFactory.create();
-        return instance;
+    public static synchronized DAL getInstance() {
+        if (instance.get() == null)
+            instance.set(DALFactory.create());
+        return instance.get();
     }
 
     public RuntimeContextBuilder getRuntimeContextBuilder() {
@@ -29,16 +31,16 @@ public class DAL {
 
     @SuppressWarnings("unchecked")
     public <T> List<T> evaluateAll(Object input, String expressions) {
-        RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = runtimeContextBuilder.build(input);
-        return compiler.compile(SourceCode.createSourceCode(expressions, Notations.LINE_COMMENTS), DALRuntimeContext).stream()
-                .map(node -> (T) node.evaluate(DALRuntimeContext))
+        DALRuntimeContext runtimeContext = runtimeContextBuilder.build(input);
+        return compiler.compile(createSourceCode(expressions, Notations.LINE_COMMENTS), runtimeContext).stream()
+                .map(node -> (T) node.evaluate(runtimeContext))
                 .collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
     public <T> T evaluate(Object input, String expression) {
-        RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = runtimeContextBuilder.build(input);
-        List<DALNode> nodes = compiler.compile(SourceCode.createSourceCode(expression, Notations.LINE_COMMENTS), DALRuntimeContext);
+        DALRuntimeContext DALRuntimeContext = runtimeContextBuilder.build(input);
+        List<DALNode> nodes = compiler.compile(createSourceCode(expression, Notations.LINE_COMMENTS), DALRuntimeContext);
         if (nodes.size() > 1)
             throw new SyntaxException("more than one expression", nodes.get(1).getPositionBegin());
         return (T) nodes.get(0).evaluate(DALRuntimeContext);

@@ -2,14 +2,16 @@ package com.github.leeonky.dal;
 
 import com.github.leeonky.interpreter.InterpreterException;
 
+import java.util.function.Supplier;
+
 public class Assertions {
     private final Object input;
-    private static DAL staticDal = DAL.getInstance();
     public static boolean dumpInput = true;
     private DAL dal;
+    private static Supplier<DAL> dalFactory = DAL::getInstance;
 
-    public static void setDal(DAL dal) {
-        Assertions.staticDal = dal;
+    public static void setDalFactory(Supplier<DAL> dalFactory) {
+        Assertions.dalFactory = dalFactory;
     }
 
     public static void dumpInput(boolean enable) {
@@ -18,7 +20,7 @@ public class Assertions {
 
     private Assertions(Object input) {
         this.input = input;
-        dal = staticDal;
+        dal = dalFactory.get();
     }
 
     public Assertions use(DAL dal) {
