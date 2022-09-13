@@ -114,9 +114,4 @@ public class SchemaVerifier {
     static IllegalStateException illegalStateException(String subPrefix) {
         return new IllegalStateException(format("%s should specify generic type", subPrefix));
     }
-
-    static boolean shouldBeSameSize(String subPrefix, int actualSize, int expectSize) {
-        return actualSize == expectSize
-                || errorLog("Expecting field `%s` to be size [%d], but was size [%d]", subPrefix, expectSize, actualSize);
-    }
 }
