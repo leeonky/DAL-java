@@ -106,3 +106,41 @@ Feature: single schema when verification failed
       is IdZero
          ^
     """
+
+  Scenario: raise error when schema field type without value is not matched
+    Given the following schema class:
+    """
+    public class StringId {
+        public String id;
+    }
+    """
+    When the following json:
+    """
+      {
+        "id": "0"
+      }
+    """
+    Then the following verification should pass:
+    """
+      is StringId
+    """
+    When the following json:
+    """
+      {
+        "id": 0
+      }
+    """
+    When evaluate by:
+    """
+      is StringId
+    """
+    Then failed with the message:
+    """
+    Expecting to match schema `StringId` but was not
+        Expecting field `.id` to be type [java.lang.String], but was [java.lang.Integer]
+    """
+    And got the following notation:
+    """
+      is StringId
+         ^
+    """

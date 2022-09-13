@@ -224,6 +224,14 @@ Feature: define field alias in schema
         ]
       }
     """
+    When the following json:
+    """
+      {
+        "products": [{
+          "name": 100
+        }]
+      }
+    """
 
   Scenario: provide schema via is and use alias in nested list verification
     Given the following schema class:
