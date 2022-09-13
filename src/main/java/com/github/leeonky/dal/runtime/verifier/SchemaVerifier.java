@@ -6,6 +6,7 @@ import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.Schema;
 import com.github.leeonky.dal.runtime.SchemaAssertionFailure;
+import com.github.leeonky.dal.runtime.verifier.field.Factory;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.dal.type.SubType;
@@ -103,15 +104,15 @@ public class SchemaVerifier {
                 polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
-    static boolean errorLog(String format, Object... params) {
+    public static boolean errorLog(String format, Object... params) {
         throw new IllegalTypeException(String.format(format, params));
     }
 
     public boolean verifySchemaInGenericType(String subPrefix, BeanClass<?> type, Object schemaProperty) {
-        return JavaValueSchema.createFieldSchema(subPrefix, type, schemaProperty, runtimeContext, object).verify(runtimeContext);
+        return Factory.createFieldSchema(subPrefix, type, schemaProperty, runtimeContext, object).verify(runtimeContext);
     }
 
-    static IllegalStateException illegalStateException(String subPrefix) {
+    public static IllegalStateException illegalStateException(String subPrefix) {
         return new IllegalStateException(format("%s should specify generic type", subPrefix));
     }
 }

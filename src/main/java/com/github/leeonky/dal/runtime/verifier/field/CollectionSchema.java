@@ -1,7 +1,7 @@
-package com.github.leeonky.dal.runtime.verifier;
+package com.github.leeonky.dal.runtime.verifier.field;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.verifier.ContainerSchemaTrait.ContainerSchema;
+import com.github.leeonky.dal.runtime.verifier.field.ContainerSchemaTrait.ContainerSchema;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.LinkedHashMap;
@@ -19,7 +19,7 @@ class CollectionSchema extends ContainerSchema {
     }
 
     @Override
-    public BeanClass<?> getElementType(BeanClass<?> type) {
+    public BeanClass<?> getElementType(BeanClass<?> type, String subPrefix) {
         return type.getElementType();
     }
 
@@ -28,8 +28,8 @@ class CollectionSchema extends ContainerSchema {
         return range(0, actual.getListSize()).boxed().collect(toList());
     }
 
-    static class CollectionElementSchema extends CollectionSchema implements ContainerSizeSchemaTrait {
-        public CollectionElementSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
+    static class CollectionContentSchema extends CollectionSchema implements ContainerSizeSchemaTrait {
+        public CollectionContentSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
             super(subPrefix, type, expect, actual);
         }
 

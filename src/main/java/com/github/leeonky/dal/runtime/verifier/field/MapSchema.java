@@ -1,7 +1,7 @@
-package com.github.leeonky.dal.runtime.verifier;
+package com.github.leeonky.dal.runtime.verifier.field;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.verifier.ContainerSchemaTrait.ContainerSchema;
+import com.github.leeonky.dal.runtime.verifier.field.ContainerSchemaTrait.ContainerSchema;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ class MapSchema extends ContainerSchema {
     }
 
     @Override
-    public BeanClass<?> getElementType(BeanClass<?> type) {
+    public BeanClass<?> getElementType(BeanClass<?> type, String subPrefix) {
         return type.getTypeArguments(1).orElseThrow(() ->
                 new IllegalArgumentException(format("`%s` should be generic type", subPrefix)));
     }
@@ -26,8 +26,8 @@ class MapSchema extends ContainerSchema {
         return new ArrayList<>(actual.getFieldNames());
     }
 
-    static class MapElementSchema extends MapSchema implements ContainerSizeSchemaTrait {
-        public MapElementSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
+    static class MapContentSchema extends MapSchema implements ContainerSizeSchemaTrait {
+        public MapContentSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
             super(subPrefix, type, expect, actual);
         }
 
