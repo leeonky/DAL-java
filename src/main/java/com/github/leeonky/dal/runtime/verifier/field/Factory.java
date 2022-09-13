@@ -5,42 +5,49 @@ import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.IllegalFieldException;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.Map;
 import java.util.Objects;
 
 import static com.github.leeonky.dal.runtime.verifier.SchemaVerifier.errorLog;
-import static com.github.leeonky.dal.runtime.verifier.SchemaVerifier.illegalStateException;
 import static com.github.leeonky.util.BeanClass.cast;
 import static com.github.leeonky.util.BeanClass.getClassName;
+import static java.lang.String.format;
 
 public class Factory {
     public static FieldSchema createFieldSchema(String subPrefix, BeanClass<?> type, Object expect,
-                                                RuntimeContextBuilder.DALRuntimeContext runtimeContext, Data actual) {
+                                                DALRuntimeContext runtimeContext, Data actual) {
         if (Formatter.class.isAssignableFrom(type.getType()))
             return formatterSchema(subPrefix, type, expect, actual);
-        else if (runtimeContext.isSchemaRegistered(type.getType()))
+        if (runtimeContext.isSchemaRegistered(type.getType()))
             return subSchema(subPrefix, type, expect, actual);
-        else if (type.isCollection()) {
-            if (expect == null)
-                return new CollectionSchema(subPrefix, type, expect, actual);
+        return expect == null ? createSub(subPrefix, type, expect, actual)
+                : createContentSchema(subPrefix, type, expect, actual);
+    }
+
+    private static FieldSchema createSub(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
+        if (type.isCollection())
+            return new CollectionSchema(subPrefix, type, expect, actual);
+        if (Map.class.isAssignableFrom(type.getType()))
+            return new MapSchema(subPrefix, type, expect, actual);
+        if (Value.class.isAssignableFrom(type.getType()))
+            return valueSchema(subPrefix, type, actual);
+        if (Type.class.isAssignableFrom(type.getType()))
+            return typeSchema(subPrefix, type, actual);
+        return javaTypeSchema(subPrefix, type, actual);
+    }
+
+    private static FieldSchema createContentSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
+        if (type.isCollection())
             return new CollectionSchema.CollectionContentSchema(subPrefix, type, expect, actual);
-        } else if (Map.class.isAssignableFrom(type.getType())) {
-            if (expect == null)
-                return new MapSchema(subPrefix, type, expect, actual);
+        if (Map.class.isAssignableFrom(type.getType()))
             return new MapSchema.MapContentSchema(subPrefix, type, expect, actual);
-        } else if (Value.class.isAssignableFrom(type.getType())) {
-            if (expect == null)
-                return valueSchema(subPrefix, type, actual);
+        if (Value.class.isAssignableFrom(type.getType()))
             return valueContentSchema(subPrefix, type, (Value<Object>) expect, actual);
-        } else if (Type.class.isAssignableFrom(type.getType())) {
-            if (expect == null)
-                return typeSchema(subPrefix, type, actual);
+        if (Type.class.isAssignableFrom(type.getType()))
             return typeContentSchema(subPrefix, expect, actual);
-        } else if (expect == null)
-            return javaTypeSchema(subPrefix, type, actual);
         return javaValueSchema(subPrefix, expect, actual);
     }
 
@@ -116,5 +123,9 @@ public class Factory {
                     || errorLog("Expecting field `%s` to be type [%s], but was [%s]", subPrefix,
                     rawType.getName(), getClassName(actual.getInstance()));
         };
+    }
+
+    private static IllegalStateException illegalStateException(String subPrefix) {
+        return new IllegalStateException(format("%s should specify generic type", subPrefix));
     }
 }

@@ -6,7 +6,6 @@ import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.Schema;
 import com.github.leeonky.dal.runtime.SchemaAssertionFailure;
-import com.github.leeonky.dal.runtime.verifier.field.Factory;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.dal.type.SubType;
@@ -16,6 +15,7 @@ import com.github.leeonky.util.PropertyReader;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.runtime.verifier.field.Factory.createFieldSchema;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 
@@ -35,9 +35,7 @@ public class SchemaVerifier {
         SubType subType = superSchemaType.getAnnotation(SubType.class);
         if (subType != null) {
             Object value = object.getValue(compiler.toChainNodes(subType.property())).getInstance();
-            type = Stream.of(subType.types())
-                    .filter(t -> t.value().equals(value))
-                    .map(SubType.Type::type)
+            type = Stream.of(subType.types()).filter(t -> t.value().equals(value)).map(SubType.Type::type)
                     .findFirst().orElseThrow(() -> new IllegalStateException(
                             format("Cannot guess sub type through property type value[%s]", value)));
         }
@@ -68,8 +66,7 @@ public class SchemaVerifier {
     }
 
     private <T> boolean noMoreUnexpectedField(BeanClass<T> polymorphicBeanClass, Set<String> expectedFields, Set<String> actualFields) {
-        return actualFields.stream()
-                .allMatch(f -> shouldNotContainsUnexpectedField(polymorphicBeanClass, expectedFields, f));
+        return actualFields.stream().allMatch(f -> shouldNotContainsUnexpectedField(polymorphicBeanClass, expectedFields, f));
     }
 
     private <T> boolean allMandatoryPropertyShouldBeExist(BeanClass<T> polymorphicBeanClass, Set<String> actualFields) {
@@ -79,14 +76,14 @@ public class SchemaVerifier {
     }
 
     private <T> boolean allPropertyValueShouldBeValid(String subPrefix, BeanClass<T> polymorphicBeanClass, T schemaInstance) {
-        return polymorphicBeanClass.getPropertyReaders().values().stream()
-                .allMatch(propertyReader -> {
-                    Data wrappedPropertyValue = object.getValue(propertyReader.getName());
-                    return allowNullAndIsNull(propertyReader, wrappedPropertyValue)
-                            || wrappedPropertyValue.createSchemaVerifier()
-                            .verifySchemaInGenericType(subPrefix + "." + propertyReader.getName(),
-                                    propertyReader.getType(), propertyReader.getValue(schemaInstance));
-                });
+        return polymorphicBeanClass.getPropertyReaders().values().stream().allMatch(propertyReader -> {
+            Data wrappedPropertyValue = object.getValue(propertyReader.getName());
+            SchemaVerifier schemaVerifier = wrappedPropertyValue.createSchemaVerifier();
+            return allowNullAndIsNull(propertyReader, wrappedPropertyValue) || createFieldSchema(
+                    subPrefix + "." + propertyReader.getName(), propertyReader.getType(),
+                    propertyReader.getValue(schemaInstance), schemaVerifier.runtimeContext, schemaVerifier.object)
+                    .verify(schemaVerifier.runtimeContext);
+        });
     }
 
     private <T> boolean allowNullAndIsNull(PropertyReader<T> propertyReader, Data propertyValueWrapper) {
@@ -106,13 +103,5 @@ public class SchemaVerifier {
 
     public static boolean errorLog(String format, Object... params) {
         throw new IllegalTypeException(String.format(format, params));
-    }
-
-    public boolean verifySchemaInGenericType(String subPrefix, BeanClass<?> type, Object schemaProperty) {
-        return Factory.createFieldSchema(subPrefix, type, schemaProperty, runtimeContext, object).verify(runtimeContext);
-    }
-
-    public static IllegalStateException illegalStateException(String subPrefix) {
-        return new IllegalStateException(format("%s should specify generic type", subPrefix));
     }
 }
