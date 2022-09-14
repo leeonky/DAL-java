@@ -9,7 +9,6 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.Map;
-import java.util.Objects;
 
 import static com.github.leeonky.dal.runtime.verifier.SchemaVerifier.errorLog;
 import static com.github.leeonky.util.BeanClass.cast;
@@ -36,7 +35,7 @@ public class Factory {
             return valueSchema(subPrefix, type, actual);
         if (Type.class.isAssignableFrom(type.getType()))
             return typeSchema(subPrefix, type, actual);
-        return javaTypeSchema(subPrefix, type, actual);
+        return javaTypeSchema(new StructureExpectation(subPrefix, type), actual);
     }
 
     private static FieldSchema createContentSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
@@ -48,7 +47,7 @@ public class Factory {
             return valueContentSchema(subPrefix, type, (Value<Object>) expect, actual);
         if (Type.class.isAssignableFrom(type.getType()))
             return typeContentSchema(subPrefix, expect, actual);
-        return javaValueSchema(subPrefix, expect, actual);
+        return javaValueSchema(new ContentExpectation(subPrefix, expect), actual);
     }
 
     @SuppressWarnings("unchecked")
@@ -99,16 +98,12 @@ public class Factory {
         };
     }
 
-    private static FieldSchema javaTypeSchema(String subPrefix, BeanClass<?> type, Data actual) {
-        return runtimeContext -> type.getType().isInstance(actual.getInstance())
-                || errorLog("Expecting field `%s` to be type [%s], but was [%s]", subPrefix,
-                type.getName(), getClassName(actual.getInstance()));
+    private static FieldSchema javaTypeSchema(Expectation expectation, Data actual) {
+        return runtimeContext -> expectation.verify(actual);
     }
 
-    private static FieldSchema javaValueSchema(String subPrefix, Object expect, Data actual) {
-        return runtimeContext -> Objects.equals(expect, actual.getInstance())
-                || errorLog("Expecting field `%s` to be %s[%s], but was %s[%s]", subPrefix,
-                getClassName(expect), expect, getClassName(actual.getInstance()), actual.getInstance());
+    private static FieldSchema javaValueSchema(Expectation expectation, Data actual) {
+        return runtimeContext -> expectation.verify(actual);
     }
 
     private static FieldSchema typeContentSchema(String subPrefix, Object expect, Data actual) {
