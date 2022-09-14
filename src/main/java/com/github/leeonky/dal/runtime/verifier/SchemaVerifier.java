@@ -77,12 +77,13 @@ public class SchemaVerifier {
 
     private <T> boolean allPropertyValueShouldBeValid(String subPrefix, BeanClass<T> polymorphicBeanClass, T schemaInstance) {
         return polymorphicBeanClass.getPropertyReaders().values().stream().allMatch(propertyReader -> {
-            Data wrappedPropertyValue = object.getValue(propertyReader.getName());
-            SchemaVerifier schemaVerifier = wrappedPropertyValue.createSchemaVerifier();
-            return allowNullAndIsNull(propertyReader, wrappedPropertyValue) || createFieldSchema(
-                    subPrefix + "." + propertyReader.getName(), propertyReader.getType(),
+            Data fieldValue = object.getValue(propertyReader.getName());
+            SchemaVerifier schemaVerifier = fieldValue.createSchemaVerifier();
+            return allowNullAndIsNull(propertyReader, fieldValue)
+                    || createFieldSchema(subPrefix + "." + propertyReader.getName(), propertyReader.getType(),
                     propertyReader.getValue(schemaInstance), schemaVerifier.runtimeContext, schemaVerifier.object)
                     .verify(schemaVerifier.runtimeContext);
+
         });
     }
 

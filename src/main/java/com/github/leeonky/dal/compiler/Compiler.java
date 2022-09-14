@@ -43,33 +43,34 @@ public class Compiler {
             PROPERTY, OBJECT, SORTED_LIST, LIST, PARENTHESES, VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND,
             TABLE, SHORT_VERIFICATION_OPERAND, CELL_VERIFICATION_OPERAND, GROUP_PROPERTY, OPTIONAL_PROPERTY_CHAIN,
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> INPUT_NODE),
-            NUMBER = Tokens.NUMBER.nodeParser(DALNode::constNumber),
-            INTEGER = Tokens.INTEGER.nodeParser(DALNode::constInteger),
+            NUMBER = Tokens.NUMBER.nodeParser(Factory::constNumber),
+            INTEGER = Tokens.INTEGER.nodeParser(Factory::constInteger),
             SINGLE_QUOTED_STRING = Notations.SINGLE_QUOTED.with(many(charNode(SINGLE_QUOTED_ESCAPES))
-                    .and(endWith(Notations.SINGLE_QUOTED.getLabel())).as(DALNode::constString)),
+                    .and(endWith(Notations.SINGLE_QUOTED.getLabel())).as(Factory::constString)),
             DOUBLE_QUOTED_STRING = Notations.DOUBLE_QUOTED.with(many(charNode(DOUBLE_QUOTED_ESCAPES))
-                    .and(endWith(Notations.DOUBLE_QUOTED.getLabel())).as(DALNode::constString)),
-            CONST_TRUE = Notations.Keywords.TRUE.wordNode(DALNode::constTrue, PROPERTY_DELIMITER_STRING),
-            CONST_FALSE = Notations.Keywords.FALSE.wordNode(DALNode::constFalse, PROPERTY_DELIMITER_STRING),
-            CONST_NULL = Notations.Keywords.NULL.wordNode(DALNode::constNull, PROPERTY_DELIMITER_STRING),
+                    .and(endWith(Notations.DOUBLE_QUOTED.getLabel())).as(Factory::constString)),
+            CONST_TRUE = Notations.Keywords.TRUE.wordNode(Factory::constTrue, PROPERTY_DELIMITER_STRING),
+            CONST_FALSE = Notations.Keywords.FALSE.wordNode(Factory::constFalse, PROPERTY_DELIMITER_STRING),
+            CONST_NULL = Notations.Keywords.NULL.wordNode(Factory::constNull, PROPERTY_DELIMITER_STRING),
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
-            REGEX = Notations.OPEN_REGEX.with(many(charNode(REGEX_ESCAPES)).and(endWith(Notations.CLOSE_REGEX.getLabel())).as(DALNode::regex)),
+            REGEX = Notations.OPEN_REGEX.with(many(charNode(REGEX_ESCAPES))
+                    .and(endWith(Notations.CLOSE_REGEX.getLabel())).as(Factory::regex)),
             WILDCARD = Notations.Operators.WILDCARD.node(WildcardNode::new),
             ROW_WILDCARD = Notations.Operators.ROW_WILDCARD.node(WildcardNode::new),
             CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
                     CONST_USER_DEFINED_LITERAL),
             ELEMENT_ELLIPSIS = Notations.Operators.ELEMENT_ELLIPSIS.node(token -> new ListEllipsisNode()),
-            SCHEMA = Tokens.SCHEMA.nodeParser(DALNode::schema),
+            SCHEMA = Tokens.SCHEMA.nodeParser(Factory::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
             STRING_PROPERTY = procedure -> procedure.isEnableRelaxProperty() ? single(oneOf(SINGLE_QUOTED_STRING,
-                    DOUBLE_QUOTED_STRING)).as(DALNode::stringSymbol).parse(procedure) : empty(),
-            NUMBER_PROPERTY = procedure -> procedure.isEnableNumberProperty() ? single(NUMBER).as(DALNode::numberSymbol)
-                    .parse(procedure) : empty(),
+                    DOUBLE_QUOTED_STRING)).as(Factory::stringSymbol).parse(procedure) : empty(),
+            NUMBER_PROPERTY = procedure -> procedure.isEnableNumberProperty() ? single(NUMBER)
+                    .as(Factory::numberSymbol).parse(procedure) : empty(),
             SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_SYMBOL : Tokens.SYMBOL).nodeParser(
-                    DALNode::symbolNode).parse(procedure),
+                    Factory::symbolNode).parse(procedure),
             DOT_SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_DOT_SYMBOL : Tokens.DOT_SYMBOL)
-                    .nodeParser(DALNode::symbolNode).parse(procedure),
-            META_SYMBOL = Tokens.DOT_SYMBOL.nodeParser(DALNode::metaSymbolNode),
+                    .nodeParser(Factory::symbolNode).parse(procedure),
+            META_SYMBOL = Tokens.DOT_SYMBOL.nodeParser(Factory::metaSymbolNode),
             PROPERTY_PATTERN = this::propertyPattern,
             OPTIONAL_VERIFICATION_PROPERTY = lazyNode(() -> enableSlashProperty(enableRelaxProperty(OPTIONAL_PROPERTY_CHAIN)));
 
@@ -83,13 +84,13 @@ public class Compiler {
             PROPERTY_CHAIN, OPERAND, EXPRESSION, VERIFICATION_PROPERTY, OBJECT_VERIFICATION_PROPERTY,
             DEFAULT_INPUT = procedure -> INPUT_NODE,
             SCHEMA_COMPOSE = Notations.OPENING_BRACKET.with(single(many(SCHEMA.mandatory("Expect a schema"))
-                    .and(Syntax.Rules.splitBy(Notations.SCHEMA_AND)).as(DALNode::elementSchemas))
+                    .and(Syntax.Rules.splitBy(Notations.SCHEMA_AND)).as(Factory::elementSchemas))
                     .and(endWith(Notations.CLOSING_BRACKET)).as()).or(many(SCHEMA.mandatory("Expect a schema"))
-                    .and(Syntax.Rules.splitBy(Notations.SCHEMA_AND)).as(DALNode::schemas)),
-            EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(DALNode::relaxString),
-            OBJECT_SCOPE_RELAX_STRING = Tokens.OBJECT_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
-            LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(DALNode::relaxString),
-            TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(DALNode::relaxString),
+                    .and(Syntax.Rules.splitBy(Notations.SCHEMA_AND)).as(Factory::schemas)),
+            EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(Factory::relaxString),
+            OBJECT_SCOPE_RELAX_STRING = Tokens.OBJECT_SCOPE_RELAX_STRING.nodeParser(Factory::relaxString),
+            LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(Factory::relaxString),
+            TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(Factory::relaxString),
             DEFAULT_INDEX_HEADER = procedure -> new TableDefaultIndexHeadRow();
 
     public ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
@@ -106,7 +107,7 @@ public class Compiler {
                     Operators.PROPERTY_SLASH.clause(propertyChainNode()),
                     Operators.PROPERTY_IMPLICIT.clause(Notations.OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
                             "Should given one property or array index in `[]`")).and(endWith(Notations.CLOSING_BRACKET))
-                            .as(DALNode::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE))),
+                            .as(Factory::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE))),
                     Operators.PROPERTY_META.clause(symbolClause(META_SYMBOL.concat(META_LIST_MAPPING_CLAUSE))));
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> propertyChainNode() {
@@ -129,13 +130,13 @@ public class Compiler {
 
     public Compiler() {
         PARENTHESES = lazyNode(() -> enableCommaAnd(Notations.OPENING_PARENTHESES.with(single(EXPRESSION).and(endWith(Notations.CLOSING_PARENTHESES))
-                .as(DALNode::parenthesesNode))));
+                .as(Factory::parenthesesNode))));
         PROPERTY = lazyNode(() -> oneOf(GROUP_PROPERTY, DEFAULT_INPUT.with(oneOf(EXPLICIT_PROPERTY_CLAUSE, IMPLICIT_PROPERTY_CLAUSE))));
         OPTIONAL_PROPERTY_CHAIN = PROPERTY.concatAll(EXPLICIT_PROPERTY_CLAUSE);
         PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
         VERIFICATION_PROPERTY = enableNumberProperty(enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN)));
         OBJECT_VERIFICATION_PROPERTY = many(VERIFICATION_PROPERTY).and(optionalSplitBy(Notations.COMMA))
-                .and(endBefore(Notations.Operators.EQUAL, Notations.Operators.MATCHER, Notations.Operators.IS)).as(DALNode::createVerificationGroup);
+                .and(endBefore(Notations.Operators.EQUAL, Notations.Operators.MATCHER, Notations.Operators.IS)).as(Factory::createVerificationGroup);
         OBJECT = lazyNode(() -> disableCommaAnd(Notations.OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(Notations.CLOSING_BRACES))
                 .as(ObjectScopeNode::new).or(many(OBJECT_VERIFICATION_PROPERTY.concat(shortVerificationClause(Operators.VERIFICATION_OPERATORS
                         .mandatory("Expect operator `:` or `=`"), SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING))))

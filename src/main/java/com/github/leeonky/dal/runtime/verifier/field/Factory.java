@@ -17,14 +17,14 @@ import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
 
 public class Factory {
-    public static FieldSchema createFieldSchema(String subPrefix, BeanClass<?> type, Object expect,
+    public static FieldSchema createFieldSchema(String subPrefix, BeanClass<?> expectType, Object expect,
                                                 DALRuntimeContext runtimeContext, Data actual) {
-        if (Formatter.class.isAssignableFrom(type.getType()))
-            return formatterSchema(subPrefix, type, expect, actual);
-        if (runtimeContext.isSchemaRegistered(type.getType()))
-            return subSchema(subPrefix, type, expect, actual);
-        return expect == null ? createSub(subPrefix, type, expect, actual)
-                : createContentSchema(subPrefix, type, expect, actual);
+        if (Formatter.class.isAssignableFrom(expectType.getType()))
+            return formatterSchema(subPrefix, expectType, expect, actual);
+        if (runtimeContext.isSchemaRegistered(expectType.getType()))
+            return subSchema(subPrefix, expectType, expect, actual);
+        return expect == null ? createSub(subPrefix, expectType, expect, actual)
+                : createContentSchema(subPrefix, expectType, expect, actual);
     }
 
     private static FieldSchema createSub(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
