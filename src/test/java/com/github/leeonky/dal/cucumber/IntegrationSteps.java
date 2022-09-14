@@ -2,6 +2,7 @@ package com.github.leeonky.dal.cucumber;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.dal.compiler.IntegrationTestContext;
+import io.cucumber.java.After;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -13,11 +14,16 @@ import java.util.List;
 import java.util.Map;
 
 public class IntegrationSteps {
-    private IntegrationTestContext integrationTestContext = new IntegrationTestContext();
+    private IntegrationTestContext integrationTestContext;
 
     @Before
-    public void reset() {
+    public void reset() throws InterruptedException {
         integrationTestContext = new IntegrationTestContext();
+    }
+
+    @After
+    public void release() throws InterruptedException {
+        integrationTestContext.release();
     }
 
     @Given("the following json:")

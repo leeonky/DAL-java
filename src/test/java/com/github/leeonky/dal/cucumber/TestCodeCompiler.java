@@ -24,26 +24,28 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toCollection;
 import static javax.tools.ToolProvider.getSystemJavaCompiler;
 
-public class Compiler {
+public class TestCodeCompiler {
     private final URLClassLoader loader = getUrlClassLoader();
     private final String packageName;
+    private final int workSpace;
+    private static final BlockingDeque<Integer> workspaces = workspaces();
 
-    private static final BlockingDeque<Compiler> compilers = initCompilers();
-
-    private static BlockingDeque<Compiler> initCompilers() {
-        return IntStream.range(0, 0).mapToObj(Compiler::new).collect(toCollection(LinkedBlockingDeque::new));
+    private static BlockingDeque<Integer> workspaces() {
+        return IntStream.range(0, TestTask.threadsCount("CUCUMBER_THREADS", 8) * 2).boxed()
+                .collect(toCollection(LinkedBlockingDeque::new));
     }
 
-    public static Compiler take() {
-        return compilers.pop();
+    public TestCodeCompiler(int workSpace) {
+        packageName = "src.test.generate.ws" + workSpace;
+        this.workSpace = workSpace;
     }
 
-    public void giveBack() {
-        compilers.push(this);
+    public static TestCodeCompiler take() throws InterruptedException {
+        return new TestCodeCompiler(workspaces.takeFirst());
     }
 
-    public Compiler(int index) {
-        packageName = "src.test" + index;
+    public static void giveBack(TestCodeCompiler compiler) throws InterruptedException {
+        workspaces.putLast(compiler.workSpace);
     }
 
     @SneakyThrows

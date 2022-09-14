@@ -6,6 +6,7 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
+import com.github.leeonky.dal.cucumber.TestCodeCompiler;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.InterpreterException;
@@ -45,7 +46,15 @@ public class IntegrationTestContext {
     private DALNode dalNode = null;
     private Map<String, Integer> firstIndexes = new HashMap<>();
     private final List<Class<?>> classes = new ArrayList<>();
-    private com.github.leeonky.dal.cucumber.Compiler javaCompiler = new com.github.leeonky.dal.cucumber.Compiler(0);
+    private TestCodeCompiler testCodeCompiler;
+
+    public IntegrationTestContext() throws InterruptedException {
+        testCodeCompiler = TestCodeCompiler.take();
+    }
+
+    public void release() throws InterruptedException {
+        testCodeCompiler.giveBack(testCodeCompiler);
+    }
 
     private static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> optional(
             NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeFactory) {
@@ -57,7 +66,7 @@ public class IntegrationTestContext {
         exception = null;
         result = null;
         try {
-            javaCompiler.compileToClasses(schemas.stream().map(s ->
+            testCodeCompiler.compileToClasses(schemas.stream().map(s ->
                                     "import com.github.leeonky.dal.type.*;\n" +
                                             "import com.github.leeonky.dal.runtime.*;\n" +
                                             "import java.util.*;\n" + s)
@@ -110,7 +119,7 @@ public class IntegrationTestContext {
 
     private void compileAll() {
         if (classes.isEmpty()) {
-            classes.addAll(javaCompiler.compileToClasses(javaClasses.stream().map(s ->
+            classes.addAll(testCodeCompiler.compileToClasses(javaClasses.stream().map(s ->
                     "import com.github.leeonky.dal.type.*;\n" +
                             "import java.math.*;\n" + s).collect(Collectors.toList())));
             classes.forEach(dal.getRuntimeContextBuilder()::registerStaticMethodExtension);
@@ -142,7 +151,7 @@ public class IntegrationTestContext {
     }
 
     public void shouldFailedWith(String message) {
-        assertThat(exception.getMessage()).isEqualTo(message.replace("#package#", javaCompiler.packagePrefix()));
+        assertThat(exception.getMessage()).isEqualTo(message.replace("#package#", testCodeCompiler.packagePrefix()));
     }
 
     public void shouldHaveNotation(String notation) {
@@ -249,7 +258,7 @@ public class IntegrationTestContext {
     public void verifyDumpedData(String verification) {
         RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(null);
 
-        assertThat(runtimeContext.wrap(input).dump()).isEqualTo(verification.replace("#package#", javaCompiler.packagePrefix()));
+        assertThat(runtimeContext.wrap(input).dump()).isEqualTo(verification.replace("#package#", testCodeCompiler.packagePrefix()));
     }
 
     public void setCurryingStaticMethodArgRange(String type, String methodType, String method, List<String> range) {
