@@ -33,8 +33,8 @@ public class IntegrationTestContext {
     private String expression;
     private final List<String> schemas = new ArrayList<>();
     private final List<String> javaClasses = new ArrayList<>();
-    private static final Compiler compiler = new Compiler();
-    private static final Map<String, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
+    private final Compiler compiler = new Compiler();
+    private final Map<String, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
             DALProcedure>> parserMap = new HashMap<String, NodeParser<DALRuntimeContext, DALNode, DALExpression,
             DALOperator, DALProcedure>>() {{
         put("symbol", compiler.SYMBOL);
