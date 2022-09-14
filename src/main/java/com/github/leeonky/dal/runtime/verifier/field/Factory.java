@@ -34,7 +34,7 @@ public class Factory {
         if (Value.class.isAssignableFrom(type.getType()))
             return valueSchema(subPrefix, type, actual);
         if (Type.class.isAssignableFrom(type.getType()))
-            return typeSchema(subPrefix, type, actual);
+            return typeSchema(new StructureExpectation.SchemaType(subPrefix, type), actual);
         return javaTypeSchema(new StructureExpectation(subPrefix, type), actual);
     }
 
@@ -46,8 +46,8 @@ public class Factory {
         if (Value.class.isAssignableFrom(type.getType()))
             return valueContentSchema(subPrefix, type, (Value<Object>) expect, actual);
         if (Type.class.isAssignableFrom(type.getType()))
-            return typeContentSchema(subPrefix, expect, actual);
-        return javaValueSchema(new ContentExpectation(subPrefix, expect), actual);
+            return typeContentSchema(new ContentExpectation.SchemaType(subPrefix, (Type<Object>) expect), actual);
+        return javaValueSchema(new ContentExpectation<>(subPrefix, expect), actual);
     }
 
     @SuppressWarnings("unchecked")
@@ -106,21 +106,15 @@ public class Factory {
         return runtimeContext -> expectation.verify(actual);
     }
 
-    private static FieldSchema typeContentSchema(String subPrefix, Object expect, Data actual) {
-        return runtimeContext -> ((Type<Object>) expect).verify(actual.getInstance())
-                || errorLog(((Type<Object>) expect).errorMessage(subPrefix, actual.getInstance()));
+    private static FieldSchema typeContentSchema(ContentExpectation.SchemaType expectation, Data actual) {
+        return runtimeContext -> expectation.verify(actual);
     }
 
-    private static FieldSchema typeSchema(String subPrefix, BeanClass<?> type, Data actual) {
-        return runtimeContext -> {
-            Class<?> rawType = type.getTypeArguments(0).orElseThrow(() -> illegalStateException(subPrefix)).getType();
-            return rawType.isInstance(actual.getInstance())
-                    || errorLog("Expecting field `%s` to be type [%s], but was [%s]", subPrefix,
-                    rawType.getName(), getClassName(actual.getInstance()));
-        };
+    private static FieldSchema typeSchema(StructureExpectation.SchemaType expectation, Data actual) {
+        return runtimeContext -> expectation.verify(actual);
     }
 
-    private static IllegalStateException illegalStateException(String subPrefix) {
+    static IllegalStateException illegalStateException(String subPrefix) {
         return new IllegalStateException(format("%s should specify generic type", subPrefix));
     }
 }

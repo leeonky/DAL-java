@@ -31,4 +31,10 @@ public class StructureExpectation extends Expectation {
     public BeanClass<?> getType() {
         return type;
     }
+
+    public static class SchemaType extends StructureExpectation {
+        public SchemaType(String property, BeanClass<?> type) {
+            super(property, type.getTypeArguments(0).orElseThrow(() -> Factory.illegalStateException(property)));
+        }
+    }
 }
