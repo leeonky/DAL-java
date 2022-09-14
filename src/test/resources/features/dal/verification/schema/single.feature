@@ -35,7 +35,7 @@ Feature: single schema when verification failed
     Then failed with the message:
     """
     Expecting to match schema `IdZero` but was not
-        Unexpected field `unexpected field` for schema IdZero[IdZero]
+        Unexpected field `unexpected field` for schema IdZero[#package#IdZero]
     """
     And got the following notation:
     """
@@ -55,7 +55,7 @@ Feature: single schema when verification failed
     Then failed with the message:
     """
     Expecting to match schema `IdZero` but was not
-        Expecting field `id` to be in type IdZero[IdZero], but does not exist
+        Expecting field `id` to be in type IdZero[#package#IdZero], but does not exist
     """
     And got the following notation:
     """

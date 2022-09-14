@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Deprecated
 public class CucumberContextBak {
+    com.github.leeonky.dal.cucumber.Compiler javaCompiler = new com.github.leeonky.dal.cucumber.Compiler(0);
 
     public static CucumberContextBak INSTANCE = new CucumberContextBak();
     DAL dal = new DAL();
@@ -72,9 +73,7 @@ public class CucumberContextBak {
     public void assertInputData(String assertion) {
         giveDalSourceCode(assertion);
         try {
-            com.github.leeonky.dal.cucumber.Compiler compiler
-                    = new com.github.leeonky.dal.cucumber.Compiler();
-            compiler.compileToClasses(schemas.stream().map(s ->
+            javaCompiler.compileToClasses(schemas.stream().map(s ->
                                     "import com.github.leeonky.dal.type.*;\n" +
                                             "import com.github.leeonky.dal.runtime.*;\n" +
                                             "import java.util.*;\n" + s)
@@ -133,9 +132,7 @@ public class CucumberContextBak {
     public void assertJavaClass(String className, String assertion) {
         giveDalSourceCode(assertion);
         try {
-            com.github.leeonky.dal.cucumber.Compiler compiler
-                    = new com.github.leeonky.dal.cucumber.Compiler();
-            List<Class<?>> classes = compiler.compileToClasses(javaClasses.stream().map(s ->
+            List<Class<?>> classes = javaCompiler.compileToClasses(javaClasses.stream().map(s ->
                     "import java.math.*;\n" + s).collect(Collectors.toList()));
             Class type = classes.stream().filter(clazz -> clazz.getName().equals(className))
                     .findFirst().orElseThrow(() -> new IllegalArgumentException

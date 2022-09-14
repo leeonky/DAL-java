@@ -137,7 +137,7 @@ Feature: dump-data
     {
       "value": 1,
       "this": "** same with root",
-      "__type": "Data"
+      "__type": "#package#Data"
     }
     """
 
@@ -165,9 +165,9 @@ Feature: dump-data
       "subData": {
         "value": 2,
         "this": "** same with .subData",
-        "__type": "SubData"
+        "__type": "#package#SubData"
       },
-      "__type": "Data"
+      "__type": "#package#Data"
     }
     """
 
@@ -298,7 +298,7 @@ Feature: dump-data
         "__type": "java.lang.Class",
         "__value": "java.lang.String"
       },
-      "__type": "Data"
+      "__type": "#package#Data"
     }
     """
 
@@ -317,7 +317,7 @@ Feature: dump-data
     {
       "value": 2,
       "error": "** Got exception during dump: com.github.leeonky.util.InvocationException: java.lang.RuntimeException: error",
-      "__type": "Data"
+      "__type": "#package#Data"
     }
     """
 
@@ -337,6 +337,6 @@ Feature: dump-data
       "data": {
         0: "str1"
       },
-      "__type": "Data"
+      "__type": "#package#Data"
     }
     """

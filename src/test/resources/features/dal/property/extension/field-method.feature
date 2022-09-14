@@ -49,5 +49,5 @@ Feature: field-method
       4. Map key value
       5. customized type getter
       6. static method extension
-    Method or property `privateField` does not exist in `Data`
+    Method or property `privateField` does not exist in `#package#Data`
     """

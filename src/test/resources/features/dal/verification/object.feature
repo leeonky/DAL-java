@@ -120,7 +120,7 @@ Feature: object
       4. Map key value
       5. customized type getter
       6. static method extension
-    Method or property `string` does not exist in `Data`
+    Method or property `string` does not exist in `#package#Data`
     """
     And got the following notation:
     """

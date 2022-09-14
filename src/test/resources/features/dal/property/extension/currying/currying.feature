@@ -101,7 +101,7 @@ Feature: currying function
       4. Map key value
       5. customized type getter
       6. static method extension
-    Method or property `upperCase` does not exist in `Data`
+    Method or property `upperCase` does not exist in `#package#Data`
     """
 
   Scenario: should use same arg type of method in instance method currying
@@ -246,8 +246,8 @@ Feature: currying function
       5. customized type getter
       6. static method extension
     More than one currying method:
-      public java.lang.String Data.method(java.lang.CharSequence)
-      public java.lang.String Data.method(java.lang.Object)
+      public java.lang.String #package#Data.method(java.lang.CharSequence)
+      public java.lang.String #package#Data.method(java.lang.Object)
     """
     And got the following notation:
     """

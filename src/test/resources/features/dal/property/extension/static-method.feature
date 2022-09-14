@@ -37,7 +37,7 @@ Feature: static method
       4. Map key value
       5. customized type getter
       6. static method extension
-    Method or property `privateProperty` does not exist in `Data`
+    Method or property `privateProperty` does not exist in `#package#Data`
     """
     And got the following notation:
     """
@@ -57,7 +57,7 @@ Feature: static method
       4. Map key value
       5. customized type getter
       6. static method extension
-    Method or property `nonStaticProperty` does not exist in `Data`
+    Method or property `nonStaticProperty` does not exist in `#package#Data`
     """
     And got the following notation:
     """
