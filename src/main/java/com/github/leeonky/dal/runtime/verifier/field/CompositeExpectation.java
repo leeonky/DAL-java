@@ -33,8 +33,8 @@ public class CompositeExpectation implements Expectation {
         return expect;
     }
 
-    public BeanClass<?> getType() {
-        return type;
+    protected String fieldStr() {
+        return property;
     }
 
 
@@ -44,47 +44,46 @@ public class CompositeExpectation implements Expectation {
         this.expect = expect;
     }
 
-    protected String fieldStr() {
-        return property;
+    public CompositeExpectation subExpectation(PropertyReader<Object> propertyReader) {
+        return new CompositeExpectation((BeanClass<Object>) propertyReader.getType(),
+                propertyReader.getBeanType().isCollection() ? property + "[" + propertyReader.getName() + "]"
+                        : property + "." + propertyReader.getName(), propertyReader.getValue(expect));
     }
 
-    protected CompositeExpectation subExpectation(PropertyReader<Object> propertyReader) {
-        String subProperty = propertyReader.getBeanType().isCollection() ? property + "[" + propertyReader.getName() + "]" : property + "." + propertyReader.getName();
-        BeanClass<Object> subType = (BeanClass<Object>) propertyReader.getType();
-        Object subExpect = propertyReader.getValue(expect);
-        return new CompositeExpectation(subType, subProperty, subExpect);
+    public CompositeExpectation mapEntryExpectation(Object key) {
+        return new CompositeExpectation((BeanClass<Object>) type.getTypeArguments(1).orElseThrow(() ->
+                new IllegalArgumentException(format("`%s` should be generic type", property))),
+                format("%s.%s", property, key), ((Map<?, Object>) expect).get(key));
     }
 
     @Override
     public boolean verify(Data actual, RuntimeContextBuilder.DALRuntimeContext runtimeContext) {
         RootExpectation_BK<Object> expectation = new RootExpectation_BK<>(type, property, expect);
+
         return (expect == null ? Factory.createSchema(property, type, expect, actual, expectation, runtimeContext).verify(runtimeContext)
-                : verifyContent(actual, runtimeContext, expectation))
-                ;
+                : delegate(actual, runtimeContext).verify(actual, runtimeContext));
     }
 
-    private boolean verifyContent(Data actual, RuntimeContextBuilder.DALRuntimeContext runtimeContext, RootExpectation_BK<Object> expectation) {
-        FieldSchema_BK result = null;
-        Expectation expectation1 = null;
-        if (Formatter.class.isAssignableFrom(((BeanClass<?>) type).getType())) {
-            expectation1 = formatterExpectation((Formatter<Object, Object>) expect);
-        } else if (runtimeContext.isSchemaRegistered(((BeanClass<?>) type).getType())) {
-            expectation1 = new SchemaContentExpectation(fieldStr(), type, actual, expect);
-        } else if (type.isCollection()) {
-            expectation1 = collectionContentExpectation();
-        } else if (Map.class.isAssignableFrom(((BeanClass<?>) type).getType())) {
-            result = new MapSchemaBK.MapContentSchemaBK(property, type, expect, actual);
-        } else if (Value.class.isAssignableFrom(expectation.getType().getType())) {
-            expectation1 = valueContentExpectation();
-        } else if (Type.class.isAssignableFrom(expectation.getType().getType())) {
-            expectation1 = typeContentExpectation();
-        } else {
-            expectation1 = contentExpectation();
-        }
-        if (expectation1 != null)
-            return expectation1.verify(actual, runtimeContext);
-        return result.verify(runtimeContext);
+    private Expectation delegate(Data actual, RuntimeContextBuilder.DALRuntimeContext runtimeContext) {
+        if (Formatter.class.isAssignableFrom(((BeanClass<?>) type).getType()))
+            return formatterExpectation((Formatter<Object, Object>) expect);
+        if (runtimeContext.isSchemaRegistered(((BeanClass<?>) type).getType()))
+            return new SchemaContentExpectation(fieldStr(), type, actual, expect);
+        if (type.isCollection())
+            return collectionContentExpectation();
+        if (Map.class.isAssignableFrom(((BeanClass<?>) type).getType()))
+            return mapContentExpectation();
+        if (Value.class.isAssignableFrom(((BeanClass<?>) type).getType()))
+            return valueContentExpectation();
+        if (Type.class.isAssignableFrom(((BeanClass<?>) type).getType()))
+            return typeContentExpectation();
+        return contentExpectation();
+    }
 
+    private Expectation mapContentExpectation() {
+        return (actual, runtimeContext) -> verifySize(actual.getFieldNames().size(), ((Map<?, Object>) expect).size())
+                && actual.getFieldNames().stream().allMatch(key ->
+                mapEntryExpectation(key).verify(actual.getValue(key), runtimeContext));
     }
 
     private Expectation collectionContentExpectation() {
@@ -126,8 +125,8 @@ public class CompositeExpectation implements Expectation {
     }
 
     private Expectation contentExpectation() {
-        return (actual, runtimeContext) -> (Objects.equals(getExpect(), actual.getInstance())) ||
+        return (actual, runtimeContext) -> (Objects.equals(expect, actual.getInstance())) ||
                 errorLog(format("Expecting field `%s` to be %s[%s], but was %s[%s]", fieldStr(),
-                        getClassName(getExpect()), getExpect(), getClassName(actual.getInstance()), actual.getInstance()));
+                        getClassName(expect), expect, getClassName(actual.getInstance()), actual.getInstance()));
     }
 }
