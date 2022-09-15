@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.runtime.verifier.field;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.verifier.field.ContainerSchemaTrait.ContainerSchema;
+import com.github.leeonky.dal.runtime.verifier.field.ContainerSchemaTrait.ContainerSchemaBK;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.LinkedHashMap;
@@ -13,8 +13,9 @@ import static com.github.leeonky.util.CollectionHelper.toStream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
-class CollectionSchema extends ContainerSchema {
-    public CollectionSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
+@Deprecated
+class CollectionSchemaBK extends ContainerSchemaBK {
+    public CollectionSchemaBK(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
         super(subPrefix, type, expect, actual, "%s[%d]");
     }
 
@@ -28,8 +29,8 @@ class CollectionSchema extends ContainerSchema {
         return range(0, actual.getListSize()).boxed().collect(toList());
     }
 
-    static class CollectionContentSchema extends CollectionSchema implements ContainerSizeSchemaTrait {
-        public CollectionContentSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
+    static class CollectionContentSchemaBK extends CollectionSchemaBK implements ContainerSizeSchemaTrait {
+        public CollectionContentSchemaBK(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
             super(subPrefix, type, expect, actual);
         }
 

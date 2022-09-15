@@ -11,23 +11,24 @@ import java.util.Map;
 
 import static java.lang.String.format;
 
+@Deprecated
 public class Factory {
-    public static FieldSchema createFieldSchema(String subPrefix, BeanClass<?> expectType, Object expect,
-                                                DALRuntimeContext runtimeContext, Data actual) {
-        RootExpectation<Object> expectation = new RootExpectation<>(expectType, subPrefix, expect);
+    public static FieldSchema_BK createFieldSchema(String subPrefix, BeanClass<?> expectType, Object expect,
+                                                   DALRuntimeContext runtimeContext, Data actual) {
+        RootExpectation_BK<Object> expectation = new RootExpectation_BK<>(expectType, subPrefix, expect);
         return expect == null ? createSchema(subPrefix, expectType, expect, actual, expectation, runtimeContext)
                 : createContentSchema(subPrefix, expectType, expect, actual, expectation, runtimeContext);
     }
 
-    private static FieldSchema createSchema(String subPrefix, BeanClass<?> expectType, Object expect, Data actual, RootExpectation<Object> expectation, DALRuntimeContext runtimeContext) {
+    public static FieldSchema_BK createSchema(String subPrefix, BeanClass<?> expectType, Object expect, Data actual, RootExpectation_BK<Object> expectation, DALRuntimeContext runtimeContext) {
         if (Formatter.class.isAssignableFrom(expectType.getType()))
             return formatterSchema(actual, expectation);
         if (runtimeContext.isSchemaRegistered(expectType.getType()))
             return subSchema(actual, expectation);
         if (expectType.isCollection())
-            return new CollectionSchema(subPrefix, expectType, expect, actual);
+            return new CollectionSchemaBK(subPrefix, expectType, expect, actual);
         if (Map.class.isAssignableFrom(expectType.getType()))
-            return new MapSchema(subPrefix, expectType, expect, actual);
+            return new MapSchemaBK(subPrefix, expectType, expect, actual);
         if (Value.class.isAssignableFrom(expectation.getType().getType()))
             return valueSchema(actual, expectation);
         if (Type.class.isAssignableFrom(expectation.getType().getType()))
@@ -35,15 +36,15 @@ public class Factory {
         return javaSchema(actual, expectation);
     }
 
-    private static FieldSchema createContentSchema(String subPrefix, BeanClass<?> expectType, Object expect, Data actual, RootExpectation<Object> expectation, DALRuntimeContext runtimeContext) {
+    public static FieldSchema_BK createContentSchema(String subPrefix, BeanClass<?> expectType, Object expect, Data actual, RootExpectation_BK<Object> expectation, DALRuntimeContext runtimeContext) {
         if (Formatter.class.isAssignableFrom(expectType.getType()))
             return formatterContentSchema(actual, expectation);
         if (runtimeContext.isSchemaRegistered(expectType.getType()))
             return subContentSchema(actual, expectation);
         if (expectType.isCollection())
-            return new CollectionSchema.CollectionContentSchema(subPrefix, expectType, expect, actual);
+            return new CollectionSchemaBK.CollectionContentSchemaBK(subPrefix, expectType, expect, actual);
         if (Map.class.isAssignableFrom(expectType.getType()))
-            return new MapSchema.MapContentSchema(subPrefix, expectType, expect, actual);
+            return new MapSchemaBK.MapContentSchemaBK(subPrefix, expectType, expect, actual);
         if (Value.class.isAssignableFrom(expectation.getType().getType()))
             return valueContentSchema(actual, expectation);
         if (Type.class.isAssignableFrom(expectation.getType().getType()))
@@ -51,44 +52,44 @@ public class Factory {
         return javaContentSchema(actual, expectation);
     }
 
-    private static FieldSchema formatterSchema(Data actual, RootExpectation<Object> expectation) {
+    private static FieldSchema_BK formatterSchema(Data actual, RootExpectation_BK<Object> expectation) {
         return runtimeContext -> expectation.formatterExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema formatterContentSchema(Data actual, RootExpectation<Object> expectation) {
+    private static FieldSchema_BK formatterContentSchema(Data actual, RootExpectation_BK<Object> expectation) {
         return runtimeContext -> expectation.formatterContentExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema subSchema(Data actual, RootExpectation<Object> expectation) {
+    private static FieldSchema_BK subSchema(Data actual, RootExpectation_BK<Object> expectation) {
         return runtimeContext -> expectation.schemaExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema subContentSchema(Data actual, RootExpectation<Object> expectation) {
+    private static FieldSchema_BK subContentSchema(Data actual, RootExpectation_BK<Object> expectation) {
         return runtimeContext -> expectation.schemaContentExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema valueContentSchema(Data actual, RootExpectation<Object> expectation) {
+    private static FieldSchema_BK valueContentSchema(Data actual, RootExpectation_BK<Object> expectation) {
         return runtimeContext -> expectation.valueContentExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema valueSchema(Data actual, RootExpectation<Object> expectation) {
+    private static FieldSchema_BK valueSchema(Data actual, RootExpectation_BK<Object> expectation) {
         return runtimeContext -> expectation.valueExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema javaSchema(Data actual, RootExpectation<Object> expectation) {
+    private static FieldSchema_BK javaSchema(Data actual, RootExpectation_BK<Object> expectation) {
         return runtimeContext -> expectation.structureExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema javaContentSchema(Data actual, RootExpectation<Object> objectRootExpectation) {
-        return runtimeContext -> objectRootExpectation.contentExpectation().verify(actual, runtimeContext);
+    private static FieldSchema_BK javaContentSchema(Data actual, RootExpectation_BK<Object> objectRootExpectationBK) {
+        return runtimeContext -> objectRootExpectationBK.contentExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema typeContentSchema(Data actual, RootExpectation<Object> objectRootExpectation) {
-        return runtimeContext -> objectRootExpectation.typeContentExpectation().verify(actual, runtimeContext);
+    private static FieldSchema_BK typeContentSchema(Data actual, RootExpectation_BK<Object> objectRootExpectationBK) {
+        return runtimeContext -> objectRootExpectationBK.typeContentExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema typeSchema(Data actual, RootExpectation<Object> objectRootExpectation) {
-        return runtimeContext -> objectRootExpectation.typeExpectation().verify(actual, runtimeContext);
+    private static FieldSchema_BK typeSchema(Data actual, RootExpectation_BK<Object> objectRootExpectationBK) {
+        return runtimeContext -> objectRootExpectationBK.typeExpectation().verify(actual, runtimeContext);
     }
 
     static IllegalStateException illegalStateException(String subPrefix) {

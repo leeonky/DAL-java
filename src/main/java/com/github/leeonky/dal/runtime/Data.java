@@ -2,7 +2,6 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.dal.runtime.verifier.SchemaVerifier;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.*;
@@ -21,7 +20,7 @@ import static java.util.stream.StreamSupport.stream;
 
 public class Data {
     private final SchemaType schemaType;
-    private final DALRuntimeContext dalRuntimeContext;
+    final DALRuntimeContext dalRuntimeContext;
     private final Object instance;
     private List<Object> listValue;
     private Comparator<Object> listComparator = SortGroupNode.NOP_COMPARATOR;
@@ -67,10 +66,6 @@ public class Data {
         return dalRuntimeContext.isNull(instance);
     }
 
-    public SchemaVerifier createSchemaVerifier() {
-        return new SchemaVerifier(dalRuntimeContext, this);
-    }
-
     public Data getValue(List<Object> propertyChain) {
         return propertyChain.isEmpty() ? this :
                 getValue(propertyChain.get(0)).getValue(propertyChain.subList(1, propertyChain.size()));
@@ -86,12 +81,12 @@ public class Data {
             throw new PropertyAccessException("Index out of bounds (" + ex.getMessage() + "), first index is: " + getListFirstIndex(), ex);
         } catch (Exception e) {
             throw new PropertyAccessException(format("Get property `%s` failed, property can be:\n" +
-                                                     "  1. public field\n" +
-                                                     "  2. public getter\n" +
-                                                     "  3. public no args method\n" +
-                                                     "  4. Map key value\n" +
-                                                     "  5. customized type getter\n" +
-                                                     "  6. static method extension\n%s%s",
+                            "  1. public field\n" +
+                            "  2. public getter\n" +
+                            "  3. public no args method\n" +
+                            "  4. Map key value\n" +
+                            "  5. customized type getter\n" +
+                            "  6. static method extension\n%s%s",
                     propertyChain, e.getMessage(), listMappingMessage(this, propertyChain)), e);
         }
     }
@@ -154,7 +149,7 @@ public class Data {
 
     private String trimPrefix(String prefix, String fieldName) {
         return fieldName.substring(prefix.length(), prefix.length() + 1).toLowerCase()
-               + fieldName.substring(prefix.length() + 1);
+                + fieldName.substring(prefix.length() + 1);
     }
 
     public String dump() {

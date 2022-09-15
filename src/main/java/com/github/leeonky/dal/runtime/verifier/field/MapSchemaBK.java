@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.runtime.verifier.field;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.verifier.field.ContainerSchemaTrait.ContainerSchema;
+import com.github.leeonky.dal.runtime.verifier.field.ContainerSchemaTrait.ContainerSchemaBK;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.ArrayList;
@@ -10,8 +10,9 @@ import java.util.Map;
 
 import static java.lang.String.format;
 
-class MapSchema extends ContainerSchema {
-    public MapSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
+@Deprecated
+class MapSchemaBK extends ContainerSchemaBK {
+    public MapSchemaBK(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
         super(subPrefix, type, expect, actual, "%s.%s");
     }
 
@@ -26,8 +27,8 @@ class MapSchema extends ContainerSchema {
         return new ArrayList<>(actual.getFieldNames());
     }
 
-    static class MapContentSchema extends MapSchema implements ContainerSizeSchemaTrait {
-        public MapContentSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
+    static class MapContentSchemaBK extends MapSchemaBK implements ContainerSizeSchemaTrait {
+        public MapContentSchemaBK(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
             super(subPrefix, type, expect, actual);
         }
 

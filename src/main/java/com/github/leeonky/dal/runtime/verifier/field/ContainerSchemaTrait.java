@@ -7,10 +7,11 @@ import com.github.leeonky.util.BeanClass;
 import java.util.List;
 import java.util.Map;
 
-import static com.github.leeonky.dal.runtime.verifier.SchemaVerifier.errorLog;
+import static com.github.leeonky.dal.runtime.verifier.field.SchemaExpectation.errorLog;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 
+@Deprecated
 public interface ContainerSchemaTrait {
     BeanClass<?> getElementType(BeanClass<?> type, String subPrefix);
 
@@ -32,14 +33,14 @@ public interface ContainerSchemaTrait {
         }
     }
 
-    abstract class ContainerSchema implements ContainerSchemaTrait, FieldSchema {
+    abstract class ContainerSchemaBK implements ContainerSchemaTrait, FieldSchema_BK {
         private final String fieldFormat;
         private final String subPrefix;
         private final BeanClass<?> type;
         private final Object expect;
         private final Data actual;
 
-        public ContainerSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual, String fieldFormat) {
+        public ContainerSchemaBK(String subPrefix, BeanClass<?> type, Object expect, Data actual, String fieldFormat) {
             this.subPrefix = subPrefix;
             this.type = type;
             this.expect = expect;

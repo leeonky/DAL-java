@@ -3,6 +3,7 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
+import com.github.leeonky.dal.runtime.verifier.field.SchemaExpectation;
 import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.util.BeanClass;
@@ -131,7 +132,9 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerSchema(String name, Class<?> schema) {
         schemas.put(name, BeanClass.create(schema));
-        return registerSchema(name, data -> data.createSchemaVerifier().verify(schema, null, ""));
+        return registerSchema(name, data ->
+                new SchemaExpectation("", BeanClass.create(schema), data).verify(data, data.dalRuntimeContext)
+        );
     }
 
     public RuntimeContextBuilder registerSchema(String name, Function<Data, Boolean> predicate) {
