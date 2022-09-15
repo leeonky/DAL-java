@@ -53,8 +53,8 @@ public interface ContainerSchemaTrait {
             return verifySizeAndElements(runtimeContext, getActualProperties(actual), getExpectValues(expect));
         }
 
-        private boolean verifySizeAndElements(DALRuntimeContext runtimeContext, List<?> actualProperties,
-                                              Map<?, Object> expectValues) {
+        public boolean verifySizeAndElements(DALRuntimeContext runtimeContext, List<?> actualProperties,
+                                             Map<?, Object> expectValues) {
             return verifySize(subPrefix, actualProperties.size(), expectValues.size())
                     && actualProperties.stream().allMatch(property -> Factory.createFieldSchema(
                     format(fieldFormat, subPrefix, property), getElementType(type, subPrefix), expectValues.get(property),

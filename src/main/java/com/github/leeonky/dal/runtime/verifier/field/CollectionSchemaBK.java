@@ -14,7 +14,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
 @Deprecated
-class CollectionSchemaBK extends ContainerSchemaBK {
+public class CollectionSchemaBK extends ContainerSchemaBK {
     public CollectionSchemaBK(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
         super(subPrefix, type, expect, actual, "%s[%d]");
     }

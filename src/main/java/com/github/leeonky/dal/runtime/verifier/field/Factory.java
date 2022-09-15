@@ -56,7 +56,7 @@ public class Factory {
         return runtimeContext -> expectation.formatterExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema_BK formatterContentSchema(Data actual, RootExpectation_BK<Object> expectation) {
+    static FieldSchema_BK formatterContentSchema(Data actual, RootExpectation_BK<Object> expectation) {
         return runtimeContext -> expectation.formatterContentExpectation().verify(actual, runtimeContext);
     }
 
@@ -64,11 +64,11 @@ public class Factory {
         return runtimeContext -> expectation.schemaExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema_BK subContentSchema(Data actual, RootExpectation_BK<Object> expectation) {
+    static FieldSchema_BK subContentSchema(Data actual, RootExpectation_BK<Object> expectation) {
         return runtimeContext -> expectation.schemaContentExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema_BK valueContentSchema(Data actual, RootExpectation_BK<Object> expectation) {
+    static FieldSchema_BK valueContentSchema(Data actual, RootExpectation_BK<Object> expectation) {
         return runtimeContext -> expectation.valueContentExpectation().verify(actual, runtimeContext);
     }
 
@@ -80,11 +80,11 @@ public class Factory {
         return runtimeContext -> expectation.structureExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema_BK javaContentSchema(Data actual, RootExpectation_BK<Object> objectRootExpectationBK) {
+    static FieldSchema_BK javaContentSchema(Data actual, RootExpectation_BK<Object> objectRootExpectationBK) {
         return runtimeContext -> objectRootExpectationBK.contentExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema_BK typeContentSchema(Data actual, RootExpectation_BK<Object> objectRootExpectationBK) {
+    static FieldSchema_BK typeContentSchema(Data actual, RootExpectation_BK<Object> objectRootExpectationBK) {
         return runtimeContext -> objectRootExpectationBK.typeContentExpectation().verify(actual, runtimeContext);
     }
 

@@ -10,36 +10,27 @@ import com.github.leeonky.util.PropertyReader;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 
-public class SchemaExpectation implements Expectation {
-    final BeanClass<Object> type;
-    final String property;
-    final Object expect;
+public class SchemaExpectation extends CompositeExpectation {
     private final boolean partial;
-
     private static final Compiler compiler = new Compiler();
 
-    private SchemaExpectation(String property, BeanClass<?> type, Data actual,
-                              Function<BeanClass<Object>, Object> expectFactory) {
+    private SchemaExpectation(String property, BeanClass<?> type, BeanClass<Object> newType, Object expect) {
+        super(newType, property, expect == null ? newType.newInstance() : expect);
         partial = type.getType().getAnnotation(Partial.class) != null;
-        this.type = (BeanClass<Object>) getPolymorphicSchemaType(type.getType(), actual);
-        this.property = property;
-        expect = expectFactory.apply(this.type);
-
-    }
-
-    public SchemaExpectation(String property, BeanClass<?> type, Data actual) {
-        this(property, type, actual, BeanClass::newInstance);
     }
 
     public SchemaExpectation(String property, BeanClass<?> type, Data actual, Object expect) {
-        this(property, type, actual, t -> expect);
+        this(property, type, (BeanClass<Object>) getPolymorphicSchemaType(type.getType(), actual), expect);
+    }
+
+    public SchemaExpectation(String property, BeanClass<?> type, Data actual) {
+        this(property, type, actual, null);
     }
 
     private static BeanClass<?> getPolymorphicSchemaType(Class<?> schemaType, Data actual) {
@@ -56,10 +47,6 @@ public class SchemaExpectation implements Expectation {
 
     public static boolean errorLog(String format, Object... params) {
         throw new IllegalTypeException(String.format(format, params));
-    }
-
-    protected String fieldStr() {
-        return property;
     }
 
     @Override
@@ -82,20 +69,16 @@ public class SchemaExpectation implements Expectation {
     }
 
 
-    private boolean allowNullAndIsNull(PropertyReader<?> propertyReader, Data propertyValueWrapper) {
-        return propertyReader.getAnnotation(AllowNull.class) != null && propertyValueWrapper.isNull();
-    }
-
     private boolean allPropertyValueShouldBeValid(Data actual, RuntimeContextBuilder.DALRuntimeContext runtimeContext) {
         return type.getPropertyReaders().values().stream().allMatch(propertyReader -> {
             Data subActual = actual.getValue(propertyReader.getName());
-            String subProperty = fieldStr() + "." + propertyReader.getName();
-            BeanClass<?> subType = propertyReader.getType();
-            Object subExpect = propertyReader.getValue(expect);
             return allowNullAndIsNull(propertyReader, subActual)
-                    || Factory.createFieldSchema(subProperty, subType, subExpect, runtimeContext, subActual)
-                    .verify(runtimeContext);
+                    || subExpectation(propertyReader).verify(subActual, runtimeContext);
         });
+    }
+
+    private boolean allowNullAndIsNull(PropertyReader<?> propertyReader, Data propertyValueWrapper) {
+        return propertyReader.getAnnotation(AllowNull.class) != null && propertyValueWrapper.isNull();
     }
 
     private boolean noMoreUnexpectedField(Set<String> actualFields) {
