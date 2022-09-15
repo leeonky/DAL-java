@@ -1,8 +1,15 @@
 package com.github.leeonky.dal.format;
 
 import com.github.leeonky.dal.runtime.IllegalTypeException;
+import com.github.leeonky.util.BeanClass;
 
 public interface Formatter<T, R> {
+
+    @SuppressWarnings("unchecked")
+    static Formatter<Object, Object> createFormatter(BeanClass<?> type) {
+        return (Formatter<Object, Object>) type.getTypeArguments(0)
+                .<Object>map(t -> type.newInstance((Object) t.getType())).orElseGet(type::newInstance);
+    }
 
     R convert(T input);
 

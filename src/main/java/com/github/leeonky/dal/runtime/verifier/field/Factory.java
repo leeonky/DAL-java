@@ -4,114 +4,91 @@ import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.IllegalFieldException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.BeanClass;
 
 import java.util.Map;
 
-import static com.github.leeonky.dal.runtime.verifier.SchemaVerifier.errorLog;
-import static com.github.leeonky.util.BeanClass.cast;
-import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
 
 public class Factory {
     public static FieldSchema createFieldSchema(String subPrefix, BeanClass<?> expectType, Object expect,
                                                 DALRuntimeContext runtimeContext, Data actual) {
+        RootExpectation<Object> expectation = new RootExpectation<>(expectType, subPrefix, expect);
+        return expect == null ? createSchema(subPrefix, expectType, expect, actual, expectation, runtimeContext)
+                : createContentSchema(subPrefix, expectType, expect, actual, expectation, runtimeContext);
+    }
+
+    private static FieldSchema createSchema(String subPrefix, BeanClass<?> expectType, Object expect, Data actual, RootExpectation<Object> expectation, DALRuntimeContext runtimeContext) {
         if (Formatter.class.isAssignableFrom(expectType.getType()))
-            return formatterSchema(subPrefix, expectType, expect, actual);
+            return formatterSchema(actual, expectation);
         if (runtimeContext.isSchemaRegistered(expectType.getType()))
-            return subSchema(subPrefix, expectType, expect, actual);
-        return expect == null ? createSub(subPrefix, expectType, expect, actual)
-                : createContentSchema(subPrefix, expectType, expect, actual);
+            return subSchema(actual, expectation);
+        if (expectType.isCollection())
+            return new CollectionSchema(subPrefix, expectType, expect, actual);
+        if (Map.class.isAssignableFrom(expectType.getType()))
+            return new MapSchema(subPrefix, expectType, expect, actual);
+        if (Value.class.isAssignableFrom(expectation.getType().getType()))
+            return valueSchema(actual, expectation);
+        if (Type.class.isAssignableFrom(expectation.getType().getType()))
+            return typeSchema(actual, expectation);
+        return javaSchema(actual, expectation);
     }
 
-    private static FieldSchema createSub(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
-        if (type.isCollection())
-            return new CollectionSchema(subPrefix, type, expect, actual);
-        if (Map.class.isAssignableFrom(type.getType()))
-            return new MapSchema(subPrefix, type, expect, actual);
-        if (Value.class.isAssignableFrom(type.getType()))
-            return valueSchema(subPrefix, type, actual);
-        if (Type.class.isAssignableFrom(type.getType()))
-            return typeSchema(new StructureExpectation.SchemaType(subPrefix, type), actual);
-        return javaTypeSchema(new StructureExpectation(subPrefix, type), actual);
+    private static FieldSchema createContentSchema(String subPrefix, BeanClass<?> expectType, Object expect, Data actual, RootExpectation<Object> expectation, DALRuntimeContext runtimeContext) {
+        if (Formatter.class.isAssignableFrom(expectType.getType()))
+            return formatterContentSchema(actual, expectation);
+        if (runtimeContext.isSchemaRegistered(expectType.getType()))
+            return subContentSchema(actual, expectation);
+        if (expectType.isCollection())
+            return new CollectionSchema.CollectionContentSchema(subPrefix, expectType, expect, actual);
+        if (Map.class.isAssignableFrom(expectType.getType()))
+            return new MapSchema.MapContentSchema(subPrefix, expectType, expect, actual);
+        if (Value.class.isAssignableFrom(expectation.getType().getType()))
+            return valueContentSchema(actual, expectation);
+        if (Type.class.isAssignableFrom(expectation.getType().getType()))
+            return typeContentSchema(actual, expectation);
+        return javaContentSchema(actual, expectation);
     }
 
-    private static FieldSchema createContentSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
-        if (type.isCollection())
-            return new CollectionSchema.CollectionContentSchema(subPrefix, type, expect, actual);
-        if (Map.class.isAssignableFrom(type.getType()))
-            return new MapSchema.MapContentSchema(subPrefix, type, expect, actual);
-        if (Value.class.isAssignableFrom(type.getType()))
-            return valueContentSchema(subPrefix, type, (Value<Object>) expect, actual);
-        if (Type.class.isAssignableFrom(type.getType()))
-            return typeContentSchema(new ContentExpectation.SchemaType(subPrefix, (Type<Object>) expect), actual);
-        return javaValueSchema(new ContentExpectation<>(subPrefix, expect), actual);
+    private static FieldSchema formatterSchema(Data actual, RootExpectation<Object> expectation) {
+        return runtimeContext -> expectation.formatterExpectation().verify(actual, runtimeContext);
     }
 
-    @SuppressWarnings("unchecked")
-    private static FieldSchema formatterSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
-        return runtimeContext -> {
-            Formatter<Object, Object> formatter = cast(expect, Formatter.class).orElseGet(() -> createFormatter(type));
-            return formatter.isValid(actual.getInstance())
-                    || errorLog("Expecting field `%s` to be in `%s`, but was [%s]", subPrefix,
-                    formatter.getFormatterName(), actual.getInstance());
-        };
+    private static FieldSchema formatterContentSchema(Data actual, RootExpectation<Object> expectation) {
+        return runtimeContext -> expectation.formatterContentExpectation().verify(actual, runtimeContext);
     }
 
-    @SuppressWarnings("unchecked")
-    private static Formatter<Object, Object> createFormatter(BeanClass<?> type) {
-        return (Formatter<Object, Object>) type.getTypeArguments(0)
-                .<Object>map(t -> type.newInstance((Object) t.getType())).orElseGet(type::newInstance);
+    private static FieldSchema subSchema(Data actual, RootExpectation<Object> expectation) {
+        return runtimeContext -> expectation.schemaExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema subSchema(String subPrefix, BeanClass<?> type, Object expect, Data actual) {
-        return dalRuntimeContext -> actual.createSchemaVerifier().verify(type.getType(), expect, subPrefix);
+    private static FieldSchema subContentSchema(Data actual, RootExpectation<Object> expectation) {
+        return runtimeContext -> expectation.schemaContentExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema valueContentSchema(String subPrefix, BeanClass<?> type, Value<Object> expect, Data actual) {
-        return runtimeContext -> {
-            try {
-                return expect.verify(expect.convertAs(runtimeContext, actual.getInstance(),
-                        type.getTypeArguments(0).orElse(null)))
-                        || errorLog(expect.errorMessage(subPrefix, actual.getInstance()));
-            } catch (IllegalFieldException ignore) {
-                throw illegalStateException(subPrefix);
-            }
-        };
+    private static FieldSchema valueContentSchema(Data actual, RootExpectation<Object> expectation) {
+        return runtimeContext -> expectation.valueContentExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema valueSchema(String subPrefix, BeanClass<?> type, Data actual) {
-        return runtimeContext -> {
-            Class<?> rawType = type.getTypeArguments(0).orElseThrow(() -> illegalStateException(subPrefix)).getType();
-            try {
-                if (actual.isNull())
-                    return errorLog("Can not convert null field `%s` to type [%s], " +
-                            "use @AllowNull to verify nullable field", subPrefix, rawType.getName());
-                actual.convert(rawType);
-                return true;
-            } catch (Exception ignore) {
-                return errorLog("Can not convert field `%s` (%s: %s) to type [%s]", subPrefix,
-                        getClassName(actual.getInstance()), actual.getInstance(), rawType.getName());
-            }
-        };
+    private static FieldSchema valueSchema(Data actual, RootExpectation<Object> expectation) {
+        return runtimeContext -> expectation.valueExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema javaTypeSchema(Expectation expectation, Data actual) {
-        return runtimeContext -> expectation.verify(actual);
+    private static FieldSchema javaSchema(Data actual, RootExpectation<Object> expectation) {
+        return runtimeContext -> expectation.structureExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema javaValueSchema(Expectation expectation, Data actual) {
-        return runtimeContext -> expectation.verify(actual);
+    private static FieldSchema javaContentSchema(Data actual, RootExpectation<Object> objectRootExpectation) {
+        return runtimeContext -> objectRootExpectation.contentExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema typeContentSchema(ContentExpectation.SchemaType expectation, Data actual) {
-        return runtimeContext -> expectation.verify(actual);
+    private static FieldSchema typeContentSchema(Data actual, RootExpectation<Object> objectRootExpectation) {
+        return runtimeContext -> objectRootExpectation.typeContentExpectation().verify(actual, runtimeContext);
     }
 
-    private static FieldSchema typeSchema(StructureExpectation.SchemaType expectation, Data actual) {
-        return runtimeContext -> expectation.verify(actual);
+    private static FieldSchema typeSchema(Data actual, RootExpectation<Object> objectRootExpectation) {
+        return runtimeContext -> objectRootExpectation.typeExpectation().verify(actual, runtimeContext);
     }
 
     static IllegalStateException illegalStateException(String subPrefix) {

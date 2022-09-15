@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.format.Value;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.util.BeanClass;
@@ -239,8 +239,8 @@ public class VerifyValueInSchema extends Base {
     public static class ToIntegerAndIncrease implements Value<Integer> {
 
         @Override
-        public Integer convertAs(RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext, Object instance, BeanClass<?> type) {
-            return (int) instance + 1;
+        public Integer convertAs(Data actual, BeanClass<?> type) {
+            return (int) actual.getInstance() + 1;
         }
 
         @Override

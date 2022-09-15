@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.format;
 
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.IllegalFieldException;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Comparator;
 
@@ -59,19 +59,19 @@ public interface Value<T> extends Type<T> {
         return new ComparableValue<>(comparator, value, valueName);
     }
 
-    @SuppressWarnings("unchecked")
-    default T convertAs(RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext, Object instance, BeanClass<?> type) {
-        if (type == null)
-            throw new IllegalFieldException();
-        return (T) DALRuntimeContext.getConverter().tryConvert(type.getType(), instance);
-    }
-
     @Override
     boolean verify(T actual);
 
     @Override
     default String errorMessage(String field, Object actual) {
         return format("Field `%s` is invalid", field);
+    }
+
+    @SuppressWarnings("unchecked")
+    default T convertAs(Data actual, BeanClass<?> type) {
+        if (type == null)
+            throw new IllegalFieldException();
+        return (T) actual.convert(type.getType()).getInstance();
     }
 
     class ComparableValue<T extends Comparable<T>> extends ComparableType<T> implements Value<T> {

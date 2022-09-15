@@ -20,8 +20,11 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 
 public class SchemaVerifier {
-    private final Data object;
-    private final DALRuntimeContext runtimeContext;
+
+    //    TODO private
+    public final Data object;
+    //    TODO private
+    public final DALRuntimeContext runtimeContext;
     private static final Compiler compiler = new Compiler();
 
     public SchemaVerifier(DALRuntimeContext runtimeContext, Data object) {
@@ -30,7 +33,7 @@ public class SchemaVerifier {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> BeanClass<T> getPolymorphicSchemaType(Class<?> superSchemaType) {
+    public <T> BeanClass<T> getPolymorphicSchemaType(Class<?> superSchemaType) {
         Class<?> type = superSchemaType;
         SubType subType = superSchemaType.getAnnotation(SubType.class);
         if (subType != null) {
@@ -54,7 +57,7 @@ public class SchemaVerifier {
                 && schemaVerificationShouldPass(schema);
     }
 
-    private boolean schemaVerificationShouldPass(Object schema) {
+    public boolean schemaVerificationShouldPass(Object schema) {
         if (schema instanceof Schema) {
             try {
                 ((Schema) schema).verify(object);
@@ -65,17 +68,17 @@ public class SchemaVerifier {
         return true;
     }
 
-    private <T> boolean noMoreUnexpectedField(BeanClass<T> polymorphicBeanClass, Set<String> expectedFields, Set<String> actualFields) {
+    public <T> boolean noMoreUnexpectedField(BeanClass<T> polymorphicBeanClass, Set<String> expectedFields, Set<String> actualFields) {
         return actualFields.stream().allMatch(f -> shouldNotContainsUnexpectedField(polymorphicBeanClass, expectedFields, f));
     }
 
-    private <T> boolean allMandatoryPropertyShouldBeExist(BeanClass<T> polymorphicBeanClass, Set<String> actualFields) {
+    public <T> boolean allMandatoryPropertyShouldBeExist(BeanClass<T> polymorphicBeanClass, Set<String> actualFields) {
         return polymorphicBeanClass.getPropertyReaders().values().stream()
                 .filter(propertyReader -> propertyReader.getAnnotation(AllowNull.class) == null)
                 .allMatch(propertyReader -> shouldContainsField(actualFields, polymorphicBeanClass, propertyReader));
     }
 
-    private <T> boolean allPropertyValueShouldBeValid(String subPrefix, BeanClass<T> polymorphicBeanClass, T schemaInstance) {
+    public <T> boolean allPropertyValueShouldBeValid(String subPrefix, BeanClass<T> polymorphicBeanClass, T schemaInstance) {
         return polymorphicBeanClass.getPropertyReaders().values().stream().allMatch(propertyReader -> {
             Data fieldValue = object.getValue(propertyReader.getName());
             SchemaVerifier schemaVerifier = fieldValue.createSchemaVerifier();
@@ -87,16 +90,16 @@ public class SchemaVerifier {
         });
     }
 
-    private <T> boolean allowNullAndIsNull(PropertyReader<T> propertyReader, Data propertyValueWrapper) {
+    public static <T> boolean allowNullAndIsNull(PropertyReader<T> propertyReader, Data propertyValueWrapper) {
         return propertyReader.getAnnotation(AllowNull.class) != null && propertyValueWrapper.isNull();
     }
 
-    private <T> boolean shouldNotContainsUnexpectedField(BeanClass<T> polymorphicBeanClass, Set<String> expectedFields, String f) {
+    public static boolean shouldNotContainsUnexpectedField(BeanClass<?> polymorphicBeanClass, Set<String> expectedFields, String f) {
         return expectedFields.contains(f) || errorLog("Unexpected field `%s` for schema %s[%s]", f,
                 polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
     }
 
-    private <T> boolean shouldContainsField(Set<String> actualFields, BeanClass<T> polymorphicBeanClass, PropertyReader<T> propertyReader) {
+    public static boolean shouldContainsField(Set<String> actualFields, BeanClass<?> polymorphicBeanClass, PropertyReader<?> propertyReader) {
         return actualFields.contains(propertyReader.getName())
                 || errorLog("Expecting field `%s` to be in type %s[%s], but does not exist", propertyReader.getName(),
                 polymorphicBeanClass.getSimpleName(), polymorphicBeanClass.getName());
