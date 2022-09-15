@@ -1,9 +1,13 @@
-package com.github.leeonky.dal.runtime.verifier.field;
+package com.github.leeonky.dal.runtime.schema;
 
 import com.github.leeonky.dal.compiler.Compiler;
-import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.IllegalTypeException;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.SchemaAssertionFailure;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Partial;
+import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.dal.type.SubType;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyReader;

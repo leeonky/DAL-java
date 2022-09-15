@@ -3,7 +3,7 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
-import com.github.leeonky.dal.runtime.verifier.field.SchemaExpectation;
+import com.github.leeonky.dal.runtime.schema.SchemaExpectation;
 import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.util.BeanClass;
