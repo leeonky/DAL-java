@@ -144,3 +144,22 @@ Feature: single schema when verification failed
       is StringId
          ^
     """
+
+  Scenario: @AllowNull on field
+    Given the following json:
+    """
+      {
+        "value": null
+      }
+    """
+    Given the following schema class:
+    """
+    public class Data {
+        @AllowNull
+        public Integer value;
+    }
+    """
+    Then the following verification should pass:
+    """
+    is Data
+    """
