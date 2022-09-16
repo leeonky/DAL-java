@@ -20,20 +20,20 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 
-public class SchemaExpectation extends CompositeExpectation {
+public class SchemaVerification extends Verification {
     private final boolean partial;
     private static final Compiler compiler = new Compiler();
 
-    private SchemaExpectation(String property, BeanClass<?> type, BeanClass<Object> newType, Object expect) {
-        super(newType, property, expect == null ? newType.newInstance() : expect);
+    private SchemaVerification(String property, BeanClass<?> type, BeanClass<Object> newType, Object expect, Data actual) {
+        super(newType, property, expect == null ? newType.newInstance() : expect, actual);
         partial = type.getType().getAnnotation(Partial.class) != null;
     }
 
-    public SchemaExpectation(String property, BeanClass<?> type, Data actual, Object expect) {
-        this(property, type, (BeanClass<Object>) getPolymorphicSchemaType(type.getType(), actual), expect);
+    public SchemaVerification(String property, BeanClass<?> type, Data actual, Object expect) {
+        this(property, type, (BeanClass<Object>) getPolymorphicSchemaType(type.getType(), actual), expect, actual);
     }
 
-    public SchemaExpectation(String property, BeanClass<?> type, Data actual) {
+    public SchemaVerification(String property, BeanClass<?> type, Data actual) {
         this(property, type, actual, null);
     }
 
@@ -54,7 +54,7 @@ public class SchemaExpectation extends CompositeExpectation {
     }
 
     @Override
-    public boolean verify(Data actual, RuntimeContextBuilder.DALRuntimeContext runtimeContext) {
+    public boolean verify(RuntimeContextBuilder.DALRuntimeContext runtimeContext) {
         Set<String> actualFields = actual.getFieldNames().stream().filter(String.class::isInstance)
                 .map(Object::toString).collect(toSet());
         return (partial || noMoreUnexpectedField(actualFields))
@@ -62,7 +62,6 @@ public class SchemaExpectation extends CompositeExpectation {
                 && allPropertyValueShouldBeValid(actual, runtimeContext)
                 && schemaVerificationShouldPass(expect, actual);
     }
-
 
     private boolean allMandatoryPropertyShouldBeExist(Set<String> actualFields) {
         return type.getPropertyReaders().values().stream()
@@ -77,7 +76,7 @@ public class SchemaExpectation extends CompositeExpectation {
         return type.getPropertyReaders().values().stream().allMatch(propertyReader -> {
             Data subActual = actual.getValue(propertyReader.getName());
             return allowNullAndIsNull(propertyReader, subActual)
-                    || subExpectation(propertyReader).verify(subActual, runtimeContext);
+                    || propertyExpectation(propertyReader).verify(runtimeContext);
         });
     }
 
