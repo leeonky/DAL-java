@@ -9,12 +9,11 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyReader;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 
-import static com.github.leeonky.dal.runtime.schema.Assertion.PredicateAble.when;
+import static com.github.leeonky.dal.runtime.schema.Assertion.IfFactory.when;
+import static com.github.leeonky.dal.runtime.schema.Assertion.assertion;
 import static com.github.leeonky.dal.runtime.schema.SchemaVerification.errorLog;
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static com.github.leeonky.util.CollectionHelper.toStream;
@@ -53,8 +52,7 @@ public class Verification implements Expectation {
             public boolean isSchema() {
                 return context.isSchemaRegistered(getType().getType());
             }
-        }, property,
-                actual.getValue(pro));
+        }, property, actual.getValue(pro));
     }
 
     @SuppressWarnings("unchecked")
@@ -72,39 +70,19 @@ public class Verification implements Expectation {
 
     @Override
     public boolean verify(DALRuntimeContext runtimeContext) {
-        return new ArrayList<Assertion>() {{
-            add(when(Verification::isFormatter).then(Verification::formatterStructure, Verification::formatterContent));
-            add(when(Verification::isCollection).then(Verification::collectionStructure, Verification::collectionContent));
-            add(when(Verification::isMap).then(Verification::mapStructure, Verification::mapContent));
-            add(when(Verification::isSchemaValue).then(Verification::valueStructure, Verification::valueContent));
-            add(when(Verification::isSchema).then(Verification::schemaStructure, Verification::schemaContent));
-        }}.stream().filter(assertion -> assertion.matches(this)).findFirst()
-                .map(assertion -> assertion.verify(runtimeContext, this))
-                .orElseGet(() -> delegateAll().verify(runtimeContext));
+        return when(Expect::isFormatter).then(assertion(Verification::formatterStructure, Verification::formatterContent))
+                .when(Expect::isCollection).then(assertion(Verification::collectionStructure, Verification::collectionContent))
+                .when(Expect::isMap).then(assertion(Verification::mapStructure, Verification::mapContent))
+                .when(Expect::isSchemaValue).then(assertion(Verification::valueStructure, Verification::valueContent))
+                .when(Expect::isSchema).then(assertion(Verification::schemaStructure, Verification::schemaContent))
+                .when(Expect::isSchemaType).then(assertion(Verification::typeStructure, Verification::typeContent))
+                .orElse(assertion(Verification::structure, Verification::content))
+                .create(expect)
+                .verify(runtimeContext, this);
     }
 
     public boolean structure() {
         return expect.getExpect() == null;
-    }
-
-    public Expectation delegateAll() {
-        if (structure()) {
-            if (isSchemaType()) {
-                return typeExpectation();
-            }
-            return structureExpectation();
-        }
-        if (isSchemaType())
-            return typeContentExpectation();
-        return contentExpectation();
-    }
-
-    private boolean isSchemaType() {
-        return Type.class.isAssignableFrom(((BeanClass<?>) expect.getType()).getType());
-    }
-
-    private boolean isSchema() {
-        return expect.isSchema();
     }
 
     private boolean schemaContent(DALRuntimeContext context) {
@@ -113,10 +91,6 @@ public class Verification implements Expectation {
 
     private boolean schemaStructure(DALRuntimeContext context) {
         return new SchemaVerification(property, expect.getType(), actual).verify(context);
-    }
-
-    private boolean isSchemaValue() {
-        return Value.class.isAssignableFrom(((BeanClass<?>) expect.getType()).getType());
     }
 
     private boolean valueStructure(DALRuntimeContext runtimeContext) {
@@ -143,20 +117,12 @@ public class Verification implements Expectation {
         }
     }
 
-    private boolean isMap() {
-        return Map.class.isAssignableFrom(((BeanClass<?>) expect.getType()).getType());
-    }
-
     private boolean mapStructure(DALRuntimeContext context) {
         return actual.getFieldNames().stream().allMatch(key -> mapEntryExpectation(key, context).verify(context));
     }
 
     private boolean mapContent(DALRuntimeContext context) {
         return verifySize(actual.getFieldNames().size(), ((Map<?, Object>) expect.getExpect()).size()) && mapStructure(context);
-    }
-
-    private boolean isCollection() {
-        return expect.getType().isCollection();
     }
 
     private boolean collectionStructure(DALRuntimeContext context) {
@@ -166,10 +132,6 @@ public class Verification implements Expectation {
 
     private boolean collectionContent(DALRuntimeContext context) {
         return verifySize(actual.getListSize(), (int) toStream(expect.getExpect()).count()) && collectionStructure(context);
-    }
-
-    private boolean isFormatter() {
-        return Formatter.class.isAssignableFrom(((BeanClass<?>) expect.getType()).getType());
     }
 
     private boolean formatterContent(DALRuntimeContext runtimeContext) {
@@ -191,36 +153,31 @@ public class Verification implements Expectation {
                 formatter.getFormatterName(), actual.getInstance());
     }
 
-    private Expectation typeContentExpectation() {
-        return (runtimeContext) -> {
-            Type<Object> expect = (Type<Object>) this.expect.getExpect();
-            return (expect.verify(actual.getInstance())) ||
-                    errorLog(expect.errorMessage(property, actual.getInstance()));
-        };
+    private boolean typeContent(DALRuntimeContext runtimeContext) {
+        Type<Object> expect = (Type<Object>) this.expect.getExpect();
+        return expect.verify(actual.getInstance()) ||
+                errorLog(expect.errorMessage(property, actual.getInstance()));
     }
 
     private String inspectExpectType() {
         return format("type [%s]", expect.getType().getName());
     }
 
-    private Expectation genericType(Function<BeanClass<?>, Expectation> method) {
-        return method.apply(expect.getType().getTypeArguments(0).orElseThrow(() -> illegalStateException(property)));
-    }
-
-    private Expectation typeExpectation() {
-        return genericType(type -> (runtimeContext) -> (type.getType().isInstance(actual.getInstance())) ||
+    private boolean typeStructure(DALRuntimeContext r) {
+        BeanClass<?> type1 = expect.getType().getTypeArguments(0).orElseThrow(() -> illegalStateException(property));
+        return type1.getType().isInstance(actual.getInstance()) ||
                 errorLog(format("Expecting field `%s` to be %s, but was [%s]", property, inspectExpectType(),
-                        getClassName(actual.getInstance()))));
+                        getClassName(actual.getInstance())));
     }
 
-    private Expectation structureExpectation() {
-        return (runtimeContext) -> expect.getType().getType().isInstance(actual.getInstance())
+    private boolean structure(DALRuntimeContext runtimeContext) {
+        return expect.getType().getType().isInstance(actual.getInstance())
                 || errorLog(format("Expecting field `%s` to be %s, but was [%s]", property, inspectExpectType(),
                 getClassName(actual.getInstance())));
     }
 
-    private Expectation contentExpectation() {
-        return (runtimeContext) -> (Objects.equals(expect.getExpect(), actual.getInstance())) ||
+    private boolean content(DALRuntimeContext runtimeContext) {
+        return Objects.equals(expect.getExpect(), actual.getInstance()) ||
                 errorLog(format("Expecting field `%s` to be %s[%s], but was %s[%s]", property,
                         getClassName(expect.getExpect()), expect.getExpect(), getClassName(actual.getInstance()), actual.getInstance()));
     }
