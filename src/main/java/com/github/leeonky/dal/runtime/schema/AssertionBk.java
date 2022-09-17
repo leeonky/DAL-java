@@ -24,9 +24,8 @@ public interface Assertion {
             return () -> predicate;
         }
 
-        default Assertion then(
-                BiPredicate<Verification, DALRuntimeContext> verifyStructure,
-                BiPredicate<Verification, DALRuntimeContext> verifyContent) {
+        default Assertion then(BiPredicate<Verification, DALRuntimeContext> verifyStructure,
+                               BiPredicate<Verification, DALRuntimeContext> verifyContent) {
             return new Assertion() {
                 @Override
                 public boolean matches(Verification verification) {

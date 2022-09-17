@@ -25,7 +25,12 @@ public class SchemaVerification extends Verification {
     private static final Compiler compiler = new Compiler();
 
     private SchemaVerification(String property, BeanClass<?> type, BeanClass<Object> newType, Object expect, Data actual) {
-        super(newType, property, expect == null ? newType.newInstance() : expect, actual);
+        super(new Expect(newType, expect == null ? newType.newInstance() : expect) {
+            @Override
+            public boolean isSchema() {
+                return true;
+            }
+        }, property, actual);
         partial = type.getType().getAnnotation(Partial.class) != null;
     }
 
@@ -60,23 +65,23 @@ public class SchemaVerification extends Verification {
         return (partial || noMoreUnexpectedField(actualFields))
                 && allMandatoryPropertyShouldBeExist(actualFields)
                 && allPropertyValueShouldBeValid(actual, runtimeContext)
-                && schemaVerificationShouldPass(expect, actual);
+                && schemaVerificationShouldPass(expect.getExpect(), actual);
     }
 
     private boolean allMandatoryPropertyShouldBeExist(Set<String> actualFields) {
-        return type.getPropertyReaders().values().stream()
+        return expect.getType().getPropertyReaders().values().stream()
                 .filter(field -> field.getAnnotation(AllowNull.class) == null)
                 .allMatch(field -> actualFields.contains(field.getName())
                         || errorLog("Expecting field `%s` to be in type %s[%s], but does not exist", field.getName(),
-                        type.getSimpleName(), type.getName()));
+                        expect.getType().getSimpleName(), expect.getType().getName()));
     }
 
 
     private boolean allPropertyValueShouldBeValid(Data actual, RuntimeContextBuilder.DALRuntimeContext runtimeContext) {
-        return type.getPropertyReaders().values().stream().allMatch(propertyReader -> {
+        return expect.getType().getPropertyReaders().values().stream().allMatch(propertyReader -> {
             Data subActual = actual.getValue(propertyReader.getName());
             return allowNullAndIsNull(propertyReader, subActual)
-                    || propertyExpectation(propertyReader).verify(runtimeContext);
+                    || propertyExpectation(propertyReader, runtimeContext).verify(runtimeContext);
         });
     }
 
@@ -86,11 +91,11 @@ public class SchemaVerification extends Verification {
 
     private boolean noMoreUnexpectedField(Set<String> actualFields) {
         Set<String> expectFields = new LinkedHashSet<String>(actualFields) {{
-            removeAll(type.getPropertyReaders().keySet());
+            removeAll(expect.getType().getPropertyReaders().keySet());
         }};
         return expectFields.isEmpty() || errorLog("Unexpected field %s for schema %s[%s]",
                 expectFields.stream().collect(Collectors.joining("`, `", "`", "`")),
-                type.getSimpleName(), type.getName());
+                expect.getType().getSimpleName(), expect.getType().getName());
     }
 
     private boolean schemaVerificationShouldPass(Object schema, Data actual) {
