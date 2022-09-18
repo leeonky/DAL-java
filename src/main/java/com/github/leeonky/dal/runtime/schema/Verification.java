@@ -5,21 +5,28 @@ import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.IllegalFieldException;
+import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.SchemaAssertionFailure;
+import com.github.leeonky.dal.type.AllowNull;
+import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyReader;
 
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.runtime.schema.Assertion.IfFactory.when;
 import static com.github.leeonky.dal.runtime.schema.Assertion.assertion;
-import static com.github.leeonky.dal.runtime.schema.SchemaVerification.errorLog;
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static com.github.leeonky.util.CollectionHelper.toStream;
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
+import static java.util.stream.Collectors.toSet;
 import static java.util.stream.IntStream.range;
 
 public class Verification implements Expectation {
@@ -37,6 +44,10 @@ public class Verification implements Expectation {
         return new IllegalStateException(format("%s should specify generic type", subPrefix));
     }
 
+    public static boolean errorLog(String format, Object... params) {
+        throw new IllegalTypeException(format(format, params));
+    }
+
     public Verification collectionElementExpectation(PropertyReader<Object> propertyReader, DALRuntimeContext context) {
         return subExpectation(propertyReader, property + "[" + propertyReader.getName() + "]", parseInt(propertyReader.getName()), context);
     }
@@ -46,13 +57,7 @@ public class Verification implements Expectation {
     }
 
     private Verification subExpectation(PropertyReader<Object> propertyReader, String property, Object pro, DALRuntimeContext context) {
-        return new Verification(new Expect((BeanClass<Object>) propertyReader.getType(),
-                structure() ? null : propertyReader.getValue(expect.getExpect())) {
-            @Override
-            public boolean isSchema() {
-                return context.isSchemaRegistered(getType().getType());
-            }
-        }, property, actual.getValue(pro));
+        return new Verification(expect.subExpect(propertyReader, context, actual.getValue(pro)), property, actual.getValue(pro));
     }
 
     @SuppressWarnings("unchecked")
@@ -74,23 +79,15 @@ public class Verification implements Expectation {
                 .when(Expect::isCollection).then(assertion(Verification::collectionStructure, Verification::collectionContent))
                 .when(Expect::isMap).then(assertion(Verification::mapStructure, Verification::mapContent))
                 .when(Expect::isSchemaValue).then(assertion(Verification::valueStructure, Verification::valueContent))
-                .when(Expect::isSchema).then(assertion(Verification::schemaStructure, Verification::schemaContent))
+                .when(Expect::isSchema).then(assertion(Verification::schema))
                 .when(Expect::isSchemaType).then(assertion(Verification::typeStructure, Verification::typeContent))
                 .orElse(assertion(Verification::structure, Verification::content))
-                .create(expect)
+                .createBy(expect)
                 .verify(runtimeContext, this);
     }
 
     public boolean structure() {
         return expect.getExpect() == null;
-    }
-
-    private boolean schemaContent(DALRuntimeContext context) {
-        return new SchemaVerification(property, expect.getType(), actual, expect.getExpect()).verify(context);
-    }
-
-    private boolean schemaStructure(DALRuntimeContext context) {
-        return new SchemaVerification(property, expect.getType(), actual).verify(context);
     }
 
     private boolean valueStructure(DALRuntimeContext runtimeContext) {
@@ -180,5 +177,54 @@ public class Verification implements Expectation {
         return Objects.equals(expect.getExpect(), actual.getInstance()) ||
                 errorLog(format("Expecting field `%s` to be %s[%s], but was %s[%s]", property,
                         getClassName(expect.getExpect()), expect.getExpect(), getClassName(actual.getInstance()), actual.getInstance()));
+    }
+
+    protected boolean schema(DALRuntimeContext runtimeContext) {
+        Set<String> actualFields = actual.getFieldNames().stream().filter(String.class::isInstance)
+                .map(Object::toString).collect(toSet());
+        return (expect.isPartial() || noMoreUnexpectedField(actualFields))
+                && allMandatoryPropertyShouldBeExist(actualFields)
+                && allPropertyValueShouldBeValid(actual, runtimeContext)
+                && schemaVerificationShouldPass(expect.getExpect(), actual);
+    }
+
+    private boolean allMandatoryPropertyShouldBeExist(Set<String> actualFields) {
+        return expect.getType().getPropertyReaders().values().stream()
+                .filter(field -> field.getAnnotation(AllowNull.class) == null)
+                .allMatch(field -> actualFields.contains(field.getName())
+                        || errorLog("Expecting field `%s` to be in type %s[%s], but does not exist", field.getName(),
+                        expect.getType().getSimpleName(), expect.getType().getName()));
+    }
+
+    private boolean allPropertyValueShouldBeValid(Data actual, DALRuntimeContext runtimeContext) {
+        return expect.getType().getPropertyReaders().values().stream().allMatch(propertyReader -> {
+            Data subActual = actual.getValue(propertyReader.getName());
+            return allowNullAndIsNull(propertyReader, subActual)
+                    || propertyExpectation(propertyReader, runtimeContext).verify(runtimeContext);
+        });
+    }
+
+    private boolean allowNullAndIsNull(PropertyReader<?> propertyReader, Data propertyValueWrapper) {
+        return propertyReader.getAnnotation(AllowNull.class) != null && propertyValueWrapper.isNull();
+    }
+
+    private boolean noMoreUnexpectedField(Set<String> actualFields) {
+        Set<String> expectFields = new LinkedHashSet<String>(actualFields) {{
+            removeAll(expect.getType().getPropertyReaders().keySet());
+        }};
+        return expectFields.isEmpty() || errorLog("Unexpected field %s for schema %s[%s]",
+                expectFields.stream().collect(Collectors.joining("`, `", "`", "`")),
+                expect.getType().getSimpleName(), expect.getType().getName());
+    }
+
+    private boolean schemaVerificationShouldPass(Object schema, Data actual) {
+        if (schema instanceof Schema) {
+            try {
+                ((Schema) schema).verify(actual);
+            } catch (SchemaAssertionFailure schemaAssertionFailure) {
+                errorLog(schemaAssertionFailure.getMessage());
+            }
+        }
+        return true;
     }
 }

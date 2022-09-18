@@ -9,9 +9,13 @@ import java.util.function.Predicate;
 import static java.util.Optional.of;
 
 public interface Assertion {
-    boolean verifyStructure(Verification verification, DALRuntimeContext context);
+    default boolean verifyStructure(Verification verification, DALRuntimeContext context) {
+        return true;
+    }
 
-    boolean verifyContent(Verification verification, DALRuntimeContext context);
+    default boolean verifyContent(Verification verification, DALRuntimeContext context) {
+        return true;
+    }
 
     default boolean verify(DALRuntimeContext runtimeContext, Verification verification) {
         return verification.structure() ? verifyStructure(verification, runtimeContext)
@@ -29,6 +33,15 @@ public interface Assertion {
             @Override
             public boolean verifyContent(Verification verification, DALRuntimeContext context) {
                 return verifyContent.test(verification, context);
+            }
+        };
+    }
+
+    static Assertion assertion(BiPredicate<Verification, DALRuntimeContext> verify) {
+        return new Assertion() {
+            @Override
+            public boolean verify(DALRuntimeContext runtimeContext, Verification verification) {
+                return verify.test(verification, runtimeContext);
             }
         };
     }
@@ -81,6 +94,6 @@ public interface Assertion {
     }
 
     interface Factory<CONDITION, VALUE> {
-        VALUE create(CONDITION condition);
+        VALUE createBy(CONDITION condition);
     }
 }
