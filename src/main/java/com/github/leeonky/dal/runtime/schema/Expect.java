@@ -15,6 +15,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.BeanClass.newInstance;
@@ -137,5 +138,9 @@ public class Expect {
 
     String inspectExpectType() {
         return format("type [%s]", getType().getName());
+    }
+
+    public boolean verifyValue(BiPredicate<Value<Object>, BeanClass<?>> predicate) {
+        return predicate.test((Value<Object>) getExpect(), getGenericType(0).orElse(null));
     }
 }

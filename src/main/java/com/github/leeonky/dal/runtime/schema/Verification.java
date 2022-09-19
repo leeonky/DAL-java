@@ -2,7 +2,6 @@ package com.github.leeonky.dal.runtime.schema;
 
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
-import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.runtime.IllegalFieldException;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -71,30 +70,14 @@ public class Verification {
     }
 
     private boolean valueStructure(DALRuntimeContext runtimeContext, Actual actual) {
-        BeanClass<?> type = expect.getGenericType(0).orElseThrow(actual.invalidGenericType());
-        return convertAble(actual, type);
-    }
-
-    private boolean convertAble(Actual actual, BeanClass<?> type) {
-        try {
-            if (actual.isNull())
-                return errorLog("Can not convert null field `%s` to %s, " +
-                        "use @AllowNull to verify nullable field", actual.getProperty(), expect.inspectExpectType());
-            actual.getActual().convert(type.getType());
-            return true;
-        } catch (Exception ignore) {
-            return errorLog("Can not convert field `%s` (%s: %s) to %s", actual.getProperty(),
-                    getClassName(actual.getActual().getInstance()), actual.getActual().getInstance(), expect.inspectExpectType());
-        }
+        return actual.convertAble(expect.getGenericType(0).orElseThrow(actual::invalidFieldGenericType), expect.inspectExpectType());
     }
 
     private boolean valueContent(DALRuntimeContext runtimeContext, Actual actual) {
         try {
-            Value<Object> expect = (Value<Object>) this.expect.getExpect();
-            return expect.verify(expect.convertAs(actual.getActual(), this.expect.getGenericType(0).orElse(null)))
-                    || errorLog(expect.errorMessage(actual.getProperty(), actual.getActual().getInstance()));
+            return expect.verifyValue(actual::verifyValue);
         } catch (IllegalFieldException ignore) {
-            throw new IllegalStateException(format("%s should specify generic type", actual.getProperty()));
+            throw actual.invalidFieldGenericType();
         }
     }
 
@@ -142,7 +125,7 @@ public class Verification {
     }
 
     private boolean typeStructure(DALRuntimeContext r, Actual actual) {
-        BeanClass<?> type = expect.getGenericType(0).orElseThrow(actual.invalidGenericType());
+        BeanClass<?> type = expect.getGenericType(0).orElseThrow(actual::invalidFieldGenericType);
         return type.getType().isInstance(actual.getActual().getInstance()) ||
                 errorLog(format("Expecting field `%s` to be %s, but was [%s]", actual.getProperty(), expect.inspectExpectType(),
                         getClassName(actual.getActual().getInstance())));

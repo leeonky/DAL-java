@@ -1,12 +1,14 @@
 package com.github.leeonky.dal.runtime.schema;
 
 import com.github.leeonky.dal.compiler.Compiler;
+import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.type.SubType;
+import com.github.leeonky.util.BeanClass;
 
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
@@ -56,7 +58,25 @@ public class Actual {
         }).orElse((Class<Object>) schemaType);
     }
 
-    Supplier<IllegalStateException> invalidGenericType() {
-        return () -> new IllegalStateException(format("%s should specify generic type", getProperty()));
+    public IllegalStateException invalidFieldGenericType() {
+        return new IllegalStateException(format("%s should specify generic type", property));
+    }
+
+    public boolean convertAble(BeanClass<?> type, String inspect) {
+        try {
+            if (isNull())
+                return Verification.errorLog("Can not convert null field `%s` to %s, " +
+                        "use @AllowNull to verify nullable field", property, inspect);
+            actual.convert(type.getType());
+            return true;
+        } catch (Exception ignore) {
+            return Verification.errorLog("Can not convert field `%s` (%s: %s) to %s", property,
+                    getClassName(actual.getInstance()), actual.getInstance(), inspect);
+        }
+    }
+
+    public boolean verifyValue(Value<Object> value, BeanClass<?> type) {
+        return value.verify(value.convertAs(actual, type))
+                || Verification.errorLog(value.errorMessage(property, actual.getInstance()));
     }
 }
