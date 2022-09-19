@@ -3,9 +3,6 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
-import com.github.leeonky.dal.runtime.schema.Actual;
-import com.github.leeonky.dal.runtime.schema.Expect;
-import com.github.leeonky.dal.runtime.schema.Verification;
 import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.util.BeanClass;
@@ -25,7 +22,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.ListAccessor.changeFirstIndex;
+import static com.github.leeonky.dal.runtime.schema.Actual.actual;
 import static com.github.leeonky.dal.runtime.schema.Expect.schemaExpect;
+import static com.github.leeonky.dal.runtime.schema.Verification.expect;
+import static com.github.leeonky.util.BeanClass.create;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
@@ -134,14 +134,9 @@ public class RuntimeContextBuilder {
     }
 
     public RuntimeContextBuilder registerSchema(String name, Class<?> schema) {
-        schemas.put(name, BeanClass.create(schema));
+        schemas.put(name, create(schema));
         return registerSchema(name, (data, context) ->
-                {
-                    Expect expect = schemaExpect(BeanClass.create(schema), null, data);
-                    Actual actual = new Actual("", data);
-                    return new Verification(expect).verify(context, actual);
-                }
-        );
+                expect(schemaExpect(create(schema).getType(), null, actual(data))).verify(context, actual(data)));
     }
 
     public RuntimeContextBuilder registerSchema(String name, BiFunction<Data, DALRuntimeContext, Boolean> predicate) {
@@ -316,7 +311,7 @@ public class RuntimeContextBuilder {
         public Data wrap(Object instance, String schema, boolean isList) {
             BeanClass<?> schemaBeanClass = schemas.get(schema);
             if (isList)
-                schemaBeanClass = BeanClass.create(Array.newInstance(schemaBeanClass.getType(), 0).getClass());
+                schemaBeanClass = create(Array.newInstance(schemaBeanClass.getType(), 0).getClass());
             return new Data(instance, this, SchemaType.create(schemaBeanClass));
         }
 

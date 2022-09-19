@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.runtime.schema;
 
-import com.github.leeonky.dal.compiler.Compiler;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
@@ -9,17 +8,18 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.SchemaAssertionFailure;
 import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.dal.type.Schema;
-import com.github.leeonky.dal.type.SubType;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyReader;
 
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import static com.github.leeonky.util.BeanClass.newInstance;
 import static java.lang.String.format;
+import static java.lang.String.valueOf;
 
 public class Expect {
     private final BeanClass<Object> type;
@@ -30,10 +30,9 @@ public class Expect {
         this.expect = expect;
     }
 
-    public static Expect schemaExpect(BeanClass<?> type, Object expect, Data actual) {
-        BeanClass<?> polymorphicSchemaType = getPolymorphicSchemaType(type.getType(), actual);
-        return new Expect((BeanClass<Object>) polymorphicSchemaType,
-                expect == null ? polymorphicSchemaType.newInstance() : expect) {
+    public static Expect schemaExpect(Class<?> type, Object expect, Actual subActual) {
+        Class<Object> realSchemaType = subActual.polymorphicSchemaType(type);
+        return new Expect(BeanClass.create(realSchemaType), expect == null ? newInstance(realSchemaType) : expect) {
             @Override
             public boolean isSchema() {
                 return true;
@@ -41,23 +40,9 @@ public class Expect {
 
             @Override
             public boolean isPartial() {
-                return type.getType().getAnnotation(Partial.class) != null;
+                return type.getAnnotation(Partial.class) != null;
             }
         };
-    }
-
-    private static final Compiler compiler = new Compiler();
-
-    public static BeanClass<?> getPolymorphicSchemaType(Class<?> schemaType, Data actual) {
-        Class<?> type = schemaType;
-        SubType subType = schemaType.getAnnotation(SubType.class);
-        if (subType != null) {
-            Object subTypeProperty = actual.getValue(compiler.toChainNodes(subType.property())).getInstance();
-            type = Stream.of(subType.types()).filter(t -> t.value().equals(subTypeProperty)).map(SubType.Type::type)
-                    .findFirst().orElseThrow(() -> new IllegalStateException(
-                            format("Cannot guess sub type through property type value[%s]", subTypeProperty)));
-        }
-        return BeanClass.create(type);
     }
 
     public BeanClass<Object> getType() {
@@ -97,20 +82,19 @@ public class Expect {
     }
 
     @SuppressWarnings("unchecked")
-    public Expect subExpect(PropertyReader<Object> propertyReader, DALRuntimeContext context, Data actual) {
+    public Expect sub(PropertyReader<Object> propertyReader, DALRuntimeContext context, Actual actual) {
         return create((BeanClass<Object>) propertyReader.getType(),
                 expect == null ? null : propertyReader.getValue(expect), context, actual);
     }
 
-    private static Expect create(BeanClass<Object> type, Object expect, DALRuntimeContext context, Data actual) {
-        return context.isSchemaRegistered(type.getType()) ? schemaExpect(type, expect, actual) : new Expect(type, expect);
+    private static Expect create(BeanClass<Object> type, Object expect, DALRuntimeContext context, Actual subActual) {
+        return context.isSchemaRegistered(type.getType()) ? schemaExpect(type.getType(), expect, subActual) : new Expect(type, expect);
     }
 
     @SuppressWarnings("unchecked")
-    Expect subExpect(Object key, DALRuntimeContext context, Expect expect, String property, Data subActual) {
-        return create((BeanClass<Object>) expect.getType().getTypeArguments(1).orElseThrow(() ->
-                        Verification.illegalStateException(property)),
-                expect.getExpect() == null ? null : ((Map<?, Object>) expect.getExpect()).get(key), context, subActual);
+    Expect sub(Object key, DALRuntimeContext context, Expect expect, String property, Actual subActual) {
+        return create((BeanClass<Object>) expect.getType().getTypeArguments(1).orElseThrow(() -> new IllegalStateException(format("%s should specify generic type", property))),
+                expect.expect == null ? null : ((Map<?, Object>) expect.expect).get(key), context, subActual);
     }
 
     public boolean verifySchemaInstance(Data actual) {
@@ -141,5 +125,17 @@ public class Expect {
             return (Formatter<Object, Object>) type.getTypeArguments(0).map(t -> type.newInstance((Object) t.getType()))
                     .orElseGet(type::newInstance);
         return (Formatter<Object, Object>) expect;
+    }
+
+    Expect sub(DALRuntimeContext context, int index, Actual subActual) {
+        return sub(type.getPropertyReader(valueOf(index)), context, subActual);
+    }
+
+    Optional<BeanClass<?>> getGenericType(int typePosition) {
+        return getType().getTypeArguments(typePosition);
+    }
+
+    String inspectExpectType() {
+        return format("type [%s]", getType().getName());
     }
 }

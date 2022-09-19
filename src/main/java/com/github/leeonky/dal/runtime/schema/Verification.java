@@ -3,13 +3,11 @@ package com.github.leeonky.dal.runtime.schema;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
-import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.IllegalFieldException;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.PropertyReader;
 
 import java.util.Map;
 import java.util.Objects;
@@ -17,21 +15,19 @@ import java.util.Set;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static com.github.leeonky.util.CollectionHelper.toStream;
-import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
-import static java.lang.String.valueOf;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.IntStream.range;
 
 public class Verification {
     final Expect expect;
 
-    public Verification(Expect expect) {
+    private Verification(Expect expect) {
         this.expect = expect;
     }
 
-    static IllegalStateException illegalStateException(String subPrefix) {
-        return new IllegalStateException(format("%s should specify generic type", subPrefix));
+    public static Verification expect(Expect expect) {
+        return new Verification(expect);
     }
 
     public static boolean errorLog(String format, Object... params) {
@@ -75,35 +71,39 @@ public class Verification {
     }
 
     private boolean valueStructure(DALRuntimeContext runtimeContext, Actual actual) {
-        BeanClass<?> type = expect.getType().getTypeArguments(0).orElseThrow(() -> illegalStateException(actual.getProperty()));
+        BeanClass<?> type = expect.getGenericType(0).orElseThrow(actual.invalidGenericType());
+        return convertAble(actual, type);
+    }
+
+    private boolean convertAble(Actual actual, BeanClass<?> type) {
         try {
-            if (actual.getActual().isNull())
+            if (actual.isNull())
                 return errorLog("Can not convert null field `%s` to %s, " +
-                        "use @AllowNull to verify nullable field", actual.getProperty(), inspectExpectType());
+                        "use @AllowNull to verify nullable field", actual.getProperty(), expect.inspectExpectType());
             actual.getActual().convert(type.getType());
             return true;
         } catch (Exception ignore) {
             return errorLog("Can not convert field `%s` (%s: %s) to %s", actual.getProperty(),
-                    getClassName(actual.getActual().getInstance()), actual.getActual().getInstance(), inspectExpectType());
+                    getClassName(actual.getActual().getInstance()), actual.getActual().getInstance(), expect.inspectExpectType());
         }
     }
 
     private boolean valueContent(DALRuntimeContext runtimeContext, Actual actual) {
         try {
             Value<Object> expect = (Value<Object>) this.expect.getExpect();
-            return expect.verify(expect.convertAs(actual.getActual(), this.expect.getType().getTypeArguments(0).orElse(null)))
+            return expect.verify(expect.convertAs(actual.getActual(), this.expect.getGenericType(0).orElse(null)))
                     || errorLog(expect.errorMessage(actual.getProperty(), actual.getActual().getInstance()));
         } catch (IllegalFieldException ignore) {
-            throw illegalStateException(actual.getProperty());
+            throw new IllegalStateException(format("%s should specify generic type", actual.getProperty()));
         }
     }
 
     private boolean mapStructure(DALRuntimeContext context, Actual actual) {
-        return actual.getActual().getFieldNames().stream().allMatch(key -> {
-            Actual subActual = new Actual(actual.getProperty() + "." + key, actual.getActual().getValue(key));
-            Verification verification = new Verification(
-                    expect.subExpect(key, context, expect, actual.getProperty(), actual.getActual().getValue(key)));
-            return verification.verify(context, subActual);
+        return actual.getActual().getFieldNames().stream().allMatch(key ->
+        {
+            Actual subActual = actual.sub(key);
+            return expect(expect.sub(key, context, expect, actual.getProperty(), subActual))
+                    .verify(context, subActual);
         });
     }
 
@@ -114,11 +114,8 @@ public class Verification {
     private boolean collectionStructure(DALRuntimeContext context, Actual actual) {
         return range(0, actual.getActual().getListSize()).allMatch(index ->
         {
-            PropertyReader<Object> propertyReader = expect.getType().getPropertyReader(valueOf(index));
-            Object property = parseInt(propertyReader.getName());
-            Actual actual1 = new Actual(actual.getProperty() + "[" + propertyReader.getName() + "]", actual.getActual().getValue(property));
-            Verification verification = new Verification(expect.subExpect(propertyReader, context, actual.getActual().getValue(property)));
-            return verification.verify(context, actual1);
+            Actual subActual = actual.sub(index);
+            return expect(expect.sub(context, index, subActual)).verify(context, subActual);
         });
     }
 
@@ -144,20 +141,16 @@ public class Verification {
                 errorLog(expect.errorMessage(actual.getProperty(), actual.getActual().getInstance()));
     }
 
-    private String inspectExpectType() {
-        return format("type [%s]", expect.getType().getName());
-    }
-
     private boolean typeStructure(DALRuntimeContext r, Actual actual) {
-        BeanClass<?> type = expect.getType().getTypeArguments(0).orElseThrow(() -> illegalStateException(actual.getProperty()));
+        BeanClass<?> type = expect.getGenericType(0).orElseThrow(actual.invalidGenericType());
         return type.getType().isInstance(actual.getActual().getInstance()) ||
-                errorLog(format("Expecting field `%s` to be %s, but was [%s]", actual.getProperty(), inspectExpectType(),
+                errorLog(format("Expecting field `%s` to be %s, but was [%s]", actual.getProperty(), expect.inspectExpectType(),
                         getClassName(actual.getActual().getInstance())));
     }
 
     private boolean structure(DALRuntimeContext runtimeContext, Actual actual) {
         return expect.getType().getType().isInstance(actual.getActual().getInstance())
-                || errorLog(format("Expecting field `%s` to be %s, but was [%s]", actual.getProperty(), inspectExpectType(),
+                || errorLog(format("Expecting field `%s` to be %s, but was [%s]", actual.getProperty(), expect.inspectExpectType(),
                 getClassName(actual.getActual().getInstance())));
     }
 
@@ -186,16 +179,9 @@ public class Verification {
 
     private boolean allPropertyValueShouldBeValid(DALRuntimeContext runtimeContext, Actual actual) {
         return expect.getType().getPropertyReaders().values().stream().allMatch(propertyReader -> {
-            Data subActual = actual.getActual().getValue(propertyReader.getName());
-            if (allowNullAndIsNull(propertyReader, subActual)) return true;
-            Object property = propertyReader.getName();
-            Actual actual1 = new Actual(actual.getProperty() + "." + propertyReader.getName(), actual.getActual().getValue(property));
-            Verification verification = new Verification(expect.subExpect(propertyReader, runtimeContext, actual.getActual().getValue(property)));
-            return verification.verify(runtimeContext, actual1);
+            Actual subActual = actual.sub(propertyReader.getName());
+            return propertyReader.getAnnotation(AllowNull.class) != null && subActual.isNull()
+                    || expect(expect.sub(propertyReader, runtimeContext, subActual)).verify(runtimeContext, subActual);
         });
-    }
-
-    private boolean allowNullAndIsNull(PropertyReader<?> propertyReader, Data propertyValueWrapper) {
-        return propertyReader.getAnnotation(AllowNull.class) != null && propertyValueWrapper.isNull();
     }
 }
