@@ -134,4 +134,12 @@ public class Expect {
                 expectFields.stream().collect(Collectors.joining("`, `", "`", "`")),
                 getType().getSimpleName(), getType().getName());
     }
+
+    @SuppressWarnings("unchecked")
+    public Formatter<Object, Object> extractFormatter() {
+        if (expect == null)
+            return (Formatter<Object, Object>) type.getTypeArguments(0).map(t -> type.newInstance((Object) t.getType()))
+                    .orElseGet(type::newInstance);
+        return (Formatter<Object, Object>) expect;
+    }
 }

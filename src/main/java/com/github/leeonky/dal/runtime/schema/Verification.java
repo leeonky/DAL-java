@@ -15,8 +15,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static com.github.leeonky.dal.runtime.schema.Assertion.IfFactory.when;
-import static com.github.leeonky.dal.runtime.schema.Assertion.assertion;
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static com.github.leeonky.util.CollectionHelper.toStream;
 import static java.lang.Integer.parseInt;
@@ -26,21 +24,10 @@ import static java.util.stream.Collectors.toSet;
 import static java.util.stream.IntStream.range;
 
 public class Verification {
-    private static final Assertion.Factory<Expect, Assertion> SCHEMA_ASSERTIONS = when(Expect::isFormatter).then(assertion(Verification::formatterStructure, Verification::formatterContent))
-            .when(Expect::isCollection).then(assertion(Verification::collectionStructure, Verification::collectionContent))
-            .when(Expect::isMap).then(assertion(Verification::mapStructure, Verification::mapContent))
-            .when(Expect::isSchemaValue).then(assertion(Verification::valueStructure, Verification::valueContent))
-            .when(Expect::isSchema).then(assertion(Verification::schema))
-            .when(Expect::isSchemaType).then(assertion(Verification::typeStructure, Verification::typeContent))
-            .orElse(assertion(Verification::structure, Verification::content));
     final Expect expect;
-    final String property;
-    final Data actual;
 
-    public Verification(Expect expect, String property, Data actual) {
+    public Verification(Expect expect) {
         this.expect = expect;
-        this.property = property;
-        this.actual = actual;
     }
 
     static IllegalStateException illegalStateException(String subPrefix) {
@@ -51,136 +38,142 @@ public class Verification {
         throw new IllegalTypeException(format(format, params));
     }
 
-    public Verification collectionElementExpectation(PropertyReader<Object> propertyReader, DALRuntimeContext context) {
-        return subExpectation(propertyReader, property + "[" + propertyReader.getName() + "]", parseInt(propertyReader.getName()), context);
-    }
-
-    public Verification propertyExpectation(PropertyReader<Object> propertyReader, DALRuntimeContext context) {
-        return subExpectation(propertyReader, property + "." + propertyReader.getName(), propertyReader.getName(), context);
-    }
-
-    //    TODO refactor ********************
-    private Verification subExpectation(PropertyReader<Object> propertyReader, String propertyChain, Object property, DALRuntimeContext context) {
-        return new Verification(expect.subExpect(propertyReader, context, actual.getValue(property)), propertyChain, actual.getValue(property));
-    }
-
-    private Verification mapEntryExpectation(Object key, DALRuntimeContext context) {
-        return new Verification(
-                expect.subExpect(key, context, expect, property, actual.getValue(key)), property + "." + key, actual.getValue(key));
-    }
-
-    public boolean verify(DALRuntimeContext runtimeContext, Expect expect) {
-        return SCHEMA_ASSERTIONS
-                .createBy(expect)
-                .verify(runtimeContext, this);
+    public boolean verify(DALRuntimeContext runtimeContext, Actual actual) {
+        if (expect.isSchema()) {
+            return schema(runtimeContext, actual);
+        }
+        if (expect.isFormatter()) {
+            return formatter(runtimeContext, actual);
+        }
+        if (expect.isSchemaValue()) {
+            if (structure())
+                return valueStructure(runtimeContext, actual);
+            return valueContent(runtimeContext, actual);
+        }
+        if (expect.isMap()) {
+            if (structure())
+                return mapStructure(runtimeContext, actual);
+            return mapContent(runtimeContext, actual);
+        }
+        if (expect.isCollection()) {
+            if (structure())
+                return collectionStructure(runtimeContext, actual);
+            return collectionContent(runtimeContext, actual);
+        }
+        if (expect.isSchemaType()) {
+            if (structure())
+                return typeStructure(runtimeContext, actual);
+            return typeContent(runtimeContext, actual);
+        }
+        if (structure())
+            return structure(runtimeContext, actual);
+        return content(runtimeContext, actual);
     }
 
     public boolean structure() {
         return expect.getExpect() == null;
     }
 
-    private boolean valueStructure(DALRuntimeContext runtimeContext) {
-        BeanClass<?> type = expect.getType().getTypeArguments(0).orElseThrow(() -> illegalStateException(property));
+    private boolean valueStructure(DALRuntimeContext runtimeContext, Actual actual) {
+        BeanClass<?> type = expect.getType().getTypeArguments(0).orElseThrow(() -> illegalStateException(actual.getProperty()));
         try {
-            if (actual.isNull())
+            if (actual.getActual().isNull())
                 return errorLog("Can not convert null field `%s` to %s, " +
-                        "use @AllowNull to verify nullable field", property, inspectExpectType());
-            actual.convert(type.getType());
+                        "use @AllowNull to verify nullable field", actual.getProperty(), inspectExpectType());
+            actual.getActual().convert(type.getType());
             return true;
         } catch (Exception ignore) {
-            return errorLog("Can not convert field `%s` (%s: %s) to %s", property,
-                    getClassName(actual.getInstance()), actual.getInstance(), inspectExpectType());
+            return errorLog("Can not convert field `%s` (%s: %s) to %s", actual.getProperty(),
+                    getClassName(actual.getActual().getInstance()), actual.getActual().getInstance(), inspectExpectType());
         }
     }
 
-    private boolean valueContent(DALRuntimeContext runtimeContext) {
+    private boolean valueContent(DALRuntimeContext runtimeContext, Actual actual) {
         try {
             Value<Object> expect = (Value<Object>) this.expect.getExpect();
-            return expect.verify(expect.convertAs(actual, this.expect.getType().getTypeArguments(0).orElse(null)))
-                    || errorLog(expect.errorMessage(property, actual.getInstance()));
+            return expect.verify(expect.convertAs(actual.getActual(), this.expect.getType().getTypeArguments(0).orElse(null)))
+                    || errorLog(expect.errorMessage(actual.getProperty(), actual.getActual().getInstance()));
         } catch (IllegalFieldException ignore) {
-            throw illegalStateException(property);
+            throw illegalStateException(actual.getProperty());
         }
     }
 
-    private boolean mapStructure(DALRuntimeContext context) {
-        return actual.getFieldNames().stream().allMatch(key -> {
-            Verification verification = mapEntryExpectation(key, context);
-            return verification.verify(context, verification.expect);
+    private boolean mapStructure(DALRuntimeContext context, Actual actual) {
+        return actual.getActual().getFieldNames().stream().allMatch(key -> {
+            Actual subActual = new Actual(actual.getProperty() + "." + key, actual.getActual().getValue(key));
+            Verification verification = new Verification(
+                    expect.subExpect(key, context, expect, actual.getProperty(), actual.getActual().getValue(key)));
+            return verification.verify(context, subActual);
         });
     }
 
-    private boolean mapContent(DALRuntimeContext context) {
-        return verifySize(actual.getFieldNames().size(), ((Map<?, Object>) expect.getExpect()).size()) && mapStructure(context);
+    private boolean mapContent(DALRuntimeContext context, Actual actual) {
+        return verifySize(actual.getActual().getFieldNames().size(), ((Map<?, Object>) expect.getExpect()).size(), actual) && mapStructure(context, actual);
     }
 
-    private boolean collectionStructure(DALRuntimeContext context) {
-        return range(0, actual.getListSize()).allMatch(index ->
+    private boolean collectionStructure(DALRuntimeContext context, Actual actual) {
+        return range(0, actual.getActual().getListSize()).allMatch(index ->
         {
-            Verification verification = collectionElementExpectation(expect.getType().getPropertyReader(valueOf(index)), context);
-            return verification.verify(context, verification.expect);
+            PropertyReader<Object> propertyReader = expect.getType().getPropertyReader(valueOf(index));
+            Object property = parseInt(propertyReader.getName());
+            Actual actual1 = new Actual(actual.getProperty() + "[" + propertyReader.getName() + "]", actual.getActual().getValue(property));
+            Verification verification = new Verification(expect.subExpect(propertyReader, context, actual.getActual().getValue(property)));
+            return verification.verify(context, actual1);
         });
     }
 
-    private boolean collectionContent(DALRuntimeContext context) {
-        return verifySize(actual.getListSize(), (int) toStream(expect.getExpect()).count()) && collectionStructure(context);
+    private boolean collectionContent(DALRuntimeContext context, Actual actual) {
+        return verifySize(actual.getActual().getListSize(), (int) toStream(expect.getExpect()).count(), actual) && collectionStructure(context, actual);
     }
 
-    private boolean formatterContent(DALRuntimeContext runtimeContext) {
-        return verifyFormatter((Formatter<Object, Object>) expect.getExpect());
+    private boolean formatter(DALRuntimeContext runtimeContext, Actual actual) {
+        Formatter<Object, Object> formatter = expect.extractFormatter();
+        return formatter.isValid(actual.getActual().getInstance())
+                || errorLog("Expecting field `%s` to be in `%s`, but was [%s]", actual.getProperty(),
+                formatter.getFormatterName(), actual.getActual().getInstance());
     }
 
-    private boolean formatterStructure(DALRuntimeContext runtimeContext) {
-        return verifyFormatter(Formatter.createFormatter(expect.getType()));
-    }
-
-    private boolean verifySize(int actualSize, int expectSize) {
+    private boolean verifySize(int actualSize, int expectSize, Actual actual) {
         return actualSize == expectSize || errorLog("Expecting field `%s` to be size [%d], but was size [%d]",
-                property, expectSize, actualSize);
+                actual.getProperty(), expectSize, actualSize);
     }
 
-    private boolean verifyFormatter(Formatter<Object, Object> formatter) {
-        return formatter.isValid(actual.getInstance())
-                || errorLog("Expecting field `%s` to be in `%s`, but was [%s]", property,
-                formatter.getFormatterName(), actual.getInstance());
-    }
-
-    private boolean typeContent(DALRuntimeContext runtimeContext) {
+    private boolean typeContent(DALRuntimeContext runtimeContext, Actual actual) {
         Type<Object> expect = (Type<Object>) this.expect.getExpect();
-        return expect.verify(actual.getInstance()) ||
-                errorLog(expect.errorMessage(property, actual.getInstance()));
+        return expect.verify(actual.getActual().getInstance()) ||
+                errorLog(expect.errorMessage(actual.getProperty(), actual.getActual().getInstance()));
     }
 
     private String inspectExpectType() {
         return format("type [%s]", expect.getType().getName());
     }
 
-    private boolean typeStructure(DALRuntimeContext r) {
-        BeanClass<?> type1 = expect.getType().getTypeArguments(0).orElseThrow(() -> illegalStateException(property));
-        return type1.getType().isInstance(actual.getInstance()) ||
-                errorLog(format("Expecting field `%s` to be %s, but was [%s]", property, inspectExpectType(),
-                        getClassName(actual.getInstance())));
+    private boolean typeStructure(DALRuntimeContext r, Actual actual) {
+        BeanClass<?> type = expect.getType().getTypeArguments(0).orElseThrow(() -> illegalStateException(actual.getProperty()));
+        return type.getType().isInstance(actual.getActual().getInstance()) ||
+                errorLog(format("Expecting field `%s` to be %s, but was [%s]", actual.getProperty(), inspectExpectType(),
+                        getClassName(actual.getActual().getInstance())));
     }
 
-    private boolean structure(DALRuntimeContext runtimeContext) {
-        return expect.getType().getType().isInstance(actual.getInstance())
-                || errorLog(format("Expecting field `%s` to be %s, but was [%s]", property, inspectExpectType(),
-                getClassName(actual.getInstance())));
+    private boolean structure(DALRuntimeContext runtimeContext, Actual actual) {
+        return expect.getType().getType().isInstance(actual.getActual().getInstance())
+                || errorLog(format("Expecting field `%s` to be %s, but was [%s]", actual.getProperty(), inspectExpectType(),
+                getClassName(actual.getActual().getInstance())));
     }
 
-    private boolean content(DALRuntimeContext runtimeContext) {
-        return Objects.equals(expect.getExpect(), actual.getInstance()) ||
-                errorLog(format("Expecting field `%s` to be %s[%s], but was %s[%s]", property,
-                        getClassName(expect.getExpect()), expect.getExpect(), getClassName(actual.getInstance()), actual.getInstance()));
+    private boolean content(DALRuntimeContext runtimeContext, Actual actual) {
+        return Objects.equals(expect.getExpect(), actual.getActual().getInstance()) ||
+                errorLog(format("Expecting field `%s` to be %s[%s], but was %s[%s]", actual.getProperty(),
+                        getClassName(expect.getExpect()), expect.getExpect(), getClassName(actual.getActual().getInstance()), actual.getActual().getInstance()));
     }
 
-    protected boolean schema(DALRuntimeContext runtimeContext) {
-        Set<String> actualFields = actual.getFieldNames().stream().filter(String.class::isInstance)
+    private boolean schema(DALRuntimeContext runtimeContext, Actual actual) {
+        Set<String> actualFields = actual.getActual().getFieldNames().stream().filter(String.class::isInstance)
                 .map(Object::toString).collect(toSet());
         return (expect.noMoreUnexpectedField(actualFields))
                 && allMandatoryPropertyShouldBeExist(actualFields)
-                && allPropertyValueShouldBeValid(actual, runtimeContext)
-                && expect.verifySchemaInstance(actual);
+                && allPropertyValueShouldBeValid(runtimeContext, actual)
+                && expect.verifySchemaInstance(actual.getActual());
     }
 
     private boolean allMandatoryPropertyShouldBeExist(Set<String> actualFields) {
@@ -191,12 +184,14 @@ public class Verification {
                         expect.getType().getSimpleName(), expect.getType().getName()));
     }
 
-    private boolean allPropertyValueShouldBeValid(Data actual, DALRuntimeContext runtimeContext) {
+    private boolean allPropertyValueShouldBeValid(DALRuntimeContext runtimeContext, Actual actual) {
         return expect.getType().getPropertyReaders().values().stream().allMatch(propertyReader -> {
-            Data subActual = actual.getValue(propertyReader.getName());
+            Data subActual = actual.getActual().getValue(propertyReader.getName());
             if (allowNullAndIsNull(propertyReader, subActual)) return true;
-            Verification verification = propertyExpectation(propertyReader, runtimeContext);
-            return verification.verify(runtimeContext, verification.expect);
+            Object property = propertyReader.getName();
+            Actual actual1 = new Actual(actual.getProperty() + "." + propertyReader.getName(), actual.getActual().getValue(property));
+            Verification verification = new Verification(expect.subExpect(propertyReader, runtimeContext, actual.getActual().getValue(property)));
+            return verification.verify(runtimeContext, actual1);
         });
     }
 
