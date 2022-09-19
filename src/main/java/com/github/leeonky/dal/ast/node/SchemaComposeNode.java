@@ -54,7 +54,7 @@ public class SchemaComposeNode extends DALNode {
 
     private Object convertViaSchema(DALRuntimeContext context, SchemaNode schemaNode, Data element, String input) {
         try {
-            return schemaNode.getValueConstructorViaSchema(context).apply(element);
+            return schemaNode.getValueConstructorViaSchema(context).apply(element, context);
         } catch (IllegalTypeException exception) {
             throw new AssertionFailure(exception.assertionFailureMessage(input.isEmpty() ? input : input + " ",
                     schemaNode), schemaNode.getPositionBegin());

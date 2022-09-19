@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.ListAccessor.changeFirstIndex;
+import static com.github.leeonky.dal.runtime.schema.Expect.schemaExpect;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
@@ -57,7 +58,7 @@ public class RuntimeContextBuilder {
                 .registerValueFormat(new Formatters.PositiveNumber())
                 .registerValueFormat(new Formatters.ZeroNumber())
                 .registerValueFormat(new Formatters.Boolean())
-                .registerSchema("List", Data::isList)
+                .registerSchema("List", (d, c) -> d.isList())
                 .registerListAccessor(Iterable.class, iterable -> iterable)
                 .registerListAccessor(Stream.class, stream -> stream::iterator)
                 .registerListAccessor(AutoMappingList.class, changeFirstIndex(AutoMappingList::firstIndex))
@@ -123,7 +124,7 @@ public class RuntimeContextBuilder {
 
     @SuppressWarnings("unchecked")
     public RuntimeContextBuilder registerValueFormat(String name, Formatter<?, ?> formatter) {
-        valueConstructors.put(name, o -> ((Formatter<Object, ?>) formatter).transform(o.getInstance()));
+        valueConstructors.put(name, (o, c) -> ((Formatter<Object, ?>) formatter).transform(o.getInstance()));
         return this;
     }
 
@@ -133,15 +134,17 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerSchema(String name, Class<?> schema) {
         schemas.put(name, BeanClass.create(schema));
-        return registerSchema(name, data ->
-                new Verification(Expect.schemaExpect(BeanClass.create(schema), null, data), "", data)
-                        .verify(data.dalRuntimeContext)
+        return registerSchema(name, (data, context) ->
+                {
+                    Expect expect = schemaExpect(BeanClass.create(schema), null, data);
+                    return new Verification(expect, "", data).verify(context, expect);
+                }
         );
     }
 
-    public RuntimeContextBuilder registerSchema(String name, Function<Data, Boolean> predicate) {
-        valueConstructors.put(name, (o) -> {
-            if (predicate.apply(o))
+    public RuntimeContextBuilder registerSchema(String name, BiFunction<Data, DALRuntimeContext, Boolean> predicate) {
+        valueConstructors.put(name, (o, context) -> {
+            if (predicate.apply(o, context))
                 return o.getInstance();
             throw new IllegalTypeException();
         });

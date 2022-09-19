@@ -29,7 +29,14 @@ import static java.lang.String.valueOf;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.IntStream.range;
 
-public class Verification implements Expectation {
+public class Verification {
+    private static final Assertion.Factory<Expect, Assertion> SCHEMA_ASSERTIONS = when(Expect::isFormatter).then(assertion(Verification::formatterStructure, Verification::formatterContent))
+            .when(Expect::isCollection).then(assertion(Verification::collectionStructure, Verification::collectionContent))
+            .when(Expect::isMap).then(assertion(Verification::mapStructure, Verification::mapContent))
+            .when(Expect::isSchemaValue).then(assertion(Verification::valueStructure, Verification::valueContent))
+            .when(Expect::isSchema).then(assertion(Verification::schema))
+            .when(Expect::isSchemaType).then(assertion(Verification::typeStructure, Verification::typeContent))
+            .orElse(assertion(Verification::structure, Verification::content));
     final Expect expect;
     final String property;
     final Data actual;
@@ -56,32 +63,18 @@ public class Verification implements Expectation {
         return subExpectation(propertyReader, property + "." + propertyReader.getName(), propertyReader.getName(), context);
     }
 
-    private Verification subExpectation(PropertyReader<Object> propertyReader, String property, Object pro, DALRuntimeContext context) {
-        return new Verification(expect.subExpect(propertyReader, context, actual.getValue(pro)), property, actual.getValue(pro));
+    //    TODO refactor ********************
+    private Verification subExpectation(PropertyReader<Object> propertyReader, String propertyChain, Object property, DALRuntimeContext context) {
+        return new Verification(expect.subExpect(propertyReader, context, actual.getValue(property)), propertyChain, actual.getValue(property));
     }
 
-    @SuppressWarnings("unchecked")
     private Verification mapEntryExpectation(Object key, DALRuntimeContext context) {
         return new Verification(
-                new Expect((BeanClass<Object>) expect.getType().getTypeArguments(1).orElseThrow(() ->
-                        new IllegalArgumentException(format("`%s` should be generic type", property))),
-                        structure() ? null : ((Map<?, Object>) expect.getExpect()).get(key)) {
-                    @Override
-                    public boolean isSchema() {
-                        return context.isSchemaRegistered(getType().getType());
-                    }
-                }, property + "." + key, actual.getValue(key));
+                expect.subExpect(key, context, expect, property, actual.getValue(key)), property + "." + key, actual.getValue(key));
     }
 
-    @Override
-    public boolean verify(DALRuntimeContext runtimeContext) {
-        return when(Expect::isFormatter).then(assertion(Verification::formatterStructure, Verification::formatterContent))
-                .when(Expect::isCollection).then(assertion(Verification::collectionStructure, Verification::collectionContent))
-                .when(Expect::isMap).then(assertion(Verification::mapStructure, Verification::mapContent))
-                .when(Expect::isSchemaValue).then(assertion(Verification::valueStructure, Verification::valueContent))
-                .when(Expect::isSchema).then(assertion(Verification::schema))
-                .when(Expect::isSchemaType).then(assertion(Verification::typeStructure, Verification::typeContent))
-                .orElse(assertion(Verification::structure, Verification::content))
+    public boolean verify(DALRuntimeContext runtimeContext, Expect expect) {
+        return SCHEMA_ASSERTIONS
                 .createBy(expect)
                 .verify(runtimeContext, this);
     }
@@ -115,7 +108,10 @@ public class Verification implements Expectation {
     }
 
     private boolean mapStructure(DALRuntimeContext context) {
-        return actual.getFieldNames().stream().allMatch(key -> mapEntryExpectation(key, context).verify(context));
+        return actual.getFieldNames().stream().allMatch(key -> {
+            Verification verification = mapEntryExpectation(key, context);
+            return verification.verify(context, verification.expect);
+        });
     }
 
     private boolean mapContent(DALRuntimeContext context) {
@@ -124,7 +120,10 @@ public class Verification implements Expectation {
 
     private boolean collectionStructure(DALRuntimeContext context) {
         return range(0, actual.getListSize()).allMatch(index ->
-                collectionElementExpectation(expect.getType().getPropertyReader(valueOf(index)), context).verify(context));
+        {
+            Verification verification = collectionElementExpectation(expect.getType().getPropertyReader(valueOf(index)), context);
+            return verification.verify(context, verification.expect);
+        });
     }
 
     private boolean collectionContent(DALRuntimeContext context) {
@@ -199,8 +198,9 @@ public class Verification implements Expectation {
     private boolean allPropertyValueShouldBeValid(Data actual, DALRuntimeContext runtimeContext) {
         return expect.getType().getPropertyReaders().values().stream().allMatch(propertyReader -> {
             Data subActual = actual.getValue(propertyReader.getName());
-            return allowNullAndIsNull(propertyReader, subActual)
-                    || propertyExpectation(propertyReader, runtimeContext).verify(runtimeContext);
+            if (allowNullAndIsNull(propertyReader, subActual)) return true;
+            Verification verification = propertyExpectation(propertyReader, runtimeContext);
+            return verification.verify(runtimeContext, verification.expect);
         });
     }
 

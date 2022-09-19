@@ -163,3 +163,13 @@ Feature: single schema when verification failed
     """
     is Data
     """
+
+  Scenario: input value is Formatter
+    Given the following json:
+    """
+      "string"
+    """
+    Then the following verification should pass:
+    """
+    is String
+    """

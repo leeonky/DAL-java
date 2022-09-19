@@ -9,7 +9,8 @@ class DALTest {
 
     @Test
     void support_extend() {
-        DALExtension.extensionForTest = dal -> dal.getRuntimeContextBuilder().registerSchema("ExtensionSchema", a -> true);
+        DALExtension.extensionForTest = dal ->
+                dal.getRuntimeContextBuilder().registerSchema("ExtensionSchema", (a, c) -> true);
 
         assertThat(new DAL().extend().<String>evaluate("input", "is ExtensionSchema")).isEqualTo("input");
     }

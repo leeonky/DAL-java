@@ -99,4 +99,11 @@ public class Expect {
     private static Expect create(BeanClass<Object> type, Object expect, DALRuntimeContext context, Data actual) {
         return context.isSchemaRegistered(type.getType()) ? schemaExpect(type, expect, actual) : new Expect(type, expect);
     }
+
+    @SuppressWarnings("unchecked")
+    Expect subExpect(Object key, DALRuntimeContext context, final Expect expect, String property, Data subActual) {
+        return create((BeanClass<Object>) expect.getType().getTypeArguments(1).orElseThrow(() ->
+                        Verification.illegalStateException(property)),
+                expect.getExpect() == null ? null : ((Map<?, Object>) expect.getExpect()).get(key), context, subActual);
+    }
 }
