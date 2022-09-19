@@ -6,12 +6,17 @@ import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.SchemaAssertionFailure;
 import com.github.leeonky.dal.type.Partial;
+import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.dal.type.SubType;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyReader;
 
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -27,7 +32,8 @@ public class Expect {
 
     public static Expect schemaExpect(BeanClass<?> type, Object expect, Data actual) {
         BeanClass<?> polymorphicSchemaType = getPolymorphicSchemaType(type.getType(), actual);
-        return new Expect((BeanClass<Object>) polymorphicSchemaType, expect == null ? polymorphicSchemaType.newInstance() : expect) {
+        return new Expect((BeanClass<Object>) polymorphicSchemaType,
+                expect == null ? polymorphicSchemaType.newInstance() : expect) {
             @Override
             public boolean isSchema() {
                 return true;
@@ -66,7 +72,7 @@ public class Expect {
         return false;
     }
 
-    public boolean isPartial() {
+    protected boolean isPartial() {
         return false;
     }
 
@@ -101,9 +107,31 @@ public class Expect {
     }
 
     @SuppressWarnings("unchecked")
-    Expect subExpect(Object key, DALRuntimeContext context, final Expect expect, String property, Data subActual) {
+    Expect subExpect(Object key, DALRuntimeContext context, Expect expect, String property, Data subActual) {
         return create((BeanClass<Object>) expect.getType().getTypeArguments(1).orElseThrow(() ->
                         Verification.illegalStateException(property)),
                 expect.getExpect() == null ? null : ((Map<?, Object>) expect.getExpect()).get(key), context, subActual);
+    }
+
+    public boolean verifySchemaInstance(Data actual) {
+        if (expect instanceof Schema) {
+            try {
+                ((Schema) expect).verify(actual);
+            } catch (SchemaAssertionFailure schemaAssertionFailure) {
+                Verification.errorLog(schemaAssertionFailure.getMessage());
+            }
+        }
+        return true;
+    }
+
+    public boolean noMoreUnexpectedField(Set<String> actualFields) {
+        if (isPartial())
+            return true;
+        Set<String> expectFields = new LinkedHashSet<String>(actualFields) {{
+            removeAll(getType().getPropertyReaders().keySet());
+        }};
+        return expectFields.isEmpty() || Verification.errorLog("Unexpected field %s for schema %s[%s]",
+                expectFields.stream().collect(Collectors.joining("`, `", "`", "`")),
+                getType().getSimpleName(), getType().getName());
     }
 }

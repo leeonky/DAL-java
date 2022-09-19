@@ -7,17 +7,13 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.IllegalFieldException;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.dal.runtime.SchemaAssertionFailure;
 import com.github.leeonky.dal.type.AllowNull;
-import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyReader;
 
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.runtime.schema.Assertion.IfFactory.when;
 import static com.github.leeonky.dal.runtime.schema.Assertion.assertion;
@@ -181,10 +177,10 @@ public class Verification {
     protected boolean schema(DALRuntimeContext runtimeContext) {
         Set<String> actualFields = actual.getFieldNames().stream().filter(String.class::isInstance)
                 .map(Object::toString).collect(toSet());
-        return (expect.isPartial() || noMoreUnexpectedField(actualFields))
+        return (expect.noMoreUnexpectedField(actualFields))
                 && allMandatoryPropertyShouldBeExist(actualFields)
                 && allPropertyValueShouldBeValid(actual, runtimeContext)
-                && schemaVerificationShouldPass(expect.getExpect(), actual);
+                && expect.verifySchemaInstance(actual);
     }
 
     private boolean allMandatoryPropertyShouldBeExist(Set<String> actualFields) {
@@ -206,25 +202,5 @@ public class Verification {
 
     private boolean allowNullAndIsNull(PropertyReader<?> propertyReader, Data propertyValueWrapper) {
         return propertyReader.getAnnotation(AllowNull.class) != null && propertyValueWrapper.isNull();
-    }
-
-    private boolean noMoreUnexpectedField(Set<String> actualFields) {
-        Set<String> expectFields = new LinkedHashSet<String>(actualFields) {{
-            removeAll(expect.getType().getPropertyReaders().keySet());
-        }};
-        return expectFields.isEmpty() || errorLog("Unexpected field %s for schema %s[%s]",
-                expectFields.stream().collect(Collectors.joining("`, `", "`", "`")),
-                expect.getType().getSimpleName(), expect.getType().getName());
-    }
-
-    private boolean schemaVerificationShouldPass(Object schema, Data actual) {
-        if (schema instanceof Schema) {
-            try {
-                ((Schema) schema).verify(actual);
-            } catch (SchemaAssertionFailure schemaAssertionFailure) {
-                errorLog(schemaAssertionFailure.getMessage());
-            }
-        }
-        return true;
     }
 }
