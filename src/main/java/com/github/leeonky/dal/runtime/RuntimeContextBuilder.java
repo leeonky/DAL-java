@@ -24,8 +24,8 @@ import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.ListAccessor.changeFirstIndex;
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
-import static com.github.leeonky.dal.runtime.schema.Verification.expect;
 import static com.github.leeonky.util.BeanClass.create;
+import static com.github.leeonky.util.Verification.expect;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;

@@ -5,13 +5,10 @@ import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.TriplePredicate;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.IfFactory;
 
-import java.util.Optional;
-import java.util.function.Predicate;
-
-import static com.github.leeonky.dal.runtime.schema.Verification.IfFactory.when;
+import static com.github.leeonky.util.IfFactory.when;
 import static java.lang.String.format;
-import static java.util.Optional.of;
 import static java.util.stream.Collectors.toSet;
 
 public class Verification {
@@ -102,56 +99,5 @@ public class Verification {
     private boolean schema(DALRuntimeContext runtimeContext, Actual actual) {
         return expect.asSchema(actual).verify(runtimeContext, actual,
                 actual.fieldNames().filter(String.class::isInstance).map(Object::toString).collect(toSet()));
-    }
-
-    public interface IfFactory<CONDITION> {
-        boolean matches(CONDITION condition);
-
-        static <CONDITION> IfFactory<CONDITION> when(Predicate<CONDITION> predicate) {
-            return predicate::test;
-        }
-
-        default <VALUE> OptionalFactory<CONDITION, VALUE> then(VALUE value) {
-            return condition -> matches(condition) ? of(value) : Optional.empty();
-        }
-
-        interface ElseIfFactory<CONDITION, VALUE> {
-            boolean matches(CONDITION condition);
-
-            Optional<VALUE> previousIf(CONDITION condition);
-
-            default OptionalFactory<CONDITION, VALUE> then(VALUE value) {
-                return condition -> {
-                    Optional<VALUE> previous = previousIf(condition);
-                    return previous.isPresent() ? previous : matches(condition) ? of(value) : Optional.empty();
-                };
-            }
-        }
-
-        interface OptionalFactory<CONDITION, VALUE> {
-            Optional<VALUE> get(CONDITION condition);
-
-            default Factory<CONDITION, VALUE> orElse(VALUE value) {
-                return condition -> get(condition).orElse(value);
-            }
-
-            default ElseIfFactory<CONDITION, VALUE> when(Predicate<CONDITION> predicate) {
-                return new ElseIfFactory<CONDITION, VALUE>() {
-                    @Override
-                    public boolean matches(CONDITION condition) {
-                        return predicate.test(condition);
-                    }
-
-                    @Override
-                    public Optional<VALUE> previousIf(CONDITION condition) {
-                        return get(condition);
-                    }
-                };
-            }
-        }
-
-        interface Factory<CONDITION, VALUE> {
-            VALUE createBy(CONDITION condition);
-        }
     }
 }

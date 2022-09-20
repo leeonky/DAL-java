@@ -37,11 +37,6 @@ public class Expect {
         return Schema.class.isAssignableFrom(type.getType());
     }
 
-    public boolean isPartial() {
-//        TODO move to beanclass *************** instance/method return optional
-        return type.getType().getAnnotation(Partial.class) != null;
-    }
-
     public boolean isFormatter() {
 //        TODO move to beanclass ***************
         return Formatter.class.isAssignableFrom(type.getType());
@@ -94,18 +89,19 @@ public class Expect {
         return (Formatter<Object, Object>) expect;
     }
 
-    Optional<BeanClass<?>> getGenericType(int typePosition) {
+    public Optional<BeanClass<?>> getGenericType(int typePosition) {
         return type.getTypeArguments(typePosition);
     }
 
-    String inspectExpectType() {
+    public String inspectExpectType() {
         return format("type [%s]", type.getName());
     }
 
-    String inspectFullType() {
+    public String inspectFullType() {
         return String.format("%s[%s]", type.getSimpleName(), type.getName());
     }
 
+    @SuppressWarnings("unchecked")
     public boolean verifyValue(BiPredicate<Value<Object>, BeanClass<?>> predicate) {
         return predicate.test((Value<Object>) expect, getGenericType(0).orElse(null));
     }
@@ -115,28 +111,28 @@ public class Expect {
         return ((Map<?, Object>) expect).size();
     }
 
-    int collectionSize() {
+    public int collectionSize() {
         return (int) toStream(expect).count();
     }
 
     @SuppressWarnings("unchecked")
-    Type<Object> extractType() {
+    public Type<Object> extractType() {
         return (Type<Object>) expect;
     }
 
-    boolean isInstanceOf(Actual actual) {
+    public boolean isInstanceOf(Actual actual) {
         return actual.inInstanceOf(type);
     }
 
-    boolean isInstanceType(Actual actual) {
+    public boolean isInstanceType(Actual actual) {
         return actual.inInstanceOf(getGenericType(0).orElseThrow(actual::invalidGenericType));
     }
 
-    boolean equals(Actual actual) {
+    public boolean equals(Actual actual) {
         return actual.equalsExpect(expect);
     }
 
-    Stream<PropertyReader<Object>> prpertyReaders() {
+    public Stream<PropertyReader<Object>> propertyReaders() {
         return type.getPropertyReaders().values().stream();
     }
 
@@ -145,34 +141,34 @@ public class Expect {
     }
 
     public SchemaExpect asSchema(Actual actual) {
-        Class<Object> schemaType = actual.polymorphicSchemaType(type.getType());
-        return new SchemaExpect(schemaType, expect);
+        return new SchemaExpect(actual.polymorphicSchemaType(type.getType()), expect);
     }
 
-    public static class SchemaExpect extends Expect {
+    static class SchemaExpect extends Expect {
         public SchemaExpect(Class<Object> schemaType, Object expect) {
             super(BeanClass.create(schemaType), expect == null ? BeanClass.newInstance(schemaType) : expect);
         }
 
-        boolean noMoreUnexpectedField(Set<String> actualFields) {
-            if (isPartial())
+        public boolean noMoreUnexpectedField(Set<String> actualFields) {
+            //        TODO move to beanclass *************** instance/method return optional
+            if (type.getType().getAnnotation(Partial.class) != null)
                 return true;
             Set<String> expectFields = new LinkedHashSet<String>(actualFields) {{
-                prpertyReaders().map(PropertyAccessor::getName).forEach(this::remove);
+                propertyReaders().map(PropertyAccessor::getName).forEach(this::remove);
             }};
             return expectFields.isEmpty() || Verification.errorLog("Unexpected field %s for schema %s",
                     expectFields.stream().collect(joining("`, `", "`", "`")), inspectFullType());
         }
 
-        boolean allMandatoryPropertyShouldBeExist(Set<String> actualFields) {
-            return prpertyReaders().filter(field -> field.getAnnotation(AllowNull.class) == null)
+        public boolean allMandatoryPropertyShouldBeExist(Set<String> actualFields) {
+            return propertyReaders().filter(field -> field.getAnnotation(AllowNull.class) == null)
                     .allMatch(field -> actualFields.contains(field.getName())
                             || Verification.errorLog("Expecting field `%s` to be in type %s, but does not exist", field.getName(),
                             inspectFullType()));
         }
 
-        boolean allPropertyValueShouldBeValid(RuntimeContextBuilder.DALRuntimeContext runtimeContext, Actual actual) {
-            return prpertyReaders().allMatch(propertyReader -> {
+        public boolean allPropertyValueShouldBeValid(RuntimeContextBuilder.DALRuntimeContext runtimeContext, Actual actual) {
+            return propertyReaders().allMatch(propertyReader -> {
                 Actual subActual = actual.sub(propertyReader.getName());
                 //            TODO annotation optional **************
                 return propertyReader.getAnnotation(AllowNull.class) != null && subActual.isNull()
@@ -180,12 +176,12 @@ public class Expect {
             });
         }
 
-        boolean verifySchemaInstance(Actual actual) {
+        public boolean verifySchemaInstance(Actual actual) {
             getSchema().ifPresent(actual::verifySchema);
             return true;
         }
 
-        boolean verify(RuntimeContextBuilder.DALRuntimeContext runtimeContext, Actual actual, Set<String> actualFields) {
+        public boolean verify(RuntimeContextBuilder.DALRuntimeContext runtimeContext, Actual actual, Set<String> actualFields) {
             return noMoreUnexpectedField(actualFields)
                     && allMandatoryPropertyShouldBeExist(actualFields)
                     && allPropertyValueShouldBeValid(runtimeContext, actual)
