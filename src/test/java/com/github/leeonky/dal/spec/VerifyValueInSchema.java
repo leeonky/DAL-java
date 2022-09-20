@@ -4,6 +4,7 @@ import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.type.AllowNull;
+import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.util.BeanClass;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -187,52 +188,52 @@ public class VerifyValueInSchema extends Base {
                 "    Expecting field `.value` [2] to be greater or equal to [3], but was not.");
     }
 
-    public static class MatchString1 {
+    public static class MatchString1 implements Schema {
         public Value<String> value = Value.equalTo("1");
     }
 
-    public static class MatchNullValue {
+    public static class MatchNullValue implements Schema {
         public Value<String> value = Value.nullReference();
     }
 
-    public static class MatchLessThan2 {
+    public static class MatchLessThan2 implements Schema {
         public Value<Integer> value = Value.lessThan(2);
     }
 
-    public static class MatchGreaterThan3 {
+    public static class MatchGreaterThan3 implements Schema {
         public Value<Integer> value = Value.greaterThan(3);
     }
 
-    public static class MatchLessOrEqualTo3 {
+    public static class MatchLessOrEqualTo3 implements Schema {
         public Value<Integer> value = Value.lessOrEqualTo(3);
     }
 
-    public static class MatchGreaterOrEqualTo3 {
+    public static class MatchGreaterOrEqualTo3 implements Schema {
         public Value<Integer> value = Value.greaterOrEqualTo(3);
     }
 
-    public static class MatchType {
+    public static class MatchType implements Schema {
         public Value<Integer> value;
     }
 
-    public static class MatchTypeWithNullableValue {
+    public static class MatchTypeWithNullableValue implements Schema {
         @AllowNull
         public Value<Integer> value;
     }
 
-    public static class MatchInvalidValue {
+    public static class MatchInvalidValue implements Schema {
         public Value<Integer> value;
     }
 
-    public static class MissingTypeArg {
+    public static class MissingTypeArg implements Schema {
         public Value<?> value;
     }
 
-    public static class MissingTypeArgButGivenValue {
+    public static class MissingTypeArgButGivenValue implements Schema {
         public Value<?> value = Value.equalTo(1);
     }
 
-    public static class CustomizedConverter {
+    public static class CustomizedConverter implements Schema {
         public Value<?> value = new ToIntegerAndIncrease();
     }
 

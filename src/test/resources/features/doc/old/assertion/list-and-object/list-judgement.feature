@@ -290,7 +290,7 @@ Feature: verify list
   Scenario: use schema expression in object
     Given the following schema:
     """
-    public class IdZero {
+    public class IdZero implements Schema {
         public int id = 0;
     }
     """
@@ -307,7 +307,7 @@ Feature: verify list
     Given the following schema:
     """
     @Partial
-    public class IdZero {
+    public class IdZero implements Schema {
         public int id = 0;
     }
     """

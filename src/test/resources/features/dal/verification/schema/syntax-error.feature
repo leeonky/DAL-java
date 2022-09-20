@@ -97,8 +97,8 @@ Feature: syntax-error
   Scenario: available schema syntax
     Given the following schema class:
     """
-    public class Id {
-      public static class Zero {
+    public class Id implements Schema {
+      public static class Zero implements Schema {
           public int id = 0;
       }
     }

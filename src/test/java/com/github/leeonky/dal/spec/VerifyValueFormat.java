@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.format.Formatters;
+import com.github.leeonky.dal.type.Schema;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,7 @@ class VerifyValueFormat extends Base {
         A, b
     }
 
-    public static class EnumSchema {
+    public static class EnumSchema implements Schema {
         public Formatters.Enum<E> e;
     }
 

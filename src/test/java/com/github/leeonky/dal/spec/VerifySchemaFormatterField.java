@@ -3,6 +3,7 @@ package com.github.leeonky.dal.spec;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.format.Formatters;
+import com.github.leeonky.dal.type.Schema;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,47 +29,47 @@ class VerifySchemaFormatterField extends Base {
         A, B
     }
 
-    public static class InstantNowValue {
+    public static class InstantNowValue implements Schema {
         public final Formatters.Instant instant = Formatters.Instant.now();
     }
 
-    public static class IntegerValue {
+    public static class IntegerValue implements Schema {
         public final Formatters.Integer integer1 = Formatters.Integer.equalTo(1);
         public Formatters.Integer integer2 = Formatters.Integer.equalTo(2);
     }
 
-    public static class IntegerListValue {
+    public static class IntegerListValue implements Schema {
         public List<Formatters.Integer> integerList = asList(Formatters.Integer.equalTo(1), Formatters.Integer.equalTo(2));
     }
 
-    public static class IntegerArrayValue {
+    public static class IntegerArrayValue implements Schema {
         public Formatters.Integer[] integerArray = new Formatters.Integer[]{Formatters.Integer.equalTo(1), Formatters.Integer.equalTo(2)};
     }
 
-    public static class IntegerMapValue {
+    public static class IntegerMapValue implements Schema {
         public Map<String, Formatters.Integer> integerMap = new HashMap<String, Formatters.Integer>() {{
             put("a", Formatters.Integer.equalTo(1));
             put("b", Formatters.Integer.equalTo(2));
         }};
     }
 
-    public static class PositiveIntegerValue {
+    public static class PositiveIntegerValue implements Schema {
         public Formatters.Integer integer = Formatters.Integer.positive();
     }
 
-    public static class NegativeIntegerValue {
+    public static class NegativeIntegerValue implements Schema {
         public Formatters.Integer integer = Formatters.Integer.negative();
     }
 
-    public static class NumberValue {
+    public static class NumberValue implements Schema {
         public Formatters.Number number = Formatters.Number.equalTo(1);
     }
 
-    public static class PositiveNumberValue {
+    public static class PositiveNumberValue implements Schema {
         public Formatters.Number number = Formatters.Number.positive();
     }
 
-    public static class NegativeNumberValue {
+    public static class NegativeNumberValue implements Schema {
         public Formatters.Number number = Formatters.Number.negative();
     }
 

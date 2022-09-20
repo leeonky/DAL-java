@@ -4,19 +4,14 @@ import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.dal.runtime.SchemaAssertionFailure;
 import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.PropertyReader;
 
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiPredicate;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.util.BeanClass.newInstance;
@@ -26,7 +21,7 @@ import static java.lang.String.valueOf;
 
 public class Expect {
     private final BeanClass<Object> type;
-    private final Object expect;
+    final Object expect;
 
     public Expect(BeanClass<Object> type, Object expect) {
         this.type = type;
@@ -39,11 +34,6 @@ public class Expect {
         Class<Object> realSchemaType = subActual.polymorphicSchemaType(type);
         return new Expect(BeanClass.create(realSchemaType), expect == null ? newInstance(realSchemaType) : expect) {
             @Override
-            public boolean isSchema() {
-                return true;
-            }
-
-            @Override
             public boolean isPartial() {
                 return type.getAnnotation(Partial.class) != null;
             }
@@ -51,7 +41,7 @@ public class Expect {
     }
 
     public boolean isSchema() {
-        return false;
+        return Schema.class.isAssignableFrom(type.getType());
     }
 
     protected boolean isPartial() {
@@ -97,26 +87,8 @@ public class Expect {
         return sub(type.getPropertyReader(valueOf(index)), context, subActual);
     }
 
-    public boolean verifySchemaInstance(Consumer<Schema> verifySchema) {
-        if (expect instanceof Schema) {
-            try {
-                verifySchema.accept((Schema) expect);
-            } catch (SchemaAssertionFailure schemaAssertionFailure) {
-                Verification.errorLog(schemaAssertionFailure.getMessage());
-            }
-        }
-        return true;
-    }
-
-    public boolean noMoreUnexpectedField(Set<String> actualFields) {
-        if (isPartial())
-            return true;
-        Set<String> expectFields = new LinkedHashSet<String>(actualFields) {{
-            removeAll(type.getPropertyReaders().keySet());
-        }};
-        return expectFields.isEmpty() || Verification.errorLog("Unexpected field %s for schema %s[%s]",
-                expectFields.stream().collect(Collectors.joining("`, `", "`", "`")),
-                type.getSimpleName(), type.getName());
+    public Optional<Schema> getSchema() {
+        return BeanClass.cast(expect, Schema.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -174,5 +146,9 @@ public class Expect {
 
     public boolean structure() {
         return expect == null;
+    }
+
+    public Expect asSchema(Actual actual) {
+        return schemaExpect(type.getType(), expect, actual);
     }
 }

@@ -5,10 +5,13 @@ import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.PropertyAccessor;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 
 public class Verification {
@@ -117,20 +120,36 @@ public class Verification {
     private boolean schema(DALRuntimeContext runtimeContext, Actual actual) {
         Set<String> actualFields = actual.fieldNames().filter(String.class::isInstance)
                 .map(Object::toString).collect(toSet());
-        return (expect.noMoreUnexpectedField(actualFields))
-                && allMandatoryPropertyShouldBeExist(actualFields)
-                && allPropertyValueShouldBeValid(runtimeContext, actual)
-                && expect.verifySchemaInstance(actual::verifySchema);
+        Expect expect1 = expect.asSchema(actual);
+        return noMoreUnexpectedField(actualFields, expect1)
+                && allMandatoryPropertyShouldBeExist(actualFields, expect1)
+                && allPropertyValueShouldBeValid(runtimeContext, actual, expect1)
+                && verifySchemaInstance(actual, expect1);
     }
 
-    private boolean allMandatoryPropertyShouldBeExist(Set<String> actualFields) {
+    private boolean verifySchemaInstance(Actual actual, Expect expect) {
+        expect.getSchema().ifPresent(actual::verifySchema);
+        return true;
+    }
+
+    private boolean noMoreUnexpectedField(Set<String> actualFields, final Expect expect) {
+        if (expect.isPartial())
+            return true;
+        Set<String> expectFields = new LinkedHashSet<String>(actualFields) {{
+            expect.prpertyReaders().map(PropertyAccessor::getName).forEach(this::remove);
+        }};
+        return expectFields.isEmpty() || errorLog("Unexpected field %s for schema %s",
+                expectFields.stream().collect(joining("`, `", "`", "`")), expect.inspectFullType());
+    }
+
+    private boolean allMandatoryPropertyShouldBeExist(Set<String> actualFields, Expect expect) {
         return expect.prpertyReaders().filter(field -> field.getAnnotation(AllowNull.class) == null)
                 .allMatch(field -> actualFields.contains(field.getName())
                         || errorLog("Expecting field `%s` to be in type %s, but does not exist", field.getName(),
                         expect.inspectFullType()));
     }
 
-    private boolean allPropertyValueShouldBeValid(DALRuntimeContext runtimeContext, Actual actual) {
+    private boolean allPropertyValueShouldBeValid(DALRuntimeContext runtimeContext, Actual actual, Expect expect) {
         return expect.prpertyReaders().allMatch(propertyReader -> {
             Actual subActual = actual.sub(propertyReader.getName());
             return propertyReader.getAnnotation(AllowNull.class) != null && subActual.isNull()

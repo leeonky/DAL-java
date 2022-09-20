@@ -129,6 +129,7 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    //    TODO ************ Class should  implements Schema
     public RuntimeContextBuilder registerSchema(Class<?> schema) {
         return registerSchema(NameStrategy.SIMPLE_NAME, schema);
     }

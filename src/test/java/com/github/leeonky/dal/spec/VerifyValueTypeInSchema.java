@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.format.Type;
+import com.github.leeonky.dal.type.Schema;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -175,39 +176,39 @@ class VerifyValueTypeInSchema extends Base {
                 "    Expecting field `.value` [2] to be greater or equal to [3], but was not.");
     }
 
-    public static class JavaTypeInSchema {
+    public static class JavaTypeInSchema implements Schema {
         public String stringValue;
     }
 
-    public static class JavaTypeWithValueInSchema {
+    public static class JavaTypeWithValueInSchema implements Schema {
         public String stringValue = "world";
     }
 
-    public static class WrappedJavaTypeInSchema {
+    public static class WrappedJavaTypeInSchema implements Schema {
         public Type<String> stringValue;
     }
 
-    public static class WrappedJavaTypeWithValueInSchema {
+    public static class WrappedJavaTypeWithValueInSchema implements Schema {
         public Type<String> stringValue = Type.equalTo("hello");
     }
 
-    public static class WrappedJavaTypeNullReferenceInSchema {
+    public static class WrappedJavaTypeNullReferenceInSchema implements Schema {
         public Type<String> stringValue = Type.nullReference();
     }
 
-    public static class LessThan2 {
+    public static class LessThan2 implements Schema {
         public Type<Integer> value = Type.lessThan(2);
     }
 
-    public static class GreaterThan3 {
+    public static class GreaterThan3 implements Schema {
         public Type<Integer> value = Type.greaterThan(3);
     }
 
-    public static class LessOrEqualTo3 {
+    public static class LessOrEqualTo3 implements Schema {
         public Type<Integer> value = Type.lessOrEqualTo(3);
     }
 
-    public static class GreaterOrEqualTo3 {
+    public static class GreaterOrEqualTo3 implements Schema {
         public Type<Integer> value = Type.greaterOrEqualTo(3);
     }
 }

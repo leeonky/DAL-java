@@ -77,12 +77,12 @@ Feature: this
     @FieldAliases({
             @FieldAlias(alias = "aliasOfAge", field = "age"),
     })
-    public class User {
+    public class User implements Schema {
     }
     """
     And the following schema class:
     """
-    public class Order {
+    public class Order implements Schema {
         public User user;
     }
     """

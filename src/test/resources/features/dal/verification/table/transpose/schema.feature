@@ -7,7 +7,7 @@ Feature: schema in table
     @FieldAliases({
             @FieldAlias(alias = "aliasOfName", field = "name")
     })
-    public class IdZero {
+    public class IdZero implements Schema {
         public int id = 0;
     }
     """
@@ -55,7 +55,7 @@ Feature: schema in table
     @FieldAliases({
             @FieldAlias(alias = "aliasOfName", field = "name")
     })
-    public class IdZero {
+    public class IdZero implements Schema {
         public int id = 0;
     }
     """
@@ -108,7 +108,7 @@ Feature: schema in table
     @FieldAliases({
             @FieldAlias(alias = "aliasOfName", field = "name")
     })
-    public class IdZero {
+    public class IdZero implements Schema {
         public int id = 0;
     }
     """
@@ -161,7 +161,7 @@ Feature: schema in table
     @FieldAliases({
             @FieldAlias(alias = "aliasOfName", field = "name")
     })
-    public class IdZero {
+    public class IdZero implements Schema {
         public int id = 0;
     }
     """

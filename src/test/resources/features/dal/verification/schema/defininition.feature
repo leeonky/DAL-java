@@ -3,7 +3,7 @@ Feature: define schema
   Scenario: map element is schema
     Given the following schema class:
     """
-    public class IdZero {
+    public class IdZero implements Schema {
         public String id = "0";
     }
     """
@@ -19,7 +19,7 @@ Feature: define schema
     """
     And the following schema class:
     """
-    public class MapIdZero {
+    public class MapIdZero implements Schema {
         public Map<String, IdZero> value;
     }
     """
@@ -55,7 +55,7 @@ Feature: define schema
   Scenario: list element is schema
     Given the following schema class:
     """
-    public class IdZero {
+    public class IdZero implements Schema {
         public String id = "0";
     }
     """
@@ -69,7 +69,7 @@ Feature: define schema
     """
     And the following schema class:
     """
-    public class ListIdZero {
+    public class ListIdZero implements Schema {
         public List<IdZero> value;
     }
     """

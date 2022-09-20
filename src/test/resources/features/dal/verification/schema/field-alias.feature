@@ -7,7 +7,7 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "aliasOfId", field = "id")
     })
-    public class Order {
+    public class Order implements Schema {
     }
     """
     And the following json:
@@ -29,7 +29,7 @@ Feature: define field alias in schema
             @FieldAlias(alias = "aliasOfId", field = "id"),
             @FieldAlias(alias = "aliasOfAliasId", field = "aliasOfId")
     })
-    public class Order {
+    public class Order implements Schema {
     }
     """
     And the following json:
@@ -50,7 +50,7 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "firstLine", field = "lines[0]"),
     })
-    public class Order {
+    public class Order implements Schema {
     }
     """
     And the following json:
@@ -73,7 +73,7 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "userName", field = "user.name")
     })
-    public class Order {
+    public class Order implements Schema {
     }
     """
     And the following json:
@@ -96,13 +96,13 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "aliasOfAge", field = "age"),
     })
-    public class User {
+    public class User implements Schema {
     }
     """
     And the following schema class:
     """
     @Partial
-    public class Order {
+    public class Order implements Schema {
         public User user;
     }
     """
@@ -126,7 +126,7 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "aliasOfId", field = "id")
     })
-    public class Order {
+    public class Order implements Schema {
     }
     """
     And the following json:
@@ -155,12 +155,12 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "aliasOfAge", field = "age"),
     })
-    public class User {
+    public class User implements Schema {
     }
     """
     And the following schema class:
     """
-    public class Order {
+    public class Order implements Schema {
         public User user;
     }
     """
@@ -192,7 +192,7 @@ Feature: define field alias in schema
   Scenario: provide schema via is and use alias in list verification
     Given the following schema class:
     """
-    public class Order {
+    public class Order implements Schema {
       public List<Product> products;
     }
     """
@@ -201,7 +201,7 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "aliasOfName", field = "name"),
     })
-    public class Product {
+    public class Product implements Schema {
         public String name;
     }
     """
@@ -236,7 +236,7 @@ Feature: define field alias in schema
   Scenario: provide schema via is and use alias in nested list verification
     Given the following schema class:
     """
-    public class Image {
+    public class Image implements Schema {
       public List<List<Pixel>> pixels;
     }
     """
@@ -245,7 +245,7 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "aliasOfColor", field = "color"),
     })
-    public class Pixel {
+    public class Pixel implements Schema {
       public String color;
     }
     """
@@ -271,13 +271,13 @@ Feature: define field alias in schema
   Scenario: provide schema via is and use alias in list mapping
     Given the following schema class:
     """
-    public class Order {
+    public class Order implements Schema {
       public List<Product> products;
     }
     """
     And the following schema class:
     """
-    public class Product {
+    public class Product implements Schema {
         public Catalog catalog;
     }
     """
@@ -289,7 +289,7 @@ Feature: define field alias in schema
             @FieldAlias(alias = "aliasOfSubType", field = "sub"),
     })
     @Partial
-    public class Catalog {
+    public class Catalog implements Schema {
       public SubType sub;
     }
     """
@@ -300,7 +300,7 @@ Feature: define field alias in schema
             @FieldAlias(alias = "aliasOfValue", field = "value"),
     })
     @Partial
-    public class SubType {
+    public class SubType implements Schema {
       public SubTypeValue value;
     }
     """
@@ -310,7 +310,7 @@ Feature: define field alias in schema
             @FieldAlias(alias = "aliasOfString", field = "string"),
     })
     @Partial
-    public class SubTypeValue {
+    public class SubTypeValue implements Schema {
     }
     """
     And the following json:
@@ -377,7 +377,7 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "nameInSuper", field = "name")
     })
-    public class Super {
+    public class Super implements Schema {
     }
     """
     And the following schema class:
@@ -385,13 +385,13 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "nameInInterface", field = "name")
     })
-    public interface Interface {
+    public interface Interface extends Schema {
     }
     """
     And the following schema class:
     """
     @Partial
-    public class Schema extends Super implements Interface {
+    public class SubSchema extends Super implements Interface {
     }
     """
     And the following json:
@@ -400,7 +400,7 @@ Feature: define field alias in schema
     """
     Then the following verification should pass:
     """
-      is Schema: {
+      is SubSchema: {
         nameInInterface: 'hello'
         nameInSuper: 'hello'
       }
@@ -413,7 +413,7 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "aliasOfId", field = "id")
     })
-    public class Order {
+    public class Order implements Schema {
     }
     """
     And the following json:
@@ -440,7 +440,7 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "aliasOfId", field = "id")
     })
-    public class Order {
+    public class Order implements Schema {
     }
     """
     And the following json:
@@ -465,7 +465,7 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "aliasOfId", field = "id")
     })
-    public class Order {
+    public class Order implements Schema {
     }
     """
     And the following json:
@@ -486,7 +486,7 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "aliasOfId", field = "id")
     })
-    public class Order {
+    public class Order implements Schema {
     }
     """
     And the following json:
@@ -511,7 +511,7 @@ Feature: define field alias in schema
     @FieldAliases({
             @FieldAlias(alias = "aliasOfId", field = "id")
     })
-    public class Order {
+    public class Order implements Schema{
     }
     """
     And the following json:

@@ -6,6 +6,7 @@ import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.dal.runtime.PropertyAccessor;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Partial;
+import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.dal.type.SubType;
 import lombok.Getter;
 import lombok.Setter;
@@ -57,41 +58,41 @@ class VerifySchema extends Base {
         assertPass(JSONObject.NULL, "= null");
     }
 
-    public static class RightFieldAndType {
+    public static class RightFieldAndType implements Schema {
         public Formatters.PositiveInteger id;
     }
 
     @Partial
-    public static class IgnoreUnexpectedField {
+    public static class IgnoreUnexpectedField implements Schema {
         public Formatters.PositiveInteger id;
     }
 
-    public static class AllowNullField {
+    public static class AllowNullField implements Schema {
         @AllowNull
         public Formatters.PositiveInteger id;
     }
 
-    public static class NestedType {
+    public static class NestedType implements Schema {
         public RightFieldAndType type;
     }
 
-    public static class NestedList {
+    public static class NestedList implements Schema {
         public List<RightFieldAndType> list;
     }
 
-    public static class NestedArray {
+    public static class NestedArray implements Schema {
         public RightFieldAndType[] array;
     }
 
-    public static class NestedNestedList {
+    public static class NestedNestedList implements Schema {
         public List<List<RightFieldAndType>> list;
     }
 
-    public static class NestedMap {
+    public static class NestedMap implements Schema {
         public Map<String, RightFieldAndType> map;
     }
 
-    public static class NestedNestedMap {
+    public static class NestedNestedMap implements Schema {
         public Map<String, Map<String, RightFieldAndType>> map;
     }
 
@@ -106,27 +107,27 @@ class VerifySchema extends Base {
             @SubType.Type(value = "V1", type = V1.class),
             @SubType.Type(value = "V2", type = V2.class)
     })
-    public static abstract class Abstract {
+    public static abstract class Abstract implements Schema {
         public String type;
     }
 
-    public static class V1 extends Abstract {
+    public static class V1 extends Abstract implements Schema {
         public Formatters.PositiveInteger id;
     }
 
-    public static class V2 extends Abstract {
+    public static class V2 extends Abstract implements Schema {
         public Formatters.URL url;
     }
 
-    public static class V {
+    public static class V implements Schema {
         public Abstract v;
     }
 
-    public static class VList {
+    public static class VList implements Schema {
         public List<Abstract> vs;
     }
 
-    public static class NestedSubType {
+    public static class NestedSubType implements Schema {
         public String type;
     }
 
@@ -134,19 +135,19 @@ class VerifySchema extends Base {
             @SubType.Type(value = "V1", type = NestedV1.class),
             @SubType.Type(value = "V2", type = NestedV2.class)
     })
-    public static class NestedAbstract {
+    public static class NestedAbstract implements Schema {
         public NestedSubType type;
     }
 
-    public static class NestedV1 extends NestedAbstract {
+    public static class NestedV1 extends NestedAbstract implements Schema {
         public Formatters.PositiveInteger id;
     }
 
-    public static class NestedV2 extends NestedAbstract {
+    public static class NestedV2 extends NestedAbstract implements Schema {
         public Formatters.URL url;
     }
 
-    public static class FieldValue {
+    public static class FieldValue implements Schema {
         public Formatters.Number integer;
 
         public FieldValue() {
@@ -157,7 +158,7 @@ class VerifySchema extends Base {
         }
     }
 
-    public static class SchemaWithInstance {
+    public static class SchemaWithInstance implements Schema {
         public FieldValue fieldValue = new FieldValue(1);
     }
 

@@ -3,13 +3,13 @@ Feature: multiple schema and list schema
   Background:
     Given the following schema class:
     """
-    public class IdZero {
+    public class IdZero implements Schema {
         public int id = 0;
     }
     """
     And the following schema class:
     """
-    public class IdOne {
+    public class IdOne implements Schema {
         public int id = 1;
     }
     """

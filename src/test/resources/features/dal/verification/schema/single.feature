@@ -3,7 +3,7 @@ Feature: single schema when verification failed
   Background:
     Given the following schema class:
     """
-    public class IdZero {
+    public class IdZero implements Schema {
         public int id = 0;
     }
     """
@@ -110,7 +110,7 @@ Feature: single schema when verification failed
   Scenario: raise error when schema field type without value is not matched
     Given the following schema class:
     """
-    public class StringId {
+    public class StringId implements Schema {
         public String id;
     }
     """
@@ -154,7 +154,7 @@ Feature: single schema when verification failed
     """
     Given the following schema class:
     """
-    public class Data {
+    public class Data implements Schema {
         @AllowNull
         public Integer value;
     }

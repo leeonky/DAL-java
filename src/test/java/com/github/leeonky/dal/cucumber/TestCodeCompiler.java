@@ -65,10 +65,10 @@ public class TestCodeCompiler {
         matcher = Pattern.compile(".* class\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
-        matcher = Pattern.compile(".* interface\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(s);
+        matcher = Pattern.compile(".* interface\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
-        matcher = Pattern.compile(".* interface\\s(.*)\\sextends.*", Pattern.DOTALL).matcher(s);
+        matcher = Pattern.compile(".* interface\\s([^{]*)\\s\\{.*", Pattern.DOTALL).matcher(s);
         if (matcher.matches())
             return matcher.group(1).trim();
         throw new IllegalStateException("Can not guess class name");
