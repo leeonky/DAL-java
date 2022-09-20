@@ -3,19 +3,27 @@ package com.github.leeonky.dal.runtime.schema;
 import com.github.leeonky.dal.runtime.IllegalFieldException;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.dal.type.AllowNull;
+import com.github.leeonky.interpreter.TriplePredicate;
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.PropertyAccessor;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.Optional;
+import java.util.function.Predicate;
 
+import static com.github.leeonky.dal.runtime.schema.Verification.IfFactory.when;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toSet;
 
 public class Verification {
-    final Expect expect;
+    private static final IfFactory.Factory<Expect, TriplePredicate<Verification, DALRuntimeContext, Actual>> VERIFICATIONS =
+            when(Expect::isSchema).<TriplePredicate<Verification, DALRuntimeContext, Actual>>then(Verification::schema)
+                    .when(Expect::isFormatter).then(Verification::formatter)
+                    .when(Expect::isSchemaValue).then(combine(Verification::valueStructure, Verification::valueContent))
+                    .when(Expect::isMap).then(combine(Verification::mapStructure, Verification::mapContent))
+                    .when(Expect::isCollection).then(combine(Verification::collectionStructure, Verification::collectionContent))
+                    .when(Expect::isSchemaType).then(combine(Verification::typeStructure, Verification::typeContent))
+                    .orElse(combine(Verification::structure, Verification::content));
+    private final Expect expect;
 
     private Verification(Expect expect) {
         this.expect = expect;
@@ -29,36 +37,15 @@ public class Verification {
         throw new IllegalTypeException(format(format, params));
     }
 
+    private static TriplePredicate<Verification, DALRuntimeContext, Actual> combine(
+            TriplePredicate<Verification, DALRuntimeContext, Actual> structure,
+            TriplePredicate<Verification, DALRuntimeContext, Actual> content) {
+        return ((verification, context, actual) -> verification.expect.structure()
+                ? structure.test(verification, context, actual) : content.test(verification, context, actual));
+    }
+
     public boolean verify(DALRuntimeContext runtimeContext, Actual actual) {
-        if (expect.isSchema()) {
-            return schema(runtimeContext, actual);
-        }
-        if (expect.isFormatter()) {
-            return formatter(runtimeContext, actual);
-        }
-        if (expect.isSchemaValue()) {
-            if (expect.structure())
-                return valueStructure(runtimeContext, actual);
-            return valueContent(runtimeContext, actual);
-        }
-        if (expect.isMap()) {
-            if (expect.structure())
-                return mapStructure(runtimeContext, actual);
-            return mapContent(runtimeContext, actual);
-        }
-        if (expect.isCollection()) {
-            if (expect.structure())
-                return collectionStructure(runtimeContext, actual);
-            return collectionContent(runtimeContext, actual);
-        }
-        if (expect.isSchemaType()) {
-            if (expect.structure())
-                return typeStructure(runtimeContext, actual);
-            return typeContent(runtimeContext, actual);
-        }
-        if (expect.structure())
-            return structure(runtimeContext, actual);
-        return content(runtimeContext, actual);
+        return VERIFICATIONS.createBy(expect).test(this, runtimeContext, actual);
     }
 
     private boolean valueStructure(DALRuntimeContext runtimeContext, Actual actual) {
@@ -74,12 +61,10 @@ public class Verification {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private boolean mapStructure(DALRuntimeContext context, Actual actual) {
         BeanClass<Object> type = (BeanClass<Object>) expect.getGenericType(1).orElseThrow(actual::invalidGenericType);
-        return actual.fieldNames().allMatch(key -> {
-            Actual subActual = actual.sub(key);
-            return expect(expect.sub(type, key, context, subActual)).verify(context, subActual);
-        });
+        return actual.fieldNames().allMatch(key -> expect(expect.sub(type, key)).verify(context, actual.sub(key)));
     }
 
     private boolean mapContent(DALRuntimeContext context, Actual actual) {
@@ -87,10 +72,7 @@ public class Verification {
     }
 
     private boolean collectionStructure(DALRuntimeContext context, Actual actual) {
-        return actual.indexStream().allMatch(index -> {
-            Actual subActual = actual.sub(index);
-            return expect(expect.sub(context, index, subActual)).verify(context, subActual);
-        });
+        return actual.indexStream().allMatch(index -> expect(expect.sub(index)).verify(context, actual.sub(index)));
     }
 
     private boolean collectionContent(DALRuntimeContext context, Actual actual) {
@@ -118,42 +100,58 @@ public class Verification {
     }
 
     private boolean schema(DALRuntimeContext runtimeContext, Actual actual) {
-        Set<String> actualFields = actual.fieldNames().filter(String.class::isInstance)
-                .map(Object::toString).collect(toSet());
-        Expect expect1 = expect.asSchema(actual);
-        return noMoreUnexpectedField(actualFields, expect1)
-                && allMandatoryPropertyShouldBeExist(actualFields, expect1)
-                && allPropertyValueShouldBeValid(runtimeContext, actual, expect1)
-                && verifySchemaInstance(actual, expect1);
+        return expect.asSchema(actual).verify(runtimeContext, actual,
+                actual.fieldNames().filter(String.class::isInstance).map(Object::toString).collect(toSet()));
     }
 
-    private boolean verifySchemaInstance(Actual actual, Expect expect) {
-        expect.getSchema().ifPresent(actual::verifySchema);
-        return true;
-    }
+    public interface IfFactory<CONDITION> {
+        boolean matches(CONDITION condition);
 
-    private boolean noMoreUnexpectedField(Set<String> actualFields, final Expect expect) {
-        if (expect.isPartial())
-            return true;
-        Set<String> expectFields = new LinkedHashSet<String>(actualFields) {{
-            expect.prpertyReaders().map(PropertyAccessor::getName).forEach(this::remove);
-        }};
-        return expectFields.isEmpty() || errorLog("Unexpected field %s for schema %s",
-                expectFields.stream().collect(joining("`, `", "`", "`")), expect.inspectFullType());
-    }
+        static <CONDITION> IfFactory<CONDITION> when(Predicate<CONDITION> predicate) {
+            return predicate::test;
+        }
 
-    private boolean allMandatoryPropertyShouldBeExist(Set<String> actualFields, Expect expect) {
-        return expect.prpertyReaders().filter(field -> field.getAnnotation(AllowNull.class) == null)
-                .allMatch(field -> actualFields.contains(field.getName())
-                        || errorLog("Expecting field `%s` to be in type %s, but does not exist", field.getName(),
-                        expect.inspectFullType()));
-    }
+        default <VALUE> OptionalFactory<CONDITION, VALUE> then(VALUE value) {
+            return condition -> matches(condition) ? of(value) : Optional.empty();
+        }
 
-    private boolean allPropertyValueShouldBeValid(DALRuntimeContext runtimeContext, Actual actual, Expect expect) {
-        return expect.prpertyReaders().allMatch(propertyReader -> {
-            Actual subActual = actual.sub(propertyReader.getName());
-            return propertyReader.getAnnotation(AllowNull.class) != null && subActual.isNull()
-                    || expect(expect.sub(propertyReader, runtimeContext, subActual)).verify(runtimeContext, subActual);
-        });
+        interface ElseIfFactory<CONDITION, VALUE> {
+            boolean matches(CONDITION condition);
+
+            Optional<VALUE> previousIf(CONDITION condition);
+
+            default OptionalFactory<CONDITION, VALUE> then(VALUE value) {
+                return condition -> {
+                    Optional<VALUE> previous = previousIf(condition);
+                    return previous.isPresent() ? previous : matches(condition) ? of(value) : Optional.empty();
+                };
+            }
+        }
+
+        interface OptionalFactory<CONDITION, VALUE> {
+            Optional<VALUE> get(CONDITION condition);
+
+            default Factory<CONDITION, VALUE> orElse(VALUE value) {
+                return condition -> get(condition).orElse(value);
+            }
+
+            default ElseIfFactory<CONDITION, VALUE> when(Predicate<CONDITION> predicate) {
+                return new ElseIfFactory<CONDITION, VALUE>() {
+                    @Override
+                    public boolean matches(CONDITION condition) {
+                        return predicate.test(condition);
+                    }
+
+                    @Override
+                    public Optional<VALUE> previousIf(CONDITION condition) {
+                        return get(condition);
+                    }
+                };
+            }
+        }
+
+        interface Factory<CONDITION, VALUE> {
+            VALUE createBy(CONDITION condition);
+        }
     }
 }

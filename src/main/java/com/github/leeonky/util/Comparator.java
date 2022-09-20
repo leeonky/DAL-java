@@ -1,5 +1,6 @@
 package com.github.leeonky.util;
 
+//TODO move to beanclass
 public interface Comparator<V extends Comparable<V>> {
 
     static <V extends Comparable<V>> Comparator<V> lessThan(V target) {

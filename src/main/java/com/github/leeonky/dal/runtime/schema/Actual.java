@@ -105,20 +105,22 @@ public class Actual {
     }
 
     boolean inInstanceOf(BeanClass<?> type) {
+
+//        TODO move to beanclass ***************
         return type.getType().isInstance(actual.getInstance()) ||
                 Verification.errorLog(String.format("Expecting field `%s` to be %s, but was [%s]", property,
                         format("type [%s]", type.getName()), getClassName(actual.getInstance())));
     }
 
-    boolean equals2(Object expect) {
+    public boolean equalsExpect(Object expect) {
         return Objects.equals(expect, actual.getInstance()) ||
                 Verification.errorLog(format("Expecting field `%s` to be %s[%s], but was %s[%s]", property,
                         getClassName(expect), expect, getClassName(actual.getInstance()), actual.getInstance()));
     }
 
-    void verifySchema(Schema expect1) {
+    public void verifySchema(Schema expect) {
         try {
-            expect1.verify(actual);
+            expect.verify(actual);
         } catch (SchemaAssertionFailure schemaAssertionFailure) {
             Verification.errorLog(schemaAssertionFailure.getMessage());
         }

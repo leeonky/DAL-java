@@ -3,53 +3,48 @@ package com.github.leeonky.dal.runtime.schema;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.PropertyAccessor;
 import com.github.leeonky.util.PropertyReader;
 
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.util.BeanClass.newInstance;
 import static com.github.leeonky.util.CollectionHelper.toStream;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
+import static java.util.stream.Collectors.joining;
 
 public class Expect {
-    private final BeanClass<Object> type;
-    final Object expect;
+    protected final BeanClass<Object> type;
+    protected final Object expect;
 
     public Expect(BeanClass<Object> type, Object expect) {
         this.type = type;
         this.expect = expect;
     }
 
-    public static Expect schemaExpect(Class<?> type, Object expect,
-                                      @Deprecated
-                                      Actual subActual) {
-        Class<Object> realSchemaType = subActual.polymorphicSchemaType(type);
-        return new Expect(BeanClass.create(realSchemaType), expect == null ? newInstance(realSchemaType) : expect) {
-            @Override
-            public boolean isPartial() {
-                return type.getAnnotation(Partial.class) != null;
-            }
-        };
-    }
-
     public boolean isSchema() {
+//        TODO move to beanclass ***************
         return Schema.class.isAssignableFrom(type.getType());
     }
 
-    protected boolean isPartial() {
-        return false;
+    public boolean isPartial() {
+//        TODO move to beanclass *************** instance/method return optional
+        return type.getType().getAnnotation(Partial.class) != null;
     }
 
     public boolean isFormatter() {
-        return Formatter.class.isAssignableFrom(((BeanClass<?>) type).getType());
+//        TODO move to beanclass ***************
+        return Formatter.class.isAssignableFrom(type.getType());
     }
 
     public boolean isCollection() {
@@ -57,45 +52,45 @@ public class Expect {
     }
 
     public boolean isMap() {
-        return Map.class.isAssignableFrom(((BeanClass<?>) type).getType());
+//        TODO move to beanclass ***************
+        return Map.class.isAssignableFrom(type.getType());
     }
 
     public boolean isSchemaValue() {
-        return Value.class.isAssignableFrom(((BeanClass<?>) type).getType());
+//        TODO move to beanclass ***************
+        return Value.class.isAssignableFrom(type.getType());
     }
 
     public boolean isSchemaType() {
-        return Type.class.isAssignableFrom(((BeanClass<?>) type).getType());
+//        TODO move to beanclass ***************
+        return Type.class.isAssignableFrom(type.getType());
     }
 
     @SuppressWarnings("unchecked")
-    public Expect sub(PropertyReader<Object> propertyReader, DALRuntimeContext context, Actual actual) {
-        return create((BeanClass<Object>) propertyReader.getType(),
-                expect == null ? null : propertyReader.getValue(expect), context, actual);
-    }
-
-    private static Expect create(BeanClass<Object> type, Object expect, DALRuntimeContext context, Actual subActual) {
-        return context.isSchemaRegistered(type.getType()) ? schemaExpect(type.getType(), expect, subActual) : new Expect(type, expect);
+    public Expect sub(PropertyReader<Object> propertyReader) {
+        return new Expect((BeanClass<Object>) propertyReader.getType(),
+                expect == null ? null : propertyReader.getValue(expect));
     }
 
     @SuppressWarnings("unchecked")
-    public Expect sub(BeanClass<Object> type, Object key, DALRuntimeContext context, Actual subActual) {
-        return create(type, expect == null ? null : ((Map<?, Object>) expect).get(key), context, subActual);
+    public Expect sub(BeanClass<Object> type, Object key) {
+        return new Expect(type, expect == null ? null : ((Map<?, Object>) expect).get(key));
     }
 
-    public Expect sub(DALRuntimeContext context, int index, Actual subActual) {
-        return sub(type.getPropertyReader(valueOf(index)), context, subActual);
+    public Expect sub(int index) {
+        return sub(type.getPropertyReader(valueOf(index)));
     }
 
     public Optional<Schema> getSchema() {
+//        TODO move to beanclass ***************
         return BeanClass.cast(expect, Schema.class);
     }
 
     @SuppressWarnings("unchecked")
     public Formatter<Object, Object> extractFormatter() {
         if (expect == null)
-            return (Formatter<Object, Object>) type.getTypeArguments(0).map(t -> type.newInstance((Object) t.getType()))
-                    .orElseGet(type::newInstance);
+            return (Formatter<Object, Object>) type.getTypeArguments(0)
+                    .map(t -> type.newInstance((Object) t.getType())).orElseGet(type::newInstance);
         return (Formatter<Object, Object>) expect;
     }
 
@@ -124,6 +119,7 @@ public class Expect {
         return (int) toStream(expect).count();
     }
 
+    @SuppressWarnings("unchecked")
     Type<Object> extractType() {
         return (Type<Object>) expect;
     }
@@ -137,7 +133,7 @@ public class Expect {
     }
 
     boolean equals(Actual actual) {
-        return actual.equals2(expect);
+        return actual.equalsExpect(expect);
     }
 
     Stream<PropertyReader<Object>> prpertyReaders() {
@@ -148,7 +144,52 @@ public class Expect {
         return expect == null;
     }
 
-    public Expect asSchema(Actual actual) {
-        return schemaExpect(type.getType(), expect, actual);
+    public SchemaExpect asSchema(Actual actual) {
+        Class<Object> schemaType = actual.polymorphicSchemaType(type.getType());
+        return new SchemaExpect(schemaType, expect);
+    }
+
+    public static class SchemaExpect extends Expect {
+        public SchemaExpect(Class<Object> schemaType, Object expect) {
+            super(BeanClass.create(schemaType), expect == null ? BeanClass.newInstance(schemaType) : expect);
+        }
+
+        boolean noMoreUnexpectedField(Set<String> actualFields) {
+            if (isPartial())
+                return true;
+            Set<String> expectFields = new LinkedHashSet<String>(actualFields) {{
+                prpertyReaders().map(PropertyAccessor::getName).forEach(this::remove);
+            }};
+            return expectFields.isEmpty() || Verification.errorLog("Unexpected field %s for schema %s",
+                    expectFields.stream().collect(joining("`, `", "`", "`")), inspectFullType());
+        }
+
+        boolean allMandatoryPropertyShouldBeExist(Set<String> actualFields) {
+            return prpertyReaders().filter(field -> field.getAnnotation(AllowNull.class) == null)
+                    .allMatch(field -> actualFields.contains(field.getName())
+                            || Verification.errorLog("Expecting field `%s` to be in type %s, but does not exist", field.getName(),
+                            inspectFullType()));
+        }
+
+        boolean allPropertyValueShouldBeValid(RuntimeContextBuilder.DALRuntimeContext runtimeContext, Actual actual) {
+            return prpertyReaders().allMatch(propertyReader -> {
+                Actual subActual = actual.sub(propertyReader.getName());
+                //            TODO annotation optional **************
+                return propertyReader.getAnnotation(AllowNull.class) != null && subActual.isNull()
+                        || Verification.expect(sub(propertyReader)).verify(runtimeContext, subActual);
+            });
+        }
+
+        boolean verifySchemaInstance(Actual actual) {
+            getSchema().ifPresent(actual::verifySchema);
+            return true;
+        }
+
+        boolean verify(RuntimeContextBuilder.DALRuntimeContext runtimeContext, Actual actual, Set<String> actualFields) {
+            return noMoreUnexpectedField(actualFields)
+                    && allMandatoryPropertyShouldBeExist(actualFields)
+                    && allPropertyValueShouldBeValid(runtimeContext, actual)
+                    && verifySchemaInstance(actual);
+        }
     }
 }
