@@ -3,7 +3,6 @@ package com.github.leeonky.dal.runtime.schema;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
-import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.SchemaAssertionFailure;
 import com.github.leeonky.dal.type.Partial;
@@ -16,9 +15,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.util.BeanClass.newInstance;
+import static com.github.leeonky.util.CollectionHelper.toStream;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 
@@ -31,7 +33,9 @@ public class Expect {
         this.expect = expect;
     }
 
-    public static Expect schemaExpect(Class<?> type, Object expect, Actual subActual) {
+    public static Expect schemaExpect(Class<?> type, Object expect,
+                                      @Deprecated
+                                      Actual subActual) {
         Class<Object> realSchemaType = subActual.polymorphicSchemaType(type);
         return new Expect(BeanClass.create(realSchemaType), expect == null ? newInstance(realSchemaType) : expect) {
             @Override
@@ -46,14 +50,6 @@ public class Expect {
         };
     }
 
-    public BeanClass<Object> getType() {
-        return type;
-    }
-
-    public Object getExpect() {
-        return expect;
-    }
-
     public boolean isSchema() {
         return false;
     }
@@ -63,23 +59,23 @@ public class Expect {
     }
 
     public boolean isFormatter() {
-        return Formatter.class.isAssignableFrom(((BeanClass<?>) getType()).getType());
+        return Formatter.class.isAssignableFrom(((BeanClass<?>) type).getType());
     }
 
     public boolean isCollection() {
-        return getType().isCollection();
+        return type.isCollection();
     }
 
     public boolean isMap() {
-        return Map.class.isAssignableFrom(((BeanClass<?>) getType()).getType());
+        return Map.class.isAssignableFrom(((BeanClass<?>) type).getType());
     }
 
     public boolean isSchemaValue() {
-        return Value.class.isAssignableFrom(((BeanClass<?>) getType()).getType());
+        return Value.class.isAssignableFrom(((BeanClass<?>) type).getType());
     }
 
     public boolean isSchemaType() {
-        return Type.class.isAssignableFrom(((BeanClass<?>) getType()).getType());
+        return Type.class.isAssignableFrom(((BeanClass<?>) type).getType());
     }
 
     @SuppressWarnings("unchecked")
@@ -93,15 +89,18 @@ public class Expect {
     }
 
     @SuppressWarnings("unchecked")
-    Expect sub(Object key, DALRuntimeContext context, Expect expect, String property, Actual subActual) {
-        return create((BeanClass<Object>) expect.getType().getTypeArguments(1).orElseThrow(() -> new IllegalStateException(format("%s should specify generic type", property))),
-                expect.expect == null ? null : ((Map<?, Object>) expect.expect).get(key), context, subActual);
+    public Expect sub(BeanClass<Object> type, Object key, DALRuntimeContext context, Actual subActual) {
+        return create(type, expect == null ? null : ((Map<?, Object>) expect).get(key), context, subActual);
     }
 
-    public boolean verifySchemaInstance(Data actual) {
+    public Expect sub(DALRuntimeContext context, int index, Actual subActual) {
+        return sub(type.getPropertyReader(valueOf(index)), context, subActual);
+    }
+
+    public boolean verifySchemaInstance(Consumer<Schema> verifySchema) {
         if (expect instanceof Schema) {
             try {
-                ((Schema) expect).verify(actual);
+                verifySchema.accept((Schema) expect);
             } catch (SchemaAssertionFailure schemaAssertionFailure) {
                 Verification.errorLog(schemaAssertionFailure.getMessage());
             }
@@ -113,11 +112,11 @@ public class Expect {
         if (isPartial())
             return true;
         Set<String> expectFields = new LinkedHashSet<String>(actualFields) {{
-            removeAll(getType().getPropertyReaders().keySet());
+            removeAll(type.getPropertyReaders().keySet());
         }};
         return expectFields.isEmpty() || Verification.errorLog("Unexpected field %s for schema %s[%s]",
                 expectFields.stream().collect(Collectors.joining("`, `", "`", "`")),
-                getType().getSimpleName(), getType().getName());
+                type.getSimpleName(), type.getName());
     }
 
     @SuppressWarnings("unchecked")
@@ -128,19 +127,52 @@ public class Expect {
         return (Formatter<Object, Object>) expect;
     }
 
-    Expect sub(DALRuntimeContext context, int index, Actual subActual) {
-        return sub(type.getPropertyReader(valueOf(index)), context, subActual);
-    }
-
     Optional<BeanClass<?>> getGenericType(int typePosition) {
-        return getType().getTypeArguments(typePosition);
+        return type.getTypeArguments(typePosition);
     }
 
     String inspectExpectType() {
-        return format("type [%s]", getType().getName());
+        return format("type [%s]", type.getName());
+    }
+
+    String inspectFullType() {
+        return String.format("%s[%s]", type.getSimpleName(), type.getName());
     }
 
     public boolean verifyValue(BiPredicate<Value<Object>, BeanClass<?>> predicate) {
-        return predicate.test((Value<Object>) getExpect(), getGenericType(0).orElse(null));
+        return predicate.test((Value<Object>) expect, getGenericType(0).orElse(null));
+    }
+
+    @SuppressWarnings("unchecked")
+    public int mapKeysSize() {
+        return ((Map<?, Object>) expect).size();
+    }
+
+    int collectionSize() {
+        return (int) toStream(expect).count();
+    }
+
+    Type<Object> extractType() {
+        return (Type<Object>) expect;
+    }
+
+    boolean isInstanceOf(Actual actual) {
+        return actual.inInstanceOf(type);
+    }
+
+    boolean isInstanceType(Actual actual) {
+        return actual.inInstanceOf(getGenericType(0).orElseThrow(actual::invalidGenericType));
+    }
+
+    boolean equals(Actual actual) {
+        return actual.equals2(expect);
+    }
+
+    Stream<PropertyReader<Object>> prpertyReaders() {
+        return type.getPropertyReaders().values().stream();
+    }
+
+    public boolean structure() {
+        return expect == null;
     }
 }

@@ -1,16 +1,22 @@
 package com.github.leeonky.dal.runtime.schema;
 
 import com.github.leeonky.dal.compiler.Compiler;
+import com.github.leeonky.dal.format.Formatter;
+import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.dal.type.SubType;
 import com.github.leeonky.util.BeanClass;
 
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.util.BeanClass.getClassName;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.IntStream.range;
 
 public class Actual {
     private final String property;
@@ -25,15 +31,6 @@ public class Actual {
         return new Actual("", data);
     }
 
-    public String getProperty() {
-        return property;
-    }
-
-    @Deprecated
-    public Data getActual() {
-        return actual;
-    }
-
     public Actual sub(Object property) {
         return new Actual(this.property + "." + property, actual.getValue(property));
     }
@@ -42,7 +39,7 @@ public class Actual {
         return actual.isNull();
     }
 
-    public Actual sub(int index) {
+    public Actual sub(Integer index) {
         return new Actual(property + "[" + index + "]", actual.getValue(index));
     }
 
@@ -58,12 +55,13 @@ public class Actual {
         }).orElse((Class<Object>) schemaType);
     }
 
-    public IllegalStateException invalidFieldGenericType() {
+    public IllegalStateException invalidGenericType() {
         return new IllegalStateException(format("%s should specify generic type", property));
     }
 
     public boolean convertAble(BeanClass<?> type, String inspect) {
         try {
+//            TODO missing test error message
             if (isNull())
                 return Verification.errorLog("Can not convert null field `%s` to %s, " +
                         "use @AllowNull to verify nullable field", property, inspect);
@@ -78,5 +76,46 @@ public class Actual {
     public boolean verifyValue(Value<Object> value, BeanClass<?> type) {
         return value.verify(value.convertAs(actual, type))
                 || Verification.errorLog(value.errorMessage(property, actual.getInstance()));
+    }
+
+    public Stream<Object> fieldNames() {
+        return actual.getFieldNames().stream();
+    }
+
+    public Stream<Integer> indexStream() {
+        return range(0, actual.getListSize()).boxed();
+    }
+
+    public boolean verifyFormatter(Formatter<Object, Object> formatter) {
+        return formatter.isValid(actual.getInstance())
+                || Verification.errorLog("Expecting field `%s` to be in `%s`, but was [%s]", property,
+                formatter.getFormatterName(), actual.getInstance());
+    }
+
+    boolean verifySize(Function<Actual, Stream<?>> actualStream, int expectSize) {
+        return actualStream.apply(this).count() == expectSize
+                || Verification.errorLog("Expecting field `%s` to be size [%d], but was size [%d]",
+                property, expectSize, actualStream.apply(this).count());
+    }
+
+    boolean verifyType(Type<Object> expect) {
+        return expect.verify(actual.getInstance()) ||
+                Verification.errorLog(expect.errorMessage(property, actual.getInstance()));
+    }
+
+    boolean inInstanceOf(BeanClass<?> type) {
+        return type.getType().isInstance(actual.getInstance()) ||
+                Verification.errorLog(String.format("Expecting field `%s` to be %s, but was [%s]", property,
+                        format("type [%s]", type.getName()), getClassName(actual.getInstance())));
+    }
+
+    boolean equals2(Object expect) {
+        return Objects.equals(expect, actual.getInstance()) ||
+                Verification.errorLog(format("Expecting field `%s` to be %s[%s], but was %s[%s]", property,
+                        getClassName(expect), expect, getClassName(actual.getInstance()), actual.getInstance()));
+    }
+
+    void verifySchema(Schema expect1) {
+        expect1.verify(actual);
     }
 }

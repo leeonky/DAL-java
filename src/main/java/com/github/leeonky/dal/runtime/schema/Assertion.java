@@ -18,7 +18,7 @@ public interface Assertion {
     }
 
     default boolean verify(DALRuntimeContext runtimeContext, Verification verification) {
-        return verification.structure() ? verifyStructure(verification, runtimeContext)
+        return verification.expect.structure() ? verifyStructure(verification, runtimeContext)
                 : verifyContent(verification, runtimeContext);
     }
 
