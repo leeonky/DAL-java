@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static com.github.leeonky.interpreter.FunctionUtil.notAllowParallelReduce;
+import static com.github.leeonky.util.function.Extension.notAllowParallelReduce;
 import static java.util.Arrays.asList;
 
 public class SchemaType {

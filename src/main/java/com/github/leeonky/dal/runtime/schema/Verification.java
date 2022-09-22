@@ -5,9 +5,9 @@ import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.TriplePredicate;
 import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.IfFactory;
+import com.github.leeonky.util.function.IfFactory;
 
-import static com.github.leeonky.util.IfFactory.when;
+import static com.github.leeonky.util.function.When.when;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 
@@ -42,7 +42,7 @@ public class Verification {
     }
 
     public boolean verify(DALRuntimeContext runtimeContext, Actual actual) {
-        return VERIFICATIONS.createBy(expect).test(this, runtimeContext, actual);
+        return VERIFICATIONS.get(expect).test(this, runtimeContext, actual);
     }
 
     private boolean valueStructure(DALRuntimeContext runtimeContext, Actual actual) {

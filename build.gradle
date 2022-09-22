@@ -51,8 +51,8 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.leeonky:bean-util:0.5.1'
-    compile 'com.github.leeonky:interpreter-core:0.0.4'
+    compile 'com.github.leeonky:bean-util:0.5.2'
+    compile 'com.github.leeonky:interpreter-core:0.0.5'
 
     testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
     testImplementation 'org.assertj:assertj-core:3.21.0'
@@ -66,6 +66,7 @@ dependencies {
     testCompile('org.projectlombok:lombok:1.18.4')
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.0.0'
 
+    testImplementation("com.github.leeonky:DAL-extension-basic:0.0.2")
     pitest 'io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.3.1'
 }
 

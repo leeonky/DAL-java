@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.format;
 
 import com.github.leeonky.dal.runtime.IllegalTypeException;
-import com.github.leeonky.util.Comparator;
+import com.github.leeonky.util.function.Comparator;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -109,8 +109,8 @@ public class Formatters {
         @Override
         public BigInteger convert(java.lang.Number input) {
             if (input instanceof Double
-                || input instanceof Float
-                || (input instanceof BigDecimal && ((BigDecimal) input).scale() != 0)) {
+                    || input instanceof Float
+                    || (input instanceof BigDecimal && ((BigDecimal) input).scale() != 0)) {
                 throw new IllegalTypeException();
             }
             return new BigInteger(input.toString());

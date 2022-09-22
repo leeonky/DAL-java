@@ -30,7 +30,7 @@ class CompilerTest {
         }
 
         private void relaxStringShouldBe(String code, String expected) {
-            assertThat(compiler.EXPRESSION_RELAX_STRING.parse(new DALProcedure(SourceCode.createSourceCode(code, emptyList()),
+            assertThat(compiler.EXPRESSION_RELAX_STRING.parse(new DALProcedure(new SourceCode(code, emptyList()),
                     runtimeContext, DALExpression::new)).evaluate(runtimeContext)).isEqualTo(expected);
         }
     }
@@ -50,7 +50,7 @@ class CompilerTest {
         }
 
         private void relaxStringShouldBe(String code, String expected) {
-            assertThat(compiler.OBJECT_SCOPE_RELAX_STRING.parse(new DALProcedure(SourceCode.createSourceCode(code, emptyList()),
+            assertThat(compiler.OBJECT_SCOPE_RELAX_STRING.parse(new DALProcedure(new SourceCode(code, emptyList()),
                     runtimeContext, DALExpression::new)).evaluate(runtimeContext)).isEqualTo(expected);
         }
     }
@@ -70,7 +70,7 @@ class CompilerTest {
         }
 
         private void relaxStringShouldBe(String code, String expected) {
-            assertThat(compiler.LIST_SCOPE_RELAX_STRING.parse(new DALProcedure(SourceCode.createSourceCode(code, emptyList()),
+            assertThat(compiler.LIST_SCOPE_RELAX_STRING.parse(new DALProcedure(new SourceCode(code, emptyList()),
                     runtimeContext, DALExpression::new)).evaluate(runtimeContext)).isEqualTo(expected);
         }
     }

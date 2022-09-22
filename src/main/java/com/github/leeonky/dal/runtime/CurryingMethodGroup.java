@@ -1,7 +1,5 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.interpreter.FunctionUtil;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +7,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.util.function.Extension.oneOf;
 import static java.util.stream.Collectors.joining;
 
 class CurryingMethodGroup implements CurryingMethod {
@@ -29,7 +28,7 @@ class CurryingMethodGroup implements CurryingMethod {
 
     @Override
     public Object resolve() {
-        Optional<InstanceCurryingMethod> curryingMethod = FunctionUtil.oneOf(
+        Optional<InstanceCurryingMethod> curryingMethod = oneOf(
                 () -> selectCurryingMethod(InstanceCurryingMethod::allParamsSameType),
                 () -> selectCurryingMethod(InstanceCurryingMethod::allParamsBaseType),
                 () -> selectCurryingMethod(InstanceCurryingMethod::allParamsConvertible));

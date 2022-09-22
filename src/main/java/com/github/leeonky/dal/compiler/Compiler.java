@@ -16,13 +16,13 @@ import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRIN
 import static com.github.leeonky.dal.compiler.DALProcedure.*;
 import static com.github.leeonky.interpreter.ClauseParser.Mandatory.clause;
 import static com.github.leeonky.interpreter.ClauseParser.positionClause;
-import static com.github.leeonky.interpreter.IfThenFactory.when;
 import static com.github.leeonky.interpreter.NodeParser.positionNode;
 import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.Parser.*;
-import static com.github.leeonky.interpreter.Syntax.Rules.*;
+import static com.github.leeonky.interpreter.Rules.*;
 import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
+import static com.github.leeonky.util.function.When.when;
 import static java.util.Optional.empty;
 
 public class Compiler {
@@ -84,9 +84,9 @@ public class Compiler {
             PROPERTY_CHAIN, OPERAND, EXPRESSION, VERIFICATION_PROPERTY, OBJECT_VERIFICATION_PROPERTY,
             DEFAULT_INPUT = procedure -> INPUT_NODE,
             SCHEMA_COMPOSE = Notations.OPENING_BRACKET.with(single(many(SCHEMA.mandatory("Expect a schema"))
-                    .and(Syntax.Rules.splitBy(Notations.SCHEMA_AND)).as(Factory::elementSchemas))
+                    .and(splitBy(Notations.SCHEMA_AND)).as(Factory::elementSchemas))
                     .and(endWith(Notations.CLOSING_BRACKET)).as()).or(many(SCHEMA.mandatory("Expect a schema"))
-                    .and(Syntax.Rules.splitBy(Notations.SCHEMA_AND)).as(Factory::schemas)),
+                    .and(splitBy(Notations.SCHEMA_AND)).as(Factory::schemas)),
             EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(Factory::relaxString),
             OBJECT_SCOPE_RELAX_STRING = Tokens.OBJECT_SCOPE_RELAX_STRING.nodeParser(Factory::relaxString),
             LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(Factory::relaxString),
@@ -197,7 +197,7 @@ public class Compiler {
     }
 
     public List<Object> toChainNodes(String sourceCode) {
-        return PROPERTY_CHAIN.parse(new DALProcedure(SourceCode.createSourceCode(sourceCode, Notations.LINE_COMMENTS),
+        return PROPERTY_CHAIN.parse(new DALProcedure(new SourceCode(sourceCode, Notations.LINE_COMMENTS),
                 null, DALExpression::new)).propertyChain();
     }
 

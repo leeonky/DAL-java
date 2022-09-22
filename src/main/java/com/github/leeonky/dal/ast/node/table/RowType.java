@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.node.SymbolNode.Type.BRACKET;
 import static com.github.leeonky.dal.ast.node.table.SpecifyIndexRowType.indexToExpression;
-import static com.github.leeonky.interpreter.IfThenFactory.when;
+import static com.github.leeonky.util.function.When.when;
 import static java.util.stream.Collectors.toList;
 
 abstract class RowType {

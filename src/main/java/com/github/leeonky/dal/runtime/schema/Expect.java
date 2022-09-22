@@ -33,13 +33,11 @@ public class Expect {
     }
 
     public boolean isSchema() {
-//        TODO move to beanclass ***************
-        return Schema.class.isAssignableFrom(type.getType());
+        return type.isInheritedFrom(Schema.class);
     }
 
     public boolean isFormatter() {
-//        TODO move to beanclass ***************
-        return Formatter.class.isAssignableFrom(type.getType());
+        return type.isInheritedFrom(Formatter.class);
     }
 
     public boolean isCollection() {
@@ -47,18 +45,15 @@ public class Expect {
     }
 
     public boolean isMap() {
-//        TODO move to beanclass ***************
-        return Map.class.isAssignableFrom(type.getType());
+        return type.isInheritedFrom(Map.class);
     }
 
     public boolean isSchemaValue() {
-//        TODO move to beanclass ***************
-        return Value.class.isAssignableFrom(type.getType());
+        return type.isInheritedFrom(Value.class);
     }
 
     public boolean isSchemaType() {
-//        TODO move to beanclass ***************
-        return Type.class.isAssignableFrom(type.getType());
+        return type.isInheritedFrom(Type.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -77,7 +72,6 @@ public class Expect {
     }
 
     public Optional<Schema> getSchema() {
-//        TODO move to beanclass ***************
         return BeanClass.cast(expect, Schema.class);
     }
 
@@ -151,7 +145,7 @@ public class Expect {
 
         public boolean noMoreUnexpectedField(Set<String> actualFields) {
             //        TODO move to beanclass *************** instance/method return optional
-            if (type.getType().getAnnotation(Partial.class) != null)
+            if (type.getAnnotation(Partial.class) != null)
                 return true;
             Set<String> expectFields = new LinkedHashSet<String>(actualFields) {{
                 propertyReaders().map(PropertyAccessor::getName).forEach(this::remove);
@@ -170,7 +164,6 @@ public class Expect {
         public boolean allPropertyValueShouldBeValid(RuntimeContextBuilder.DALRuntimeContext runtimeContext, Actual actual) {
             return propertyReaders().allMatch(propertyReader -> {
                 Actual subActual = actual.sub(propertyReader.getName());
-                //            TODO annotation optional **************
                 return propertyReader.getAnnotation(AllowNull.class) != null && subActual.isNull()
                         || Verification.expect(sub(propertyReader)).verify(runtimeContext, subActual);
             });

@@ -11,8 +11,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
-import static com.github.leeonky.interpreter.FunctionUtil.oneOf;
 import static com.github.leeonky.util.BeanClass.getClassName;
+import static com.github.leeonky.util.function.Extension.oneOf;
 import static java.lang.String.format;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;

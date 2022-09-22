@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.format;
 
-import com.github.leeonky.util.Comparator;
+import com.github.leeonky.util.function.Comparator;
 
 import java.util.Objects;
 

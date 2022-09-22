@@ -17,8 +17,8 @@ import static com.github.leeonky.dal.ast.opt.Factory.*;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
 import static com.github.leeonky.dal.compiler.Notations.COMMA;
 import static com.github.leeonky.dal.compiler.Notations.Operators.*;
-import static com.github.leeonky.interpreter.FunctionUtil.not;
 import static com.github.leeonky.interpreter.Parser.oneOf;
+import static com.github.leeonky.util.function.Extension.not;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 

@@ -2,7 +2,7 @@ package com.github.leeonky.dal.format;
 
 import org.junit.jupiter.api.Test;
 
-import static com.github.leeonky.util.Comparator.*;
+import static com.github.leeonky.util.function.Comparator.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ComparatorTest {

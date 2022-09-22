@@ -105,9 +105,7 @@ public class Actual {
     }
 
     boolean inInstanceOf(BeanClass<?> type) {
-
-//        TODO move to beanclass ***************
-        return type.getType().isInstance(actual.getInstance()) ||
+        return type.isInstance(actual.getInstance()) ||
                 Verification.errorLog(String.format("Expecting field `%s` to be %s, but was [%s]", property,
                         format("type [%s]", type.getName()), getClassName(actual.getInstance())));
     }
