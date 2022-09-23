@@ -49,7 +49,7 @@ class CurryingMethodGroup implements CurryingMethod {
                     .filter(InstanceCurryingMethod::isSameInstanceType).collect(Collectors.toList());
             if (sameInstanceTypeMethods.size() == 1)
                 return sameInstanceTypeMethods.stream().findFirst();
-            throw new IllegalStateException("More than one currying method:\n" + methods.stream().map(
+            throw new InvalidPropertyException("More than one currying method:\n" + methods.stream().map(
                     instanceCurryingMethod -> "  " + instanceCurryingMethod.toString()).sorted().collect(joining("\n")));
         }
         return methods.stream().findFirst();

@@ -8,6 +8,7 @@ import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.InvocationException;
 import com.github.leeonky.util.NumberType;
 
 import java.lang.reflect.Array;
@@ -263,10 +264,15 @@ public class RuntimeContextBuilder {
         }
 
         public Object getPropertyValue(Data data, Object property) {
+            PropertyAccessor<Object> propertyAccessor = propertyAccessors.getData(data.getInstance());
             try {
-                return propertyAccessors.getData(data.getInstance()).getValueByData(data, property);
+                return propertyAccessor.getValueByData(data, property);
             } catch (InvalidPropertyException e) {
                 return data.currying(property).orElseThrow(() -> e).resolve();
+            } catch (InvocationException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new InvocationException(e);
             }
         }
 
