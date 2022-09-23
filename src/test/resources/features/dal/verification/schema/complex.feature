@@ -43,8 +43,11 @@ Feature: multiple schema and list schema
     """
     Then failed with the message:
     """
-    Expecting to match schema `IdOne` but was not
-        Expecting field `.id` to be java.lang.Integer[1], but was java.lang.Integer[0]
+    Expected to match schema `IdOne` but was not
+        Expected field `.id` to be java.lang.Integer
+        <1>
+        Actual: java.lang.Integer
+        <0>
     """
     And got the following notation:
     """
@@ -57,8 +60,11 @@ Feature: multiple schema and list schema
     """
     Then failed with the message:
     """
-    Expecting to match schema `IdOne` but was not
-        Expecting field `.id` to be java.lang.Integer[1], but was java.lang.Integer[0]
+    Expected to match schema `IdOne` but was not
+        Expected field `.id` to be java.lang.Integer
+        <1>
+        Actual: java.lang.Integer
+        <0>
     """
     And got the following notation:
     """
@@ -103,8 +109,11 @@ Feature: multiple schema and list schema
     """
     Then failed with the message:
     """
-    Expecting [1] to match schema `IdZero` but was not
-        Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
+    Expected [1] to match schema `IdZero` but was not
+        Expected field `.id` to be java.lang.Integer
+        <0>
+        Actual: java.lang.Integer
+        <1>
     """
     And got the following notation:
     """

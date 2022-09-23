@@ -273,7 +273,7 @@ Feature: group
     """
     Then failed with the message:
     """
-    Expecting c to match schema `Number` but was not
+    Expected c to match schema `Number` but was not
     """
     And got the following notation:
     """

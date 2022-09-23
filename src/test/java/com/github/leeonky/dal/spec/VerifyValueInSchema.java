@@ -124,7 +124,7 @@ public class VerifyValueInSchema extends Base {
         AssertionFailure assertionFailure = assertFailed(new HashMap<String, Object>() {{
             put("value", "invalid int");
         }}, "is MatchType");
-        assertThat(assertionFailure).hasMessage("Expecting to match schema `MatchType` but was not\n" +
+        assertThat(assertionFailure).hasMessage("Expected to match schema `MatchType` but was not\n" +
                 "    Can not convert field `.value` (java.lang.String: invalid int) to type [com.github.leeonky.dal.format.Value]");
 
         assertPass(new HashMap<String, Object>() {{
@@ -133,7 +133,7 @@ public class VerifyValueInSchema extends Base {
         assertionFailure = assertFailed(new HashMap<String, Object>() {{
             put("value", null);
         }}, "is MatchType");
-        assertThat(assertionFailure).hasMessage("Expecting to match schema `MatchType` but was not\n" +
+        assertThat(assertionFailure).hasMessage("Expected to match schema `MatchType` but was not\n" +
                 "    Can not convert null field `.value` to type [com.github.leeonky.dal.format.Value], use @AllowNull to verify nullable field");
     }
 
@@ -165,32 +165,32 @@ public class VerifyValueInSchema extends Base {
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is MatchString1", "Expecting to match schema `MatchString1` but was not\n" +
+        }}, "is MatchString1", "Expected to match schema `MatchString1` but was not\n" +
                 "    Expecting field `.value` [2] to be equal to [1], but was not.");
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is MatchNullValue", "Expecting to match schema `MatchNullValue` but was not\n" +
+        }}, "is MatchNullValue", "Expected to match schema `MatchNullValue` but was not\n" +
                 "    Expecting field `.value` [2] to be null, but was not.");
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is MatchLessThan2", "Expecting to match schema `MatchLessThan2` but was not\n" +
+        }}, "is MatchLessThan2", "Expected to match schema `MatchLessThan2` but was not\n" +
                 "    Expecting field `.value` [2] to be less than [2], but was not.");
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is MatchGreaterThan3", "Expecting to match schema `MatchGreaterThan3` but was not\n" +
+        }}, "is MatchGreaterThan3", "Expected to match schema `MatchGreaterThan3` but was not\n" +
                 "    Expecting field `.value` [2] to be greater than [3], but was not.");
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 4);
-        }}, "is MatchLessOrEqualTo3", "Expecting to match schema `MatchLessOrEqualTo3` but was not\n" +
+        }}, "is MatchLessOrEqualTo3", "Expected to match schema `MatchLessOrEqualTo3` but was not\n" +
                 "    Expecting field `.value` [4] to be less or equal to [3], but was not.");
 
         assertErrorContains(new HashMap<String, Object>() {{
             put("value", 2);
-        }}, "is MatchGreaterOrEqualTo3", "Expecting to match schema `MatchGreaterOrEqualTo3` but was not\n" +
+        }}, "is MatchGreaterOrEqualTo3", "Expected to match schema `MatchGreaterOrEqualTo3` but was not\n" +
                 "    Expecting field `.value` [2] to be greater or equal to [3], but was not.");
     }
 

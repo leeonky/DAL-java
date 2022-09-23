@@ -156,7 +156,7 @@ public class Expect {
         public boolean allMandatoryPropertyShouldBeExist(Set<String> actualFields) {
             return propertyReaders().filter(field -> field.getAnnotation(AllowNull.class) == null)
                     .allMatch(field -> actualFields.contains(field.getName())
-                            || Verification.errorLog("Expecting field `%s` to be in type %s, but does not exist", field.getName(),
+                            || Verification.errorLog("Expected field `%s` to be in type %s, but does not exist", field.getName(),
                             inspectFullType()));
         }
 

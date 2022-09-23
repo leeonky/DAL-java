@@ -43,8 +43,11 @@ Feature: define schema
     """
     Then failed with the message:
     """
-    Expecting to match schema `MapIdZero` but was not
-        Expecting field `.value.object.id` to be java.lang.String[0], but was java.lang.String[1]
+    Expected to match schema `MapIdZero` but was not
+        Expected field `.value.object.id` to be java.lang.String
+        <0>
+        Actual: java.lang.String
+        <1>
     """
     And got the following notation:
     """
@@ -93,8 +96,11 @@ Feature: define schema
     """
     Then failed with the message:
     """
-    Expecting to match schema `ListIdZero` but was not
-        Expecting field `.value[1].id` to be java.lang.String[0], but was java.lang.String[1]
+    Expected to match schema `ListIdZero` but was not
+        Expected field `.value[1].id` to be java.lang.String
+        <0>
+        Actual: java.lang.String
+        <1>
     """
     And got the following notation:
     """

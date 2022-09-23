@@ -24,8 +24,11 @@ Feature: schema in table
     """
     Then failed with the message:
     """
-    Expecting [0] to match schema `IdZero` but was not
-        Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
+    Expected [0] to match schema `IdZero` but was not
+        Expected field `.id` to be java.lang.Integer
+        <0>
+        Actual: java.lang.Integer
+        <1>
     """
     And got the following notation:
     """
@@ -73,8 +76,11 @@ Feature: schema in table
     """
     Then failed with the message:
     """
-    Expecting [0] to match schema `IdZero` but was not
-        Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
+    Expected [0] to match schema `IdZero` but was not
+        Expected field `.id` to be java.lang.Integer
+        <0>
+        Actual: java.lang.Integer
+        <1>
     """
     And got the following notation:
     """
@@ -127,8 +133,11 @@ Feature: schema in table
     """
     Then failed with the message:
     """
-    Expecting obj to match schema `IdZero` but was not
-        Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
+    Expected obj to match schema `IdZero` but was not
+        Expected field `.id` to be java.lang.Integer
+        <0>
+        Actual: java.lang.Integer
+        <1>
     """
     And got the following notation:
     """
@@ -180,8 +189,11 @@ Feature: schema in table
     """
     Then failed with the message:
     """
-    Expecting obj to match schema `IdZero` but was not
-        Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[1]
+    Expected obj to match schema `IdZero` but was not
+        Expected field `.id` to be java.lang.Integer
+        <0>
+        Actual: java.lang.Integer
+        <1>
     """
     And got the following notation:
     """

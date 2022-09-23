@@ -88,13 +88,13 @@ public class Actual {
 
     public boolean verifyFormatter(Formatter<Object, Object> formatter) {
         return formatter.isValid(actual.getInstance())
-                || Verification.errorLog("Expecting field `%s` to be in `%s`, but was [%s]", property,
-                formatter.getFormatterName(), actual.getInstance());
+                || Verification.errorLog("Expected field `%s` to be formatter `%s`\nActual: %s", property,
+                formatter.getFormatterName(), actual.inspect().trim());
     }
 
     boolean verifySize(Function<Actual, Stream<?>> actualStream, int expectSize) {
         return actualStream.apply(this).count() == expectSize
-                || Verification.errorLog("Expecting field `%s` to be size [%d], but was size [%d]",
+                || Verification.errorLog("Expected field `%s` to be size <%d>, but was size <%d>",
                 property, expectSize, actualStream.apply(this).count());
     }
 
@@ -105,14 +105,18 @@ public class Actual {
 
     boolean inInstanceOf(BeanClass<?> type) {
         return type.isInstance(actual.getInstance()) ||
-                Verification.errorLog(String.format("Expecting field `%s` to be %s, but was [%s]", property,
-                        format("type [%s]", type.getName()), getClassName(actual.getInstance())));
+                Verification.errorLog(String.format("Expected field `%s` to be %s\nActual: %s", property,
+                        type.getName(), actual.inspect().trim()));
     }
 
     public boolean equalsExpect(Object expect) {
         return Objects.equals(expect, actual.getInstance()) ||
-                Verification.errorLog(format("Expecting field `%s` to be %s[%s], but was %s[%s]", property,
-                        getClassName(expect), expect, getClassName(actual.getInstance()), actual.getInstance()));
+                Verification.errorLog(format("Expected field `%s` to be %s\nActual: %s", property,
+                        inspect(expect), actual.inspect().trim()));
+    }
+
+    public String inspect(Object obj) {
+        return obj == null ? "null " : format("%s\n<%s>", getClassName(obj), obj);
     }
 
     public void verifySchema(Schema expect) {

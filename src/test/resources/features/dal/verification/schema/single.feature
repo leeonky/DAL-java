@@ -34,7 +34,7 @@ Feature: single schema when verification failed
     """
     Then failed with the message:
     """
-    Expecting to match schema `IdZero` but was not
+    Expected to match schema `IdZero` but was not
         Unexpected field `unexpected field` for schema IdZero[#package#IdZero]
     """
     And got the following notation:
@@ -54,8 +54,8 @@ Feature: single schema when verification failed
     """
     Then failed with the message:
     """
-    Expecting to match schema `IdZero` but was not
-        Expecting field `id` to be in type IdZero[#package#IdZero], but does not exist
+    Expected to match schema `IdZero` but was not
+        Expected field `id` to be in type IdZero[#package#IdZero], but does not exist
     """
     And got the following notation:
     """
@@ -76,8 +76,11 @@ Feature: single schema when verification failed
     """
     Then failed with the message:
     """
-    Expecting to match schema `IdZero` but was not
-        Expecting field `.id` to be java.lang.Integer[0], but was java.lang.String[0]
+    Expected to match schema `IdZero` but was not
+        Expected field `.id` to be java.lang.Integer
+        <0>
+        Actual: java.lang.String
+        <0>
     """
     And got the following notation:
     """
@@ -98,8 +101,11 @@ Feature: single schema when verification failed
     """
     Then failed with the message:
     """
-    Expecting to match schema `IdZero` but was not
-        Expecting field `.id` to be java.lang.Integer[0], but was java.lang.Integer[2]
+    Expected to match schema `IdZero` but was not
+        Expected field `.id` to be java.lang.Integer
+        <0>
+        Actual: java.lang.Integer
+        <2>
     """
     And got the following notation:
     """
@@ -136,8 +142,10 @@ Feature: single schema when verification failed
     """
     Then failed with the message:
     """
-    Expecting to match schema `StringId` but was not
-        Expecting field `.id` to be type [java.lang.String], but was [java.lang.Integer]
+    Expected to match schema `StringId` but was not
+        Expected field `.id` to be java.lang.String
+        Actual: java.lang.Integer
+        <0>
     """
     And got the following notation:
     """

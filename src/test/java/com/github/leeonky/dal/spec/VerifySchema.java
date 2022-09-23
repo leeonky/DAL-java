@@ -3,6 +3,7 @@ package com.github.leeonky.dal.spec;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.format.Formatters;
+import com.github.leeonky.dal.runtime.AssertionFailure;
 import com.github.leeonky.dal.runtime.PropertyAccessor;
 import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Partial;
@@ -313,7 +314,11 @@ class VerifySchema extends Base {
         @Test
         void should_support_verify_field_in_schema_type_with_instance() throws JSONException {
             assertPass(new JSONObject("{\"fieldValue\": {\"integer\": 1}}"), "is SchemaWithInstance");
-            assertFailed(new JSONObject("{\"fieldValue\": {\"integer\": 2}}"), "is SchemaWithInstance");
+            AssertionFailure failure = assertFailed(new JSONObject("{\"fieldValue\": {\"integer\": 2}}"), "is SchemaWithInstance");
+            assertThat(failure).hasMessage("Expected to match schema `SchemaWithInstance` but was not\n" +
+                    "    Expected field `.fieldValue.integer` to be formatter `Number equal to [1]`\n" +
+                    "    Actual: java.lang.Integer\n" +
+                    "    <2>");
         }
     }
 }

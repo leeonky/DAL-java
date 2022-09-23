@@ -22,7 +22,7 @@ Feature: customized schema
     """
     Then failed with the message:
     """
-    Expecting to match schema `SchemaVerify` but was not
+    Expected to match schema `SchemaVerify` but was not
         a message
     """
     And got the following notation:
