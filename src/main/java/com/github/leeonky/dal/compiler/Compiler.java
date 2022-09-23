@@ -43,34 +43,34 @@ public class Compiler {
             PROPERTY, OBJECT, SORTED_LIST, LIST, PARENTHESES, VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND,
             TABLE, SHORT_VERIFICATION_OPERAND, CELL_VERIFICATION_OPERAND, GROUP_PROPERTY, OPTIONAL_PROPERTY_CHAIN,
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> INPUT_NODE),
-            NUMBER = Tokens.NUMBER.nodeParser(Factory::constNumber),
-            INTEGER = Tokens.INTEGER.nodeParser(Factory::constInteger),
+            NUMBER = Tokens.NUMBER.nodeParser(NodeFactory::constNumber),
+            INTEGER = Tokens.INTEGER.nodeParser(NodeFactory::constInteger),
             SINGLE_QUOTED_STRING = Notations.SINGLE_QUOTED.with(many(charNode(SINGLE_QUOTED_ESCAPES))
-                    .and(endWith(Notations.SINGLE_QUOTED.getLabel())).as(Factory::constString)),
+                    .and(endWith(Notations.SINGLE_QUOTED.getLabel())).as(NodeFactory::constString)),
             DOUBLE_QUOTED_STRING = Notations.DOUBLE_QUOTED.with(many(charNode(DOUBLE_QUOTED_ESCAPES))
-                    .and(endWith(Notations.DOUBLE_QUOTED.getLabel())).as(Factory::constString)),
-            CONST_TRUE = Notations.Keywords.TRUE.wordNode(Factory::constTrue, PROPERTY_DELIMITER_STRING),
-            CONST_FALSE = Notations.Keywords.FALSE.wordNode(Factory::constFalse, PROPERTY_DELIMITER_STRING),
-            CONST_NULL = Notations.Keywords.NULL.wordNode(Factory::constNull, PROPERTY_DELIMITER_STRING),
+                    .and(endWith(Notations.DOUBLE_QUOTED.getLabel())).as(NodeFactory::constString)),
+            CONST_TRUE = Notations.Keywords.TRUE.wordNode(NodeFactory::constTrue, PROPERTY_DELIMITER_STRING),
+            CONST_FALSE = Notations.Keywords.FALSE.wordNode(NodeFactory::constFalse, PROPERTY_DELIMITER_STRING),
+            CONST_NULL = Notations.Keywords.NULL.wordNode(NodeFactory::constNull, PROPERTY_DELIMITER_STRING),
             CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
             REGEX = Notations.OPEN_REGEX.with(many(charNode(REGEX_ESCAPES))
-                    .and(endWith(Notations.CLOSE_REGEX.getLabel())).as(Factory::regex)),
+                    .and(endWith(Notations.CLOSE_REGEX.getLabel())).as(NodeFactory::regex)),
             WILDCARD = Notations.Operators.WILDCARD.node(WildcardNode::new),
             ROW_WILDCARD = Notations.Operators.ROW_WILDCARD.node(WildcardNode::new),
             CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
                     CONST_USER_DEFINED_LITERAL),
             ELEMENT_ELLIPSIS = Notations.Operators.ELEMENT_ELLIPSIS.node(token -> new ListEllipsisNode()),
-            SCHEMA = Tokens.SCHEMA.nodeParser(Factory::schema),
+            SCHEMA = Tokens.SCHEMA.nodeParser(NodeFactory::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
             STRING_PROPERTY = procedure -> procedure.isEnableRelaxProperty() ? single(oneOf(SINGLE_QUOTED_STRING,
-                    DOUBLE_QUOTED_STRING)).as(Factory::stringSymbol).parse(procedure) : empty(),
+                    DOUBLE_QUOTED_STRING)).as(NodeFactory::stringSymbol).parse(procedure) : empty(),
             NUMBER_PROPERTY = procedure -> procedure.isEnableNumberProperty() ? single(NUMBER)
-                    .as(Factory::numberSymbol).parse(procedure) : empty(),
+                    .as(NodeFactory::numberSymbol).parse(procedure) : empty(),
             SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_SYMBOL : Tokens.SYMBOL).nodeParser(
-                    Factory::symbolNode).parse(procedure),
+                    NodeFactory::symbolNode).parse(procedure),
             DOT_SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_DOT_SYMBOL : Tokens.DOT_SYMBOL)
-                    .nodeParser(Factory::symbolNode).parse(procedure),
-            META_SYMBOL = Tokens.DOT_SYMBOL.nodeParser(Factory::metaSymbolNode),
+                    .nodeParser(NodeFactory::symbolNode).parse(procedure),
+            META_SYMBOL = Tokens.DOT_SYMBOL.nodeParser(NodeFactory::metaSymbolNode),
             PROPERTY_PATTERN = this::propertyPattern,
             OPTIONAL_VERIFICATION_PROPERTY = lazyNode(() -> enableSlashProperty(enableRelaxProperty(OPTIONAL_PROPERTY_CHAIN)));
 
@@ -84,13 +84,13 @@ public class Compiler {
             PROPERTY_CHAIN, OPERAND, EXPRESSION, VERIFICATION_PROPERTY, OBJECT_VERIFICATION_PROPERTY,
             DEFAULT_INPUT = procedure -> INPUT_NODE,
             SCHEMA_COMPOSE = Notations.OPENING_BRACKET.with(single(many(SCHEMA.mandatory("Expect a schema"))
-                    .and(splitBy(Notations.SCHEMA_AND)).as(Factory::elementSchemas))
+                    .and(splitBy(Notations.SCHEMA_AND)).as(NodeFactory::elementSchemas))
                     .and(endWith(Notations.CLOSING_BRACKET)).as()).or(many(SCHEMA.mandatory("Expect a schema"))
-                    .and(splitBy(Notations.SCHEMA_AND)).as(Factory::schemas)),
-            EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(Factory::relaxString),
-            OBJECT_SCOPE_RELAX_STRING = Tokens.OBJECT_SCOPE_RELAX_STRING.nodeParser(Factory::relaxString),
-            LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(Factory::relaxString),
-            TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(Factory::relaxString),
+                    .and(splitBy(Notations.SCHEMA_AND)).as(NodeFactory::schemas)),
+            EXPRESSION_RELAX_STRING = Tokens.EXPRESSION_RELAX_STRING.nodeParser(NodeFactory::relaxString),
+            OBJECT_SCOPE_RELAX_STRING = Tokens.OBJECT_SCOPE_RELAX_STRING.nodeParser(NodeFactory::relaxString),
+            LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(NodeFactory::relaxString),
+            TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(NodeFactory::relaxString),
             DEFAULT_INDEX_HEADER = procedure -> new TableDefaultIndexHeadRow();
 
     public ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
@@ -107,7 +107,7 @@ public class Compiler {
                     Operators.PROPERTY_SLASH.clause(propertyChainNode()),
                     Operators.PROPERTY_IMPLICIT.clause(Notations.OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
                             "Should given one property or array index in `[]`")).and(endWith(Notations.CLOSING_BRACKET))
-                            .as(Factory::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE))),
+                            .as(NodeFactory::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE))),
                     Operators.PROPERTY_META.clause(symbolClause(META_SYMBOL.concat(META_LIST_MAPPING_CLAUSE))));
 
     private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> propertyChainNode() {
@@ -130,13 +130,13 @@ public class Compiler {
 
     public Compiler() {
         PARENTHESES = lazyNode(() -> enableCommaAnd(Notations.OPENING_PARENTHESES.with(single(EXPRESSION).and(endWith(Notations.CLOSING_PARENTHESES))
-                .as(Factory::parenthesesNode))));
+                .as(NodeFactory::parenthesesNode))));
         PROPERTY = lazyNode(() -> oneOf(GROUP_PROPERTY, DEFAULT_INPUT.with(oneOf(EXPLICIT_PROPERTY_CLAUSE, IMPLICIT_PROPERTY_CLAUSE))));
         OPTIONAL_PROPERTY_CHAIN = PROPERTY.concatAll(EXPLICIT_PROPERTY_CLAUSE);
         PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
         VERIFICATION_PROPERTY = enableNumberProperty(enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN)));
         OBJECT_VERIFICATION_PROPERTY = many(VERIFICATION_PROPERTY).and(optionalSplitBy(Notations.COMMA))
-                .and(endBefore(Notations.Operators.EQUAL, Notations.Operators.MATCHER, Notations.Operators.IS)).as(Factory::createVerificationGroup);
+                .and(endBefore(Notations.Operators.EQUAL, Notations.Operators.MATCHER, Notations.Operators.IS)).as(NodeFactory::createVerificationGroup);
         OBJECT = lazyNode(() -> disableCommaAnd(Notations.OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(Notations.CLOSING_BRACES))
                 .as(ObjectScopeNode::new).or(many(OBJECT_VERIFICATION_PROPERTY.concat(shortVerificationClause(Operators.VERIFICATION_OPERATORS
                         .mandatory("Expect operator `:` or `=`"), SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING))))

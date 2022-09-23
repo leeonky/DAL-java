@@ -8,7 +8,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Factory {
+public class NodeFactory {
     private static final NumberParser numberParser = new NumberParser();
 
     public static DALNode stringSymbol(DALNode dalNode) {

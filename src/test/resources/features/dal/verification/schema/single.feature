@@ -173,3 +173,32 @@ Feature: single schema when verification failed
     """
     is String
     """
+
+  Scenario: compare type in un-boxed type
+    Given the following schema class:
+    """
+    public class Id implements Schema {
+        public int id;
+    }
+    """
+    And the following schema class:
+    """
+    public class MapId implements Schema {
+      public Map<String, IdZero> value;
+    }
+    """
+    When the following json:
+    """
+    {
+      "value": {
+        "object": {
+          "id": 0
+        }
+      }
+    }
+    """
+
+    Then the following verification should pass:
+    """
+    is MapId
+    """

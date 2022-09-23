@@ -144,7 +144,6 @@ public class Expect {
         }
 
         public boolean noMoreUnexpectedField(Set<String> actualFields) {
-            //        TODO move to beanclass *************** instance/method return optional
             if (type.getAnnotation(Partial.class) != null)
                 return true;
             Set<String> expectFields = new LinkedHashSet<String>(actualFields) {{
