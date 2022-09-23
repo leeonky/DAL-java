@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.util.BeanClass.getClassName;
+import static com.github.leeonky.util.Classes.getClassName;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.IntStream.range;

@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Classes;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class ClassKeyMap<T> extends LinkedHashMap<Class<?>, T> {
         if (data != null)
             return Optional.of(data);
         return entrySet().stream().filter(e -> e.getKey().isInstance(object))
-                .sorted(comparingByKey(BeanClass::compareByExtends))
+                .sorted(comparingByKey(Classes::compareByExtends))
                 .map(Map.Entry::getValue).findFirst();
     }
 

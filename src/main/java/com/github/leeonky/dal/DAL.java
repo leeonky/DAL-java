@@ -8,7 +8,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.SourceCode;
 import com.github.leeonky.interpreter.SyntaxException;
-import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Classes;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,8 +46,8 @@ public class DAL {
     }
 
     public DAL extend() {
-        BeanClass.subTypesOf(Extension.class, "com.github.leeonky.dal.extensions")
-                .forEach(c -> ((Extension) BeanClass.newInstance(c)).extend(this));
+        Classes.subTypesOf(Extension.class, "com.github.leeonky.dal.extensions")
+                .forEach(c -> ((Extension) Classes.newInstance(c)).extend(this));
         return this;
     }
 }

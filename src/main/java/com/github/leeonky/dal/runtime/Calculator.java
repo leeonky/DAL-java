@@ -6,7 +6,7 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static com.github.leeonky.util.BeanClass.getClassName;
+import static com.github.leeonky.util.Classes.getClassName;
 import static java.lang.String.format;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.reverseOrder;

@@ -8,6 +8,7 @@ import com.github.leeonky.dal.type.AllowNull;
 import com.github.leeonky.dal.type.Partial;
 import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Classes;
 import com.github.leeonky.util.PropertyAccessor;
 import com.github.leeonky.util.PropertyReader;
 
@@ -140,7 +141,7 @@ public class Expect {
 
     static class SchemaExpect extends Expect {
         public SchemaExpect(Class<Object> schemaType, Object expect) {
-            super(BeanClass.create(schemaType), expect == null ? BeanClass.newInstance(schemaType) : expect);
+            super(BeanClass.create(schemaType), expect == null ? Classes.newInstance(schemaType) : expect);
         }
 
         public boolean noMoreUnexpectedField(Set<String> actualFields) {

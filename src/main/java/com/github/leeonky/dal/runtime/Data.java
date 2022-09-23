@@ -2,7 +2,6 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.util.BeanClass;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -11,7 +10,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
-import static com.github.leeonky.util.BeanClass.getClassName;
+import static com.github.leeonky.util.Classes.getClassName;
 import static com.github.leeonky.util.function.Extension.oneOf;
 import static java.lang.String.format;
 import static java.util.Optional.of;
@@ -200,7 +199,7 @@ public class Data {
             List<String> strings = fieldNames.stream().map(fieldName -> dumpField(dumped, path, keyIndentation, fieldName))
                     .filter(Objects::nonNull).collect(toList());
             if (!(instance instanceof Map))
-                strings.add(format("%s\"%s\": %s", keyIndentation, "__type", "\"" + BeanClass.getClassName(instance) + "\""));
+                strings.add(format("%s\"%s\": %s", keyIndentation, "__type", "\"" + getClassName(instance) + "\""));
             return strings.stream().collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
         });
     }
