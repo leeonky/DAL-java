@@ -61,11 +61,10 @@ public class Actual {
     }
 
     public boolean convertAble(BeanClass<?> type, String inspect) {
+        if (isNull())
+            return Verification.errorLog("Can not convert null field `%s` to %s, " +
+                    "use @AllowNull to verify nullable field", property, inspect);
         try {
-//            TODO missing test error message
-            if (isNull())
-                return Verification.errorLog("Can not convert null field `%s` to %s, " +
-                        "use @AllowNull to verify nullable field", property, inspect);
             actual.convert(type.getType());
             return true;
         } catch (Exception ignore) {

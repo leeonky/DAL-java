@@ -23,7 +23,7 @@ public class Base {
         dal.evaluate(input, expression);
     }
 
-    protected void assertFailed(Object input, String expression) {
+    protected AssertionFailure assertFailed(Object input, String expression) {
         AssertionFailure assertionFailure = null;
         try {
             dal.evaluate(input, expression);
@@ -31,6 +31,7 @@ public class Base {
             assertionFailure = failure;
         }
         assertThat(assertionFailure).isNotNull();
+        return assertionFailure;
     }
 
     protected void assertRuntimeException(Object input, String sourceCode, int position, String message) {

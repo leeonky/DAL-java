@@ -164,16 +164,6 @@ Feature: single schema when verification failed
     is Data
     """
 
-  Scenario: input value is Formatter
-    Given the following json:
-    """
-      "string"
-    """
-    Then the following verification should pass:
-    """
-    is String
-    """
-
   Scenario: compare type in un-boxed type
     Given the following schema class:
     """
@@ -201,4 +191,14 @@ Feature: single schema when verification failed
     Then the following verification should pass:
     """
     is MapId
+    """
+
+  Scenario: input value is Formatter
+    Given the following json:
+    """
+      "string"
+    """
+    Then the following verification should pass:
+    """
+    is String
     """
