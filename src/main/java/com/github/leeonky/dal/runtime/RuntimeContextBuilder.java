@@ -5,6 +5,7 @@ import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
+import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
@@ -131,14 +132,15 @@ public class RuntimeContextBuilder {
     }
 
     //    TODO ************ Class should  implements Schema
-    public RuntimeContextBuilder registerSchema(Class<?> schema) {
+    public RuntimeContextBuilder registerSchema(Class<? extends Schema> schema) {
         return registerSchema(NameStrategy.SIMPLE_NAME, schema);
     }
 
-    public RuntimeContextBuilder registerSchema(String name, Class<?> schema) {
+    @SuppressWarnings("unchecked")
+    public RuntimeContextBuilder registerSchema(String name, Class<? extends Schema> schema) {
         schemas.put(name, create(schema));
         return registerSchema(name, (data, context) ->
-                expect(new Expect(create((Class<Object>) schema), null)).verify(context, actual(data)));
+                expect(new Expect(create((Class) schema), null)).verify(context, actual(data)));
     }
 
     public RuntimeContextBuilder registerSchema(String name, BiFunction<Data, DALRuntimeContext, Boolean> predicate) {
@@ -162,7 +164,7 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerSchema(NameStrategy nameStrategy, Class<?> schema) {
+    public RuntimeContextBuilder registerSchema(NameStrategy nameStrategy, Class<? extends Schema> schema) {
         return registerSchema(nameStrategy.toName(schema), schema);
     }
 

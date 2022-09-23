@@ -78,7 +78,7 @@ public class CucumberContextBak {
                                             "import com.github.leeonky.dal.runtime.*;\n" +
                                             "import java.util.*;\n" + s)
                             .collect(Collectors.toList()))
-                    .forEach(dal.getRuntimeContextBuilder()::registerSchema);
+                    .forEach(c -> dal.getRuntimeContextBuilder().registerSchema((Class) c));
             dal.evaluate(inputObject, assertion);
             interpreterException = null;
         } catch (InterpreterException e) {

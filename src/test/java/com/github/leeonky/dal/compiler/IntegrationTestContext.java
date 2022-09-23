@@ -72,9 +72,9 @@ public class IntegrationTestContext {
                                             "import java.util.*;\n" + s)
                             .collect(Collectors.toList()))
                     .forEach(schema -> {
-                        dal.getRuntimeContextBuilder().registerSchema(NameStrategy.SIMPLE_NAME_WITH_PARENT, schema);
+                        dal.getRuntimeContextBuilder().registerSchema(NameStrategy.SIMPLE_NAME_WITH_PARENT, (Class) schema);
                         Arrays.stream(schema.getDeclaredClasses()).forEach(c ->
-                                dal.getRuntimeContextBuilder().registerSchema(NameStrategy.SIMPLE_NAME_WITH_PARENT, c));
+                                dal.getRuntimeContextBuilder().registerSchema(NameStrategy.SIMPLE_NAME_WITH_PARENT, (Class) c));
                     });
             result = dal.evaluate(input, expression);
         } catch (InterpreterException e) {
