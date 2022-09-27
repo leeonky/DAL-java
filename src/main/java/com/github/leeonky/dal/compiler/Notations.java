@@ -78,6 +78,7 @@ public class Notations {
             LIST_MAPPING = notation("[]"),
             OPENING_GROUP = notation("<<"),
             CLOSING_GROUP = notation(">>"),
+            TEXT_BLOCK = notation("```"),
             EMPTY = notation("");
 
     public final static List<Notation> LINE_COMMENTS = asList(LINE_COMMENT1, LINE_COMMENT2);

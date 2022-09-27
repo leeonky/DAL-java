@@ -61,7 +61,8 @@ public class NodeFactory {
         return new RegexNode(getString(nodes));
     }
 
-    private static String getString(List<DALNode> nodes) {
+    //    TODO to private
+    public static String getString(List<DALNode> nodes) {
         return nodes.stream().map(ConstNode.class::cast).map(ConstNode::getValue)
                 .map(Object::toString).collect(Collectors.joining());
     }
@@ -87,7 +88,7 @@ public class NodeFactory {
         if (number != null) {
             Class<? extends Number> type = number.getClass();
             if (type.equals(Integer.class) || type.equals(Long.class) || type.equals(Short.class)
-                    || type.equals(Byte.class) || type.equals(BigInteger.class)) {
+                || type.equals(Byte.class) || type.equals(BigInteger.class)) {
                 return new ConstNode(number);
             }
         }

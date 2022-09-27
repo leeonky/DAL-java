@@ -24,6 +24,7 @@ import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
 import static com.github.leeonky.util.function.When.when;
 import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 
 public class Compiler {
     private static final EscapeChars SINGLE_QUOTED_ESCAPES = new EscapeChars()
@@ -49,6 +50,7 @@ public class Compiler {
                     .and(endWith(Notations.SINGLE_QUOTED.getLabel())).as(NodeFactory::constString)),
             DOUBLE_QUOTED_STRING = Notations.DOUBLE_QUOTED.with(many(charNode(DOUBLE_QUOTED_ESCAPES))
                     .and(endWith(Notations.DOUBLE_QUOTED.getLabel())).as(NodeFactory::constString)),
+            STRING = oneOf(this::textBlock, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
             CONST_TRUE = Notations.Keywords.TRUE.wordNode(NodeFactory::constTrue, PROPERTY_DELIMITER_STRING),
             CONST_FALSE = Notations.Keywords.FALSE.wordNode(NodeFactory::constFalse, PROPERTY_DELIMITER_STRING),
             CONST_NULL = Notations.Keywords.NULL.wordNode(NodeFactory::constNull, PROPERTY_DELIMITER_STRING),
@@ -57,17 +59,17 @@ public class Compiler {
                     .and(endWith(Notations.CLOSE_REGEX.getLabel())).as(NodeFactory::regex)),
             WILDCARD = Notations.Operators.WILDCARD.node(WildcardNode::new),
             ROW_WILDCARD = Notations.Operators.ROW_WILDCARD.node(WildcardNode::new),
-            CONST = oneOf(NUMBER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
+            CONST = oneOf(NUMBER, STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
                     CONST_USER_DEFINED_LITERAL),
             ELEMENT_ELLIPSIS = Notations.Operators.ELEMENT_ELLIPSIS.node(token -> new ListEllipsisNode()),
             SCHEMA = Tokens.SCHEMA.nodeParser(NodeFactory::schema),
-            INTEGER_OR_STRING = oneOf(INTEGER, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
-            STRING_PROPERTY = procedure -> procedure.isEnableRelaxProperty() ? single(oneOf(SINGLE_QUOTED_STRING,
-                    DOUBLE_QUOTED_STRING)).as(NodeFactory::stringSymbol).parse(procedure) : empty(),
+            INTEGER_OR_STRING = oneOf(INTEGER, STRING),
+            STRING_PROPERTY = procedure -> procedure.isEnableRelaxProperty() ? single(STRING)
+                    .as(NodeFactory::stringSymbol).parse(procedure) : empty(),
             NUMBER_PROPERTY = procedure -> procedure.isEnableNumberProperty() ? single(NUMBER)
                     .as(NodeFactory::numberSymbol).parse(procedure) : empty(),
-            SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_SYMBOL : Tokens.SYMBOL).nodeParser(
-                    NodeFactory::symbolNode).parse(procedure),
+            SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_SYMBOL : Tokens.SYMBOL)
+                    .nodeParser(NodeFactory::symbolNode).parse(procedure),
             DOT_SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_DOT_SYMBOL : Tokens.DOT_SYMBOL)
                     .nodeParser(NodeFactory::symbolNode).parse(procedure),
             META_SYMBOL = Tokens.DOT_SYMBOL.nodeParser(NodeFactory::metaSymbolNode),
@@ -284,5 +286,35 @@ public class Compiler {
         return dalProcedure.getSourceCode().tryFetch(() -> Tokens.SYMBOL.scan(dalProcedure.getSourceCode())
                 .flatMap(token -> dalProcedure.getRuntimeContext().takeUserDefinedLiteral(token.getContent())
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
+    }
+
+    private Optional<DALNode> textBlock(DALProcedure procedure) {
+        if (procedure.getSourceCode().startsWith(Notations.TEXT_BLOCK)) {
+
+            procedure.getSourceCode().popWord(Notations.TEXT_BLOCK);
+
+            DALNode a = many(charNode(new EscapeChars())).and(syntax -> new Syntax.CompositeSyntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, DALNode, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<DALNode>>(syntax) {
+
+                private boolean closed;
+
+                @Override
+                public void close(DALProcedure procedure) {
+                    if (!closed)
+                        throw procedure.getSourceCode().syntaxError("Should end with " + Notations.TEXT_BLOCK.getLabel(), 0);
+                }
+
+                @Override
+                public boolean isClose(DALProcedure procedure) {
+                    return !procedure.getSourceCode().hasCode()
+                           || (closed = procedure.getSourceCode().startsWith(Notations.TEXT_BLOCK.getLabel()));
+                }
+
+            }).as(ls -> new ConstNode(NodeFactory.getString(ls).trim())).parse(procedure);
+
+            Optional<Token> token = procedure.getSourceCode().popWord(Notations.TEXT_BLOCK);
+
+            return ofNullable(a.setPositionBegin(token.get().getPosition()));
+        }
+        return empty();
     }
 }
