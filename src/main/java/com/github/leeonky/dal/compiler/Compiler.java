@@ -7,6 +7,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -289,12 +290,15 @@ public class Compiler {
     }
 
     private Optional<DALNode> textBlock(DALProcedure procedure) {
-        if (procedure.getSourceCode().startsWith(Notations.TEXT_BLOCK)) {
+        Optional<Token> openTextBlock = procedure.getSourceCode().popWord(Notations.TEXT_BLOCK);
+        if (openTextBlock.isPresent()) {
+//            Popup \n
+            procedure.getSourceCode().popChar(Collections.emptyMap());
+            Token token = openTextBlock.get();
+            int linePosition = HotFix.getCode(procedure).lastIndexOf("\n", token.getPosition());
+            int indent = linePosition == -1 ? token.getPosition() : token.getPosition() - linePosition;
 
-            procedure.getSourceCode().popWord(Notations.TEXT_BLOCK);
-
-            DALNode a = many(charNode(new EscapeChars())).and(syntax -> new Syntax.CompositeSyntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, DALNode, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<DALNode>>(syntax) {
-
+            DALNode textBlock = many(charNode(new EscapeChars())).and(syntax -> new Syntax.CompositeSyntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, DALNode, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<DALNode>>(syntax) {
                 private boolean closed;
 
                 @Override
@@ -309,12 +313,18 @@ public class Compiler {
                            || (closed = procedure.getSourceCode().startsWith(Notations.TEXT_BLOCK.getLabel()));
                 }
 
-            }).as(ls -> new ConstNode(NodeFactory.getString(ls).trim())).parse(procedure);
-
-            Optional<Token> token = procedure.getSourceCode().popWord(Notations.TEXT_BLOCK);
-
-            return ofNullable(a.setPositionBegin(token.get().getPosition()));
+            }).as(ls -> new ConstNode(getTextBlock(ls, indent))).parse(procedure);
+            Optional<Token> closeToken = procedure.getSourceCode().popWord(Notations.TEXT_BLOCK);
+            return ofNullable(textBlock.setPositionBegin(closeToken.get().getPosition()));
         }
         return empty();
+    }
+
+    private static String getTextBlock(List<DALNode> ls, int indentSize) {
+        String indent = String.join("", Collections.nCopies(indentSize, " "));
+        String text = NodeFactory.getString(ls).substring(indentSize).replace("\n" + indent, "\n");
+        if (text.isEmpty())
+            return text;
+        return text.substring(0, text.length() - 1);
     }
 }

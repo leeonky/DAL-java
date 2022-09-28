@@ -26,7 +26,7 @@ Feature: ```string```
          ^
     """
 
-  Scenario: multiple line text block
+  Scenario: single line text block
     Given the following json:
     """
     {
@@ -37,6 +37,21 @@ Feature: ```string```
     """
     key= ```
          a
+         ```
+    """
+
+  Scenario: multiple line text block with indent
+    Given the following json:
+    """
+    {
+      "key": "a\nb"
+    }
+    """
+    Then the following verification should pass:
+    """
+    key= ```
+         a
+         b
          ```
     """
 
