@@ -7,11 +7,9 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
@@ -25,6 +23,7 @@ import static com.github.leeonky.interpreter.Rules.*;
 import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
 import static com.github.leeonky.util.function.When.when;
+import static java.util.Collections.nCopies;
 import static java.util.Optional.empty;
 
 public class Compiler {
@@ -292,15 +291,25 @@ public class Compiler {
     private Optional<DALNode> textBlock(DALProcedure procedure) {
         Optional<Token> openTextBlock = procedure.getSourceCode().popWord(Notations.TEXT_BLOCK);
         return openTextBlock.map(token -> {
-            List<Character> customerNotation = new ArrayList<>();
-            while (procedure.getSourceCode().hasCode()) {
-                char c = procedure.getSourceCode().popChar(Collections.emptyMap());
-                if (c == '\n')
-                    break;
-                customerNotation.add(c);
+            ConstNode parse = (ConstNode) many(charNode(new EscapeChars())).and(endWithLine())
+                    .as(NodeFactory::constString).parse(procedure);
+            String s = parse.getValue().toString();
+
+            int i = s.indexOf('`');
+            String attribute;
+            if (i == -1)
+                attribute = s;
+            else
+                attribute = s.substring(i);
+
+            if (attribute.equals("not-exist")) {
+                throw procedure.getSourceCode().syntaxError("Invalid text block attribute `not-exist`, all supported attributes are:\n" +
+                                                            "  LF: use \\n as new line", -s.length() - 1);
             }
-            int indent = procedure.getIndent(token.getPosition(), "\n");
-            String endNotation = Notations.TEXT_BLOCK.getLabel() + customerNotation.stream().map(Object::toString).collect(Collectors.joining());
+
+            int indent = getIndent(token.getPosition(), "\n", procedure.getSourceCode());
+            String endNotation = String.join("", nCopies((int) s.chars().filter(c -> c == ('`')).count() + 3, "`"));
+
             return many(charNode(new EscapeChars())).and(endBefore2(endNotation))
                     .as(ls -> NodeFactory.constText(indent, ls)).parse(procedure)
                     .setPositionBegin(procedure.getSourceCode().popWord(notation(endNotation)).get().getPosition());
@@ -325,5 +334,10 @@ public class Compiler {
                 return !procedure.getSourceCode().hasCode() || (closed = procedure.getSourceCode().startsWith(label));
             }
         };
+    }
+
+    public int getIndent(int position, String newLine, SourceCode sourceCode) {
+        int linePosition = HotFix.getCode(sourceCode).lastIndexOf(newLine, position);
+        return linePosition == -1 ? position : position - linePosition;
     }
 }
