@@ -51,7 +51,8 @@ Feature: ```string```
       """
       Then the following verification should pass:
       """
-      key= ```
+      key
+         = ```
            a
            b
            ```
@@ -71,7 +72,7 @@ Feature: ```string```
       """
       Then failed with the message:
       """
-      Should end with ```
+      Should end with '```'
       """
       And got the following notation:
       """
@@ -85,7 +86,7 @@ Feature: ```string```
       """
       Then failed with the message:
       """
-      Should end with ```
+      Should end with '```'
       """
       And got the following notation:
       """
@@ -120,7 +121,7 @@ Feature: ```string```
       """
       Then failed with the message:
       """
-      Should end with ````
+      Should end with '````'
       """
       And got the following notation:
       """

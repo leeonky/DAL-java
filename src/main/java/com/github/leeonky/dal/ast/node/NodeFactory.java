@@ -5,8 +5,8 @@ import com.github.leeonky.interpreter.Token;
 import com.github.leeonky.util.NumberParser;
 
 import java.math.BigInteger;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class NodeFactory {
@@ -50,8 +50,13 @@ public class NodeFactory {
         return new DALExpression(null, com.github.leeonky.dal.ast.opt.Factory.parentheses(), node);
     }
 
+    @Deprecated
     public static DALNode constString(List<DALNode> nodes) {
         return new ConstNode(getString(nodes));
+    }
+
+    public static DALNode constString2(List<Character> characters) {
+        return new ConstNode(characters.stream().map(Objects::toString).collect(Collectors.joining()));
     }
 
     public static DALNode relaxString(Token token) {
@@ -99,15 +104,5 @@ public class NodeFactory {
         if (list.size() == 1)
             return list.get(0);
         return new GroupExpression(list);
-    }
-
-    private static String getTextBlock(List<DALNode> ls, int indentSize) {
-        String indent = String.join("", Collections.nCopies(indentSize, " "));
-        String text = getString(ls).substring(indentSize).replace("\n" + indent, "\n");
-        return text.isEmpty() ? text : text.substring(0, text.length() - 1);
-    }
-
-    public static ConstNode constText(int indent, List<DALNode> ls) {
-        return new ConstNode(getTextBlock(ls, indent));
     }
 }

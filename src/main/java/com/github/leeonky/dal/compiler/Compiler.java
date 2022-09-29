@@ -2,6 +2,8 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.node.*;
 import com.github.leeonky.dal.ast.node.table.*;
+import com.github.leeonky.dal.ast.node.text.NotationAttribute;
+import com.github.leeonky.dal.ast.node.text.TextNotation;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.*;
@@ -23,7 +25,7 @@ import static com.github.leeonky.interpreter.Rules.*;
 import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
 import static com.github.leeonky.util.function.When.when;
-import static java.util.Collections.nCopies;
+import static java.lang.String.format;
 import static java.util.Optional.empty;
 
 public class Compiler {
@@ -50,7 +52,9 @@ public class Compiler {
                     .and(endWith(Notations.SINGLE_QUOTED.getLabel())).as(NodeFactory::constString)),
             DOUBLE_QUOTED_STRING = Notations.DOUBLE_QUOTED.with(many(charNode(DOUBLE_QUOTED_ESCAPES))
                     .and(endWith(Notations.DOUBLE_QUOTED.getLabel())).as(NodeFactory::constString)),
-            STRING = oneOf(this::textBlock, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
+            TEXT_NOTATION_START = this::notationStart,
+            TEXT_BLOCK = TEXT_NOTATION_START.concat(this::textAttribute).concat(this::textBlock),
+            STRING = oneOf(TEXT_BLOCK, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
             CONST_TRUE = Notations.Keywords.TRUE.wordNode(NodeFactory::constTrue, PROPERTY_DELIMITER_STRING),
             CONST_FALSE = Notations.Keywords.FALSE.wordNode(NodeFactory::constFalse, PROPERTY_DELIMITER_STRING),
             CONST_NULL = Notations.Keywords.NULL.wordNode(NodeFactory::constNull, PROPERTY_DELIMITER_STRING),
@@ -193,6 +197,7 @@ public class Compiler {
         }};
     }
 
+    @Deprecated
     private static NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> charNode(
             EscapeChars escapeChars) {
         return procedure -> new ConstNode(procedure.getSourceCode().popChar(escapeChars));
@@ -288,56 +293,44 @@ public class Compiler {
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }
 
-    private Optional<DALNode> textBlock(DALProcedure procedure) {
-        Optional<Token> openTextBlock = procedure.getSourceCode().popWord(Notations.TEXT_BLOCK);
-        return openTextBlock.map(token -> {
-            ConstNode parse = (ConstNode) many(charNode(new EscapeChars())).and(endWithLine())
-                    .as(NodeFactory::constString).parse(procedure);
-            String s = parse.getValue().toString();
-
-            int i = s.indexOf('`');
-            String attribute;
-            if (i == -1)
-                attribute = s;
-            else
-                attribute = s.substring(i);
-
-            if (attribute.equals("not-exist")) {
-                throw procedure.getSourceCode().syntaxError("Invalid text block attribute `not-exist`, all supported attributes are:\n" +
-                                                            "  LF: use \\n as new line", -s.length() - 1);
-            }
-
-            int indent = getIndent(token.getPosition(), "\n", procedure.getSourceCode());
-            String endNotation = String.join("", nCopies((int) s.chars().filter(c -> c == ('`')).count() + 3, "`"));
-
-            return many(charNode(new EscapeChars())).and(endBefore2(endNotation))
-                    .as(ls -> NodeFactory.constText(indent, ls)).parse(procedure)
-                    .setPositionBegin(procedure.getSourceCode().popWord(notation(endNotation)).get().getPosition());
-        });
+    private Clause<DALRuntimeContext, DALNode> textBlock(DALProcedure procedure) {
+        return node -> {
+            NotationAttribute notationAttribute = (NotationAttribute) node;
+            return many(charNode2(new EscapeChars())).and(getRule(notationAttribute))
+                    .as(ls -> new ConstNode(notationAttribute.text(ls))).parse(procedure);
+        };
     }
 
-    private static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
-            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
-            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
-            Syntax<C, N, E, O, P, PA, MA, T, R, A>> endBefore2(String label) {
-        return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
-            private boolean closed;
+    private Function<Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, ObjectParser<DALProcedure, Character>, ObjectParser.Mandatory<DALProcedure, Character>, Character, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<Character>>, Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, ObjectParser<DALProcedure, Character>, ObjectParser.Mandatory<DALProcedure, Character>, Character, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<Character>>> getRule(NotationAttribute notationAttribute) {
+        return n -> new Syntax.CompositeSyntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, ObjectParser<DALProcedure, Character>, ObjectParser.Mandatory<DALProcedure, Character>, Character, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<Character>>
+                (n.and(endWith(notationAttribute.endNotation()))) {
+
+            private Token token;
 
             @Override
-            public void close(P procedure) {
-                if (!closed)
-                    throw procedure.getSourceCode().syntaxError("Should end with " + label, 0);
+            protected void close(DALProcedure procedure) {
+                token = procedure.getSourceCode().popWord(notation(notationAttribute.endNotation()))
+                        .orElseThrow(() -> procedure.getSourceCode().syntaxError(format("Should end with '%s'", notationAttribute.endNotation()), 0));
             }
 
             @Override
-            public boolean isClose(P procedure) {
-                return !procedure.getSourceCode().hasCode() || (closed = procedure.getSourceCode().startsWith(label));
+            protected NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> parse(Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, ObjectParser<DALProcedure, Character>, ObjectParser.Mandatory<DALProcedure, Character>, Character, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<Character>> syntax, Function<List<Character>, DALNode> factory) {
+                NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> parse = super.parse(syntax, factory);
+                return p -> parse.parse(p).setPositionBegin(token.getPosition());
             }
         };
     }
 
-    public int getIndent(int position, String newLine, SourceCode sourceCode) {
-        int linePosition = HotFix.getCode(sourceCode).lastIndexOf(newLine, position);
-        return linePosition == -1 ? position : position - linePosition;
+    private Clause<DALRuntimeContext, DALNode> textAttribute(DALProcedure procedure) {
+        return notationNode -> new NotationAttribute(notationNode, many(charNode2(new EscapeChars())).and(endWithLine())
+                .as(NodeFactory::constString2).parse(procedure));
+    }
+
+    private Optional<DALNode> notationStart(DALProcedure procedure) {
+        return procedure.getSourceCode().popWord(Notations.TEXT_BLOCK).map(token -> new TextNotation(token, procedure.getSourceCode()));
+    }
+
+    private ObjectParser.Mandatory<DALProcedure, Character> charNode2(EscapeChars escapeChars) {
+        return procedure -> procedure.getSourceCode().popChar(escapeChars);
     }
 }
