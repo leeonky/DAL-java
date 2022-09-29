@@ -5,6 +5,7 @@ import com.github.leeonky.interpreter.Token;
 import com.github.leeonky.util.NumberParser;
 
 import java.math.BigInteger;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -61,8 +62,7 @@ public class NodeFactory {
         return new RegexNode(getString(nodes));
     }
 
-    //    TODO to private
-    public static String getString(List<DALNode> nodes) {
+    private static String getString(List<DALNode> nodes) {
         return nodes.stream().map(ConstNode.class::cast).map(ConstNode::getValue)
                 .map(Object::toString).collect(Collectors.joining());
     }
@@ -99,5 +99,15 @@ public class NodeFactory {
         if (list.size() == 1)
             return list.get(0);
         return new GroupExpression(list);
+    }
+
+    private static String getTextBlock(List<DALNode> ls, int indentSize) {
+        String indent = String.join("", Collections.nCopies(indentSize, " "));
+        String text = getString(ls).substring(indentSize).replace("\n" + indent, "\n");
+        return text.isEmpty() ? text : text.substring(0, text.length() - 1);
+    }
+
+    public static ConstNode constText(int indent, List<DALNode> ls) {
+        return new ConstNode(getTextBlock(ls, indent));
     }
 }

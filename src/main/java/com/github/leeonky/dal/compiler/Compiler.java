@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
@@ -25,7 +26,6 @@ import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
 import static com.github.leeonky.util.function.When.when;
 import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
 
 public class Compiler {
     private static final EscapeChars SINGLE_QUOTED_ESCAPES = new EscapeChars()
@@ -291,40 +291,39 @@ public class Compiler {
 
     private Optional<DALNode> textBlock(DALProcedure procedure) {
         Optional<Token> openTextBlock = procedure.getSourceCode().popWord(Notations.TEXT_BLOCK);
-        if (openTextBlock.isPresent()) {
-//            Popup \n
-            procedure.getSourceCode().popChar(Collections.emptyMap());
-            Token token = openTextBlock.get();
-            int linePosition = HotFix.getCode(procedure).lastIndexOf("\n", token.getPosition());
-            int indent = linePosition == -1 ? token.getPosition() : token.getPosition() - linePosition;
-
-            DALNode textBlock = many(charNode(new EscapeChars())).and(syntax -> new Syntax.CompositeSyntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, DALNode, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<DALNode>>(syntax) {
-                private boolean closed;
-
-                @Override
-                public void close(DALProcedure procedure) {
-                    if (!closed)
-                        throw procedure.getSourceCode().syntaxError("Should end with " + Notations.TEXT_BLOCK.getLabel(), 0);
-                }
-
-                @Override
-                public boolean isClose(DALProcedure procedure) {
-                    return !procedure.getSourceCode().hasCode()
-                           || (closed = procedure.getSourceCode().startsWith(Notations.TEXT_BLOCK.getLabel()));
-                }
-
-            }).as(ls -> new ConstNode(getTextBlock(ls, indent))).parse(procedure);
-            Optional<Token> closeToken = procedure.getSourceCode().popWord(Notations.TEXT_BLOCK);
-            return ofNullable(textBlock.setPositionBegin(closeToken.get().getPosition()));
-        }
-        return empty();
+        return openTextBlock.map(token -> {
+            List<Character> customerNotation = new ArrayList<>();
+            while (procedure.getSourceCode().hasCode()) {
+                char c = procedure.getSourceCode().popChar(Collections.emptyMap());
+                if (c == '\n')
+                    break;
+                customerNotation.add(c);
+            }
+            int indent = procedure.getIndent(token.getPosition(), "\n");
+            String endNotation = Notations.TEXT_BLOCK.getLabel() + customerNotation.stream().map(Object::toString).collect(Collectors.joining());
+            return many(charNode(new EscapeChars())).and(endBefore2(endNotation))
+                    .as(ls -> NodeFactory.constText(indent, ls)).parse(procedure)
+                    .setPositionBegin(procedure.getSourceCode().popWord(notation(endNotation)).get().getPosition());
+        });
     }
 
-    private static String getTextBlock(List<DALNode> ls, int indentSize) {
-        String indent = String.join("", Collections.nCopies(indentSize, " "));
-        String text = NodeFactory.getString(ls).substring(indentSize).replace("\n" + indent, "\n");
-        if (text.isEmpty())
-            return text;
-        return text.substring(0, text.length() - 1);
+    private static <C extends RuntimeContext<C>, N extends Node<C, N>, E extends Expression<C, N, E, O>,
+            O extends Operator<C, N, O>, P extends Procedure<C, N, E, O, P>, PA extends Parser<C, N, E, O, P, PA, MA, T>,
+            MA extends Parser.Mandatory<C, N, E, O, P, PA, MA, T>, T, R, A> Function<Syntax<C, N, E, O, P, PA, MA, T, R, A>,
+            Syntax<C, N, E, O, P, PA, MA, T, R, A>> endBefore2(String label) {
+        return syntax -> new Syntax.CompositeSyntax<C, N, E, O, P, PA, MA, T, R, A>(syntax) {
+            private boolean closed;
+
+            @Override
+            public void close(P procedure) {
+                if (!closed)
+                    throw procedure.getSourceCode().syntaxError("Should end with " + label, 0);
+            }
+
+            @Override
+            public boolean isClose(P procedure) {
+                return !procedure.getSourceCode().hasCode() || (closed = procedure.getSourceCode().startsWith(label));
+            }
+        };
     }
 }

@@ -77,3 +77,31 @@ Feature: ```string```
          a
           ^
     """
+    When evaluate by:
+    """
+    key= ```
+    """
+    Then failed with the message:
+    """
+    Should end with ```
+    """
+    And got the following notation:
+    """
+    key= ```
+            ^
+    """
+
+  Scenario: customer text block notation
+    Given the following json:
+    """
+    {
+      "key": "a\nb"
+    }
+    """
+    Then the following verification should pass:
+    """
+    key= ````
+         a
+         b
+         ````
+    """

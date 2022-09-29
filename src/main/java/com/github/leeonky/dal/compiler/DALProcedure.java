@@ -5,10 +5,7 @@ import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.node.GroupExpression;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.interpreter.ExpressionFactory;
-import com.github.leeonky.interpreter.NodeParser;
-import com.github.leeonky.interpreter.Procedure;
-import com.github.leeonky.interpreter.SourceCode;
+import com.github.leeonky.interpreter.*;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -144,5 +141,10 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
         if (right instanceof GroupExpression)
             return ((GroupExpression) right).insert(left, operator, this);
         return super.createExpression(left, operator, right);
+    }
+
+    int getIndent(int position, String newLine) {
+        int linePosition = HotFix.getCode(this).lastIndexOf(newLine, position);
+        return linePosition == -1 ? position : position - linePosition;
     }
 }
