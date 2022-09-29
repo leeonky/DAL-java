@@ -53,7 +53,11 @@ public class Compiler {
             DOUBLE_QUOTED_STRING = Notations.DOUBLE_QUOTED.with(many(charNode(DOUBLE_QUOTED_ESCAPES))
                     .and(endWith(Notations.DOUBLE_QUOTED.getLabel())).as(NodeFactory::constString)),
             TEXT_NOTATION_START = this::notationStart,
-            TEXT_BLOCK = TEXT_NOTATION_START.concat(this::textAttribute).concat(this::textBlock),
+            TEXT_BLOCK = TEXT_NOTATION_START.concat(clause(notationNode -> many(charNode2(new EscapeChars()))
+                            .and(endWithLine()).as(characters ->
+                                    new NotationAttribute(notationNode, NodeFactory.constString2(characters)))))
+                    .concat(clause(node -> many(charNode2(new EscapeChars())).and(getRule((NotationAttribute) node))
+                            .as(ls -> new ConstNode(((NotationAttribute) node).text(ls))))),
             STRING = oneOf(TEXT_BLOCK, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
             CONST_TRUE = Notations.Keywords.TRUE.wordNode(NodeFactory::constTrue, PROPERTY_DELIMITER_STRING),
             CONST_FALSE = Notations.Keywords.FALSE.wordNode(NodeFactory::constFalse, PROPERTY_DELIMITER_STRING),
@@ -293,14 +297,6 @@ public class Compiler {
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }
 
-    private Clause<DALRuntimeContext, DALNode> textBlock(DALProcedure procedure) {
-        return node -> {
-            NotationAttribute notationAttribute = (NotationAttribute) node;
-            return many(charNode2(new EscapeChars())).and(getRule(notationAttribute))
-                    .as(ls -> new ConstNode(notationAttribute.text(ls))).parse(procedure);
-        };
-    }
-
     private Function<Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, ObjectParser<DALProcedure, Character>, ObjectParser.Mandatory<DALProcedure, Character>, Character, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<Character>>, Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, ObjectParser<DALProcedure, Character>, ObjectParser.Mandatory<DALProcedure, Character>, Character, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<Character>>> getRule(NotationAttribute notationAttribute) {
         return n -> new Syntax.CompositeSyntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, ObjectParser<DALProcedure, Character>, ObjectParser.Mandatory<DALProcedure, Character>, Character, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<Character>>
                 (n.and(endWith(notationAttribute.endNotation()))) {
@@ -319,11 +315,6 @@ public class Compiler {
                 return p -> parse.parse(p).setPositionBegin(token.getPosition());
             }
         };
-    }
-
-    private Clause<DALRuntimeContext, DALNode> textAttribute(DALProcedure procedure) {
-        return notationNode -> new NotationAttribute(notationNode, many(charNode2(new EscapeChars())).and(endWithLine())
-                .as(NodeFactory::constString2).parse(procedure));
     }
 
     private Optional<DALNode> notationStart(DALProcedure procedure) {
