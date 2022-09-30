@@ -40,10 +40,15 @@ public class DAL {
     @SuppressWarnings("unchecked")
     public <T> T evaluate(Object input, String expression) {
         DALRuntimeContext DALRuntimeContext = runtimeContextBuilder.build(input);
-        List<DALNode> nodes = compiler.compile(new SourceCode(format(expression), Notations.LINE_COMMENTS), DALRuntimeContext);
+        List<DALNode> nodes = compiler.compile(new SourceCode(format(expression), Notations.LINE_COMMENTS),
+                DALRuntimeContext);
         if (nodes.size() > 1)
-            throw new SyntaxException("more than one expression", nodes.get(1).getPositionBegin());
+            throw new SyntaxException("more than one expression", getOperandPosition(nodes.get(1)));
         return (T) nodes.get(0).evaluate(DALRuntimeContext);
+    }
+
+    private int getOperandPosition(DALNode node) {
+        return node.getPositionBegin() == 0 ? node.getOperandPosition() : node.getPositionBegin();
     }
 
     private String format(String expression) {

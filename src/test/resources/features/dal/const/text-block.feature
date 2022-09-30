@@ -110,11 +110,12 @@ Feature: ```string```
            b
            ````
       """
-      And the inspect should:
-      """
-      key= 'a
-      b'
-      """
+#      TODO
+#      And the inspect should:
+#      """
+#      key= 'a
+#      b'
+#      """
       When evaluate by:
       """
       key= ````
@@ -153,7 +154,7 @@ Feature: ```string```
       """
       When evaluate by:
       """
-      key= ``` not-exist
+      key= ``` CR not-exist
            a
            b
            ```
@@ -165,8 +166,8 @@ Feature: ```string```
       """
       And got the following notation:
       """
-      key= ``` not-exist
-               ^
+      key= ``` CR not-exist
+                  ^
            a
            b
            ```
@@ -182,6 +183,21 @@ Feature: ```string```
       Then the following verification should pass:
       """
       key= ``` CR
+           a
+           b
+           ```
+      """
+
+    Scenario: override all attribute
+      Given the following json:
+      """
+      {
+        "key": "a\rb"
+      }
+      """
+      Then the following verification should pass:
+      """
+      key= ``` LF CR
            a
            b
            ```

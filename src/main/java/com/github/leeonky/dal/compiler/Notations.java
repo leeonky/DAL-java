@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.compiler;
 
+import com.github.leeonky.dal.ast.node.DALNode;
+import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.interpreter.Notation;
 
 import java.util.HashSet;
@@ -11,8 +13,9 @@ import static com.github.leeonky.interpreter.Notation.notation;
 import static java.util.Arrays.asList;
 
 public class Notations {
+
     public static class Keywords {
-        public static final Notation
+        public static final Notation<DALNode, DALOperator, DALProcedure>
                 WHICH = notation("which"),
                 IS = notation("is"),
                 TRUE = notation("true"),
@@ -21,12 +24,13 @@ public class Notations {
                 AND = notation("and"),
                 OR = notation("or");
 
-        public static final Set<Notation> ALL = new HashSet<>(asList(WHICH, IS, TRUE, FALSE, NULL, AND, OR));
+        public static final Set<Notation<DALNode, DALOperator, DALProcedure>>
+                ALL = new HashSet<>(asList(WHICH, IS, TRUE, FALSE, NULL, AND, OR));
         public static final Set<String> ALL_STRING = ALL.stream().map(Notation::getLabel).collect(Collectors.toSet());
     }
 
     public static class Operators {
-        public static final Notation
+        public static final Notation<DALNode, DALOperator, DALProcedure>
                 WILDCARD = notation("*"),
                 ROW_WILDCARD = notation("***"),
                 ELEMENT_ELLIPSIS = notation("..."),
@@ -53,7 +57,7 @@ public class Notations {
                 WHICH = Keywords.WHICH;
     }
 
-    public static final Notation
+    public static final Notation<DALNode, DALOperator, DALProcedure>
             SINGLE_QUOTED = notation("'"),
             DOUBLE_QUOTED = notation("\""),
             OPENING_BRACKET = notation("["),
@@ -78,8 +82,9 @@ public class Notations {
             LIST_MAPPING = notation("[]"),
             OPENING_GROUP = notation("<<"),
             CLOSING_GROUP = notation(">>"),
-            TEXT_BLOCK = notation("```"),
-            EMPTY = notation("");
+            TEXT_BLOCK = notation("`"),
+            EMPTY = notation(""),
+            THIS = notation("{}");
 
-    public final static List<Notation> LINE_COMMENTS = asList(LINE_COMMENT1, LINE_COMMENT2);
+    public final static List<Notation<?, ?, ?>> LINE_COMMENTS = asList(LINE_COMMENT1, LINE_COMMENT2);
 }

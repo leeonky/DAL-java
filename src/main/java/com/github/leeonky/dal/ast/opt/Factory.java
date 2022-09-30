@@ -14,23 +14,23 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Factory {
-    public static DALOperator logical(Notation notation, NodeNodeContextObject.SupplierSupplierObject logical) {
+    public static DALOperator logical(Notation<?, ?, ?> notation, NodeNodeContextObject.SupplierSupplierObject logical) {
         return new Operator(Precedence.LOGICAL, notation, NodeNodeContextObject.adapt(logical), true);
     }
 
-    public static DALOperator plusSub(Notation notation, NodeNodeContextObject.ObjectObjectContextObject plusSub) {
+    public static DALOperator plusSub(Notation<?, ?, ?> notation, NodeNodeContextObject.ObjectObjectContextObject plusSub) {
         return new Operator(Precedence.PLUS_SUB, notation, NodeNodeContextObject.adapt(plusSub), false);
     }
 
-    public static DALOperator mulDiv(Notation notation, NodeNodeContextObject.ObjectObjectContextObject mulDiv) {
+    public static DALOperator mulDiv(Notation<?, ?, ?> notation, NodeNodeContextObject.ObjectObjectContextObject mulDiv) {
         return new Operator(Precedence.MUL_DIV, notation, NodeNodeContextObject.adapt(mulDiv), false);
     }
 
-    public static DALOperator comparator(Notation notation, NodeNodeContextObject operation) {
+    public static DALOperator comparator(Notation<?, ?, ?> notation, NodeNodeContextObject operation) {
         return new Operator(Precedence.COMPARISON, notation, operation, true);
     }
 
-    public static DALOperator unary(Notation notation, NodeNodeContextObject unary) {
+    public static DALOperator unary(Notation<?, ?, ?> notation, NodeNodeContextObject unary) {
         return new Operator(Precedence.UNARY_OPERATION, notation, unary, true) {
             @Override
             public String inspect(String node1, String node2) {
@@ -53,7 +53,7 @@ public class Factory {
         };
     }
 
-    public static DALOperator executable(Notation notation) {
+    public static DALOperator executable(Notation<?, ?, ?> notation) {
         return new DALOperator(Precedence.PROPERTY, notation.getLabel(), false) {
             @Override
             public Data calculateData(DALNode left, DALNode right, RuntimeContextBuilder.DALRuntimeContext context) {
@@ -133,7 +133,7 @@ public class Factory {
     static class Operator extends DALOperator {
         private final NodeNodeContextObject operation;
 
-        public Operator(int precedence, Notation notation, NodeNodeContextObject operation, boolean needInspect) {
+        public Operator(int precedence, Notation<?, ?, ?> notation, NodeNodeContextObject operation, boolean needInspect) {
             super(precedence, notation.getLabel(), needInspect);
             this.operation = operation;
         }

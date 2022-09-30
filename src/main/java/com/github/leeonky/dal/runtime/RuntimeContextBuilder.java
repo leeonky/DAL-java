@@ -1,12 +1,14 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.DALNode;
+import com.github.leeonky.dal.ast.node.text.TextAttributeListNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.interpreter.RuntimeContext;
+import com.github.leeonky.interpreter.SyntaxException;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.InvocationException;
@@ -46,6 +48,7 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<Function<Object, String>> valueDumpers = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Map<String, Object>>> objectDumpers = new ClassKeyMap<>();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
+    private final Map<String, TextAttributeListNode.TextAttribute> textAttributeMap = new HashMap<>();
     private Converter converter = Converter.getInstance();
 
     public RuntimeContextBuilder() {
@@ -90,10 +93,29 @@ public class RuntimeContextBuilder {
 
         registerMetaProperty("size", BuildInMetaProperty::size);
         registerMetaProperty("throw", BuildInMetaProperty::throw_);
+
+
+        registerTextAttribute("LF", new TextAttributeListNode.TextAttribute() {
+            @Override
+            public CharSequence newLine() {
+                return "\n";
+            }
+        });
+        registerTextAttribute("CR", new TextAttributeListNode.TextAttribute() {
+            @Override
+            public CharSequence newLine() {
+                return "\r";
+            }
+        });
     }
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
+        return this;
+    }
+
+    public RuntimeContextBuilder registerTextAttribute(String name, TextAttributeListNode.TextAttribute attribute) {
+        textAttributeMap.put(name, attribute);
         return this;
     }
 
@@ -304,6 +326,10 @@ public class RuntimeContextBuilder {
             };
         }
 
+        public Map<String, TextAttributeListNode.TextAttribute> map() {
+            return textAttributeMap;
+        }
+
         public boolean isRegisteredList(Object instance) {
             return listAccessors.tryGetData(instance).map(listAccessor -> listAccessor.isList(instance)).orElse(false);
         }
@@ -384,6 +410,14 @@ public class RuntimeContextBuilder {
                 throw new RuntimeException(format("Meta property `%s` not found", property.getRootSymbolName()),
                         property.getPositionBegin());
             });
+        }
+
+        public TextAttributeListNode.TextAttribute getAttribute(String name, int position) {
+            return map().computeIfAbsent(name, k -> {
+                        throw new SyntaxException("Invalid text block attribute `not-exist`, all supported attributes are:\n" +
+                                                  "  LF: use \\n as new line", position);
+                    }
+            );
         }
     }
 }

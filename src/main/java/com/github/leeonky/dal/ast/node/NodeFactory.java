@@ -105,4 +105,5 @@ public class NodeFactory {
             return list.get(0);
         return new GroupExpression(list);
     }
+
 }

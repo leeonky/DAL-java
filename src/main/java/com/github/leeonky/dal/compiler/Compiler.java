@@ -2,8 +2,7 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.node.*;
 import com.github.leeonky.dal.ast.node.table.*;
-import com.github.leeonky.dal.ast.node.text.NotationAttribute;
-import com.github.leeonky.dal.ast.node.text.TextNotation;
+import com.github.leeonky.dal.ast.node.text.*;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.*;
@@ -19,7 +18,6 @@ import static com.github.leeonky.dal.compiler.DALProcedure.*;
 import static com.github.leeonky.interpreter.ClauseParser.Mandatory.clause;
 import static com.github.leeonky.interpreter.ClauseParser.positionClause;
 import static com.github.leeonky.interpreter.NodeParser.positionNode;
-import static com.github.leeonky.interpreter.Notation.notation;
 import static com.github.leeonky.interpreter.Parser.*;
 import static com.github.leeonky.interpreter.Rules.*;
 import static com.github.leeonky.interpreter.Syntax.many;
@@ -51,11 +49,10 @@ public class Compiler {
                     .and(endWith(Notations.SINGLE_QUOTED.getLabel())).as(NodeFactory::constString)),
             DOUBLE_QUOTED_STRING = Notations.DOUBLE_QUOTED.with(many(charNode(DOUBLE_QUOTED_ESCAPES))
                     .and(endWith(Notations.DOUBLE_QUOTED.getLabel())).as(NodeFactory::constString)),
-            TEXT_NOTATION_START = this::notationStart,
-            TEXT_BLOCK = TEXT_NOTATION_START.concat(clause(notationNode -> many(charNode2(new EscapeChars()))
-                            .and(endWithLine()).as(characters -> new NotationAttribute(notationNode, NodeFactory.constString2(characters)))))
-                    .concat(clause(node -> many(charNode2(new EscapeChars())).and(endWithPosition(((NotationAttribute) node).endNotation()))
-                            .as(ls -> new ConstNode(((NotationAttribute) node).text(ls))))),
+            TEXT_NOTATION_START = positionNode(many(Notations.TEXT_BLOCK).and(atLeast(3)).as(TextNotationNode::new)),
+            TEXT_BLOCK = TEXT_NOTATION_START.concat(clause(this::textAttribute))
+                    .concat(clause(node -> many(charNode2(new EscapeChars())).and(endWithPosition(((NotationAttributeNode) node).endNotation()))
+                            .as(ls -> new TextNode((NotationAttributeNode) node, ls)))),
             STRING = oneOf(TEXT_BLOCK, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
             CONST_TRUE = Notations.Keywords.TRUE.wordNode(NodeFactory::constTrue, PROPERTY_DELIMITER_STRING),
             CONST_FALSE = Notations.Keywords.FALSE.wordNode(NodeFactory::constFalse, PROPERTY_DELIMITER_STRING),
@@ -76,16 +73,22 @@ public class Compiler {
                     .as(NodeFactory::numberSymbol).parse(procedure) : empty(),
             SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_SYMBOL : Tokens.SYMBOL)
                     .nodeParser(NodeFactory::symbolNode).parse(procedure),
+            TEXT_ATTRIBUTE = Tokens.RELAX_SYMBOL.nodeParser(t -> new TextAttributeNode(t.getContent())),
             DOT_SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_DOT_SYMBOL : Tokens.DOT_SYMBOL)
                     .nodeParser(NodeFactory::symbolNode).parse(procedure),
             META_SYMBOL = Tokens.DOT_SYMBOL.nodeParser(NodeFactory::metaSymbolNode),
             PROPERTY_PATTERN = this::propertyPattern,
             OPTIONAL_VERIFICATION_PROPERTY = lazyNode(() -> enableSlashProperty(enableRelaxProperty(OPTIONAL_PROPERTY_CHAIN)));
 
+    private NodeParser.Mandatory<DALNode, DALProcedure> textAttribute(DALNode notationNode) {
+        return many(TEXT_ATTRIBUTE).and(endWithLine()).as(attributes ->
+                new NotationAttributeNode(notationNode, new TextAttributeListNode(attributes)));
+    }
+
     private Optional<DALNode> propertyPattern(DALProcedure dalProcedure) {
         ClauseParser<DALNode, DALProcedure> patternClause =
-                notation("{}").clause((token, symbol) -> new PropertyPattern(symbol));
-        return oneOf(notation("{}").node(n -> new PropertyThis()), SYMBOL.with(patternClause)).parse(dalProcedure);
+                Notations.THIS.clause((token, symbol) -> new PropertyPattern(symbol));
+        return oneOf(Notations.THIS.node(n -> new PropertyThis()), SYMBOL.with(patternClause)).parse(dalProcedure);
     }
 
     public NodeParser.Mandatory<DALNode, DALProcedure>
@@ -119,7 +122,8 @@ public class Compiler {
                     Operators.PROPERTY_META.clause(symbolClause(META_SYMBOL.concat(META_LIST_MAPPING_CLAUSE))));
 
     private NodeParser.Mandatory<DALNode, DALProcedure> propertyChainNode() {
-        return symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL, NUMBER_PROPERTY, lazyNode(() -> GROUP_PROPERTY)).concat(LIST_MAPPING_CLAUSE));
+        return symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL, NUMBER_PROPERTY,
+                lazyNode(() -> GROUP_PROPERTY)).concat(LIST_MAPPING_CLAUSE));
     }
 
     private NodeParser.Mandatory<DALNode, DALProcedure> symbolClause(
@@ -253,14 +257,12 @@ public class Compiler {
                 Operators.DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING))));
     }
 
-    private ClauseParser.Mandatory<DALNode, DALProcedure> tableRow(
-            TableHeadRow headRow) {
+    private ClauseParser.Mandatory<DALNode, DALProcedure> tableRow(TableHeadRow headRow) {
         return clause(rowPrefix -> tableLine(tableCell(rowPrefix, headRow))
                 .as(cells -> new TableRowNode(rowPrefix, cells, headRow)));
     }
 
-    private ClauseParser.Mandatory<DALNode, DALProcedure> transposeTableCell(
-            DALNode prefix, DALNode header) {
+    private ClauseParser.Mandatory<DALNode, DALProcedure> transposeTableCell(DALNode prefix, DALNode header) {
         return positionClause(ClauseParser.<DALNode, DALProcedure>
                 columnMandatory(column -> oneOf(ELEMENT_ELLIPSIS_CLAUSE, ROW_WILDCARD_CLAUSE)
                 .or(shortVerificationClause(oneOf(Operators.VERIFICATION_OPERATORS, ((HeaderNode) prefix).operator(),
@@ -291,11 +293,6 @@ public class Compiler {
         return dalProcedure.getSourceCode().tryFetch(() -> Tokens.SYMBOL.scan(dalProcedure.getSourceCode())
                 .flatMap(token -> dalProcedure.getRuntimeContext().takeUserDefinedLiteral(token.getContent())
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
-    }
-
-    private Optional<DALNode> notationStart(DALProcedure procedure) {
-        return procedure.getSourceCode().popWord(Notations.TEXT_BLOCK).map(token ->
-                new TextNotation(token, procedure.getSourceCode()));
     }
 
     private ObjectParser.Mandatory<DALProcedure, Character> charNode2(EscapeChars escapeChars) {
