@@ -133,8 +133,8 @@ public class Compiler {
         return SCHEMA_CLAUSE.concat(Operators.VERIFICATION_OPERATORS.clause(operand)).or(operatorMandatory.clause(operand));
     }
 
-    private ClauseParser<DALNode, DALProcedure> ARITHMETIC_CLAUSE_CHAIN,
-            VERIFICATION_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN, WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN, EXPRESSION_CLAUSE;
+    private ClauseParser<DALNode, DALProcedure> ARITHMETIC_CLAUSE_CHAIN, VERIFICATION_CLAUSE_CHAIN,
+            EXPLICIT_PROPERTY_CHAIN, WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN, EXPRESSION_CLAUSE;
 
     public Compiler() {
         PARENTHESES = lazyNode(() -> enableCommaAnd(Notations.OPENING_PARENTHESES.with(single(EXPRESSION).and(endWith(Notations.CLOSING_PARENTHESES))
@@ -236,7 +236,8 @@ public class Compiler {
             TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHeadRow) head, (TableBody) many(ROW_PREFIX.with(oneOf(
             Notations.COLUMN_SPLITTER.before(singleCellRow(ELEMENT_ELLIPSIS, (TableHeadRow) head)),
             Notations.COLUMN_SPLITTER.before(singleCellRow(ROW_WILDCARD, (TableHeadRow) head)),
-            Notations.COLUMN_SPLITTER.before(tableRow((TableHeadRow) head))))).and(endWithOptionalLine()).as(TableBody::new).parse(procedure));
+            Notations.COLUMN_SPLITTER.before(tableRow((TableHeadRow) head))))).and(endWithOptionalLine())
+            .as(TableBody::new).parse(procedure));
 
     private ClauseParser<DALNode, DALProcedure> singleCellRow(
             NodeParser<DALNode, DALProcedure> nodeParser, TableHeadRow head) {
@@ -254,7 +255,8 @@ public class Compiler {
 
     private ClauseParser.Mandatory<DALNode, DALProcedure> tableRow(
             TableHeadRow headRow) {
-        return clause(rowPrefix -> tableLine(tableCell(rowPrefix, headRow)).as(cells -> new TableRowNode(rowPrefix, cells, headRow)));
+        return clause(rowPrefix -> tableLine(tableCell(rowPrefix, headRow))
+                .as(cells -> new TableRowNode(rowPrefix, cells, headRow)));
     }
 
     private ClauseParser.Mandatory<DALNode, DALProcedure> transposeTableCell(
@@ -275,8 +277,7 @@ public class Compiler {
 
     private static Syntax<DALNode, DALProcedure, NodeParser<DALNode, DALProcedure>, NodeParser.Mandatory<DALNode,
             DALProcedure>, DALNode, NodeParser.Mandatory<DALNode, DALProcedure>, List<DALNode>> tableLine(
-            NodeParser.Mandatory<
-                    DALNode, DALProcedure> mandatory) {
+            NodeParser.Mandatory<DALNode, DALProcedure> mandatory) {
         return many(mandatory).and(mandatorySplitBy(Notations.COLUMN_SPLITTER)).and(endOfRow(Notations.COLUMN_SPLITTER));
     }
 

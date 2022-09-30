@@ -171,3 +171,18 @@ Feature: ```string```
            b
            ```
       """
+
+    Scenario: use CR to join lines
+      Given the following json:
+      """
+      {
+        "key": "a\rb"
+      }
+      """
+      Then the following verification should pass:
+      """
+      key= ``` CR
+           a
+           b
+           ```
+      """

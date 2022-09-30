@@ -6,19 +6,21 @@ import com.github.leeonky.dal.ast.node.DALNode;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.util.TextUtil.lines;
 import static java.util.Collections.nCopies;
 
 public class NotationAttribute extends DALNode {
     @Deprecated
-    public final String s;
-
+    private final String s;
+    private final TextNotation textNotation;
+   
     @Deprecated
-    public final TextNotation textNotation;
+    private final String attribute;
 
     public NotationAttribute(DALNode textNotation, DALNode attribute) {
         this.textNotation = (TextNotation) textNotation;
         s = ((ConstNode) attribute).getValue().toString();
-        verifyAttribute();
+        this.attribute = verifyAttribute();
     }
 
     @Override
@@ -34,7 +36,7 @@ public class NotationAttribute extends DALNode {
         return String.join("", nCopies((int) s.chars().filter(c -> c == ('`')).count() + 3, "`"));
     }
 
-    public void verifyAttribute() {
+    public String verifyAttribute() {
         int i = s.indexOf('`');
         String attribute;
         if (i == -1)
@@ -46,12 +48,17 @@ public class NotationAttribute extends DALNode {
             throw textNotation.getSourceCode().syntaxError("Invalid text block attribute `not-exist`, all supported attributes are:\n" +
                                                            "  LF: use \\n as new line", -s.length() - 1);
         }
+        return attribute;
     }
 
     public String text(List<Character> ls) {
         String indent = String.join("", nCopies(indent(), " "));
         String text = ls.stream().map(Object::toString).collect(Collectors.joining())
                 .substring(indent()).replace("\n" + indent, "\n");
-        return text.isEmpty() ? text : text.substring(0, text.length() - 1);
+        if (text.isEmpty())
+            return text;
+        if (attribute.equals("CR"))
+            return String.join("\r", lines(text.substring(0, text.length() - 1)));
+        return String.join("\n", lines(text.substring(0, text.length() - 1)));
     }
 }

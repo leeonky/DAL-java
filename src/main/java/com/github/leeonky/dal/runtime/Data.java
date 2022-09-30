@@ -31,7 +31,11 @@ public class Data {
     }
 
     public String inspect() {
-        return isNull() ? "null " : format("%s\n<%s>\n", getClassName(getInstance()), getInstance());
+        if (isNull())
+            return "null ";
+        String content = getInstance().toString();
+        return format("%s\n<%s>\n", getClassName(getInstance()), content
+                .replace("\\\\", "\\").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t"));
     }
 
     public Object getInstance() {
@@ -80,12 +84,12 @@ public class Data {
             throw new PropertyAccessException("Index out of bounds (" + ex.getMessage() + "), first index is: " + getListFirstIndex(), ex);
         } catch (Exception e) {
             throw new PropertyAccessException(format("Get property `%s` failed, property can be:\n" +
-                            "  1. public field\n" +
-                            "  2. public getter\n" +
-                            "  3. public no args method\n" +
-                            "  4. Map key value\n" +
-                            "  5. customized type getter\n" +
-                            "  6. static method extension\n%s%s",
+                                                     "  1. public field\n" +
+                                                     "  2. public getter\n" +
+                                                     "  3. public no args method\n" +
+                                                     "  4. Map key value\n" +
+                                                     "  5. customized type getter\n" +
+                                                     "  6. static method extension\n%s%s",
                     propertyChain, e.getMessage(), listMappingMessage(this, propertyChain)), e);
         }
     }
@@ -148,7 +152,7 @@ public class Data {
 
     private String trimPrefix(String prefix, String fieldName) {
         return fieldName.substring(prefix.length(), prefix.length() + 1).toLowerCase()
-                + fieldName.substring(prefix.length() + 1);
+               + fieldName.substring(prefix.length() + 1);
     }
 
     public String dump() {
