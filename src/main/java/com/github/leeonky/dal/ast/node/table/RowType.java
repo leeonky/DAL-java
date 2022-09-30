@@ -4,7 +4,6 @@ import com.github.leeonky.dal.ast.node.*;
 import com.github.leeonky.dal.ast.opt.Factory;
 import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 
 import java.util.Collections;
@@ -35,7 +34,7 @@ abstract class RowType {
         throw new IllegalArgumentException();
     }
 
-    public abstract DALNode constructVerificationNode(Data actual, Stream<Clause<DALRuntimeContext, DALNode>> rowClauses,
+    public abstract DALNode constructVerificationNode(Data actual, Stream<Clause<DALNode>> rowClauses,
                                                       Comparator<Object> comparator);
 
     public DALNode constructAccessingRowNode(DALNode input, Optional<DALNode> indexOrKey) {
@@ -66,7 +65,7 @@ class EmptyTableRowType extends RowType {
     }
 
     @Override
-    public DALNode constructVerificationNode(Data actual, Stream<Clause<DALRuntimeContext, DALNode>> rowClauses,
+    public DALNode constructVerificationNode(Data actual, Stream<Clause<DALNode>> rowClauses,
                                              Comparator<Object> comparator) {
         return actual.isList() ? new ListScopeNode(rowClauses.collect(toList()), comparator, ListScopeNode.Style.TABLE)
                 : new ObjectScopeNode(Collections.emptyList());
@@ -90,7 +89,7 @@ class SpecifyIndexRowType extends RowType {
     }
 
     @Override
-    public DALNode constructVerificationNode(Data actual, Stream<Clause<DALRuntimeContext, DALNode>> rowClauses,
+    public DALNode constructVerificationNode(Data actual, Stream<Clause<DALNode>> rowClauses,
                                              Comparator<Object> comparator) {
         List<DALNode> rowNodes = rowClauses.map(rowClause -> rowClause.expression(null))
                 .collect(toList());
@@ -122,7 +121,7 @@ class DefaultIndexRowType extends RowType {
     }
 
     @Override
-    public DALNode constructVerificationNode(Data actual, Stream<Clause<DALRuntimeContext, DALNode>> rowClauses,
+    public DALNode constructVerificationNode(Data actual, Stream<Clause<DALNode>> rowClauses,
                                              Comparator<Object> comparator) {
         return new ListScopeNode(rowClauses.collect(toList()), comparator, ListScopeNode.Style.TABLE);
     }
@@ -136,7 +135,7 @@ class SpecifyPropertyRowType extends RowType {
     }
 
     @Override
-    public DALNode constructVerificationNode(Data actual, Stream<Clause<DALRuntimeContext, DALNode>> rowClauses,
+    public DALNode constructVerificationNode(Data actual, Stream<Clause<DALNode>> rowClauses,
                                              Comparator<Object> comparator) {
         return new ObjectScopeNode(rowClauses.map(rowNode -> rowNode.expression(null)).collect(toList()));
     }

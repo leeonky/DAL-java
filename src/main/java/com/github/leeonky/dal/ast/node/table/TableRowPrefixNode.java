@@ -5,7 +5,6 @@ import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.compiler.DALProcedure;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.OperatorParser;
 
@@ -16,10 +15,10 @@ public class TableRowPrefixNode extends DALNode {
             SPECIFY_INDEX = new SpecifyIndexRowType(),
             SPECIFY_PROPERTY = new SpecifyPropertyRowType();
     private final Optional<DALNode> indexOrProperty;
-    private final Optional<Clause<DALRuntimeContext, DALNode>> rowSchema;
+    private final Optional<Clause<DALNode>> rowSchema;
     private final Optional<DALOperator> rowOperator;
 
-    public TableRowPrefixNode(Optional<DALNode> indexOrProperty, Optional<Clause<DALRuntimeContext, DALNode>> rowSchema,
+    public TableRowPrefixNode(Optional<DALNode> indexOrProperty, Optional<Clause<DALNode>> rowSchema,
                               Optional<DALOperator> rowOperator) {
         this.rowSchema = rowSchema;
         this.rowOperator = rowOperator;
@@ -40,7 +39,7 @@ public class TableRowPrefixNode extends DALNode {
                 rowOperator.orElse(defaultOperator), expectedRow);
     }
 
-    public OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> operator() {
+    public OperatorParser<DALNode, DALOperator, DALProcedure> operator() {
         return procedure -> rowOperator;
     }
 

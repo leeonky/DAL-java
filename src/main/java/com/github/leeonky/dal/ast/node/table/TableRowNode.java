@@ -3,7 +3,6 @@ package com.github.leeonky.dal.ast.node.table;
 import com.github.leeonky.dal.ast.node.*;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.DalException;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.SyntaxException;
 
@@ -20,7 +19,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 public class TableRowNode extends DALNode {
-    private final List<Clause<DALRuntimeContext, DALNode>> cells;
+    private final List<Clause<DALNode>> cells;
     private final TableHeadRow tableHeadRow;
     private final TableRowPrefixNode rowPrefix;
 
@@ -28,7 +27,7 @@ public class TableRowNode extends DALNode {
         this(prefix, singletonList(n -> cell), tableHeadRow);
     }
 
-    public TableRowNode(DALNode prefix, List<Clause<DALRuntimeContext, DALNode>> clauses, TableHeadRow tableHeadRow) {
+    public TableRowNode(DALNode prefix, List<Clause<DALNode>> clauses, TableHeadRow tableHeadRow) {
         rowPrefix = (TableRowPrefixNode) prefix;
         cells = new ArrayList<>(clauses);
         this.tableHeadRow = tableHeadRow;
@@ -42,7 +41,7 @@ public class TableRowNode extends DALNode {
         return (prefix.isEmpty() ? data : prefix + " " + data);
     }
 
-    public Clause<DALRuntimeContext, DALNode> constructVerificationClause(DALOperator operator, RowType rowType) {
+    public Clause<DALNode> constructVerificationClause(DALOperator operator, RowType rowType) {
         return input -> isEllipsis() ? firstCell() :
                 rowPrefix.makeExpressionWithOptionalIndexAndSchema(rowType, input, operator, expectedRow());
     }
@@ -75,7 +74,7 @@ public class TableRowNode extends DALNode {
     }
 
     public TableRowNode merge(TableRowNode rowNode) {
-        return (TableRowNode) new TableRowNode(rowPrefix, new ArrayList<Clause<DALRuntimeContext, DALNode>>() {{
+        return (TableRowNode) new TableRowNode(rowPrefix, new ArrayList<Clause<DALNode>>() {{
             addAll(cells);
             addAll(rowNode.cells);
         }}, tableHeadRow.merge(rowNode.tableHeadRow)).setPositionBegin(getPositionBegin());

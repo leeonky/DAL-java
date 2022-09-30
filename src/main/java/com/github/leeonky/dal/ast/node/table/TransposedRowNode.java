@@ -4,7 +4,6 @@ import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.node.ListEllipsisNode;
 import com.github.leeonky.dal.ast.node.TableNode;
 import com.github.leeonky.dal.ast.node.WildcardNode;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 
 import java.util.ArrayList;
@@ -16,9 +15,9 @@ import static java.util.Collections.singletonList;
 
 public class TransposedRowNode extends DALNode {
     private final HeaderNode headerNode;
-    private final List<Clause<DALRuntimeContext, DALNode>> cellClauses;
+    private final List<Clause<DALNode>> cellClauses;
 
-    public TransposedRowNode(DALNode header, List<Clause<DALRuntimeContext, DALNode>> clauses) {
+    public TransposedRowNode(DALNode header, List<Clause<DALNode>> clauses) {
         cellClauses = clauses;
         headerNode = (HeaderNode) header;
         setPositionBegin(header.getPositionBegin());

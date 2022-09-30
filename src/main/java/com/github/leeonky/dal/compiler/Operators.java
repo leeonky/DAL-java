@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.compiler;
 
-import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.ast.opt.Equal;
@@ -8,7 +7,6 @@ import com.github.leeonky.dal.ast.opt.Factory;
 import com.github.leeonky.dal.ast.opt.Matcher;
 import com.github.leeonky.dal.compiler.Notations.Keywords;
 import com.github.leeonky.dal.runtime.Calculator;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.OperatorParser;
 import com.github.leeonky.interpreter.Procedure;
 
@@ -23,11 +21,11 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 public class Operators {
-    private static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+    private static final OperatorParser<DALNode, DALOperator, DALProcedure>
             DEFAULT_OPERATOR = Procedure::currentOperator,
             MAYBE_PROPERTY_SLASH = SLASH.operator(() -> Factory.executable(SLASH));
 
-    static final OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+    static final OperatorParser<DALNode, DALOperator, DALProcedure>
             IS = Notations.Operators.IS.operator(() -> Factory.is()),
             WHICH = Notations.Operators.WHICH.operator(() -> Factory.which()),
             PROPERTY_DOT = DOT.operator(() -> Factory.executable(DOT), not(DALProcedure::mayBeElementEllipsis)),
@@ -55,6 +53,6 @@ public class Operators {
             VERIFICATION_OPERATORS = oneOf(MATCHER.operator(Matcher::new, not(DALProcedure::mayBeMetaProperty)),
                     EQUAL.operator(Equal::new));
 
-    static final OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+    static final OperatorParser.Mandatory<DALNode, DALOperator, DALProcedure>
             DEFAULT_VERIFICATION_OPERATOR = DEFAULT_OPERATOR.mandatory("");
 }

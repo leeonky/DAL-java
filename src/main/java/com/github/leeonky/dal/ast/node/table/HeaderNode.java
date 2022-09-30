@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.ast.node.table;
 
-import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
@@ -32,7 +31,7 @@ public class HeaderNode extends DALNode {
         return property;
     }
 
-    public OperatorParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> operator() {
+    public OperatorParser<DALNode, DALOperator, DALProcedure> operator() {
         return procedure -> operator;
     }
 

@@ -24,12 +24,12 @@ import static java.util.stream.Collectors.toList;
 public class ListScopeNode extends DALNode {
     private List<DALNode> verificationExpressions;
     private List<DALNode> inputExpressions;
-    private List<Clause<DALRuntimeContext, DALNode>> inputClauses;
+    private List<Clause<DALNode>> inputClauses;
     private final Type type;
     private final Style style;
     private final Comparator<Object> comparator;
 
-    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> clauses, Comparator<Object> comparator, Style style) {
+    public ListScopeNode(List<Clause<DALNode>> clauses, Comparator<Object> comparator, Style style) {
         type = guessType(clauses);
         inputClauses = clauses;
         this.comparator = comparator;
@@ -43,7 +43,7 @@ public class ListScopeNode extends DALNode {
         this.style = style;
     }
 
-    public ListScopeNode(List<Clause<DALRuntimeContext, DALNode>> clauses) {
+    public ListScopeNode(List<Clause<DALNode>> clauses) {
         this(clauses, SortGroupNode.NOP_COMPARATOR, Style.LIST);
     }
 
@@ -73,7 +73,7 @@ public class ListScopeNode extends DALNode {
                 new SymbolNode(type.indexOfNode(firstIndex, index, inputClauses.size()), BRACKET));
     }
 
-    private Type guessType(List<Clause<DALRuntimeContext, DALNode>> clauses) {
+    private Type guessType(List<Clause<DALNode>> clauses) {
         List<Boolean> isListEllipsis = clauses.stream().map(this::isListEllipsis).collect(toList());
         long ellipsesCount = isListEllipsis.stream().filter(Boolean::booleanValue).count();
         if (ellipsesCount > 0) {
@@ -123,9 +123,9 @@ public class ListScopeNode extends DALNode {
     private boolean verifyContainElement(DALRuntimeContext context, Data data) {
         //            TODO raise error when index list(expressionFactories == null)
         int elementIndex = 0;
-        List<Clause<DALRuntimeContext, DALNode>> expected = trimFirstEllipsis();
+        List<Clause<DALNode>> expected = trimFirstEllipsis();
         for (int clauseIndex = 0; clauseIndex < expected.size(); clauseIndex++) {
-            Clause<DALRuntimeContext, DALNode> clause = expected.get(clauseIndex);
+            Clause<DALNode> clause = expected.get(clauseIndex);
             try {
                 while (!isElementPassedVerification(context, clause, getElement(data, elementIndex++, clause))) ;
             } catch (AssertionFailure exception) {
@@ -135,7 +135,7 @@ public class ListScopeNode extends DALNode {
         return true;
     }
 
-    private boolean isElementPassedVerification(DALRuntimeContext context, Clause<DALRuntimeContext, DALNode> clause,
+    private boolean isElementPassedVerification(DALRuntimeContext context, Clause<DALNode> clause,
                                                 Object element) {
         try {
             return (boolean) clause.expression(new ConstNode(element)).evaluate(context);
@@ -144,13 +144,13 @@ public class ListScopeNode extends DALNode {
         }
     }
 
-    private Object getElement(Data data, int elementIndex, Clause<DALRuntimeContext, DALNode> clause) {
+    private Object getElement(Data data, int elementIndex, Clause<DALNode> clause) {
         if (elementIndex == data.getListSize())
             throw new AssertionFailure("No such element", clause.expression(INPUT_NODE).getOperandPosition());
         return data.getValueList().get(elementIndex);
     }
 
-    private List<Clause<DALRuntimeContext, DALNode>> trimFirstEllipsis() {
+    private List<Clause<DALNode>> trimFirstEllipsis() {
         return inputClauses.subList(1, inputClauses.size() - 1);
     }
 
@@ -171,7 +171,7 @@ public class ListScopeNode extends DALNode {
         return true;
     }
 
-    private boolean isListEllipsis(Clause<DALRuntimeContext, DALNode> clause) {
+    private boolean isListEllipsis(Clause<DALNode> clause) {
         return clause.expression(INPUT_NODE) instanceof ListEllipsisNode;
     }
 
@@ -196,7 +196,7 @@ public class ListScopeNode extends DALNode {
     public static class NatureOrder extends ListScopeNode {
 
         @SuppressWarnings("unchecked")
-        public NatureOrder(List<Clause<DALRuntimeContext, DALNode>> clauses) {
+        public NatureOrder(List<Clause<DALNode>> clauses) {
             super(clauses, (Comparator) naturalOrder(), Style.LIST);
         }
 
@@ -209,7 +209,7 @@ public class ListScopeNode extends DALNode {
     public static class ReverseOrder extends ListScopeNode {
 
         @SuppressWarnings("unchecked")
-        public ReverseOrder(List<Clause<DALRuntimeContext, DALNode>> clauses) {
+        public ReverseOrder(List<Clause<DALNode>> clauses) {
             super(clauses, (Comparator) reverseOrder(), Style.LIST);
         }
 

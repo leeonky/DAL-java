@@ -169,7 +169,7 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerStaticMethodExtension(Class<?> staticMethodExtensionClass) {
         Stream.of(staticMethodExtensionClass.getMethods()).filter(method -> method.getParameterCount() >= 1
-                && (STATIC & method.getModifiers()) != 0).forEach(extensionMethods::add);
+                                                                            && (STATIC & method.getModifiers()) != 0).forEach(extensionMethods::add);
         return this;
     }
 
@@ -223,7 +223,7 @@ public class RuntimeContextBuilder {
         return curryingMethodArgRanges.get(method);
     }
 
-    public class DALRuntimeContext implements RuntimeContext<DALRuntimeContext> {
+    public class DALRuntimeContext implements RuntimeContext {
         private final LinkedList<Data> stack = new LinkedList<>();
         private final Set<Class<?>> schemaSet;
         private final Map<Data, PartialPropertyStack> partialPropertyStacks;

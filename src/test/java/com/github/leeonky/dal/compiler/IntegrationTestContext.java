@@ -5,10 +5,8 @@ import com.github.leeonky.dal.BaseTest;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
-import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.cucumber.TestCodeCompiler;
 import com.github.leeonky.dal.runtime.*;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.SyntaxException;
@@ -34,9 +32,9 @@ public class IntegrationTestContext {
     private final List<String> schemas = new ArrayList<>();
     private final List<String> javaClasses = new ArrayList<>();
     private final Compiler compiler = new Compiler();
-    private final Map<String, NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator,
-            DALProcedure>> parserMap = new HashMap<String, NodeParser<DALRuntimeContext, DALNode, DALExpression,
-            DALOperator, DALProcedure>>() {{
+    private final Map<String, NodeParser<DALNode,
+            DALProcedure>> parserMap = new HashMap<String, NodeParser<DALNode,
+            DALProcedure>>() {{
         put("symbol", compiler.SYMBOL);
         put("number", compiler.NUMBER);
         put("integer", compiler.INTEGER);
@@ -56,8 +54,8 @@ public class IntegrationTestContext {
         testCodeCompiler.giveBack(testCodeCompiler);
     }
 
-    private static NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> optional(
-            NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeFactory) {
+    private static NodeParser<DALNode, DALProcedure> optional(
+            NodeParser.Mandatory<DALNode, DALProcedure> nodeFactory) {
         return procedure -> Optional.ofNullable(nodeFactory.parse(procedure));
     }
 
@@ -68,8 +66,8 @@ public class IntegrationTestContext {
         try {
             testCodeCompiler.compileToClasses(schemas.stream().map(s ->
                                     "import com.github.leeonky.dal.type.*;\n" +
-                                            "import com.github.leeonky.dal.runtime.*;\n" +
-                                            "import java.util.*;\n" + s)
+                                    "import com.github.leeonky.dal.runtime.*;\n" +
+                                    "import java.util.*;\n" + s)
                             .collect(Collectors.toList()))
                     .forEach(schema -> {
                         dal.getRuntimeContextBuilder().registerSchema(NameStrategy.SIMPLE_NAME_WITH_PARENT, (Class) schema);
@@ -121,7 +119,7 @@ public class IntegrationTestContext {
         if (classes.isEmpty()) {
             classes.addAll(testCodeCompiler.compileToClasses(javaClasses.stream().map(s ->
                     "import com.github.leeonky.dal.type.*;\n" +
-                            "import java.math.*;\n" + s).collect(Collectors.toList())));
+                    "import java.math.*;\n" + s).collect(Collectors.toList())));
             classes.forEach(dal.getRuntimeContextBuilder()::registerStaticMethodExtension);
         }
     }
@@ -265,7 +263,7 @@ public class IntegrationTestContext {
         compileAll();
         dal.getRuntimeContextBuilder().registerCurryingMethodRange(
                 Arrays.stream(getType(methodType).getMethods()).filter(m -> m.getName().equals(method)
-                        && m.getParameters()[0].getType().equals(getType(type))).findFirst().get(),
+                                                                            && m.getParameters()[0].getType().equals(getType(type))).findFirst().get(),
                 (instance, args) -> new ArrayList<>(range));
     }
 

@@ -25,7 +25,6 @@ import static com.github.leeonky.interpreter.Rules.*;
 import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
 import static com.github.leeonky.util.function.When.when;
-import static java.lang.String.format;
 import static java.util.Optional.empty;
 
 public class Compiler {
@@ -42,7 +41,7 @@ public class Compiler {
             .escape("\\/", '/');
 
     //    TODO private
-    NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+    NodeParser<DALNode, DALProcedure>
             PROPERTY, OBJECT, SORTED_LIST, LIST, PARENTHESES, VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND,
             TABLE, SHORT_VERIFICATION_OPERAND, CELL_VERIFICATION_OPERAND, GROUP_PROPERTY, OPTIONAL_PROPERTY_CHAIN,
             INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> INPUT_NODE),
@@ -54,9 +53,8 @@ public class Compiler {
                     .and(endWith(Notations.DOUBLE_QUOTED.getLabel())).as(NodeFactory::constString)),
             TEXT_NOTATION_START = this::notationStart,
             TEXT_BLOCK = TEXT_NOTATION_START.concat(clause(notationNode -> many(charNode2(new EscapeChars()))
-                            .and(endWithLine()).as(characters ->
-                                    new NotationAttribute(notationNode, NodeFactory.constString2(characters)))))
-                    .concat(clause(node -> many(charNode2(new EscapeChars())).and(getRule((NotationAttribute) node))
+                            .and(endWithLine()).as(characters -> new NotationAttribute(notationNode, NodeFactory.constString2(characters)))))
+                    .concat(clause(node -> many(charNode2(new EscapeChars())).and(endWithPosition(((NotationAttribute) node).endNotation()))
                             .as(ls -> new ConstNode(((NotationAttribute) node).text(ls))))),
             STRING = oneOf(TEXT_BLOCK, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
             CONST_TRUE = Notations.Keywords.TRUE.wordNode(NodeFactory::constTrue, PROPERTY_DELIMITER_STRING),
@@ -85,12 +83,12 @@ public class Compiler {
             OPTIONAL_VERIFICATION_PROPERTY = lazyNode(() -> enableSlashProperty(enableRelaxProperty(OPTIONAL_PROPERTY_CHAIN)));
 
     private Optional<DALNode> propertyPattern(DALProcedure dalProcedure) {
-        ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> patternClause =
+        ClauseParser<DALNode, DALProcedure> patternClause =
                 notation("{}").clause((token, symbol) -> new PropertyPattern(symbol));
         return oneOf(notation("{}").node(n -> new PropertyThis()), SYMBOL.with(patternClause)).parse(dalProcedure);
     }
 
-    public NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+    public NodeParser.Mandatory<DALNode, DALProcedure>
             PROPERTY_CHAIN, OPERAND, EXPRESSION, VERIFICATION_PROPERTY, OBJECT_VERIFICATION_PROPERTY,
             DEFAULT_INPUT = procedure -> INPUT_NODE,
             SCHEMA_COMPOSE = Notations.OPENING_BRACKET.with(single(many(SCHEMA.mandatory("Expect a schema"))
@@ -103,7 +101,7 @@ public class Compiler {
             TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(NodeFactory::relaxString),
             DEFAULT_INDEX_HEADER = procedure -> new TableDefaultIndexHeadRow();
 
-    public ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+    public ClauseParser<DALNode, DALProcedure>
             ARITHMETIC_CLAUSE, VERIFICATION_CLAUSE,
             SCHEMA_CLAUSE = Operators.IS.clause(SCHEMA_COMPOSE),
             WHICH_CLAUSE = lazyClause(() -> Operators.WHICH.clause(EXPRESSION)),
@@ -120,22 +118,22 @@ public class Compiler {
                             .as(NodeFactory::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE))),
                     Operators.PROPERTY_META.clause(symbolClause(META_SYMBOL.concat(META_LIST_MAPPING_CLAUSE))));
 
-    private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> propertyChainNode() {
+    private NodeParser.Mandatory<DALNode, DALProcedure> propertyChainNode() {
         return symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL, NUMBER_PROPERTY, lazyNode(() -> GROUP_PROPERTY)).concat(LIST_MAPPING_CLAUSE));
     }
 
-    private NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> symbolClause(
-            NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser) {
+    private NodeParser.Mandatory<DALNode, DALProcedure> symbolClause(
+            NodeParser<DALNode, DALProcedure> nodeParser) {
         return nodeParser.mandatory("Expect a symbol");
     }
 
-    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> shortVerificationClause(
-            OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> operatorMandatory,
-            NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> operand) {
+    private ClauseParser.Mandatory<DALNode, DALProcedure> shortVerificationClause(
+            OperatorParser.Mandatory<DALNode, DALOperator, DALProcedure> operatorMandatory,
+            NodeParser.Mandatory<DALNode, DALProcedure> operand) {
         return SCHEMA_CLAUSE.concat(Operators.VERIFICATION_OPERATORS.clause(operand)).or(operatorMandatory.clause(operand));
     }
 
-    private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> ARITHMETIC_CLAUSE_CHAIN,
+    private ClauseParser<DALNode, DALProcedure> ARITHMETIC_CLAUSE_CHAIN,
             VERIFICATION_CLAUSE_CHAIN, EXPLICIT_PROPERTY_CHAIN, WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN, EXPRESSION_CLAUSE;
 
     public Compiler() {
@@ -182,8 +180,8 @@ public class Compiler {
                 .and(optionalSplitBy(Notations.COMMA)).and(endWith(Notations.CLOSING_GROUP)).as(GroupExpression::new)));
     }
 
-    private NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> pureList(
-            Function<List<Clause<DALRuntimeContext, DALNode>>, DALNode> factory) {
+    private NodeParser<DALNode, DALProcedure> pureList(
+            Function<List<Clause<DALNode>>, DALNode> factory) {
         return lazyNode(() -> disableCommaAnd(Notations.OPENING_BRACKET.with(many(ELEMENT_ELLIPSIS_CLAUSE.or(
                 shortVerificationClause(Operators.VERIFICATION_OPERATORS.or(Operators.DEFAULT_VERIFICATION_OPERATOR),
                         SHORT_VERIFICATION_OPERAND.or(LIST_SCOPE_RELAX_STRING)))).and(optionalSplitBy(Notations.COMMA))
@@ -202,7 +200,7 @@ public class Compiler {
     }
 
     @Deprecated
-    private static NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> charNode(
+    private static NodeParser.Mandatory<DALNode, DALProcedure> charNode(
             EscapeChars escapeChars) {
         return procedure -> new ConstNode(procedure.getSourceCode().popChar(escapeChars));
     }
@@ -212,14 +210,14 @@ public class Compiler {
                 null, DALExpression::new)).propertyChain();
     }
 
-    private final NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+    private final NodeParser<DALNode, DALProcedure>
             SEQUENCE_AZ = Notations.SEQUENCE_AZ.node(SortSymbolNode::new),
             SEQUENCE_ZA = Notations.SEQUENCE_ZA.node(SortSymbolNode::new),
             SEQUENCE_AZ_2 = Notations.SEQUENCE_AZ_2.node(SortSymbolNode::new),
             SEQUENCE_ZA_2 = Notations.SEQUENCE_ZA_2.node(SortSymbolNode::new),
             ROW_KEY = oneOf(INTEGER, OPTIONAL_VERIFICATION_PROPERTY);
 
-    private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+    private final NodeParser.Mandatory<DALNode, DALProcedure>
             SEQUENCE = oneOf(
             many(SEQUENCE_AZ).and(atLeast(1)).as(SortGroupNode::new),
             many(SEQUENCE_AZ_2).and(atLeast(1)).as(SortGroupNode::new),
@@ -227,67 +225,64 @@ public class Compiler {
             many(SEQUENCE_ZA_2).and(atLeast(1)).as(SortGroupNode::new)).or(procedure -> SortGroupNode.noSequence()),
             EMPTY_TRANSPOSED_HEAD = procedure -> new EmptyTransposedTableHead();
 
-    private final NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+    private final NodeParser.Mandatory<DALNode, DALProcedure>
             ROW_PREFIX = procedure -> new TableRowPrefixNode(ROW_KEY.parse(procedure), SCHEMA_CLAUSE.parse(procedure),
             Operators.VERIFICATION_OPERATORS.parse(procedure)),
             TABLE_HEADER = procedure -> new HeaderNode((SortGroupNode) SEQUENCE.parse(procedure),
                     VERIFICATION_PROPERTY.concat(SCHEMA_CLAUSE).parse(procedure),
                     Operators.VERIFICATION_OPERATORS.parse(procedure));
 
-    private final ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+    private final ClauseParser.Mandatory<DALNode, DALProcedure>
             TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHeadRow) head, (TableBody) many(ROW_PREFIX.with(oneOf(
             Notations.COLUMN_SPLITTER.before(singleCellRow(ELEMENT_ELLIPSIS, (TableHeadRow) head)),
             Notations.COLUMN_SPLITTER.before(singleCellRow(ROW_WILDCARD, (TableHeadRow) head)),
             Notations.COLUMN_SPLITTER.before(tableRow((TableHeadRow) head))))).and(endWithOptionalLine()).as(TableBody::new).parse(procedure));
 
-    private ClauseParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> singleCellRow(
-            NodeParser<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> nodeParser, TableHeadRow head) {
+    private ClauseParser<DALNode, DALProcedure> singleCellRow(
+            NodeParser<DALNode, DALProcedure> nodeParser, TableHeadRow head) {
         return single(single(nodeParser).and(endWith(Notations.COLUMN_SPLITTER)).as()).and(endWithLine()).as()
                 .clause((prefix, cell) -> new TableRowNode(prefix, cell, head));
     }
 
-    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableCell(
+    private ClauseParser.Mandatory<DALNode, DALProcedure> tableCell(
             DALNode rowPrefix, TableHeadRow head) {
-        return positionClause(ClauseParser.<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+        return positionClause(ClauseParser.<DALNode, DALProcedure>
                 columnMandatory(column -> shortVerificationClause(oneOf(Operators.VERIFICATION_OPERATORS,
                 head.getHeader(column).operator(), ((TableRowPrefixNode) rowPrefix).operator()).or(
                 Operators.DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING))));
     }
 
-    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> tableRow(
+    private ClauseParser.Mandatory<DALNode, DALProcedure> tableRow(
             TableHeadRow headRow) {
         return clause(rowPrefix -> tableLine(tableCell(rowPrefix, headRow)).as(cells -> new TableRowNode(rowPrefix, cells, headRow)));
     }
 
-    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTableCell(
+    private ClauseParser.Mandatory<DALNode, DALProcedure> transposeTableCell(
             DALNode prefix, DALNode header) {
-        return positionClause(ClauseParser.<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
+        return positionClause(ClauseParser.<DALNode, DALProcedure>
                 columnMandatory(column -> oneOf(ELEMENT_ELLIPSIS_CLAUSE, ROW_WILDCARD_CLAUSE)
                 .or(shortVerificationClause(oneOf(Operators.VERIFICATION_OPERATORS, ((HeaderNode) prefix).operator(),
                         ((TransposedTableHead) header).getPrefix(column).operator())
                         .or(Operators.DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING)))));
     }
 
-    private ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> transposeTable() {
+    private ClauseParser.Mandatory<DALNode, DALProcedure> transposeTable() {
         return procedure -> header -> new TransposedTableNode(header, many(positionNode(Notations.COLUMN_SPLITTER.before(
                 single(TABLE_HEADER).and(endWith(Notations.COLUMN_SPLITTER)).as())).concat(clause(prefix -> tableLine(
                 transposeTableCell(prefix, header)).as(cells -> new TransposedRowNode(prefix, cells))))).and(atLeast(1))
                 .and(endWithOptionalLine()).as(TransposedTableBody::new).mandatory("Expecting a table").parse(procedure));
     }
 
-    private static Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, NodeParser<DALRuntimeContext,
-            DALNode, DALExpression, DALOperator, DALProcedure>, NodeParser.Mandatory<DALRuntimeContext, DALNode,
-            DALExpression, DALOperator, DALProcedure>, DALNode, NodeParser.Mandatory<DALRuntimeContext, DALNode,
-            DALExpression, DALOperator, DALProcedure>, List<DALNode>> tableLine(NodeParser.Mandatory<DALRuntimeContext,
-            DALNode, DALExpression, DALOperator, DALProcedure> mandatory) {
+    private static Syntax<DALNode, DALProcedure, NodeParser<DALNode, DALProcedure>, NodeParser.Mandatory<DALNode,
+            DALProcedure>, DALNode, NodeParser.Mandatory<DALNode, DALProcedure>, List<DALNode>> tableLine(
+            NodeParser.Mandatory<
+                    DALNode, DALProcedure> mandatory) {
         return many(mandatory).and(mandatorySplitBy(Notations.COLUMN_SPLITTER)).and(endOfRow(Notations.COLUMN_SPLITTER));
     }
 
-    private static Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, ClauseParser<DALRuntimeContext,
-            DALNode, DALExpression, DALOperator, DALProcedure>, ClauseParser.Mandatory<DALRuntimeContext, DALNode,
-            DALExpression, DALOperator, DALProcedure>, Clause<DALRuntimeContext, DALNode>, NodeParser.Mandatory<DALRuntimeContext,
-            DALNode, DALExpression, DALOperator, DALProcedure>, List<Clause<DALRuntimeContext, DALNode>>> tableLine(
-            ClauseParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> mandatory) {
+    private static Syntax<DALNode, DALProcedure, ClauseParser<DALNode, DALProcedure>, ClauseParser.Mandatory<DALNode,
+            DALProcedure>, Clause<DALNode>, NodeParser.Mandatory<DALNode, DALProcedure>, List<Clause<DALNode>>> tableLine(
+            ClauseParser.Mandatory<DALNode, DALProcedure> mandatory) {
         return many(mandatory).and(mandatorySplitBy(Notations.COLUMN_SPLITTER)).and(endOfRow(Notations.COLUMN_SPLITTER));
     }
 
@@ -297,28 +292,9 @@ public class Compiler {
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }
 
-    private Function<Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, ObjectParser<DALProcedure, Character>, ObjectParser.Mandatory<DALProcedure, Character>, Character, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<Character>>, Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, ObjectParser<DALProcedure, Character>, ObjectParser.Mandatory<DALProcedure, Character>, Character, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<Character>>> getRule(NotationAttribute notationAttribute) {
-        return n -> new Syntax.CompositeSyntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, ObjectParser<DALProcedure, Character>, ObjectParser.Mandatory<DALProcedure, Character>, Character, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<Character>>
-                (n.and(endWith(notationAttribute.endNotation()))) {
-
-            private Token token;
-
-            @Override
-            protected void close(DALProcedure procedure) {
-                token = procedure.getSourceCode().popWord(notation(notationAttribute.endNotation()))
-                        .orElseThrow(() -> procedure.getSourceCode().syntaxError(format("Should end with '%s'", notationAttribute.endNotation()), 0));
-            }
-
-            @Override
-            protected NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> parse(Syntax<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure, ObjectParser<DALProcedure, Character>, ObjectParser.Mandatory<DALProcedure, Character>, Character, NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>, List<Character>> syntax, Function<List<Character>, DALNode> factory) {
-                NodeParser.Mandatory<DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure> parse = super.parse(syntax, factory);
-                return p -> parse.parse(p).setPositionBegin(token.getPosition());
-            }
-        };
-    }
-
     private Optional<DALNode> notationStart(DALProcedure procedure) {
-        return procedure.getSourceCode().popWord(Notations.TEXT_BLOCK).map(token -> new TextNotation(token, procedure.getSourceCode()));
+        return procedure.getSourceCode().popWord(Notations.TEXT_BLOCK).map(token ->
+                new TextNotation(token, procedure.getSourceCode()));
     }
 
     private ObjectParser.Mandatory<DALProcedure, Character> charNode2(EscapeChars escapeChars) {
