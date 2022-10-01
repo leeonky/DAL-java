@@ -12,7 +12,7 @@ public class MetaThrowTest {
 
     @Test
     void should_catch_exception_thrown_in_property_accessor() {
-        DAL dal = new DAL();
+        DAL dal = new DAL().extend();
         RuntimeContextBuilder builder = dal.getRuntimeContextBuilder();
         builder.registerPropertyAccessor(Bean.class, new JavaClassPropertyAccessor<Bean>(builder, create(Bean.class)) {
             @Override

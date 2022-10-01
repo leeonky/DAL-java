@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class Base {
-    protected DAL dal = new DAL();
+    protected DAL dal = new DAL().extend();
 
     public static DALNode createPropertyNode(DALNode instanceNode, Object name) {
         return new DALExpression(instanceNode, executable(Notations.EMPTY), new SymbolNode(name, SymbolNode.Type.BRACKET));

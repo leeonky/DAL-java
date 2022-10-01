@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.node.ConstNode;
 import com.github.leeonky.dal.ast.node.ListEllipsisNode;
 import com.github.leeonky.dal.ast.node.ObjectScopeNode;
@@ -23,7 +24,7 @@ class ObjectScopeNodeTest {
 
     @Nested
     class EqualTo {
-        RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder().build(null);
+        RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new DAL().extend().getRuntimeContextBuilder().build(null);
         ObjectScopeNode objectScopeNode = new ObjectScopeNode(Collections.emptyList());
 
         @Test

@@ -1,4 +1,6 @@
-package com.github.leeonky.dal.runtime;
+package com.github.leeonky.dal.extensions;
+
+import com.github.leeonky.dal.runtime.PropertyAccessor;
 
 import java.util.LinkedHashSet;
 import java.util.Map;

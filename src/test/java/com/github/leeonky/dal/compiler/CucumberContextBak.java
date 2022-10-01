@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class CucumberContextBak {
     private final TestCodeCompiler javaTestCodeCompiler;
 
-    DAL dal = new DAL();
+    DAL dal = new DAL().extend();
 
     Object inputObject = null;
     DALProcedure dalProcedure = null;
@@ -75,8 +75,8 @@ public class CucumberContextBak {
         try {
             javaTestCodeCompiler.compileToClasses(schemas.stream().map(s ->
                                     "import com.github.leeonky.dal.type.*;\n" +
-                                            "import com.github.leeonky.dal.runtime.*;\n" +
-                                            "import java.util.*;\n" + s)
+                                    "import com.github.leeonky.dal.runtime.*;\n" +
+                                    "import java.util.*;\n" + s)
                             .collect(Collectors.toList()))
                     .forEach(c -> dal.getRuntimeContextBuilder().registerSchema((Class) c));
             dal.evaluate(inputObject, assertion);

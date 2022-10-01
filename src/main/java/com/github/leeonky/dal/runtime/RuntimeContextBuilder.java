@@ -2,7 +2,6 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
-import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.dal.type.Schema;
@@ -16,7 +15,6 @@ import com.github.leeonky.util.NumberType;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.time.*;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
@@ -25,7 +23,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.dal.runtime.ListAccessor.changeFirstIndex;
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
 import static com.github.leeonky.dal.runtime.schema.Verification.expect;
 import static com.github.leeonky.util.BeanClass.create;
@@ -51,51 +48,6 @@ public class RuntimeContextBuilder {
     private final Map<String, TextAttribute> textAttributeMap = new LinkedHashMap<>();
     private Converter converter = Converter.getInstance();
 
-    public RuntimeContextBuilder() {
-        registerValueFormat(new Formatters.String())
-                .registerValueFormat(new Formatters.URL())
-                .registerValueFormat(new Formatters.Instant())
-                .registerValueFormat(new Formatters.LocalDate())
-                .registerValueFormat(new Formatters.LocalDateTime())
-                .registerValueFormat(new Formatters.Enum<>())
-                .registerValueFormat(new Formatters.Number())
-                .registerValueFormat(new Formatters.PositiveInteger())
-                .registerValueFormat(new Formatters.Integer())
-                .registerValueFormat(new Formatters.PositiveNumber())
-                .registerValueFormat(new Formatters.ZeroNumber())
-                .registerValueFormat(new Formatters.Boolean())
-                .registerSchema("List", (d, c) -> d.isList())
-                .registerListAccessor(Iterable.class, iterable -> iterable)
-                .registerListAccessor(Stream.class, stream -> stream::iterator)
-                .registerListAccessor(AutoMappingList.class, changeFirstIndex(AutoMappingList::firstIndex))
-                .registerPropertyAccessor(Map.class, new MapPropertyAccessor())
-                .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor(this))
-                .registerPropertyAccessor(CurryingMethod.class, new CurryingMethodPropertyAccessor(this))
-        ;
-
-        registerValueDumper(String.class, RuntimeContextBuilder::dumpString)
-                .registerValueDumper(Number.class, Object::toString)
-                .registerValueDumper(Boolean.class, Object::toString)
-                .registerValueDumper(boolean.class, Object::toString)
-        ;
-
-        registerObjectDumper(UUID.class, Object::toString)
-                .registerObjectDumper(Instant.class, Object::toString)
-                .registerObjectDumper(Date.class, date -> date.toInstant().toString())
-                .registerObjectDumper(LocalTime.class, LocalTime::toString)
-                .registerObjectDumper(LocalDate.class, LocalDate::toString)
-                .registerObjectDumper(LocalDateTime.class, LocalDateTime::toString)
-                .registerObjectDumper(OffsetDateTime.class, OffsetDateTime::toString)
-                .registerObjectDumper(ZonedDateTime.class, ZonedDateTime::toString)
-                .registerObjectDumper(YearMonth.class, YearMonth::toString)
-                .registerObjectDumper(Class.class, Class::getName)
-        ;
-
-        registerMetaProperty("size", BuildInMetaProperty::size);
-        registerMetaProperty("throw", BuildInMetaProperty::throw_);
-
-    }
-
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
         return this;
@@ -104,11 +56,6 @@ public class RuntimeContextBuilder {
     public RuntimeContextBuilder registerTextBlockAttribute(String name, TextAttribute attribute) {
         textAttributeMap.put(name, attribute);
         return this;
-    }
-
-    private static String dumpString(Object o) {
-        return "\"" + o.toString().replace("\\", "\\\\").replace("\t", "\\t").replace("\b", "\\b").replace("\n", "\\n")
-                .replace("\r", "\\r").replace("\f", "\\f").replace("'", "\\'").replace("\"", "\\\"") + "\"";
     }
 
     @SuppressWarnings("unchecked")

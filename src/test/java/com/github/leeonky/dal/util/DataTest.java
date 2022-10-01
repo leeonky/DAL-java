@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.util;
 
+import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.*;
@@ -72,7 +73,7 @@ class DataTest {
 
     @Nested
     class GetPropertyOrIndexValue {
-        RuntimeContextBuilder runtimeContextBuilder = new RuntimeContextBuilder()
+        RuntimeContextBuilder runtimeContextBuilder = new DAL().extend().getRuntimeContextBuilder()
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
                 .registerListAccessor(JSONArray.class, new JSONArrayAccessor());
 

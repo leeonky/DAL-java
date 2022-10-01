@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast;
 
+import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.node.ConstNode;
 import com.github.leeonky.dal.ast.node.ListScopeNode;
 import com.github.leeonky.dal.ast.opt.Equal;
@@ -15,7 +16,7 @@ class ListScopeNodeTest {
 
     public static final Equal EQUAL = new Equal();
     public static final Matcher MATCHER = new Matcher();
-    RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder().build(null);
+    RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new DAL().extend().getRuntimeContextBuilder().build(null);
     ListScopeNode listScopeNode = new ListScopeNode(Collections.emptyList());
 
     @Test
