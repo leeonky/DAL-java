@@ -7,6 +7,9 @@ import com.github.leeonky.dal.runtime.TextAttribute;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.extensions.TextBlockAttributes.DEFAULT_END_OF_LINE;
+import static com.github.leeonky.dal.extensions.TextBlockAttributes.DEFAULT_NEW_LINE;
+
 public class TextAttributeListNode extends DALNode {
     final List<DALNode> attributes;
 
@@ -16,28 +19,11 @@ public class TextAttributeListNode extends DALNode {
 
     public TextAttribute getAttribute(RuntimeContextBuilder.DALRuntimeContext context) {
         return attributes.stream().map(TextAttributeNode.class::cast).map(node -> node.getTextAttribute(context))
-                .reduce(new DefaultTextAttribute(), TextAttribute::merge);
+                .reduce(DEFAULT_NEW_LINE.merge(DEFAULT_END_OF_LINE), TextAttribute::merge);
     }
 
     @Override
     public String inspect() {
         return attributes.stream().map(DALNode::inspect).collect(Collectors.joining(" "));
-    }
-
-    private static class DefaultTextAttribute extends TextAttribute {
-        @Override
-        public String newLine() {
-            return "\n";
-        }
-
-        @Override
-        public String tail() {
-            return "<";
-        }
-
-        @Override
-        public String description() {
-            return "default";
-        }
     }
 }

@@ -58,6 +58,8 @@ public class DAL {
     public DAL extend() {
         Classes.subTypesOf(Extension.class, "com.github.leeonky.dal.extensions")
                 .forEach(c -> ((Extension) Classes.newInstance(c)).extend(this));
+        Classes.subTypesOf(Extension.class, "com.github.leeonky.extensions.dal")
+                .forEach(c -> ((Extension) Classes.newInstance(c)).extend(this));
         return this;
     }
 }

@@ -94,51 +94,6 @@ public class RuntimeContextBuilder {
         registerMetaProperty("size", BuildInMetaProperty::size);
         registerMetaProperty("throw", BuildInMetaProperty::throw_);
 
-
-        registerTextBlockAttribute("LF", new TextAttribute() {
-            @Override
-            public String newLine() {
-                return "\n";
-            }
-
-            @Override
-            public String description() {
-                return "use \\n as new line";
-            }
-        });
-        registerTextBlockAttribute("CR", new TextAttribute() {
-            @Override
-            public String newLine() {
-                return "\r";
-            }
-
-            @Override
-            public String description() {
-                return "use \\r as new line";
-            }
-        });
-        registerTextBlockAttribute("<", new TextAttribute() {
-            @Override
-            public String tail() {
-                return "<";
-            }
-
-            @Override
-            public String description() {
-                return "use < as end of line character";
-            }
-        });
-        registerTextBlockAttribute("⏎", new TextAttribute() {
-            @Override
-            public String tail() {
-                return "⏎";
-            }
-
-            @Override
-            public String description() {
-                return "use ⏎ as end of line character";
-            }
-        });
     }
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
@@ -442,9 +397,9 @@ public class RuntimeContextBuilder {
 
         public TextAttribute getAttribute(String name, int position) {
             return textAttributeMap.computeIfAbsent(name, k -> {
-                throw new SyntaxException("Invalid text block attribute `not-exist`, all supported attributes are:\n"
-                                          + textAttributeMap.entrySet().stream().map(e -> format("  %s:\n    %s",
-                        e.getKey(), e.getValue().description())).collect(joining("\n")), position);
+                throw new SyntaxException(format("Invalid text block attribute `%s`, all supported attributes are:\n%s",
+                        k, textAttributeMap.entrySet().stream().map(e -> format("  %s:\n    %s",
+                                e.getKey(), e.getValue().description())).collect(joining("\n"))), position);
             });
         }
     }

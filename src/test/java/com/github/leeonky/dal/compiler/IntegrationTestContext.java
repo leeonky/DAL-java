@@ -23,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 public class IntegrationTestContext {
-    private final DAL dal = new DAL();
+    private final DAL dal;
     private Object input = null;
     private Object result;
     private InterpreterException exception;
@@ -42,11 +42,12 @@ public class IntegrationTestContext {
         put("schema", optional(compiler.SCHEMA_COMPOSE));
     }};
     private DALNode dalNode = null;
-    private Map<String, Integer> firstIndexes = new HashMap<>();
+    private final Map<String, Integer> firstIndexes = new HashMap<>();
     private final List<Class<?>> classes = new ArrayList<>();
-    private TestCodeCompiler testCodeCompiler;
+    private final TestCodeCompiler testCodeCompiler;
 
     public IntegrationTestContext() throws InterruptedException {
+        dal = new DAL().extend();
         testCodeCompiler = TestCodeCompiler.take();
     }
 
