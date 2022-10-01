@@ -110,12 +110,13 @@ Feature: ```string```
            b
            ````
       """
-#      TODO
-#      And the inspect should:
-#      """
-#      key= 'a
-#      b'
-#      """
+      And the inspect should:
+      """
+      key= ````
+           a
+           b
+           ````
+      """
       When evaluate by:
       """
       key= ````

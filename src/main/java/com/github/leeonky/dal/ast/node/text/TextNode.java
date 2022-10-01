@@ -4,7 +4,6 @@ import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class TextNode extends DALNode {
@@ -23,6 +22,8 @@ public class TextNode extends DALNode {
 
     @Override
     public String inspect() {
-        return "'" + content.stream().map(Objects::toString).collect(Collectors.joining()).trim() + "'";
+        return notationAttributeNode.inspect() + "\n"
+               + content.stream().map(Object::toString).collect(Collectors.joining())
+               + notationAttributeNode.endNotation();
     }
 }

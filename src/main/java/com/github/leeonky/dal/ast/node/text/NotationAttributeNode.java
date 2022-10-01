@@ -20,7 +20,7 @@ public class NotationAttributeNode extends DALNode {
 
     @Override
     public String inspect() {
-        return null;
+        return (notation.inspect() + " " + attributeList.inspect()).trim();
     }
 
     public String endNotation() {
