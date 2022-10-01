@@ -163,7 +163,14 @@ Feature: ```string```
       Then failed with the message:
       """
       Invalid text block attribute `not-exist`, all supported attributes are:
-        LF: use \n as new line
+        LF:
+          use \n as new line
+        CR:
+          use \r as new line
+        <:
+          use < as end of line character
+        ⏎:
+          use ⏎ as end of line character
       """
       And got the following notation:
       """
@@ -200,6 +207,51 @@ Feature: ```string```
       """
       key= ``` LF CR
            a
+           b
+           ```
+      """
+
+    Scenario: customer tail char
+      Given the following json:
+      """
+      {
+        "key": "a \nb"
+      }
+      """
+      Then the following verification should pass:
+      """
+      key= ```
+           a <
+           b<
+           ```
+      """
+
+    Scenario: unicode tail char
+      Given the following json:
+      """
+      {
+        "key": "a \nb"
+      }
+      """
+      Then the following verification should pass:
+      """
+      key= ``` ⏎
+           a ⏎
+           b
+           ```
+      """
+
+    Scenario: mixin and override attribute
+      Given the following json:
+      """
+      {
+        "key": "a \rb"
+      }
+      """
+      Then the following verification should pass:
+      """
+      key= ``` CR ⏎
+           a ⏎
            b
            ```
       """

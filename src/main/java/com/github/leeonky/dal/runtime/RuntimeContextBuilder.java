@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.DALNode;
-import com.github.leeonky.dal.ast.node.text.TextAttributeListNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Formatters;
 import com.github.leeonky.dal.runtime.schema.Expect;
@@ -34,6 +33,7 @@ import static java.lang.String.format;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
+import static java.util.stream.Collectors.joining;
 
 public class RuntimeContextBuilder {
     private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
@@ -48,7 +48,7 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<Function<Object, String>> valueDumpers = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Map<String, Object>>> objectDumpers = new ClassKeyMap<>();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
-    private final Map<String, TextAttributeListNode.TextAttribute> textAttributeMap = new HashMap<>();
+    private final Map<String, TextAttribute> textAttributeMap = new LinkedHashMap<>();
     private Converter converter = Converter.getInstance();
 
     public RuntimeContextBuilder() {
@@ -95,16 +95,48 @@ public class RuntimeContextBuilder {
         registerMetaProperty("throw", BuildInMetaProperty::throw_);
 
 
-        registerTextAttribute("LF", new TextAttributeListNode.TextAttribute() {
+        registerTextBlockAttribute("LF", new TextAttribute() {
             @Override
-            public CharSequence newLine() {
+            public String newLine() {
                 return "\n";
             }
-        });
-        registerTextAttribute("CR", new TextAttributeListNode.TextAttribute() {
+
             @Override
-            public CharSequence newLine() {
+            public String description() {
+                return "use \\n as new line";
+            }
+        });
+        registerTextBlockAttribute("CR", new TextAttribute() {
+            @Override
+            public String newLine() {
                 return "\r";
+            }
+
+            @Override
+            public String description() {
+                return "use \\r as new line";
+            }
+        });
+        registerTextBlockAttribute("<", new TextAttribute() {
+            @Override
+            public String tail() {
+                return "<";
+            }
+
+            @Override
+            public String description() {
+                return "use < as end of line character";
+            }
+        });
+        registerTextBlockAttribute("⏎", new TextAttribute() {
+            @Override
+            public String tail() {
+                return "⏎";
+            }
+
+            @Override
+            public String description() {
+                return "use ⏎ as end of line character";
             }
         });
     }
@@ -114,7 +146,7 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerTextAttribute(String name, TextAttributeListNode.TextAttribute attribute) {
+    public RuntimeContextBuilder registerTextBlockAttribute(String name, TextAttribute attribute) {
         textAttributeMap.put(name, attribute);
         return this;
     }
@@ -326,10 +358,6 @@ public class RuntimeContextBuilder {
             };
         }
 
-        public Map<String, TextAttributeListNode.TextAttribute> map() {
-            return textAttributeMap;
-        }
-
         public boolean isRegisteredList(Object instance) {
             return listAccessors.tryGetData(instance).map(listAccessor -> listAccessor.isList(instance)).orElse(false);
         }
@@ -412,12 +440,12 @@ public class RuntimeContextBuilder {
             });
         }
 
-        public TextAttributeListNode.TextAttribute getAttribute(String name, int position) {
-            return map().computeIfAbsent(name, k -> {
-                        throw new SyntaxException("Invalid text block attribute `not-exist`, all supported attributes are:\n" +
-                                                  "  LF: use \\n as new line", position);
-                    }
-            );
+        public TextAttribute getAttribute(String name, int position) {
+            return textAttributeMap.computeIfAbsent(name, k -> {
+                throw new SyntaxException("Invalid text block attribute `not-exist`, all supported attributes are:\n"
+                                          + textAttributeMap.entrySet().stream().map(e -> format("  %s:\n    %s",
+                        e.getKey(), e.getValue().description())).collect(joining("\n")), position);
+            });
         }
     }
 }
