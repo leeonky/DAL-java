@@ -51,7 +51,7 @@ public class Compiler {
             DOUBLE_QUOTED_STRING = Notations.DOUBLE_QUOTED.with(many(charNode(DOUBLE_QUOTED_ESCAPES))
                     .and(endWith(Notations.DOUBLE_QUOTED.getLabel())).as(NodeFactory::constString)),
             TEXT_BLOCK = positionNode(many(Notations.TEXT_BLOCK).and(atLeast(3)).as(TextBlockNotationNode::new))
-                    .concat(clause(this::textAttribute)).concat(clause(node -> many(charNode2(new EscapeChars()))
+                    .concat(clause(this::textAttribute)).concat(clause(node -> many(charNode(new EscapeChars()))
                             .and(endWithPosition(((NotationAttributeNode) node).endNotation()))
                             .as(ls -> new TextBlockNode((NotationAttributeNode) node, ls)))),
             STRING = oneOf(TEXT_BLOCK, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
@@ -204,12 +204,6 @@ public class Compiler {
         }};
     }
 
-    @Deprecated
-    private static NodeParser.Mandatory<DALNode, DALProcedure> charNode(
-            EscapeChars escapeChars) {
-        return procedure -> new ConstNode(procedure.getSourceCode().popChar(escapeChars));
-    }
-
     public List<Object> toChainNodes(String sourceCode) {
         return PROPERTY_CHAIN.parse(new DALProcedure(new SourceCode(sourceCode, Notations.LINE_COMMENTS),
                 null, DALExpression::new)).propertyChain();
@@ -296,7 +290,7 @@ public class Compiler {
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }
 
-    private ObjectParser.Mandatory<DALProcedure, Character> charNode2(EscapeChars escapeChars) {
+    private ObjectParser.Mandatory<DALProcedure, Character> charNode(EscapeChars escapeChars) {
         return procedure -> procedure.getSourceCode().popChar(escapeChars);
     }
 }

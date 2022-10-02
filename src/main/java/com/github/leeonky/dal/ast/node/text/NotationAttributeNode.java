@@ -5,8 +5,8 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.TextBlockAttribute;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.util.TextUtil.join;
 import static com.github.leeonky.dal.util.TextUtil.lines;
 import static java.util.Collections.nCopies;
 
@@ -28,15 +28,11 @@ public class NotationAttributeNode extends DALNode {
         return notation.inspect();
     }
 
-    public String text(List<Character> ls, RuntimeContextBuilder.DALRuntimeContext context) {
-        TextBlockAttribute attribute1 = attributeList.getAttribute(context);
-
+    public String text(List<Character> content, RuntimeContextBuilder.DALRuntimeContext context) {
+        TextBlockAttribute attribute = attributeList.getAttribute(context);
         String indent = String.join("", nCopies(notation.getIndent(), " "));
-        String text = ls.stream().map(Object::toString).collect(Collectors.joining())
-                .substring(notation.getIndent()).replace("\n" + indent, "\n")
-                .replaceAll(attribute1.tail() + "\n", "\n");
-        if (text.isEmpty())
-            return text;
-        return String.join(attribute1.newLine(), lines(text.substring(0, text.length() - 1)));
+        String text = join(content).substring(notation.getIndent()).replace("\n" + indent, "\n")
+                .replace(attribute.tail() + "\n", "\n");
+        return text.isEmpty() ? text : String.join(attribute.newLine(), lines(text.substring(0, text.length() - 1)));
     }
 }

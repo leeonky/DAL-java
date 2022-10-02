@@ -25,4 +25,10 @@ public class TextUtil {
     public static List<String> lines(String content) {
         return lines(content, new ArrayList<>());
     }
+
+    public static String join(List<Character> characters) {
+        StringBuilder builder = new StringBuilder();
+        characters.forEach(builder::append);
+        return builder.toString();
+    }
 }

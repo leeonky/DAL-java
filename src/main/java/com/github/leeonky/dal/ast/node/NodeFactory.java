@@ -1,12 +1,12 @@
 package com.github.leeonky.dal.ast.node;
 
+import com.github.leeonky.dal.util.TextUtil;
 import com.github.leeonky.interpreter.SyntaxException;
 import com.github.leeonky.interpreter.Token;
 import com.github.leeonky.util.NumberParser;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class NodeFactory {
@@ -50,26 +50,16 @@ public class NodeFactory {
         return new DALExpression(null, com.github.leeonky.dal.ast.opt.Factory.parentheses(), node);
     }
 
-    @Deprecated
-    public static DALNode constString(List<DALNode> nodes) {
-        return new ConstNode(getString(nodes));
-    }
-
-    public static DALNode constString2(List<Character> characters) {
-        return new ConstNode(characters.stream().map(Objects::toString).collect(Collectors.joining()));
+    public static DALNode constString(List<Character> characters) {
+        return new ConstNode(TextUtil.join(characters));
     }
 
     public static DALNode relaxString(Token token) {
         return new ConstNode(token.getContent().trim());
     }
 
-    public static DALNode regex(List<DALNode> nodes) {
-        return new RegexNode(getString(nodes));
-    }
-
-    private static String getString(List<DALNode> nodes) {
-        return nodes.stream().map(ConstNode.class::cast).map(ConstNode::getValue)
-                .map(Object::toString).collect(Collectors.joining());
+    public static DALNode regex(List<Character> characters) {
+        return new RegexNode(TextUtil.join(characters));
     }
 
     public static DALNode constTrue(String token) {
