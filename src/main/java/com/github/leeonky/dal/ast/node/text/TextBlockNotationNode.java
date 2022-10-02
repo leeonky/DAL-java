@@ -4,10 +4,10 @@ import com.github.leeonky.dal.ast.node.DALNode;
 
 import java.util.List;
 
-public class TextNotationNode extends DALNode {
+public class TextBlockNotationNode extends DALNode {
     private final String notation;
 
-    public TextNotationNode(List<String> ls) {
+    public TextBlockNotationNode(List<String> ls) {
         notation = String.join("", ls);
     }
 

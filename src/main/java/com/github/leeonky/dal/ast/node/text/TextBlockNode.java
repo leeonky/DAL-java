@@ -6,11 +6,11 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TextNode extends DALNode {
+public class TextBlockNode extends DALNode {
     private final NotationAttributeNode notationAttributeNode;
     private final List<Character> content;
 
-    public TextNode(NotationAttributeNode notationAttributeNode, List<Character> content) {
+    public TextBlockNode(NotationAttributeNode notationAttributeNode, List<Character> content) {
         this.notationAttributeNode = notationAttributeNode;
         this.content = content;
     }

@@ -45,7 +45,7 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<Function<Object, String>> valueDumpers = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Map<String, Object>>> objectDumpers = new ClassKeyMap<>();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
-    private final Map<String, TextAttribute> textAttributeMap = new LinkedHashMap<>();
+    private final Map<String, TextBlockAttribute> textAttributeMap = new LinkedHashMap<>();
     private Converter converter = Converter.getInstance();
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
@@ -53,7 +53,7 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerTextBlockAttribute(String name, TextAttribute attribute) {
+    public RuntimeContextBuilder registerTextBlockAttribute(String name, TextBlockAttribute attribute) {
         textAttributeMap.put(name, attribute);
         return this;
     }
@@ -342,7 +342,7 @@ public class RuntimeContextBuilder {
             });
         }
 
-        public TextAttribute getAttribute(String name, int position) {
+        public TextBlockAttribute getAttribute(String name, int position) {
             return textAttributeMap.computeIfAbsent(name, k -> {
                 throw new SyntaxException(format("Invalid text block attribute `%s`, all supported attributes are:\n%s",
                         k, textAttributeMap.entrySet().stream().map(e -> format("  %s:\n    %s",

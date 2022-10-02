@@ -2,10 +2,10 @@ package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
-import com.github.leeonky.dal.runtime.TextAttribute;
+import com.github.leeonky.dal.runtime.TextBlockAttribute;
 
 public class TextBlockAttributes implements Extension {
-    public static final TextAttribute DEFAULT_NEW_LINE = new TextAttribute() {
+    public static final TextBlockAttribute DEFAULT_NEW_LINE = new TextBlockAttribute() {
         @Override
         public String newLine() {
             return "\n";
@@ -16,7 +16,7 @@ public class TextBlockAttributes implements Extension {
             return "use \\n as new line";
         }
     };
-    public static final TextAttribute DEFAULT_END_OF_LINE = new TextAttribute() {
+    public static final TextBlockAttribute DEFAULT_END_OF_LINE = new TextBlockAttribute() {
         @Override
         public String tail() {
             return "<";
@@ -32,7 +32,7 @@ public class TextBlockAttributes implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerTextBlockAttribute("LF", DEFAULT_NEW_LINE)
-                .registerTextBlockAttribute("CR", new TextAttribute() {
+                .registerTextBlockAttribute("CR", new TextBlockAttribute() {
                     @Override
                     public String newLine() {
                         return "\r";
@@ -44,7 +44,7 @@ public class TextBlockAttributes implements Extension {
                     }
                 })
                 .registerTextBlockAttribute("<", DEFAULT_END_OF_LINE)
-                .registerTextBlockAttribute("⏎", new TextAttribute() {
+                .registerTextBlockAttribute("⏎", new TextBlockAttribute() {
                     @Override
                     public String tail() {
                         return "⏎";

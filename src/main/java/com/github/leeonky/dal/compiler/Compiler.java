@@ -25,6 +25,7 @@ import static com.github.leeonky.interpreter.Syntax.single;
 import static com.github.leeonky.util.function.When.when;
 import static java.util.Optional.empty;
 
+//TODO splite to sub classes
 public class Compiler {
     private static final EscapeChars SINGLE_QUOTED_ESCAPES = new EscapeChars()
             .escape("\\\\", '\\')
@@ -49,10 +50,10 @@ public class Compiler {
                     .and(endWith(Notations.SINGLE_QUOTED.getLabel())).as(NodeFactory::constString)),
             DOUBLE_QUOTED_STRING = Notations.DOUBLE_QUOTED.with(many(charNode(DOUBLE_QUOTED_ESCAPES))
                     .and(endWith(Notations.DOUBLE_QUOTED.getLabel())).as(NodeFactory::constString)),
-            TEXT_NOTATION_START = positionNode(many(Notations.TEXT_BLOCK).and(atLeast(3)).as(TextNotationNode::new)),
-            TEXT_BLOCK = TEXT_NOTATION_START.concat(clause(this::textAttribute))
-                    .concat(clause(node -> many(charNode2(new EscapeChars())).and(endWithPosition(((NotationAttributeNode) node).endNotation()))
-                            .as(ls -> new TextNode((NotationAttributeNode) node, ls)))),
+            TEXT_BLOCK = positionNode(many(Notations.TEXT_BLOCK).and(atLeast(3)).as(TextBlockNotationNode::new))
+                    .concat(clause(this::textAttribute)).concat(clause(node -> many(charNode2(new EscapeChars()))
+                            .and(endWithPosition(((NotationAttributeNode) node).endNotation()))
+                            .as(ls -> new TextBlockNode((NotationAttributeNode) node, ls)))),
             STRING = oneOf(TEXT_BLOCK, SINGLE_QUOTED_STRING, DOUBLE_QUOTED_STRING),
             CONST_TRUE = Notations.Keywords.TRUE.wordNode(NodeFactory::constTrue, PROPERTY_DELIMITER_STRING),
             CONST_FALSE = Notations.Keywords.FALSE.wordNode(NodeFactory::constFalse, PROPERTY_DELIMITER_STRING),
@@ -73,7 +74,7 @@ public class Compiler {
                     .as(NodeFactory::numberSymbol).parse(procedure) : empty(),
             SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_SYMBOL : Tokens.SYMBOL)
                     .nodeParser(NodeFactory::symbolNode).parse(procedure),
-            TEXT_ATTRIBUTE = Tokens.RELAX_SYMBOL.nodeParser(t -> new TextAttributeNode(t.getContent())),
+            TEXT_ATTRIBUTE = Tokens.RELAX_SYMBOL.nodeParser(t -> new TextBlockAttributeNode(t.getContent())),
             DOT_SYMBOL = procedure -> (procedure.isEnableRelaxProperty() ? Tokens.RELAX_DOT_SYMBOL : Tokens.DOT_SYMBOL)
                     .nodeParser(NodeFactory::symbolNode).parse(procedure),
             META_SYMBOL = Tokens.DOT_SYMBOL.nodeParser(NodeFactory::metaSymbolNode),
@@ -82,7 +83,7 @@ public class Compiler {
 
     private NodeParser.Mandatory<DALNode, DALProcedure> textAttribute(DALNode notationNode) {
         return many(TEXT_ATTRIBUTE).and(endWithLine()).as(attributes ->
-                new NotationAttributeNode(notationNode, new TextAttributeListNode(attributes)));
+                new NotationAttributeNode(notationNode, new TextBlockAttributeListNode(attributes)));
     }
 
     private Optional<DALNode> propertyPattern(DALProcedure dalProcedure) {

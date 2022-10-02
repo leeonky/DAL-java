@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
-public abstract class TextAttribute {
+public abstract class TextBlockAttribute {
     public String newLine() {
         return null;
     }
@@ -9,16 +9,16 @@ public abstract class TextAttribute {
         return null;
     }
 
-    public TextAttribute merge(TextAttribute another) {
-        return new TextAttribute() {
+    public TextBlockAttribute merge(TextBlockAttribute another) {
+        return new TextBlockAttribute() {
             @Override
             public String newLine() {
-                return chooseValue(TextAttribute.this.newLine(), another.newLine());
+                return chooseValue(TextBlockAttribute.this.newLine(), another.newLine());
             }
 
             @Override
             public String tail() {
-                return chooseValue(TextAttribute.this.tail(), another.tail());
+                return chooseValue(TextBlockAttribute.this.tail(), another.tail());
             }
 
             @Override

@@ -145,6 +145,13 @@ Feature: ```string```
            b
            ```
       """
+      And the inspect should:
+      """
+      key= ``` LF
+           a
+           b
+           ```
+      """
 
     Scenario: raise error when invalid block attribute
       Given the following json:
