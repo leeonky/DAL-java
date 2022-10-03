@@ -18,13 +18,26 @@ public class TextBlockAttributes implements Extension {
     };
     public static final TextBlockAttribute DEFAULT_END_OF_LINE = new TextBlockAttribute() {
         @Override
-        public String tail() {
+        public String endOfLine() {
             return "<";
         }
 
         @Override
         public String description() {
             return "use < as end of line character";
+        }
+    };
+
+    public static final TextBlockAttribute DEFAULT_CONTINUE_CHAR = new TextBlockAttribute() {
+
+        @Override
+        public String continuation() {
+            return "\\";
+        }
+
+        @Override
+        public String description() {
+            return "use \\ as line continuation character";
         }
     };
 
@@ -44,9 +57,10 @@ public class TextBlockAttributes implements Extension {
                     }
                 })
                 .registerTextBlockAttribute("<", DEFAULT_END_OF_LINE)
+                .registerTextBlockAttribute("\\", DEFAULT_CONTINUE_CHAR)
                 .registerTextBlockAttribute("⏎", new TextBlockAttribute() {
                     @Override
-                    public String tail() {
+                    public String endOfLine() {
                         return "⏎";
                     }
 

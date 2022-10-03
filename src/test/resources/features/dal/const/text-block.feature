@@ -176,6 +176,8 @@ Feature: ```string```
           use \r as new line
         <:
           use < as end of line character
+        \:
+          use \ as line continuation character
         ⏎:
           use ⏎ as end of line character
       """
@@ -259,6 +261,21 @@ Feature: ```string```
       """
       key= ``` CR ⏎
            a ⏎
+           b
+           ```
+      """
+
+    Scenario: default continue char is \
+      Given the following json:
+      """
+      {
+        "key": "a b"
+      }
+      """
+      Then the following verification should pass:
+      """
+      key= ```
+           a \
            b
            ```
       """

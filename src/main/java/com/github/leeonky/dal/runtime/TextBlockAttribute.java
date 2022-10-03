@@ -1,11 +1,17 @@
 package com.github.leeonky.dal.runtime;
 
+import static com.github.leeonky.dal.util.TextUtil.lines;
+
 public abstract class TextBlockAttribute {
     public String newLine() {
         return null;
     }
 
-    public String tail() {
+    public String endOfLine() {
+        return null;
+    }
+
+    public String continuation() {
         return null;
     }
 
@@ -17,8 +23,13 @@ public abstract class TextBlockAttribute {
             }
 
             @Override
-            public String tail() {
-                return chooseValue(TextBlockAttribute.this.tail(), another.tail());
+            public String endOfLine() {
+                return chooseValue(TextBlockAttribute.this.endOfLine(), another.endOfLine());
+            }
+
+            @Override
+            public String continuation() {
+                return chooseValue(TextBlockAttribute.this.continuation(), another.continuation());
             }
 
             @Override
@@ -33,4 +44,9 @@ public abstract class TextBlockAttribute {
     }
 
     public abstract String description();
+
+    public Object format(String content) {
+        String text = content.replace(endOfLine() + "\n", "\n").replace(continuation() + "\n", "");
+        return text.isEmpty() ? text : String.join(newLine(), lines(text.substring(0, text.length() - 1)));
+    }
 }

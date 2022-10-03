@@ -2,12 +2,10 @@ package com.github.leeonky.dal.ast.node.text;
 
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.dal.runtime.TextBlockAttribute;
 
 import java.util.List;
 
 import static com.github.leeonky.dal.util.TextUtil.join;
-import static com.github.leeonky.dal.util.TextUtil.lines;
 import static java.util.Collections.nCopies;
 
 public class NotationAttributeNode extends DALNode {
@@ -28,11 +26,8 @@ public class NotationAttributeNode extends DALNode {
         return notation.inspect();
     }
 
-    public String text(List<Character> content, RuntimeContextBuilder.DALRuntimeContext context) {
-        TextBlockAttribute attribute = attributeList.getAttribute(context);
-        String indent = String.join("", nCopies(notation.getIndent(), " "));
-        String text = join(content).substring(notation.getIndent()).replace("\n" + indent, "\n")
-                .replace(attribute.tail() + "\n", "\n");
-        return text.isEmpty() ? text : String.join(attribute.newLine(), lines(text.substring(0, text.length() - 1)));
+    public Object text(List<Character> content, RuntimeContextBuilder.DALRuntimeContext context) {
+        return attributeList.getAttribute(context).format(join(content).substring(notation.getIndent())
+                .replace("\n" + String.join("", nCopies(notation.getIndent(), " ")), "\n"));
     }
 }
