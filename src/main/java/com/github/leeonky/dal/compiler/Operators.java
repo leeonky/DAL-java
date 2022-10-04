@@ -26,7 +26,7 @@ public class Operators {
             MAYBE_PROPERTY_SLASH = SLASH.operator(() -> Factory.executable(SLASH));
 
     static final OperatorParser<DALNode, DALOperator, DALProcedure>
-            IS = Notations.Operators.IS.operator(Factory::is),
+            IS = Notations.Operators.IS.keywordOperator(Factory::is, PROPERTY_DELIMITER_STRING),
             WHICH = Notations.Operators.WHICH.operator(Factory::which),
             PROPERTY_DOT = DOT.operator(() -> Factory.executable(DOT), not(DALProcedure::mayBeElementEllipsis)),
             PROPERTY_SLASH = procedure -> procedure.isEnableSlashProperty() ? MAYBE_PROPERTY_SLASH.parse(procedure) : empty(),

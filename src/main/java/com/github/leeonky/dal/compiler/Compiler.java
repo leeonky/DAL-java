@@ -10,6 +10,7 @@ import com.github.leeonky.interpreter.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
@@ -24,6 +25,7 @@ import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
 import static com.github.leeonky.util.function.When.when;
 import static java.util.Optional.empty;
+import static java.util.stream.Collectors.toSet;
 
 //TODO splite to sub classes
 public class Compiler {
@@ -58,13 +60,11 @@ public class Compiler {
             CONST_TRUE = Notations.Keywords.TRUE.wordNode(NodeFactory::constTrue, PROPERTY_DELIMITER_STRING),
             CONST_FALSE = Notations.Keywords.FALSE.wordNode(NodeFactory::constFalse, PROPERTY_DELIMITER_STRING),
             CONST_NULL = Notations.Keywords.NULL.wordNode(NodeFactory::constNull, PROPERTY_DELIMITER_STRING),
-            CONST_USER_DEFINED_LITERAL = this::compileUserDefinedLiteral,
             REGEX = Notations.OPEN_REGEX.with(many(charNode(REGEX_ESCAPES))
                     .and(endWith(Notations.CLOSE_REGEX.getLabel())).as(NodeFactory::regex)),
             WILDCARD = Notations.Operators.WILDCARD.node(WildcardNode::new),
             ROW_WILDCARD = Notations.Operators.ROW_WILDCARD.node(WildcardNode::new),
-            CONST = oneOf(NUMBER, STRING, CONST_TRUE, CONST_FALSE, CONST_NULL,
-                    CONST_USER_DEFINED_LITERAL),
+            CONST = oneOf(STRING, CONST_TRUE, CONST_FALSE, CONST_NULL, this::compileUserDefinedLiteral, NUMBER),
             ELEMENT_ELLIPSIS = Notations.Operators.ELEMENT_ELLIPSIS.node(token -> new ListEllipsisNode()),
             SCHEMA = Tokens.SCHEMA.nodeParser(NodeFactory::schema),
             INTEGER_OR_STRING = oneOf(INTEGER, STRING),
@@ -149,7 +149,7 @@ public class Compiler {
         PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
         VERIFICATION_PROPERTY = enableNumberProperty(enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN)));
         OBJECT_VERIFICATION_PROPERTY = many(VERIFICATION_PROPERTY).and(optionalSplitBy(Notations.COMMA))
-                .and(endBefore(Notations.Operators.EQUAL, Notations.Operators.MATCHER, Notations.Operators.IS)).as(NodeFactory::createVerificationGroup);
+                .and(endBefore(verificationNotations())).as(NodeFactory::createVerificationGroup);
         OBJECT = lazyNode(() -> disableCommaAnd(Notations.OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(Notations.CLOSING_BRACES))
                 .as(ObjectScopeNode::new).or(many(OBJECT_VERIFICATION_PROPERTY.concat(shortVerificationClause(Operators.VERIFICATION_OPERATORS
                         .mandatory("Expect operator `:` or `=`"), SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING))))
@@ -183,6 +183,18 @@ public class Compiler {
                 .concatAll(oneOf(ARITHMETIC_CLAUSE)))).and(enabledBefore(Notations.COLUMN_SPLITTER)).as();
         GROUP_PROPERTY = disableCommaAnd(Notations.OPENING_GROUP.with(many(VERIFICATION_PROPERTY)
                 .and(optionalSplitBy(Notations.COMMA)).and(endWith(Notations.CLOSING_GROUP)).as(GroupExpression::new)));
+    }
+
+    private Notation<DALNode, DALOperator, DALProcedure>[] verificationNotations() {
+        return new ArrayList<Notation>() {{
+            addAll(postfix(Notations.Operators.IS, Constants.PROPERTY_DELIMITER));
+            add(Notations.Operators.EQUAL);
+            add(Notations.Operators.MATCHER);
+        }}.toArray(new Notation[0]);
+    }
+
+    private Set<Notation> postfix(Notation<DALNode, DALOperator, DALProcedure> notation, Set<?> postfixes) {
+        return postfixes.stream().map(c -> notation.getLabel() + c).map(Notation::notation).collect(toSet());
     }
 
     private NodeParser<DALNode, DALProcedure> pureList(
@@ -285,7 +297,7 @@ public class Compiler {
     }
 
     private Optional<DALNode> compileUserDefinedLiteral(DALProcedure dalProcedure) {
-        return dalProcedure.getSourceCode().tryFetch(() -> Tokens.SYMBOL.scan(dalProcedure.getSourceCode())
+        return dalProcedure.getSourceCode().tryFetch(() -> Tokens.USER_LITERAL_SYMBOL.scan(dalProcedure.getSourceCode())
                 .flatMap(token -> dalProcedure.getRuntimeContext().takeUserDefinedLiteral(token.getContent())
                         .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }

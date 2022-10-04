@@ -30,6 +30,8 @@ public class Tokens {
                     .predicate(Tokens::isNumber).scanner(),
             SYMBOL = tokenSpec(not(PROPERTY_DELIMITER::contains), Keywords.ALL_STRING, PROPERTY_DELIMITER)
                     .predicate(not(Tokens::isNumber)).scanner(),
+            USER_LITERAL_SYMBOL = tokenSpec(not(PROPERTY_DELIMITER::contains), Keywords.ALL_STRING, PROPERTY_DELIMITER)
+                    .scanner(),
             DOT_SYMBOL = tokenSpec(not(PROPERTY_DELIMITER::contains), emptySet(), PROPERTY_DELIMITER)
                     .predicate(not(Tokens::isNumber)).scanner(),
             RELAX_SYMBOL = tokenSpec(not(RELAX_PROPERTY_DELIMITER::contains), Keywords.ALL_STRING, RELAX_PROPERTY_DELIMITER)
