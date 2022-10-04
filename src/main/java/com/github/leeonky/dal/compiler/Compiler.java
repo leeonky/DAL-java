@@ -10,7 +10,6 @@ import com.github.leeonky.interpreter.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
@@ -25,7 +24,6 @@ import static com.github.leeonky.interpreter.Syntax.many;
 import static com.github.leeonky.interpreter.Syntax.single;
 import static com.github.leeonky.util.function.When.when;
 import static java.util.Optional.empty;
-import static java.util.stream.Collectors.toSet;
 
 //TODO splite to sub classes
 public class Compiler {
@@ -185,20 +183,16 @@ public class Compiler {
                 .and(optionalSplitBy(Notations.COMMA)).and(endWith(Notations.CLOSING_GROUP)).as(GroupExpression::new)));
     }
 
+    @SuppressWarnings("unchecked")
     private Notation<DALNode, DALOperator, DALProcedure>[] verificationNotations() {
         return new ArrayList<Notation>() {{
-            addAll(postfix(Notations.Operators.IS, Constants.PROPERTY_DELIMITER));
+            addAll(Notations.Operators.IS.postfix(Constants.PROPERTY_DELIMITER));
             add(Notations.Operators.EQUAL);
             add(Notations.Operators.MATCHER);
         }}.toArray(new Notation[0]);
     }
 
-    private Set<Notation> postfix(Notation<DALNode, DALOperator, DALProcedure> notation, Set<?> postfixes) {
-        return postfixes.stream().map(c -> notation.getLabel() + c).map(Notation::notation).collect(toSet());
-    }
-
-    private NodeParser<DALNode, DALProcedure> pureList(
-            Function<List<Clause<DALNode>>, DALNode> factory) {
+    private NodeParser<DALNode, DALProcedure> pureList(Function<List<Clause<DALNode>>, DALNode> factory) {
         return lazyNode(() -> disableCommaAnd(Notations.OPENING_BRACKET.with(many(ELEMENT_ELLIPSIS_CLAUSE.or(
                 shortVerificationClause(Operators.VERIFICATION_OPERATORS.or(Operators.DEFAULT_VERIFICATION_OPERATOR),
                         SHORT_VERIFICATION_OPERAND.or(LIST_SCOPE_RELAX_STRING)))).and(optionalSplitBy(Notations.COMMA))
