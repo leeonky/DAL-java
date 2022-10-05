@@ -113,7 +113,7 @@ Feature: string
     And got the following notation:
     """
       5: '5'
-       ^
+         ^
     """
 
   Scenario: not allow convert boolean to string implicitly
@@ -131,5 +131,5 @@ Feature: string
     And got the following notation:
     """
       true: 'true'
-          ^
+            ^
     """

@@ -128,5 +128,5 @@ Feature: number
     And got the following notation:
     """
       '5': 5
-         ^
+           ^
     """

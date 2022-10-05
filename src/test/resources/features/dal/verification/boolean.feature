@@ -84,7 +84,7 @@ Feature: boolean
     And got the following notation:
     """
       'true': true
-            ^
+              ^
     """
 
 #    TODO object convert to Boolean

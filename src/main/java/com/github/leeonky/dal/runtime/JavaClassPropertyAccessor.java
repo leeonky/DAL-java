@@ -10,11 +10,9 @@ import java.util.Set;
 import static java.lang.String.format;
 
 public class JavaClassPropertyAccessor<T> implements PropertyAccessor<T> {
-    protected final RuntimeContextBuilder runtimeContextBuilder;
     private final BeanClass<T> beanClass;
 
-    public JavaClassPropertyAccessor(RuntimeContextBuilder runtimeContextBuilder, BeanClass<T> type) {
-        this.runtimeContextBuilder = runtimeContextBuilder;
+    public JavaClassPropertyAccessor(BeanClass<T> type) {
         beanClass = type;
     }
 

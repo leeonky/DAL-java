@@ -14,7 +14,7 @@ public class MetaThrowTest {
     void should_catch_exception_thrown_in_property_accessor() {
         DAL dal = new DAL().extend();
         RuntimeContextBuilder builder = dal.getRuntimeContextBuilder();
-        builder.registerPropertyAccessor(Bean.class, new JavaClassPropertyAccessor<Bean>(builder, create(Bean.class)) {
+        builder.registerPropertyAccessor(Bean.class, new JavaClassPropertyAccessor<Bean>(create(Bean.class)) {
             @Override
             public Object getValueByData(Data data, Object property) {
                 throw new java.lang.RuntimeException("hello");

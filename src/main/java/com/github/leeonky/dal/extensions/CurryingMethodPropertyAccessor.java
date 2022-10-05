@@ -9,8 +9,11 @@ import java.util.Set;
 
 class CurryingMethodPropertyAccessor extends JavaClassPropertyAccessor<CurryingMethod> {
 
+    private final RuntimeContextBuilder runtimeContextBuilder;
+
     public CurryingMethodPropertyAccessor(RuntimeContextBuilder runtimeContextBuilder) {
-        super(runtimeContextBuilder, BeanClass.create(CurryingMethod.class));
+        super(BeanClass.create(CurryingMethod.class));
+        this.runtimeContextBuilder = runtimeContextBuilder;
     }
 
     @Override

@@ -125,7 +125,7 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerStaticMethodExtension(Class<?> staticMethodExtensionClass) {
         Stream.of(staticMethodExtensionClass.getMethods()).filter(method -> method.getParameterCount() >= 1
-                                                                            && (STATIC & method.getModifiers()) != 0).forEach(extensionMethods::add);
+                && (STATIC & method.getModifiers()) != 0).forEach(extensionMethods::add);
         return this;
     }
 
@@ -282,7 +282,7 @@ public class RuntimeContextBuilder {
         public <T> DALRuntimeContext registerPropertyAccessor(T instance) {
             if (!Objects.equals(instance, null) && !propertyAccessors.containsType(instance))
                 propertyAccessors.put(BeanClass.getClass(instance),
-                        new JavaClassPropertyAccessor<>(RuntimeContextBuilder.this, BeanClass.createFrom(instance)));
+                        new JavaClassPropertyAccessor<>(BeanClass.createFrom(instance)));
             return this;
         }
 

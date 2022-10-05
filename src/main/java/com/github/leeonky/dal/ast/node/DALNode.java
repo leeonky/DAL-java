@@ -32,23 +32,22 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         Data actual = actualNode.evaluateData(context);
         Data expected = evaluateData(context);
         if (expected.isNull())
-            return assertMatchNull(actual, actualNode.getPositionBegin());
+            return assertMatchNull(actual, getPositionBegin());
 
-        invalidTypeToMatchValue(String.class, actual, Number.class, expected, operator);
-        invalidTypeToMatchValue(String.class, actual, Boolean.class, expected, operator);
+        invalidTypeToMatchValue(String.class, actual, Number.class, expected);
+        invalidTypeToMatchValue(String.class, actual, Boolean.class, expected);
 
-        invalidTypeToMatchValue(Number.class, actual, String.class, expected, operator);
-        invalidTypeToMatchValue(Boolean.class, actual, String.class, expected, operator);
+        invalidTypeToMatchValue(Number.class, actual, String.class, expected);
+        invalidTypeToMatchValue(Boolean.class, actual, String.class, expected);
         return assertMatch(expected, actual, getPositionBegin(), context.getNumberType());
     }
 
     public abstract String inspect();
 
-    private void invalidTypeToMatchValue(Class<?> actualType, Data actual, Class<?> expectedType, Data expected,
-                                         Matcher operator) {
+    private void invalidTypeToMatchValue(Class<?> actualType, Data actual, Class<?> expectedType, Data expected) {
         if (actualType.isInstance(actual.getInstance()) && expectedType.isInstance(expected.getInstance()))
             throw new RuntimeException(format("Cannot compare between %sand %s", actual.inspect(), expected.inspect()).trim(),
-                    operator.getPosition());
+                    getPositionBegin());
     }
 
     public Object getRootSymbolName() {

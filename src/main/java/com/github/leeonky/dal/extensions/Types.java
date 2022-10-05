@@ -19,7 +19,7 @@ public class Types implements Extension {
                 .registerListAccessor(Stream.class, stream -> stream::iterator)
                 .registerListAccessor(AutoMappingList.class, changeFirstIndex(AutoMappingList::firstIndex))
                 .registerPropertyAccessor(Map.class, new MapPropertyAccessor())
-                .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor(builder))
+                .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor())
                 .registerPropertyAccessor(CurryingMethod.class, new CurryingMethodPropertyAccessor(builder))
         ;
     }
