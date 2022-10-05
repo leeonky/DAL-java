@@ -24,14 +24,6 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         return evaluateData(context).getInstance();
     }
 
-    public boolean verifyBy(DALNode expected, Equal operator, DALRuntimeContext context) {
-        return expected.verify(this, operator, context);
-    }
-
-    public boolean verifyBy(DALNode expected, Matcher operator, DALRuntimeContext context) {
-        return expected.verify(this, operator, context);
-    }
-
     public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
         return verify(actualNode.evaluateData(context), operator, context, actualNode);
     }

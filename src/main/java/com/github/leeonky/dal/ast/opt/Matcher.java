@@ -11,7 +11,7 @@ public class Matcher extends DALOperator {
 
     @Override
     public Object calculate(DALNode left, DALNode right, RuntimeContextBuilder.DALRuntimeContext context) {
-        return left.verifyBy(right, this, context);
+        return right.verify(left, this, context);
     }
 
     @Override
