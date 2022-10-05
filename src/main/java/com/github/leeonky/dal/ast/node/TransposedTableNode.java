@@ -18,20 +18,20 @@ public class TransposedTableNode extends DALNode {
     }
 
     @Override
-    protected boolean verify(Data actual, Matcher operator, DALRuntimeContext context, DALNode actualNode) {
+    public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
+        Data actual = actualNode.evaluateData(context);
         try {
-            return transpose().convertToVerificationNode(actual, operator, context)
-                    .verify(actual, operator, context, actualNode);
+            return transpose().convertToVerificationNode(actual, operator, context).verify(actualNode, operator, context);
         } catch (RowAssertionFailure rowAssertionFailure) {
             throw rowAssertionFailure.columnPositionException(this);
         }
     }
 
     @Override
-    protected boolean verify(Data actual, Equal operator, DALRuntimeContext context, DALNode actualNode) {
+    public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+        Data actual = actualNode.evaluateData(context);
         try {
-            return transpose().convertToVerificationNode(actual, operator, context)
-                    .verify(actual, operator, context, actualNode);
+            return transpose().convertToVerificationNode(actual, operator, context).verify(actualNode, operator, context);
         } catch (RowAssertionFailure rowAssertionFailure) {
             throw rowAssertionFailure.columnPositionException(this);
         }

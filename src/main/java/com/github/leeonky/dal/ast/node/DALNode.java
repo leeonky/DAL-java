@@ -25,18 +25,11 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     }
 
     public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        return verify(actualNode.evaluateData(context), operator, context, actualNode);
+        return assertEquals(evaluateData(context), actualNode.evaluateData(context), getPositionBegin());
     }
 
     public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
-        return verify(actualNode.evaluateData(context), operator, context, actualNode);
-    }
-
-    protected boolean verify(Data actual, Equal operator, DALRuntimeContext context, DALNode actualNode) {
-        return assertEquals(evaluateData(context), actual, getPositionBegin());
-    }
-
-    protected boolean verify(Data actual, Matcher operator, DALRuntimeContext context, DALNode actualNode) {
+        Data actual = actualNode.evaluateData(context);
         Data expected = evaluateData(context);
         if (expected.isNull())
             return assertMatchNull(actual, actualNode.getPositionBegin());

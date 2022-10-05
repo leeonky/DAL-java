@@ -99,13 +99,13 @@ public class ListScopeNode extends DALNode {
     }
 
     @Override
-    protected boolean verify(Data actual, Equal operator, DALRuntimeContext context, DALNode actualNode) {
-        return verify(context, actual);
+    public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+        return verify(context, actualNode.evaluateData(context));
     }
 
     @Override
-    protected boolean verify(Data actual, Matcher operator, DALRuntimeContext context, DALNode actualNode) {
-        return verify(context, actual);
+    public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
+        return verify(context, actualNode.evaluateData(context));
     }
 
     private boolean verify(DALRuntimeContext context, Data data) {

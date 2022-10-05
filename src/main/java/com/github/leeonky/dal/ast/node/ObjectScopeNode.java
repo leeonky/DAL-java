@@ -38,11 +38,24 @@ public class ObjectScopeNode extends DALNode {
     }
 
     @Override
-    protected boolean verify(Data data, Equal operator, DALRuntimeContext context, DALNode actualNode) {
+    public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
+        Data data = actualNode.evaluateData(context);
         checkNull(data);
         return data.newBlockScope(() -> {
             verificationExpressions.forEach(expression -> expression.evaluate(context));
             assertUnexpectedFields(collectUnexpectedFields(data, context), actualNode.inspect(), operator.getPosition());
+            return true;
+        });
+    }
+
+    @Override
+    public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+        Data data = actualNode.evaluateData(context);
+        if (verificationExpressions.isEmpty() && !isObjectWildcard)
+            throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
+        checkNull(data);
+        return data.newBlockScope(() -> {
+            verificationExpressions.forEach(expression -> expression.evaluate(context));
             return true;
         });
     }
@@ -57,17 +70,6 @@ public class ObjectScopeNode extends DALNode {
     private Object convertFiled(Data data, Object obj) {
         return data.getInstance() instanceof CurryingMethod ?
                 ((CurryingMethod) data.getInstance()).convertToArgType(obj) : obj;
-    }
-
-    @Override
-    protected boolean verify(Data data, Matcher operator, DALRuntimeContext context, DALNode actualNode) {
-        if (verificationExpressions.isEmpty() && !isObjectWildcard)
-            throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
-        checkNull(data);
-        return data.newBlockScope(() -> {
-            verificationExpressions.forEach(expression -> expression.evaluate(context));
-            return true;
-        });
     }
 
     private void checkNull(Data data) {

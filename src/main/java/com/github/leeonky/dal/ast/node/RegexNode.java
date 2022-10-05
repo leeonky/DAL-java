@@ -24,14 +24,16 @@ public class RegexNode extends DALNode {
     }
 
     @Override
-    protected boolean verify(Data actual, Equal operator, DALRuntimeContext context, DALNode actualNode) {
+    public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
+        Data actual = actualNode.evaluateData(context);
         if (actual.getInstance() instanceof String)
             return assertRegexMatches(pattern, (String) actual.getInstance(), getPositionBegin());
         throw new RuntimeException("Operator = before regex need a string input value", operator.getPosition());
     }
 
     @Override
-    protected boolean verify(Data actual, Matcher operator, DALRuntimeContext context, DALNode actualNode) {
+    public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+        Data actual = actualNode.evaluateData(context);
         return assertRegexMatches(pattern, (String) actual.convert(String.class).getInstance(), actual, getPositionBegin());
     }
 }
