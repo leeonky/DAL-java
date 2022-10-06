@@ -5,15 +5,10 @@ import com.github.leeonky.dal.ast.opt.Matcher;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ExpectActual;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.NodeBase;
 
 import java.util.List;
 import java.util.stream.Stream;
-
-import static com.github.leeonky.dal.runtime.AssertionFailure.assertMatch;
-import static com.github.leeonky.dal.runtime.AssertionFailure.assertMatchNull;
-import static java.lang.String.format;
 
 public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
 
@@ -27,33 +22,16 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     }
 
     public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        Data expected = evaluateData(context);
-        ExpectActual expectActual = new ExpectActual(expected, actualNode.evaluateData(context));
-        context.fetchEqualsChecker(expected).verify(expectActual, getPositionBegin());
-        return true;
+        ExpectActual expectActual = new ExpectActual(evaluateData(context), actualNode.evaluateData(context), context);
+        return context.fetchEqualsChecker(expectActual).verify(expectActual, getPositionBegin());
     }
 
     public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
-        Data actual = actualNode.evaluateData(context);
-        Data expected = evaluateData(context);
-        if (expected.isNull())
-            return assertMatchNull(actual, getPositionBegin());
-
-        invalidTypeToMatchValue(String.class, actual, Number.class, expected);
-        invalidTypeToMatchValue(String.class, actual, Boolean.class, expected);
-
-        invalidTypeToMatchValue(Number.class, actual, String.class, expected);
-        invalidTypeToMatchValue(Boolean.class, actual, String.class, expected);
-        return assertMatch(expected, actual, getPositionBegin(), context.getNumberType());
+        ExpectActual expectActual = new ExpectActual(evaluateData(context), actualNode.evaluateData(context), context);
+        return context.fetchMatchChecker(expectActual).verify(expectActual, getPositionBegin());
     }
 
     public abstract String inspect();
-
-    private void invalidTypeToMatchValue(Class<?> actualType, Data actual, Class<?> expectedType, Data expected) {
-        if (actualType.isInstance(actual.getInstance()) && expectedType.isInstance(expected.getInstance()))
-            throw new RuntimeException(format("Cannot compare between %sand %s", actual.inspect(), expected.inspect()).trim(),
-                    getPositionBegin());
-    }
 
     public Object getRootSymbolName() {
         return null;

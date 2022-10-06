@@ -149,8 +149,8 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerCurryingMethodRange(Method method,
-                                                             BiFunction<Object, List<Object>, List<Object>> range) {
+    public RuntimeContextBuilder registerCurryingMethodRange(Method method, BiFunction<Object,
+            List<Object>, List<Object>> range) {
         curryingMethodArgRanges.put(method, range);
         return this;
     }
@@ -181,11 +181,9 @@ public class RuntimeContextBuilder {
 
     public class DALRuntimeContext implements RuntimeContext {
         private final LinkedList<Data> stack = new LinkedList<>();
-        private final Set<Class<?>> schemaSet;
         private final Map<Data, PartialPropertyStack> partialPropertyStacks;
 
         public DALRuntimeContext(Object inputValue) {
-            schemaSet = schemas.values().stream().map(BeanClass::getType).collect(Collectors.toSet());
             stack.push(wrap(inputValue));
             partialPropertyStacks = new HashMap<>();
         }
@@ -205,10 +203,6 @@ public class RuntimeContextBuilder {
 
         public Optional<ConstructorViaSchema> searchValueConstructor(String type) {
             return Optional.ofNullable(valueConstructors.get(type));
-        }
-
-        public boolean isSchemaRegistered(Class<?> fieldType) {
-            return schemaSet.contains(fieldType);
         }
 
         public Set<Object> findPropertyReaderNames(Object instance) {
@@ -350,8 +344,16 @@ public class RuntimeContextBuilder {
             });
         }
 
-        public Checker fetchEqualsChecker(Data expected) {
-            return new Checker.EqualsChecker();
+        public Checker fetchEqualsChecker(ExpectActual expectActual) {
+            return ConditionalChecker.EQUALS_CHECKER;
+        }
+
+        public Checker fetchMatchChecker(ExpectActual expectActual) {
+            if (expectActual.getExpected().isNull())
+                return ConditionalChecker.MATCH_NULL_CHECKER;
+            if (expectActual.isAllNumber())
+                return ConditionalChecker.MATCH_NUMBER_CHECKER;
+            return ConditionalChecker.MATCH_CHECKER;
         }
     }
 }
