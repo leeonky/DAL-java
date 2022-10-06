@@ -70,4 +70,8 @@ public class ExpectActual {
                     getExpected().inspect().trim(), converted.inspect().trim(), getActual().inspect().trim());
         return message1;
     }
+
+    Object getExpectInstance() {
+        return getExpected().getInstance();
+    }
 }

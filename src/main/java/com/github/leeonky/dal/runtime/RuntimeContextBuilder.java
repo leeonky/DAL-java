@@ -47,6 +47,8 @@ public class RuntimeContextBuilder {
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
     private final Map<String, TextBlockAttribute> textAttributeMap = new LinkedHashMap<>();
     private Converter converter = Converter.getInstance();
+    private final ClassKeyMap<Checker> equalsChecker = new ClassKeyMap<>();
+    private final ClassKeyMap<Checker> matchesChecker = new ClassKeyMap<>();
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -345,15 +347,17 @@ public class RuntimeContextBuilder {
         }
 
         public Checker fetchEqualsChecker(ExpectActual expectActual) {
-            return ConditionalChecker.EQUALS_CHECKER;
+            return equalsChecker.tryGetData(expectActual.getExpectInstance()).orElse(ConditionalChecker.EQUALS_CHECKER);
         }
 
-        public Checker fetchMatchChecker(ExpectActual expectActual) {
-            if (expectActual.getExpected().isNull())
-                return ConditionalChecker.MATCH_NULL_CHECKER;
-            if (expectActual.isAllNumber())
-                return ConditionalChecker.MATCH_NUMBER_CHECKER;
-            return ConditionalChecker.MATCH_CHECKER;
+        public Checker fetchMatchesChecker(ExpectActual expectActual) {
+            return matchesChecker.tryGetData(expectActual.getExpectInstance()).orElseGet(() -> {
+                if (expectActual.getExpected().isNull())
+                    return ConditionalChecker.MATCH_NULL_CHECKER;
+                if (expectActual.isAllNumber())
+                    return ConditionalChecker.MATCH_NUMBER_CHECKER;
+                return ConditionalChecker.MATCH_CHECKER;
+            });
         }
     }
 }

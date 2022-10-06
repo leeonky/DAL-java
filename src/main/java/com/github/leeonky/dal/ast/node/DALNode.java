@@ -28,7 +28,7 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
 
     public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
         ExpectActual expectActual = new ExpectActual(evaluateData(context), actualNode.evaluateData(context), context);
-        return context.fetchMatchChecker(expectActual).verify(expectActual, getPositionBegin());
+        return context.fetchMatchesChecker(expectActual).verify(expectActual, getPositionBegin());
     }
 
     public abstract String inspect();
