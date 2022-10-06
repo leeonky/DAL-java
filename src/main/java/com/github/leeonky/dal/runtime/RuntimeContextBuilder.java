@@ -181,6 +181,16 @@ public class RuntimeContextBuilder {
         return curryingMethodArgRanges.get(method);
     }
 
+    public RuntimeContextBuilder registerMatchesChecker(Class<?> type, ConditionalChecker checker) {
+        matchesChecker.put(type, checker);
+        return this;
+    }
+
+    public RuntimeContextBuilder registerEqualsChecker(Class<?> type, ConditionalChecker checker) {
+        equalsChecker.put(type, checker);
+        return this;
+    }
+
     public class DALRuntimeContext implements RuntimeContext {
         private final LinkedList<Data> stack = new LinkedList<>();
         private final Map<Data, PartialPropertyStack> partialPropertyStacks;

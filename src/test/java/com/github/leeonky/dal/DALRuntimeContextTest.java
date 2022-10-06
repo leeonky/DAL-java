@@ -1,17 +1,19 @@
 package com.github.leeonky.dal;
 
-import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.ListAccessor;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.dal.runtime.SchemaType;
+import com.github.leeonky.dal.runtime.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static com.github.leeonky.dal.Assertions.expect;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 class DALRuntimeContextTest {
 
@@ -72,5 +74,75 @@ class DALRuntimeContextTest {
         public static String objString(String string) {
             return string;
         }
+    }
+
+    @Nested
+    class CustomizedChecker {
+        DAL dal = new DAL();
+        ConditionalChecker checker = spy(ConditionalChecker.class);
+
+        @BeforeEach
+        void registerLiteralAndChecker() {
+            Target target = new Target();
+            dal.getRuntimeContextBuilder().registerUserDefinedLiterals(token ->
+                    token.equals("target") ? Result.of(target) : Result.empty());
+        }
+
+        @Nested
+        class Match {
+
+            @BeforeEach
+            void registerChecker() {
+                dal.getRuntimeContextBuilder().registerMatchesChecker(Target.class, checker);
+            }
+
+            @Test
+            void pass() {
+                when(checker.failed(any())).thenReturn(false);
+
+                expect(null).use(dal).should(": target");
+
+                verify(checker).failed(any());
+            }
+
+            @Test
+            void should_raise_error_and_throw_with_right_message() {
+                when(checker.failed(any())).thenReturn(true);
+                when(checker.message(any())).thenReturn("customer-error!");
+
+                assertThatThrownBy(() -> expect(null).use(dal).should(": target"))
+                        .hasMessageContaining("customer-error!");
+            }
+        }
+
+        @Nested
+        class Equal {
+
+            @BeforeEach
+            void registerChecker() {
+                dal.getRuntimeContextBuilder().registerEqualsChecker(Target.class, checker);
+            }
+
+            @Test
+            void pass() {
+                when(checker.failed(any())).thenReturn(false);
+
+                expect(null).use(dal).should("= target");
+
+                verify(checker).failed(any());
+            }
+
+            @Test
+            void should_raise_error_and_throw_with_right_message() {
+                when(checker.failed(any())).thenReturn(true);
+                when(checker.message(any())).thenReturn("customer-error!");
+
+                assertThatThrownBy(() -> expect(null).use(dal).should("= target"))
+                        .hasMessageContaining("customer-error!");
+            }
+        }
+    }
+
+    public static class Target {
     }
 }
