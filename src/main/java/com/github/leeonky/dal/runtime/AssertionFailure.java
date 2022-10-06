@@ -58,13 +58,6 @@ public class AssertionFailure extends DalException {
                             .collect(joining(", ")), element.isEmpty() ? "" : " in " + element), position);
     }
 
-    public static boolean assertEquals(Data expected, Data actual, int position) {
-        if (!Calculator.equals(actual, expected))
-            throw new AssertionFailure(format("Expected to be equal to: %s\nActual: %s",
-                    expected.inspect().trim(), actual.inspect().trim()), position);
-        return true;
-    }
-
     public static boolean assertRegexMatches(Pattern pattern, String actual, int position) {
         if (!pattern.matcher(actual).matches())
             throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s>", pattern, actual), position);

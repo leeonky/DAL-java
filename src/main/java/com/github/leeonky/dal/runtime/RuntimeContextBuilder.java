@@ -349,5 +349,9 @@ public class RuntimeContextBuilder {
                                 e.getKey(), e.getValue().description())).collect(joining("\n"))), position);
             });
         }
+
+        public Checker fetchEqualsChecker(Data expected) {
+            return new Checker.EqualsChecker();
+        }
     }
 }

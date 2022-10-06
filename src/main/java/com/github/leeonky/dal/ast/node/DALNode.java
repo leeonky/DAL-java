@@ -3,6 +3,7 @@ package com.github.leeonky.dal.ast.node;
 import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Matcher;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.ExpectActual;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.NodeBase;
@@ -10,7 +11,8 @@ import com.github.leeonky.interpreter.NodeBase;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.github.leeonky.dal.runtime.AssertionFailure.*;
+import static com.github.leeonky.dal.runtime.AssertionFailure.assertMatch;
+import static com.github.leeonky.dal.runtime.AssertionFailure.assertMatchNull;
 import static java.lang.String.format;
 
 public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
@@ -25,7 +27,10 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     }
 
     public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        return assertEquals(evaluateData(context), actualNode.evaluateData(context), getPositionBegin());
+        Data expected = evaluateData(context);
+        ExpectActual expectActual = new ExpectActual(expected, actualNode.evaluateData(context));
+        context.fetchEqualsChecker(expected).verify(expectActual, getPositionBegin());
+        return true;
     }
 
     public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
