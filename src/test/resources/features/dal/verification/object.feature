@@ -460,3 +460,19 @@ Feature: object
       0 / 0: hello
     }
     """
+
+  Scenario: start with meta property
+    Given the following json:
+    """
+    {}
+    """
+    Then the following verification should pass:
+    """
+    : {
+      ::object.class.simpleName= 'LinkedHashMap'
+    }
+    """
+    And the inspect should:
+    """
+    : {::object.class.simpleName= 'LinkedHashMap'}
+    """

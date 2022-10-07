@@ -559,3 +559,19 @@ Feature: basic verification via table
     '1' | : '1a' | : '1b' |
     0 | : '0a' | : '0b' |
     """
+
+  Scenario: header is meta property
+    Given the following json:
+    """
+    [{}]
+    """
+    Then the following verification should pass:
+    """
+    : | ::object.class.simpleName  |
+      | LinkedHashMap              |
+    """
+    And the inspect should:
+    """
+    : | ::object.class.simpleName |
+    | : 'LinkedHashMap' |
+    """

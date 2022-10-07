@@ -26,3 +26,13 @@ Feature: original-object
       """
       ::object.field= map-key-value
       """
+
+    Scenario: null value object is still null
+      Given the following json:
+      """
+      null
+      """
+      Then the following verification should pass:
+      """
+      ::object= null
+      """

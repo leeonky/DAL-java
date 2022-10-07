@@ -115,10 +115,11 @@ public class Compiler {
                     oneOf(STRING_PROPERTY, NUMBER_PROPERTY, SYMBOL).concat(LIST_MAPPING_CLAUSE))),
             EXPLICIT_PROPERTY_CLAUSE = oneOf(Operators.PROPERTY_DOT.clause(PROPERTY_PATTERN.or(propertyChainNode())),
                     Operators.PROPERTY_SLASH.clause(propertyChainNode()),
+                    Operators.PROPERTY_META.clause(symbolClause(META_SYMBOL.concat(META_LIST_MAPPING_CLAUSE))),
                     Operators.PROPERTY_IMPLICIT.clause(Notations.OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
                             "Should given one property or array index in `[]`")).and(endWith(Notations.CLOSING_BRACKET))
-                            .as(NodeFactory::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE))),
-                    Operators.PROPERTY_META.clause(symbolClause(META_SYMBOL.concat(META_LIST_MAPPING_CLAUSE))));
+                            .as(NodeFactory::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE)))
+            );
 
     private NodeParser.Mandatory<DALNode, DALProcedure> propertyChainNode() {
         return symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL, NUMBER_PROPERTY,
@@ -147,7 +148,8 @@ public class Compiler {
         PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
         VERIFICATION_PROPERTY = enableNumberProperty(enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN)));
         OBJECT_VERIFICATION_PROPERTY = many(VERIFICATION_PROPERTY).and(optionalSplitBy(Notations.COMMA))
-                .and(endBefore(verificationNotations())).as(NodeFactory::createVerificationGroup);
+//                TODO miss test for error message
+                .and(endWith(this::verificationNotations, () -> "Expect a verification operator")).as(NodeFactory::createVerificationGroup);
         OBJECT = lazyNode(() -> disableCommaAnd(Notations.OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(Notations.CLOSING_BRACES))
                 .as(ObjectScopeNode::new).or(many(OBJECT_VERIFICATION_PROPERTY.concat(shortVerificationClause(Operators.VERIFICATION_OPERATORS
                         .mandatory("Expect operator `:` or `=`"), SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING))))
@@ -184,13 +186,11 @@ public class Compiler {
                 .and(optionalSplitBy(Notations.COMMA)).and(endWith(Notations.CLOSING_GROUP)).as(GroupExpression::new)));
     }
 
-    @SuppressWarnings("unchecked")
-    private Notation<DALNode, DALOperator, DALProcedure>[] verificationNotations() {
-        return new ArrayList<Notation>() {{
-            addAll(Notations.Operators.IS.postfix(Constants.PROPERTY_DELIMITER));
-            add(Notations.Operators.EQUAL);
-            add(Notations.Operators.MATCHER);
-        }}.toArray(new Notation[0]);
+    private boolean verificationNotations(DALProcedure procedure) {
+        SourceCode sourceCode = procedure.getSourceCode();
+        return sourceCode.startsWith(Notations.Operators.EQUAL)
+                || sourceCode.startsWith(Notations.Operators.MATCHER, Notations.Operators.META.getLabel())
+                || Notations.Operators.IS.postfix(Constants.PROPERTY_DELIMITER).stream().anyMatch(sourceCode::startsWith);
     }
 
     private NodeParser<DALNode, DALProcedure> pureList(Function<List<Clause<DALNode>>, DALNode> factory) {
@@ -245,14 +245,13 @@ public class Compiler {
             Notations.COLUMN_SPLITTER.before(tableRow((TableHeadRow) head))))).and(endWithOptionalLine())
             .as(TableBody::new).parse(procedure));
 
-    private ClauseParser<DALNode, DALProcedure> singleCellRow(
-            NodeParser<DALNode, DALProcedure> nodeParser, TableHeadRow head) {
+    private ClauseParser<DALNode, DALProcedure> singleCellRow(NodeParser<DALNode, DALProcedure> nodeParser,
+                                                              TableHeadRow head) {
         return single(single(nodeParser).and(endWith(Notations.COLUMN_SPLITTER)).as()).and(endWithLine()).as()
                 .clause((prefix, cell) -> new TableRowNode(prefix, cell, head));
     }
 
-    private ClauseParser.Mandatory<DALNode, DALProcedure> tableCell(
-            DALNode rowPrefix, TableHeadRow head) {
+    private ClauseParser.Mandatory<DALNode, DALProcedure> tableCell(DALNode rowPrefix, TableHeadRow head) {
         return positionClause(ClauseParser.<DALNode, DALProcedure>
                 columnMandatory(column -> shortVerificationClause(oneOf(Operators.VERIFICATION_OPERATORS,
                 head.getHeader(column).operator(), ((TableRowPrefixNode) rowPrefix).operator()).or(

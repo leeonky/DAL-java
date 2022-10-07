@@ -32,7 +32,7 @@ public class MetaProperties implements Extension {
     }
 
     private static Object object_(MetaData metaData) {
-        return new OriginalJavaObject(metaData.evaluateInput());
+        return metaData.evaluateInput().isNull() ? null : new OriginalJavaObject(metaData.evaluateInput());
     }
 
     @Override
