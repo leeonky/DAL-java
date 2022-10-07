@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.format.Value;
-import com.github.leeonky.dal.runtime.AssertionFailure;
+import com.github.leeonky.dal.runtime.DalException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.type.AllowNull;
@@ -121,19 +121,19 @@ public class VerifyValueInSchema extends Base {
         assertPass(new HashMap<String, Object>() {{
             put("value", "0");
         }}, "is MatchType");
-        AssertionFailure assertionFailure = assertFailed(new HashMap<String, Object>() {{
+        DalException dalException = assertFailed(new HashMap<String, Object>() {{
             put("value", "invalid int");
         }}, "is MatchType");
-        assertThat(assertionFailure).hasMessage("Expected to match schema `MatchType` but was not\n" +
+        assertThat(dalException).hasMessage("Expected to match schema `MatchType` but was not\n" +
                 "    Can not convert field `.value` (java.lang.String: invalid int) to type [com.github.leeonky.dal.format.Value]");
 
         assertPass(new HashMap<String, Object>() {{
             put("value", null);
         }}, "is MatchTypeWithNullableValue");
-        assertionFailure = assertFailed(new HashMap<String, Object>() {{
+        dalException = assertFailed(new HashMap<String, Object>() {{
             put("value", null);
         }}, "is MatchType");
-        assertThat(assertionFailure).hasMessage("Expected to match schema `MatchType` but was not\n" +
+        assertThat(dalException).hasMessage("Expected to match schema `MatchType` but was not\n" +
                 "    Can not convert null field `.value` to type [com.github.leeonky.dal.format.Value], use @AllowNull to verify nullable field");
     }
 

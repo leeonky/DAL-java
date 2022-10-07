@@ -13,13 +13,13 @@ class VerifyList extends Base {
 
     @Test
     void should_support_java_array_as_schema_list() {
-        assertPass(new Object[0], "is List");
-        assertFailed(new Object(), "is List");
+        assertPass(new Object[0], "= []");
+        assertFailed(new Object(), "= []");
     }
 
     @Test
     void should_support_java_list_as_schema_list() {
-        assertPass(new ArrayList<String>(), "is List");
+        assertPass(new ArrayList<String>(), "= []");
     }
 
     @Test
@@ -57,6 +57,6 @@ class VerifyList extends Base {
             }
         });
 
-        assertPass(new JSONArray("[2]"), "is List which ::size = 1 and [0] = 2");
+        assertPass(new JSONArray("[2]"), "= [*]");
     }
 }

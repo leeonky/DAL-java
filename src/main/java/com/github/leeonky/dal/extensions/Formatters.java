@@ -20,7 +20,6 @@ public class Formatters implements Extension {
                 .registerValueFormat(new com.github.leeonky.dal.format.Formatters.PositiveNumber())
                 .registerValueFormat(new com.github.leeonky.dal.format.Formatters.ZeroNumber())
                 .registerValueFormat(new com.github.leeonky.dal.format.Formatters.Boolean())
-                .registerSchema("List", (d, c) -> d.isList())
         ;
     }
 }

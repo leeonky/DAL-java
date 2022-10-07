@@ -5,7 +5,6 @@ import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.node.SymbolNode;
 import com.github.leeonky.dal.compiler.Notations;
-import com.github.leeonky.dal.runtime.AssertionFailure;
 import com.github.leeonky.dal.runtime.DalException;
 
 import static com.github.leeonky.dal.ast.opt.Factory.executable;
@@ -23,15 +22,15 @@ public class Base {
         dal.evaluate(input, expression);
     }
 
-    protected AssertionFailure assertFailed(Object input, String expression) {
-        AssertionFailure assertionFailure = null;
+    protected DalException assertFailed(Object input, String expression) {
+        DalException dalException = null;
         try {
             dal.evaluate(input, expression);
-        } catch (AssertionFailure failure) {
-            assertionFailure = failure;
+        } catch (DalException failure) {
+            dalException = failure;
         }
-        assertThat(assertionFailure).isNotNull();
-        return assertionFailure;
+        assertThat(dalException).isNotNull();
+        return dalException;
     }
 
     protected void assertRuntimeException(Object input, String sourceCode, int position, String message) {
