@@ -92,4 +92,10 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     public Data getValue(Data data, DALRuntimeContext context) {
         return context.newBlockScope(data, () -> evaluateData(context));
     }
+
+    @Override
+    public int getPositionBegin() {
+        if (left == null || left instanceof InputNode) return super.getPositionBegin();
+        return Math.min(super.getPositionBegin(), left.getPositionBegin());
+    }
 }

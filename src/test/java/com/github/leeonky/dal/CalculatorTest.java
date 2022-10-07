@@ -144,6 +144,11 @@ class CalculatorTest {
             assertEqual(JSONObject.NULL, null);
         }
 
+        @Test
+        void list() {
+            assertEqual(new String[0], new String[0]);
+        }
+
         private void assertNotEqual(Object v1, Object v2) {
             assertFalse(Calculator.equals(DALRuntimeContext.wrap(v1), DALRuntimeContext.wrap(v2)));
         }

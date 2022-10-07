@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.util.CollectionHelper;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -25,9 +26,11 @@ public class Calculator {
     }
 
     public static boolean equals(Data v1, Data v2) {
-        if (v1.isNull())
-            return v2.isNull();
-        return !v2.isNull() && Objects.equals(v1.getInstance(), v2.getInstance());
+        if (v2.isNull())
+            return v1.isNull();
+        if (v2.isList())
+            return CollectionHelper.equals(v1.getInstance(), v2.getInstance());
+        return Objects.equals(v1.getInstance(), v2.getInstance());
     }
 
     public static Object plus(Object v1, Object v2, DALRuntimeContext context) {

@@ -7,13 +7,13 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
 import static com.github.leeonky.util.Classes.getClassName;
 import static com.github.leeonky.util.function.Extension.oneOf;
 import static java.lang.String.format;
 import static java.util.Optional.of;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -33,6 +33,8 @@ public class Data {
     public String inspect() {
         if (isNull())
             return "null ";
+        if (isList())
+            return getDataList().stream().map(Data::inspect).collect(joining(", ", "[", "]"));
         String content = getInstance().toString();
         return format("%s\n<%s>\n", getClassName(getInstance()), content
                 .replace("\\\\", "\\").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t"));
@@ -193,7 +195,7 @@ public class Data {
         String keyIndentation = indentation + "  ";
         return instance.entrySet().stream().map(entry -> format("%s\"%s\": %s", keyIndentation, entry.getKey(),
                         dumpInstance(entry.getValue(), keyIndentation, new HashMap<>(), entry.getKey())))
-                .collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
+                .collect(joining(",\n", "{\n", "\n" + indentation + "}"));
     }
 
     private String dumpObject(String indentation, Map<Object, String> dumped, String path) {
@@ -204,7 +206,7 @@ public class Data {
                     .filter(Objects::nonNull).collect(toList());
             if (!(instance instanceof Map))
                 strings.add(format("%s\"%s\": %s", keyIndentation, "__type", "\"" + getClassName(instance) + "\""));
-            return strings.stream().collect(Collectors.joining(",\n", "{\n", "\n" + indentation + "}"));
+            return strings.stream().collect(joining(",\n", "{\n", "\n" + indentation + "}"));
         });
     }
 

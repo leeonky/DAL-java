@@ -20,20 +20,34 @@ Feature: compare null
       | 0     | java.lang.Integer       | 0       |
       | ""    | java.lang.String        |         |
       | {}    | java.util.LinkedHashMap | {}      |
-      | []    | java.util.ArrayList     | []      |
 
-  Scenario Outline: non null matches null
+  Scenario: empty list equals to null
+    Given the following json:
+    """
+    []
+    """
+    When evaluate by:
+    """
+      = null
+    """
+    Then failed with the message:
+    """
+    Expected to be equal to: null
+    Actual: []
+    """
+
+  Scenario Outline: non null equals to null
     Given the following json:
     """
       <value>
     """
     When evaluate by:
     """
-      : null
+      = null
     """
     Then failed with the message:
     """
-    Expected to match: null
+    Expected to be equal to: null
     Actual: <type>
     <<message>>
     """
@@ -42,7 +56,21 @@ Feature: compare null
       | 0     | java.lang.Integer       | 0       |
       | ""    | java.lang.String        |         |
       | {}    | java.util.LinkedHashMap | {}      |
-      | []    | java.util.ArrayList     | []      |
+
+  Scenario: emply list matches null
+    Given the following json:
+    """
+    []
+    """
+    When evaluate by:
+    """
+      : null
+    """
+    Then failed with the message:
+    """
+    Expected to match: null
+    Actual: []
+    """
 
   Scenario Outline: null equals to non null
     When evaluate by:
