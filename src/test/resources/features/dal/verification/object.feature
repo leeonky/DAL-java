@@ -304,7 +304,7 @@ Feature: object
     """
     Then failed with the message:
     """
-    Expect a object property
+    Expect a verification operator
     """
     And got the following notation:
     """
@@ -319,7 +319,7 @@ Feature: object
     """
     Then failed with the message:
     """
-    Expect a object property
+    Expect a verification operator
     """
     And got the following notation:
     """

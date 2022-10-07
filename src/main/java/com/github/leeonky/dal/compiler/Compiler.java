@@ -147,7 +147,7 @@ public class Compiler {
         OPTIONAL_PROPERTY_CHAIN = PROPERTY.concatAll(EXPLICIT_PROPERTY_CLAUSE);
         PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
         VERIFICATION_PROPERTY = enableNumberProperty(enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN)));
-        OBJECT_VERIFICATION_PROPERTY = many(VERIFICATION_PROPERTY).and(optionalSplitBy(Notations.COMMA))
+        OBJECT_VERIFICATION_PROPERTY = many(VERIFICATION_PROPERTY).and(splitBy(Notations.COMMA))
 //                TODO miss test for error message
                 .and(endWith(this::verificationNotations, () -> "Expect a verification operator")).as(NodeFactory::createVerificationGroup);
         OBJECT = lazyNode(() -> disableCommaAnd(Notations.OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(Notations.CLOSING_BRACES))

@@ -419,7 +419,7 @@ Feature: group
       Then the following verification should pass:
       """
       value= {
-        a, b c: 1
+        a, b, c: 1
       }
       """
       And the inspect should:
