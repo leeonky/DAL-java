@@ -13,14 +13,6 @@ public class ExpectActual {
         this.context = context;
     }
 
-    public Data getExpected() {
-        return expected;
-    }
-
-    public Data getActual() {
-        return actual;
-    }
-
     public boolean objectNotEquals() {
         return !Calculator.equals(actual, expected);
     }
@@ -30,11 +22,11 @@ public class ExpectActual {
     }
 
     public boolean actualNotNull() {
-        return !getActual().isNull();
+        return !actual.isNull();
     }
 
     public String shouldMatchNull() {
-        return format("Expected to match: null\nActual: %s", getActual().inspect());
+        return format("Expected to match: null\nActual: %s", actual.inspect());
     }
 
     public boolean isInstanceOf(Class<?> actualType, Class<?> expectType) {
@@ -42,7 +34,7 @@ public class ExpectActual {
     }
 
     public boolean isAllNumber() {
-        return getExpected().getInstance() instanceof Number && getActual().getInstance() instanceof Number;
+        return expected.getInstance() instanceof Number && actual.getInstance() instanceof Number;
     }
 
     public RuntimeContextBuilder.DALRuntimeContext getContext() {
@@ -58,20 +50,30 @@ public class ExpectActual {
     }
 
     public Data convertToExpectedType() {
-        return getActual().convert(getExpected().getInstance().getClass());
+        return actual.convert(expected.getInstance().getClass());
     }
 
     public String shouldMatch(Data converted) {
-        String message1;
-        if (converted.getInstance() == getActual().getInstance()) {
-            message1 = shouldMatch();
-        } else
-            message1 = format("Expected to match: %s\nActual: %s converted from: %s",
-                    getExpected().inspect().trim(), converted.inspect().trim(), getActual().inspect().trim());
-        return message1;
+        if (converted.getInstance() == actual.getInstance()) {
+            return shouldMatch();
+        }
+        return format("Expected to match: %s\nActual: %s converted from: %s",
+                expected.inspect().trim(), converted.inspect().trim(), actual.inspect().trim());
     }
 
-    Object getExpectInstance() {
-        return getExpected().getInstance();
+    public Object getExpectInstance() {
+        return expected.getInstance();
+    }
+
+    public String cannotCompare() {
+        return format("Cannot compare between %sand %s", actual.inspect(), expected.inspect());
+    }
+
+    boolean expectNull() {
+        return expected.isNull();
+    }
+
+    boolean equalTo(Data actual) {
+        return Calculator.equals(actual, expected);
     }
 }

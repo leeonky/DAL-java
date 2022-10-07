@@ -3,8 +3,6 @@ package com.github.leeonky.dal.runtime;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static java.lang.String.format;
-
 public interface ConditionalChecker extends Checker {
     Checker MATCH_NULL_CHECKER = conditionalChecker(ExpectActual::actualNotNull, ExpectActual::shouldMatchNull),
             MATCH_NUMBER_CHECKER = conditionalChecker(ExpectActual::numberNotEquals, ExpectActual::shouldMatch),
@@ -16,17 +14,8 @@ public interface ConditionalChecker extends Checker {
                     .and(new ConvertMatchChecker());
 
     static ConditionalChecker matchTypeChecker(Class<?> actualType, Class<?> expectType) {
-        return new ConditionalChecker() {
-            @Override
-            public boolean failed(ExpectActual expectActual) {
-                return expectActual.isInstanceOf(actualType, expectType);
-            }
-
-            @Override
-            public String message(ExpectActual expectActual) {
-                return format("Cannot compare between %sand %s", expectActual.getActual().inspect(), expectActual.getExpected().inspect());
-            }
-        };
+        return conditionalChecker(expectActual -> expectActual.isInstanceOf(actualType, expectType),
+                ExpectActual::cannotCompare);
     }
 
     static ConditionalChecker conditionalChecker(Predicate<ExpectActual> failed, Function<ExpectActual, String> message) {
@@ -61,9 +50,8 @@ public interface ConditionalChecker extends Checker {
         public boolean failed(ExpectActual expectActual) {
             try {
                 Data result = expectActual.convertToExpectedType();
-                if (Calculator.equals(result, expectActual.getExpected())) {
+                if (expectActual.equalTo(result))
                     return false;
-                }
                 message = expectActual.shouldMatch(result);
             } catch (Exception e) {
                 message = e.getMessage();

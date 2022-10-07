@@ -362,7 +362,7 @@ public class RuntimeContextBuilder {
 
         public Checker fetchMatchesChecker(ExpectActual expectActual) {
             return matchesChecker.tryGetData(expectActual.getExpectInstance()).orElseGet(() -> {
-                if (expectActual.getExpected().isNull())
+                if (expectActual.expectNull())
                     return ConditionalChecker.MATCH_NULL_CHECKER;
                 if (expectActual.isAllNumber())
                     return ConditionalChecker.MATCH_NUMBER_CHECKER;
