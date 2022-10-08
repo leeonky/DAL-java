@@ -33,7 +33,8 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to be equal to: null
-    Actual: []
+    Actual: java.util.ArrayList
+    []
     """
 
   Scenario Outline: non null equals to null
@@ -69,7 +70,8 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to match: null
-    Actual: []
+    Actual: java.util.ArrayList
+    []
     """
 
   Scenario Outline: null equals to non null

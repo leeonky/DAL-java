@@ -30,11 +30,12 @@ public class Data {
         dalRuntimeContext = context.registerPropertyAccessor(instance);
     }
 
-    public String inspect() {
+    @Deprecated
+    public String inspectBk() {
         if (isNull())
             return "null ";
         if (isList())
-            return getDataList().stream().map(Data::inspect).collect(joining(", ", "[", "]"));
+            return getDataList().stream().map(Data::inspectBk).collect(joining(", ", "[", "]"));
         String content = getInstance().toString();
         return format("%s\n<%s>\n", getClassName(getInstance()), content
                 .replace("\\\\", "\\").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t"));
@@ -157,6 +158,7 @@ public class Data {
                 + fieldName.substring(prefix.length() + 1);
     }
 
+    @Deprecated
     public String dump() {
         return dump("", new HashMap<>(), "");
     }
@@ -250,7 +252,11 @@ public class Data {
     public Data requireList(int position) {
         if (isList())
             return this;
-        throw new RuntimeException(format("Invalid input value, expect a List but: %s", inspect()), position);
+        throw new RuntimeException(format("Invalid input value, expect a List but: %s", inspectBk().trim()), position);
+    }
+
+    public String inspect() {
+        return new Inspector(this).inspect();
     }
 
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {

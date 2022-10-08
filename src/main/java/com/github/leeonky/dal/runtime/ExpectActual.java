@@ -18,7 +18,7 @@ public class ExpectActual {
     }
 
     public String shouldEqualTo() {
-        return format("Expected to be equal to: %s\nActual: %s", expected.inspect().trim(), actual.inspect().trim());
+        return format("Expected to be equal to: %s\nActual: %s", expected.inspect(), actual.inspect());
     }
 
     public boolean actualNotNull() {
@@ -26,7 +26,7 @@ public class ExpectActual {
     }
 
     public String shouldMatchNull() {
-        return format("Expected to match: null\nActual: %s", actual.inspect());
+        return format("Expected to match: null\nActual: %s", actual.inspect().trim());
     }
 
     public boolean isInstanceOf(Class<?> actualType, Class<?> expectType) {
@@ -37,16 +37,12 @@ public class ExpectActual {
         return expected.getInstance() instanceof Number && actual.getInstance() instanceof Number;
     }
 
-    public RuntimeContextBuilder.DALRuntimeContext getContext() {
-        return context;
-    }
-
     public boolean numberNotEquals() {
         return context.getNumberType().compare((Number) expected.getInstance(), (Number) actual.getInstance()) != 0;
     }
 
     public String shouldMatch() {
-        return format("Expected to match: %s\nActual: %s", expected.inspect().trim(), actual.inspect().trim());
+        return format("Expected to match: %s\nActual: %s", expected.inspectBk().trim(), actual.inspectBk().trim());
     }
 
     public Data convertToExpectedType() {
@@ -54,11 +50,10 @@ public class ExpectActual {
     }
 
     public String shouldMatch(Data converted) {
-        if (converted.getInstance() == actual.getInstance()) {
+        if (converted.getInstance() == actual.getInstance())
             return shouldMatch();
-        }
         return format("Expected to match: %s\nActual: %s converted from: %s",
-                expected.inspect().trim(), converted.inspect().trim(), actual.inspect().trim());
+                expected.inspectBk().trim(), converted.inspectBk().trim(), actual.inspectBk().trim());
     }
 
     public Object getExpectInstance() {
@@ -66,7 +61,7 @@ public class ExpectActual {
     }
 
     public String cannotCompare() {
-        return format("Cannot compare between %sand %s", actual.inspect(), expected.inspect());
+        return format("Cannot compare between %s\nand %s", actual.inspectBk().trim(), expected.inspectBk().trim());
     }
 
     boolean expectNull() {

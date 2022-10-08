@@ -19,6 +19,7 @@ import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.IntStream.range;
 
+//TODO use ExpectActual build error message
 public class Actual {
     private final String property;
     private final Data actual;
@@ -89,7 +90,7 @@ public class Actual {
     public boolean verifyFormatter(Formatter<Object, Object> formatter) {
         return formatter.isValid(actual.getInstance())
                 || Verification.errorLog("Expected field `%s` to be formatter `%s`\nActual: %s", property,
-                formatter.getFormatterName(), actual.inspect().trim());
+                formatter.getFormatterName(), actual.inspectBk().trim());
     }
 
     boolean verifySize(Function<Actual, Stream<?>> actualStream, int expectSize) {
@@ -106,13 +107,13 @@ public class Actual {
     boolean inInstanceOf(BeanClass<?> type) {
         return type.isInstance(actual.getInstance()) ||
                 Verification.errorLog(String.format("Expected field `%s` to be %s\nActual: %s", property,
-                        type.getName(), actual.inspect().trim()));
+                        type.getName(), actual.inspectBk().trim()));
     }
 
     public boolean equalsExpect(Object expect) {
         return Objects.equals(expect, actual.getInstance()) ||
                 Verification.errorLog(format("Expected field `%s` to be %s\nActual: %s", property,
-                        inspect(expect), actual.inspect().trim()));
+                        inspect(expect), actual.inspectBk().trim()));
     }
 
     public String inspect(Object obj) {
