@@ -31,13 +31,11 @@ Feature: list as value
     """
     Expected to match: [B
     [
-        java.lang.Byte
-        <98>
+        java.lang.Byte <98>
     ]
     Actual: [B
     [
-        java.lang.Byte
-        <97>
+        java.lang.Byte <97>
     ]
     """
     And got the following notation:

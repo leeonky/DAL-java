@@ -154,7 +154,8 @@ public class Data {
 
     @Deprecated
     public String dump() {
-        return dump("", new HashMap<>(), "");
+        return context.fetchInspector(this).dump();
+//        return dump("", new HashMap<>(), "");
     }
 
     private String dump(String indentation, Map<Object, String> dumped, String path) {

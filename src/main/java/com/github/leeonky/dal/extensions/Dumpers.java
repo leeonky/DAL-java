@@ -7,6 +7,7 @@ import java.time.*;
 import java.util.Date;
 import java.util.UUID;
 
+//TODO renames to inspectors
 public class Dumpers implements Extension {
 
     @Override
@@ -28,6 +29,8 @@ public class Dumpers implements Extension {
                 .registerObjectDumper(YearMonth.class, YearMonth::toString)
                 .registerObjectDumper(Class.class, Class::getName)
         ;
+
+        dal.getRuntimeContextBuilder().registerValueInspector(String.class, Number.class, Boolean.class, Instant.class);
     }
 
     private String dumpString(Object o) {

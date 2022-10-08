@@ -67,8 +67,8 @@ public class IntegrationTestContext {
         try {
             testCodeCompiler.compileToClasses(schemas.stream().map(s ->
                                     "import com.github.leeonky.dal.type.*;\n" +
-                                    "import com.github.leeonky.dal.runtime.*;\n" +
-                                    "import java.util.*;\n" + s)
+                                            "import com.github.leeonky.dal.runtime.*;\n" +
+                                            "import java.util.*;\n" + s)
                             .collect(Collectors.toList()))
                     .forEach(schema -> {
                         dal.getRuntimeContextBuilder().registerSchema(NameStrategy.SIMPLE_NAME_WITH_PARENT, (Class) schema);
@@ -120,7 +120,7 @@ public class IntegrationTestContext {
         if (classes.isEmpty()) {
             classes.addAll(testCodeCompiler.compileToClasses(javaClasses.stream().map(s ->
                     "import com.github.leeonky.dal.type.*;\n" +
-                    "import java.math.*;\n" + s).collect(Collectors.toList())));
+                            "import java.math.*;\n" + s).collect(Collectors.toList())));
             classes.forEach(dal.getRuntimeContextBuilder()::registerStaticMethodExtension);
         }
     }
@@ -257,14 +257,15 @@ public class IntegrationTestContext {
     public void verifyDumpedData(String verification) {
         RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(null);
 
-        assertThat(runtimeContext.wrap(input).dump()).isEqualTo(verification.replace("#package#", testCodeCompiler.packagePrefix()));
+        String dump = runtimeContext.wrap(input).dump();
+        assertThat(dump).isEqualTo(verification.replace("#package#", testCodeCompiler.packagePrefix()));
     }
 
     public void setCurryingStaticMethodArgRange(String type, String methodType, String method, List<String> range) {
         compileAll();
         dal.getRuntimeContextBuilder().registerCurryingMethodRange(
                 Arrays.stream(getType(methodType).getMethods()).filter(m -> m.getName().equals(method)
-                                                                            && m.getParameters()[0].getType().equals(getType(type))).findFirst().get(),
+                        && m.getParameters()[0].getType().equals(getType(type))).findFirst().get(),
                 (instance, args) -> new ArrayList<>(range));
     }
 

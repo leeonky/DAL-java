@@ -10,10 +10,10 @@ Feature: dump-data
     <expected>
     """
     Examples:
-      | value   | expected |
-      | null    | null     |
-      | 100.1   | 100.1    |
-      | "hello" | "hello"  |
+      | value   | expected                 |
+      | null    | null                     |
+      | 100.1   | java.lang.Double <100.1> |
+      | "hello" | java.lang.String <hello> |
 
   Scenario: dump list
     Given the following json:
@@ -22,7 +22,12 @@ Feature: dump-data
     """
     Then dumped data should be:
     """
-    [1, 2, "3", null]
+    java.util.ArrayList [
+        java.lang.Integer <1>,
+        java.lang.Integer <2>,
+        java.lang.String <3>,
+        null
+    ]
     """
 
   Scenario: dump empty list
@@ -32,7 +37,7 @@ Feature: dump-data
     """
     Then dumped data should be:
     """
-    []
+    java.util.ArrayList []
     """
 
   Scenario: dump nested list
@@ -42,7 +47,16 @@ Feature: dump-data
     """
     Then dumped data should be:
     """
-    [[1], [1, 2], []]
+    java.util.ArrayList [
+        java.util.ArrayList [
+            java.lang.Integer <1>
+        ],
+        java.util.ArrayList [
+            java.lang.Integer <1>,
+            java.lang.Integer <2>
+        ],
+        java.util.ArrayList []
+    ]
     """
 
   Scenario: dump object

@@ -16,10 +16,9 @@ Feature: compare null
     <<message>>
     """
     Examples:
-      | value | type                    | message |
-      | 0     | java.lang.Integer       | 0       |
-      | ""    | java.lang.String        |         |
-      | {}    | java.util.LinkedHashMap | {}      |
+      | value | type              | message |
+      | 0     | java.lang.Integer | 0       |
+      | ""    | java.lang.String  |         |
 
   Scenario: empty list equals to null
     Given the following json:
@@ -35,6 +34,22 @@ Feature: compare null
     Expected to be equal to: null
     Actual: java.util.ArrayList
     []
+    """
+
+  Scenario: empty map equals to null
+    Given the following json:
+    """
+    {}
+    """
+    When evaluate by:
+    """
+      = null
+    """
+    Then failed with the message:
+    """
+    Expected to be equal to: null
+    Actual: java.util.LinkedHashMap
+    {}
     """
 
   Scenario Outline: non null equals to null
@@ -53,12 +68,11 @@ Feature: compare null
     <<message>>
     """
     Examples:
-      | value | type                    | message |
-      | 0     | java.lang.Integer       | 0       |
-      | ""    | java.lang.String        |         |
-      | {}    | java.util.LinkedHashMap | {}      |
+      | value | type              | message |
+      | 0     | java.lang.Integer | 0       |
+      | ""    | java.lang.String  |         |
 
-  Scenario: emply list matches null
+  Scenario: empty list matches null
     Given the following json:
     """
     []
@@ -72,6 +86,22 @@ Feature: compare null
     Expected to match: null
     Actual: java.util.ArrayList
     []
+    """
+
+  Scenario: empty map matches null
+    Given the following json:
+    """
+    {}
+    """
+    When evaluate by:
+    """
+      : null
+    """
+    Then failed with the message:
+    """
+    Expected to match: null
+    Actual: java.util.LinkedHashMap
+    {}
     """
 
   Scenario Outline: null equals to non null

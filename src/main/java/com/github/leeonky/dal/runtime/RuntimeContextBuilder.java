@@ -7,10 +7,7 @@ import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
-import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.Converter;
-import com.github.leeonky.util.InvocationException;
-import com.github.leeonky.util.NumberType;
+import com.github.leeonky.util.*;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -47,8 +44,9 @@ public class RuntimeContextBuilder {
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
     private final Map<String, TextBlockAttribute> textAttributeMap = new LinkedHashMap<>();
     private Converter converter = Converter.getInstance();
-    private final ClassKeyMap<Checker> equalsChecker = new ClassKeyMap<>();
-    private final ClassKeyMap<Checker> matchesChecker = new ClassKeyMap<>();
+    private final ClassKeyMap<Checker> equalsCheckers = new ClassKeyMap<>();
+    private final ClassKeyMap<Checker> matchesCheckers = new ClassKeyMap<>();
+    private final ClassKeyMap<Function<Data, Inspector>> inspectors = new ClassKeyMap<>();
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -182,12 +180,31 @@ public class RuntimeContextBuilder {
     }
 
     public RuntimeContextBuilder registerMatchesChecker(Class<?> type, ConditionalChecker checker) {
-        matchesChecker.put(type, checker);
+        matchesCheckers.put(type, checker);
         return this;
     }
 
     public RuntimeContextBuilder registerEqualsChecker(Class<?> type, ConditionalChecker checker) {
-        equalsChecker.put(type, checker);
+        equalsCheckers.put(type, checker);
+        return this;
+    }
+
+    //    TODO Refactor
+    public RuntimeContextBuilder registerValueInspector(Class<?>... types) {
+        for (Class<?> type : types) {
+            inspectors.put(type, data -> new Inspector() {
+
+                @Override
+                public String inspectType() {
+                    return Classes.getClassName(data.getInstance());
+                }
+
+                @Override
+                public String inspectValue() {
+                    return "<" + data.getInstance().toString() + ">";
+                }
+            });
+        }
         return this;
     }
 
@@ -357,11 +374,11 @@ public class RuntimeContextBuilder {
         }
 
         public Checker fetchEqualsChecker(ExpectActual expectActual) {
-            return equalsChecker.tryGetData(expectActual.getExpectInstance()).orElse(ConditionalChecker.EQUALS_CHECKER);
+            return equalsCheckers.tryGetData(expectActual.getExpectInstance()).orElse(ConditionalChecker.EQUALS_CHECKER);
         }
 
         public Checker fetchMatchesChecker(ExpectActual expectActual) {
-            return matchesChecker.tryGetData(expectActual.getExpectInstance()).orElseGet(() -> {
+            return matchesCheckers.tryGetData(expectActual.getExpectInstance()).orElseGet(() -> {
                 if (expectActual.expectNull())
                     return ConditionalChecker.MATCH_NULL_CHECKER;
                 if (expectActual.isAllNumber())
@@ -371,7 +388,7 @@ public class RuntimeContextBuilder {
         }
 
         public Inspector fetchInspector(Data data) {
-            return new Inspector(data);
+            return inspectors.tryGetData(data.getInstance()).orElseGet(() -> DefaultInspector::new).apply(data);
         }
     }
 }
