@@ -2,6 +2,8 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.inspector.Inspector;
+import com.github.leeonky.dal.runtime.inspector.InspectorCache;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -154,8 +156,11 @@ public class Data {
 
     @Deprecated
     public String dump() {
-        return context.fetchInspector(this).dump();
-//        return dump("", new HashMap<>(), "");
+        return buildInspector().dump("root", new InspectorCache(new HashMap<>()));
+    }
+
+    public Inspector buildInspector() {
+        return context.fetchInspector(this);
     }
 
     private String dump(String indentation, Map<Object, String> dumped, String path) {
@@ -251,7 +256,7 @@ public class Data {
     }
 
     public String inspect() {
-        return context.fetchInspector(this).inspect();
+        return buildInspector().inspect("root", new InspectorCache(new HashMap<>()));
     }
 
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {

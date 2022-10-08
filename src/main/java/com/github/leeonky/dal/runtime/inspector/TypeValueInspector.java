@@ -1,4 +1,4 @@
-package com.github.leeonky.dal.runtime;
+package com.github.leeonky.dal.runtime.inspector;
 
 public interface TypeValueInspector extends Inspector {
     String inspectType();
@@ -6,12 +6,12 @@ public interface TypeValueInspector extends Inspector {
     String inspectValue();
 
     @Override
-    default String inspect() {
+    default String inspect(String path, InspectorCache cache) {
         return String.join("\n", inspectType(), inspectValue()).trim();
     }
 
     @Override
-    default String dump() {
+    default String dump(String path, InspectorCache cache) {
         return String.join(" ", inspectType(), inspectValue()).trim();
     }
 }

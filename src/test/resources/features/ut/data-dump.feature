@@ -153,10 +153,9 @@ Feature: dump-data
     """
     Then dumped instance of java class "Data" should be:
     """
-    {
-      "value": 1,
-      "this": "** same with root",
-      "__type": "#package#Data"
+    #package#Data {
+        value: java.lang.Integer <1>,
+        this: *reference* root
     }
     """
 
@@ -179,14 +178,12 @@ Feature: dump-data
     """
     Then dumped instance of java class "Data" should be:
     """
-    {
-      "value": 1,
-      "subData": {
-        "value": 2,
-        "this": "** same with .subData",
-        "__type": "#package#SubData"
-      },
-      "__type": "#package#Data"
+    #package#Data {
+        value: java.lang.Integer <1>,
+        subData: #package#SubData {
+            value: java.lang.Integer <2>,
+            this: *reference* root.subData
+        }
     }
     """
 
