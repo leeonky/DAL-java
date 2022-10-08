@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.joining;
 
 public class TextUtil {
     public static final Set<String> SPLITTERS = new LinkedHashSet<>(asList("\r\n", "\n\r", "\n", "\r"));
@@ -30,5 +31,9 @@ public class TextUtil {
         StringBuilder builder = new StringBuilder();
         characters.forEach(builder::append);
         return builder.toString();
+    }
+
+    public static String indent(String content) {
+        return lines(content).stream().map(l -> "    " + l).collect(joining("\n"));
     }
 }

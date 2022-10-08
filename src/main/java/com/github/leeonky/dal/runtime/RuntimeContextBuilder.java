@@ -369,5 +369,9 @@ public class RuntimeContextBuilder {
                 return ConditionalChecker.MATCH_CHECKER;
             });
         }
+
+        public Inspector fetchInspector(Data data) {
+            return new Inspector(data);
+        }
     }
 }

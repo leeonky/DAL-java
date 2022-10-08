@@ -19,7 +19,7 @@ import static java.util.stream.StreamSupport.stream;
 
 public class Data {
     private final SchemaType schemaType;
-    final DALRuntimeContext dalRuntimeContext;
+    final DALRuntimeContext context;
     private final Object instance;
     private List<Object> listValue;
     private Comparator<Object> listComparator = SortGroupNode.NOP_COMPARATOR;
@@ -27,18 +27,12 @@ public class Data {
     public Data(Object instance, DALRuntimeContext context, SchemaType schemaType) {
         this.instance = instance;
         this.schemaType = schemaType;
-        dalRuntimeContext = context.registerPropertyAccessor(instance);
+        this.context = context.registerPropertyAccessor(instance);
     }
 
     @Deprecated
     public String inspectBk() {
-        if (isNull())
-            return "null ";
-        if (isList())
-            return getDataList().stream().map(Data::inspectBk).collect(joining(", ", "[", "]"));
-        String content = getInstance().toString();
-        return format("%s\n<%s>\n", getClassName(getInstance()), content
-                .replace("\\\\", "\\").replace("\n", "\\n").replace("\r", "\\r").replace("\t", "\\t"));
+        return inspect();
     }
 
     public Object getInstance() {
@@ -46,11 +40,11 @@ public class Data {
     }
 
     public Set<Object> getFieldNames() {
-        return dalRuntimeContext.findPropertyReaderNames(instance);
+        return context.findPropertyReaderNames(instance);
     }
 
     public boolean isList() {
-        return dalRuntimeContext.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
+        return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
     public int getListSize() {
@@ -58,18 +52,18 @@ public class Data {
     }
 
     public List<Object> getValueList() {
-        return listValue == null ? (listValue = stream(dalRuntimeContext.getList(instance).spliterator(), false)
+        return listValue == null ? (listValue = stream(context.getList(instance).spliterator(), false)
                 .sorted(listComparator).collect(toList())) : listValue;
     }
 
     public List<Data> getDataList() {
         AtomicInteger index = new AtomicInteger(0);
-        return getValueList().stream().map(object -> new Data(object, dalRuntimeContext,
+        return getValueList().stream().map(object -> new Data(object, context,
                 schemaType.access(index.incrementAndGet()))).collect(toList());
     }
 
     public boolean isNull() {
-        return dalRuntimeContext.isNull(instance);
+        return context.isNull(instance);
     }
 
     public Data getValue(List<Object> propertyChain) {
@@ -81,7 +75,7 @@ public class Data {
         try {
             List<Object> chain = schemaType.access(propertyChain).getPropertyChainBefore(schemaType);
             if (chain.size() == 1 && chain.get(0).equals(propertyChain))
-                return new Data(getPropertyValue(propertyChain), dalRuntimeContext, propertySchema(propertyChain));
+                return new Data(getPropertyValue(propertyChain), context, propertySchema(propertyChain));
             return getValue(chain);
         } catch (IndexOutOfBoundsException ex) {
             throw new PropertyAccessException("Index out of bounds (" + ex.getMessage() + "), first index is: " + getListFirstIndex(), ex);
@@ -103,19 +97,19 @@ public class Data {
     }
 
     private Object getPropertyValue(Object property) {
-        return isList() ? fetchFromList(property) : dalRuntimeContext.getPropertyValue(this, property);
+        return isList() ? fetchFromList(property) : context.getPropertyValue(this, property);
     }
 
     private Object fetchFromList(Object property) {
         if (property instanceof String)
-            return dalRuntimeContext.getPropertyValue(this, property);
+            return context.getPropertyValue(this, property);
         if ((int) property < 0)
             return getValueList().get(getListSize() + (int) property);
         return getValueList().get((int) property - getListFirstIndex());
     }
 
     public int getListFirstIndex() {
-        return dalRuntimeContext.getListFirstIndex(instance);
+        return context.getListFirstIndex(instance);
     }
 
     private SchemaType propertySchema(Object property) {
@@ -129,7 +123,7 @@ public class Data {
     }
 
     public Data convert(Class<?> target) {
-        return new Data(dalRuntimeContext.getConverter().convert(target, instance), dalRuntimeContext, schemaType);
+        return new Data(context.getConverter().convert(target, instance), context, schemaType);
     }
 
     public Data setListComparator(Comparator<Object> listComparator) {
@@ -138,7 +132,7 @@ public class Data {
     }
 
     public Data listMap(Object property) {
-        return new Data(listMap(data -> data.getValue(property).getInstance()), dalRuntimeContext, propertySchema(property));
+        return new Data(listMap(data -> data.getValue(property).getInstance()), context, propertySchema(property));
     }
 
     public AutoMappingList listMap(Function<Data, Object> mapper) {
@@ -150,7 +144,7 @@ public class Data {
         getFieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
                 .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
                         filteredObject.put(trimPrefix(prefix, fieldName), getValue(fieldName).getInstance()));
-        return new Data(filteredObject, dalRuntimeContext, schemaType).setListComparator(listComparator);
+        return new Data(filteredObject, context, schemaType).setListComparator(listComparator);
     }
 
     private String trimPrefix(String prefix, String fieldName) {
@@ -176,9 +170,9 @@ public class Data {
     }
 
     private String dumpInstance(Object instance, String indentation, Map<Object, String> dumped, String path) {
-        return isNull() ? "null" : oneOf(() -> dalRuntimeContext.fetchSingleDumper(instance)
+        return isNull() ? "null" : oneOf(() -> context.fetchSingleDumper(instance)
                         .map(dumper -> dumper.apply(instance)),
-                () -> dalRuntimeContext.fetchObjectDumper(instance)
+                () -> context.fetchObjectDumper(instance)
                         .map(dumper -> dumpValueObject(dumper.apply(instance), indentation)))
                 .orElseGet(() -> dumpObject(indentation, dumped, path));
     }
@@ -234,7 +228,7 @@ public class Data {
     }
 
     public <T> T newBlockScope(Supplier<T> supplier) {
-        return dalRuntimeContext.newBlockScope(this, supplier);
+        return context.newBlockScope(this, supplier);
     }
 
     public Optional<CurryingMethod> currying(Object property) {
@@ -242,11 +236,11 @@ public class Data {
     }
 
     private Optional<CurryingMethod> currying(Object instance, Object property) {
-        List<InstanceCurryingMethod> methods = dalRuntimeContext.methodToCurrying(instance.getClass(), property).stream()
-                .map(method -> createCurryingMethod(instance, method, dalRuntimeContext.getConverter())).collect(toList());
+        List<InstanceCurryingMethod> methods = context.methodToCurrying(instance.getClass(), property).stream()
+                .map(method -> createCurryingMethod(instance, method, context.getConverter())).collect(toList());
         if (!methods.isEmpty())
             return of(new CurryingMethodGroup(methods, null));
-        return dalRuntimeContext.getImplicitObject(instance).flatMap(obj -> currying(obj, property));
+        return context.getImplicitObject(instance).flatMap(obj -> currying(obj, property));
     }
 
     public Data requireList(int position) {
@@ -256,7 +250,7 @@ public class Data {
     }
 
     public String inspect() {
-        return new Inspector(this).inspect();
+        return context.fetchInspector(this).inspect();
     }
 
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
