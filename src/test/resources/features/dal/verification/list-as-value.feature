@@ -29,12 +29,10 @@ Feature: list as value
     """
     Then failed with the message:
     """
-    Expected to match: [B
-    [
+    Expected to match: [
         java.lang.Byte <98>
     ]
-    Actual: [B
-    [
+    Actual: [
         java.lang.Byte <97>
     ]
     """

@@ -32,8 +32,7 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to be equal to: null
-    Actual: java.util.ArrayList
-    []
+    Actual: []
     """
 
   Scenario: empty map equals to null
@@ -48,8 +47,7 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to be equal to: null
-    Actual: java.util.LinkedHashMap
-    {}
+    Actual: {}
     """
 
   Scenario Outline: non null equals to null
@@ -84,8 +82,7 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to match: null
-    Actual: java.util.ArrayList
-    []
+    Actual: []
     """
 
   Scenario: empty map matches null
@@ -100,8 +97,7 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to match: null
-    Actual: java.util.LinkedHashMap
-    {}
+    Actual: {}
     """
 
   Scenario Outline: null equals to non null

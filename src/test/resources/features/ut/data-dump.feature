@@ -22,7 +22,7 @@ Feature: dump-data
     """
     Then dumped data should be:
     """
-    java.util.ArrayList [
+    [
         java.lang.Integer <1>,
         java.lang.Integer <2>,
         java.lang.String <3>,
@@ -37,7 +37,7 @@ Feature: dump-data
     """
     Then dumped data should be:
     """
-    java.util.ArrayList []
+    []
     """
 
   Scenario: dump nested list
@@ -47,15 +47,15 @@ Feature: dump-data
     """
     Then dumped data should be:
     """
-    java.util.ArrayList [
-        java.util.ArrayList [
+    [
+        [
             java.lang.Integer <1>
         ],
-        java.util.ArrayList [
+        [
             java.lang.Integer <1>,
             java.lang.Integer <2>
         ],
-        java.util.ArrayList []
+        []
     ]
     """
 
@@ -69,7 +69,7 @@ Feature: dump-data
     Then dumped data should be:
     """
     {
-      "name": "John"
+        name: java.lang.String <John>
     }
     """
 
@@ -99,13 +99,13 @@ Feature: dump-data
     Then dumped data should be:
     """
     {
-      "a": {
-        "name": "John"
-      },
-      "b": {
-        "name": "Tom"
-      },
-      "c": {}
+        a: {
+            name: java.lang.String <John>
+        },
+        b: {
+            name: java.lang.String <Tom>
+        },
+        c: {}
     }
     """
 
@@ -127,13 +127,18 @@ Feature: dump-data
     """
     Then dumped data should be:
     """
-    [{
-      "name": "John"
-    }, {
-      "name": "Tom"
-    }, {}, {
-      "name": "Jerry"
-    }]
+    [
+        {
+            name: java.lang.String <John>
+        },
+        {
+            name: java.lang.String <Tom>
+        },
+        {},
+        {
+            name: java.lang.String <Jerry>
+        }
+    ]
     """
 
   Scenario: circle reference
@@ -193,9 +198,9 @@ Feature: dump-data
     Then dumped data should be:
     """
     {
-      "a": {},
-      "b": {},
-      "c": {}
+        a: {},
+        b: {},
+        c: {}
     }
     """
 
@@ -206,9 +211,18 @@ Feature: dump-data
     """
     Then dumped data should be:
     """
-    [[{
-      "a": 1
-    }], "** same with [0]"]
+    [
+        [
+            {
+                a: java.lang.Integer <1>
+            }
+        ],
+        [
+            {
+                a: java.lang.Integer <1>
+            }
+        ]
+    ]
     """
 
   Scenario: ignore empty list in list reference
@@ -218,7 +232,11 @@ Feature: dump-data
     """
     Then dumped data should be:
     """
-    [[], [], []]
+    [
+        [],
+        [],
+        []
+    ]
     """
 
   Scenario: complex data dump
@@ -238,15 +256,23 @@ Feature: dump-data
     """
     Then dumped data should be:
     """
-    [{
-      "obj": [{
-        "user": {
-          "name": "John"
+    [
+        {
+            obj: [
+                {
+                    user: {
+                        name: java.lang.String <John>
+                    }
+                }
+            ]
+        },
+        {
+            name: java.lang.String <Tom>
+        },
+        {
+            name: java.lang.String <John>
         }
-      }]
-    }, {
-      "name": "Tom"
-    }, "** same with [0].obj[0].user"]
+    ]
     """
 
   Scenario: build-in value type:
@@ -269,50 +295,19 @@ Feature: dump-data
     """
     Then dumped instance of java class "Data" should be:
     """
-    {
-      "booleanValue": true,
-      "boxedBoolean": false,
-      "uuid": {
-        "__type": "java.util.UUID",
-        "__value": "00000000-0000-0000-0000-000000000000"
-      },
-      "instant": {
-        "__type": "java.time.Instant",
-        "__value": "2000-01-01T00:00:00Z"
-      },
-      "date": {
-        "__type": "java.util.Date",
-        "__value": "2000-01-02T00:00:00Z"
-      },
-      "localTime": {
-        "__type": "java.time.LocalTime",
-        "__value": "12:00"
-      },
-      "localDate": {
-        "__type": "java.time.LocalDate",
-        "__value": "2000-12-01"
-      },
-      "localDateTime": {
-        "__type": "java.time.LocalDateTime",
-        "__value": "2000-12-01T12:00"
-      },
-      "offsetDateTime": {
-        "__type": "java.time.OffsetDateTime",
-        "__value": "1996-01-23T00:00:01+08:00"
-      },
-      "zonedDateTime": {
-        "__type": "java.time.ZonedDateTime",
-        "__value": "1996-01-23T00:00:01+08:00[Asia/Shanghai]"
-      },
-      "yearMonth": {
-        "__type": "java.time.YearMonth",
-        "__value": "2000-12"
-      },
-      "type": {
-        "__type": "java.lang.Class",
-        "__value": "java.lang.String"
-      },
-      "__type": "#package#Data"
+    #package#Data {
+        booleanValue: java.lang.Boolean <true>,
+        boxedBoolean: java.lang.Boolean <false>,
+        uuid: java.util.UUID <00000000-0000-0000-0000-000000000000>,
+        instant: java.time.Instant <2000-01-01T00:00:00Z>,
+        date: java.util.Date <Sun Jan 02 08:00:00 CST 2000>,
+        localTime: java.time.LocalTime <12:00>,
+        localDate: java.time.LocalDate <2000-12-01>,
+        localDateTime: java.time.LocalDateTime <2000-12-01T12:00>,
+        offsetDateTime: java.time.OffsetDateTime <1996-01-23T00:00:01+08:00>,
+        zonedDateTime: java.time.ZonedDateTime <1996-01-23T00:00:01+08:00[Asia/Shanghai]>,
+        yearMonth: java.time.YearMonth <2000-12>,
+        type: java.lang.Class <class java.lang.String>
     }
     """
 
@@ -328,10 +323,9 @@ Feature: dump-data
     """
     Then dumped instance of java class "Data" should be:
     """
-    {
-      "value": 2,
-      "error": "** Got exception during dump: com.github.leeonky.util.InvocationException: java.lang.RuntimeException: error",
-      "__type": "#package#Data"
+    #package#Data {
+        value: java.lang.Integer <2>,
+        error: *throw* com.github.leeonky.dal.runtime.PropertyAccessException: com.github.leeonky.util.InvocationException: java.lang.RuntimeException: error
     }
     """
 
@@ -347,10 +341,9 @@ Feature: dump-data
     """
     Then dumped instance of java class "Data" should be:
     """
-    {
-      "data": {
-        0: "str1"
-      },
-      "__type": "#package#Data"
+    #package#Data {
+        data: {
+            0: java.lang.String <str1>
+        }
     }
     """

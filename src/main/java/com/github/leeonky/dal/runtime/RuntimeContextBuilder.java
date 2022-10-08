@@ -192,7 +192,7 @@ public class RuntimeContextBuilder {
     //    TODO Refactor
     public RuntimeContextBuilder registerValueInspector(Class<?>... types) {
         for (Class<?> type : types) {
-            inspectors.put(type, data -> new Inspector() {
+            inspectors.put(type, data -> new TypeValueInspector() {
 
                 @Override
                 public String inspectType() {
@@ -388,7 +388,7 @@ public class RuntimeContextBuilder {
         }
 
         public Inspector fetchInspector(Data data) {
-            return inspectors.tryGetData(data.getInstance()).orElseGet(() -> DefaultInspector::new).apply(data);
+            return inspectors.tryGetData(data.getInstance()).orElseGet(() -> Inspector::defaultInspector).apply(data);
         }
     }
 }

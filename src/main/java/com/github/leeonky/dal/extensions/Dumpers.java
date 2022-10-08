@@ -3,6 +3,7 @@ package com.github.leeonky.dal.extensions;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
 
+import java.lang.reflect.Type;
 import java.time.*;
 import java.util.Date;
 import java.util.UUID;
@@ -30,7 +31,11 @@ public class Dumpers implements Extension {
                 .registerObjectDumper(Class.class, Class::getName)
         ;
 
-        dal.getRuntimeContextBuilder().registerValueInspector(String.class, Number.class, Boolean.class, Instant.class);
+//        TODO missing Test for numbers
+        dal.getRuntimeContextBuilder().registerValueInspector(Type.class, String.class, Number.class, Boolean.class,
+                UUID.class, Instant.class, Date.class, LocalTime.class, LocalDate.class, LocalDateTime.class,
+                OffsetDateTime.class, ZonedDateTime.class, YearMonth.class
+        );
     }
 
     private String dumpString(Object o) {
