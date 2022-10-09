@@ -49,6 +49,7 @@ public class IntegrationTestContext {
     public IntegrationTestContext() throws InterruptedException {
         dal = new DAL().extend();
         testCodeCompiler = TestCodeCompiler.take();
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
     public void release() throws InterruptedException {

@@ -297,7 +297,7 @@ Feature: dump-data
         boxedBoolean: java.lang.Boolean <false>,
         uuid: java.util.UUID <00000000-0000-0000-0000-000000000000>,
         instant: java.time.Instant <2000-01-01T00:00:00Z>,
-        date: java.util.Date <Sun Jan 02 08:00:00 CST 2000>,
+        date: java.util.Date <Sun Jan 02 00:00:00 UTC 2000>,
         localTime: java.time.LocalTime <12:00>,
         localDate: java.time.LocalDate <2000-12-01>,
         localDateTime: java.time.LocalDateTime <2000-12-01T12:00>,
