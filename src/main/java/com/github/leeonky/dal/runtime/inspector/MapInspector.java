@@ -2,7 +2,9 @@ package com.github.leeonky.dal.runtime.inspector;
 
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.util.TextUtil;
+import com.github.leeonky.util.Classes;
 
+import java.util.Map;
 import java.util.Set;
 
 import static java.util.stream.Collectors.joining;
@@ -14,10 +16,11 @@ public class MapInspector extends CacheableInspector {
 
     @Override
     public String cachedInspect(String path, InspectorCache cache) {
+        String type = type();
         Set<Object> fieldNames = getFieldNames();
         if (fieldNames.isEmpty())
-            return "{}";
-        return fieldNames.stream().map(o -> dumpEntry(path, cache, o)).map(TextUtil::indent)
+            return type + "{}";
+        return type + fieldNames.stream().map(o -> dumpEntry(path, cache, o)).map(TextUtil::indent)
                 .collect(joining(",\n", "{\n", "\n}"));
     }
 
@@ -37,5 +40,9 @@ public class MapInspector extends CacheableInspector {
 
     protected Set<Object> getFieldNames() {
         return data.getFieldNames();
+    }
+
+    protected String type() {
+        return data.getInstance() instanceof Map ? "" : Classes.getClassName(data.getInstance()) + " ";
     }
 }
