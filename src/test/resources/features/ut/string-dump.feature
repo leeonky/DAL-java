@@ -1,5 +1,7 @@
-Feature: string-dump-check
+Feature: string-dump
+
   Rule: dump
+
     Scenario: should dump string in escape char
       Given the following json:
       """
