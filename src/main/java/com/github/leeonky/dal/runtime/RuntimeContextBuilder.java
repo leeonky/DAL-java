@@ -3,6 +3,7 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.runtime.inspector.Inspector;
+import com.github.leeonky.dal.runtime.inspector.InspectorBuilder;
 import com.github.leeonky.dal.runtime.inspector.ValueInspector;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
@@ -49,7 +50,7 @@ public class RuntimeContextBuilder {
     private Converter converter = Converter.getInstance();
     private final ClassKeyMap<Checker> equalsCheckers = new ClassKeyMap<>();
     private final ClassKeyMap<Checker> matchesCheckers = new ClassKeyMap<>();
-    private final ClassKeyMap<Function<Data, Inspector>> inspectors = new ClassKeyMap<>();
+    private final ClassKeyMap<InspectorBuilder> inspectorBuilders = new ClassKeyMap<>();
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -179,7 +180,12 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerValueInspector(Class<?>... types) {
         for (Class<?> type : types)
-            inspectors.put(type, ValueInspector::new);
+            registerInspector(type, ValueInspector::new);
+        return this;
+    }
+
+    public RuntimeContextBuilder registerInspector(Class<?> type, InspectorBuilder builder) {
+        inspectorBuilders.put(type, builder);
         return this;
     }
 
@@ -351,7 +357,7 @@ public class RuntimeContextBuilder {
         }
 
         public Inspector fetchInspector(Data data) {
-            return inspectors.tryGetData(data.getInstance()).orElseGet(() -> Inspector::defaultInspector).apply(data);
+            return inspectorBuilders.tryGetData(data.getInstance()).orElseGet(() -> Inspector::defaultInspector).apply(data);
         }
     }
 }
