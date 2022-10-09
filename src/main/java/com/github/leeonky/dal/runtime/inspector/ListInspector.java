@@ -20,7 +20,7 @@ public class ListInspector extends CacheableInspector {
         if (dataList.isEmpty())
             return "[]";
         AtomicInteger index = new AtomicInteger(0);
-        return dataList.stream().map(data1 -> data1.buildInspector().dump(path + "[" + index.getAndIncrement() + "]", cache))
+        return dataList.stream().map(data -> data.buildInspector().dump(path + "[" + index.getAndIncrement() + "]", cache))
                 .map(TextUtil::indent).collect(joining(",\n", "[\n", "\n]"));
     }
 }
