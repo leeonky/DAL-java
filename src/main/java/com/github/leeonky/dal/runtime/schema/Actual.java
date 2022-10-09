@@ -90,7 +90,7 @@ public class Actual {
     public boolean verifyFormatter(Formatter<Object, Object> formatter) {
         return formatter.isValid(actual.getInstance())
                 || Verification.errorLog("Expected field `%s` to be formatter `%s`\nActual: %s", property,
-                formatter.getFormatterName(), actual.inspectBk().trim());
+                formatter.getFormatterName(), actual.inspect());
     }
 
     boolean verifySize(Function<Actual, Stream<?>> actualStream, int expectSize) {
@@ -107,13 +107,13 @@ public class Actual {
     boolean inInstanceOf(BeanClass<?> type) {
         return type.isInstance(actual.getInstance()) ||
                 Verification.errorLog(String.format("Expected field `%s` to be %s\nActual: %s", property,
-                        type.getName(), actual.inspectBk().trim()));
+                        type.getName(), actual.inspect()));
     }
 
     public boolean equalsExpect(Object expect) {
         return Objects.equals(expect, actual.getInstance()) ||
                 Verification.errorLog(format("Expected field `%s` to be %s\nActual: %s", property,
-                        inspect(expect), actual.inspectBk().trim()));
+                        inspect(expect), actual.inspect()));
     }
 
     public String inspect(Object obj) {

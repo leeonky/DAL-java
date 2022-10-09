@@ -3,13 +3,16 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.runtime.inspector.Inspector;
-import com.github.leeonky.dal.runtime.inspector.TypeValueInspector;
+import com.github.leeonky.dal.runtime.inspector.ValueInspector;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
-import com.github.leeonky.util.*;
+import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.InvocationException;
+import com.github.leeonky.util.NumberType;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -41,8 +44,6 @@ public class RuntimeContextBuilder {
     private final Map<Object, Function<MetaData, Object>> metaProperties = new HashMap<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
-    private final ClassKeyMap<Function<Object, String>> valueDumpers = new ClassKeyMap<>();
-    private final ClassKeyMap<Function<Object, Map<String, Object>>> objectDumpers = new ClassKeyMap<>();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
     private final Map<String, TextBlockAttribute> textAttributeMap = new LinkedHashMap<>();
     private Converter converter = Converter.getInstance();
@@ -57,21 +58,6 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerTextBlockAttribute(String name, TextBlockAttribute attribute) {
         textAttributeMap.put(name, attribute);
-        return this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> RuntimeContextBuilder registerValueDumper(Class<T> key, Function<T, String> toString) {
-        valueDumpers.put(key, obj -> toString.apply((T) obj));
-        return this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> RuntimeContextBuilder registerObjectDumper(Class<T> type, Function<T, String> toString) {
-        objectDumpers.put(type, obj -> new LinkedHashMap<String, Object>() {{
-            put("__type", obj.getClass().getName());
-            put("__value", toString.apply((T) obj));
-        }});
         return this;
     }
 
@@ -191,22 +177,9 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    //    TODO Refactor
     public RuntimeContextBuilder registerValueInspector(Class<?>... types) {
-        for (Class<?> type : types) {
-            inspectors.put(type, data -> new TypeValueInspector() {
-
-                @Override
-                public String inspectType() {
-                    return Classes.getClassName(data.getInstance());
-                }
-
-                @Override
-                public String inspectValue() {
-                    return "<" + data.getInstance().toString() + ">";
-                }
-            });
-        }
+        for (Class<?> type : types)
+            inspectors.put(type, ValueInspector::new);
         return this;
     }
 
@@ -344,14 +317,6 @@ public class RuntimeContextBuilder {
             return numberType;
         }
 
-        public Optional<Function<Object, String>> fetchSingleDumper(Object instance) {
-            return valueDumpers.tryGetData(instance);
-        }
-
-        public Optional<Function<Object, Map<String, Object>>> fetchObjectDumper(Object instance) {
-            return objectDumpers.tryGetData(instance);
-        }
-
         public Optional<Object> getImplicitObject(Object obj) {
             return objectImplicitMapper.tryGetData(obj).map(mapper -> mapper.apply(obj));
         }
@@ -368,25 +333,21 @@ public class RuntimeContextBuilder {
         }
 
         public TextBlockAttribute getAttribute(String name, int position) {
-            return textAttributeMap.computeIfAbsent(name, k -> {
+            return textAttributeMap.computeIfAbsent(name, attribute -> {
                 throw new SyntaxException(format("Invalid text block attribute `%s`, all supported attributes are:\n%s",
-                        k, textAttributeMap.entrySet().stream().map(e -> format("  %s:\n    %s",
+                        attribute, textAttributeMap.entrySet().stream().map(e -> format("  %s:\n    %s",
                                 e.getKey(), e.getValue().description())).collect(joining("\n"))), position);
             });
         }
 
         public Checker fetchEqualsChecker(ExpectActual expectActual) {
-            return equalsCheckers.tryGetData(expectActual.getExpectInstance()).orElse(ConditionalChecker.EQUALS_CHECKER);
+            return equalsCheckers.tryGetData(expectActual.getExpectInstance())
+                    .orElse(ConditionalChecker.EQUALS_CHECKER);
         }
 
         public Checker fetchMatchesChecker(ExpectActual expectActual) {
-            return matchesCheckers.tryGetData(expectActual.getExpectInstance()).orElseGet(() -> {
-                if (expectActual.expectNull())
-                    return ConditionalChecker.MATCH_NULL_CHECKER;
-                if (expectActual.isAllNumber())
-                    return ConditionalChecker.MATCH_NUMBER_CHECKER;
-                return ConditionalChecker.MATCH_CHECKER;
-            });
+            return matchesCheckers.tryGetData(expectActual.getExpectInstance())
+                    .orElseGet(expectActual::defaultMatchesChecker);
         }
 
         public Inspector fetchInspector(Data data) {

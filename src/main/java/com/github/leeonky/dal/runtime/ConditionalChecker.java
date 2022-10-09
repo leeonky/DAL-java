@@ -4,9 +4,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface ConditionalChecker extends Checker {
-    Checker MATCH_NULL_CHECKER = conditionalChecker(ExpectActual::actualNotNull, ExpectActual::shouldMatchNull),
-            MATCH_NUMBER_CHECKER = conditionalChecker(ExpectActual::numberNotEquals, ExpectActual::shouldMatch),
-            EQUALS_CHECKER = conditionalChecker(ExpectActual::objectNotEquals, ExpectActual::shouldEqualTo),
+    Checker MATCH_NULL_CHECKER = conditionalChecker(ExpectActual::actualNotNull, ExpectActual::notationMatch),
+            MATCH_NUMBER_CHECKER = conditionalChecker(ExpectActual::numberNotEquals, ExpectActual::notationMatch),
+            EQUALS_CHECKER = conditionalChecker(ExpectActual::objectNotEquals, ExpectActual::notationEqualTo),
             MATCH_CHECKER = matchTypeChecker(String.class, Number.class)
                     .and(matchTypeChecker(String.class, Boolean.class))
                     .and(matchTypeChecker(Number.class, String.class))
@@ -52,7 +52,7 @@ public interface ConditionalChecker extends Checker {
                 Data result = expectActual.convertToExpectedType();
                 if (expectActual.equalTo(result))
                     return false;
-                message = expectActual.shouldMatch(result);
+                message = expectActual.notationMatch(result);
             } catch (Exception e) {
                 message = e.getMessage();
             }

@@ -22,12 +22,12 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     }
 
     public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        ExpectActual expectActual = new ExpectActual(evaluateData(context), actualNode.evaluateData(context), context);
+        ExpectActual expectActual = new ExpectActual(evaluateData(context), actualNode.evaluateData(context));
         return context.fetchEqualsChecker(expectActual).verify(expectActual, getPositionBegin());
     }
 
     public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
-        ExpectActual expectActual = new ExpectActual(evaluateData(context), actualNode.evaluateData(context), context);
+        ExpectActual expectActual = new ExpectActual(evaluateData(context), actualNode.evaluateData(context));
         return context.fetchMatchesChecker(expectActual).verify(expectActual, getPositionBegin());
     }
 

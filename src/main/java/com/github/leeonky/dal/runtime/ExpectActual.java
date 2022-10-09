@@ -5,28 +5,26 @@ import static java.lang.String.format;
 public class ExpectActual {
     private final Data expected;
     private final Data actual;
-    private final RuntimeContextBuilder.DALRuntimeContext context;
 
-    public ExpectActual(Data expected, Data actual, RuntimeContextBuilder.DALRuntimeContext context) {
+    public Data getActual() {
+        return actual;
+    }
+
+    public Data getExpected() {
+        return expected;
+    }
+
+    public ExpectActual(Data expected, Data actual) {
         this.expected = expected;
         this.actual = actual;
-        this.context = context;
     }
 
     public boolean objectNotEquals() {
         return !Calculator.equals(actual, expected);
     }
 
-    public String shouldEqualTo() {
-        return format("Expected to be equal to: %s\nActual: %s", expected.inspect(), actual.inspect());
-    }
-
     public boolean actualNotNull() {
         return !actual.isNull();
-    }
-
-    public String shouldMatchNull() {
-        return format("Expected to match: null\nActual: %s", actual.inspect().trim());
     }
 
     public boolean isInstanceOf(Class<?> actualType, Class<?> expectType) {
@@ -37,38 +35,49 @@ public class ExpectActual {
         return expected.getInstance() instanceof Number && actual.getInstance() instanceof Number;
     }
 
-    public boolean numberNotEquals() {
-        return context.getNumberType().compare((Number) expected.getInstance(), (Number) actual.getInstance()) != 0;
-    }
-
-    public String shouldMatch() {
-        return format("Expected to match: %s\nActual: %s", expected.inspectBk().trim(), actual.inspectBk().trim());
-    }
-
     public Data convertToExpectedType() {
         return actual.convert(expected.getInstance().getClass());
-    }
-
-    public String shouldMatch(Data converted) {
-        if (converted.getInstance() == actual.getInstance())
-            return shouldMatch();
-        return format("Expected to match: %s\nActual: %s converted from: %s",
-                expected.inspectBk().trim(), converted.inspectBk().trim(), actual.inspectBk().trim());
     }
 
     public Object getExpectInstance() {
         return expected.getInstance();
     }
 
-    public String cannotCompare() {
-        return format("Cannot compare between %s\nand %s", actual.inspectBk().trim(), expected.inspectBk().trim());
-    }
-
-    boolean expectNull() {
+    public boolean expectNull() {
         return expected.isNull();
     }
 
-    boolean equalTo(Data actual) {
+    public boolean equalTo(Data actual) {
         return Calculator.equals(actual, expected);
+    }
+
+    public boolean numberNotEquals() {
+        return getExpected().numberNotEquals(getActual());
+    }
+
+    public String notationEqualTo() {
+        return format("Expected to be equal to: %s\nActual: %s", expected.inspect(), actual.inspect());
+    }
+
+    public String notationMatch() {
+        return format("Expected to match: %s\nActual: %s", expected.inspect(), actual.inspect());
+    }
+
+    public String notationMatch(Data converted) {
+        return converted.getInstance() == actual.getInstance() ? notationMatch()
+                : format("Expected to match: %s\nActual: %s converted from: %s", expected.inspect(),
+                converted.inspect(), actual.inspect());
+    }
+
+    public String cannotCompare() {
+        return format("Cannot compare between %s\nand %s", actual.inspect(), expected.inspect());
+    }
+
+    Checker defaultMatchesChecker() {
+        if (expectNull())
+            return ConditionalChecker.MATCH_NULL_CHECKER;
+        if (isAllNumber())
+            return ConditionalChecker.MATCH_NUMBER_CHECKER;
+        return ConditionalChecker.MATCH_CHECKER;
     }
 }

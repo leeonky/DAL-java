@@ -11,11 +11,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
-import static com.github.leeonky.util.Classes.getClassName;
-import static com.github.leeonky.util.function.Extension.oneOf;
 import static java.lang.String.format;
 import static java.util.Optional.of;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -30,11 +27,6 @@ public class Data {
         this.instance = instance;
         this.schemaType = schemaType;
         this.context = context.registerPropertyAccessor(instance);
-    }
-
-    @Deprecated
-    public String inspectBk() {
-        return inspect();
     }
 
     public Object getInstance() {
@@ -154,83 +146,16 @@ public class Data {
                 + fieldName.substring(prefix.length() + 1);
     }
 
-    @Deprecated
+    public String inspect() {
+        return buildInspector().inspect("root", InspectorCache.cache());
+    }
+
     public String dump() {
-        return buildInspector().dump("root", new InspectorCache(new HashMap<>()));
+        return buildInspector().dump("root", InspectorCache.cache());
     }
 
     public Inspector buildInspector() {
         return context.fetchInspector(this);
-    }
-
-    private String dump(String indentation, Map<Object, String> dumped, String path) {
-        if (path.length() > 100)
-            return "\"** too deep level property!\"";
-        try {
-            if (isList())
-                return dumpList(indentation, dumped, path);
-            return dumpInstance(instance, indentation, dumped, path);
-        } catch (Exception e) {
-            return String.format("\"** Got exception during dump: %s\"", e);
-        }
-    }
-
-    private String dumpInstance(Object instance, String indentation, Map<Object, String> dumped, String path) {
-        return isNull() ? "null" : oneOf(() -> context.fetchSingleDumper(instance)
-                        .map(dumper -> dumper.apply(instance)),
-                () -> context.fetchObjectDumper(instance)
-                        .map(dumper -> dumpValueObject(dumper.apply(instance), indentation)))
-                .orElseGet(() -> dumpObject(indentation, dumped, path));
-    }
-
-    private String dumpList(String indentation, Map<Object, String> dumped, String path) {
-        return getValueList().isEmpty() ? "[]" : fetchSameReference(dumped, path).orElseGet(() -> {
-            StringJoiner joiner = new StringJoiner(", ", "[", "]");
-            List<Data> listObjects = getDataList();
-            for (int i = 0; i < listObjects.size(); i++)
-                joiner.add(listObjects.get(i).dump(indentation, dumped, path + "[" + i + "]"));
-            return joiner.toString();
-        });
-    }
-
-    private String dumpValueObject(Map<String, Object> instance, String indentation) {
-        String keyIndentation = indentation + "  ";
-        return instance.entrySet().stream().map(entry -> format("%s\"%s\": %s", keyIndentation, entry.getKey(),
-                        dumpInstance(entry.getValue(), keyIndentation, new HashMap<>(), entry.getKey())))
-                .collect(joining(",\n", "{\n", "\n" + indentation + "}"));
-    }
-
-    private String dumpObject(String indentation, Map<Object, String> dumped, String path) {
-        Set<Object> fieldNames = new LinkedHashSet<>(getFieldNames());
-        return fieldNames.isEmpty() ? "{}" : fetchSameReference(dumped, path).orElseGet(() -> {
-            String keyIndentation = indentation + "  ";
-            List<String> strings = fieldNames.stream().map(fieldName -> dumpField(dumped, path, keyIndentation, fieldName))
-                    .filter(Objects::nonNull).collect(toList());
-            if (!(instance instanceof Map))
-                strings.add(format("%s\"%s\": %s", keyIndentation, "__type", "\"" + getClassName(instance) + "\""));
-            return strings.stream().collect(joining(",\n", "{\n", "\n" + indentation + "}"));
-        });
-    }
-
-    private String dumpField(Map<Object, String> dumped, String path, String keyIndentation, Object fieldName) {
-        String value;
-        try {
-            value = getValue(fieldName).dump(keyIndentation, dumped, path + "." + fieldName);
-        } catch (PropertyAccessException e) {
-            value = "\"** Got exception during dump: " + e.getCause() + "\"";
-        }
-        return format("%s%s: %s", keyIndentation, fieldName instanceof String ? String.format("\"%s\"", fieldName)
-                : fieldName.toString(), value);
-    }
-
-    private Optional<String> fetchSameReference(Map<Object, String> dumped, String path) {
-        String reference = dumped.get(instance);
-        if (reference != null)
-            return of(format("\"** same with %s\"", reference.isEmpty() ? "root" : reference));
-        else {
-            dumped.put(instance, path);
-            return Optional.empty();
-        }
     }
 
     public <T> T newBlockScope(Supplier<T> supplier) {
@@ -252,11 +177,11 @@ public class Data {
     public Data requireList(int position) {
         if (isList())
             return this;
-        throw new RuntimeException(format("Invalid input value, expect a List but: %s", inspectBk().trim()), position);
+        throw new RuntimeException(format("Invalid input value, expect a List but: %s", inspect().trim()), position);
     }
 
-    public String inspect() {
-        return buildInspector().inspect("root", new InspectorCache(new HashMap<>()));
+    public boolean numberNotEquals(Data another) {
+        return context.getNumberType().compare((Number) instance, (Number) another.instance) != 0;
     }
 
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
