@@ -198,8 +198,8 @@ Feature: schema in table
     And got the following notation:
     """
     : >>| obj | is IdZero: {aliasOfName: 'Tom'} |
-                ^
                    ^
+                ^
     """
     When the following json:
     """

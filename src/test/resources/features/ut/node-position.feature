@@ -20,8 +20,7 @@ Feature: node position
     """
     string: {
       <<"key">>: 2
-        ^
-                 ^
+        ^        ^
     }
     """
     When evaluate by:
@@ -34,8 +33,7 @@ Feature: node position
     """
     array: {
       <<0>>: 2
-        ^
-             ^
+        ^    ^
     }
     """
     When evaluate by:
@@ -48,7 +46,6 @@ Feature: node position
     """
     string: {
       <<["key"]>>: 2
-        ^
-                   ^
+        ^          ^
     }
     """

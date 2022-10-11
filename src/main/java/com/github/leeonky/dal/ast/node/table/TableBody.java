@@ -10,7 +10,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.ROW;
 import static java.util.stream.Collectors.toList;
 
 public class TableBody extends DALNode {
@@ -19,7 +19,7 @@ public class TableBody extends DALNode {
     private final RowType rowType;
 
     public TableBody(List<? extends DALNode> rows) {
-        this(rows, LINE);
+        this(rows, ROW);
     }
 
     public TableBody(List<? extends DALNode> rows, InterpreterException.Position.Type type) {

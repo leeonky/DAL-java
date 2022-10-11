@@ -7,7 +7,7 @@ import com.github.leeonky.interpreter.SyntaxException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.interpreter.InterpreterException.Position.Type.LINE;
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.ROW;
 import static java.util.Optional.empty;
 
 public class TransposedTableHead extends DALNode {
@@ -32,6 +32,6 @@ public class TransposedTableHead extends DALNode {
 
     public void checkSize(TransposedRowNode row) {
         if (row.cellCount() != prefixes.size())
-            throw new SyntaxException("Different cell size", getPositionBegin(), LINE);
+            throw new SyntaxException("Different cell size", getPositionBegin(), ROW);
     }
 }

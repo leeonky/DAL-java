@@ -14,7 +14,7 @@ public class RowAssertionFailure extends java.lang.RuntimeException {
     }
 
     public DalException linePositionException(TableNode tableNode) {
-        dalException.setType(InterpreterException.Position.Type.LINE);
+        dalException.setType(InterpreterException.Position.Type.ROW);
         return dalException;
     }
 

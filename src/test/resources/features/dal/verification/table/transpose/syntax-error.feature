@@ -15,7 +15,7 @@ Feature: syntax error
     """
     #
      : >>| name | 'Tom' |
-    ^^^^^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^^^^^
          | age  |
     """
 
@@ -75,7 +75,7 @@ Feature: syntax error
     """
     #
      : | >>   |
-    ^^^^^^^^^^^
+    ^^^^^^^^^^^^
        | name | 'Tom' |
     """
     When evaluate by:
@@ -92,7 +92,7 @@ Feature: syntax error
     """
     #
      : | >>   | 0     |
-    ^^^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^^^
        | name |
     """
 
@@ -155,6 +155,5 @@ Feature: syntax error
     """
     = | >>   | 0     | =      |
       | name | 'Tom' | 'John' |
-               ^
-                       ^
+               ^       ^
     """

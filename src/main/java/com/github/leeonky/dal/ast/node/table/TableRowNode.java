@@ -13,7 +13,7 @@ import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.node.ListScopeNode.Style.ROW;
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static com.github.leeonky.dal.ast.node.TableNode.printLine;
-import static com.github.leeonky.interpreter.InterpreterException.Position.Type.CHAR;
+import static com.github.leeonky.interpreter.InterpreterException.Position.Type.COLUMN;
 import static com.github.leeonky.util.function.Extension.notAllowParallelReduce;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -100,6 +100,6 @@ public class TableRowNode extends DALNode {
 
     public DalException markPositionOnCells(DalException dalException) {
         return cells.stream().reduce(dalException, (e, cell) ->
-                e.multiPosition(cell.expression(null).getPositionBegin(), CHAR), notAllowParallelReduce());
+                e.multiPosition(cell.expression(null).getPositionBegin(), COLUMN), notAllowParallelReduce());
     }
 }

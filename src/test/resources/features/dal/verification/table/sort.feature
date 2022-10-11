@@ -45,7 +45,7 @@ Feature: sort
       | 'John' |
       | 'Lucy' |
         ^
-    ^^^^^^^^^^^^
+    ^^^^^^^^^^^^^
     """
 
   Scenario: support sort list by header from z to a

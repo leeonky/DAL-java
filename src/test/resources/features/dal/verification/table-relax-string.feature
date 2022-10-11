@@ -211,7 +211,7 @@ Feature: table-relax-string
                   ^
     """
     Examples:
-      | string | notation    |
-      | true   | ^^^^^^^^^^  |
-      | false  | ^^^^^^^^^^^ |
-      | null   | ^^^^^^^^^^  |
+      | string | notation     |
+      | true   | ^^^^^^^^^^^  |
+      | false  | ^^^^^^^^^^^^ |
+      | null   | ^^^^^^^^^^^  |

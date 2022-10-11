@@ -39,7 +39,7 @@ Feature: two dimensional array
     """
     data: ^| str1 | str2 | strA |
            | str3 | str4 |
-    ^^^^^^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^^^^^^
     """
     When use a instance of java class "Data" to evaluate:
     """
@@ -58,5 +58,5 @@ Feature: two dimensional array
     data: ^| str1  | str2 | strA |
            | error | str4 | strB |
              ^
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     """

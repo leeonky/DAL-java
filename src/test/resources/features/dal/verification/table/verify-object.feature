@@ -51,9 +51,9 @@ Feature: verify object
     """
     :    | col |
     row0 | 1   |
-    ^^^^^^^^^^^^
+    ^^^^^^^^^^^^^
          | 2   |
-    ^^^^^^^^^^^^
+    ^^^^^^^^^^^^^
     """
 
   Scenario: verify all keys in object

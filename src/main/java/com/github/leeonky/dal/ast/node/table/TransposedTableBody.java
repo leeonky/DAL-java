@@ -37,7 +37,7 @@ public class TransposedTableBody extends DALNode {
         Map<Integer, List<TransposedRowNode>> rowsByCount = rows.stream().collect(groupingBy(TransposedRowNode::cellCount));
         if (rowsByCount.size() > 1)
             throw new SyntaxException("Different cell size", new ArrayList<>(rowsByCount.values()).get(1).get(0)
-                    .getPositionBegin(), InterpreterException.Position.Type.LINE);
+                    .getPositionBegin(), InterpreterException.Position.Type.ROW);
     }
 
     public TableBody transpose(TransposedTableHead tableHead) {

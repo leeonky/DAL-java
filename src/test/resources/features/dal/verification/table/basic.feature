@@ -114,7 +114,7 @@ Feature: basic verification via table
     : | name  |
       | 'Tom' |
         ^
-    ^^^^^^^^^^^
+    ^^^^^^^^^^^^
     """
 
   Scenario: table two header and two row
@@ -169,7 +169,7 @@ Feature: basic verification via table
       | 'Tom'  | 10  |
       | 'Lucy' | 15  |
                  ^
-    ^^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^^
     """
 
   Scenario: verification table by table verification
@@ -210,7 +210,7 @@ Feature: basic verification via table
      = | name   |
      ^
        | 'John' |
-    ^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^
     """
 
   Scenario: compile table with row verification operator which has higher priority than table verification operator
@@ -251,7 +251,7 @@ Feature: basic verification via table
     : | name   |
     = | 'John' |
     ^
-    ^^^^^^^^^^^^
+    ^^^^^^^^^^^^^
     """
 
   Scenario: compile table and specified header verification operator which has higher priority than row verification operator
@@ -296,7 +296,7 @@ Feature: basic verification via table
     : | user=         |
             ^
     : | {name: 'Tom'} |
-    ^^^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^^^
     """
 
   Scenario: compile table and specified cell verification operator which has higher priority than header verification operator
@@ -341,7 +341,7 @@ Feature: basic verification via table
     : | user:           |
     : | = {name: 'Tom'} |
         ^
-    ^^^^^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^^^^^
     """
 
   Scenario: is clause after table

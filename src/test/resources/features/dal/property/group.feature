@@ -33,8 +33,7 @@ Feature: group
     And got the following notation:
     """
     <<a, c.value>><opt> 1
-           ^
-                    ^
+           ^        ^
     """
     Examples:
       | opt | text        |
@@ -130,8 +129,7 @@ Feature: group
     And got the following notation:
     """
     <<a, c.value>>= World
-           ^
-                    ^
+           ^        ^
     """
 
   Scenario: operator precedence in group node expression
@@ -186,9 +184,7 @@ Feature: group
     And got the following notation:
     """
     <<a b>> + <<c a>>= 3
-      ^
-                  ^
-                       ^
+      ^           ^    ^
     """
 
   Scenario: group node in property chain and convert to currying method arg type
@@ -278,8 +274,7 @@ Feature: group
     And got the following notation:
     """
     <<a c>> is Number
-        ^
-               ^
+        ^      ^
     """
 
   Rule: in object scope
@@ -322,8 +317,7 @@ Feature: group
       """
       value: {
         <<c a>>: 1
-          ^
-                 ^
+          ^      ^
       }
       """
 
@@ -361,8 +355,7 @@ Feature: group
       """
       list: {
         <<1 2>>: 1
-            ^
-                 ^
+            ^    ^
       }
       """
 

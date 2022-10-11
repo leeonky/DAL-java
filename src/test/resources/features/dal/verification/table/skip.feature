@@ -42,7 +42,7 @@ Feature: skip
       | ***          |
       | 'John' | 12  |
                  ^
-    ^^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^^
     """
 
   Scenario: skip row should not access any property
@@ -125,7 +125,7 @@ Feature: skip
     = | name  | age |
       | 'Tom' | 12  |
                 ^
-    ^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^
       | ...         |
     """
     And the following verification should pass:
@@ -152,7 +152,7 @@ Feature: skip
       | ...         |
       | 'Lily' | 25 |
                  ^
-    ^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^
     """
 
   Scenario: specify index before row
@@ -192,7 +192,7 @@ Feature: skip
     = | name  | age |
     0 | 'Tom' | 12  |
                 ^
-    ^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^
     2 | 'Lily' | 15 |
     """
     When evaluate by:
@@ -207,7 +207,7 @@ Feature: skip
     0 | 'Tom' | 10  |
     2 | 'Lily' | 25 |
                  ^
-    ^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^
     """
     And the following verification should pass:
     """
@@ -243,7 +243,7 @@ Feature: skip
      2 | 'Lily' | 15  |
     -2 | 'John' | 30  |
                   ^
-    ^^^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^^^
     """
 
   Scenario: ignore row should not check row index
@@ -294,6 +294,6 @@ Feature: skip
     = | name  | age |
       | ...         |
       | 'Lily' | 18 |
-    ^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^
       | ...         |
     """

@@ -91,7 +91,7 @@ Feature: schema in table
     :         | name  |
     is IdZero | 'Tom' |
        ^
-    ^^^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^^^
     """
     When the following json:
     """
@@ -149,7 +149,7 @@ Feature: schema in table
     : | obj is IdZero        |
                ^
       | {aliasOfName: 'Tom'} |
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     """
     When the following json:
     """
@@ -209,7 +209,7 @@ Feature: schema in table
     : | obj                             |
       | is IdZero: {aliasOfName: 'Tom'} |
            ^
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     """
     When the following json:
     """
