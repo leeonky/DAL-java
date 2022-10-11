@@ -11,8 +11,12 @@ import com.github.leeonky.interpreter.SourceCode;
 import com.github.leeonky.interpreter.SyntaxException;
 import com.github.leeonky.util.Classes;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.github.leeonky.util.Classes.subTypesOf;
+import static java.util.stream.Stream.concat;
 
 public class DAL {
     private final Compiler compiler = new Compiler();
@@ -56,10 +60,13 @@ public class DAL {
     }
 
     public DAL extend() {
-        Classes.subTypesOf(Extension.class, "com.github.leeonky.dal.extensions")
-                .forEach(c -> ((Extension) Classes.newInstance(c)).extend(this));
-        Classes.subTypesOf(Extension.class, "com.github.leeonky.extensions.dal")
-                .forEach(c -> ((Extension) Classes.newInstance(c)).extend(this));
+        List<Extension> collect = concat(subTypesOf(Extension.class, "com.github.leeonky.dal.extensions").stream(),
+                subTypesOf(Extension.class, "com.github.leeonky.extensions.dal").stream())
+//                TODO refactor update beanutil
+                .map(type -> (Extension) Classes.newInstance(type))
+                .sorted(Comparator.comparing(Extension::order)).collect(Collectors.toList());
+        collect
+                .forEach(e -> e.extend(this));
         return this;
     }
 }

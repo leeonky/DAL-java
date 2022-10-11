@@ -1,16 +1,15 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.AutoMappingList;
-import com.github.leeonky.dal.runtime.CurryingMethod;
-import com.github.leeonky.dal.runtime.Extension;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.*;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.ListAccessor.changeFirstIndex;
+import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
 
+@Order(BUILD_IN)
 public class Types implements Extension {
     @Override
     public void extend(DAL dal) {

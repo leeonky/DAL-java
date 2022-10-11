@@ -2,8 +2,12 @@ package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
+import com.github.leeonky.dal.runtime.Order;
 import com.github.leeonky.dal.runtime.TextBlockAttribute;
 
+import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
+
+@Order(BUILD_IN)
 public class TextBlockAttributes implements Extension {
     public static final TextBlockAttribute DEFAULT_NEW_LINE = new TextBlockAttribute() {
         @Override

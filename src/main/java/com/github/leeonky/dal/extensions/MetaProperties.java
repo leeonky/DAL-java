@@ -9,8 +9,10 @@ import com.github.leeonky.util.NoSuchAccessorException;
 
 import java.util.Set;
 
+import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
 import static java.lang.String.format;
 
+@Order(BUILD_IN)
 public class MetaProperties implements Extension {
     private static Object size(MetaData metaData) {
         Data data = metaData.evaluateInput();
