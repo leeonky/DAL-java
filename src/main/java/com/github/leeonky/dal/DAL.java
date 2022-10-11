@@ -11,11 +11,12 @@ import com.github.leeonky.interpreter.SourceCode;
 import com.github.leeonky.interpreter.SyntaxException;
 import com.github.leeonky.util.Classes;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.Classes.subTypesOf;
+import static com.github.leeonky.util.function.Extension.not;
+import static java.util.Arrays.asList;
 import static java.util.stream.Stream.concat;
 
 public class DAL {
@@ -25,8 +26,15 @@ public class DAL {
 
     public static synchronized DAL getInstance() {
         if (instance.get() == null)
-            instance.set(DALFactory.create());
+            instance.set(create());
         return instance.get();
+    }
+
+    public static DAL create(Class<?>... exceptExtensions) {
+        Iterator<DALFactory> iterator = ServiceLoader.load(DALFactory.class).iterator();
+        if (iterator.hasNext())
+            return iterator.next().newInstance();
+        return new DAL().extend(exceptExtensions);
     }
 
     public RuntimeContextBuilder getRuntimeContextBuilder() {
@@ -59,13 +67,14 @@ public class DAL {
         return String.join("\n", TextUtil.lines(expression));
     }
 
-    public DAL extend() {
-        List<Extension> collect = concat(subTypesOf(Extension.class, "com.github.leeonky.dal.extensions").stream(),
+    public DAL extend(Class<?>... excepts) {
+        Set<Class<?>> exceptExtensions = new HashSet<>(asList(excepts));
+        concat(subTypesOf(Extension.class, "com.github.leeonky.dal.extensions").stream(),
                 subTypesOf(Extension.class, "com.github.leeonky.extensions.dal").stream())
+                .filter(not(exceptExtensions::contains))
 //                TODO refactor update beanutil
                 .map(type -> (Extension) Classes.newInstance(type))
-                .sorted(Comparator.comparing(Extension::order)).collect(Collectors.toList());
-        collect
+                .sorted(Comparator.comparing(Extension::order))
                 .forEach(e -> e.extend(this));
         return this;
     }

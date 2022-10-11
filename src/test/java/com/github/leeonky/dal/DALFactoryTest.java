@@ -23,7 +23,7 @@ class DALFactoryTest {
             ServiceLoader mockServiceLoader = mock(ServiceLoader.class);
             when(mockServiceLoader.iterator()).thenReturn(singletonList(mockDALFactory).iterator());
             utilities.when(() -> ServiceLoader.load(DALFactory.class)).thenReturn(mockServiceLoader);
-            actual = DALFactory.create();
+            actual = DAL.create();
         }
 
         assertThat(actual).isEqualTo(instance);
@@ -31,6 +31,6 @@ class DALFactoryTest {
 
     @Test
     void create_DAL_by_new_when_no_DAL_factory() {
-        assertThat(DALFactory.create()).isInstanceOf(DAL.class);
+        assertThat(DAL.create()).isInstanceOf(DAL.class);
     }
 }
