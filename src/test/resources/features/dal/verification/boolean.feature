@@ -24,8 +24,10 @@ Feature: boolean
     """
     Expected to be equal to: java.lang.Boolean
     <false>
+     ^
     Actual: java.lang.Boolean
     <true>
+     ^
     """
     And got the following notation:
     """
@@ -59,8 +61,10 @@ Feature: boolean
     Then failed with the message:
     """
     Expected to be equal to: java.lang.Boolean
+                                       ^
     <true>
     Actual: java.lang.String
+                      ^
     <true>
     """
     And got the following notation:

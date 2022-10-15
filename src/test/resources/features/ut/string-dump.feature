@@ -15,6 +15,8 @@ Feature: string-dump
       """
       Expected to be equal to: java.lang.String
       <xx>
+       ^
       Actual: java.lang.String
       <\r\n\t\b\\>
+       ^
       """

@@ -68,8 +68,10 @@ Feature: number
     """
     Expected to be equal to: java.lang.Integer
     <4>
+     ^
     Actual: java.lang.Integer
     <5>
+     ^
     """
     And got the following notation:
     """
@@ -85,8 +87,10 @@ Feature: number
     Then failed with the message:
     """
     Expected to be equal to: java.lang.Double
+                                       ^
     <5.0>
     Actual: java.lang.Integer
+                      ^
     <5>
     """
     And got the following notation:

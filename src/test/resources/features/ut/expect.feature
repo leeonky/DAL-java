@@ -33,8 +33,10 @@ Feature: expect - assertion
 
     Expected to be equal to: java.lang.Integer
     <200>
+     ^
     Actual: java.lang.Integer
     <100>
+     ^
 
     The root value was:
     {
@@ -75,8 +77,10 @@ Feature: expect - assertion
 
     Expected to be equal to: java.lang.Integer
     <200>
+     ^
     Actual: java.lang.Integer
     <100>
+     ^
 
     The root value was:
     {
@@ -117,8 +121,10 @@ Feature: expect - assertion
 
     Expected to be equal to: java.lang.Integer
     <200>
+     ^
     Actual: java.lang.Integer
     <100>
+     ^
 
     The root value was:
     {

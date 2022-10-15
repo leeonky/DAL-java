@@ -103,9 +103,11 @@ Feature: list-scope-relax-string
     Then failed with the message:
     """
     Expected to be equal to: com.github.leeonky.dal.compiler.CucumberContextBak$USDollar {
+                             ^
         amount: java.lang.Integer <1>
     }
     Actual: java.lang.String
+            ^
     <$1>
     """
 

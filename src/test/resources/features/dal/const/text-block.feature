@@ -18,8 +18,10 @@ Feature: ```string```
       """
       Expected to be equal to: java.lang.String
       <>
+       ^
       Actual: java.lang.String
       <a>
+       ^
       """
       And got the following notation:
       """

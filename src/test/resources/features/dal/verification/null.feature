@@ -12,7 +12,9 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to be equal to: null
+                             ^
     Actual: <type>
+            ^
     <<message>>
     """
     Examples:
@@ -32,7 +34,9 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to be equal to: null
+                             ^
     Actual: []
+            ^
     """
 
   Scenario: empty map equals to null
@@ -47,7 +51,9 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to be equal to: null
+                             ^
     Actual: {}
+            ^
     """
 
   Scenario Outline: non null equals to null
@@ -62,7 +68,9 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to be equal to: null
+                             ^
     Actual: <type>
+            ^
     <<message>>
     """
     Examples:
@@ -108,8 +116,10 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to be equal to: <type>
+                             ^
     <<message>>
     Actual: null
+            ^
     """
     And got the following notation:
     """

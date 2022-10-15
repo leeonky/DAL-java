@@ -32,8 +32,10 @@ Feature: verify list
     """
     Expected to be equal to: java.lang.Integer
     <3>
+     ^
     Actual: java.lang.Integer
     <2>
+     ^
     """
     And got the following source code information:
     """
@@ -158,8 +160,10 @@ Feature: verify list
     """
     Expected to be equal to: java.lang.Integer
     <4>
+     ^
     Actual: java.lang.Integer
     <3>
+     ^
     """
     And got the following source code information:
     """
