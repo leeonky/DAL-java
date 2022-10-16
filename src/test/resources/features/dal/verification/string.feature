@@ -99,8 +99,10 @@ Feature: string
     """
     Expected to match: java.lang.String
     <un matched>
+     ^
     Actual: java.lang.String
     <2000-10-10T00:00:00Z> converted from: java.time.Instant
+     ^
     <2000-10-10T00:00:00Z>
     """
 
