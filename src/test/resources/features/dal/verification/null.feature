@@ -90,7 +90,9 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to match: null
+                       ^
     Actual: []
+            ^
     """
 
   Scenario: empty map matches null
@@ -105,7 +107,9 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to match: null
+                       ^
     Actual: {}
+            ^
     """
 
   Scenario Outline: null equals to non null
@@ -139,8 +143,10 @@ Feature: compare null
     Then failed with the message:
     """
     Expected to match: <type>
+                       ^
     <<message>>
     Actual: null
+            ^
     """
     Examples:
       | value | message | type              |

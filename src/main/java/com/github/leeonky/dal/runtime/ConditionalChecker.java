@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 
 public interface ConditionalChecker extends Checker {
     Checker MATCH_NULL_CHECKER = conditionalChecker(ExpectActual::actualNotNull, ExpectActual::notationMatch),
-            MATCH_NUMBER_CHECKER = conditionalChecker(ExpectActual::numberNotEquals, ExpectActual::notationMatch),
+            MATCH_NUMBER_CHECKER = conditionalChecker(ExpectActual::numberNotEquals, ExpectActual::notationNumberMatch),
             EQUALS_CHECKER = conditionalChecker(ExpectActual::objectNotEquals, ExpectActual::notationEqualTo),
             MATCH_CHECKER = matchTypeChecker(String.class, Number.class)
                     .and(matchTypeChecker(String.class, Boolean.class))

@@ -43,8 +43,10 @@ Feature: string
     """
     Expected to match: java.lang.String
     <efg>
+     ^
     Actual: java.lang.String
     <abc>
+     ^
     """
     And got the following notation:
     """

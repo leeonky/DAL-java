@@ -31,9 +31,11 @@ Feature: list as value
     """
     Expected to match: [
         java.lang.Byte <98>
+                         ^
     ]
     Actual: [
         java.lang.Byte <97>
+                         ^
     ]
     """
     And got the following notation:

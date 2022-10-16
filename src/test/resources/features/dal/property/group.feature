@@ -1,6 +1,6 @@
 Feature: group
 
-  Scenario Outline: support group with << >> and verification with same value
+  Scenario: support group with << >> and verification with same value
     Given the following json:
     """
     {
@@ -13,35 +13,56 @@ Feature: group
     """
     Then the following verification should pass:
     """
-    <<a b>><opt> 1
+    <<a b>>: 1
     """
     And the inspect should:
     """
-    <<a, b>><opt> 1
+    <<a, b>>: 1
     """
     And evaluate by:
     """
-    <<a, c.value>><opt> 1
+    <<a, c.value>>: 1
     """
     Then failed with the message:
     """
-    Expected to <text>: java.lang.Integer
+    Expected to match: java.lang.Integer
     <1>
     Actual: java.lang.Integer
     <2>
     """
     And got the following notation:
     """
-    <<a, c.value>><opt> 1
+    <<a, c.value>>: 1
            ^        ^
     """
-    Examples:
-      | opt | text  |
-      | :   | match |
-#    TODO missing test
-#      | =   | be equal to |
+    Then the following verification should pass:
+    """
+    <<a b>>= 1
+    """
+    And the inspect should:
+    """
+    <<a, b>>= 1
+    """
+    And evaluate by:
+    """
+    <<a, c.value>>= 1
+    """
+    Then failed with the message:
+    """
+    Expected to be equal to: java.lang.Integer
+    <1>
+     ^
+    Actual: java.lang.Integer
+    <2>
+     ^
+    """
+    And got the following notation:
+    """
+    <<a, c.value>>= 1
+           ^        ^
+    """
 
-  Scenario Outline: invoke property of group should also a group
+  Scenario: invoke property of group should also a group
     Given the following json:
     """
     {
@@ -58,28 +79,44 @@ Feature: group
     """
     Then the following verification should pass:
     """
-    <<a b>>.value<opt> 1
+    <<a b>>.value: 1
     """
     And the inspect should:
     """
-    <<a, b>>.value<opt> 1
+    <<a, b>>.value: 1
     """
     And evaluate by:
     """
-    <<a, c>>.value<opt> 1
+    <<a, c>>.value: 1
     """
     Then failed with the message:
     """
-    Expected to <text>: java.lang.Integer
+    Expected to match: java.lang.Integer
     <1>
     Actual: java.lang.Integer
     <2>
     """
-    Examples:
-      | opt | text  |
-      | :   | match |
-#    TODO missing test
-#      | =   | be equal to |
+    Then the following verification should pass:
+    """
+    <<a b>>.value= 1
+    """
+    And the inspect should:
+    """
+    <<a, b>>.value= 1
+    """
+    And evaluate by:
+    """
+    <<a, c>>.value= 1
+    """
+    Then failed with the message:
+    """
+    Expected to be equal to: java.lang.Integer
+    <1>
+     ^
+    Actual: java.lang.Integer
+    <2>
+     ^
+    """
 
   Scenario: group node as left operand of expression
     Given the following json:

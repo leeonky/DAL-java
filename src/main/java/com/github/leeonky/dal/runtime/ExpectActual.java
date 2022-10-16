@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.util.TextUtil;
 import com.github.leeonky.interpreter.StringWithPosition;
 
 import static java.lang.String.format;
@@ -60,16 +61,21 @@ public class ExpectActual {
     public String notationEqualTo() {
         String expected = this.expected.inspect();
         String actual = this.actual.inspect();
-        int minCount = Math.min(expected.length(), actual.length());
-        int i = 0;
-        while (i < minCount && expected.charAt(i) == actual.charAt(i))
-            i++;
-        String firstPart = new StringWithPosition(expected).position(i).result("Expected to be equal to: ");
-        return new StringWithPosition(actual).position(i).result(firstPart + "\nActual: ");
+        int position = TextUtil.differentPosition(expected, actual);
+        String firstPart = new StringWithPosition(expected).position(position).result("Expected to be equal to: ");
+        return new StringWithPosition(actual).position(position).result(firstPart + "\nActual: ");
+    }
+
+    public String notationNumberMatch() {
+        return format("Expected to match: %s\nActual: %s", expected.inspect(), actual.inspect());
     }
 
     public String notationMatch() {
-        return format("Expected to match: %s\nActual: %s", expected.inspect(), actual.inspect());
+        String expected = this.expected.inspect();
+        String actual = this.actual.inspect();
+        int position = TextUtil.differentPosition(expected, actual);
+        String firstPart = new StringWithPosition(expected).position(position).result("Expected to match: ");
+        return new StringWithPosition(actual).position(position).result(firstPart + "\nActual: ");
     }
 
     public String notationMatch(Data converted) {

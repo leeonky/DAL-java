@@ -44,8 +44,10 @@ Feature: boolean
     """
     Expected to match: java.lang.Boolean
     <false>
+     ^
     Actual: java.lang.Boolean
     <true>
+     ^
     """
     And got the following notation:
     """

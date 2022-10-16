@@ -108,8 +108,10 @@ Feature: basic verification via table
     """
     Expected to match: java.lang.String
     <Tom>
+     ^
     Actual: java.lang.String
     <John>
+     ^
     """
     And got the following notation:
     """

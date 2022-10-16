@@ -87,8 +87,10 @@ Feature: object
     """
     Expected to match: java.lang.String
     <Jack>
+     ^
     Actual: java.lang.String
     <Tom>
+     ^
     """
     And got the following notation:
     """
@@ -255,8 +257,10 @@ Feature: object
     """
     Expected to match: java.lang.String
     <002>
+       ^
     Actual: java.lang.String
     <001>
+       ^
     """
     And got the following notation:
     """

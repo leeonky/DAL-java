@@ -50,8 +50,10 @@ Feature: two dimensional array
     """
     Expected to match: java.lang.String
     <error>
+     ^
     Actual: java.lang.String
     <str3>
+     ^
     """
     And got the following notation:
     """

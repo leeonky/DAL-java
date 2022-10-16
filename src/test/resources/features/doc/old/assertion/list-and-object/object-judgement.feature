@@ -39,8 +39,10 @@ Feature: verify object
     """
     Expected to match: java.lang.String
     <unmatched>
+     ^
     Actual: java.lang.String
     <2>
+     ^
     """
     And got the following source code information:
     """
@@ -76,8 +78,10 @@ Feature: verify object
     """
     Expected to match: java.lang.String
     <unmatched>
+     ^
     Actual: java.lang.String
     <2>
+     ^
     """
     And got the following source code information:
     """

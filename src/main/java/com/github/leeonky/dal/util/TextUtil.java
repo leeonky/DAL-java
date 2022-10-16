@@ -19,4 +19,12 @@ public class TextUtil {
     public static String indent(String content) {
         return lines(content).stream().map(l -> "    " + l).collect(joining("\n"));
     }
+
+    public static int differentPosition(String expected, String actual) {
+        int minCount = Math.min(expected.length(), actual.length());
+        int i = 0;
+        while (i < minCount && expected.charAt(i) == actual.charAt(i))
+            i++;
+        return i;
+    }
 }
