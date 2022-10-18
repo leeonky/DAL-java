@@ -62,7 +62,7 @@ public class ExpectActual {
         return buildMessage("Expected to be equal to: ", expected.inspect(), actual.inspect());
     }
 
-    private String buildMessage(String prefix, String expected, String actual) {
+    public String buildMessage(String prefix, String expected, String actual) {
         int position = TextUtil.differentPosition(expected, actual);
         String firstPart = new StringWithPosition(expected).position(position).result(prefix);
         return new StringWithPosition(actual).position(position).result(firstPart + "\nActual: ");

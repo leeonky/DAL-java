@@ -168,12 +168,12 @@ public class RuntimeContextBuilder {
         return curryingMethodArgRanges.get(method);
     }
 
-    public RuntimeContextBuilder registerMatchesChecker(Class<?> type, ConditionalChecker checker) {
+    public RuntimeContextBuilder registerMatchesChecker(Class<?> type, Checker checker) {
         matchesCheckers.put(type, checker);
         return this;
     }
 
-    public RuntimeContextBuilder registerEqualsChecker(Class<?> type, ConditionalChecker checker) {
+    public RuntimeContextBuilder registerEqualsChecker(Class<?> type, Checker checker) {
         equalsCheckers.put(type, checker);
         return this;
     }
