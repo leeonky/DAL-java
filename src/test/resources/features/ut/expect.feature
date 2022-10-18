@@ -38,8 +38,7 @@ Feature: expect - assertion
     <100>
      ^
 
-    The root value was:
-    {
+    The root value was: {
         key: java.lang.Integer <100>
     }
     """
@@ -82,8 +81,7 @@ Feature: expect - assertion
     <100>
      ^
 
-    The root value was:
-    {
+    The root value was: {
         key: java.lang.Integer <100>
     }
     """
@@ -126,8 +124,7 @@ Feature: expect - assertion
     <100>
      ^
 
-    The root value was:
-    {
+    The root value was: {
         key: java.lang.Integer <100>
     }
     """

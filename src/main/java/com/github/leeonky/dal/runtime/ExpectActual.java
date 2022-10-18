@@ -59,13 +59,7 @@ public class ExpectActual {
     }
 
     public String notationEqualTo() {
-        return buildMessage("Expected to be equal to: ", expected.inspect(), actual.inspect());
-    }
-
-    public String buildMessage(String prefix, String expected, String actual) {
-        int position = TextUtil.differentPosition(expected, actual);
-        String firstPart = new StringWithPosition(expected).position(position).result(prefix);
-        return new StringWithPosition(actual).position(position).result(firstPart + "\nActual: ");
+        return verificationMessage("Expected to be equal to: ");
     }
 
     public String notationNumberMatch() {
@@ -73,13 +67,24 @@ public class ExpectActual {
     }
 
     public String notationMatch() {
-        return buildMessage("Expected to match: ", expected.inspect(), actual.inspect());
+        return verificationMessage("Expected to match: ");
+    }
+
+    public String verificationMessage(String prefix) {
+        return verificationMessage(prefix, "");
     }
 
     public String notationMatch(Data converted) {
         return converted.getInstance() == actual.getInstance() ? notationMatch()
-                : buildMessage("Expected to match: ", expected.inspect(),
-                converted.inspect() + " converted from: " + actual.inspect());
+                : verificationMessage("Expected to match: ", converted.inspect() + " converted from: ");
+    }
+
+    public String verificationMessage(String prefix, String actualPrefix) {
+        String actual = actualPrefix + this.actual.inspect();
+        String expected = this.expected.inspect();
+        int position = TextUtil.differentPosition(expected, actual);
+        String firstPart = new StringWithPosition(expected).position(position).result(prefix);
+        return new StringWithPosition(actual).position(position).result(firstPart + "\nActual: ");
     }
 
     public String cannotCompare() {
