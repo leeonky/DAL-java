@@ -7,8 +7,6 @@ import com.github.leeonky.dal.runtime.TextBlockAttribute;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.extensions.TextBlockAttributes.*;
-
 public class TextBlockAttributeListNode extends DALNode {
     final List<DALNode> attributes;
 
@@ -18,7 +16,7 @@ public class TextBlockAttributeListNode extends DALNode {
 
     public TextBlockAttribute getAttribute(RuntimeContextBuilder.DALRuntimeContext context) {
         return attributes.stream().map(TextBlockAttributeNode.class::cast).map(node -> node.extractTextAttribute(context))
-                .reduce(DEFAULT_NEW_LINE.merge(DEFAULT_END_OF_LINE).merge(DEFAULT_CONTINUE_CHAR), TextBlockAttribute::merge);
+                .reduce(TextBlockAttribute.DEFAULT, TextBlockAttribute::merge);
     }
 
     @Override
