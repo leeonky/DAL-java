@@ -27,7 +27,8 @@ public class NotationAttributeNode extends DALNode {
     }
 
     public Object text(List<Character> content, RuntimeContextBuilder.DALRuntimeContext context) {
-        return attributeList.getAttribute(context).format(join(content).substring(notation.getIndent())
-                .replace("\n" + String.join("", nCopies(notation.getIndent(), " ")), "\n"));
+        String raw = join(content).substring(notation.getIndent())
+                .replace("\n" + String.join("", nCopies(notation.getIndent(), " ")), "\n");
+        return attributeList.getFormatter(context).format(raw);
     }
 }

@@ -2,7 +2,7 @@ package com.github.leeonky.dal.ast.node.text;
 
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.dal.runtime.TextBlockAttribute;
+import com.github.leeonky.dal.runtime.TextFormatter;
 
 public class TextBlockAttributeNode extends DALNode {
     final String name;
@@ -16,7 +16,7 @@ public class TextBlockAttributeNode extends DALNode {
         return name;
     }
 
-    public TextBlockAttribute extractTextAttribute(RuntimeContextBuilder.DALRuntimeContext context) {
-        return context.getAttribute(name, getPositionBegin());
+    public TextFormatter extractTextFormatter(RuntimeContextBuilder.DALRuntimeContext context) {
+        return context.fetchFormatter(name, getPositionBegin());
     }
 }

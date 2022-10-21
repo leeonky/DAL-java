@@ -5,18 +5,18 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class TextBlockAttributeFactoryTest {
+class TextFormatterTest {
 
     @Nested
     class NewLine {
         TextFormatter textFormatter = new TextFormatter() {
             @Override
-            protected Attribute attribute(Attribute attribute) {
+            protected TextAttribute attribute(TextAttribute attribute) {
                 return attribute.newLine("new-line");
             }
 
             @Override
-            protected Object format(Object content, Attribute attribute) {
+            protected Object format(Object content, TextAttribute attribute) {
                 return attribute.newLine();
             }
         };
@@ -37,7 +37,7 @@ class TextBlockAttributeFactoryTest {
         void replace_in_merged_formatter() {
             TextFormatter overrideNewline = new TextFormatter() {
                 @Override
-                protected Attribute attribute(Attribute attribute) {
+                protected TextAttribute attribute(TextAttribute attribute) {
                     return attribute.newLine("override-new-line");
                 }
             };
@@ -50,12 +50,12 @@ class TextBlockAttributeFactoryTest {
     class EndOfLine {
         TextFormatter textFormatter = new TextFormatter() {
             @Override
-            protected Attribute attribute(Attribute attribute) {
+            protected TextAttribute attribute(TextAttribute attribute) {
                 return attribute.endOfLine("end-of-line");
             }
 
             @Override
-            protected Object format(Object content, Attribute attribute) {
+            protected Object format(Object content, TextAttribute attribute) {
                 return attribute.endOfLine();
             }
         };
@@ -76,7 +76,7 @@ class TextBlockAttributeFactoryTest {
         void replace_in_merged_formatter() {
             TextFormatter overrideNewline = new TextFormatter() {
                 @Override
-                protected Attribute attribute(Attribute attribute) {
+                protected TextAttribute attribute(TextAttribute attribute) {
                     return attribute.endOfLine("override-enf-of-line");
                 }
             };
@@ -89,12 +89,12 @@ class TextBlockAttributeFactoryTest {
     class Continuation {
         TextFormatter textFormatter = new TextFormatter() {
             @Override
-            protected Attribute attribute(Attribute attribute) {
+            protected TextAttribute attribute(TextAttribute attribute) {
                 return attribute.continuation("continuation");
             }
 
             @Override
-            protected Object format(Object content, Attribute attribute) {
+            protected Object format(Object content, TextAttribute attribute) {
                 return attribute.continuation();
             }
         };
@@ -115,7 +115,7 @@ class TextBlockAttributeFactoryTest {
         void replace_in_merged_formatter() {
             TextFormatter overrideNewline = new TextFormatter() {
                 @Override
-                protected Attribute attribute(Attribute attribute) {
+                protected TextAttribute attribute(TextAttribute attribute) {
                     return attribute.continuation("override-continuation");
                 }
             };
@@ -132,14 +132,14 @@ class TextBlockAttributeFactoryTest {
         void pipeline_format_method() {
             TextFormatter textFormatter = new TextFormatter() {
                 @Override
-                protected Object format(Object content, Attribute attribute) {
+                protected Object format(Object content, TextAttribute attribute) {
                     return content.toString().toLowerCase();
                 }
             };
 
             TextFormatter next = new TextFormatter() {
                 @Override
-                protected Object format(Object content, Attribute attribute) {
+                protected Object format(Object content, TextAttribute attribute) {
                     String s = content.toString();
                     return s.substring(0, 1).toUpperCase() + s.substring(1);
                 }
@@ -147,68 +147,6 @@ class TextBlockAttributeFactoryTest {
 
 
             assertThat(textFormatter.merge(next).format("HELLO")).isEqualTo("Hello");
-        }
-    }
-
-    private static class TextFormatter {
-        protected Object format(Object content, Attribute attribute) {
-            return content;
-        }
-
-        protected Attribute attribute(Attribute attribute) {
-            return attribute;
-        }
-
-        final public Object format(Object content) {
-            return format(content, attribute(new Attribute("", "", "")));
-        }
-
-        final public TextFormatter merge(TextFormatter another) {
-            return new TextFormatter() {
-                @Override
-                protected Attribute attribute(Attribute attribute) {
-                    return another.attribute(TextFormatter.this.attribute(attribute));
-                }
-
-                @Override
-                protected Object format(Object content, Attribute attribute) {
-                    return another.format(TextFormatter.this.format(content, attribute), attribute);
-                }
-            };
-        }
-    }
-
-    private static class Attribute {
-        private final String newLine, endOfLine, continuation;
-
-        private Attribute(String newLine, String endOfLine, String continuation) {
-            this.newLine = newLine;
-            this.endOfLine = endOfLine;
-            this.continuation = continuation;
-        }
-
-        public String newLine() {
-            return newLine;
-        }
-
-        public Attribute newLine(String newLine) {
-            return new Attribute(newLine, endOfLine, continuation);
-        }
-
-        public String endOfLine() {
-            return endOfLine;
-        }
-
-        public Attribute endOfLine(String endOfLine) {
-            return new Attribute(newLine, endOfLine, continuation);
-        }
-
-        public Attribute continuation(String continuation) {
-            return new Attribute(newLine, endOfLine, continuation);
-        }
-
-        public String continuation() {
-            return continuation;
         }
     }
 }

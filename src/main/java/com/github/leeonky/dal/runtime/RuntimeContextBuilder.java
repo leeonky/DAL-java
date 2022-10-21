@@ -46,7 +46,7 @@ public class RuntimeContextBuilder {
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
-    private final Map<String, TextBlockAttribute> textAttributeMap = new LinkedHashMap<>();
+    private final Map<String, TextFormatter> textFormatterMap = new LinkedHashMap<>();
     private Converter converter = Converter.getInstance();
     private final ClassKeyMap<Checker> equalsCheckers = new ClassKeyMap<>();
     private final ClassKeyMap<Checker> matchesCheckers = new ClassKeyMap<>();
@@ -57,8 +57,8 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerTextBlockAttribute(String name, TextBlockAttribute attribute) {
-        textAttributeMap.put(name, attribute);
+    public RuntimeContextBuilder registerTextFormatter(String name, TextFormatter formatter) {
+        textFormatterMap.put(name, formatter);
         return this;
     }
 
@@ -338,10 +338,10 @@ public class RuntimeContextBuilder {
             });
         }
 
-        public TextBlockAttribute getAttribute(String name, int position) {
-            return textAttributeMap.computeIfAbsent(name, attribute -> {
-                throw new SyntaxException(format("Invalid text block attribute `%s`, all supported attributes are:\n%s",
-                        attribute, textAttributeMap.entrySet().stream().map(e -> format("  %s:\n    %s",
+        public TextFormatter fetchFormatter(String name, int position) {
+            return textFormatterMap.computeIfAbsent(name, attribute -> {
+                throw new SyntaxException(format("Invalid text formatter `%s`, all supported formatters are:\n%s",
+                        attribute, textFormatterMap.entrySet().stream().map(e -> format("  %s:\n    %s",
                                 e.getKey(), e.getValue().description())).collect(joining("\n"))), position);
             });
         }

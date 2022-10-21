@@ -171,7 +171,7 @@ Feature: ```string```
       """
       Then failed with the message:
       """
-      Invalid text block attribute `not-exist`, all supported attributes are:
+      Invalid text formatter `not-exist`, all supported formatters are:
         LF:
           use \n as new line
         CR:
