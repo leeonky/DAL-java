@@ -32,16 +32,16 @@ public class Assertions {
         return new Assertions(input);
     }
 
-    public <T> T should(String dalExpression) {
+    public Assertions should(String dalExpression) {
         return should("", dalExpression);
     }
 
     public <T> T get(String dalExpression) {
-        return should(dalExpression);
+        return get(dalExpression);
     }
 
-    public <T> T should(String prefix, String verification) {
-        String fullCode = prefix + verification;
+    public <T> T get(String prefix, String dalExpression) {
+        String fullCode = prefix + dalExpression;
         try {
             return dal.evaluate(input, fullCode);
         } catch (InterpreterException e) {
@@ -50,6 +50,11 @@ public class Assertions {
                 detailMessage += "\n\nThe root value was: " + dal.getRuntimeContextBuilder().build(null).wrap(input).inspect();
             throw new AssertionError(detailMessage);
         }
+    }
+
+    public Assertions should(String prefix, String verification) {
+        get(prefix, verification);
+        return this;
     }
 
     public void exact(String verification) {

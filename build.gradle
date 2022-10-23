@@ -11,6 +11,10 @@ buildscript {
     }
 }
 
+def dep(p, version) {
+    return gradle.projects.contains(p) ? project(p) : "com.github.leeonky${p}:${version}"
+}
+
 plugins {
     id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.8.2'
@@ -36,7 +40,7 @@ task sourcesJar(type: Jar) {
 }
 
 group = 'com.github.leeonky'
-version = '0.3.15' + System.env.VERSION_SCOPE
+version = '0.3.16' + System.env.VERSION_SCOPE
 sourceCompatibility = 1.8
 
 jacocoTestReport {
@@ -51,8 +55,8 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.leeonky:bean-util:0.6.2'
-    compile 'com.github.leeonky:interpreter-core:0.0.14'
+    compile dep(':bean-util', '0.6.2')
+    compile dep(':interpreter-core', '0.0.14')
 
     testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'
     testImplementation 'org.assertj:assertj-core:3.21.0'
