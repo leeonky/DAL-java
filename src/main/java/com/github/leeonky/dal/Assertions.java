@@ -37,7 +37,7 @@ public class Assertions {
     }
 
     public <T> T get(String dalExpression) {
-        return get(dalExpression);
+        return get("", dalExpression);
     }
 
     public <T> T get(String prefix, String dalExpression) {
