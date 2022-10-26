@@ -2,7 +2,9 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
-import com.github.leeonky.dal.runtime.inspector.*;
+import com.github.leeonky.dal.runtime.inspector.Inspector;
+import com.github.leeonky.dal.runtime.inspector.InspectorBk;
+import com.github.leeonky.dal.runtime.inspector.InspectorBuilderBk;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.dal.type.Schema;
@@ -50,7 +52,8 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<Checker> matchesCheckers = new ClassKeyMap<>();
     @Deprecated
     private final ClassKeyMap<InspectorBuilderBk> inspectorBuildersBk = new ClassKeyMap<>();
-    private final ClassKeyMap<InspectorFactory> inspectorFactories = new ClassKeyMap<>();
+
+    private final ClassKeyMap<Inspector> inspectors = new ClassKeyMap<>();
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -179,20 +182,13 @@ public class RuntimeContextBuilder {
     }
 
     @Deprecated
-    public RuntimeContextBuilder registerValueInspector(Class<?>... types) {
-        for (Class<?> type : types)
-            registerInspectorBk(type, ValueInspectorBk::new);
-        return this;
-    }
-
-    @Deprecated
     public RuntimeContextBuilder registerInspectorBk(Class<?> type, InspectorBuilderBk builder) {
         inspectorBuildersBk.put(type, builder);
         return this;
     }
 
-    public RuntimeContextBuilder registerInspector(Class<?> type, InspectorFactory factory) {
-        inspectorFactories.put(type, factory);
+    public RuntimeContextBuilder registerInspector(Class<?> type, Inspector inspector) {
+        inspectors.put(type, inspector);
         return this;
     }
 
@@ -368,17 +364,14 @@ public class RuntimeContextBuilder {
         }
 
         public Inspector fetchInspector(Data data) {
-            return inspectorFactories.tryGetData(data.getInstance())
-                    .filter(inspectorFactory -> inspectorFactory.matches(data))
-                    .map(inspectorFactory -> inspectorFactory.create(data))
-                    .orElseGet(() -> {
-                        if (data.isNull())
-                            return (_data, context) -> "null";
-                        else if (data.isList())
-                            return ListInspector.INSTANCE;
-                        else
-                            return MapInspector.INSTANCE;
-                    });
+            return inspectors.tryGetData(data.getInstance()).orElseGet(() -> {
+                if (data.isNull())
+                    return (_data, context) -> "null";
+                else if (data.isList())
+                    return Inspector.LIST_INSPECTOR;
+                else
+                    return Inspector.MAP_INSPECTOR;
+            });
         }
     }
 }

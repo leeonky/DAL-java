@@ -4,6 +4,11 @@ import com.github.leeonky.dal.runtime.Data;
 
 //TODO refactor
 public interface Inspector {
+    ValueInspector VALUE_INSPECTOR = new ValueInspector();
+    StringInspector STRING_INSPECTOR = new StringInspector();
+    MapInspector MAP_INSPECTOR = new MapInspector();
+    ListInspector LIST_INSPECTOR = new ListInspector();
+
     String inspect(Data data, InspectorContext context);
 
     default String dump(Data data, InspectorContext context) {

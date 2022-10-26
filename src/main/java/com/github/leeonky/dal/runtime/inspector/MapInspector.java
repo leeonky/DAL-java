@@ -9,9 +9,8 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.joining;
 
+//TODO refactor
 public class MapInspector implements Inspector.Cacheable {
-
-    public static final MapInspector INSTANCE = new MapInspector();
 
     @Override
     public String cachedInspect(Data data, InspectorContext context) {

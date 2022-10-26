@@ -12,7 +12,6 @@ import static java.util.stream.Collectors.joining;
 
 //TODO refactor
 public class ListInspector implements Inspector.Cacheable {
-    public static final ListInspector INSTANCE = new ListInspector();
 
     @Override
     public String cachedInspect(Data data, InspectorContext context) {
