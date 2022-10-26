@@ -3,8 +3,6 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.runtime.inspector.Inspector;
-import com.github.leeonky.dal.runtime.inspector.InspectorBk;
-import com.github.leeonky.dal.runtime.inspector.InspectorBuilderBk;
 import com.github.leeonky.dal.runtime.inspector.InspectorFactory;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
@@ -51,9 +49,6 @@ public class RuntimeContextBuilder {
     private Converter converter = Converter.getInstance();
     private final ClassKeyMap<Checker> equalsCheckers = new ClassKeyMap<>();
     private final ClassKeyMap<Checker> matchesCheckers = new ClassKeyMap<>();
-    @Deprecated
-    private final ClassKeyMap<InspectorBuilderBk> inspectorBuildersBk = new ClassKeyMap<>();
-
     private final ClassKeyMap<InspectorFactory> inspectorFactories = new ClassKeyMap<>();
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
@@ -179,12 +174,6 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerEqualsChecker(Class<?> type, Checker checker) {
         equalsCheckers.put(type, checker);
-        return this;
-    }
-
-    @Deprecated
-    public RuntimeContextBuilder registerInspectorBk(Class<?> type, InspectorBuilderBk builder) {
-        inspectorBuildersBk.put(type, builder);
         return this;
     }
 
@@ -358,10 +347,6 @@ public class RuntimeContextBuilder {
         public Checker fetchMatchesChecker(ExpectActual expectActual) {
             return matchesCheckers.tryGetData(expectActual.getExpectInstance())
                     .orElseGet(expectActual::defaultMatchesChecker);
-        }
-
-        public InspectorBk fetchInspectorBk(Data data) {
-            return inspectorBuildersBk.tryGetData(data.getInstance()).orElseGet(() -> data1 -> InspectorBk.defaultInspectorBk(data1, this)).apply(data);
         }
 
         public Inspector fetchInspector(Data data) {

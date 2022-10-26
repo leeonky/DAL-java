@@ -18,18 +18,18 @@ public class MapInspector implements Inspector.Cacheable {
         Set<Object> fieldNames = getFieldNames(data);
         if (fieldNames.isEmpty())
             return type + "{}";
-        return type + fieldNames.stream().map(fieldName -> dumpEntry(data, context.getPath(), context.getCache(), fieldName)).map(TextUtil::indent)
+        return type + fieldNames.stream().map(fieldName -> dumpEntry(data, fieldName, context)).map(TextUtil::indent)
                 .collect(joining(",\n", "{\n", "\n}"));
     }
 
-    private String dumpEntry(Data data, String path, InspectorCache cache, Object o) {
+    private String dumpEntry(Data data, Object o, InspectorContext context) {
         Data value;
         try {
             value = data.getValue(o);
         } catch (Exception e) {
             return key(o) + ": *throw* " + e;
         }
-        return key(o) + ": " + value.buildInspector().dump(path + "." + o, cache);
+        return key(o) + ": " + context.sub(o).dump(value);
     }
 
     protected String key(Object o) {
