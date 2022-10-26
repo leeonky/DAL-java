@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.runtime.inspector;
 
-public interface TypeValueInspector extends Inspector {
+@Deprecated
+public interface TypeValueInspectorBk extends InspectorBk {
     String inspectType();
 
     String inspectValue();

@@ -3,11 +3,12 @@ package com.github.leeonky.dal.runtime.inspector;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.util.Classes;
 
-public class ValueInspector implements TypeValueInspector {
+@Deprecated
+public class ValueInspectorBk implements TypeValueInspectorBk {
 
     private final Data data;
 
-    public ValueInspector(Data data) {
+    public ValueInspectorBk(Data data) {
         this.data = data;
     }
 

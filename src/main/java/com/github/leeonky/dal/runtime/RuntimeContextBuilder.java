@@ -2,9 +2,7 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
-import com.github.leeonky.dal.runtime.inspector.Inspector;
-import com.github.leeonky.dal.runtime.inspector.InspectorBuilder;
-import com.github.leeonky.dal.runtime.inspector.ValueInspector;
+import com.github.leeonky.dal.runtime.inspector.*;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.dal.type.Schema;
@@ -50,7 +48,9 @@ public class RuntimeContextBuilder {
     private Converter converter = Converter.getInstance();
     private final ClassKeyMap<Checker> equalsCheckers = new ClassKeyMap<>();
     private final ClassKeyMap<Checker> matchesCheckers = new ClassKeyMap<>();
-    private final ClassKeyMap<InspectorBuilder> inspectorBuilders = new ClassKeyMap<>();
+    @Deprecated
+    private final ClassKeyMap<InspectorBuilderBk> inspectorBuildersBk = new ClassKeyMap<>();
+    private final ClassKeyMap<InspectorFactory> inspectorFactories = new ClassKeyMap<>();
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -178,14 +178,21 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    @Deprecated
     public RuntimeContextBuilder registerValueInspector(Class<?>... types) {
         for (Class<?> type : types)
-            registerInspector(type, ValueInspector::new);
+            registerInspectorBk(type, ValueInspectorBk::new);
         return this;
     }
 
-    public RuntimeContextBuilder registerInspector(Class<?> type, InspectorBuilder builder) {
-        inspectorBuilders.put(type, builder);
+    @Deprecated
+    public RuntimeContextBuilder registerInspectorBk(Class<?> type, InspectorBuilderBk builder) {
+        inspectorBuildersBk.put(type, builder);
+        return this;
+    }
+
+    public RuntimeContextBuilder registerInspector(Class<?> type, InspectorFactory factory) {
+        inspectorFactories.put(type, factory);
         return this;
     }
 
@@ -356,8 +363,22 @@ public class RuntimeContextBuilder {
                     .orElseGet(expectActual::defaultMatchesChecker);
         }
 
+        public InspectorBk fetchInspectorBk(Data data) {
+            return inspectorBuildersBk.tryGetData(data.getInstance()).orElseGet(() -> data1 -> InspectorBk.defaultInspectorBk(data1, this)).apply(data);
+        }
+
         public Inspector fetchInspector(Data data) {
-            return inspectorBuilders.tryGetData(data.getInstance()).orElseGet(() -> Inspector::defaultInspector).apply(data);
+            return inspectorFactories.tryGetData(data.getInstance())
+                    .filter(inspectorFactory -> inspectorFactory.matches(data))
+                    .map(inspectorFactory -> inspectorFactory.create(data))
+                    .orElseGet(() -> {
+                        if (data.isNull())
+                            return (_data, context) -> "null";
+                        else if (data.isList())
+                            return ListInspector.INSTANCE;
+                        else
+                            return MapInspector.INSTANCE;
+                    });
         }
     }
 }

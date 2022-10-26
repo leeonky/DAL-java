@@ -2,7 +2,7 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.dal.runtime.inspector.Inspector;
+import com.github.leeonky.dal.runtime.inspector.InspectorBk;
 import com.github.leeonky.dal.runtime.inspector.InspectorCache;
 
 import java.util.*;
@@ -18,7 +18,9 @@ import static java.util.stream.StreamSupport.stream;
 
 public class Data {
     private final SchemaType schemaType;
-    final DALRuntimeContext context;
+    //    TODO private
+    @Deprecated
+    public final DALRuntimeContext context;
     private final Object instance;
     private List<Object> listValue;
     private Comparator<Object> listComparator = SortGroupNode.NOP_COMPARATOR;
@@ -154,8 +156,8 @@ public class Data {
         return buildInspector().dump("root", InspectorCache.cache());
     }
 
-    public Inspector buildInspector() {
-        return context.fetchInspector(this);
+    public InspectorBk buildInspector() {
+        return context.fetchInspectorBk(this);
     }
 
     public <T> T newBlockScope(Supplier<T> supplier) {

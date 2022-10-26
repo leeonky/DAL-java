@@ -9,22 +9,21 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.joining;
 
-public class MapInspector extends CacheableInspector {
-    public MapInspector(Data data) {
-        super(data);
-    }
+public class MapInspector implements Inspector.Cacheable {
+
+    public static final MapInspector INSTANCE = new MapInspector();
 
     @Override
-    public String cachedInspect(String path, InspectorCache cache) {
-        String type = type();
-        Set<Object> fieldNames = getFieldNames();
+    public String cachedInspect(Data data, InspectorContext context) {
+        String type = type(data);
+        Set<Object> fieldNames = getFieldNames(data);
         if (fieldNames.isEmpty())
             return type + "{}";
-        return type + fieldNames.stream().map(o -> dumpEntry(path, cache, o)).map(TextUtil::indent)
+        return type + fieldNames.stream().map(fieldName -> dumpEntry(data, context.getPath(), context.getCache(), fieldName)).map(TextUtil::indent)
                 .collect(joining(",\n", "{\n", "\n}"));
     }
 
-    private String dumpEntry(String path, InspectorCache cache, Object o) {
+    private String dumpEntry(Data data, String path, InspectorCache cache, Object o) {
         Data value;
         try {
             value = data.getValue(o);
@@ -38,11 +37,11 @@ public class MapInspector extends CacheableInspector {
         return String.valueOf(o);
     }
 
-    protected Set<Object> getFieldNames() {
+    protected Set<Object> getFieldNames(Data data) {
         return data.getFieldNames();
     }
 
-    protected String type() {
+    protected String type(Data data) {
         return data.getInstance() instanceof Map ? "" : Classes.getClassName(data.getInstance()) + " ";
     }
 }

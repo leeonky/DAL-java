@@ -3,7 +3,7 @@ package com.github.leeonky.dal.extensions;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.Order;
-import com.github.leeonky.dal.runtime.inspector.StringInspector;
+import com.github.leeonky.dal.runtime.inspector.StringInspectorBk;
 
 import java.lang.reflect.Type;
 import java.time.*;
@@ -21,6 +21,6 @@ public class Inspectors implements Extension {
                 UUID.class, Instant.class, Date.class, LocalTime.class, LocalDate.class, LocalDateTime.class,
                 OffsetDateTime.class, ZonedDateTime.class, YearMonth.class);
 
-        dal.getRuntimeContextBuilder().registerInspector(CharSequence.class, StringInspector::new);
+        dal.getRuntimeContextBuilder().registerInspectorBk(CharSequence.class, StringInspectorBk::new);
     }
 }
