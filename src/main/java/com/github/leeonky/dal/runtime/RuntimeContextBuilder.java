@@ -5,6 +5,7 @@ import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.runtime.inspector.Inspector;
 import com.github.leeonky.dal.runtime.inspector.InspectorBk;
 import com.github.leeonky.dal.runtime.inspector.InspectorBuilderBk;
+import com.github.leeonky.dal.runtime.inspector.InspectorFactory;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.dal.type.Schema;
@@ -53,7 +54,7 @@ public class RuntimeContextBuilder {
     @Deprecated
     private final ClassKeyMap<InspectorBuilderBk> inspectorBuildersBk = new ClassKeyMap<>();
 
-    private final ClassKeyMap<Inspector> inspectors = new ClassKeyMap<>();
+    private final ClassKeyMap<InspectorFactory> inspectorFactories = new ClassKeyMap<>();
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -187,8 +188,8 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerInspector(Class<?> type, Inspector inspector) {
-        inspectors.put(type, inspector);
+    public RuntimeContextBuilder registerInspector(Class<?> type, InspectorFactory factory) {
+        inspectorFactories.put(type, factory);
         return this;
     }
 
@@ -364,13 +365,12 @@ public class RuntimeContextBuilder {
         }
 
         public Inspector fetchInspector(Data data) {
-            return inspectors.tryGetData(data.getInstance()).orElseGet(() -> {
+            return inspectorFactories.tryGetData(data.getInstance()).map(factory -> factory.apply(data)).orElseGet(() -> {
                 if (data.isNull())
                     return (_data, context) -> "null";
                 else if (data.isList())
                     return Inspector.LIST_INSPECTOR;
-                else
-                    return Inspector.MAP_INSPECTOR;
+                return Inspector.MAP_INSPECTOR;
             });
         }
     }

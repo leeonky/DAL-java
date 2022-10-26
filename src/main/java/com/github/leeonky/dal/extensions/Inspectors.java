@@ -22,12 +22,12 @@ public class Inspectors implements Extension {
         registerValueTypes(dal, Type.class, Number.class, Boolean.class, UUID.class, Instant.class, Date.class,
                 LocalTime.class, LocalDate.class, LocalDateTime.class, OffsetDateTime.class, ZonedDateTime.class,
                 YearMonth.class);
-        dal.getRuntimeContextBuilder().registerInspector(CharSequence.class, STRING_INSPECTOR);
+        dal.getRuntimeContextBuilder().registerInspector(CharSequence.class, data -> STRING_INSPECTOR);
     }
 
     private void registerValueTypes(DAL dal, Class<?>... types) {
         RuntimeContextBuilder builder = dal.getRuntimeContextBuilder();
         for (Class<?> type : types)
-            builder.registerInspector(type, VALUE_INSPECTOR);
+            builder.registerInspector(type, data -> VALUE_INSPECTOR);
     }
 }
