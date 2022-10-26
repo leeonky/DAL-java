@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import java.util.Objects;
 import java.util.Set;
 
 public interface PropertyAccessor<T> {
@@ -13,5 +14,7 @@ public interface PropertyAccessor<T> {
 
     Set<Object> getPropertyNames(T instance);
 
-    boolean isNull(T instance);
+    default boolean isNull(T instance) {
+        return Objects.equals(instance, null);
+    }
 }

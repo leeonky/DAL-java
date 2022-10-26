@@ -16,9 +16,4 @@ class MapPropertyAccessor implements PropertyAccessor<Map<?, ?>> {
     public Set<Object> getPropertyNames(Map<?, ?> instance) {
         return new LinkedHashSet<>(instance.keySet());
     }
-
-    @Override
-    public boolean isNull(Map<?, ?> instance) {
-        return instance == null;
-    }
 }
