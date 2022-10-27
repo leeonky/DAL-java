@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-//TODO move to context
 public class InspectorCache {
     private final Map<InspectorCacheKey, String> caches = new HashMap<>();
 

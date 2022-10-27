@@ -3,6 +3,8 @@ package com.github.leeonky.dal.runtime.inspector;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
+import java.util.function.Supplier;
+
 import static java.lang.String.format;
 
 public class InspectorContext {
@@ -16,19 +18,10 @@ public class InspectorContext {
         this.dalRuntimeContext = dalRuntimeContext;
     }
 
-    //    TODO private
-    @Deprecated
     public String getPath() {
         return path;
     }
 
-    //    TODO private
-    @Deprecated
-    public InspectorCache getCache() {
-        return cache;
-    }
-
-    @Deprecated
     public DALRuntimeContext getDalRuntimeContext() {
         return dalRuntimeContext;
     }
@@ -47,5 +40,9 @@ public class InspectorContext {
 
     public InspectorContext sub(Object property) {
         return new InspectorContext(format("%s.%s", path, property), cache, dalRuntimeContext);
+    }
+
+    public String cached(Data data, Supplier<String> action) {
+        return cache.act(path, data, action);
     }
 }
