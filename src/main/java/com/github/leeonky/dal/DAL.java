@@ -72,8 +72,7 @@ public class DAL {
         concat(subTypesOf(Extension.class, "com.github.leeonky.dal.extensions").stream(),
                 subTypesOf(Extension.class, "com.github.leeonky.extensions.dal").stream())
                 .filter(not(exceptExtensions::contains))
-//                TODO refactor update beanutil
-                .map(type -> (Extension) Classes.newInstance(type))
+                .map(Classes::newInstance)
                 .sorted(Comparator.comparing(Extension::order))
                 .forEach(e -> e.extend(this));
         return this;

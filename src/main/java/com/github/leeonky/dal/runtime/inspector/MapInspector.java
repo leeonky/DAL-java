@@ -9,27 +9,28 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.joining;
 
-//TODO refactor
 public class MapInspector implements Inspector.Cacheable {
 
     @Override
     public String cachedInspect(Data data, InspectorContext context) {
-        String type = type(data);
         Set<Object> fieldNames = getFieldNames(data);
-        if (fieldNames.isEmpty())
-            return type + "{}";
-        return type + fieldNames.stream().map(fieldName -> dumpEntry(data, fieldName, context)).map(TextUtil::indent)
-                .collect(joining(",\n", "{\n", "\n}"));
+        return type(data) + (fieldNames.isEmpty() ? "{}" : fieldNames.stream()
+                .map(fieldName -> dumpEntry(key(fieldName), dumpField(data, fieldName, context)))
+                .map(TextUtil::indent).collect(joining(",\n", "{\n", "\n}")));
     }
 
-    private String dumpEntry(Data data, Object o, InspectorContext context) {
+    protected String dumpEntry(String key, String value) {
+        return key + ": " + value;
+    }
+
+    protected String dumpField(Data data, Object field, InspectorContext context) {
         Data value;
         try {
-            value = data.getValue(o);
+            value = data.getValue(field);
         } catch (Exception e) {
-            return key(o) + ": *throw* " + e;
+            return "*throw* " + e;
         }
-        return key(o) + ": " + context.sub(o).dump(value);
+        return context.sub(field).dump(value);
     }
 
     protected String key(Object o) {

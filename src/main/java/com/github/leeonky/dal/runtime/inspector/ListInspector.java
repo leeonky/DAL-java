@@ -10,17 +10,18 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
-//TODO refactor
 public class ListInspector implements Inspector.Cacheable {
 
     @Override
     public String cachedInspect(Data data, InspectorContext context) {
-        List<Data> dataList = data.getDataList();
-        String type = type(data);
+        return type(data) + body(context, data.getDataList());
+    }
+
+    private String body(InspectorContext context, List<Data> dataList) {
         if (dataList.isEmpty())
-            return type + "[]";
+            return "[]";
         AtomicInteger index = new AtomicInteger(0);
-        return type + dataList.stream().map(subData -> context.index(index.getAndIncrement()).dump(subData))
+        return dataList.stream().map(subData -> context.index(index.getAndIncrement()).dump(subData))
                 .map(TextUtil::indent).collect(joining(",\n", "[\n", "\n]"));
     }
 

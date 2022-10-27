@@ -18,9 +18,7 @@ import static java.util.stream.StreamSupport.stream;
 
 public class Data {
     private final SchemaType schemaType;
-    //    TODO private
-    @Deprecated
-    public final DALRuntimeContext context;
+    private final DALRuntimeContext context;
     private final Object instance;
     private List<Object> listValue;
     private Comparator<Object> listComparator = SortGroupNode.NOP_COMPARATOR;
