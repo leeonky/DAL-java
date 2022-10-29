@@ -32,6 +32,7 @@ public class InspectorContextBk {
         return dalRuntimeContext.fetchInspector(data).inspect(data, this);
     }
 
+    @Deprecated
     public String dump(Data data) {
         return dalRuntimeContext.fetchInspector(data).dump(data, this);
     }
@@ -59,6 +60,10 @@ public class InspectorContextBk {
 
     public String cached(Data data, Supplier<String> action) {
         return cache.act(path, data, action, this);
+    }
+
+    public void cached(Data data, Runnable runnable) {
+        cache.act(path, data, dumpingContext(), runnable);
     }
 
     @Deprecated

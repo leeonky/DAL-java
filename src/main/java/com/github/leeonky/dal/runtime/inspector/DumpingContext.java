@@ -16,13 +16,14 @@ public class DumpingContext extends InspectorContextBk {
         super(path, cache, dalRuntimeContext);
     }
 
-    public void append(String s) {
+    public DumpingContext append(String s) {
         if (thens.length() != 0) {
             stringBuilder.append(thens);
             thens = new StringBuilder();
         }
         stringBuilder.append(s);
         length = stringBuilder.length();
+        return this;
     }
 
     public String content() {
@@ -38,10 +39,10 @@ public class DumpingContext extends InspectorContextBk {
         return this;
     }
 
-    public DumpingContext indent(int i) {
+    public DumpingContext indent() {
         DumpingContext dumpingContext = new DumpingContext(path, cache, dalRuntimeContext);
         dumpingContext.stringBuilder = stringBuilder;
-        dumpingContext.indent = indent + i;
+        dumpingContext.indent = indent + 1;
         dumpingContext.thens = thens;
         thens = new StringBuilder();
         return dumpingContext;
@@ -49,5 +50,11 @@ public class DumpingContext extends InspectorContextBk {
 
     public boolean hasContent() {
         return length != stringBuilder.length();
+    }
+
+    public DumpingContext optionalNewLine() {
+        if (hasContent())
+            newLine();
+        return this;
     }
 }

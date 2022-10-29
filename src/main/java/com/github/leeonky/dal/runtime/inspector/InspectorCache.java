@@ -16,6 +16,7 @@ public class InspectorCache {
         return new InspectorCache();
     }
 
+    @Deprecated
     public String act(String path, Data data, Supplier<String> action, InspectorContextBk inspectorContextBk) {
         InspectorCacheKey key = new InspectorCacheKey(data);
         String reference = caches.get(key);
@@ -25,5 +26,16 @@ public class InspectorCache {
         }
         inspectorContextBk.dumpingContext().append("*reference* " + reference);
         return "*reference* " + reference;
+    }
+
+    public void act(String path, Data data, DumpingContext context, Runnable runnable) {
+        InspectorCacheKey key = new InspectorCacheKey(data);
+        String reference = caches.get(key);
+        if (reference == null) {
+            caches.put(key, path);
+            runnable.run();
+            return;
+        }
+        context.dumpingContext().append("*reference* " + reference);
     }
 }

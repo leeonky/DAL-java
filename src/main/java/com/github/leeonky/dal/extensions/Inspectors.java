@@ -18,6 +18,7 @@ import static com.github.leeonky.dal.runtime.inspector.Dumper.STRING_DUMPER;
 import static com.github.leeonky.dal.runtime.inspector.Dumper.VALUE_INSPECTOR;
 
 @Order(BUILD_IN)
+@SuppressWarnings("used")
 public class Inspectors implements Extension {
 
     @Override

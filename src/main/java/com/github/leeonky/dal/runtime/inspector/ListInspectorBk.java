@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
+@Deprecated
 public class ListInspectorBk implements InspectorBk.Cacheable {
 
     @Override
@@ -23,7 +24,7 @@ public class ListInspectorBk implements InspectorBk.Cacheable {
     private String body(List<Data> dataList, DumpingContext dumpingContext) {
         dumpingContext.append("[");
         AtomicInteger index = new AtomicInteger(0);
-        DumpingContext indentContext = dumpingContext.indent(1);
+        DumpingContext indentContext = dumpingContext.indent();
         String collect = dataList.stream().map(subData -> {
                     InspectorContextBk subContextBk = indentContext.index(index.getAndIncrement());
                     DumpingContext subContext = subContextBk.dumpingContext();

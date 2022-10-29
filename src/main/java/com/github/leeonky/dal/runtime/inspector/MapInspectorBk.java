@@ -24,7 +24,7 @@ public class MapInspectorBk implements InspectorBk.Cacheable {
             dumpingContext.append("}");
             return "{}";
         }
-        DumpingContext indentContext = dumpingContext.indent(1);
+        DumpingContext indentContext = dumpingContext.indent();
         String collect = fieldNames.stream()
                 .map(fieldName -> {
 //                    context.setDumpingContext(indentContext);

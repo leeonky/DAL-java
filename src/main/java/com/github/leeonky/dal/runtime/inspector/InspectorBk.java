@@ -5,7 +5,19 @@ import com.github.leeonky.dal.runtime.Data;
 @Deprecated
 public interface InspectorBk {
     InspectorBk MAP_INSPECTOR_BK = new MapInspectorBk();
-    InspectorBk LIST_INSPECTOR_BK = new ListInspectorBk();
+    InspectorBk LIST_INSPECTOR_BK = new InspectorBk() {
+        @Override
+        public String inspect(Data data, InspectorContextBk context) {
+            Dumper.LIST_DUMPER.dumpDetail(data, context.dumpingContext());
+            return "";
+        }
+
+        @Override
+        public String dump(Data data, InspectorContextBk context) {
+            Dumper.LIST_DUMPER.dump(data, context.dumpingContext());
+            return "";
+        }
+    };
 
     //    TODO rename
     String inspect(Data data, InspectorContextBk context);
