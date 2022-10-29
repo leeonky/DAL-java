@@ -9,10 +9,10 @@ import java.util.Set;
 
 import static java.util.stream.Collectors.joining;
 
-public class MapInspector implements Inspector.Cacheable {
+public class MapInspectorBk implements InspectorBk.Cacheable {
 
     @Override
-    public String cachedInspect(Data data, InspectorContext context) {
+    public String cachedInspect(Data data, InspectorContextBk context) {
         Set<Object> fieldNames = getFieldNames(data);
         return type(data) + (fieldNames.isEmpty() ? "{}" : fieldNames.stream()
                 .map(fieldName -> dumpEntry(key(fieldName), dumpField(data, fieldName, context)))
@@ -23,7 +23,7 @@ public class MapInspector implements Inspector.Cacheable {
         return key + ": " + value;
     }
 
-    protected String dumpField(Data data, Object field, InspectorContext context) {
+    protected String dumpField(Data data, Object field, InspectorContextBk context) {
         Data value;
         try {
             value = data.getValue(field);

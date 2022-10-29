@@ -7,12 +7,13 @@ import java.util.function.Supplier;
 
 import static java.lang.String.format;
 
-public class InspectorContext {
+@Deprecated
+public class InspectorContextBk {
     private final String path;
     private final InspectorCache cache;
     private final DALRuntimeContext dalRuntimeContext;
 
-    public InspectorContext(String path, InspectorCache cache, DALRuntimeContext dalRuntimeContext) {
+    public InspectorContextBk(String path, InspectorCache cache, DALRuntimeContext dalRuntimeContext) {
         this.path = path;
         this.cache = cache;
         this.dalRuntimeContext = dalRuntimeContext;
@@ -34,12 +35,12 @@ public class InspectorContext {
         return dalRuntimeContext.fetchInspector(data).dump(data, this);
     }
 
-    public InspectorContext index(int index) {
-        return new InspectorContext(format("%s[%d]", path, index), cache, dalRuntimeContext);
+    public InspectorContextBk index(int index) {
+        return new InspectorContextBk(format("%s[%d]", path, index), cache, dalRuntimeContext);
     }
 
-    public InspectorContext sub(Object property) {
-        return new InspectorContext(format("%s.%s", path, property), cache, dalRuntimeContext);
+    public InspectorContextBk sub(Object property) {
+        return new InspectorContextBk(format("%s.%s", path, property), cache, dalRuntimeContext);
     }
 
     public String cached(Data data, Supplier<String> action) {

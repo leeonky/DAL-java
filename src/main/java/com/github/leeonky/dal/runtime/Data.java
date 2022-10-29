@@ -3,7 +3,7 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.InspectorCache;
-import com.github.leeonky.dal.runtime.inspector.InspectorContext;
+import com.github.leeonky.dal.runtime.inspector.InspectorContextBk;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -147,11 +147,11 @@ public class Data {
     }
 
     public String inspect() {
-        return new InspectorContext("root", InspectorCache.cache(), context).inspect(this);
+        return new InspectorContextBk("root", InspectorCache.cache(), context).inspect(this);
     }
 
     public String dump() {
-        return new InspectorContext("root", InspectorCache.cache(), context).dump(this);
+        return new InspectorContextBk("root", InspectorCache.cache(), context).dump(this);
     }
 
     public <T> T newBlockScope(Supplier<T> supplier) {

@@ -2,7 +2,7 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
-import com.github.leeonky.dal.runtime.inspector.Inspector;
+import com.github.leeonky.dal.runtime.inspector.InspectorBk;
 import com.github.leeonky.dal.runtime.inspector.InspectorFactory;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
@@ -349,13 +349,13 @@ public class RuntimeContextBuilder {
                     .orElseGet(expectActual::defaultMatchesChecker);
         }
 
-        public Inspector fetchInspector(Data data) {
+        public InspectorBk fetchInspector(Data data) {
             return inspectorFactories.tryGetData(data.getInstance()).map(factory -> factory.apply(data)).orElseGet(() -> {
                 if (data.isNull())
                     return (_data, context) -> "null";
                 else if (data.isList())
-                    return Inspector.LIST_INSPECTOR;
-                return Inspector.MAP_INSPECTOR;
+                    return InspectorBk.LIST_INSPECTOR_BK;
+                return InspectorBk.MAP_INSPECTOR_BK;
             });
         }
     }

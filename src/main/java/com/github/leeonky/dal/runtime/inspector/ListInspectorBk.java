@@ -10,14 +10,14 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 
-public class ListInspector implements Inspector.Cacheable {
+public class ListInspectorBk implements InspectorBk.Cacheable {
 
     @Override
-    public String cachedInspect(Data data, InspectorContext context) {
+    public String cachedInspect(Data data, InspectorContextBk context) {
         return type(data) + body(context, data.getDataList());
     }
 
-    private String body(InspectorContext context, List<Data> dataList) {
+    private String body(InspectorContextBk context, List<Data> dataList) {
         if (dataList.isEmpty())
             return "[]";
         AtomicInteger index = new AtomicInteger(0);

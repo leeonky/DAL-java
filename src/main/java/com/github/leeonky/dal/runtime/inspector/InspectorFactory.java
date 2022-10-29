@@ -4,5 +4,5 @@ import com.github.leeonky.dal.runtime.Data;
 
 import java.util.function.Function;
 
-public interface InspectorFactory extends Function<Data, Inspector> {
+public interface InspectorFactory extends Function<Data, InspectorBk> {
 }
