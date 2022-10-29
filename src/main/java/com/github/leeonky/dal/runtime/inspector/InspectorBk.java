@@ -4,10 +4,8 @@ import com.github.leeonky.dal.runtime.Data;
 
 @Deprecated
 public interface InspectorBk {
-    InspectorBk VALUE_INSPECTOR_BK = new ValueInspectorBk(),
-            STRING_INSPECTOR_BK = new StringInspectorBk(),
-            MAP_INSPECTOR_BK = new MapInspectorBk(),
-            LIST_INSPECTOR_BK = new ListInspectorBk();
+    InspectorBk MAP_INSPECTOR_BK = new MapInspectorBk();
+    InspectorBk LIST_INSPECTOR_BK = new ListInspectorBk();
 
     //    TODO rename
     String inspect(Data data, InspectorContextBk context);

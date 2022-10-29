@@ -2,9 +2,7 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
-import com.github.leeonky.dal.runtime.inspector.InspectorBk;
-import com.github.leeonky.dal.runtime.inspector.InspectorContextBk;
-import com.github.leeonky.dal.runtime.inspector.InspectorFactory;
+import com.github.leeonky.dal.runtime.inspector.*;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.dal.type.Schema;
@@ -51,6 +49,7 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<Checker> equalsCheckers = new ClassKeyMap<>();
     private final ClassKeyMap<Checker> matchesCheckers = new ClassKeyMap<>();
     private final ClassKeyMap<InspectorFactory> inspectorFactories = new ClassKeyMap<>();
+    private final ClassKeyMap<DumperFactory> dumperFactories = new ClassKeyMap<>();
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -180,6 +179,11 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerInspector(Class<?> type, InspectorFactory factory) {
         inspectorFactories.put(type, factory);
+        return this;
+    }
+
+    public RuntimeContextBuilder registerDumper(Class<?> type, DumperFactory factory) {
+        dumperFactories.put(type, factory);
         return this;
     }
 
@@ -351,14 +355,19 @@ public class RuntimeContextBuilder {
         }
 
         public InspectorBk fetchInspector(Data data) {
+            if (data.isNull()) {
+                return (_data, context) -> {
+                    new Dumper() {
+                        @Override
+                        public void dumpDetail(Data data, DumpingContext dumpingContext) {
+                            dumpingContext.append("null");
+                        }
+                    }.dumpDetail(data, context.dumpingContext());
+                    return "";
+                };
+            }
             return inspectorFactories.tryGetData(data.getInstance()).map(factory -> factory.apply(data)).orElseGet(() -> {
-                if (data.isNull())
-                    return (_data, context) -> {
-                        InspectorContextBk.DumpingContext dumpingContext = context.dumpingContext();
-                        dumpingContext.append("null");
-                        return dumpingContext.content();
-                    };
-                else if (data.isList())
+                if (data.isList())
                     return InspectorBk.LIST_INSPECTOR_BK;
                 return InspectorBk.MAP_INSPECTOR_BK;
             });

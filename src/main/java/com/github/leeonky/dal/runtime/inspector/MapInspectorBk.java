@@ -14,23 +14,22 @@ public class MapInspectorBk implements InspectorBk.Cacheable {
     @Override
     public String cachedInspect(Data data, InspectorContextBk context) {
         Set<Object> fieldNames = getFieldNames(data);
-        InspectorContextBk.DumpingContext dumpingContext = context.dumpingContext();
+        DumpingContext dumpingContext = context.dumpingContext();
         return type(data, dumpingContext) + getString(data, context, fieldNames, dumpingContext);
     }
 
-    private String getString(Data data, InspectorContextBk context, Set<Object> fieldNames, InspectorContextBk.DumpingContext dumpingContext) {
+    private String getString(Data data, InspectorContextBk context, Set<Object> fieldNames, DumpingContext dumpingContext) {
         dumpingContext.append("{");
         if (fieldNames.isEmpty()) {
             dumpingContext.append("}");
             return "{}";
         }
-        InspectorContextBk.DumpingContext indentContext = dumpingContext.indent(1);
+        DumpingContext indentContext = dumpingContext.indent(1);
         String collect = fieldNames.stream()
                 .map(fieldName -> {
-                    context.setDumpingContext(indentContext);
-                    InspectorContextBk subContextBk = context.sub(fieldName);
-
-                    InspectorContextBk.DumpingContext subContext = subContextBk.dumpingContext();
+//                    context.setDumpingContext(indentContext);
+                    InspectorContextBk subContextBk = indentContext.sub(fieldName);
+                    DumpingContext subContext = subContextBk.dumpingContext();
                     subContext.newLine();
                     subContext.append(key(fieldName));
                     subContext.append(": ");
@@ -67,7 +66,7 @@ public class MapInspectorBk implements InspectorBk.Cacheable {
         return data.getFieldNames();
     }
 
-    protected String type(Data data, InspectorContextBk.DumpingContext dumpingContext) {
+    protected String type(Data data, DumpingContext dumpingContext) {
         if (data.getInstance() instanceof Map)
             return "";
         dumpingContext.append(Classes.getClassName(data.getInstance()));

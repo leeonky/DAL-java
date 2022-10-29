@@ -8,25 +8,19 @@ public class ValueInspectorBk implements InspectorBk {
         return Classes.getClassName(data.getInstance());
     }
 
-    protected void inspectValue(Data data, InspectorContextBk.DumpingContext dumpingContext) {
+    protected void inspectValue(Data data, DumpingContext dumpingContext) {
         dumpingContext.append("<" + data.getInstance().toString() + ">");
     }
 
     @Override
     public String inspect(Data data, InspectorContextBk context) {
-        InspectorContextBk.DumpingContext dumpingContext = context.dumpingContext();
-        dumpingContext.append(inspectType(data));
-        dumpingContext.newLine();
-        inspectValue(data, dumpingContext);
-        return dumpingContext.content();
+        new ValueDumper().dumpDetail(data, context.dumpingContext());
+        return "";
     }
 
     @Override
     public String dump(Data data, InspectorContextBk context) {
-        InspectorContextBk.DumpingContext dumpingContext = context.dumpingContext();
-        dumpingContext.append(inspectType(data));
-        dumpingContext.appendThen(" ");
-        inspectValue(data, dumpingContext);
-        return dumpingContext.content();
+        new ValueDumper().dump(data, context.dumpingContext());
+        return "";
     }
 }

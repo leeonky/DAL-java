@@ -14,30 +14,19 @@ public class ListInspectorBk implements InspectorBk.Cacheable {
 
     @Override
     public String cachedInspect(Data data, InspectorContextBk context) {
-        InspectorContextBk.DumpingContext dumpingContext = context.dumpingContext();
-        String s = type(data, context) + body(context, data.getDataList(), dumpingContext);
+        DumpingContext dumpingContext = context.dumpingContext();
+        String s = type(data, context) + body(data.getDataList(), dumpingContext);
         return s;
     }
 
     //    TODO refactor
-    private String body(InspectorContextBk context, List<Data> dataList, InspectorContextBk.DumpingContext dumpingContext) {
+    private String body(List<Data> dataList, DumpingContext dumpingContext) {
         dumpingContext.append("[");
-//        if (dataList.isEmpty()) {
-//            dumpingContext.append("]");
-//            return dumpingContext.content();
-//        }
-//        [\n\ta,\n\tb,\n\tb,\n\tb\n\t]
-//        InspectorContextBk.DumpingContext subContext = dumpingContext.newLine().subContext();
-//        for (int i = 0; i < dataList.size(); i++) {
-//            subContext.append(context.index(i).dump(dataList.get(i)));
-//        }
-//        InspectorContextBk.DumpingContext subContext = dumpingContext.indent();
         AtomicInteger index = new AtomicInteger(0);
-        InspectorContextBk.DumpingContext indentContext = dumpingContext.indent(1);
+        DumpingContext indentContext = dumpingContext.indent(1);
         String collect = dataList.stream().map(subData -> {
-                    context.setDumpingContext(indentContext);
-                    InspectorContextBk subContextBk = context.index(index.getAndIncrement());
-                    InspectorContextBk.DumpingContext subContext = subContextBk.dumpingContext();
+                    InspectorContextBk subContextBk = indentContext.index(index.getAndIncrement());
+                    DumpingContext subContext = subContextBk.dumpingContext();
                     subContext.newLine();
                     String dump = subContextBk.dump(subData);
                     indentContext.appendThen(",");

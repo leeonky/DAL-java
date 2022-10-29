@@ -2,8 +2,8 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.inspector.DumpingContext;
 import com.github.leeonky.dal.runtime.inspector.InspectorCache;
-import com.github.leeonky.dal.runtime.inspector.InspectorContextBk;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -147,13 +147,13 @@ public class Data {
     }
 
     public String inspect() {
-        InspectorContextBk contextBk = new InspectorContextBk("root", InspectorCache.cache(), context);
+        DumpingContext contextBk = new DumpingContext("root", InspectorCache.cache(), context);
         contextBk.inspect(this);
         return contextBk.dumpingContext().content();
     }
 
     public String dump() {
-        InspectorContextBk contextBk = new InspectorContextBk("root", InspectorCache.cache(), context);
+        DumpingContext contextBk = new DumpingContext("root", InspectorCache.cache(), context);
         contextBk.dump(this);
         return contextBk.dumpingContext().content();
     }
