@@ -14,21 +14,50 @@ public class ListInspectorBk implements InspectorBk.Cacheable {
 
     @Override
     public String cachedInspect(Data data, InspectorContextBk context) {
-        return type(data) + body(context, data.getDataList());
+        InspectorContextBk.DumpingContext dumpingContext = context.dumpingContext();
+        String s = type(data, context) + body(context, data.getDataList(), dumpingContext);
+        return s;
     }
 
-    private String body(InspectorContextBk context, List<Data> dataList) {
-        if (dataList.isEmpty())
-            return "[]";
+    //    TODO refactor
+    private String body(InspectorContextBk context, List<Data> dataList, InspectorContextBk.DumpingContext dumpingContext) {
+        dumpingContext.append("[");
+//        if (dataList.isEmpty()) {
+//            dumpingContext.append("]");
+//            return dumpingContext.content();
+//        }
+//        [\n\ta,\n\tb,\n\tb,\n\tb\n\t]
+//        InspectorContextBk.DumpingContext subContext = dumpingContext.newLine().subContext();
+//        for (int i = 0; i < dataList.size(); i++) {
+//            subContext.append(context.index(i).dump(dataList.get(i)));
+//        }
+//        InspectorContextBk.DumpingContext subContext = dumpingContext.indent();
         AtomicInteger index = new AtomicInteger(0);
-        return dataList.stream().map(subData -> context.index(index.getAndIncrement()).dump(subData))
+        InspectorContextBk.DumpingContext indentContext = dumpingContext.indent(1);
+        String collect = dataList.stream().map(subData -> {
+                    context.setDumpingContext(indentContext);
+                    InspectorContextBk subContextBk = context.index(index.getAndIncrement());
+                    InspectorContextBk.DumpingContext subContext = subContextBk.dumpingContext();
+                    subContext.newLine();
+                    String dump = subContextBk.dump(subData);
+                    indentContext.appendThen(",");
+                    return dump;
+                })
                 .map(TextUtil::indent).collect(joining(",\n", "[\n", "\n]"));
+        if (dumpingContext.hasContent()) {
+            dumpingContext.newLine();
+        }
+        dumpingContext.append("]");
+        String content = dumpingContext.content();
+        return content;
     }
 
-    protected String type(Data data) {
+    protected String type(Data data, InspectorContextBk context) {
         if (data.getInstance() instanceof Iterable || data.getInstance() instanceof Stream
                 || data.getInstance().getClass().isArray())
             return "";
+        context.dumpingContext().append(Classes.getClassName(data.getInstance()));
+        context.dumpingContext().appendThen(" ");
         return Classes.getClassName(data.getInstance()) + " ";
     }
 }

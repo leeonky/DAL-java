@@ -16,7 +16,7 @@ public class ValueInspectorBk implements InspectorBk {
     public String inspect(Data data, InspectorContextBk context) {
         InspectorContextBk.DumpingContext dumpingContext = context.dumpingContext();
         dumpingContext.append(inspectType(data));
-        dumpingContext.appendThen("\n");
+        dumpingContext.newLine();
         inspectValue(data, dumpingContext);
         return dumpingContext.content();
     }

@@ -16,13 +16,14 @@ public class InspectorCache {
         return new InspectorCache();
     }
 
-    public String act(String path, Data data, Supplier<String> action) {
+    public String act(String path, Data data, Supplier<String> action, InspectorContextBk inspectorContextBk) {
         InspectorCacheKey key = new InspectorCacheKey(data);
         String reference = caches.get(key);
         if (reference == null) {
             caches.put(key, path);
             return action.get();
         }
+        inspectorContextBk.dumpingContext().append("*reference* " + reference);
         return "*reference* " + reference;
     }
 }

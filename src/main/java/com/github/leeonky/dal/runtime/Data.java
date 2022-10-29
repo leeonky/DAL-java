@@ -147,11 +147,15 @@ public class Data {
     }
 
     public String inspect() {
-        return new InspectorContextBk("root", InspectorCache.cache(), context).inspect(this);
+        InspectorContextBk contextBk = new InspectorContextBk("root", InspectorCache.cache(), context);
+        contextBk.inspect(this);
+        return contextBk.dumpingContext().content();
     }
 
     public String dump() {
-        return new InspectorContextBk("root", InspectorCache.cache(), context).dump(this);
+        InspectorContextBk contextBk = new InspectorContextBk("root", InspectorCache.cache(), context);
+        contextBk.dump(this);
+        return contextBk.dumpingContext().content();
     }
 
     public <T> T newBlockScope(Supplier<T> supplier) {

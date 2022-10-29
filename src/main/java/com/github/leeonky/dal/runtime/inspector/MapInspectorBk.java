@@ -14,23 +14,49 @@ public class MapInspectorBk implements InspectorBk.Cacheable {
     @Override
     public String cachedInspect(Data data, InspectorContextBk context) {
         Set<Object> fieldNames = getFieldNames(data);
-        return type(data) + (fieldNames.isEmpty() ? "{}" : fieldNames.stream()
-                .map(fieldName -> dumpEntry(key(fieldName), dumpField(data, fieldName, context)))
-                .map(TextUtil::indent).collect(joining(",\n", "{\n", "\n}")));
+        InspectorContextBk.DumpingContext dumpingContext = context.dumpingContext();
+        return type(data, dumpingContext) + getString(data, context, fieldNames, dumpingContext);
     }
 
-    protected String dumpEntry(String key, String value) {
-        return key + ": " + value;
+    private String getString(Data data, InspectorContextBk context, Set<Object> fieldNames, InspectorContextBk.DumpingContext dumpingContext) {
+        dumpingContext.append("{");
+        if (fieldNames.isEmpty()) {
+            dumpingContext.append("}");
+            return "{}";
+        }
+        InspectorContextBk.DumpingContext indentContext = dumpingContext.indent(1);
+        String collect = fieldNames.stream()
+                .map(fieldName -> {
+                    context.setDumpingContext(indentContext);
+                    InspectorContextBk subContextBk = context.sub(fieldName);
+
+                    InspectorContextBk.DumpingContext subContext = subContextBk.dumpingContext();
+                    subContext.newLine();
+                    subContext.append(key(fieldName));
+                    subContext.append(": ");
+                    String s = key(fieldName) + ": " + dumpField(data, fieldName, subContextBk);
+                    indentContext.appendThen(",");
+
+                    return s;
+                })
+                .map(TextUtil::indent).collect(joining(",\n", "{\n", "\n}"));
+
+        if (dumpingContext.hasContent()) {
+            dumpingContext.newLine();
+        }
+        dumpingContext.append("}");
+        return collect;
     }
 
-    protected String dumpField(Data data, Object field, InspectorContextBk context) {
+    protected String dumpField(Data data, Object field, InspectorContextBk sub) {
         Data value;
         try {
             value = data.getValue(field);
         } catch (Exception e) {
+            sub.dumpingContext().append("*throw* " + e);
             return "*throw* " + e;
         }
-        return context.sub(field).dump(value);
+        return sub.dump(value);
     }
 
     protected String key(Object o) {
@@ -41,7 +67,11 @@ public class MapInspectorBk implements InspectorBk.Cacheable {
         return data.getFieldNames();
     }
 
-    protected String type(Data data) {
-        return data.getInstance() instanceof Map ? "" : Classes.getClassName(data.getInstance()) + " ";
+    protected String type(Data data, InspectorContextBk.DumpingContext dumpingContext) {
+        if (data.getInstance() instanceof Map)
+            return "";
+        dumpingContext.append(Classes.getClassName(data.getInstance()));
+        dumpingContext.appendThen(" ");
+        return Classes.getClassName(data.getInstance()) + " ";
     }
 }
