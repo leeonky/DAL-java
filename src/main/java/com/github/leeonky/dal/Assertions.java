@@ -48,6 +48,8 @@ public class Assertions {
             String detailMessage = "\n" + e.show(fullCode, prefix.length()) + "\n\n" + e.getMessage();
             if (dumpInput)
                 detailMessage += "\n\nThe root value was: " + dal.getRuntimeContextBuilder().build(null).wrap(input).inspect();
+//            TODO should raise assert error only in assert method (should)
+//            TODO move get out
             throw new AssertionError(detailMessage);
         }
     }

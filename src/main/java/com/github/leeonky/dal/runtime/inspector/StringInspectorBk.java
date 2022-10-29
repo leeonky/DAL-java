@@ -4,8 +4,8 @@ import com.github.leeonky.dal.runtime.Data;
 
 public class StringInspectorBk extends ValueInspectorBk {
     @Override
-    public String inspectValue(Data data) {
-        return "<" + data.getInstance().toString().replace("\\", "\\\\").replace("\n", "\\n")
-                .replace("\r", "\\r").replace("\t", "\\t").replace("\b", "\\b") + ">";
+    public void inspectValue(Data data, InspectorContextBk.DumpingContext dumpingContext) {
+        dumpingContext.append("<" + data.getInstance().toString().replace("\\", "\\\\").replace("\n", "\\n")
+                .replace("\r", "\\r").replace("\t", "\\t").replace("\b", "\\b") + ">");
     }
 }

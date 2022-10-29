@@ -203,4 +203,19 @@ public class IntegrationSteps {
         List<Map<String, List<?>>> rangeList = new ObjectMapper().readValue(ranges, List.class);
         integrationTestContext.setCurryingMethodArgRange2(type, method, rangeList);
     }
+
+    @Given("the following dal input:")
+    public void theFollowingDalInput(String expression) {
+        integrationTestContext.givenDalData(expression);
+    }
+
+    @Given("register Empty value dumper;")
+    public void registerEmptyValueDumper() {
+        integrationTestContext.registerEmptyValueDumper();
+    }
+
+    @Given("the following dal inputs:")
+    public void theFollowingDalInputs(String expression) {
+        integrationTestContext.givenDalDataList(expression);
+    }
 }

@@ -46,4 +46,29 @@ public class InspectorContextBk {
     public String cached(Data data, Supplier<String> action) {
         return cache.act(path, data, action);
     }
+
+    public DumpingContext dumpingContext() {
+        return new DumpingContext();
+    }
+
+    public class DumpingContext {
+        private StringBuilder stringBuilder = new StringBuilder();
+        private String then;
+
+        public void append(String s) {
+            if (then != null) {
+                stringBuilder.append(then);
+                then = null;
+            }
+            stringBuilder.append(s);
+        }
+
+        public String content() {
+            return stringBuilder.toString();
+        }
+
+        public void appendThen(String then) {
+            this.then = then;
+        }
+    }
 }

@@ -9,6 +9,7 @@ public interface InspectorBk {
             MAP_INSPECTOR_BK = new MapInspectorBk(),
             LIST_INSPECTOR_BK = new ListInspectorBk();
 
+    //    TODO rename
     String inspect(Data data, InspectorContextBk context);
 
     default String dump(Data data, InspectorContextBk context) {

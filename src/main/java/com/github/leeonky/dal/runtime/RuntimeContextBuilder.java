@@ -3,6 +3,7 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.runtime.inspector.InspectorBk;
+import com.github.leeonky.dal.runtime.inspector.InspectorContextBk;
 import com.github.leeonky.dal.runtime.inspector.InspectorFactory;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
@@ -352,7 +353,11 @@ public class RuntimeContextBuilder {
         public InspectorBk fetchInspector(Data data) {
             return inspectorFactories.tryGetData(data.getInstance()).map(factory -> factory.apply(data)).orElseGet(() -> {
                 if (data.isNull())
-                    return (_data, context) -> "null";
+                    return (_data, context) -> {
+                        InspectorContextBk.DumpingContext dumpingContext = context.dumpingContext();
+                        dumpingContext.append("null");
+                        return dumpingContext.content();
+                    };
                 else if (data.isList())
                     return InspectorBk.LIST_INSPECTOR_BK;
                 return InspectorBk.MAP_INSPECTOR_BK;

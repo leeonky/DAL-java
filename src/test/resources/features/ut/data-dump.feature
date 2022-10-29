@@ -15,6 +15,29 @@ Feature: dump-data
       | 100.1   | java.lang.Double <100.1> |
       | "hello" | java.lang.String <hello> |
 
+  Scenario: dump empty value
+    Given register Empty value dumper;
+    Given the following dal input:
+    """
+    Empty
+    """
+    Then dumped data should be:
+    """
+    com.github.leeonky.dal.compiler.IntegrationTestContext$Empty
+    """
+    Given the following dal inputs:
+    """
+    Empty
+    Empty
+    """
+    Then dumped data should be:
+    """
+    [
+        com.github.leeonky.dal.compiler.IntegrationTestContext$Empty,
+        com.github.leeonky.dal.compiler.IntegrationTestContext$Empty
+    ]
+    """
+
   Scenario: dump list
     Given the following json:
     """

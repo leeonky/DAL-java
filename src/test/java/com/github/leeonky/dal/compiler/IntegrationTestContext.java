@@ -7,6 +7,10 @@ import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.cucumber.TestCodeCompiler;
 import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.inspector.InspectorBk;
+import com.github.leeonky.dal.runtime.inspector.InspectorContextBk;
+import com.github.leeonky.dal.runtime.inspector.InspectorFactory;
+import com.github.leeonky.dal.runtime.inspector.ValueInspectorBk;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.SyntaxException;
@@ -288,5 +292,38 @@ public class IntegrationTestContext {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void givenDalData(String expression) {
+        input = dal.evaluate(null, expression);
+    }
+
+    public void givenDalDataList(String expression) {
+        input = dal.evaluateAll(null, expression);
+    }
+
+    public void registerEmptyValueDumper() {
+        dal.getRuntimeContextBuilder().registerUserDefinedLiterals(new UserLiteralRule() {
+                    @Override
+                    public Result compile(String token) {
+                        if (token.equals("Empty"))
+                            return Result.of(new Empty());
+                        return Result.empty();
+                    }
+                })
+                .registerInspector(Empty.class, new InspectorFactory() {
+                    @Override
+                    public InspectorBk apply(Data data) {
+                        return new ValueInspectorBk() {
+
+                            @Override
+                            protected void inspectValue(Data data, InspectorContextBk.DumpingContext dumpingContext) {
+                            }
+                        };
+                    }
+                });
+    }
+
+    public static class Empty {
     }
 }
