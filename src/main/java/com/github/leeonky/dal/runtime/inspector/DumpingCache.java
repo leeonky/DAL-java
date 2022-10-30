@@ -6,19 +6,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class InspectorCache {
-    private final Map<InspectorCacheKey, String> caches = new HashMap<>();
+public class DumpingCache {
+    private final Map<DumpingCacheKey, String> caches = new HashMap<>();
 
-    private InspectorCache() {
+    private DumpingCache() {
     }
 
-    public static InspectorCache cache() {
-        return new InspectorCache();
+    public static DumpingCache cache() {
+        return new DumpingCache();
     }
 
     @Deprecated
     public String act(String path, Data data, Supplier<String> action, DumpingContext dumpingContext) {
-        InspectorCacheKey key = new InspectorCacheKey(data);
+        DumpingCacheKey key = new DumpingCacheKey(data);
         String reference = caches.get(key);
         if (reference == null) {
             caches.put(key, path);
@@ -29,7 +29,7 @@ public class InspectorCache {
     }
 
     public void act(String path, Data data, DumpingContext context, Runnable runnable) {
-        InspectorCacheKey key = new InspectorCacheKey(data);
+        DumpingCacheKey key = new DumpingCacheKey(data);
         String reference = caches.get(key);
         if (reference == null) {
             caches.put(key, path);

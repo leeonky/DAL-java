@@ -63,7 +63,7 @@ public class ExpectActual {
     }
 
     public String notationNumberMatch() {
-        return format("Expected to match: %s\nActual: %s", expected.inspect(), actual.inspect());
+        return format("Expected to match: %s\nActual: %s", expected.dumpDetail(), actual.dumpDetail());
     }
 
     public String notationMatch() {
@@ -76,19 +76,19 @@ public class ExpectActual {
 
     public String notationMatch(Data converted) {
         return converted.getInstance() == actual.getInstance() ? notationMatch()
-                : verificationMessage("Expected to match: ", converted.inspect() + " converted from: ");
+                : verificationMessage("Expected to match: ", converted.dumpDetail() + " converted from: ");
     }
 
     public String verificationMessage(String prefix, String actualPrefix) {
-        String actual = actualPrefix + this.actual.inspect();
-        String expected = this.expected.inspect();
+        String actual = actualPrefix + this.actual.dumpDetail();
+        String expected = this.expected.dumpDetail();
         int position = TextUtil.differentPosition(expected, actual);
         String firstPart = new StringWithPosition(expected).position(position).result(prefix);
         return new StringWithPosition(actual).position(position).result(firstPart + "\nActual: ");
     }
 
     public String cannotCompare() {
-        return format("Cannot compare between %s\nand %s", actual.inspect(), expected.inspect());
+        return format("Cannot compare between %s\nand %s", actual.dumpDetail(), expected.dumpDetail());
     }
 
     Checker defaultMatchesChecker() {

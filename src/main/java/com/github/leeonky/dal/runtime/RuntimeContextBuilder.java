@@ -4,8 +4,6 @@ import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.runtime.inspector.Dumper;
 import com.github.leeonky.dal.runtime.inspector.DumperFactory;
-import com.github.leeonky.dal.runtime.inspector.InspectorBk;
-import com.github.leeonky.dal.runtime.inspector.InspectorFactory;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.dal.type.Schema;
@@ -51,7 +49,6 @@ public class RuntimeContextBuilder {
     private Converter converter = Converter.getInstance();
     private final ClassKeyMap<Checker> equalsCheckers = new ClassKeyMap<>();
     private final ClassKeyMap<Checker> matchesCheckers = new ClassKeyMap<>();
-    private final ClassKeyMap<InspectorFactory> inspectorFactories = new ClassKeyMap<>();
     private final ClassKeyMap<DumperFactory> dumperFactories = new ClassKeyMap<>();
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
@@ -177,11 +174,6 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerEqualsChecker(Class<?> type, Checker checker) {
         equalsCheckers.put(type, checker);
-        return this;
-    }
-
-    public RuntimeContextBuilder registerInspector(Class<?> type, InspectorFactory factory) {
-        inspectorFactories.put(type, factory);
         return this;
     }
 
@@ -355,21 +347,6 @@ public class RuntimeContextBuilder {
         public Checker fetchMatchesChecker(ExpectActual expectActual) {
             return matchesCheckers.tryGetData(expectActual.getExpectInstance())
                     .orElseGet(expectActual::defaultMatchesChecker);
-        }
-
-        public InspectorBk fetchInspector(Data data) {
-//            if (data.isNull()) {
-//                return (_data, context) -> {
-//                    new Dumper() {
-//                        @Override
-//                        public void dumpDetail(Data data, DumpingContext dumpingContext) {
-//                            dumpingContext.append("null");
-//                        }
-//                    }.dumpDetail(data, context);
-//                    return "";
-//                };
-//            }
-            return inspectorFactories.tryGetData(data.getInstance()).map(factory -> factory.apply(data)).orElse(null);
         }
 
         public Dumper fetchDumper(Data data) {

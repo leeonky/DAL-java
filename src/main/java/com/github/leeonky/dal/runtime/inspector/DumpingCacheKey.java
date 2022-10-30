@@ -4,10 +4,10 @@ import com.github.leeonky.dal.runtime.Data;
 
 import java.util.Objects;
 
-class InspectorCacheKey {
+class DumpingCacheKey {
     private final Data data;
 
-    public InspectorCacheKey(Data data) {
+    public DumpingCacheKey(Data data) {
         this.data = data;
     }
 
@@ -18,6 +18,6 @@ class InspectorCacheKey {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof InspectorCacheKey && ((InspectorCacheKey) obj).data.getInstance() == data.getInstance();
+        return obj instanceof DumpingCacheKey && ((DumpingCacheKey) obj).data.getInstance() == data.getInstance();
     }
 }

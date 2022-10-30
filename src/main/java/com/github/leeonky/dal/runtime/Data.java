@@ -145,18 +145,12 @@ public class Data {
                 + fieldName.substring(prefix.length() + 1);
     }
 
-    @Deprecated
-    public String inspect() {
-        DumpingContext dumpingContext = DumpingContext.rootContext(context);
-        dumpingContext.inspect(this);
-        return dumpingContext.content();
+    public String dumpDetail() {
+        return DumpingContext.rootContext(context).dumpDetail(this).content();
     }
 
-    @Deprecated
     public String dump() {
-        DumpingContext dumpingContext = DumpingContext.rootContext(context);
-        dumpingContext.dump(this);
-        return dumpingContext.content();
+        return DumpingContext.rootContext(context).dump(this).content();
     }
 
     public <T> T newBlockScope(Supplier<T> supplier) {
@@ -178,7 +172,7 @@ public class Data {
     public Data requireList(int position) {
         if (isList())
             return this;
-        throw new RuntimeException(format("Invalid input value, expect a List but: %s", inspect().trim()), position);
+        throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpDetail().trim()), position);
     }
 
     public boolean numberNotEquals(Data another) {

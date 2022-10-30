@@ -6,21 +6,18 @@ import com.github.leeonky.util.Classes;
 import java.util.Map;
 import java.util.Set;
 
-//TODO refactor
 public class MapDumper implements Dumper.Cacheable {
 
     @Override
     public void cachedInspect(Data data, DumpingContext context) {
-        type(data, context);
-        body(data, context);
+        dumpType(data, context);
+        dumpBody(data, context);
     }
 
-    private void body(Data data, DumpingContext dumpingContext) {
-        dumpingContext.append("{");
-        DumpingContext indentContext = dumpingContext.indent();
+    private void dumpBody(Data data, DumpingContext dumpingContext) {
+        DumpingContext indentContext = dumpingContext.append("{").indent();
         getFieldNames(data).forEach(fieldName -> {
-            DumpingContext sub = indentContext.sub(fieldName);
-            dumpField(data, fieldName, sub);
+            dumpField(data, fieldName, indentContext.sub(fieldName).newLine());
             indentContext.appendThen(",");
         });
         dumpingContext.optionalNewLine().append("}");
@@ -28,7 +25,7 @@ public class MapDumper implements Dumper.Cacheable {
 
     protected void dumpField(Data data, Object field, DumpingContext context) {
         Data value;
-        context.newLine().append(key(field)).append(": ");
+        context.append(key(field)).append(": ");
         try {
             value = data.getValue(field);
         } catch (Exception e) {
@@ -46,11 +43,8 @@ public class MapDumper implements Dumper.Cacheable {
         return data.getFieldNames();
     }
 
-    protected String type(Data data, DumpingContext dumpingContext) {
-        if (data.getInstance() instanceof Map)
-            return "";
-        dumpingContext.append(Classes.getClassName(data.getInstance()));
-        dumpingContext.appendThen(" ");
-        return Classes.getClassName(data.getInstance()) + " ";
+    protected void dumpType(Data data, DumpingContext dumpingContext) {
+        if (!(data.getInstance() instanceof Map))
+            dumpingContext.append(Classes.getClassName(data.getInstance())).appendThen(" ");
     }
 }

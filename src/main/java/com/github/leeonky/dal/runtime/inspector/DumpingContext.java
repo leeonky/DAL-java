@@ -6,23 +6,24 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import static java.lang.String.format;
 import static java.util.Collections.nCopies;
 
+//TODO refactor
 public class DumpingContext {
     private final String path;
-    private final InspectorCache cache;
+    private final DumpingCache cache;
     private final DALRuntimeContext runtimeContext;
     private StringBuilder stringBuilder = new StringBuilder();
     private StringBuilder splits = new StringBuilder();
     private int indent = 0;
     private int length = 0;
 
-    private DumpingContext(String path, InspectorCache cache, DALRuntimeContext runtimeContext) {
+    private DumpingContext(String path, DumpingCache cache, DALRuntimeContext runtimeContext) {
         this.path = path;
         this.cache = cache;
         this.runtimeContext = runtimeContext;
     }
 
     public static DumpingContext rootContext(DALRuntimeContext context) {
-        return new DumpingContext("root", InspectorCache.cache(), context);
+        return new DumpingContext("root", DumpingCache.cache(), context);
     }
 
     public String getPath() {
@@ -34,30 +35,14 @@ public class DumpingContext {
     }
 
     @Deprecated
-    public DumpingContext inspect(Data data) {
-        InspectorBk inspectorBk = runtimeContext.fetchInspector(data);
-        if (inspectorBk == null) {
-            Dumper dumper = runtimeContext.fetchDumper(data);
-            if (dumper != null) {
-                dumper.dumpDetail(data, this);
-                return this;
-            }
-        }
-        inspectorBk.inspect(data, this);
+    public DumpingContext dumpDetail(Data data) {
+        runtimeContext.fetchDumper(data).dumpDetail(data, this);
         return this;
     }
 
     @Deprecated
     public DumpingContext dump(Data data) {
-        InspectorBk inspectorBk = runtimeContext.fetchInspector(data);
-        if (inspectorBk == null) {
-            Dumper dumper = runtimeContext.fetchDumper(data);
-            if (dumper != null) {
-                dumper.dump(data, this);
-                return this;
-            }
-        }
-        inspectorBk.dump(data, this);
+        runtimeContext.fetchDumper(data).dump(data, this);
         return this;
     }
 

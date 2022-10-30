@@ -15,7 +15,7 @@ import static com.github.leeonky.dal.runtime.inspector.Dumper.VALUE_INSPECTOR;
 
 @Order(BUILD_IN)
 @SuppressWarnings("used")
-public class Inspectors implements Extension {
+public class Dumpers implements Extension {
 
     @Override
     public void extend(DAL dal) {
