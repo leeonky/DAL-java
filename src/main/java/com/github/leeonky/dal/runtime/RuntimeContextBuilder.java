@@ -2,7 +2,10 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
-import com.github.leeonky.dal.runtime.inspector.*;
+import com.github.leeonky.dal.runtime.inspector.Dumper;
+import com.github.leeonky.dal.runtime.inspector.DumperFactory;
+import com.github.leeonky.dal.runtime.inspector.InspectorBk;
+import com.github.leeonky.dal.runtime.inspector.InspectorFactory;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.dal.type.Schema;
@@ -355,22 +358,18 @@ public class RuntimeContextBuilder {
         }
 
         public InspectorBk fetchInspector(Data data) {
-            if (data.isNull()) {
-                return (_data, context) -> {
-                    new Dumper() {
-                        @Override
-                        public void dumpDetail(Data data, DumpingContext dumpingContext) {
-                            dumpingContext.append("null");
-                        }
-                    }.dumpDetail(data, context);
-                    return "";
-                };
-            }
-            return inspectorFactories.tryGetData(data.getInstance()).map(factory -> factory.apply(data)).orElseGet(() -> {
-                if (data.isList())
-                    return InspectorBk.LIST_INSPECTOR_BK;
-                return InspectorBk.MAP_INSPECTOR_BK;
-            });
+//            if (data.isNull()) {
+//                return (_data, context) -> {
+//                    new Dumper() {
+//                        @Override
+//                        public void dumpDetail(Data data, DumpingContext dumpingContext) {
+//                            dumpingContext.append("null");
+//                        }
+//                    }.dumpDetail(data, context);
+//                    return "";
+//                };
+//            }
+            return inspectorFactories.tryGetData(data.getInstance()).map(factory -> factory.apply(data)).orElse(null);
         }
 
         public Dumper fetchDumper(Data data) {

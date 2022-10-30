@@ -35,23 +35,29 @@ public class DumpingContext {
 
     @Deprecated
     public String inspect(Data data) {
-        Dumper dumper = dalRuntimeContext.fetchDumper(data);
-        if (dumper != null) {
-            dumper.dumpDetail(data, this);
-            return "";
+        InspectorBk inspectorBk = dalRuntimeContext.fetchInspector(data);
+        if (inspectorBk == null) {
+            Dumper dumper = dalRuntimeContext.fetchDumper(data);
+            if (dumper != null) {
+                dumper.dumpDetail(data, this);
+                return "";
+            }
         }
-        dalRuntimeContext.fetchInspector(data).inspect(data, this);
+        inspectorBk.inspect(data, this);
         return "";
     }
 
     @Deprecated
     public String dump(Data data) {
-        Dumper dumper = dalRuntimeContext.fetchDumper(data);
-        if (dumper != null) {
-            dumper.dump(data, this);
-            return "";
+        InspectorBk inspectorBk = dalRuntimeContext.fetchInspector(data);
+        if (inspectorBk == null) {
+            Dumper dumper = dalRuntimeContext.fetchDumper(data);
+            if (dumper != null) {
+                dumper.dump(data, this);
+                return "";
+            }
         }
-        return dalRuntimeContext.fetchInspector(data).dump(data, this);
+        return inspectorBk.dump(data, this);
     }
 
     public DumpingContext index(int index) {
@@ -75,6 +81,10 @@ public class DumpingContext {
         return createSub(path, 1);
     }
 
+    public DumpingContext sub() {
+        return createSub(path, 0);
+    }
+
     public void cached(Data data, Runnable runnable) {
         cache.act(path, data, this, runnable);
     }
@@ -93,8 +103,9 @@ public class DumpingContext {
         return stringBuilder.toString();
     }
 
-    public void appendThen(String then) {
+    public DumpingContext appendThen(String then) {
         splits.append(then);
+        return this;
     }
 
     public DumpingContext newLine() {
