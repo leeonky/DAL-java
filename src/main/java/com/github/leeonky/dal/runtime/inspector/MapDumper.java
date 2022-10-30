@@ -23,9 +23,7 @@ public class MapDumper implements Dumper.Cacheable {
             dumpField(data, fieldName, sub);
             indentContext.appendThen(",");
         });
-        if (dumpingContext.hasContent())
-            dumpingContext.newLine();
-        dumpingContext.append("}");
+        dumpingContext.optionalNewLine().append("}");
     }
 
     protected void dumpField(Data data, Object field, DumpingContext context) {

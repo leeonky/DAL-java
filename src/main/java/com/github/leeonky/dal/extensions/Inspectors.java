@@ -5,8 +5,8 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.Order;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.inspector.DumpingContext;
 import com.github.leeonky.dal.runtime.inspector.InspectorBk;
-import com.github.leeonky.dal.runtime.inspector.InspectorContextBk;
 
 import java.lang.reflect.Type;
 import java.time.*;
@@ -29,14 +29,14 @@ public class Inspectors implements Extension {
 //        TODO remove
         dal.getRuntimeContextBuilder().registerInspector(CharSequence.class, data -> new InspectorBk() {
             @Override
-            public String inspect(Data data, InspectorContextBk context) {
-                STRING_DUMPER.dumpDetail(data, context.dumpingContext());
+            public String inspect(Data data, DumpingContext context) {
+                STRING_DUMPER.dumpDetail(data, context);
                 return "";
             }
 
             @Override
-            public String dump(Data data, InspectorContextBk context) {
-                STRING_DUMPER.dump(data, context.dumpingContext());
+            public String dump(Data data, DumpingContext context) {
+                STRING_DUMPER.dump(data, context);
                 return "";
             }
         });
@@ -47,14 +47,14 @@ public class Inspectors implements Extension {
         for (Class<?> type : types)
             builder.registerInspector(type, data -> new InspectorBk() {
                 @Override
-                public String inspect(Data data, InspectorContextBk context) {
-                    VALUE_INSPECTOR.dumpDetail(data, context.dumpingContext());
+                public String inspect(Data data, DumpingContext context) {
+                    VALUE_INSPECTOR.dumpDetail(data, context);
                     return "";
                 }
 
                 @Override
-                public String dump(Data data, InspectorContextBk context) {
-                    VALUE_INSPECTOR.dump(data, context.dumpingContext());
+                public String dump(Data data, DumpingContext context) {
+                    VALUE_INSPECTOR.dump(data, context);
                     return "";
                 }
             });

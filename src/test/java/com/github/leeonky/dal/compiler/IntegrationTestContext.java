@@ -7,7 +7,10 @@ import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.cucumber.TestCodeCompiler;
 import com.github.leeonky.dal.runtime.*;
-import com.github.leeonky.dal.runtime.inspector.*;
+import com.github.leeonky.dal.runtime.inspector.DumpingContext;
+import com.github.leeonky.dal.runtime.inspector.InspectorBk;
+import com.github.leeonky.dal.runtime.inspector.InspectorFactory;
+import com.github.leeonky.dal.runtime.inspector.ValueDumper;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.SyntaxException;
@@ -314,12 +317,12 @@ public class IntegrationTestContext {
                         return new InspectorBk() {
 
                             @Override
-                            public String inspect(Data data, InspectorContextBk context) {
+                            public String inspect(Data data, DumpingContext context) {
                                 new ValueDumper() {
                                     @Override
                                     protected void inspectValue(Data data, DumpingContext dumpingContext) {
                                     }
-                                }.dumpDetail(data, context.dumpingContext());
+                                }.dumpDetail(data, context);
                                 return "xxxx";
                             }
                         };

@@ -362,7 +362,7 @@ public class RuntimeContextBuilder {
                         public void dumpDetail(Data data, DumpingContext dumpingContext) {
                             dumpingContext.append("null");
                         }
-                    }.dumpDetail(data, context.dumpingContext());
+                    }.dumpDetail(data, context);
                     return "";
                 };
             }

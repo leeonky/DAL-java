@@ -14,7 +14,6 @@ public interface Dumper {
         dumpDetail(data, dumpingContext);
     }
 
-
     interface Cacheable extends Dumper {
 
         @Override

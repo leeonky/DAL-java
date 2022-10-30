@@ -7,54 +7,36 @@ public interface InspectorBk {
     InspectorBk MAP_INSPECTOR_BK = new InspectorBk() {
 
         @Override
-        public String inspect(Data data, InspectorContextBk context) {
-            Dumper.MAP_DUMPER.dumpDetail(data, context.dumpingContext());
+        public String inspect(Data data, DumpingContext context) {
+            Dumper.MAP_DUMPER.dumpDetail(data, context);
             return "";
         }
 
         @Override
-        public String dump(Data data, InspectorContextBk context) {
-            Dumper.MAP_DUMPER.dump(data, context.dumpingContext());
+        public String dump(Data data, DumpingContext context) {
+            Dumper.MAP_DUMPER.dump(data, context);
             return "";
         }
     };
     InspectorBk LIST_INSPECTOR_BK = new InspectorBk() {
         @Override
-        public String inspect(Data data, InspectorContextBk context) {
-            Dumper.LIST_DUMPER.dumpDetail(data, context.dumpingContext());
+        public String inspect(Data data, DumpingContext context) {
+            Dumper.LIST_DUMPER.dumpDetail(data, context);
             return "";
         }
 
         @Override
-        public String dump(Data data, InspectorContextBk context) {
-            Dumper.LIST_DUMPER.dump(data, context.dumpingContext());
+        public String dump(Data data, DumpingContext context) {
+            Dumper.LIST_DUMPER.dump(data, context);
             return "";
         }
     };
 
     //    TODO rename
-    String inspect(Data data, InspectorContextBk context);
+    String inspect(Data data, DumpingContext context);
 
-    default String dump(Data data, InspectorContextBk context) {
+    default String dump(Data data, DumpingContext context) {
         return inspect(data, context);
     }
 
-    interface Cacheable extends InspectorBk {
-
-        @Override
-        default String dump(Data data, InspectorContextBk context) {
-            return context.cached(data, () -> cachedDump(data, context));
-        }
-
-        @Override
-        default String inspect(Data data, InspectorContextBk context) {
-            return context.cached(data, () -> cachedInspect(data, context));
-        }
-
-        default String cachedDump(Data data, InspectorContextBk context) {
-            return cachedInspect(data, context);
-        }
-
-        String cachedInspect(Data data, InspectorContextBk context);
-    }
 }
