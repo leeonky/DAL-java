@@ -145,12 +145,14 @@ public class Data {
                 + fieldName.substring(prefix.length() + 1);
     }
 
+    @Deprecated
     public String inspect() {
         DumpingContext dumpingContext = DumpingContext.rootContext(context);
         dumpingContext.inspect(this);
         return dumpingContext.content();
     }
 
+    @Deprecated
     public String dump() {
         DumpingContext dumpingContext = DumpingContext.rootContext(context);
         dumpingContext.dump(this);

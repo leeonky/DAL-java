@@ -9,16 +9,16 @@ import static java.util.Collections.nCopies;
 public class DumpingContext {
     private final String path;
     private final InspectorCache cache;
-    private final DALRuntimeContext dalRuntimeContext;
+    private final DALRuntimeContext runtimeContext;
     private StringBuilder stringBuilder = new StringBuilder();
     private StringBuilder splits = new StringBuilder();
     private int indent = 0;
     private int length = 0;
 
-    private DumpingContext(String path, InspectorCache cache, DALRuntimeContext dalRuntimeContext) {
+    private DumpingContext(String path, InspectorCache cache, DALRuntimeContext runtimeContext) {
         this.path = path;
         this.cache = cache;
-        this.dalRuntimeContext = dalRuntimeContext;
+        this.runtimeContext = runtimeContext;
     }
 
     public static DumpingContext rootContext(DALRuntimeContext context) {
@@ -29,35 +29,36 @@ public class DumpingContext {
         return path;
     }
 
-    public DALRuntimeContext getDalRuntimeContext() {
-        return dalRuntimeContext;
+    public DALRuntimeContext getRuntimeContext() {
+        return runtimeContext;
     }
 
     @Deprecated
-    public String inspect(Data data) {
-        InspectorBk inspectorBk = dalRuntimeContext.fetchInspector(data);
+    public DumpingContext inspect(Data data) {
+        InspectorBk inspectorBk = runtimeContext.fetchInspector(data);
         if (inspectorBk == null) {
-            Dumper dumper = dalRuntimeContext.fetchDumper(data);
+            Dumper dumper = runtimeContext.fetchDumper(data);
             if (dumper != null) {
                 dumper.dumpDetail(data, this);
-                return "";
+                return this;
             }
         }
         inspectorBk.inspect(data, this);
-        return "";
+        return this;
     }
 
     @Deprecated
-    public String dump(Data data) {
-        InspectorBk inspectorBk = dalRuntimeContext.fetchInspector(data);
+    public DumpingContext dump(Data data) {
+        InspectorBk inspectorBk = runtimeContext.fetchInspector(data);
         if (inspectorBk == null) {
-            Dumper dumper = dalRuntimeContext.fetchDumper(data);
+            Dumper dumper = runtimeContext.fetchDumper(data);
             if (dumper != null) {
                 dumper.dump(data, this);
-                return "";
+                return this;
             }
         }
-        return inspectorBk.dump(data, this);
+        inspectorBk.dump(data, this);
+        return this;
     }
 
     public DumpingContext index(int index) {
@@ -69,7 +70,7 @@ public class DumpingContext {
     }
 
     private DumpingContext createSub(String subPath, int indent) {
-        DumpingContext dumpingContext = new DumpingContext(subPath, cache, dalRuntimeContext);
+        DumpingContext dumpingContext = new DumpingContext(subPath, cache, runtimeContext);
         dumpingContext.stringBuilder = stringBuilder;
         dumpingContext.indent = this.indent + indent;
         dumpingContext.splits = splits;

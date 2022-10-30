@@ -24,7 +24,7 @@ public class InspectorCache {
             caches.put(key, path);
             return action.get();
         }
-        dumpingContext.append("*reference* " + reference);
+        dumpingContext.append("*reference* ").append(reference);
         return "*reference* " + reference;
     }
 
