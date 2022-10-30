@@ -11,12 +11,11 @@ public class ListDumper implements Dumper.Cacheable {
 
     @Override
     public void cachedInspect(Data data, DumpingContext context) {
-        DumpingContext dumpingContext = context.dumpingContext();
-        type(data, context.dumpingContext());
-        body(data.getDataList(), dumpingContext);
+        dumpType(data, context);
+        dumpBody(data.getDataList(), context);
     }
 
-    private void body(List<Data> dataList, DumpingContext dumpingContext) {
+    private void dumpBody(List<Data> dataList, DumpingContext dumpingContext) {
         DumpingContext indentContext = dumpingContext.append("[").indent();
         for (int i = 0; i < dataList.size(); i++) {
             indentContext.index(i).newLine().dump(dataList.get(i));
@@ -25,7 +24,7 @@ public class ListDumper implements Dumper.Cacheable {
         dumpingContext.optionalNewLine().append("]");
     }
 
-    protected void type(Data data, DumpingContext context) {
+    protected void dumpType(Data data, DumpingContext context) {
         if (!(data.getInstance() instanceof Iterable) && !(data.getInstance() instanceof Stream)
                 && !data.getInstance().getClass().isArray()) {
             context.append(Classes.getClassName(data.getInstance()));

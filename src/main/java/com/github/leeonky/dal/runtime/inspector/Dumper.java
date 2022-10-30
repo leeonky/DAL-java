@@ -5,7 +5,8 @@ import com.github.leeonky.dal.runtime.Data;
 public interface Dumper {
     Dumper STRING_DUMPER = new StringDumper(),
             VALUE_INSPECTOR = new ValueDumper(),
-            LIST_DUMPER = new ListDumper();
+            LIST_DUMPER = new ListDumper(),
+            MAP_DUMPER = new MapDumper();
 
     void dumpDetail(Data data, DumpingContext dumpingContext);
 
