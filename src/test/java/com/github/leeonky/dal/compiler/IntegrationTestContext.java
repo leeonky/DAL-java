@@ -8,8 +8,6 @@ import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.cucumber.TestCodeCompiler;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.inspector.DumpingContext;
-import com.github.leeonky.dal.runtime.inspector.InspectorBk;
-import com.github.leeonky.dal.runtime.inspector.InspectorFactory;
 import com.github.leeonky.dal.runtime.inspector.ValueDumper;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
@@ -303,29 +301,14 @@ public class IntegrationTestContext {
     }
 
     public void registerEmptyValueDumper() {
-        dal.getRuntimeContextBuilder().registerUserDefinedLiterals(new UserLiteralRule() {
-                    @Override
-                    public Result compile(String token) {
-                        if (token.equals("Empty"))
-                            return Result.of(new Empty());
-                        return Result.empty();
-                    }
+        dal.getRuntimeContextBuilder().registerUserDefinedLiterals(token -> {
+                    if (token.equals("Empty"))
+                        return Result.of(new Empty());
+                    return Result.empty();
                 })
-                .registerInspector(Empty.class, new InspectorFactory() {
+                .registerDumper(Empty.class, data -> new ValueDumper() {
                     @Override
-                    public InspectorBk apply(Data data) {
-                        return new InspectorBk() {
-
-                            @Override
-                            public String inspect(Data data, DumpingContext context) {
-                                new ValueDumper() {
-                                    @Override
-                                    protected void inspectValue(Data data, DumpingContext dumpingContext) {
-                                    }
-                                }.dumpDetail(data, context);
-                                return "xxxx";
-                            }
-                        };
+                    protected void inspectValue(Data data, DumpingContext dumpingContext) {
                     }
                 });
     }

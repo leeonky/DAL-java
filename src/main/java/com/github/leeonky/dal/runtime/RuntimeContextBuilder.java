@@ -372,5 +372,15 @@ public class RuntimeContextBuilder {
                 return InspectorBk.MAP_INSPECTOR_BK;
             });
         }
+
+        public Dumper fetchDumper(Data data) {
+            return dumperFactories.tryGetData(data.getInstance()).map(factory -> factory.apply(data)).orElseGet(() -> {
+                if (data.isNull())
+                    return (_data, dumpingContext) -> dumpingContext.append("null");
+                if (data.isList())
+                    return Dumper.LIST_DUMPER;
+                return Dumper.MAP_DUMPER;
+            });
+        }
     }
 }

@@ -35,11 +35,22 @@ public class DumpingContext {
 
     @Deprecated
     public String inspect(Data data) {
-        return dalRuntimeContext.fetchInspector(data).inspect(data, this);
+        Dumper dumper = dalRuntimeContext.fetchDumper(data);
+        if (dumper != null) {
+            dumper.dumpDetail(data, this);
+            return "";
+        }
+        dalRuntimeContext.fetchInspector(data).inspect(data, this);
+        return "";
     }
 
     @Deprecated
     public String dump(Data data) {
+        Dumper dumper = dalRuntimeContext.fetchDumper(data);
+        if (dumper != null) {
+            dumper.dump(data, this);
+            return "";
+        }
         return dalRuntimeContext.fetchInspector(data).dump(data, this);
     }
 

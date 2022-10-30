@@ -1,12 +1,8 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.Order;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import com.github.leeonky.dal.runtime.inspector.DumpingContext;
-import com.github.leeonky.dal.runtime.inspector.InspectorBk;
 
 import java.lang.reflect.Type;
 import java.time.*;
@@ -26,38 +22,11 @@ public class Inspectors implements Extension {
         registerValueTypes(dal, Type.class, Number.class, Boolean.class, UUID.class, Instant.class, Date.class,
                 LocalTime.class, LocalDate.class, LocalDateTime.class, OffsetDateTime.class, ZonedDateTime.class,
                 YearMonth.class);
-//        TODO remove
-        dal.getRuntimeContextBuilder().registerInspector(CharSequence.class, data -> new InspectorBk() {
-            @Override
-            public String inspect(Data data, DumpingContext context) {
-                STRING_DUMPER.dumpDetail(data, context);
-                return "";
-            }
-
-            @Override
-            public String dump(Data data, DumpingContext context) {
-                STRING_DUMPER.dump(data, context);
-                return "";
-            }
-        });
+        dal.getRuntimeContextBuilder().registerDumper(CharSequence.class, data -> STRING_DUMPER);
     }
 
     private void registerValueTypes(DAL dal, Class<?>... types) {
-        RuntimeContextBuilder builder = dal.getRuntimeContextBuilder();
         for (Class<?> type : types)
-            builder.registerInspector(type, data -> new InspectorBk() {
-                @Override
-                public String inspect(Data data, DumpingContext context) {
-                    VALUE_INSPECTOR.dumpDetail(data, context);
-                    return "";
-                }
-
-                @Override
-                public String dump(Data data, DumpingContext context) {
-                    VALUE_INSPECTOR.dump(data, context);
-                    return "";
-                }
-            });
+            dal.getRuntimeContextBuilder().registerDumper(type, data -> VALUE_INSPECTOR);
     }
-
 }
