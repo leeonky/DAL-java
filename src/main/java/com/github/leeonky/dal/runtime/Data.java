@@ -146,11 +146,11 @@ public class Data {
     }
 
     public String dumpDetail() {
-        return DumpingContext.rootContext(context).dumpDetail(this).content();
+        return DumpingContext.rootContext(context).dump(this).content();
     }
 
     public String dump() {
-        return DumpingContext.rootContext(context).dump(this).content();
+        return DumpingContext.rootContext(context).dumpValue(this).content();
     }
 
     public <T> T newBlockScope(Supplier<T> supplier) {

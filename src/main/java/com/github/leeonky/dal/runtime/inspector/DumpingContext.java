@@ -3,27 +3,33 @@ package com.github.leeonky.dal.runtime.inspector;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static java.lang.String.format;
 import static java.util.Collections.nCopies;
 
-//TODO refactor
 public class DumpingContext {
+    private final Map<DumpingCacheKey, String> caches;
     private final String path;
-    private final DumpingCache cache;
     private final DALRuntimeContext runtimeContext;
-    private StringBuilder stringBuilder = new StringBuilder();
-    private StringBuilder splits = new StringBuilder();
-    private int indent = 0;
+    private final StringBuilder stringBuilder;
+    private final int indent;
+    private StringBuilder splits;
     private int length = 0;
 
-    private DumpingContext(String path, DumpingCache cache, DALRuntimeContext runtimeContext) {
+    private DumpingContext(String path, DALRuntimeContext runtimeContext, StringBuilder stringBuilder, int indent,
+                           Map<DumpingCacheKey, String> caches, StringBuilder splits) {
         this.path = path;
-        this.cache = cache;
         this.runtimeContext = runtimeContext;
+        this.stringBuilder = stringBuilder;
+        this.indent = indent;
+        this.caches = caches;
+        this.splits = splits;
     }
 
     public static DumpingContext rootContext(DALRuntimeContext context) {
-        return new DumpingContext("root", DumpingCache.cache(), context);
+        return new DumpingContext("root", context, new StringBuilder(), 0, new HashMap<>(), new StringBuilder());
     }
 
     public String getPath() {
@@ -34,15 +40,13 @@ public class DumpingContext {
         return runtimeContext;
     }
 
-    @Deprecated
-    public DumpingContext dumpDetail(Data data) {
-        runtimeContext.fetchDumper(data).dumpDetail(data, this);
+    public DumpingContext dump(Data data) {
+        runtimeContext.fetchDumper(data).dump(data, this);
         return this;
     }
 
-    @Deprecated
-    public DumpingContext dump(Data data) {
-        runtimeContext.fetchDumper(data).dump(data, this);
+    public DumpingContext dumpValue(Data data) {
+        runtimeContext.fetchDumper(data).dumpValue(data, this);
         return this;
     }
 
@@ -54,15 +58,6 @@ public class DumpingContext {
         return createSub(format("%s.%s", path, property), 0);
     }
 
-    private DumpingContext createSub(String subPath, int indent) {
-        DumpingContext dumpingContext = new DumpingContext(subPath, cache, runtimeContext);
-        dumpingContext.stringBuilder = stringBuilder;
-        dumpingContext.indent = this.indent + indent;
-        dumpingContext.splits = splits;
-        splits = new StringBuilder();
-        return dumpingContext;
-    }
-
     public DumpingContext indent() {
         return createSub(path, 1);
     }
@@ -71,15 +66,23 @@ public class DumpingContext {
         return createSub(path, 0);
     }
 
+    private DumpingContext createSub(String subPath, int indent) {
+        return new DumpingContext(subPath, runtimeContext, stringBuilder, this.indent + indent, caches, takeSplits());
+    }
+
+    private StringBuilder takeSplits() {
+        StringBuilder temp = splits;
+        splits = new StringBuilder();
+        return temp;
+    }
+
     public void cached(Data data, Runnable runnable) {
-        cache.act(path, data, this, runnable);
+        act(path, data, runnable);
     }
 
     public DumpingContext append(String s) {
-        if (splits.length() != 0) {
-            stringBuilder.append(splits);
-            splits = new StringBuilder();
-        }
+        if (splits.length() != 0)
+            stringBuilder.append(takeSplits());
         stringBuilder.append(s);
         length = stringBuilder.length();
         return this;
@@ -103,5 +106,15 @@ public class DumpingContext {
         if (length != stringBuilder.length())
             newLine();
         return this;
+    }
+
+    private void act(String path, Data data, Runnable runnable) {
+        DumpingCacheKey key = new DumpingCacheKey(data);
+        String reference = caches.get(key);
+        if (reference == null) {
+            caches.put(key, path);
+            runnable.run();
+        } else
+            append("*reference* " + reference);
     }
 }

@@ -32,7 +32,7 @@ public class MapDumper implements Dumper.Cacheable {
             context.append("*throw* " + e);
             return;
         }
-        context.dump(value);
+        context.dumpValue(value);
     }
 
     protected String key(Object o) {

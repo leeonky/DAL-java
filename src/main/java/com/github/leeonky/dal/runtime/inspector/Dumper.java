@@ -8,21 +8,21 @@ public interface Dumper {
             LIST_DUMPER = new ListDumper(),
             MAP_DUMPER = new MapDumper();
 
-    void dumpDetail(Data data, DumpingContext dumpingContext);
+    void dump(Data data, DumpingContext dumpingContext);
 
-    default void dump(Data data, DumpingContext dumpingContext) {
-        dumpDetail(data, dumpingContext);
+    default void dumpValue(Data data, DumpingContext dumpingContext) {
+        dump(data, dumpingContext);
     }
 
     interface Cacheable extends Dumper {
 
         @Override
-        default void dumpDetail(Data data, DumpingContext context) {
+        default void dump(Data data, DumpingContext context) {
             context.cached(data, () -> cachedInspect(data, context));
         }
 
         @Override
-        default void dump(Data data, DumpingContext context) {
+        default void dumpValue(Data data, DumpingContext context) {
             context.cached(data, () -> cachedDump(data, context));
         }
 

@@ -13,14 +13,14 @@ public class ValueDumper implements Dumper {
     }
 
     @Override
-    public void dumpDetail(Data data, DumpingContext dumpingContext) {
+    public void dump(Data data, DumpingContext dumpingContext) {
         inspectType(data, dumpingContext);
         dumpingContext.newLine();
         inspectValue(data, dumpingContext);
     }
 
     @Override
-    public void dump(Data data, DumpingContext dumpingContext) {
+    public void dumpValue(Data data, DumpingContext dumpingContext) {
         inspectType(data, dumpingContext);
         dumpingContext.appendThen(" ");
         inspectValue(data, dumpingContext);
