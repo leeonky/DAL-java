@@ -37,9 +37,9 @@ public interface ConditionalChecker extends Checker {
     String message(CheckingContext checkingContext);
 
     @Override
-    default boolean verify(CheckingContext checkingContext, int position) {
+    default boolean verify(CheckingContext checkingContext) {
         if (failed(checkingContext))
-            throw new AssertionFailure(message(checkingContext), position);
+            throw new AssertionFailure(message(checkingContext), checkingContext.getPosition());
         return true;
     }
 

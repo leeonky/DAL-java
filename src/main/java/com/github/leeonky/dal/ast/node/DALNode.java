@@ -23,7 +23,7 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
 
     public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
         CheckingContext checkingContext = createCheckingContext(actualNode, context);
-        return context.fetchEqualsChecker(checkingContext).verify(checkingContext, getPositionBegin());
+        return context.fetchEqualsChecker(checkingContext).verify(checkingContext);
     }
 
     private CheckingContext createCheckingContext(DALNode actualNode, DALRuntimeContext context) {
@@ -32,7 +32,7 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
 
     public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
         CheckingContext checkingContext = createCheckingContext(actualNode, context);
-        return context.fetchMatchesChecker(checkingContext).verify(checkingContext, getPositionBegin());
+        return context.fetchMatchesChecker(checkingContext).verify(checkingContext);
     }
 
     public abstract String inspect();

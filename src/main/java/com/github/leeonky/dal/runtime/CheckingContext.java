@@ -8,6 +8,7 @@ import static java.lang.String.format;
 public class CheckingContext {
     private final Data expected;
     private final Data actual;
+    private final int position;
 
     public Data getActual() {
         return actual;
@@ -20,6 +21,7 @@ public class CheckingContext {
     public CheckingContext(Data expected, Data actual, int positionBegin) {
         this.expected = expected;
         this.actual = actual;
+        position = positionBegin;
     }
 
     public boolean objectNotEquals() {
@@ -97,5 +99,9 @@ public class CheckingContext {
         if (isAllNumber())
             return ConditionalChecker.MATCH_NUMBER_CHECKER;
         return ConditionalChecker.MATCH_CHECKER;
+    }
+
+    public int getPosition() {
+        return position;
     }
 }

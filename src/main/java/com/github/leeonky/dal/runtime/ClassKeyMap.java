@@ -9,7 +9,6 @@ import java.util.Optional;
 import static java.util.Map.Entry.comparingByKey;
 
 public class ClassKeyMap<T> extends LinkedHashMap<Class<?>, T> {
-
     public Optional<T> tryGetData(Object object) {
         if (object == null)
             return Optional.empty();

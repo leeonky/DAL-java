@@ -1,9 +1,9 @@
 package com.github.leeonky.dal.runtime;
 
 public interface Checker {
-    boolean verify(CheckingContext checkingContext, int position);
+    boolean verify(CheckingContext checkingContext);
 
     default Checker and(Checker another) {
-        return (expectActual, position) -> verify(expectActual, position) && another.verify(expectActual, position);
+        return (expectActual) -> verify(expectActual) && another.verify(expectActual);
     }
 }
