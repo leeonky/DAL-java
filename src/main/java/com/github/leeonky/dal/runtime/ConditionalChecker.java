@@ -4,9 +4,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public interface ConditionalChecker extends Checker {
-    Checker MATCH_NULL_CHECKER = conditionalChecker(ExpectActual::actualNotNull, ExpectActual::notationMatch),
-            MATCH_NUMBER_CHECKER = conditionalChecker(ExpectActual::numberNotEquals, ExpectActual::notationNumberMatch),
-            EQUALS_CHECKER = conditionalChecker(ExpectActual::objectNotEquals, ExpectActual::notationEqualTo),
+    Checker MATCH_NULL_CHECKER = conditionalChecker(CheckingContext::actualNotNull, CheckingContext::notationMatch),
+            MATCH_NUMBER_CHECKER = conditionalChecker(CheckingContext::numberNotEquals, CheckingContext::notationNumberMatch),
+            EQUALS_CHECKER = conditionalChecker(CheckingContext::objectNotEquals, CheckingContext::notationEqualTo),
             MATCH_CHECKER = matchTypeChecker(String.class, Number.class)
                     .and(matchTypeChecker(String.class, Boolean.class))
                     .and(matchTypeChecker(Number.class, String.class))
@@ -15,31 +15,31 @@ public interface ConditionalChecker extends Checker {
 
     static ConditionalChecker matchTypeChecker(Class<?> actualType, Class<?> expectType) {
         return conditionalChecker(expectActual -> expectActual.isInstanceOf(actualType, expectType),
-                ExpectActual::cannotCompare);
+                CheckingContext::cannotCompare);
     }
 
-    static ConditionalChecker conditionalChecker(Predicate<ExpectActual> failed, Function<ExpectActual, String> message) {
+    static ConditionalChecker conditionalChecker(Predicate<CheckingContext> failed, Function<CheckingContext, String> message) {
         return new ConditionalChecker() {
             @Override
-            public String message(ExpectActual expectActual) {
-                return message.apply(expectActual);
+            public String message(CheckingContext checkingContext) {
+                return message.apply(checkingContext);
             }
 
             @Override
-            public boolean failed(ExpectActual expectActual) {
-                return failed.test(expectActual);
+            public boolean failed(CheckingContext checkingContext) {
+                return failed.test(checkingContext);
             }
         };
     }
 
-    boolean failed(ExpectActual expectActual);
+    boolean failed(CheckingContext checkingContext);
 
-    String message(ExpectActual expectActual);
+    String message(CheckingContext checkingContext);
 
     @Override
-    default boolean verify(ExpectActual expectActual, int position) {
-        if (failed(expectActual))
-            throw new AssertionFailure(message(expectActual), position);
+    default boolean verify(CheckingContext checkingContext, int position) {
+        if (failed(checkingContext))
+            throw new AssertionFailure(message(checkingContext), position);
         return true;
     }
 
@@ -47,12 +47,12 @@ public interface ConditionalChecker extends Checker {
         private String message;
 
         @Override
-        public boolean failed(ExpectActual expectActual) {
+        public boolean failed(CheckingContext checkingContext) {
             try {
-                Data result = expectActual.convertToExpectedType();
-                if (expectActual.equalTo(result))
+                Data result = checkingContext.convertToExpectedType();
+                if (checkingContext.equalTo(result))
                     return false;
-                message = expectActual.notationMatch(result);
+                message = checkingContext.notationMatch(result);
             } catch (Exception e) {
                 message = e.getMessage();
             }
@@ -60,7 +60,7 @@ public interface ConditionalChecker extends Checker {
         }
 
         @Override
-        public String message(ExpectActual expectActual1) {
+        public String message(CheckingContext checkingContext1) {
             return message;
         }
     }

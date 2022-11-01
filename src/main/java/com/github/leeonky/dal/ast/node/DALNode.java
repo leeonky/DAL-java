@@ -2,8 +2,8 @@ package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Matcher;
+import com.github.leeonky.dal.runtime.CheckingContext;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.ExpectActual;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.NodeBase;
 
@@ -22,13 +22,17 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     }
 
     public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        ExpectActual expectActual = new ExpectActual(evaluateData(context), actualNode.evaluateData(context));
-        return context.fetchEqualsChecker(expectActual).verify(expectActual, getPositionBegin());
+        CheckingContext checkingContext = createCheckingContext(actualNode, context);
+        return context.fetchEqualsChecker(checkingContext).verify(checkingContext, getPositionBegin());
+    }
+
+    private CheckingContext createCheckingContext(DALNode actualNode, DALRuntimeContext context) {
+        return new CheckingContext(evaluateData(context), actualNode.evaluateData(context), getPositionBegin());
     }
 
     public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
-        ExpectActual expectActual = new ExpectActual(evaluateData(context), actualNode.evaluateData(context));
-        return context.fetchMatchesChecker(expectActual).verify(expectActual, getPositionBegin());
+        CheckingContext checkingContext = createCheckingContext(actualNode, context);
+        return context.fetchMatchesChecker(checkingContext).verify(checkingContext, getPositionBegin());
     }
 
     public abstract String inspect();

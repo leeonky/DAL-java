@@ -339,14 +339,14 @@ public class RuntimeContextBuilder {
             });
         }
 
-        public Checker fetchEqualsChecker(ExpectActual expectActual) {
-            return equalsCheckers.tryGetData(expectActual.getExpectInstance())
+        public Checker fetchEqualsChecker(CheckingContext checkingContext) {
+            return equalsCheckers.tryGetData(checkingContext.getExpectInstance())
                     .orElse(ConditionalChecker.EQUALS_CHECKER);
         }
 
-        public Checker fetchMatchesChecker(ExpectActual expectActual) {
-            return matchesCheckers.tryGetData(expectActual.getExpectInstance())
-                    .orElseGet(expectActual::defaultMatchesChecker);
+        public Checker fetchMatchesChecker(CheckingContext checkingContext) {
+            return matchesCheckers.tryGetData(checkingContext.getExpectInstance())
+                    .orElseGet(checkingContext::defaultMatchesChecker);
         }
 
         public Dumper fetchDumper(Data data) {

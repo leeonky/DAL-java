@@ -15,6 +15,7 @@ import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
+//TODO use generic
 public class Data {
     private final SchemaType schemaType;
     private final DALRuntimeContext context;

@@ -5,7 +5,7 @@ import com.github.leeonky.interpreter.StringWithPosition;
 
 import static java.lang.String.format;
 
-public class ExpectActual {
+public class CheckingContext {
     private final Data expected;
     private final Data actual;
 
@@ -17,7 +17,7 @@ public class ExpectActual {
         return expected;
     }
 
-    public ExpectActual(Data expected, Data actual) {
+    public CheckingContext(Data expected, Data actual, int positionBegin) {
         this.expected = expected;
         this.actual = actual;
     }
