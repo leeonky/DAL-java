@@ -26,7 +26,7 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
         Data expected = evaluateData(context);
         Data actual = actualNode.evaluateData(context);
-        ConditionalChecker checker = context.getConditionalChecker(expected, actual);
+        ConditionalChecker checker = context.fetchEqualsChecker(expected, actual);
         return checker.verify(new CheckingContext(expected, actual, checker.transformExpected(expected),
                 checker.transformActual(actual), getPositionBegin()));
     }

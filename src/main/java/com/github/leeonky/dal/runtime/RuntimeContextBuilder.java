@@ -47,8 +47,6 @@ public class RuntimeContextBuilder {
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
     private final Map<String, TextFormatter> textFormatterMap = new LinkedHashMap<>();
     private Converter converter = Converter.getInstance();
-    @Deprecated
-    private final ClassKeyMap<ConditionalChecker> equalsCheckers = new ClassKeyMap<>();
     private final ClassKeyMap<ConditionalChecker> matchesCheckers = new ClassKeyMap<>();
     private final ClassKeyMap<DumperFactory> dumperFactories = new ClassKeyMap<>();
     private final ClassKeyMap<ClassKeyMap<CheckerFactory>> equalsCheckerFactories = new ClassKeyMap<>();
@@ -171,11 +169,6 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerMatchesChecker(Class<?> type, ConditionalChecker checker) {
         matchesCheckers.put(type, checker);
-        return this;
-    }
-
-    public RuntimeContextBuilder registerEqualsChecker(Class<?> type, ConditionalChecker checker) {
-        equalsCheckers.put(type, checker);
         return this;
     }
 
@@ -346,14 +339,7 @@ public class RuntimeContextBuilder {
             });
         }
 
-        @Deprecated
-//        TODO remove
-        public ConditionalChecker fetchEqualsChecker(CheckingContext checkingContext) {
-            return equalsCheckers.tryGetData(checkingContext.getExpectInstance())
-                    .orElse(ConditionalChecker.DEFAULT_EQUALS_CHECKER);
-        }
-
-        public ConditionalChecker getConditionalChecker(Data expected, Data actual) {
+        public ConditionalChecker fetchEqualsChecker(Data expected, Data actual) {
 //                     TODO default check for any expected and actual type
             return equalsCheckerFactories.tryGetData(expected.getInstance())
                     //                     TODO default check for given expected type
