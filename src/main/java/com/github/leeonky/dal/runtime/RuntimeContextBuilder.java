@@ -346,16 +346,19 @@ public class RuntimeContextBuilder {
             });
         }
 
+        @Deprecated
+//        TODO remove
         public ConditionalChecker fetchEqualsChecker(CheckingContext checkingContext) {
             return equalsCheckers.tryGetData(checkingContext.getExpectInstance())
-                    .orElse(ConditionalChecker.EQUALS_CHECKER);
+                    .orElse(ConditionalChecker.DEFAULT_EQUALS_CHECKER);
         }
 
-        public Optional<CheckerFactory> fetchEqualsChecker(Data expected, Data actual) {
+        public ConditionalChecker getConditionalChecker(Data expected, Data actual) {
 //                     TODO default check for any expected and actual type
             return equalsCheckerFactories.tryGetData(expected.getInstance())
                     //                     TODO default check for given expected type
-                    .flatMap(sub -> sub.tryGetData(actual.getInstance()));
+                    .flatMap(classKeyMap -> classKeyMap.tryGetData(actual.getInstance()))
+                    .flatMap(factory -> factory.create(expected, actual)).orElse(ConditionalChecker.DEFAULT_EQUALS_CHECKER);
         }
 
         public ConditionalChecker fetchMatchesChecker(CheckingContext checkingContext) {

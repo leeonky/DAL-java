@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 public interface ConditionalChecker {
     ConditionalChecker MATCH_NULL_CHECKER = conditionalChecker(CheckingContext::actualNotNull, CheckingContext::notationMatch),
             MATCH_NUMBER_CHECKER = conditionalChecker(CheckingContext::numberNotEquals, CheckingContext::notationNumberMatch),
-            EQUALS_CHECKER = conditionalChecker(CheckingContext::objectNotEquals, CheckingContext::notationEqualTo),
+            DEFAULT_EQUALS_CHECKER = conditionalChecker(CheckingContext::objectNotEquals, CheckingContext::notationEqualTo),
             MATCH_CHECKER = matchTypeChecker(String.class, Number.class)
                     .and(matchTypeChecker(String.class, Boolean.class))
                     .and(matchTypeChecker(Number.class, String.class))
@@ -36,6 +36,14 @@ public interface ConditionalChecker {
     boolean failed(CheckingContext checkingContext);
 
     String message(CheckingContext checkingContext);
+
+    default Data transformActual(Data actual) {
+        return actual;
+    }
+
+    default Data transformExpected(Data expected) {
+        return expected;
+    }
 
     @Deprecated
     default ConditionalChecker and(ConditionalChecker another) {
