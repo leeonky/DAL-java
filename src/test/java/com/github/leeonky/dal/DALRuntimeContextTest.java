@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.github.leeonky.dal.Assertions.expect;
+import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -118,31 +119,39 @@ class DALRuntimeContextTest {
         @Nested
         class Equal {
 
-            @BeforeEach
-            void registerChecker() {
-                dal.getRuntimeContextBuilder().registerEqualsChecker(Target.class, checker);
-            }
+            @Nested
+            class SameExpectedAndActualType {
 
-            @Test
-            void pass() {
-                when(checker.failed(any())).thenReturn(false);
+                @BeforeEach
+                void registerChecker() {
+                    dal.getRuntimeContextBuilder().registerEqualsChecker(Target.class, Actual.class,
+                            (expect, actual) -> of(checker));
+                }
 
-                expect(null).use(dal).should("= target");
+                @Test
+                void pass() {
+                    when(checker.failed(any())).thenReturn(false);
 
-                verify(checker).failed(any());
-            }
+                    expect(new Actual()).use(dal).should("= target");
 
-            @Test
-            void should_raise_error_and_throw_with_right_message() {
-                when(checker.failed(any())).thenReturn(true);
-                when(checker.message(any())).thenReturn("customer-error!");
+                    verify(checker).failed(any());
+                }
 
-                assertThatThrownBy(() -> expect(null).use(dal).should("= target"))
-                        .hasMessageContaining("customer-error!");
+                @Test
+                void should_raise_error_and_throw_with_right_message() {
+                    when(checker.failed(any())).thenReturn(true);
+                    when(checker.message(any())).thenReturn("customer-error!");
+
+                    assertThatThrownBy(() -> expect(new Actual()).use(dal).should("= target"))
+                            .hasMessageContaining("customer-error!");
+                }
             }
         }
     }
 
     public static class Target {
+    }
+
+    public static class Actual {
     }
 }

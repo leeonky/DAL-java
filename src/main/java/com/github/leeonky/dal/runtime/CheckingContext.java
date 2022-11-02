@@ -5,9 +5,13 @@ import com.github.leeonky.interpreter.StringWithPosition;
 
 import static java.lang.String.format;
 
+//TODO refactor
 public class CheckingContext {
+    //    TODO rename
     private final Data expected;
     private final Data actual;
+    private final Data transformedExpected;
+    private final Data transformedActual;
     private final int position;
 
     public Data getActual() {
@@ -18,14 +22,16 @@ public class CheckingContext {
         return expected;
     }
 
-    public CheckingContext(Data expected, Data actual, int positionBegin) {
+    public CheckingContext(Data expected, Data actual, Data transformedExpected, Data transformedActual, int positionBegin) {
         this.expected = expected;
         this.actual = actual;
+        this.transformedExpected = transformedExpected;
+        this.transformedActual = transformedActual;
         position = positionBegin;
     }
 
     public boolean objectNotEquals() {
-        return !Calculator.equals(actual, expected);
+        return !Calculator.equals(transformedActual, transformedExpected);
     }
 
     public boolean actualNotNull() {
@@ -82,8 +88,8 @@ public class CheckingContext {
     }
 
     public String verificationMessage(String prefix, String actualPrefix) {
-        String actual = actualPrefix + this.actual.dumpDetail();
-        String expected = this.expected.dumpDetail();
+        String actual = actualPrefix + transformedActual.dumpDetail();
+        String expected = transformedExpected.dumpDetail();
         int position = TextUtil.differentPosition(expected, actual);
         String firstPart = new StringWithPosition(expected).position(position).result(prefix);
         return new StringWithPosition(actual).position(position).result(firstPart + "\nActual: ");
@@ -93,7 +99,7 @@ public class CheckingContext {
         return format("Cannot compare between %s\nand %s", actual.dumpDetail(), expected.dumpDetail());
     }
 
-    Checker defaultMatchesChecker() {
+    ConditionalChecker defaultMatchesChecker() {
         if (expectNull())
             return ConditionalChecker.MATCH_NULL_CHECKER;
         if (isAllNumber())
@@ -103,5 +109,13 @@ public class CheckingContext {
 
     public int getPosition() {
         return position;
+    }
+
+    public Data getTransformedExpected() {
+        return transformedExpected;
+    }
+
+    public Data getTransformedActual() {
+        return transformedActual;
     }
 }

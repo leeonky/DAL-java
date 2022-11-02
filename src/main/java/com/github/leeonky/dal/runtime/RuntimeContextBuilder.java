@@ -47,9 +47,11 @@ public class RuntimeContextBuilder {
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
     private final Map<String, TextFormatter> textFormatterMap = new LinkedHashMap<>();
     private Converter converter = Converter.getInstance();
-    private final ClassKeyMap<Checker> equalsCheckers = new ClassKeyMap<>();
-    private final ClassKeyMap<Checker> matchesCheckers = new ClassKeyMap<>();
+    @Deprecated
+    private final ClassKeyMap<ConditionalChecker> equalsCheckers = new ClassKeyMap<>();
+    private final ClassKeyMap<ConditionalChecker> matchesCheckers = new ClassKeyMap<>();
     private final ClassKeyMap<DumperFactory> dumperFactories = new ClassKeyMap<>();
+    private final ClassKeyMap<ClassKeyMap<CheckerFactory>> equalsCheckerFactories = new ClassKeyMap<>();
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -167,13 +169,18 @@ public class RuntimeContextBuilder {
         return curryingMethodArgRanges.get(method);
     }
 
-    public RuntimeContextBuilder registerMatchesChecker(Class<?> type, Checker checker) {
+    public RuntimeContextBuilder registerMatchesChecker(Class<?> type, ConditionalChecker checker) {
         matchesCheckers.put(type, checker);
         return this;
     }
 
-    public RuntimeContextBuilder registerEqualsChecker(Class<?> type, Checker checker) {
+    public RuntimeContextBuilder registerEqualsChecker(Class<?> type, ConditionalChecker checker) {
         equalsCheckers.put(type, checker);
+        return this;
+    }
+
+    public RuntimeContextBuilder registerEqualsChecker(Class<?> expected, Class<?> actual, CheckerFactory factory) {
+        equalsCheckerFactories.computeIfAbsent(expected, _ignore -> new ClassKeyMap<>()).put(actual, factory);
         return this;
     }
 
@@ -339,12 +346,19 @@ public class RuntimeContextBuilder {
             });
         }
 
-        public Checker fetchEqualsChecker(CheckingContext checkingContext) {
+        public ConditionalChecker fetchEqualsChecker(CheckingContext checkingContext) {
             return equalsCheckers.tryGetData(checkingContext.getExpectInstance())
                     .orElse(ConditionalChecker.EQUALS_CHECKER);
         }
 
-        public Checker fetchMatchesChecker(CheckingContext checkingContext) {
+        public Optional<CheckerFactory> fetchEqualsChecker(Data expected, Data actual) {
+//                     TODO default check for any expected and actual type
+            return equalsCheckerFactories.tryGetData(expected.getInstance())
+                    //                     TODO default check for given expected type
+                    .flatMap(sub -> sub.tryGetData(actual.getInstance()));
+        }
+
+        public ConditionalChecker fetchMatchesChecker(CheckingContext checkingContext) {
             return matchesCheckers.tryGetData(checkingContext.getExpectInstance())
                     .orElseGet(checkingContext::defaultMatchesChecker);
         }

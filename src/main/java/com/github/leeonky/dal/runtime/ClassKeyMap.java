@@ -15,6 +15,7 @@ public class ClassKeyMap<T> extends LinkedHashMap<Class<?>, T> {
         T data = get(object.getClass());
         if (data != null)
             return Optional.of(data);
+//        TODO sort in put improve performance
         return entrySet().stream().filter(e -> e.getKey().isInstance(object))
                 .sorted(comparingByKey(Classes::compareByExtends))
                 .map(Map.Entry::getValue).findFirst();

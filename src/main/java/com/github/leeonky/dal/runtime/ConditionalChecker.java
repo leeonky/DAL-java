@@ -3,8 +3,9 @@ package com.github.leeonky.dal.runtime;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface ConditionalChecker extends Checker {
-    Checker MATCH_NULL_CHECKER = conditionalChecker(CheckingContext::actualNotNull, CheckingContext::notationMatch),
+//TODO rename to Checker
+public interface ConditionalChecker {
+    ConditionalChecker MATCH_NULL_CHECKER = conditionalChecker(CheckingContext::actualNotNull, CheckingContext::notationMatch),
             MATCH_NUMBER_CHECKER = conditionalChecker(CheckingContext::numberNotEquals, CheckingContext::notationNumberMatch),
             EQUALS_CHECKER = conditionalChecker(CheckingContext::objectNotEquals, CheckingContext::notationEqualTo),
             MATCH_CHECKER = matchTypeChecker(String.class, Number.class)
@@ -36,7 +37,31 @@ public interface ConditionalChecker extends Checker {
 
     String message(CheckingContext checkingContext);
 
-    @Override
+    @Deprecated
+    default ConditionalChecker and(ConditionalChecker another) {
+        return new ConditionalChecker() {
+            private String message;
+
+            @Override
+            public boolean failed(CheckingContext checkingContext) {
+                boolean verified = ConditionalChecker.this.verify(checkingContext);
+                if (!verified) {
+                    message = ConditionalChecker.this.message(checkingContext);
+                    return true;
+                }
+                verified = another.verify(checkingContext);
+                if (!verified)
+                    message = another.message(checkingContext);
+                return !verified;
+            }
+
+            @Override
+            public String message(CheckingContext checkingContext) {
+                return message;
+            }
+        };
+    }
+
     default boolean verify(CheckingContext checkingContext) {
         if (failed(checkingContext))
             throw new AssertionFailure(message(checkingContext), checkingContext.getPosition());
