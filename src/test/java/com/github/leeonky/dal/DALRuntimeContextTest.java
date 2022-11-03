@@ -80,7 +80,17 @@ class DALRuntimeContextTest {
     @Nested
     class CustomizedChecker {
         DAL dal = new DAL();
-        ConditionalChecker checker = spy(ConditionalChecker.class);
+        ConditionalChecker checker = spy(new ConditionalChecker() {
+            @Override
+            public boolean failed(CheckingContext checkingContext) {
+                return false;
+            }
+
+            @Override
+            public String message(CheckingContext checkingContext) {
+                return null;
+            }
+        });
 
         @BeforeEach
         void registerLiteralAndChecker() {

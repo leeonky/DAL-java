@@ -50,6 +50,7 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<ConditionalChecker> matchesCheckers = new ClassKeyMap<>();
     private final ClassKeyMap<DumperFactory> dumperFactories = new ClassKeyMap<>();
     private final ClassKeyMap<ClassKeyMap<CheckerFactory>> equalsCheckerFactories = new ClassKeyMap<>();
+    private final LinkedList<CheckerFactory> highPriorityMatchesCheckerFactories = new LinkedList<>();
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -169,6 +170,11 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerMatchesChecker(Class<?> type, ConditionalChecker checker) {
         matchesCheckers.put(type, checker);
+        return this;
+    }
+
+    public RuntimeContextBuilder registerMatchesChecker(CheckerFactory factory) {
+        highPriorityMatchesCheckerFactories.add(factory);
         return this;
     }
 
@@ -348,6 +354,11 @@ public class RuntimeContextBuilder {
         }
 
         public ConditionalChecker fetchMatchesChecker(CheckingContext checkingContext) {
+            for (CheckerFactory checkerFactory : highPriorityMatchesCheckerFactories) {
+                Optional<ConditionalChecker> conditionalChecker = checkerFactory.create(checkingContext.getExpected(), checkingContext.getActual());
+                if (conditionalChecker.isPresent())
+                    return conditionalChecker.get();
+            }
             return matchesCheckers.tryGetData(checkingContext.getExpectInstance())
                     .orElseGet(checkingContext::defaultMatchesChecker);
         }

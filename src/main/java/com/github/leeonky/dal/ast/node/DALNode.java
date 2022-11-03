@@ -27,8 +27,8 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         Data expected = evaluateData(context);
         Data actual = actualNode.evaluateData(context);
         ConditionalChecker checker = context.fetchEqualsChecker(expected, actual);
-        return checker.verify(new CheckingContext(expected, actual, checker.transformExpected(expected),
-                checker.transformActual(actual), getPositionBegin()));
+        return checker.verify(new CheckingContext(expected, actual, checker.transformExpected(expected, context),
+                checker.transformActual(actual, context), getPositionBegin()));
     }
 
     private CheckingContext createCheckingContext(DALNode actualNode, DALRuntimeContext context) {
@@ -38,8 +38,12 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     }
 
     public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+        Data expected = evaluateData(context);
+        Data actual = actualNode.evaluateData(context);
         CheckingContext checkingContext = createCheckingContext(actualNode, context);
-        return context.fetchMatchesChecker(checkingContext).verify(checkingContext);
+        ConditionalChecker checker = context.fetchMatchesChecker(checkingContext);
+        return checker.verify(new CheckingContext(expected, actual, checker.transformExpected(expected, context),
+                checker.transformActual(actual, context), getPositionBegin()));
     }
 
     public abstract String inspect();
