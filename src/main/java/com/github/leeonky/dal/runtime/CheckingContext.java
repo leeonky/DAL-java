@@ -5,83 +5,60 @@ import com.github.leeonky.interpreter.StringWithPosition;
 
 import static java.lang.String.format;
 
-//TODO refactor
 public class CheckingContext {
-    //    TODO rename
-    private final Data expected;
-    private final Data actual;
-    private final Data transformedExpected;
-    private final Data transformedActual;
+    private final Data originalExpected, originalActual, expected, actual;
     private final int position;
 
-    public Data getActual() {
-        return actual;
+    public Data getOriginalActual() {
+        return originalActual;
     }
 
-    public Data getExpected() {
-        return expected;
+    public Data getOriginalExpected() {
+        return originalExpected;
     }
 
-    public CheckingContext(Data expected, Data actual, Data transformedExpected, Data transformedActual, int positionBegin) {
+    public CheckingContext(Data originalExpected, Data originalActual, Data expected, Data actual, int position) {
+        this.originalExpected = originalExpected;
+        this.originalActual = originalActual;
         this.expected = expected;
         this.actual = actual;
-        this.transformedExpected = transformedExpected;
-        this.transformedActual = transformedActual;
-        position = positionBegin;
+        this.position = position;
     }
 
     public boolean objectNotEquals() {
-        return !Calculator.equals(transformedActual, transformedExpected);
+        return !Calculator.equals(actual, expected);
     }
 
-    public Object getExpectInstance() {
-        return expected.getInstance();
+    public String messageEqualTo() {
+        return verificationMessage("Expected to be equal to: ", "");
     }
 
-    public boolean expectNull() {
-        return expected.isNull();
-    }
-
-    public String notationEqualTo() {
-        return verificationMessage("Expected to be equal to: ");
-    }
-
-    public String notationMatch() {
-        return verificationMessage("Expected to match: ", transformedActual.getInstance() == actual.getInstance() ? ""
-                : " converted from: " + actual.dumpDetail());
-    }
-
-    public String verificationMessage(String prefix) {
-        return verificationMessage(prefix, "");
+    public String messageMatch() {
+        return verificationMessage("Expected to match: ", actual.getInstance() == originalActual.getInstance() ? ""
+                : " converted from: " + originalActual.dumpAll());
     }
 
     public String verificationMessage(String prefix, String actualPostfix) {
-        String actual = transformedActual.dumpDetail() + actualPostfix;
-        String expected = transformedExpected.dumpDetail();
+        String actual = this.actual.dumpAll() + actualPostfix;
+        String expected = this.expected.dumpAll();
         int position = TextUtil.differentPosition(expected, actual);
-        String firstPart = new StringWithPosition(expected).position(position).result(prefix);
-        return new StringWithPosition(actual).position(position).result(firstPart + "\nActual: ");
+        return new StringWithPosition(actual).position(position)
+                .result(new StringWithPosition(expected).position(position).result(prefix) + "\nActual: ");
     }
 
     public String cannotCompare() {
-        return format("Cannot compare between %s\nand %s", actual.dumpDetail(), expected.dumpDetail());
-    }
-
-    Checker defaultMatchesChecker() {
-        if (expectNull())
-            return Checker.MATCH_NULL_CHECKER;
-        return Checker.MATCH_CHECKER;
+        return format("Cannot compare between %s\nand %s", actual.dumpAll(), expected.dumpAll());
     }
 
     public int getPosition() {
         return position;
     }
 
-    public Data getTransformedExpected() {
-        return transformedExpected;
+    public Data getExpected() {
+        return expected;
     }
 
-    public Data getTransformedActual() {
-        return transformedActual;
+    public Data getActual() {
+        return actual;
     }
 }

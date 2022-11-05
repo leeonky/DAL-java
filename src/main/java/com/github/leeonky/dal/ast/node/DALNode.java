@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.ast.opt.Equal;
+import com.github.leeonky.dal.ast.opt.Factory;
 import com.github.leeonky.dal.ast.opt.Matcher;
 import com.github.leeonky.dal.runtime.AssertionFailure;
 import com.github.leeonky.dal.runtime.Checker;
@@ -23,31 +24,31 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         return evaluateData(context).getInstance();
     }
 
-    //    TODO refactor
     public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        Data expected = evaluateData(context);
-        Data actual = actualNode.evaluateData(context);
-        Checker checker = context.fetchEqualsChecker(expected, actual);
-        return checker.verify(new CheckingContext(expected, actual, checker.transformExpected(expected, context),
-                transformActual(context, actual, checker, expected), getPositionBegin()));
+        return verify(actualNode, context, DALRuntimeContext::fetchEqualsChecker);
     }
 
-    private Data transformActual(DALRuntimeContext context, Data actual, Checker checker, Data expected) {
+    public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+        return verify(actualNode, context, DALRuntimeContext::fetchMatchingChecker);
+    }
+
+    private boolean verify(DALNode actualNode, DALRuntimeContext context,
+                           Factory.TriFunction<DALRuntimeContext, Data, Data, Checker> factory) {
+        Data expected = evaluateData(context);
+        Data actual = actualNode.evaluateData(context);
+        Checker checker = factory.apply(context, expected, actual);
+        return checker.verify(createContext(context, expected, actual, checker));
+    }
+
+    private CheckingContext createContext(DALRuntimeContext context, Data expected, Data actual, Checker checker) {
+        Data transformedActual;
         try {
-            return checker.transformActual(actual, expected, context);
+            transformedActual = checker.transformActual(actual, expected, context);
         } catch (Exception ex) {
             throw new AssertionFailure(ex.getMessage(), getPositionBegin());
         }
-    }
-
-    //    TODO refactor
-    public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
-        Data expected = evaluateData(context);
-        Data actual = actualNode.evaluateData(context);
-        CheckingContext checkingContext = new CheckingContext(expected, actual, expected, actual, getPositionBegin());
-        Checker checker = context.fetchMatchingChecker(checkingContext.getExpected(), checkingContext.getActual());
-        return checker.verify(new CheckingContext(expected, actual, checker.transformExpected(expected, context),
-                transformActual(context, actual, checker, expected), getPositionBegin()));
+        return new CheckingContext(expected, actual, checker.transformExpected(expected, context),
+                transformedActual, getPositionBegin());
     }
 
     public abstract String inspect();

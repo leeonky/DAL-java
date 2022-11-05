@@ -260,7 +260,7 @@ public class IntegrationTestContext {
     public void verifyDumpedData(String verification) {
         RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(null);
 
-        String dump = runtimeContext.wrap(input).dump();
+        String dump = runtimeContext.wrap(input).dumpValue();
         assertThat(dump).isEqualTo(verification.replace("#package#", testCodeCompiler.packagePrefix()));
     }
 

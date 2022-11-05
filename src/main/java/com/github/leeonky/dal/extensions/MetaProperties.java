@@ -18,7 +18,7 @@ public class MetaProperties implements Extension {
         Data data = metaData.evaluateInput();
         if (data.isList())
             return data.getListSize();
-        throw new IllegalStateException(format("Invalid meta property `size` for: %s", data.dumpDetail()));
+        throw new IllegalStateException(format("Invalid meta property `size` for: %s", data.dumpAll()));
     }
 
     private static Object throw_(MetaData metaData) {

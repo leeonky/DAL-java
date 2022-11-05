@@ -162,7 +162,7 @@ class DataTest {
 
         @Test
         void dump_null_value() {
-            assertThat(build.wrap(null).dump()).isEqualTo("null");
+            assertThat(build.wrap(null).dumpValue()).isEqualTo("null");
         }
     }
 

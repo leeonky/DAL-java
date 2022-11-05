@@ -3,8 +3,8 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 public interface Checker {
-    Checker MATCH_NULL_CHECKER = CheckingContext::notationMatch;
-    Checker DEFAULT_EQUALS_CHECKER = CheckingContext::notationEqualTo;
+    Checker MATCH_NULL_CHECKER = CheckingContext::messageMatch;
+    Checker DEFAULT_EQUALS_CHECKER = CheckingContext::messageEqualTo;
     Checker MATCH_CHECKER = new ConvertMatchChecker();
 
     default boolean failed(CheckingContext checkingContext) {
@@ -36,7 +36,7 @@ public interface Checker {
 
         @Override
         public String message(CheckingContext checkingContext) {
-            return checkingContext.notationMatch();
+            return checkingContext.messageMatch();
         }
     }
 }

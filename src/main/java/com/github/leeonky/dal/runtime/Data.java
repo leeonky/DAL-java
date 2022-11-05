@@ -72,7 +72,8 @@ public class Data {
                 return new Data(getPropertyValue(propertyChain), context, propertySchema(propertyChain));
             return getValue(chain);
         } catch (IndexOutOfBoundsException ex) {
-            throw new PropertyAccessException("Index out of bounds (" + ex.getMessage() + "), first index is: " + getListFirstIndex(), ex);
+            throw new PropertyAccessException(format("Index out of bounds (%s), first index is: %d",
+                    ex.getMessage(), getListFirstIndex()), ex);
         } catch (Exception e) {
             throw new PropertyAccessException(format("Get property `%s` failed, property can be:\n" +
                             "  1. public field\n" +
@@ -146,11 +147,11 @@ public class Data {
                 + fieldName.substring(prefix.length() + 1);
     }
 
-    public String dumpDetail() {
+    public String dumpAll() {
         return DumpingContext.rootContext(context).dump(this).content();
     }
 
-    public String dump() {
+    public String dumpValue() {
         return DumpingContext.rootContext(context).dumpValue(this).content();
     }
 
@@ -173,12 +174,7 @@ public class Data {
     public Data requireList(int position) {
         if (isList())
             return this;
-        throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpDetail().trim()), position);
-    }
-
-    //    TODO remove
-    public boolean numberNotEquals(Data another) {
-        return context.getNumberType().compare((Number) instance, (Number) another.instance) != 0;
+        throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()), position);
     }
 
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
