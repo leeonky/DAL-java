@@ -1,33 +1,55 @@
 package com.github.leeonky.dal.runtime;
 
+import java.util.LinkedList;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class CheckerSet {
-    private final ClassKeyMap<ClassKeyMap<CheckerFactory>> checkerFactories = new ClassKeyMap<>();
-    private final ClassKeyMap<Checker> checkers = new ClassKeyMap<>();
+    private final LinkedList<CheckerFactory> checkerFactories = new LinkedList<>();
+    private final ClassKeyMap<ClassKeyMap<CheckerFactory>> typeTypeFactories = new ClassKeyMap<>();
+    private final ClassKeyMap<CheckerFactory> typeFactories = new ClassKeyMap<>();
     private final BiFunction<Data, Data, Checker> defaultChecker;
 
     public CheckerSet(BiFunction<Data, Data, Checker> defaultChecker) {
         this.defaultChecker = defaultChecker;
     }
 
-    public CheckerSet register(Class<?> expected, Checker checker) {
-        checkers.put(expected, checker);
+    public CheckerSet register(CheckerFactory factory) {
+        checkerFactories.addFirst(factory);
         return this;
     }
 
     public CheckerSet register(Class<?> expected, Class<?> actual, CheckerFactory factory) {
-        checkerFactories.computeIfAbsent(expected, _ignore -> new ClassKeyMap<>()).put(actual, factory);
+        typeTypeFactories.computeIfAbsent(expected, _ignore -> new ClassKeyMap<>()).put(actual, factory);
+        return this;
+    }
+
+    public CheckerSet register(Class<?> expected, CheckerFactory factory) {
+        typeFactories.put(expected, factory);
         return this;
     }
 
     public Checker fetch(Data expected, Data actual) {
-        //                     TODO default check for any expected and actual type
-        return checkerFactories.tryGetData(expected.getInstance())
+        return fetchByExpectedDataAndActualData(expected, actual).orElseGet(() ->
+                fetchByExpectedTypeAndActualType(expected, actual).orElseGet(() ->
+                        fetchByExpectedType(expected, actual).orElseGet(() ->
+                                defaultChecker.apply(expected, actual))));
+    }
+
+    private Optional<Checker> fetchByExpectedType(Data expected, Data actual) {
+        return typeFactories.tryGetData(expected.getInstance())
+                .flatMap(factory -> factory.create(expected, actual));
+    }
+
+    private Optional<Checker> fetchByExpectedTypeAndActualType(Data expected, Data actual) {
+        return typeTypeFactories.tryGetData(expected.getInstance())
                 .flatMap(classKeyMap -> classKeyMap.tryGetData(actual.getInstance()))
-                .flatMap(factory -> factory.create(expected, actual))
-                .orElseGet(() -> checkers.tryGetData(expected.getInstance())
-                        .orElseGet(() -> defaultChecker.apply(expected, actual)));
+                .flatMap(factory -> factory.create(expected, actual));
+    }
+
+    private Optional<Checker> fetchByExpectedDataAndActualData(Data expected, Data actual) {
+        return checkerFactories.stream().map(factory -> factory.create(expected, actual))
+                .filter(Optional::isPresent).map(Optional::get).findFirst();
     }
 
     public static Checker defaultMatching(Data expected, Data actual) {

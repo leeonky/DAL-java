@@ -104,7 +104,7 @@ class DALRuntimeContextTest {
 
             @BeforeEach
             void registerChecker() {
-                dal.getRuntimeContextBuilder().checkerSetForMatching().register(Target.class, checker);
+                dal.getRuntimeContextBuilder().checkerSetForMatching().register(Target.class, (d1, d2) -> of(checker));
             }
 
             @Test
