@@ -45,7 +45,7 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         Data expected = evaluateData(context);
         Data actual = actualNode.evaluateData(context);
         CheckingContext checkingContext = new CheckingContext(expected, actual, expected, actual, getPositionBegin());
-        Checker checker = context.fetchMatchesChecker(checkingContext);
+        Checker checker = context.fetchMatchingChecker(checkingContext.getExpected(), checkingContext.getActual());
         return checker.verify(new CheckingContext(expected, actual, checker.transformExpected(expected, context),
                 transformActual(context, actual, checker, expected), getPositionBegin()));
     }

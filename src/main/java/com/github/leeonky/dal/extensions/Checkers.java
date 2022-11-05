@@ -22,11 +22,10 @@ public class Checkers implements Extension {
 
     @Override
     public void extend(DAL dal) {
-        dal.getRuntimeContextBuilder()
-                .registerMatchesChecker(CharSequence.class, Number.class, ILLEGAL_TYPE_TO_CONVERT_MATCH)
-                .registerMatchesChecker(CharSequence.class, Boolean.class, ILLEGAL_TYPE_TO_CONVERT_MATCH)
-                .registerMatchesChecker(Number.class, CharSequence.class, ILLEGAL_TYPE_TO_CONVERT_MATCH)
-                .registerMatchesChecker(Boolean.class, CharSequence.class, ILLEGAL_TYPE_TO_CONVERT_MATCH)
-        ;
+        dal.getRuntimeContextBuilder().checkerSetForMatching()
+                .register(CharSequence.class, Number.class, ILLEGAL_TYPE_TO_CONVERT_MATCH)
+                .register(CharSequence.class, Boolean.class, ILLEGAL_TYPE_TO_CONVERT_MATCH)
+                .register(Number.class, CharSequence.class, ILLEGAL_TYPE_TO_CONVERT_MATCH)
+                .register(Boolean.class, CharSequence.class, ILLEGAL_TYPE_TO_CONVERT_MATCH);
     }
 }
