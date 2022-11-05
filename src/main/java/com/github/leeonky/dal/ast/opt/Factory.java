@@ -5,7 +5,7 @@ import com.github.leeonky.dal.ast.node.ExecutableNode;
 import com.github.leeonky.dal.ast.node.SchemaComposeNode;
 import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.Notation;
 
@@ -42,7 +42,7 @@ public class Factory {
     public static DALOperator parentheses() {
         return new DALOperator(Precedence.PARENTHESES, "", false) {
             @Override
-            public Data calculateData(DALNode left, DALNode right, RuntimeContextBuilder.DALRuntimeContext context) {
+            public Data calculateData(DALNode left, DALNode right, DALRuntimeContext context) {
                 return right.evaluateData(context);
             }
 
@@ -56,7 +56,7 @@ public class Factory {
     public static DALOperator executable(Notation<?, ?, ?> notation) {
         return new DALOperator(Precedence.PROPERTY, notation.getLabel(), false) {
             @Override
-            public Data calculateData(DALNode left, DALNode right, RuntimeContextBuilder.DALRuntimeContext context) {
+            public Data calculateData(DALNode left, DALNode right, DALRuntimeContext context) {
                 return ((ExecutableNode) right).getValue(left, context);
             }
 
@@ -70,7 +70,7 @@ public class Factory {
     public static DALOperator is() {
         return new DALOperator(Precedence.COMPARISON, Notations.Operators.IS.getLabel(), true) {
             @Override
-            public Data calculateData(DALNode left, DALNode right, RuntimeContextBuilder.DALRuntimeContext context) {
+            public Data calculateData(DALNode left, DALNode right, DALRuntimeContext context) {
                 return ((SchemaComposeNode) right).verify(left, context);
             }
         };
@@ -79,7 +79,7 @@ public class Factory {
     public static DALOperator which() {
         return new DALOperator(Precedence.WHICH, Notations.Operators.WHICH.getLabel(), true) {
             @Override
-            public Object calculate(DALNode left, DALNode right, RuntimeContextBuilder.DALRuntimeContext context) {
+            public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
                 try {
                     return left.evaluateData(context).newBlockScope(() -> right.evaluate(context));
                 } catch (IllegalStateException e) {
@@ -89,12 +89,12 @@ public class Factory {
         };
     }
 
-    //    TODO move to beanutil
+    //    TODO move to bean-util
     public interface TriFunction<T1, T2, T3, R> {
         R apply(T1 obj1, T2 obj2, T3 obj3);
     }
 
-    public interface NodeNodeContextObject extends TriFunction<DALNode, DALNode, RuntimeContextBuilder.DALRuntimeContext, Object> {
+    public interface NodeNodeContextObject extends TriFunction<DALNode, DALNode, DALRuntimeContext, Object> {
         static NodeNodeContextObject adapt(SupplierSupplierObject operation) {
             return (left, right, context) -> operation.apply(() -> left.evaluate(context), () -> right.evaluate(context));
         }
@@ -118,10 +118,10 @@ public class Factory {
         interface SupplierSupplierObject extends BiFunction<Supplier<Object>, Supplier<Object>, Object> {
         }
 
-        interface ObjectObjectContextObject extends TriFunction<Object, Object, RuntimeContextBuilder.DALRuntimeContext, Object> {
+        interface ObjectObjectContextObject extends TriFunction<Object, Object, DALRuntimeContext, Object> {
         }
 
-        interface DataContextObject extends BiFunction<Data, RuntimeContextBuilder.DALRuntimeContext, Object> {
+        interface DataContextObject extends BiFunction<Data, DALRuntimeContext, Object> {
         }
 
         interface ObjectObject extends Function<Object, Object> {
@@ -140,7 +140,7 @@ public class Factory {
         }
 
         @Override
-        public Object calculate(DALNode left, DALNode right, RuntimeContextBuilder.DALRuntimeContext context) {
+        public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
             return operation.apply(left, right, context);
         }
     }

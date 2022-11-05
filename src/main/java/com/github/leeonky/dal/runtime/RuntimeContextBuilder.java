@@ -175,11 +175,6 @@ public class RuntimeContextBuilder {
         return checkerSetForEqualing;
     }
 
-    public RuntimeContextBuilder registerEqualsChecker(Class<?> expected, Class<?> actual, CheckerFactory factory) {
-        checkerSetForEqualing().register(expected, actual, factory);
-        return this;
-    }
-
     public RuntimeContextBuilder registerDumper(Class<?> type, DumperFactory factory) {
         dumperFactories.put(type, factory);
         return this;
