@@ -4,10 +4,10 @@ import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Factory;
 import com.github.leeonky.dal.ast.opt.Matcher;
 import com.github.leeonky.dal.runtime.AssertionFailure;
-import com.github.leeonky.dal.runtime.Checker;
-import com.github.leeonky.dal.runtime.CheckingContext;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.checker.Checker;
+import com.github.leeonky.dal.runtime.checker.CheckingContext;
 import com.github.leeonky.interpreter.NodeBase;
 
 import java.util.List;

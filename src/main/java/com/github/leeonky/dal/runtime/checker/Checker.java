@@ -1,14 +1,15 @@
-package com.github.leeonky.dal.runtime;
+package com.github.leeonky.dal.runtime.checker;
 
+import com.github.leeonky.dal.runtime.AssertionFailure;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 public interface Checker {
     Checker MATCH_NULL_CHECKER = CheckingContext::messageMatch;
-    Checker DEFAULT_EQUALS_CHECKER = CheckingContext::messageEqualTo;
-    Checker MATCH_CHECKER = new ConvertMatchChecker();
+    Checker EQUALS_CHECKER = new EqualsChecker();
+    Checker MATCHES_CHECKER = new MatchesChecker();
 
     static Checker forceFailed(Function<CheckingContext, String> message) {
         return new Checker() {
@@ -42,22 +43,5 @@ public interface Checker {
         if (failed(checkingContext))
             throw new AssertionFailure(message(checkingContext), checkingContext.getPosition());
         return true;
-    }
-
-    class ConvertMatchChecker implements Checker {
-
-        @Override
-        public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
-            return actual.convert(expected.getInstance().getClass());
-        }
-
-        @Override
-        public String message(CheckingContext checkingContext) {
-            return checkingContext.messageMatch();
-        }
-    }
-
-    static CheckerFactory factory(Checker checker) {
-        return (d1, d2) -> Optional.of(checker);
     }
 }

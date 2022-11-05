@@ -1,13 +1,13 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.runtime.CheckerFactory;
-import com.github.leeonky.dal.runtime.CheckingContext;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.Order;
+import com.github.leeonky.dal.runtime.checker.CheckerFactory;
+import com.github.leeonky.dal.runtime.checker.CheckingContext;
 
-import static com.github.leeonky.dal.runtime.Checker.forceFailed;
 import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
+import static com.github.leeonky.dal.runtime.checker.Checker.forceFailed;
 import static java.util.Optional.of;
 
 @Order(BUILD_IN)

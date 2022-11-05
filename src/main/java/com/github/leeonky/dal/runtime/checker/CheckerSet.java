@@ -1,4 +1,7 @@
-package com.github.leeonky.dal.runtime;
+package com.github.leeonky.dal.runtime.checker;
+
+import com.github.leeonky.dal.runtime.ClassKeyMap;
+import com.github.leeonky.dal.runtime.Data;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -51,10 +54,10 @@ public class CheckerSet {
     }
 
     public static Checker defaultMatching(Data expected, Data actual) {
-        return expected.isNull() ? Checker.MATCH_NULL_CHECKER : Checker.MATCH_CHECKER;
+        return expected.isNull() ? Checker.MATCH_NULL_CHECKER : Checker.MATCHES_CHECKER;
     }
 
     public static Checker defaultEqualing(Data expected, Data actual) {
-        return Checker.DEFAULT_EQUALS_CHECKER;
+        return Checker.EQUALS_CHECKER;
     }
 }
