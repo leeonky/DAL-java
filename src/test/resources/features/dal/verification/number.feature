@@ -108,7 +108,10 @@ Feature: number
     """
     Expected to match: java.lang.Double
     <4.0>
-    Actual: java.lang.Integer
+     ^
+    Actual: java.lang.Double
+    <5.0> converted from: java.lang.Integer
+     ^
     <5>
     """
     And got the following notation:

@@ -1,34 +1,12 @@
 package com.github.leeonky.dal.runtime;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 //TODO rename to Checker
 public interface ConditionalChecker {
-    ConditionalChecker MATCH_NULL_CHECKER = conditionalChecker(CheckingContext::actualNotNull, CheckingContext::notationMatch),
-            MATCH_NUMBER_CHECKER = conditionalChecker(CheckingContext::numberNotEquals, CheckingContext::notationNumberMatch),
-            DEFAULT_EQUALS_CHECKER = conditionalChecker(CheckingContext::objectNotEquals, CheckingContext::notationEqualTo),
-            MATCH_CHECKER = new ConvertMatchChecker();
-
-    @Deprecated
-    static ConditionalChecker matchTypeChecker(Class<?> actualType, Class<?> expectType) {
-        return conditionalChecker(expectActual -> expectActual.isInstanceOf(actualType, expectType),
-                CheckingContext::cannotCompare);
-    }
-
-    static ConditionalChecker conditionalChecker(Predicate<CheckingContext> failed, Function<CheckingContext, String> message) {
-        return new ConditionalChecker() {
-            @Override
-            public String message(CheckingContext checkingContext) {
-                return message.apply(checkingContext);
-            }
-
-            @Override
-            public boolean failed(CheckingContext checkingContext) {
-                return failed.test(checkingContext);
-            }
-        };
-    }
+    ConditionalChecker MATCH_NULL_CHECKER = CheckingContext::notationMatch;
+    ConditionalChecker DEFAULT_EQUALS_CHECKER = CheckingContext::notationEqualTo;
+    ConditionalChecker MATCH_CHECKER = new ConvertMatchChecker();
 
     default boolean failed(CheckingContext checkingContext) {
         return checkingContext.objectNotEquals();
@@ -36,37 +14,12 @@ public interface ConditionalChecker {
 
     String message(CheckingContext checkingContext);
 
-    default Data transformActual(Data actual, RuntimeContextBuilder.DALRuntimeContext context) {
+    default Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
         return actual;
     }
 
-    default Data transformExpected(Data expected, RuntimeContextBuilder.DALRuntimeContext context) {
+    default Data transformExpected(Data expected, DALRuntimeContext context) {
         return expected;
-    }
-
-    @Deprecated
-    default ConditionalChecker and(ConditionalChecker another) {
-        return new ConditionalChecker() {
-            private String message;
-
-            @Override
-            public boolean failed(CheckingContext checkingContext) {
-                boolean verified = ConditionalChecker.this.verify(checkingContext);
-                if (!verified) {
-                    message = ConditionalChecker.this.message(checkingContext);
-                    return true;
-                }
-                verified = another.verify(checkingContext);
-                if (!verified)
-                    message = another.message(checkingContext);
-                return !verified;
-            }
-
-            @Override
-            public String message(CheckingContext checkingContext) {
-                return message;
-            }
-        };
     }
 
     default boolean verify(CheckingContext checkingContext) {
@@ -76,24 +29,15 @@ public interface ConditionalChecker {
     }
 
     class ConvertMatchChecker implements ConditionalChecker {
-        private String message;
 
         @Override
-        public boolean failed(CheckingContext checkingContext) {
-            try {
-                Data result = checkingContext.convertToExpectedType();
-                if (checkingContext.equalTo(result))
-                    return false;
-                message = checkingContext.notationMatch(result);
-            } catch (Exception e) {
-                message = e.getMessage();
-            }
-            return true;
+        public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
+            return actual.convert(expected.getInstance().getClass());
         }
 
         @Override
-        public String message(CheckingContext checkingContext1) {
-            return message;
+        public String message(CheckingContext checkingContext) {
+            return checkingContext.notationMatch(checkingContext.getTransformedActual());
         }
     }
 }

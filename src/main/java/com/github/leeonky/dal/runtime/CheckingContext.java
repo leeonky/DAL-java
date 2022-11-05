@@ -46,10 +46,6 @@ public class CheckingContext {
         return expected.getInstance() instanceof Number && actual.getInstance() instanceof Number;
     }
 
-    public Data convertToExpectedType() {
-        return actual.convert(expected.getInstance().getClass());
-    }
-
     public Object getExpectInstance() {
         return expected.getInstance();
     }
@@ -58,10 +54,7 @@ public class CheckingContext {
         return expected.isNull();
     }
 
-    public boolean equalTo(Data actual) {
-        return Calculator.equals(actual, expected);
-    }
-
+    //    TODO remove
     public boolean numberNotEquals() {
         return getExpected().numberNotEquals(getActual());
     }
@@ -83,12 +76,12 @@ public class CheckingContext {
     }
 
     public String notationMatch(Data converted) {
-        return converted.getInstance() == actual.getInstance() ? notationMatch()
-                : verificationMessage("Expected to match: ", converted.dumpDetail() + " converted from: ");
+        return verificationMessage("Expected to match: ", transformedActual.getInstance() == actual.getInstance() ? ""
+                : " converted from: " + actual.dumpDetail());
     }
 
-    public String verificationMessage(String prefix, String actualPrefix) {
-        String actual = actualPrefix + transformedActual.dumpDetail();
+    public String verificationMessage(String prefix, String actualPostfix) {
+        String actual = transformedActual.dumpDetail() + actualPostfix;
         String expected = transformedExpected.dumpDetail();
         int position = TextUtil.differentPosition(expected, actual);
         String firstPart = new StringWithPosition(expected).position(position).result(prefix);
@@ -102,8 +95,6 @@ public class CheckingContext {
     ConditionalChecker defaultMatchesChecker() {
         if (expectNull())
             return ConditionalChecker.MATCH_NULL_CHECKER;
-        if (isAllNumber())
-            return ConditionalChecker.MATCH_NUMBER_CHECKER;
         return ConditionalChecker.MATCH_CHECKER;
     }
 

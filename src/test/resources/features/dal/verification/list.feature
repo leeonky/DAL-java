@@ -46,8 +46,10 @@ Feature: list
     """
     Expected to match: java.lang.Integer
     <2>
+     ^
     Actual: java.lang.Integer
     <1>
+     ^
     """
     And got the following notation:
     """
@@ -95,8 +97,10 @@ Feature: list
     """
     Expected to match: java.lang.Integer
     <3>
+     ^
     Actual: java.lang.Integer
     <2>
+     ^
     """
     And got the following notation:
     """

@@ -176,6 +176,7 @@ public class Data {
         throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpDetail().trim()), position);
     }
 
+    //    TODO remove
     public boolean numberNotEquals(Data another) {
         return context.getNumberType().compare((Number) instance, (Number) another.instance) != 0;
     }

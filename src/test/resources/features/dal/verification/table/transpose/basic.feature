@@ -160,8 +160,10 @@ Feature: basic verification via table
     """
     Expected to match: java.lang.Integer
     <15>
+     ^
     Actual: java.lang.Integer
     <20>
+     ^
     """
     And got the following notation:
     """

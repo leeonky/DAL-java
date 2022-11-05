@@ -169,8 +169,10 @@ Feature: verify object
     """
     Expected to match: java.lang.Integer
     <100>
+     ^
     Actual: java.lang.Integer
     <3>
+     ^
     """
     And got the following source code information:
     """
@@ -247,8 +249,10 @@ Feature: verify object
     """
     Expected to match: java.lang.Integer
     <100>
+       ^
     Actual: java.lang.Integer
     <10>
+       ^
     """
     And got the following source code information:
     """

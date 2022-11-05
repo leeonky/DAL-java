@@ -27,8 +27,10 @@ Feature: group
     """
     Expected to match: java.lang.Integer
     <1>
+     ^
     Actual: java.lang.Integer
     <2>
+     ^
     """
     And got the following notation:
     """
@@ -93,8 +95,10 @@ Feature: group
     """
     Expected to match: java.lang.Integer
     <1>
+     ^
     Actual: java.lang.Integer
     <2>
+     ^
     """
     Then the following verification should pass:
     """
@@ -353,8 +357,10 @@ Feature: group
       """
       Expected to match: java.lang.Integer
       <1>
+       ^
       Actual: java.lang.Integer
       <2>
+       ^
       """
       And got the following notation:
       """
@@ -391,8 +397,10 @@ Feature: group
       """
       Expected to match: java.lang.Integer
       <1>
+       ^
       Actual: java.lang.Integer
       <2>
+       ^
       """
       And got the following notation:
       """
