@@ -34,18 +34,6 @@ public class CheckingContext {
         return !Calculator.equals(transformedActual, transformedExpected);
     }
 
-    public boolean actualNotNull() {
-        return !actual.isNull();
-    }
-
-    public boolean isInstanceOf(Class<?> actualType, Class<?> expectType) {
-        return actualType.isInstance(actual.getInstance()) && expectType.isInstance(expected.getInstance());
-    }
-
-    public boolean isAllNumber() {
-        return expected.getInstance() instanceof Number && actual.getInstance() instanceof Number;
-    }
-
     public Object getExpectInstance() {
         return expected.getInstance();
     }
@@ -54,30 +42,17 @@ public class CheckingContext {
         return expected.isNull();
     }
 
-    //    TODO remove
-    public boolean numberNotEquals() {
-        return getExpected().numberNotEquals(getActual());
-    }
-
     public String notationEqualTo() {
         return verificationMessage("Expected to be equal to: ");
     }
 
-    public String notationNumberMatch() {
-        return format("Expected to match: %s\nActual: %s", expected.dumpDetail(), actual.dumpDetail());
-    }
-
     public String notationMatch() {
-        return verificationMessage("Expected to match: ");
+        return verificationMessage("Expected to match: ", transformedActual.getInstance() == actual.getInstance() ? ""
+                : " converted from: " + actual.dumpDetail());
     }
 
     public String verificationMessage(String prefix) {
         return verificationMessage(prefix, "");
-    }
-
-    public String notationMatch(Data converted) {
-        return verificationMessage("Expected to match: ", transformedActual.getInstance() == actual.getInstance() ? ""
-                : " converted from: " + actual.dumpDetail());
     }
 
     public String verificationMessage(String prefix, String actualPostfix) {
@@ -92,10 +67,10 @@ public class CheckingContext {
         return format("Cannot compare between %s\nand %s", actual.dumpDetail(), expected.dumpDetail());
     }
 
-    ConditionalChecker defaultMatchesChecker() {
+    Checker defaultMatchesChecker() {
         if (expectNull())
-            return ConditionalChecker.MATCH_NULL_CHECKER;
-        return ConditionalChecker.MATCH_CHECKER;
+            return Checker.MATCH_NULL_CHECKER;
+        return Checker.MATCH_CHECKER;
     }
 
     public int getPosition() {

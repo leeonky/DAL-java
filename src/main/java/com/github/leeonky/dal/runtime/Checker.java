@@ -2,11 +2,10 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
-//TODO rename to Checker
-public interface ConditionalChecker {
-    ConditionalChecker MATCH_NULL_CHECKER = CheckingContext::notationMatch;
-    ConditionalChecker DEFAULT_EQUALS_CHECKER = CheckingContext::notationEqualTo;
-    ConditionalChecker MATCH_CHECKER = new ConvertMatchChecker();
+public interface Checker {
+    Checker MATCH_NULL_CHECKER = CheckingContext::notationMatch;
+    Checker DEFAULT_EQUALS_CHECKER = CheckingContext::notationEqualTo;
+    Checker MATCH_CHECKER = new ConvertMatchChecker();
 
     default boolean failed(CheckingContext checkingContext) {
         return checkingContext.objectNotEquals();
@@ -28,7 +27,7 @@ public interface ConditionalChecker {
         return true;
     }
 
-    class ConvertMatchChecker implements ConditionalChecker {
+    class ConvertMatchChecker implements Checker {
 
         @Override
         public Data transformActual(Data actual, Data expected, DALRuntimeContext context) {
@@ -37,7 +36,7 @@ public interface ConditionalChecker {
 
         @Override
         public String message(CheckingContext checkingContext) {
-            return checkingContext.notationMatch(checkingContext.getTransformedActual());
+            return checkingContext.notationMatch();
         }
     }
 }

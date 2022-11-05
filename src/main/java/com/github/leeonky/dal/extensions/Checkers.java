@@ -8,7 +8,7 @@ import static java.util.Optional.of;
 
 @Order(BUILD_IN)
 public class Checkers implements Extension {
-    private static final CheckerFactory ILLEGAL_TYPE_TO_CONVERT_MATCH = (d1, d2) -> of(new ConditionalChecker() {
+    private static final CheckerFactory ILLEGAL_TYPE_TO_CONVERT_MATCH = (d1, d2) -> of(new Checker() {
         @Override
         public boolean failed(CheckingContext checkingContext) {
             return true;
