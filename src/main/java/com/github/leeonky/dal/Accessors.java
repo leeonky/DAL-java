@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 
 public class Accessors {
     private final String expression;
-    public static boolean dumpInput = true;
+    private static boolean dumpInput = true;
     private DAL dal;
     private static Supplier<DAL> dalFactory = DAL::getInstance;
 
