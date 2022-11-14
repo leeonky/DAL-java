@@ -69,3 +69,23 @@ Feature: bug
       : | name                   | id    |
         |'tom'.toString.toString | '001' |
       """
+
+  Rule: call instance method of anonymous class
+
+    Scenario: call method of lambda
+      Given the following java class:
+      """
+      public interface Acc {
+        int inc(int v);
+      }
+      """
+      Given the following java class:
+      """
+      public class BeanObject {
+        public Acc acc = i-> i+1;
+      }
+      """
+      Then the following verification for the instance of java class "BeanObject" should pass:
+      """
+      acc.inc[100]= 101
+      """

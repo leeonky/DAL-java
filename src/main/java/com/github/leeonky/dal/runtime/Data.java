@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
+import static com.github.leeonky.util.Classes.named;
 import static java.lang.String.format;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
@@ -164,7 +165,7 @@ public class Data {
     }
 
     private Optional<CurryingMethod> currying(Object instance, Object property) {
-        List<InstanceCurryingMethod> methods = context.methodToCurrying(instance.getClass(), property).stream()
+        List<InstanceCurryingMethod> methods = context.methodToCurrying(named(instance.getClass()), property).stream()
                 .map(method -> createCurryingMethod(instance, method, context.getConverter())).collect(toList());
         if (!methods.isEmpty())
             return of(new CurryingMethodGroup(methods, null));
