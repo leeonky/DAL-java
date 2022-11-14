@@ -36,26 +36,16 @@ public class Assertions {
         return should("", dalExpression);
     }
 
-    public <T> T get(String dalExpression) {
-        return get("", dalExpression);
-    }
-
-    public <T> T get(String prefix, String dalExpression) {
-        String fullCode = prefix + dalExpression;
+    public Assertions should(String prefix, String verification) {
+        String fullCode = prefix + verification;
         try {
-            return dal.evaluate(input, fullCode);
+            dal.evaluate(input, fullCode);
         } catch (InterpreterException e) {
             String detailMessage = "\n" + e.show(fullCode, prefix.length()) + "\n\n" + e.getMessage();
             if (dumpInput)
                 detailMessage += "\n\nThe root value was: " + dal.getRuntimeContextBuilder().build(null).wrap(input).dumpAll();
-//            TODO should raise assert error only in assert method (should)
-//            TODO move get out
             throw new AssertionError(detailMessage);
         }
-    }
-
-    public Assertions should(String prefix, String verification) {
-        get(prefix, verification);
         return this;
     }
 
