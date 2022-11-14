@@ -8,6 +8,7 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.Notation;
+import com.github.leeonky.util.function.TriFunction;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -87,11 +88,6 @@ public class Factory {
                 }
             }
         };
-    }
-
-    //    TODO move to bean-util
-    public interface TriFunction<T1, T2, T3, R> {
-        R apply(T1 obj1, T2 obj2, T3 obj3);
     }
 
     public interface NodeNodeContextObject extends TriFunction<DALNode, DALNode, DALRuntimeContext, Object> {

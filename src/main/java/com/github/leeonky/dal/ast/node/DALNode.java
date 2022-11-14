@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.ast.opt.Equal;
-import com.github.leeonky.dal.ast.opt.Factory;
 import com.github.leeonky.dal.ast.opt.Matcher;
 import com.github.leeonky.dal.runtime.AssertionFailure;
 import com.github.leeonky.dal.runtime.Data;
@@ -9,6 +8,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;
 import com.github.leeonky.interpreter.NodeBase;
+import com.github.leeonky.util.function.TriFunction;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -33,7 +33,7 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     }
 
     private boolean verify(DALNode actualNode, DALRuntimeContext context,
-                           Factory.TriFunction<DALRuntimeContext, Data, Data, Checker> factory) {
+                           TriFunction<DALRuntimeContext, Data, Data, Checker> factory) {
         Data expected = evaluateData(context);
         Data actual = actualNode.evaluateData(context);
         Checker checker = factory.apply(context, expected, actual);

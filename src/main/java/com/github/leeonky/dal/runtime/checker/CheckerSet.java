@@ -23,7 +23,7 @@ public class CheckerSet {
     }
 
     public CheckerSet register(Class<?> expected, Class<?> actual, CheckerFactory factory) {
-        typeTypeFactories.computeIfAbsent(expected, _ignore -> new ClassKeyMap<>()).put(actual, factory);
+        typeTypeFactories.get(expected, () -> new ClassKeyMap<>()).put(actual, factory);
         return this;
     }
 

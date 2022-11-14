@@ -7,6 +7,7 @@ import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.ExpressionFactory;
 import com.github.leeonky.interpreter.NodeParser;
+import com.github.leeonky.interpreter.NodeParser.Mandatory;
 import com.github.leeonky.interpreter.Procedure;
 import com.github.leeonky.interpreter.SourceCode;
 
@@ -29,13 +30,11 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
         super(sourceCode, runtimeContext, expressionFactory);
     }
 
-    public static NodeParser<DALNode, DALProcedure> disableCommaAnd(
-            NodeParser<DALNode, DALProcedure> nodeParser) {
+    public static NodeParser<DALNode, DALProcedure> disableCommaAnd(NodeParser<DALNode, DALProcedure> nodeParser) {
         return procedure -> procedure.commaAnd(false, () -> nodeParser.parse(procedure));
     }
 
-    public static NodeParser<DALNode, DALProcedure> enableCommaAnd(
-            NodeParser<DALNode, DALProcedure> nodeParser) {
+    public static NodeParser<DALNode, DALProcedure> enableCommaAnd(NodeParser<DALNode, DALProcedure> nodeParser) {
         return procedure -> procedure.commaAnd(true, () -> nodeParser.parse(procedure));
     }
 
@@ -76,13 +75,11 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
         return getSourceCode().startsWith("::");
     }
 
-    public static NodeParser<DALNode, DALProcedure> enableSlashProperty(
-            NodeParser<DALNode, DALProcedure> nodeParser) {
+    public static NodeParser<DALNode, DALProcedure> enableSlashProperty(NodeParser<DALNode, DALProcedure> nodeParser) {
         return procedure -> procedure.enableSlashProperty(() -> nodeParser.parse(procedure));
     }
 
-    public static NodeParser.Mandatory<DALNode, DALProcedure> enableSlashProperty(
-            NodeParser.Mandatory<DALNode, DALProcedure> mandatory) {
+    public static Mandatory<DALNode, DALProcedure> enableSlashProperty(Mandatory<DALNode, DALProcedure> mandatory) {
         return procedure -> procedure.enableSlashProperty(() -> mandatory.parse(procedure));
     }
 
@@ -100,8 +97,7 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
     }
 
 
-    public static NodeParser.Mandatory<DALNode, DALProcedure> enableNumberProperty(
-            NodeParser.Mandatory<DALNode, DALProcedure> mandatory) {
+    public static Mandatory<DALNode, DALProcedure> enableNumberProperty(Mandatory<DALNode, DALProcedure> mandatory) {
         return procedure -> procedure.enableNumberProperty(() -> mandatory.parse(procedure));
     }
 
@@ -118,13 +114,11 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
         return enableNumberProperty;
     }
 
-    public static NodeParser<DALNode, DALProcedure> enableRelaxProperty(
-            NodeParser<DALNode, DALProcedure> nodeParser) {
+    public static NodeParser<DALNode, DALProcedure> enableRelaxProperty(NodeParser<DALNode, DALProcedure> nodeParser) {
         return procedure -> procedure.enableRelaxProperty(() -> nodeParser.parse(procedure));
     }
 
-    public static NodeParser.Mandatory<DALNode, DALProcedure> enableRelaxProperty(
-            NodeParser.Mandatory<DALNode, DALProcedure> mandatory) {
+    public static Mandatory<DALNode, DALProcedure> enableRelaxProperty(Mandatory<DALNode, DALProcedure> mandatory) {
         return procedure -> procedure.enableRelaxProperty(() -> mandatory.parse(procedure));
     }
 
