@@ -13,48 +13,7 @@
 - DAL是一个比较简单的表达式语言，主要用于在自动化测试环境中对数据进行读取和断言。
 - DAL的应用场景比较专注于在测试中操作数据，因此相较于编程语言，它的语言复杂性低，没有逻辑控制或变量系统，但能够集中语言特性以针对数据操作提供更多的便利性。
 - DAL的执行总是针对一个输入数据（根数据）。
-- DAL会以键值对或集合的方式操作数据，数据类型是一个泛化的类型。不但可以是 Java Class，Java Map/List，还可以通过`registerPropertyAccessor`和`registerListAccessor`方法的注册而支持其他类型格式。以下代码用来支持 JsonObject 类型数据：
-``` java
-        DAL dal = new DAL();
-        dal.getRuntimeContextBuilder().registerPropertyAccessor(JSONObject.class, new PropertyAccessor<JSONObject>() {
-            @Override
-            public Object getValue(JSONObject instance, String name) {
-                try {
-                    return instance.has(name) ? instance.get(name) : JSONObject.NULL;
-                } catch (JSONException e) {
-                    throw new IllegalArgumentException(e);
-                }
-            }
-
-            @Override
-            public Set<String> getPropertyNames(JSONObject instance) {
-                return stream(spliteratorUnknownSize((Iterator<String>) instance.keys(), Spliterator.NONNULL), false)
-                        .collect(Collectors.toSet());
-            }
-
-            @Override
-            public boolean isNull(JSONObject instance) {
-                return instance == null || instance.equals(JSONObject.NULL);
-            }
-        });
-
-        dal.getRuntimeContextBuilder().registerListAccessor(JSONArray.class, new ArrayAccessor<JSONArray>() {
-            @Override
-            public Object get(JSONArray jsonArray, int index) {
-                try {
-                    return jsonArray.get(index);
-                } catch (JSONException e) {
-                    throw new IllegalArgumentException(e);
-                }
-            }
-
-            @Override
-            public int size(JSONArray jsonArray) {
-                return jsonArray.length();
-            }
-        });
-```
-
+- DAL会以键值对或集合的方式操作数据，数据类型是一个泛化的类型。不但可以是 Java Class，Java Map/List，还可以通过`registerPropertyAccessor`和`registerListAccessor`方法的注册而支持其他类型格式。
 ## 执行 DAL 语句
 DAL通过如下两个API来执行代码并返回结果
 ``` java
@@ -65,10 +24,14 @@ DAL通过如下两个API来执行代码并返回结果
 `evaluateAll` 会执行多条语句并把多个语句的结果以集合形式返回：
 ``` java
 new DAL().evaluate(1, "+ 1");           // return 2
-new DAL().evaluateAll(null, "1 2");     //return [1, 2]
+new DAL().evaluateAll(null, "1 2");     // return [1, 2]
 ```
 
-无论是访问数据还是断言数据，都推荐用以上两个API。访问数据时返回得到的数据。断言数据时，如果断言失败则直接抛出 `AssertionFailure` 异常。
+更推荐使用如下静态方法API:
+```java
+Assertions.expect(1).should("= 1");	// test pass
+Accessors.get("length").from("hello");	// access property and return 5
+```
 
 ## 数据访问
 

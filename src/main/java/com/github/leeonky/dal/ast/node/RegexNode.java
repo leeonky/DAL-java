@@ -15,7 +15,7 @@ public class RegexNode extends DALNode {
     private final Pattern pattern;
 
     public RegexNode(String regex) {
-        pattern = Pattern.compile(regex);
+        pattern = Pattern.compile(regex, Pattern.DOTALL);
     }
 
     @Override
