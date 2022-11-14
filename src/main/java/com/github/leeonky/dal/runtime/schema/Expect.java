@@ -123,8 +123,8 @@ public class Expect {
         return actual.inInstanceOf(getGenericType(0).orElseThrow(actual::invalidGenericType));
     }
 
-    public boolean equals(Actual actual) {
-        return actual.equalsExpect(expect);
+    public boolean equals(Actual actual, RuntimeContextBuilder.DALRuntimeContext runtimeContext) {
+        return actual.equalsExpect(expect, runtimeContext);
     }
 
     public Stream<PropertyReader<Object>> propertyReaders() {

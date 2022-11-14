@@ -5,6 +5,7 @@ import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.format.Type;
 import com.github.leeonky.dal.format.Value;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.SchemaAssertionFailure;
 import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.dal.type.SubType;
@@ -19,7 +20,6 @@ import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.IntStream.range;
 
-//TODO use ExpectActual build error message
 public class Actual {
     private final String property;
     private final Data actual;
@@ -110,14 +110,10 @@ public class Actual {
                         type.getName(), actual.dumpAll()));
     }
 
-    public boolean equalsExpect(Object expect) {
+    public boolean equalsExpect(Object expect, DALRuntimeContext runtimeContext) {
         return Objects.equals(expect, actual.getInstance()) ||
                 Verification.errorLog(format("Expected field `%s` to be %s\nActual: %s", property,
-                        inspect(expect), actual.dumpAll()));
-    }
-
-    public String inspect(Object obj) {
-        return obj == null ? "null " : format("%s\n<%s>", getClassName(obj), obj);
+                        runtimeContext.wrap(expect).dumpAll(), actual.dumpAll()));
     }
 
     public void verifySchema(Schema expect) {

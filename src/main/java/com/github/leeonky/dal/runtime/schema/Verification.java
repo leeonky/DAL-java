@@ -93,7 +93,7 @@ public class Verification {
     }
 
     private boolean content(DALRuntimeContext runtimeContext, Actual actual) {
-        return expect.equals(actual);
+        return expect.equals(actual, runtimeContext);
     }
 
     private boolean schema(DALRuntimeContext runtimeContext, Actual actual) {
