@@ -47,7 +47,7 @@ public class RuntimeContextBuilder {
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
-    private final Map<String, TextFormatter> textFormatterMap = new LinkedHashMap<>();
+    private final Map<String, BuildInTextFormatter> textFormatterMap = new LinkedHashMap<>();
     private Converter converter = Converter.getInstance();
     private final ClassKeyMap<DumperFactory> dumperFactories = new ClassKeyMap<>();
     private final CheckerSet checkerSetForMatching = new CheckerSet(CheckerSet::defaultMatching);
@@ -58,7 +58,7 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerTextFormatter(String name, TextFormatter formatter) {
+    public RuntimeContextBuilder registerTextFormatter(String name, BuildInTextFormatter formatter) {
         textFormatterMap.put(name, formatter);
         return this;
     }

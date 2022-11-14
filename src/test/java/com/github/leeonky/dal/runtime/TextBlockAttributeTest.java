@@ -127,7 +127,6 @@ class TextFormatterTest {
     @Nested
     class formatPipeline {
 
-
         @Test
         void pipeline_format_method() {
             TextFormatter textFormatter = new TextFormatter() {
@@ -144,7 +143,6 @@ class TextFormatterTest {
                     return s.substring(0, 1).toUpperCase() + s.substring(1);
                 }
             };
-
 
             assertThat(textFormatter.merge(next).format("HELLO")).isEqualTo("Hello");
         }

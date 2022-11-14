@@ -15,6 +15,20 @@ class AccessorsTest {
     }
 
     @Test
+    void use_given_exist_dal() {
+        assertThat((int) get("length").by(DAL.getInstance()).from("hello")).isEqualTo(5);
+    }
+
+    @Test
+    void dump_input() {
+        try {
+            get("not-exist").from("hello");
+        } catch (RuntimeException error) {
+            assertThat(error.getMessage()).contains("The root value was");
+        }
+    }
+
+    @Test
     void disable_dump_input() {
         try {
             Accessors.dumpInput(false);

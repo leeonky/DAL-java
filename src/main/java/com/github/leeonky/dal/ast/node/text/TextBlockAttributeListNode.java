@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.ast.node.text;
 
 import com.github.leeonky.dal.ast.node.DALNode;
+import com.github.leeonky.dal.runtime.BuildInTextFormatter;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.TextFormatter;
 
@@ -16,7 +17,7 @@ public class TextBlockAttributeListNode extends DALNode {
 
     public TextFormatter getFormatter(RuntimeContextBuilder.DALRuntimeContext context) {
         return attributes.stream().map(TextBlockAttributeNode.class::cast).map(node -> node.extractTextFormatter(context))
-                .reduce(TextFormatter.DEFAULT, TextFormatter::merge);
+                .reduce(BuildInTextFormatter.DEFAULT, TextFormatter::merge);
     }
 
     @Override
