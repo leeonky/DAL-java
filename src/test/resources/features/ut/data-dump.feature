@@ -384,3 +384,26 @@ Feature: dump-data
         age: java.lang.Integer <18>
     ...
     """
+
+  Scenario: dump stackTraceItem array
+    Given the following java class:
+    """
+    public class Data {
+      public StackTraceElement[] stacks = new StackTraceElement[] {
+        new StackTraceElement("class", "method", "file", 1),
+        new StackTraceElement("class", "method", "file", 2),
+        new StackTraceElement("class", "method", "file", 3),
+        new StackTraceElement("class", "method", "file", 4)
+      };
+    }
+    """
+    Then dumped instance of java class "Data" should be:
+    """
+    #package#Data {
+        stacks: 
+            at class.method(file:1)
+            at class.method(file:2)
+            at class.method(file:3)
+            at class.method(file:4)
+    }
+    """
