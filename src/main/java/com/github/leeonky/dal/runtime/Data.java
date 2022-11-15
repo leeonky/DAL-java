@@ -2,7 +2,7 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.dal.runtime.inspector.DumpingContext;
+import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -149,11 +149,11 @@ public class Data {
     }
 
     public String dumpAll() {
-        return DumpingContext.rootContext(context).dump(this).content();
+        return DumpingBuffer.rootContext(context).dump(this).content();
     }
 
     public String dumpValue() {
-        return DumpingContext.rootContext(context).dumpValue(this).content();
+        return DumpingBuffer.rootContext(context).dumpValue(this).content();
     }
 
     public <T> T newBlockScope(Supplier<T> supplier) {

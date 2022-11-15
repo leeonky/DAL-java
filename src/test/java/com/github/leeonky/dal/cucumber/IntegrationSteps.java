@@ -218,4 +218,9 @@ public class IntegrationSteps {
     public void theFollowingDalInputs(String expression) {
         integrationTestContext.givenDalDataList(expression);
     }
+
+    @Then("dumped data under {int} lines should be:")
+    public void dumpedDataUnderLinesShouldBe(int maxCount, String verification) {
+        integrationTestContext.verifyDumpedData(verification, maxCount);
+    }
 }

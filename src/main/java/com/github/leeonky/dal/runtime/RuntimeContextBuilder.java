@@ -52,6 +52,7 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<DumperFactory> dumperFactories = new ClassKeyMap<>();
     private final CheckerSet checkerSetForMatching = new CheckerSet(CheckerSet::defaultMatching);
     private final CheckerSet checkerSetForEqualing = new CheckerSet(CheckerSet::defaultEqualing);
+    private int maxDumpingLineSize = 100;
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -180,6 +181,10 @@ public class RuntimeContextBuilder {
     public RuntimeContextBuilder registerDumper(Class<?> type, DumperFactory factory) {
         dumperFactories.put(type, factory);
         return this;
+    }
+
+    public void setMaxDumpingLineSize(int size) {
+        maxDumpingLineSize = size;
     }
 
     public class DALRuntimeContext implements RuntimeContext {
@@ -355,6 +360,10 @@ public class RuntimeContextBuilder {
                     return Dumper.LIST_DUMPER;
                 return Dumper.MAP_DUMPER;
             });
+        }
+
+        public int maxDumpingLineCount() {
+            return maxDumpingLineSize;
         }
     }
 }

@@ -9,22 +9,22 @@ import java.util.stream.Stream;
 public class ListDumper implements Dumper.Cacheable {
 
     @Override
-    public void cachedInspect(Data data, DumpingContext context) {
+    public void cachedInspect(Data data, DumpingBuffer context) {
         dumpType(data, context);
         dumpBody(data, context);
     }
 
-    private void dumpBody(Data data, DumpingContext dumpingContext) {
-        DumpingContext indentContext = dumpingContext.append("[").indent();
+    private void dumpBody(Data data, DumpingBuffer dumpingBuffer) {
+        DumpingBuffer indentContext = dumpingBuffer.append("[").indent();
         List<Data> dataList = data.getDataList();
         for (int i = 0; i < dataList.size(); i++) {
             indentContext.index(i).newLine().dumpValue(dataList.get(i));
             indentContext.appendThen(",");
         }
-        dumpingContext.optionalNewLine().append("]");
+        dumpingBuffer.optionalNewLine().append("]");
     }
 
-    protected void dumpType(Data data, DumpingContext context) {
+    protected void dumpType(Data data, DumpingBuffer context) {
         if (!(data.getInstance() instanceof Iterable) && !(data.getInstance() instanceof Stream)
                 && !data.getInstance().getClass().isArray())
             context.append(Classes.getClassName(data.getInstance())).appendThen(" ");

@@ -9,21 +9,21 @@ import java.util.Set;
 public class MapDumper implements Dumper.Cacheable {
 
     @Override
-    public void cachedInspect(Data data, DumpingContext context) {
+    public void cachedInspect(Data data, DumpingBuffer context) {
         dumpType(data, context);
         dumpBody(data, context);
     }
 
-    private void dumpBody(Data data, DumpingContext dumpingContext) {
-        DumpingContext indentContext = dumpingContext.append("{").indent();
+    private void dumpBody(Data data, DumpingBuffer dumpingBuffer) {
+        DumpingBuffer indentContext = dumpingBuffer.append("{").indent();
         getFieldNames(data).forEach(fieldName -> {
             dumpField(data, fieldName, indentContext.sub(fieldName).newLine());
             indentContext.appendThen(",");
         });
-        dumpingContext.optionalNewLine().append("}");
+        dumpingBuffer.optionalNewLine().append("}");
     }
 
-    protected void dumpField(Data data, Object field, DumpingContext context) {
+    protected void dumpField(Data data, Object field, DumpingBuffer context) {
         Data value;
         context.append(key(field)).append(": ");
         try {
@@ -43,8 +43,8 @@ public class MapDumper implements Dumper.Cacheable {
         return data.getFieldNames();
     }
 
-    protected void dumpType(Data data, DumpingContext dumpingContext) {
+    protected void dumpType(Data data, DumpingBuffer dumpingBuffer) {
         if (!(data.getInstance() instanceof Map))
-            dumpingContext.append(Classes.getClassName(data.getInstance())).appendThen(" ");
+            dumpingBuffer.append(Classes.getClassName(data.getInstance())).appendThen(" ");
     }
 }

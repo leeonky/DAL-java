@@ -367,3 +367,20 @@ Feature: dump-data
         }
     }
     """
+
+  Scenario: max dump lines
+    Given the following json:
+    """
+    {
+      "name": "John",
+      "age": 18,
+      "comments": "blabla"
+    }
+    """
+    Then dumped data under 3 lines should be:
+    """
+    {
+        name: java.lang.String <John>,
+        age: java.lang.Integer <18>
+    ...
+    """

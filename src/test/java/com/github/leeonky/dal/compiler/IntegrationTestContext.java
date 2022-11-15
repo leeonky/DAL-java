@@ -7,7 +7,7 @@ import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.cucumber.TestCodeCompiler;
 import com.github.leeonky.dal.runtime.*;
-import com.github.leeonky.dal.runtime.inspector.DumpingContext;
+import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 import com.github.leeonky.dal.runtime.inspector.ValueDumper;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
@@ -264,6 +264,14 @@ public class IntegrationTestContext {
         assertThat(dump).isEqualTo(verification.replace("#package#", testCodeCompiler.packagePrefix()));
     }
 
+    public void verifyDumpedData(String verification, int maxCount) {
+        RuntimeContextBuilder builder = dal.getRuntimeContextBuilder();
+        builder.setMaxDumpingLineSize(maxCount);
+        RuntimeContextBuilder.DALRuntimeContext runtimeContext = builder.build(null);
+        String dump = runtimeContext.wrap(input).dumpValue();
+        assertThat(dump).isEqualTo(verification.replace("#package#", testCodeCompiler.packagePrefix()));
+    }
+
     public void setCurryingStaticMethodArgRange(String type, String methodType, String method, List<String> range) {
         compileAll();
         dal.getRuntimeContextBuilder().registerCurryingMethodRange(
@@ -308,7 +316,7 @@ public class IntegrationTestContext {
                 })
                 .registerDumper(Empty.class, data -> new ValueDumper() {
                     @Override
-                    protected void inspectValue(Data data, DumpingContext dumpingContext) {
+                    protected void inspectValue(Data data, DumpingBuffer dumpingBuffer) {
                     }
                 });
     }
