@@ -104,3 +104,26 @@ Feature: static method
     """
     int: 0
     """
+
+  Scenario: static method has higher priority than instance method
+    Given the following java class:
+    """
+    public class Data {
+      public String property() {
+        return "instance";
+      }
+    }
+    """
+    And the following java class:
+    """
+    public class DataMethods {
+
+      public static String property(Data data) {
+        return "static";
+      }
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    property: static
+    """

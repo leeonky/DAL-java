@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static com.github.leeonky.util.function.Extension.oneOf;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 class CurryingMethodGroup implements CurryingMethod {
     private final CurryingMethodGroup parent;
@@ -23,7 +24,7 @@ class CurryingMethodGroup implements CurryingMethod {
     @Override
     public CurryingMethodGroup call(Object arg) {
         return new CurryingMethodGroup(curryingMethods.stream().map(curryingMethod ->
-                curryingMethod.call(arg)).collect(Collectors.toList()), this);
+                curryingMethod.call(arg)).collect(toList()), this);
     }
 
     @Override
@@ -43,16 +44,23 @@ class CurryingMethodGroup implements CurryingMethod {
     }
 
     private Optional<InstanceCurryingMethod> selectCurryingMethod(Predicate<InstanceCurryingMethod> predicate) {
-        List<InstanceCurryingMethod> methods = curryingMethods.stream().filter(predicate).collect(Collectors.toList());
+        List<InstanceCurryingMethod> methods = curryingMethods.stream().filter(predicate).collect(toList());
         if (methods.size() > 1) {
             List<InstanceCurryingMethod> sameInstanceTypeMethods = methods.stream()
-                    .filter(InstanceCurryingMethod::isSameInstanceType).collect(Collectors.toList());
-            if (sameInstanceTypeMethods.size() == 1)
-                return sameInstanceTypeMethods.stream().findFirst();
-            throw new InvalidPropertyException("More than one currying method:\n" + methods.stream().map(
-                    instanceCurryingMethod -> "  " + instanceCurryingMethod.toString()).sorted().collect(joining("\n")));
+                    .filter(StaticCurryingMethod.class::isInstance).collect(toList());
+            return of(oneOf(() -> getOnlyOne(sameInstanceTypeMethods), () -> getOnlyOne(sameInstanceTypeMethods.stream()
+                    .filter(InstanceCurryingMethod::isSameInstanceType).collect(toList())))
+                    .orElseThrow(() -> new InvalidPropertyException("More than one currying method:\n"
+                            + methods.stream().map(instanceCurryingMethod -> "  " + instanceCurryingMethod.toString())
+                            .sorted().collect(joining("\n")))));
         }
         return methods.stream().findFirst();
+    }
+
+    private Optional<InstanceCurryingMethod> getOnlyOne(List<InstanceCurryingMethod> list) {
+        if (list.size() == 1)
+            return of(list.get(0));
+        return Optional.empty();
     }
 
     @Override
