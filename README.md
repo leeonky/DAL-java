@@ -30,7 +30,7 @@ new DAL().evaluateAll(null, "1 2");     // return [1, 2]
 更推荐使用如下静态方法API:
 ```java
 Assertions.expect(1).should("= 1");	// test pass
-Accessors.get("length").from("hello");	// access property and return 5
+Accessors.get("length").from("hello");	// access property and return 6
 ```
 
 ## 数据访问

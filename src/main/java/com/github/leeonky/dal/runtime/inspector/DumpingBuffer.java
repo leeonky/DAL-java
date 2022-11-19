@@ -39,12 +39,20 @@ public class DumpingBuffer {
     }
 
     public DumpingBuffer dump(Data data) {
-        runtimeContext.fetchDumper(data).dump(data, this);
+        try {
+            runtimeContext.fetchDumper(data).dump(data, this);
+        } catch (Exception e) {
+            append("*dump throw* " + e);
+        }
         return this;
     }
 
     public DumpingBuffer dumpValue(Data data) {
-        runtimeContext.fetchDumper(data).dumpValue(data, this);
+        try {
+            runtimeContext.fetchDumper(data).dumpValue(data, this);
+        } catch (Exception e) {
+            append("*dump throw* " + e);
+        }
         return this;
     }
 
