@@ -6,7 +6,8 @@ import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
-import com.github.leeonky.dal.cucumber.TestCodeCompiler;
+import com.github.leeonky.dal.cucumber.JavaCompiler;
+import com.github.leeonky.dal.cucumber.JavaCompilerPool;
 import com.github.leeonky.dal.runtime.ListAccessor;
 import com.github.leeonky.interpreter.InterpreterException;
 import lombok.Getter;
@@ -22,11 +23,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.Assertions.expect;
+import static com.github.leeonky.dal.cucumber.TestTask.threadsCount;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Deprecated
 public class CucumberContextBak {
-    private final TestCodeCompiler javaTestCodeCompiler;
+    private final JavaCompiler javaCompiler;
 
     DAL dal = new DAL().extend();
 
@@ -37,16 +39,18 @@ public class CucumberContextBak {
     DALNode node = null;
     private final List<String> schemas = new ArrayList<>();
     private final List<String> javaClasses = new ArrayList<>();
+    private static final JavaCompilerPool JAVA_COMPILER_POOL =
+            new JavaCompilerPool(threadsCount("COMPILER_THREAD_SIZE", 8) * 2, "src.test.generate.wsbk");
 
-    public CucumberContextBak() throws InterruptedException {
+    public CucumberContextBak() {
         dal.getRuntimeContextBuilder()
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
                 .registerListAccessor(JSONArray.class, new JSONArrayAccessor());
-        javaTestCodeCompiler = TestCodeCompiler.take();
+        javaCompiler = JAVA_COMPILER_POOL.take();
     }
 
-    public void release() throws InterruptedException {
-        TestCodeCompiler.giveBack(javaTestCodeCompiler);
+    public void release() {
+        JAVA_COMPILER_POOL.giveBack(javaCompiler);
     }
 
     public void giveDalSourceCode(String code) {
@@ -73,10 +77,10 @@ public class CucumberContextBak {
     public void assertInputData(String assertion) {
         giveDalSourceCode(assertion);
         try {
-            javaTestCodeCompiler.compileToClasses(schemas.stream().map(s ->
+            javaCompiler.compileToClasses(schemas.stream().map(s ->
                                     "import com.github.leeonky.dal.type.*;\n" +
-                                    "import com.github.leeonky.dal.runtime.*;\n" +
-                                    "import java.util.*;\n" + s)
+                                            "import com.github.leeonky.dal.runtime.*;\n" +
+                                            "import java.util.*;\n" + s)
                             .collect(Collectors.toList()))
                     .forEach(c -> dal.getRuntimeContextBuilder().registerSchema((Class) c));
             dal.evaluate(inputObject, assertion);
@@ -132,7 +136,7 @@ public class CucumberContextBak {
     public void assertJavaClass(String className, String assertion) {
         giveDalSourceCode(assertion);
         try {
-            List<Class<?>> classes = javaTestCodeCompiler.compileToClasses(javaClasses.stream().map(s ->
+            List<Class<?>> classes = javaCompiler.compileToClasses(javaClasses.stream().map(s ->
                     "import java.math.*;\n" + s).collect(Collectors.toList()));
             Class type = classes.stream().filter(clazz -> clazz.getName().equals(className))
                     .findFirst().orElseThrow(() -> new IllegalArgumentException

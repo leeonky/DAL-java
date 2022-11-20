@@ -5,7 +5,8 @@ import com.github.leeonky.dal.BaseTest;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
-import com.github.leeonky.dal.cucumber.TestCodeCompiler;
+import com.github.leeonky.dal.cucumber.JavaCompiler;
+import com.github.leeonky.dal.cucumber.JavaCompilerPool;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 import com.github.leeonky.dal.runtime.inspector.ValueDumper;
@@ -21,6 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.Assertions.expect;
+import static com.github.leeonky.dal.cucumber.TestTask.threadsCount;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -46,16 +48,18 @@ public class IntegrationTestContext {
     private DALNode dalNode = null;
     private final Map<String, Integer> firstIndexes = new HashMap<>();
     private final List<Class<?>> classes = new ArrayList<>();
-    private final TestCodeCompiler testCodeCompiler;
+    private final JavaCompiler javaCompiler;
+    private static final JavaCompilerPool JAVA_COMPILER_POOL =
+            new JavaCompilerPool(threadsCount("COMPILER_THREAD_SIZE", 8) * 2, "src.test.generate.ws");
 
-    public IntegrationTestContext() throws InterruptedException {
+    public IntegrationTestContext() {
         dal = new DAL().extend();
-        testCodeCompiler = TestCodeCompiler.take();
+        javaCompiler = JAVA_COMPILER_POOL.take();
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
-    public void release() throws InterruptedException {
-        testCodeCompiler.giveBack(testCodeCompiler);
+    public void release() {
+        JAVA_COMPILER_POOL.giveBack(javaCompiler);
     }
 
     private static NodeParser<DALNode, DALProcedure> optional(
@@ -68,7 +72,7 @@ public class IntegrationTestContext {
         exception = null;
         result = null;
         try {
-            testCodeCompiler.compileToClasses(schemas.stream().map(s ->
+            javaCompiler.compileToClasses(schemas.stream().map(s ->
                                     "import com.github.leeonky.dal.type.*;\n" +
                                             "import com.github.leeonky.dal.runtime.*;\n" +
                                             "import java.util.*;\n" + s)
@@ -121,7 +125,7 @@ public class IntegrationTestContext {
 
     private void compileAll() {
         if (classes.isEmpty()) {
-            classes.addAll(testCodeCompiler.compileToClasses(javaClasses.stream().map(s ->
+            classes.addAll(javaCompiler.compileToClasses(javaClasses.stream().map(s ->
                     "import com.github.leeonky.dal.type.*;\n" +
                             "import java.math.*;\n" + s).collect(Collectors.toList())));
             classes.forEach(dal.getRuntimeContextBuilder()::registerStaticMethodExtension);
@@ -153,7 +157,7 @@ public class IntegrationTestContext {
     }
 
     public void shouldFailedWith(String message) {
-        assertThat(exception.getMessage()).isEqualTo(message.replace("#package#", testCodeCompiler.packagePrefix()));
+        assertThat(exception.getMessage()).isEqualTo(message.replace("#package#", javaCompiler.packagePrefix()));
     }
 
     public void shouldHaveNotation(String notation) {
@@ -261,7 +265,7 @@ public class IntegrationTestContext {
         RuntimeContextBuilder.DALRuntimeContext runtimeContext = dal.getRuntimeContextBuilder().build(null);
 
         String dump = runtimeContext.wrap(input).dumpValue();
-        assertThat(dump).isEqualTo(verification.replace("#package#", testCodeCompiler.packagePrefix()));
+        assertThat(dump).isEqualTo(verification.replace("#package#", javaCompiler.packagePrefix()));
     }
 
     public void verifyDumpedData(String verification, int maxCount) {
@@ -269,7 +273,7 @@ public class IntegrationTestContext {
         builder.setMaxDumpingLineSize(maxCount);
         RuntimeContextBuilder.DALRuntimeContext runtimeContext = builder.build(null);
         String dump = runtimeContext.wrap(input).dumpValue();
-        assertThat(dump).isEqualTo(verification.replace("#package#", testCodeCompiler.packagePrefix()));
+        assertThat(dump).isEqualTo(verification.replace("#package#", javaCompiler.packagePrefix()));
     }
 
     public void setCurryingStaticMethodArgRange(String type, String methodType, String method, List<String> range) {

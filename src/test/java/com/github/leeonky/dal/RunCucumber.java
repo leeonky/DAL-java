@@ -11,7 +11,7 @@ public class RunCucumber {
     @Test
     void run_cucumber() {
         assertThat(run("--plugin", "pretty", "--glue", "com.github.leeonky", "--threads",
-                String.valueOf(TestTask.threadsCount("CUCUMBER_THREADS", 8)),
+                String.valueOf(TestTask.threadsCount("COMPILER_THREAD_SIZE", 8)),
                 "src/test/resources/features")).isEqualTo(Byte.valueOf("0"));
     }
 }

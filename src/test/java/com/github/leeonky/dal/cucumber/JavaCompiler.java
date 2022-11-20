@@ -8,44 +8,26 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingDeque;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toCollection;
 import static javax.tools.ToolProvider.getSystemJavaCompiler;
 
-public class TestCodeCompiler {
+public class JavaCompiler {
     private final URLClassLoader loader = getUrlClassLoader();
     private final String packageName;
-    private final int workSpace;
-    private static final BlockingDeque<Integer> workspaces = workspaces();
+    private final int id;
 
-    private static BlockingDeque<Integer> workspaces() {
-        return IntStream.range(0, TestTask.threadsCount("CUCUMBER_THREADS", 8) * 2).boxed()
-                .collect(toCollection(LinkedBlockingDeque::new));
-    }
-
-    public TestCodeCompiler(int workSpace) {
-        packageName = "src.test.generate.ws" + workSpace;
-        this.workSpace = workSpace;
-    }
-
-    public static TestCodeCompiler take() throws InterruptedException {
-        return new TestCodeCompiler(workspaces.takeFirst());
-    }
-
-    public static void giveBack(TestCodeCompiler compiler) throws InterruptedException {
-        workspaces.putLast(compiler.workSpace);
+    public JavaCompiler(String packageName, int id) {
+        this.packageName = packageName + id;
+        this.id = id;
     }
 
     @SneakyThrows
@@ -82,11 +64,10 @@ public class TestCodeCompiler {
         List<JavaSourceFromString> files = classCodes.stream().map(code ->
                         new JavaSourceFromString(guessClassName(code).replaceAll("<.*>", ""), declarePackage() + code))
                 .collect(Collectors.toList());
-        JavaCompiler systemJavaCompiler = getSystemJavaCompiler();
+        javax.tools.JavaCompiler systemJavaCompiler = getSystemJavaCompiler();
         StandardJavaFileManager standardFileManager = systemJavaCompiler.getStandardFileManager(diagnostics, null, null);
-        standardFileManager.setLocation(StandardLocation.CLASS_OUTPUT, asList(new File("./")));
-        boolean success = systemJavaCompiler.getTask(null, standardFileManager, diagnostics, null, null, files).call();
-        if (!success) {
+        standardFileManager.setLocation(StandardLocation.CLASS_OUTPUT, Collections.singletonList(new File("./")));
+        if (!systemJavaCompiler.getTask(null, standardFileManager, diagnostics, null, null, files).call()) {
             System.out.println(diagnostics.getDiagnostics().stream().collect(groupingBy(Diagnostic::getSource))
                     .entrySet().stream().map(this::compileResults).collect(Collectors.joining("\n")));
             throw new IllegalStateException("Failed to compile java code: \n");
@@ -126,6 +107,10 @@ public class TestCodeCompiler {
 
     public String packagePrefix() {
         return packageName.isEmpty() ? "" : packageName + ".";
+    }
+
+    public int getId() {
+        return id;
     }
 }
 
