@@ -69,7 +69,7 @@ dependencies {
     testAnnotationProcessor('org.projectlombok:lombok:1.18.4')
     testCompile('org.projectlombok:lombok:1.18.4')
     testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.0.0'
-
+    testImplementation dep(':java-compiler-util', '0.0.2')
     pitest "io.github.wmaarts:pitest-mutation-testing-elements-plugin:0.3.1"
 }
 

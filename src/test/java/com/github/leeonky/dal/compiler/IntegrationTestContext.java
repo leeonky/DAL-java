@@ -5,8 +5,6 @@ import com.github.leeonky.dal.BaseTest;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
-import com.github.leeonky.dal.cucumber.JavaCompiler;
-import com.github.leeonky.dal.cucumber.JavaCompilerPool;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 import com.github.leeonky.dal.runtime.inspector.ValueDumper;
@@ -14,6 +12,8 @@ import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.SyntaxException;
 import com.github.leeonky.util.Converter;
+import com.github.leeonky.util.JavaCompiler;
+import com.github.leeonky.util.JavaCompilerPool;
 import lombok.SneakyThrows;
 
 import java.lang.RuntimeException;

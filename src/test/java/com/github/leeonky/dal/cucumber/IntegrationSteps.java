@@ -17,12 +17,12 @@ public class IntegrationSteps {
     private IntegrationTestContext integrationTestContext;
 
     @Before
-    public void reset() throws InterruptedException {
+    public void reset() {
         integrationTestContext = new IntegrationTestContext();
     }
 
     @After
-    public void release() throws InterruptedException {
+    public void release() {
         integrationTestContext.release();
     }
 
