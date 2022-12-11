@@ -303,7 +303,7 @@ null= *     // 通过
     "message": {
         "id": 1,
         "value": "hello James",
-        “receiver": {
+        "receiver": {
             "id": "007",
             "name": "James"
         }
@@ -438,7 +438,7 @@ null: {...}    // 失败
 ```
 断言表达式可以直接写成：
 ``` javascript
-lines.product.name: ['iPad' 'iPhone' 'ITouch']
+lines[].product.name: ['iPad' 'iPhone' 'ITouch']
 ```
 
 ### 分组 断言
@@ -779,7 +779,7 @@ is [已支付的订单]: {
 如果对集合的某一个元素做特定断言，则可以再行首添加断言符号，如下的断言是等效的：
 ``` javascript
 : [
-    ={
+    = {
         name= 'Tom'
         age= 18
     }
@@ -798,7 +798,7 @@ is [已支付的订单]: {
 这里要注意，要表达如下的断言效果，需要在单元格或表头额外指定单元格的断言规则：
 ``` javascript
 : [
-    ={
+    = {
         name: 'Tom'
         age: 18
     }
