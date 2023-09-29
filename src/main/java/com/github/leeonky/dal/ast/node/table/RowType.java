@@ -2,7 +2,6 @@ package com.github.leeonky.dal.ast.node.table;
 
 import com.github.leeonky.dal.ast.node.*;
 import com.github.leeonky.dal.ast.opt.Factory;
-import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.interpreter.Clause;
 
@@ -15,6 +14,7 @@ import java.util.stream.Stream;
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.node.SymbolNode.Type.BRACKET;
 import static com.github.leeonky.dal.ast.node.table.SpecifyIndexRowType.indexToExpression;
+import static com.github.leeonky.dal.compiler.Notations.EMPTY;
 import static com.github.leeonky.util.function.When.when;
 import static java.util.stream.Collectors.toList;
 
@@ -104,8 +104,8 @@ class SpecifyIndexRowType extends RowType {
     }
 
     static Optional<DALNode> indexToExpression(DALNode node) {
-        return when(node instanceof ConstNode).optional(() -> new DALExpression(INPUT_NODE,
-                Factory.executable(Notations.EMPTY), new SymbolNode(((ConstNode) node).getValue(), BRACKET)));
+        return when(node instanceof ConstNode).optional(() -> new DALExpression(INPUT_NODE, Factory.executable(EMPTY),
+                new SymbolNode(((ConstNode) node).getValue(), BRACKET).setPositionBegin(node.getPositionBegin())));
     }
 }
 

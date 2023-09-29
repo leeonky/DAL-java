@@ -241,6 +241,21 @@ Feature: skip
                         ^
                         ^
     """
+    When evaluate by:
+    """
+    = | >>   | 3 |
+      | name | * |
+      | age  | * |
+    """
+    Then got the following notation:
+    """
+    = | >>   | 3 |
+               ^
+      | name | * |
+               ^
+      | age  | * |
+               ^
+    """
 
   Scenario: ignore row should not check row index
     Given the following json:
