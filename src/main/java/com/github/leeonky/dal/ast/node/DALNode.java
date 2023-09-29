@@ -35,7 +35,9 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     private boolean verify(DALNode actualNode, DALRuntimeContext context,
                            TriFunction<DALRuntimeContext, Data, Data, Checker> factory) {
         Data expected = evaluateData(context);
+        expected.isNullWithPosition(getOperandPosition());
         Data actual = actualNode.evaluateData(context);
+        actual.isNullWithPosition(actualNode.getOperandPosition());
         Checker checker = factory.apply(context, expected, actual);
         return checker.verify(createContext(context, expected, actual, checker));
     }

@@ -14,6 +14,7 @@ import com.github.leeonky.interpreter.SyntaxException;
 import com.github.leeonky.util.Converter;
 import com.github.leeonky.util.JavaCompiler;
 import com.github.leeonky.util.JavaCompilerPool;
+import com.github.leeonky.util.Suppressor;
 import lombok.SneakyThrows;
 
 import java.lang.RuntimeException;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.cucumber.TestTask.threadsCount;
+import static com.github.leeonky.util.JavaCompiler.guessClassName;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -35,6 +37,7 @@ public class IntegrationTestContext {
     private String expression;
     private final List<String> schemas = new ArrayList<>();
     private final List<String> javaClasses = new ArrayList<>();
+    private final Map<String, String> propertyAccessors = new LinkedHashMap<>();
     private final Compiler compiler = new Compiler();
     private final Map<String, NodeParser<DALNode,
             DALProcedure>> parserMap = new HashMap<String, NodeParser<DALNode,
@@ -82,6 +85,14 @@ public class IntegrationTestContext {
                         Arrays.stream(schema.getDeclaredClasses()).forEach(c ->
                                 dal.getRuntimeContextBuilder().registerSchema(NameStrategy.SIMPLE_NAME_WITH_PARENT, (Class) c));
                     });
+
+            propertyAccessors.forEach((type, accessor) -> {
+                Class<?> beanType = classes.stream().filter(c -> c.getSimpleName().equals(type)).findFirst().get();
+                Class<?> accessorType = classes.stream().filter(c -> c.getSimpleName().equals(accessor)).findFirst().get();
+                Suppressor.run(() -> dal.getRuntimeContextBuilder().registerPropertyAccessor(beanType,
+                        (PropertyAccessor) accessorType.newInstance()));
+            });
+
             result = dal.evaluate(input, expression);
         } catch (InterpreterException e) {
             exception = e;
@@ -127,6 +138,8 @@ public class IntegrationTestContext {
         if (classes.isEmpty()) {
             classes.addAll(javaCompiler.compileToClasses(javaClasses.stream().map(s ->
                     "import com.github.leeonky.dal.type.*;\n" +
+                            "import com.github.leeonky.util.*;\n" +
+                            "import com.github.leeonky.dal.runtime.*;\n" +
                             "import java.math.*;\n" + s).collect(Collectors.toList())));
             classes.forEach(dal.getRuntimeContextBuilder()::registerStaticMethodExtension);
         }
@@ -323,6 +336,11 @@ public class IntegrationTestContext {
                     protected void inspectValue(Data data, DumpingBuffer dumpingBuffer) {
                     }
                 });
+    }
+
+    public void givenPropertyAccessor(String type, String code) {
+        javaClasses.add(code);
+        propertyAccessors.put(type, guessClassName(code));
     }
 
     public static class Empty {

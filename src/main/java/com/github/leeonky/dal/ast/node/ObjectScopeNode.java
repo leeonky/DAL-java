@@ -39,8 +39,7 @@ public class ObjectScopeNode extends DALNode {
 
     @Override
     public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        Data data = actualNode.evaluateData(context);
-        checkNull(data);
+        Data data = evaluateActualAndCheckNull(actualNode, context);
         return data.newBlockScope(() -> {
             verificationExpressions.forEach(expression -> expression.evaluate(context));
             assertUnexpectedFields(collectUnexpectedFields(data, context), actualNode.inspect(), operator.getPosition());
@@ -48,13 +47,18 @@ public class ObjectScopeNode extends DALNode {
         });
     }
 
+    private Data evaluateActualAndCheckNull(DALNode actualNode, DALRuntimeContext context) {
+        Data data = actualNode.evaluateData(context);
+        if (data.isNullWithPosition(actualNode.getOperandPosition()))
+            throw new AssertionFailure("The input value is null", getPositionBegin());
+        return data;
+    }
+
     @Override
     public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
-        Data data = actualNode.evaluateData(context);
         if (verificationExpressions.isEmpty() && !isObjectWildcard)
             throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
-        checkNull(data);
-        return data.newBlockScope(() -> {
+        return evaluateActualAndCheckNull(actualNode, context).newBlockScope(() -> {
             verificationExpressions.forEach(expression -> expression.evaluate(context));
             return true;
         });
@@ -70,11 +74,6 @@ public class ObjectScopeNode extends DALNode {
     private Object convertFiled(Data data, Object obj) {
         return data.getInstance() instanceof CurryingMethod ?
                 ((CurryingMethod) data.getInstance()).convertToArgType(obj) : obj;
-    }
-
-    private void checkNull(Data data) {
-        if (data.isNull())
-            throw new AssertionFailure("The input value is null", getPositionBegin());
     }
 
     @Override

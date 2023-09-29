@@ -178,6 +178,16 @@ public class Data {
         throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()), position);
     }
 
+    public boolean isNullWithPosition(int position) {
+        boolean isNull;
+        try {
+            isNull = isNull();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), position, e);
+        }
+        return isNull;
+    }
+
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
     }
 }

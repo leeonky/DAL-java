@@ -223,4 +223,9 @@ public class IntegrationSteps {
     public void dumpedDataUnderLinesShouldBe(int maxCount, String verification) {
         integrationTestContext.verifyDumpedData(verification, maxCount);
     }
+
+    @And("register the following PropertyAccessor for java class {string}:")
+    public void registerTheFollowingPropertyAccessorForJavaClass(String type, String code) {
+        integrationTestContext.givenPropertyAccessor(type, code);
+    }
 }

@@ -337,7 +337,7 @@ Feature: dump-data
     public class Data {
       public int value = 2;
       public int getError() {
-        throw new RuntimeException("error");
+        throw new java.lang.RuntimeException("error");
       }
     }
     """
