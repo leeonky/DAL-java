@@ -3,12 +3,16 @@ package com.github.leeonky.dal.ast.node.table;
 import com.github.leeonky.dal.ast.node.ConstNode;
 import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
+import com.github.leeonky.dal.ast.node.InputNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.compiler.DALProcedure;
 import com.github.leeonky.interpreter.Clause;
+import com.github.leeonky.interpreter.Operator;
 import com.github.leeonky.interpreter.OperatorParser;
 
 import java.util.Optional;
+
+import static com.github.leeonky.util.function.Extension.oneOf;
 
 public class TableRowPrefixNode extends DALNode {
     private static final RowType DEFAULT_INDEX = new DefaultIndexRowType(),
@@ -52,5 +56,11 @@ public class TableRowPrefixNode extends DALNode {
             else
                 return DEFAULT_INDEX;
         }).orElse(DEFAULT_INDEX);
+    }
+
+    public Optional<Integer> position() {
+        return oneOf(() -> indexOrProperty.map(DALNode::getPositionBegin),
+                () -> rowSchema.map(c -> ((DALExpression) c.expression(InputNode.INPUT_NODE)).getOperator().getPosition()),
+                () -> rowOperator.map(Operator::getPosition));
     }
 }

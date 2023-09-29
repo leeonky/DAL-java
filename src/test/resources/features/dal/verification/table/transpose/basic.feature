@@ -248,6 +248,7 @@ Feature: basic verification via table
     """
     : | >>   | =      |
                ^
+               ^
       | name | 'John' |
                ^
     """
@@ -292,6 +293,7 @@ Feature: basic verification via table
     And got the following notation:
     """
     : | >>    | :             |
+                ^
       | user= | {name: 'Tom'} |
             ^
                 ^
@@ -337,6 +339,7 @@ Feature: basic verification via table
     And got the following notation:
     """
     : | >>    | :               |
+                ^
       | user: | = {name: 'Tom'} |
                 ^
                 ^

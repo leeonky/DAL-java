@@ -99,6 +99,7 @@ public class TableRowNode extends DALNode {
 
 
     public DalException markPositionOnCells(DalException dalException) {
+        rowPrefix.position().ifPresent(position -> dalException.multiPosition(position, COLUMN));
         return cells.stream().reduce(dalException, (e, cell) ->
                 e.multiPosition(cell.expression(null).getPositionBegin(), COLUMN), notAllowParallelReduce());
     }

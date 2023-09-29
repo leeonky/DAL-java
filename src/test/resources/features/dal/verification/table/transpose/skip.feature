@@ -181,6 +181,7 @@ Feature: skip
     Then got the following notation:
     """
     = | >>   | 0     | 2      |
+               ^
       | name | 'Tom' | 'Lily' |
                ^
       | age  | 12    | 15     |
@@ -196,6 +197,7 @@ Feature: skip
     Then got the following notation:
     """
     = | >>   | 0     | 2      |
+                       ^
       | name | 'Tom' | 'Lily' |
                        ^
       | age  | 10    | 25     |
@@ -235,6 +237,7 @@ Feature: skip
     Then got the following notation:
     """
     = | >>   | 2      | -2     |
+                        ^
       | name | 'Lily' | 'John' |
                         ^
       | age  |  15    | 30     |
@@ -250,6 +253,7 @@ Feature: skip
     Then got the following notation:
     """
     = | >>   | 3 |
+               ^
                ^
       | name | * |
                ^

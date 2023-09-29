@@ -116,3 +116,22 @@ Feature: verify object
     : | >> | row0 |
     | col | : 1 |
     """
+
+  Scenario: mark invalid property position
+    Given the following java class:
+    """
+    public class Bean {
+        public String value1="str1", value2 = "str2";
+    }
+    """
+    When use a instance of java class "Bean" to evaluate:
+    """
+    =     | length |
+    value | 1      |
+    """
+    And got the following notation:
+    """
+    =     | length |
+    value | 1      |
+    ^
+    """

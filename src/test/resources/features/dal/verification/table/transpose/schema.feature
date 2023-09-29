@@ -86,6 +86,7 @@ Feature: schema in table
     """
     : | >>   | is IdZero |
                   ^
+               ^
       | name | 'Tom'     |
                ^
     """
