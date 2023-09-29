@@ -101,6 +101,7 @@ public class Compiler {
             OBJECT_SCOPE_RELAX_STRING = Tokens.OBJECT_SCOPE_RELAX_STRING.nodeParser(NodeFactory::relaxString),
             LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(NodeFactory::relaxString),
             TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(NodeFactory::relaxString),
+            BRACKET_RELAX_STRING = Tokens.BRACKET_RELAX_STRING.nodeParser(NodeFactory::relaxString),
             DEFAULT_INDEX_HEADER = procedure -> new TableDefaultIndexHeadRow();
 
     public ClauseParser<DALNode, DALProcedure>
@@ -116,8 +117,8 @@ public class Compiler {
             EXPLICIT_PROPERTY_CLAUSE = oneOf(Operators.PROPERTY_DOT.clause(PROPERTY_PATTERN.or(propertyChainNode())),
                     Operators.PROPERTY_SLASH.clause(propertyChainNode()),
                     Operators.PROPERTY_META.clause(symbolClause(META_SYMBOL.concat(META_LIST_MAPPING_CLAUSE))),
-                    Operators.PROPERTY_IMPLICIT.clause(Notations.OPENING_BRACKET.with(single(INTEGER_OR_STRING.mandatory(
-                            "Should given one property or array index in `[]`")).and(endWith(Notations.CLOSING_BRACKET))
+                    Operators.PROPERTY_IMPLICIT.clause(Notations.OPENING_BRACKET.with(single(INTEGER_OR_STRING.or(BRACKET_RELAX_STRING))
+                            .and(endWith(Notations.CLOSING_BRACKET))
                             .as(NodeFactory::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE)))
             );
 

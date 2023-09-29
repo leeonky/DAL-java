@@ -98,3 +98,29 @@ Feature: access object property by ['xxx']
     """
     data= {0= 'str1', 2= 'str2', a= 'strA'}
     """
+
+  Scenario Outline: support relax property name in []
+    Given the following json:
+    """
+      {
+        "<key>": 100,
+        "first name": "Li"
+      }
+    """
+    When evaluate by:
+    """
+    <code>
+    """
+    Then the result should:
+    """
+    : <value>
+    """
+    And the inspect should:
+    """
+    <inspect>
+    """
+    Examples:
+      | key                        | code                           | value | inspect                        |
+      | id                         | [ id ]                         | 100   | ['id']                         |
+      | with space                 | [ with space ]                 | 100   | ['with space']                 |
+      | !@#$%^&*(){}~`\|=+/?_-,.<> | [ !@#$%^&*(){}~`\|=+/?_-,.<> ] | 100   | ['!@#$%^&*(){}~`\|=+/?_-,.<>'] |
