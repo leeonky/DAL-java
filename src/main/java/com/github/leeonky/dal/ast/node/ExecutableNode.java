@@ -15,5 +15,4 @@ public interface ExecutableNode extends Node<RuntimeContextBuilder.DALRuntimeCon
             throw new RuntimeException("Instance is null", getOperandPosition());
         return getValue(data, context);
     }
-
 }

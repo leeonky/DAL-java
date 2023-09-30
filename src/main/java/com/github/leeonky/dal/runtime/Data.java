@@ -173,9 +173,14 @@ public class Data {
     }
 
     public Data requireList(int position) {
-        if (isList())
-            return this;
-        throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()), position);
+        if (!isList())
+            throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()), position);
+        try {
+            getValueList();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), position, e);
+        }
+        return this;
     }
 
     public boolean isNullWithPosition(int position) {

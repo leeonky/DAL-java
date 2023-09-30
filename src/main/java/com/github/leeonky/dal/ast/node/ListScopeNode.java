@@ -100,16 +100,16 @@ public class ListScopeNode extends DALNode {
 
     @Override
     public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
-        return verify(context, actualNode.evaluateData(context));
+        return verify(context, actualNode);
     }
 
     @Override
     public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        return verify(context, actualNode.evaluateData(context));
+        return verify(context, actualNode);
     }
 
-    private boolean verify(DALRuntimeContext context, Data data) {
-        data.requireList(getPositionBegin()).setListComparator(comparator);
+    private boolean verify(DALRuntimeContext context, DALNode node) {
+        Data data = node.evaluateData(context).setListComparator(comparator).requireList(node.getOperandPosition());
         return type == Type.CONTAINS ? verifyContainElement(context, data) : verifyCorrespondingElement(context, data);
     }
 

@@ -165,7 +165,7 @@ Feature: compare null
     And got the following notation:
     """
       null <operator> []
-             ^
+      ^
     """
     Examples:
       | operator |

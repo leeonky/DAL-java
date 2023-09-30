@@ -230,7 +230,7 @@ Feature: verify list
     And got the following source code information:
     """
     1 = [...]
-        ^
+    ^
     """
     When assert by the following code:
     """
@@ -244,7 +244,7 @@ Feature: verify list
     And got the following source code information:
     """
     1 : [...]
-        ^
+    ^
     """
 
   Scenario: use ... at first of list to ignore list size and assert element from last

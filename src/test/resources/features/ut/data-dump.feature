@@ -434,7 +434,30 @@ Feature: dump-data
       }
     }
     """
-    When use a instance of java class "AData" to assert:
+#    When use a instance of java class "AData" to assert:
+#    """
+#    = ''
+#    """
+#    Then got the following exception:
+#    """
+#    message.trim= ```
+#                  = ''
+#                    ^
+#
+#                  Expected to be equal to: java.lang.String
+#                                           ^
+#                  <>
+#                  Actual: #package#AData {
+#                          ^
+#                      data: *dump throw* java.lang.RuntimeException: Error
+#                  }
+#
+#                  The root value was: #package#AData {
+#                      data: *dump throw* java.lang.RuntimeException: Error
+#                  }
+#                  ```
+#    """
+    When use a instance of java class "Data" to assert:
     """
     = ''
     """
@@ -447,13 +470,9 @@ Feature: dump-data
                   Expected to be equal to: java.lang.String
                                            ^
                   <>
-                  Actual: #package#AData {
+                  Actual: *dump throw* java.lang.RuntimeException: Error
                           ^
-                      data: *dump throw* java.lang.RuntimeException: Error
-                  }
 
-                  The root value was: #package#AData {
-                      data: *dump throw* java.lang.RuntimeException: Error
-                  }
+                  The root value was: *dump throw* java.lang.RuntimeException: Error
                   ```
     """

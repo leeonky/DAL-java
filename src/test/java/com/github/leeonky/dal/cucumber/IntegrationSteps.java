@@ -239,4 +239,9 @@ public class IntegrationSteps {
         integrationTestContext.givenJavaDataByClassName(type);
         integrationTestContext.dalExpect(expression);
     }
+
+    @And("register the following BeanAsListAccessor for java class {string}:")
+    public void registerTheFollowingBeanAsListAccessorForJavaClass(String type, String code) {
+        integrationTestContext.givenListAccessor(type, code);
+    }
 }
