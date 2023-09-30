@@ -228,4 +228,15 @@ public class IntegrationSteps {
     public void registerTheFollowingPropertyAccessorForJavaClass(String type, String code) {
         integrationTestContext.givenPropertyAccessor(type, code);
     }
+
+    @Then("got the following exception:")
+    public void gotTheFollowingException(String expression) {
+        integrationTestContext.shouldAssertException(expression);
+    }
+
+    @When("use a instance of java class {string} to assert:")
+    public void useAInstanceOfJavaClassToAssert(String type, String expression) {
+        integrationTestContext.givenJavaDataByClassName(type);
+        integrationTestContext.dalExpect(expression);
+    }
 }

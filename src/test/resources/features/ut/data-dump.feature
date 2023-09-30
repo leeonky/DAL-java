@@ -407,3 +407,53 @@ Feature: dump-data
             at class.method(file:4)
     }
     """
+
+  Scenario: should ignore dump error
+    Given the following java class:
+    """
+    public class Data {
+      {
+        com.github.leeonky.dal.DAL.getInstance().getRuntimeContextBuilder().registerDumper(Data.class, data ->
+        new com.github.leeonky.dal.runtime.inspector.Dumper(){
+          public void dump(com.github.leeonky.dal.runtime.Data data,
+            com.github.leeonky.dal.runtime.inspector.DumpingBuffer dumpingBuffer) {
+            throw new java.lang.RuntimeException("Error");
+          }
+        });
+      }
+      public int getError() {
+        return 1;
+      }
+    }
+    """
+    Given the following java class:
+    """
+    public class AData {
+      public Data getData() {
+        return new Data();
+      }
+    }
+    """
+    When use a instance of java class "AData" to assert:
+    """
+    = ''
+    """
+    Then got the following exception:
+    """
+    message.trim= ```
+                  = ''
+                    ^
+
+                  Expected to be equal to: java.lang.String
+                                           ^
+                  <>
+                  Actual: #package#AData {
+                          ^
+                      data: *dump throw* java.lang.RuntimeException: Error
+                  }
+
+                  The root value was: #package#AData {
+                      data: *dump throw* java.lang.RuntimeException: Error
+                  }
+                  ```
+    """

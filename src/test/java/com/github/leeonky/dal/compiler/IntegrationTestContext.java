@@ -343,6 +343,18 @@ public class IntegrationTestContext {
         propertyAccessors.put(type, guessClassName(code));
     }
 
+    public void shouldAssertException(String expression) {
+        expect(bizException).should(expression.replace("#package#", javaCompiler.packagePrefix()));
+    }
+
+    public void dalExpect(String expression) {
+        try {
+            expect(input).should(expression.replace("#package#", javaCompiler.packagePrefix()));
+        } catch (Throwable e) {
+            bizException = e;
+        }
+    }
+
     public static class Empty {
     }
 }
