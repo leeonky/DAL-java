@@ -50,7 +50,7 @@ public class ObjectScopeNode extends DALNode {
     private Data evaluateActualAndCheckNull(DALNode actualNode, DALRuntimeContext context) {
         Data data = actualNode.evaluateData(context);
         if (data.isNullWithPosition(actualNode.getOperandPosition()))
-            throw new AssertionFailure("The input value is null", getPositionBegin());
+            throw new AssertionFailure("The input value is null", getOperandPosition());
         return data;
     }
 

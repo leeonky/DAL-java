@@ -6,7 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-class MapPropertyAccessor implements PropertyAccessor<Map<?, ?>> {
+public class MapPropertyAccessor implements PropertyAccessor<Map<?, ?>> {
     @Override
     public Object getValue(Map<?, ?> instance, Object property) {
         return instance.get(property);
