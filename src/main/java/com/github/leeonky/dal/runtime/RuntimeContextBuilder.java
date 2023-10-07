@@ -53,6 +53,8 @@ public class RuntimeContextBuilder {
     private final CheckerSet checkerSetForMatching = new CheckerSet(CheckerSet::defaultMatching);
     private final CheckerSet checkerSetForEqualing = new CheckerSet(CheckerSet::defaultEqualing);
     private int maxDumpingLineSize = 100;
+    private ErrorHook errorHook = (i, code, e) -> {
+    };
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -185,6 +187,11 @@ public class RuntimeContextBuilder {
 
     public void setMaxDumpingLineSize(int size) {
         maxDumpingLineSize = size;
+    }
+
+    public <T> RuntimeContextBuilder registerErrorHook(ErrorHook hook) {
+        errorHook = Objects.requireNonNull(hook);
+        return this;
     }
 
     public class DALRuntimeContext implements RuntimeContext {
@@ -364,6 +371,10 @@ public class RuntimeContextBuilder {
 
         public int maxDumpingLineCount() {
             return maxDumpingLineSize;
+        }
+
+        public void hookError(Object input, String expression, Throwable error) {
+            errorHook.handle(input, expression, error);
         }
     }
 }

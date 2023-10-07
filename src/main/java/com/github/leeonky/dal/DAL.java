@@ -44,19 +44,29 @@ public class DAL {
     @SuppressWarnings("unchecked")
     public <T> List<T> evaluateAll(Object input, String expressions) {
         DALRuntimeContext runtimeContext = runtimeContextBuilder.build(input);
-        return compiler.compile(new SourceCode(format(expressions), Notations.LINE_COMMENTS), runtimeContext).stream()
-                .map(node -> (T) node.evaluate(runtimeContext))
-                .collect(Collectors.toList());
+        try {
+            return compiler.compile(new SourceCode(format(expressions), Notations.LINE_COMMENTS), runtimeContext).stream()
+                    .map(node -> (T) node.evaluate(runtimeContext))
+                    .collect(Collectors.toList());
+        } catch (Throwable e) {
+            runtimeContext.hookError(input, expressions, e);
+            throw e;
+        }
     }
 
     @SuppressWarnings("unchecked")
     public <T> T evaluate(Object input, String expression) {
-        DALRuntimeContext DALRuntimeContext = runtimeContextBuilder.build(input);
-        List<DALNode> nodes = compiler.compile(new SourceCode(format(expression), Notations.LINE_COMMENTS),
-                DALRuntimeContext);
-        if (nodes.size() > 1)
-            throw new SyntaxException("more than one expression", getOperandPosition(nodes.get(1)));
-        return (T) nodes.get(0).evaluate(DALRuntimeContext);
+        DALRuntimeContext runtimeContext = runtimeContextBuilder.build(input);
+        try {
+            List<DALNode> nodes = compiler.compile(new SourceCode(format(expression), Notations.LINE_COMMENTS),
+                    runtimeContext);
+            if (nodes.size() > 1)
+                throw new SyntaxException("more than one expression", getOperandPosition(nodes.get(1)));
+            return (T) nodes.get(0).evaluate(runtimeContext);
+        } catch (Throwable e) {
+            runtimeContext.hookError(input, expression, e);
+            throw e;
+        }
     }
 
     private int getOperandPosition(DALNode node) {
