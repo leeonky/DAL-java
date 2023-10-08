@@ -3,10 +3,13 @@ package com.github.leeonky.dal.ast.node.text;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.runtime.CustomizedTextFormatter;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
+import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.runtime.TextFormatter;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.lang.String.format;
 
 public class TextBlockAttributeListNode extends DALNode {
     final List<DALNode> attributes;
@@ -17,8 +20,19 @@ public class TextBlockAttributeListNode extends DALNode {
 
     @SuppressWarnings("unchecked")
     public <T> TextFormatter<String, T> getFormatter(RuntimeContextBuilder.DALRuntimeContext context) {
-        return attributes.stream().map(TextBlockAttributeNode.class::cast).map(node -> node.extractTextFormatter(context))
-                .reduce(CustomizedTextFormatter.DEFAULT, TextFormatter::merge);
+        Class<?> accept = String.class;
+        TextFormatter textFormatter = CustomizedTextFormatter.DEFAULT;
+        for (DALNode attribute : attributes) {
+            TextBlockAttributeNode attributeNode = (TextBlockAttributeNode) attribute;
+            TextFormatter eachFormatter = attributeNode.extractTextFormatter(context);
+//            TODO use converter
+            if (!accept.equals(eachFormatter.acceptType()))
+                throw new RuntimeException(format("Invalid text formatter, expect a formatter which accept %s but %s",
+                        accept.getName(), eachFormatter.acceptType().getName()), attributeNode.getPositionBegin());
+            accept = eachFormatter.returnType();
+            textFormatter = textFormatter.merge(eachFormatter);
+        }
+        return textFormatter;
     }
 
     @Override

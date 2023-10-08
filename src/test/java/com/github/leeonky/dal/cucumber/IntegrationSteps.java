@@ -244,4 +244,9 @@ public class IntegrationSteps {
     public void registerTheFollowingBeanAsListAccessorForJavaClass(String type, String code) {
         integrationTestContext.givenListAccessor(type, code);
     }
+
+    @Given("the following text formatter {string}:")
+    public void theFollowingTextFormatter(String name, String code) {
+        integrationTestContext.givenTextFormatter(name, code);
+    }
 }

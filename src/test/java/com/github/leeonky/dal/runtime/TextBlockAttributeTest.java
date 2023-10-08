@@ -3,6 +3,8 @@ package com.github.leeonky.dal.runtime;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TextFormatterTest {
@@ -28,7 +30,8 @@ class TextFormatterTest {
 
         @Test
         void keep_in_merged_formatter() {
-            TextFormatter another = new TextFormatter();
+            TextFormatter another = new TextFormatter() {
+            };
 
             assertThat(textFormatter.merge(another).format(null)).isEqualTo("new-line");
         }
@@ -67,7 +70,8 @@ class TextFormatterTest {
 
         @Test
         void keep_in_merged_formatter() {
-            TextFormatter another = new TextFormatter();
+            TextFormatter another = new TextFormatter() {
+            };
 
             assertThat(textFormatter.merge(another).format(null)).isEqualTo("end-of-line");
         }
@@ -106,7 +110,8 @@ class TextFormatterTest {
 
         @Test
         void keep_in_merged_formatter() {
-            TextFormatter another = new TextFormatter();
+            TextFormatter another = new TextFormatter() {
+            };
 
             assertThat(textFormatter.merge(another).format(null)).isEqualTo("continuation");
         }
@@ -145,6 +150,21 @@ class TextFormatterTest {
             };
 
             assertThat(textFormatter.merge(next).format("HELLO")).isEqualTo("Hello");
+        }
+
+        @Test
+        void merged_format_use_first_format_accept_type_and_last_format_return_type() {
+
+            TextFormatter<String, Integer> first = new TextFormatter<String, Integer>() {
+            };
+
+            TextFormatter<Integer, List<String>> second = new TextFormatter<Integer, List<String>>() {
+            };
+
+            TextFormatter<String, List<String>> merge = first.merge(second);
+            assertThat(merge.acceptType()).isEqualTo(String.class);
+
+            assertThat(merge.returnType()).isEqualTo(List.class);
         }
     }
 }

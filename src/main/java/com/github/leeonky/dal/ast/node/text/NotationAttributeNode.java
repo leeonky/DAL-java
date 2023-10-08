@@ -49,7 +49,8 @@ public class NotationAttributeNode extends DALNode {
     }
 
     private List<String> joinToLines(List<Character> content) {
-        List<String> lines = TextUtil.lines(TextUtil.join(content));
+        // append a blank char to keep tail \n to one line in lines method
+        List<String> lines = TextUtil.lines(TextUtil.join(content) + ' ');
         return new ArrayList<>(lines.subList(0, lines.size() - 1));
     }
 

@@ -39,6 +39,7 @@ public class IntegrationTestContext {
     private final List<String> javaClasses = new ArrayList<>();
     private final Map<String, String> propertyAccessors = new LinkedHashMap<>();
     private final Map<String, String> listAccessors = new LinkedHashMap<>();
+    private final Map<String, String> textFormatters = new LinkedHashMap<>();
     private final Compiler compiler = new Compiler();
     private final Map<String, NodeParser<DALNode,
             DALProcedure>> parserMap = new HashMap<String, NodeParser<DALNode,
@@ -98,6 +99,11 @@ public class IntegrationTestContext {
                 Class<?> accessorType = classes.stream().filter(c -> c.getSimpleName().equals(accessor)).findFirst().get();
                 Suppressor.run(() -> dal.getRuntimeContextBuilder().registerListAccessor(beanType,
                         (ListAccessor) accessorType.newInstance()));
+            });
+            textFormatters.forEach((formatter, name) -> {
+                Class<?> formatterClass = classes.stream().filter(c -> c.getSimpleName().equals(name)).findFirst().get();
+                dal.getRuntimeContextBuilder().registerTextFormatter(formatter,
+                        (CustomizedTextFormatter) Suppressor.get(formatterClass::newInstance));
             });
 
             result = dal.evaluate(input, expression);
@@ -365,6 +371,11 @@ public class IntegrationTestContext {
     public void givenListAccessor(String type, String code) {
         javaClasses.add(code);
         listAccessors.put(type, guessClassName(code));
+    }
+
+    public void givenTextFormatter(String name, String code) {
+        javaClasses.add(code);
+        textFormatters.put(name, guessClassName(code));
     }
 
     public static class Empty {

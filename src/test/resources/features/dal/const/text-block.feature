@@ -1,6 +1,18 @@
 Feature: ```string```
 
-  Rule: common
+  Rule: common use in assertion
+
+    Scenario: resolve when no indent
+      When evaluate by:
+      """
+      ```
+      hello
+      ```
+      """
+      Then the result should:
+      """
+      = hello
+      """
 
     Scenario: empty string
       Given the following json:
@@ -370,5 +382,34 @@ Feature: ```string```
       """
 
   Rule: map text block
+
+    Scenario: invalid type in object map chain in text block
+      Given the following java class:
+      """
+      public class Bean {}
+      """
+      Given the following text formatter "NeedBean":
+      """
+      public class NeedBean extends CustomizedTextFormatter<Bean, String> {
+      }
+      """
+      When use a instance of java class "Bean" to evaluate:
+      """
+      ```  NeedBean
+      any string
+      ```
+      """
+      Then failed with the message:
+      """
+      Invalid text formatter, expect a formatter which accept java.lang.String but #package#Bean
+      """
+      And got the following notation:
+      """
+      ```  NeedBean
+           ^
+      any string
+      ```
+      """
+
 # invalid type
 # to new type

@@ -15,7 +15,7 @@ public class TextFormatters implements Extension {
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerTextFormatter("LF", CustomizedTextFormatter.DEFAULT_NEW_LINE)
-                .registerTextFormatter("CR", new CustomizedTextFormatter() {
+                .registerTextFormatter("CR", new CustomizedTextFormatter<String, String>() {
                     @Override
                     public String description() {
                         return "use \\r as new line";
@@ -28,7 +28,7 @@ public class TextFormatters implements Extension {
                 })
                 .registerTextFormatter("<", CustomizedTextFormatter.DEFAULT_END_OF_LINE)
                 .registerTextFormatter("\\", CustomizedTextFormatter.DEFAULT_CONTINUE_CHAR)
-                .registerTextFormatter("⏎", new CustomizedTextFormatter() {
+                .registerTextFormatter("⏎", new CustomizedTextFormatter<String, String>() {
                     @Override
                     public String description() {
                         return "use ⏎ as end of line character";
