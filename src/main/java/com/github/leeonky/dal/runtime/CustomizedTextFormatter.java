@@ -1,11 +1,10 @@
 package com.github.leeonky.dal.runtime;
 
-public abstract class BuildInTextFormatter extends TextFormatter {
-    public static final TextFormatter BASE_FORMATTER = new TextFormatter() {
+public abstract class CustomizedTextFormatter extends TextFormatter<String, String> {
+    public static final TextFormatter<String, String> BASE_FORMATTER = new TextFormatter<String, String>() {
         @Override
-        protected Object format(Object content, TextAttribute attribute) {
-            String text = content.toString()
-                    .replace(attribute.endOfLine() + "\n", attribute.newLine())
+        protected String format(String content, TextAttribute attribute) {
+            String text = content.replace(attribute.endOfLine() + "\n", attribute.newLine())
                     .replace(attribute.continuation() + "\n", "")
                     .replace("\n", attribute.newLine());
             if (text.endsWith(attribute.endOfLine()))
@@ -14,7 +13,7 @@ public abstract class BuildInTextFormatter extends TextFormatter {
         }
     };
 
-    public static final BuildInTextFormatter DEFAULT_NEW_LINE = new BuildInTextFormatter() {
+    public static final CustomizedTextFormatter DEFAULT_NEW_LINE = new CustomizedTextFormatter() {
         @Override
         public String description() {
             return "use \\n as new line";
@@ -26,7 +25,7 @@ public abstract class BuildInTextFormatter extends TextFormatter {
         }
     };
 
-    public static final BuildInTextFormatter DEFAULT_END_OF_LINE = new BuildInTextFormatter() {
+    public static final CustomizedTextFormatter DEFAULT_END_OF_LINE = new CustomizedTextFormatter() {
         @Override
         public String description() {
             return "use < as end of line character";
@@ -38,7 +37,7 @@ public abstract class BuildInTextFormatter extends TextFormatter {
         }
     };
 
-    public static final BuildInTextFormatter DEFAULT_CONTINUE_CHAR = new BuildInTextFormatter() {
+    public static final CustomizedTextFormatter DEFAULT_CONTINUE_CHAR = new CustomizedTextFormatter() {
         @Override
         public String description() {
             return "use \\ as line continuation character";
@@ -50,7 +49,7 @@ public abstract class BuildInTextFormatter extends TextFormatter {
         }
     };
 
-    public static final TextFormatter DEFAULT = BASE_FORMATTER.merge(DEFAULT_NEW_LINE)
+    public static final TextFormatter<String, String> DEFAULT = BASE_FORMATTER.merge(DEFAULT_NEW_LINE)
             .merge(DEFAULT_END_OF_LINE).merge(DEFAULT_CONTINUE_CHAR);
 
     public abstract String description();

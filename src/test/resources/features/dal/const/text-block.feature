@@ -368,3 +368,7 @@ Feature: ```string```
            b
            ```
       """
+
+  Rule: map text block
+# invalid type
+# to new type

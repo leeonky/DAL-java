@@ -47,7 +47,7 @@ public class RuntimeContextBuilder {
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
-    private final Map<String, BuildInTextFormatter> textFormatterMap = new LinkedHashMap<>();
+    private final Map<String, CustomizedTextFormatter> textFormatterMap = new LinkedHashMap<>();
     private Converter converter = Converter.getInstance();
     private final ClassKeyMap<DumperFactory> dumperFactories = new ClassKeyMap<>();
     private final CheckerSet checkerSetForMatching = new CheckerSet(CheckerSet::defaultMatching);
@@ -61,7 +61,7 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerTextFormatter(String name, BuildInTextFormatter formatter) {
+    public RuntimeContextBuilder registerTextFormatter(String name, CustomizedTextFormatter formatter) {
         textFormatterMap.put(name, formatter);
         return this;
     }
@@ -343,8 +343,9 @@ public class RuntimeContextBuilder {
             });
         }
 
-        public TextFormatter fetchFormatter(String name, int position) {
-            return textFormatterMap.computeIfAbsent(name, attribute -> {
+        @SuppressWarnings("unchecked")
+        public <T> TextFormatter<String, T> fetchFormatter(String name, int position) {
+            return (TextFormatter<String, T>) textFormatterMap.computeIfAbsent(name, attribute -> {
                 throw new SyntaxException(format("Invalid text formatter `%s`, all supported formatters are:\n%s",
                         attribute, textFormatterMap.entrySet().stream().map(e -> format("  %s:\n    %s",
                                 e.getKey(), e.getValue().description())).collect(joining("\n"))), position);

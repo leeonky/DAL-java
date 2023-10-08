@@ -29,12 +29,14 @@ public class NotationAttributeNode extends DALNode {
     }
 
     public Object text(List<Character> content, RuntimeContextBuilder.DALRuntimeContext context) {
+        return attributeList.getFormatter(context).format(resolveToText(content));
+    }
+
+    private String resolveToText(List<Character> content) {
         List<String> lines = joinToLines(content);
         int indent = resolveIndent(lines);
         List<String> collect = lines.stream().map(s -> s.equals("") ? s : processLine(s, indent)).collect(toList());
-        if (collect.size() == 1 && collect.get(0).equals(""))
-            return "\n";
-        return attributeList.getFormatter(context).format(String.join("\n", collect));
+        return collect.size() == 1 && collect.get(0).equals("") ? "\n" : String.join("\n", collect);
     }
 
     private int resolveIndent(List<String> lines) {
