@@ -1,15 +1,16 @@
 package com.github.leeonky.dal.runtime;
 
-import static com.github.leeonky.dal.util.TextUtil.lines;
-
 public abstract class BuildInTextFormatter extends TextFormatter {
     public static final TextFormatter BASE_FORMATTER = new TextFormatter() {
         @Override
         protected Object format(Object content, TextAttribute attribute) {
             String text = content.toString()
-                    .replace(attribute.endOfLine() + "\n", "\n")
-                    .replace(attribute.continuation() + "\n", "");
-            return text.isEmpty() ? text : String.join(attribute.newLine(), lines(text.substring(0, text.length() - 1)));
+                    .replace(attribute.endOfLine() + "\n", attribute.newLine())
+                    .replace(attribute.continuation() + "\n", "")
+                    .replace("\n", attribute.newLine());
+            if (text.endsWith(attribute.endOfLine()))
+                return text.substring(0, text.length() - attribute.endOfLine().length());
+            return text;
         }
     };
 

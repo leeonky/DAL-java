@@ -6,7 +6,8 @@ Feature: ```string```
       Given the following json:
       """
       {
-        "key": "a"
+        "key": "a",
+        "empty": ""
       }
       """
       When evaluate by:
@@ -29,6 +30,11 @@ Feature: ```string```
            ```
            ^
       """
+      And the following verification should pass:
+      """
+      empty= ```
+             ```
+      """
 
     Scenario: single line text block
       Given the following json:
@@ -44,7 +50,21 @@ Feature: ```string```
            ```
       """
 
-    Scenario: multiple line text block with indent
+    Scenario: single new line text block
+      Given the following json:
+      """
+      {
+        "key": "\n"
+      }
+      """
+      Then the following verification should pass:
+      """
+      key= ```
+
+           ```
+      """
+
+    Scenario: two lines text block with indent
       Given the following json:
       """
       {
@@ -57,6 +77,73 @@ Feature: ```string```
          = ```
            a
            b
+           ```
+      """
+
+    Scenario: first line is new line in two lines
+      Given the following json:
+      """
+      {
+        "key": "\nb"
+      }
+      """
+      Then the following verification should pass:
+      """
+      key
+         = ```
+
+           b
+           ```
+      """
+
+    Scenario: last line is new line in two lines
+      Given the following json:
+      """
+      {
+        "key": "b\n"
+      }
+      """
+      Then the following verification should pass:
+      """
+      key
+         = ```
+           b
+
+           ```
+      """
+
+    Scenario: resolve indent by shortest indent
+      Given the following json:
+      """
+      {
+        "key": " a\nb"
+      }
+      """
+      Then the following verification should pass:
+      """
+      key
+         = ```
+         a
+        b
+           ```
+      """
+
+    Scenario: multiple lines text block
+      Given the following json:
+      """
+      {
+        "key": "\na\nb\nc\n"
+      }
+      """
+      Then the following verification should pass:
+      """
+      key
+         = ```
+
+           a
+           b
+           c
+
            ```
       """
 
