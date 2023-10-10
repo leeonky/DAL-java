@@ -5,8 +5,6 @@ import com.github.leeonky.dal.runtime.ElementAccessException;
 import com.github.leeonky.dal.runtime.MetaData;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
-import java.util.function.Function;
-
 public class ListMappingNodeMeta extends ListMappingNode {
     public ListMappingNodeMeta(DALNode symbolNode) {
         super(symbolNode);
@@ -14,10 +12,11 @@ public class ListMappingNodeMeta extends ListMappingNode {
 
     @Override
     public Data getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
-        Function<MetaData, Object> function = context.fetchMetaFunction(this);
         try {
-            return context.wrap(left.evaluateData(context).requireList(getPositionBegin()).listMap(item ->
-                    function.apply(new MetaData(new ConstNode(item.getInstance()), this, context))));
+            return context.wrap(left.evaluateData(context).requireList(getPositionBegin()).listMap(item -> {
+                MetaData metaData = new MetaData(new ConstNode(item.getInstance()), this, context);
+                return context.fetchMetaFunction(this, metaData).apply(metaData);
+            }));
         } catch (ElementAccessException e) {
             throw e.toDalError(getPositionBegin());
         }

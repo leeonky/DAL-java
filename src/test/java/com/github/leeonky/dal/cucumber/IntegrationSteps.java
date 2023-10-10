@@ -249,4 +249,9 @@ public class IntegrationSteps {
     public void theFollowingTextFormatter(String name, String code) {
         integrationTestContext.givenTextFormatter(name, code);
     }
+
+    @And("register DAL:")
+    public void registerDAL(String code) {
+        integrationTestContext.registerDAL(code);
+    }
 }

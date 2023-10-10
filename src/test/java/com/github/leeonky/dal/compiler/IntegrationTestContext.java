@@ -20,11 +20,14 @@ import lombok.SneakyThrows;
 import java.lang.RuntimeException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.cucumber.TestTask.threadsCount;
 import static com.github.leeonky.util.JavaCompiler.guessClassName;
+import static java.util.stream.Stream.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -56,6 +59,7 @@ public class IntegrationTestContext {
     private final JavaCompiler javaCompiler;
     private static final JavaCompilerPool JAVA_COMPILER_POOL =
             new JavaCompilerPool(threadsCount("COMPILER_THREAD_SIZE", 8) * 2, "src.test.generate.ws");
+    private String registerCode = "";
 
     public IntegrationTestContext() {
         dal = new DAL().extend();
@@ -105,6 +109,8 @@ public class IntegrationTestContext {
                 dal.getRuntimeContextBuilder().registerTextFormatter(formatter,
                         (TextFormatter) Suppressor.get(formatterClass::newInstance));
             });
+            classes.stream().filter(t -> t.getSimpleName().equals("_DALRegister")).forEach(r ->
+                    ((Consumer) Suppressor.get(() -> r.newInstance())).accept(dal));
             result = dal.evaluate(input, expression);
         } catch (InterpreterException e) {
             exception = e;
@@ -148,10 +154,19 @@ public class IntegrationTestContext {
 
     private void compileAll() {
         if (classes.isEmpty()) {
-            classes.addAll(javaCompiler.compileToClasses(javaClasses.stream().map(s ->
-                    "import com.github.leeonky.dal.type.*;\n" +
+            String code = String.format("public class _DALRegister implements Consumer<DAL> {\n" +
+                    "    @Override\n" +
+                    "    public void accept(DAL dal) {\n" +
+                    "        %s\n" +
+                    "    }\n" +
+                    "}\n", registerCode);
+            classes.addAll(javaCompiler.compileToClasses(Stream.concat(javaClasses.stream(), of(code)).map(s ->
+                    "import com.github.leeonky.dal.*;\n" +
+                            "import com.github.leeonky.dal.type.*;\n" +
                             "import com.github.leeonky.util.*;\n" +
                             "import com.github.leeonky.dal.runtime.*;\n" +
+                            "import java.util.*;\n" +
+                            "import java.util.function.*;\n" +
                             "import java.math.*;\n" + s).collect(Collectors.toList())));
             classes.forEach(dal.getRuntimeContextBuilder()::registerStaticMethodExtension);
         }
@@ -375,6 +390,10 @@ public class IntegrationTestContext {
     public void givenTextFormatter(String name, String code) {
         javaClasses.add(code);
         textFormatters.put(name, guessClassName(code));
+    }
+
+    public void registerDAL(String code) {
+        registerCode += code + "\n";
     }
 
     public static class Empty {

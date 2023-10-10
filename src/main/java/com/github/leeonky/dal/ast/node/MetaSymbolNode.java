@@ -6,8 +6,6 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.InterpreterException;
 
-import java.util.function.Function;
-
 public class MetaSymbolNode extends SymbolNode {
     public MetaSymbolNode(String content) {
         super(content, Type.SYMBOL);
@@ -15,9 +13,9 @@ public class MetaSymbolNode extends SymbolNode {
 
     @Override
     public Data getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
-        Function<MetaData, Object> function = context.fetchMetaFunction(this);
         try {
-            return context.wrap(function.apply(new MetaData(left, this, context)));
+            MetaData metaData = new MetaData(left, this, context);
+            return context.wrap(context.fetchMetaFunction(this, metaData).apply(metaData));
         } catch (InterpreterException e) {
             throw e;
         } catch (Exception e) {

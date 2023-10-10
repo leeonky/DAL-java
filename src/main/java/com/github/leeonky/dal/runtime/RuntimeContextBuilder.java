@@ -11,10 +11,7 @@ import com.github.leeonky.dal.type.ExtensionName;
 import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
-import com.github.leeonky.util.BeanClass;
-import com.github.leeonky.util.Converter;
-import com.github.leeonky.util.InvocationException;
-import com.github.leeonky.util.NumberType;
+import com.github.leeonky.util.*;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -55,6 +52,8 @@ public class RuntimeContextBuilder {
     private int maxDumpingLineSize = 100;
     private ErrorHook errorHook = (i, code, e) -> {
     };
+    private final Map<Class<?>, Map<Object, Function<MetaData, Object>>> localMetaProperties
+            = new TreeMap<>(Classes::compareByExtends);
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -230,6 +229,11 @@ public class RuntimeContextBuilder {
         };
     }
 
+    public RuntimeContextBuilder registerMetaProperty(Class<?> type, Object name, Function<MetaData, Object> function) {
+        localMetaProperties.computeIfAbsent(type, k -> new HashMap<>()).put(name, function);
+        return this;
+    }
+
     public class DALRuntimeContext implements RuntimeContext {
         private final LinkedList<Data> stack = new LinkedList<>();
         private final Map<Data, PartialPropertyStack> partialPropertyStacks;
@@ -372,11 +376,15 @@ public class RuntimeContextBuilder {
             return RuntimeContextBuilder.this.methodToCurrying(type, methodName);
         }
 
-        public Function<MetaData, Object> fetchMetaFunction(DALNode property) {
-            return metaProperties.computeIfAbsent(property.getRootSymbolName(), k -> {
-                throw new RuntimeException(format("Meta property `%s` not found", property.getRootSymbolName()),
-                        property.getPositionBegin());
-            });
+        public Function<MetaData, Object> fetchMetaFunction(DALNode property, MetaData metaData) {
+            Data data = metaData.evaluateInput();
+            return localMetaProperties.entrySet().stream().filter(e -> e.getKey().isInstance(data.getInstance()))
+                    .map(e -> e.getValue().get(property.getRootSymbolName()))
+                    .filter(Objects::nonNull).findFirst().orElseGet(() ->
+                            metaProperties.computeIfAbsent(property.getRootSymbolName(), k -> {
+                                throw new RuntimeException(format("Meta property `%s` not found", property.getRootSymbolName()),
+                                        property.getPositionBegin());
+                            }));
         }
 
         @SuppressWarnings("unchecked")
