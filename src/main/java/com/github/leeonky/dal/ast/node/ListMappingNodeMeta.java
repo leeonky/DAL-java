@@ -15,7 +15,7 @@ public class ListMappingNodeMeta extends ListMappingNode {
         try {
             return context.wrap(left.evaluateData(context).requireList(getPositionBegin()).listMap(item -> {
                 MetaData metaData = new MetaData(new ConstNode(item.getInstance()), this, context);
-                return context.fetchMetaFunction(this, metaData).apply(metaData);
+                return context.fetchMetaFunction(metaData).apply(metaData);
             }));
         } catch (ElementAccessException e) {
             throw e.toDalError(getPositionBegin());

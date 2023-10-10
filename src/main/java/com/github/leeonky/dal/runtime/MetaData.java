@@ -4,6 +4,10 @@ import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.InvocationException;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class MetaData {
     private final DALNode metaDataNode;
     private final DALNode symbolNode;
@@ -29,7 +33,7 @@ public class MetaData {
         return runtimeContext;
     }
 
-    public Data evaluateInput() {
+    public Data getData() {
         if (cachedData == null)
             try {
                 return cachedData = getMetaDataNode().evaluateData(getRuntimeContext());
@@ -43,5 +47,32 @@ public class MetaData {
 
     public Throwable getError() {
         return error;
+    }
+
+    private final List<Class<?>> callTypes = new ArrayList<>();
+
+    public Object callSuper() {
+        return getRuntimeContext().fetchSuperMetaFunction(symbolNode.getRootSymbolName(), this)
+                .orElseThrow(this::noSuperError).apply(this);
+    }
+
+    public Object callSuper(Object data) {
+        cachedData = runtimeContext.wrap(data);
+        return callSuper();
+    }
+
+    private RuntimeException noSuperError() {
+        return new RuntimeException(String.format("Local meta property `%s` has no super in type %s\n  %s",
+                symbolNode.getRootSymbolName(), callTypes.get(callTypes.size() - 1).getName(),
+                callTypes.stream().map(Class::getName).collect(Collectors.joining(" => "))),
+                symbolNode.getPositionBegin());
+    }
+
+    void addCallType(Class<?> callType) {
+        callTypes.add(callType);
+    }
+
+    boolean calledBy(Class<?> type) {
+        return callTypes.contains(type);
     }
 }

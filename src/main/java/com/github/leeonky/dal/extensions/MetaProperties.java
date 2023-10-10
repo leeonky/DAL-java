@@ -13,7 +13,7 @@ import static java.lang.String.format;
 @Order(BUILD_IN)
 public class MetaProperties implements Extension {
     private static Object size(MetaData metaData) {
-        Data data = metaData.evaluateInput();
+        Data data = metaData.getData();
         if (data.isList())
             return data.getListSize();
         throw new IllegalStateException(format("Invalid meta property `size` for: %s", data.dumpAll()));
@@ -28,7 +28,7 @@ public class MetaProperties implements Extension {
     }
 
     private static Object object_(MetaData metaData) {
-        return metaData.evaluateInput().getInstance() == null ? null : new OriginalJavaObject(metaData.evaluateInput());
+        return metaData.getData().getInstance() == null ? null : new OriginalJavaObject(metaData.getData());
     }
 
     @Override

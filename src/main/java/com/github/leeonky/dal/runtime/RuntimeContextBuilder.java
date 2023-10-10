@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckerSet;
@@ -376,15 +375,35 @@ public class RuntimeContextBuilder {
             return RuntimeContextBuilder.this.methodToCurrying(type, methodName);
         }
 
-        public Function<MetaData, Object> fetchMetaFunction(DALNode property, MetaData metaData) {
-            Data data = metaData.evaluateInput();
-            return localMetaProperties.entrySet().stream().filter(e -> e.getKey().isInstance(data.getInstance()))
-                    .map(e -> e.getValue().get(property.getRootSymbolName()))
-                    .filter(Objects::nonNull).findFirst().orElseGet(() ->
-                            metaProperties.computeIfAbsent(property.getRootSymbolName(), k -> {
-                                throw new RuntimeException(format("Meta property `%s` not found", property.getRootSymbolName()),
-                                        property.getPositionBegin());
-                            }));
+        public Function<MetaData, Object> fetchMetaFunction(MetaData metaData) {
+            return fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData));
+        }
+
+        private Function<MetaData, Object> fetchGlobalMetaFunction(MetaData metaData) {
+            return metaProperties.computeIfAbsent(metaData.getSymbolNode().getRootSymbolName(), k -> {
+                throw new RuntimeException(format("Meta property `%s` not found",
+                        metaData.getSymbolNode().getRootSymbolName()), metaData.getSymbolNode().getPositionBegin());
+            });
+        }
+
+        private Optional<Function<MetaData, Object>> fetchLocalMetaFunction(MetaData metaData) {
+            return metaFunctionsByType(metaData.getData()).map(e -> {
+                metaData.addCallType(e.getKey());
+                return e.getValue().get(metaData.getSymbolNode().getRootSymbolName());
+            }).filter(Objects::nonNull).findFirst();
+        }
+
+        public Optional<Function<MetaData, Object>> fetchSuperMetaFunction(Object property, MetaData metaData) {
+            return metaFunctionsByType(metaData.getData())
+                    .filter(e -> !metaData.calledBy(e.getKey()))
+                    .map(e -> {
+                        metaData.addCallType(e.getKey());
+                        return e.getValue().get(property);
+                    }).filter(Objects::nonNull).findFirst();
+        }
+
+        private Stream<Map.Entry<Class<?>, Map<Object, Function<MetaData, Object>>>> metaFunctionsByType(Data data) {
+            return localMetaProperties.entrySet().stream().filter(e -> e.getKey().isInstance(data.getInstance()));
         }
 
         @SuppressWarnings("unchecked")
