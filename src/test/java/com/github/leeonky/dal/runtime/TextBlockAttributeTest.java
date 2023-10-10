@@ -8,6 +8,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TextFormatterTest {
+    private final RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder().build(null);
 
     @Nested
     class NewLine {
@@ -18,74 +19,75 @@ class TextFormatterTest {
             }
 
             @Override
-            protected Object format(Object content, TextAttribute attribute) {
+            protected Object format(Object content, TextAttribute attribute, RuntimeContextBuilder.DALRuntimeContext context) {
                 return attribute.newLine();
             }
         };
 
         @Test
         void reference_in_format() {
-            assertThat(textFormatter.format(null)).isEqualTo("new-line");
+
+            assertThat(textFormatter.format(null, context)).isEqualTo("new-line");
         }
 
         @Test
         void keep_in_merged_formatter() {
-            TextFormatter another = new TextFormatter() {
+            TextFormatter<Object, Object> another = new TextFormatter<Object, Object>() {
             };
 
-            assertThat(textFormatter.merge(another).format(null)).isEqualTo("new-line");
+            assertThat(textFormatter.merge(another).format(null, context)).isEqualTo("new-line");
         }
 
         @Test
         void replace_in_merged_formatter() {
-            TextFormatter overrideNewline = new TextFormatter() {
+            TextFormatter<Object, Object> overrideNewline = new TextFormatter<Object, Object>() {
                 @Override
                 protected TextAttribute attribute(TextAttribute attribute) {
                     return attribute.newLine("override-new-line");
                 }
             };
 
-            assertThat(textFormatter.merge(overrideNewline).format(null)).isEqualTo("override-new-line");
+            assertThat(textFormatter.merge(overrideNewline).format(null, context)).isEqualTo("override-new-line");
         }
     }
 
     @Nested
     class EndOfLine {
-        TextFormatter textFormatter = new TextFormatter() {
+        TextFormatter<Object, Object> textFormatter = new TextFormatter<Object, Object>() {
             @Override
             protected TextAttribute attribute(TextAttribute attribute) {
                 return attribute.endOfLine("end-of-line");
             }
 
             @Override
-            protected Object format(Object content, TextAttribute attribute) {
+            protected Object format(Object content, TextAttribute attribute, RuntimeContextBuilder.DALRuntimeContext context) {
                 return attribute.endOfLine();
             }
         };
 
         @Test
         void reference_property_in_format() {
-            assertThat(textFormatter.format(null)).isEqualTo("end-of-line");
+            assertThat(textFormatter.format(null, context)).isEqualTo("end-of-line");
         }
 
         @Test
         void keep_in_merged_formatter() {
-            TextFormatter another = new TextFormatter() {
+            TextFormatter<Object, Object> another = new TextFormatter<Object, Object>() {
             };
 
-            assertThat(textFormatter.merge(another).format(null)).isEqualTo("end-of-line");
+            assertThat(textFormatter.merge(another).format(null, context)).isEqualTo("end-of-line");
         }
 
         @Test
         void replace_in_merged_formatter() {
-            TextFormatter overrideNewline = new TextFormatter() {
+            TextFormatter<Object, Object> overrideNewline = new TextFormatter<Object, Object>() {
                 @Override
                 protected TextAttribute attribute(TextAttribute attribute) {
                     return attribute.endOfLine("override-enf-of-line");
                 }
             };
 
-            assertThat(textFormatter.merge(overrideNewline).format(null)).isEqualTo("override-enf-of-line");
+            assertThat(textFormatter.merge(overrideNewline).format(null, context)).isEqualTo("override-enf-of-line");
         }
     }
 
@@ -98,34 +100,34 @@ class TextFormatterTest {
             }
 
             @Override
-            protected Object format(Object content, TextAttribute attribute) {
+            protected Object format(Object content, TextAttribute attribute, RuntimeContextBuilder.DALRuntimeContext context) {
                 return attribute.continuation();
             }
         };
 
         @Test
         void reference_property_in_format() {
-            assertThat(textFormatter.format(null)).isEqualTo("continuation");
+            assertThat(textFormatter.format(null, context)).isEqualTo("continuation");
         }
 
         @Test
         void keep_in_merged_formatter() {
-            TextFormatter another = new TextFormatter() {
+            TextFormatter<Object, Object> another = new TextFormatter<Object, Object>() {
             };
 
-            assertThat(textFormatter.merge(another).format(null)).isEqualTo("continuation");
+            assertThat(textFormatter.merge(another).format(null, context)).isEqualTo("continuation");
         }
 
         @Test
         void replace_in_merged_formatter() {
-            TextFormatter overrideNewline = new TextFormatter() {
+            TextFormatter<Object, Object> overrideNewline = new TextFormatter<Object, Object>() {
                 @Override
                 protected TextAttribute attribute(TextAttribute attribute) {
                     return attribute.continuation("override-continuation");
                 }
             };
 
-            assertThat(textFormatter.merge(overrideNewline).format(null)).isEqualTo("override-continuation");
+            assertThat(textFormatter.merge(overrideNewline).format(null, context)).isEqualTo("override-continuation");
         }
     }
 
@@ -134,22 +136,22 @@ class TextFormatterTest {
 
         @Test
         void pipeline_format_method() {
-            TextFormatter textFormatter = new TextFormatter() {
+            TextFormatter<Object, Object> textFormatter = new TextFormatter<Object, Object>() {
                 @Override
-                protected Object format(Object content, TextAttribute attribute) {
+                protected Object format(Object content, TextAttribute attribute, RuntimeContextBuilder.DALRuntimeContext context) {
                     return content.toString().toLowerCase();
                 }
             };
 
-            TextFormatter next = new TextFormatter() {
+            TextFormatter<Object, Object> next = new TextFormatter<Object, Object>() {
                 @Override
-                protected Object format(Object content, TextAttribute attribute) {
+                protected Object format(Object content, TextAttribute attribute, RuntimeContextBuilder.DALRuntimeContext context) {
                     String s = content.toString();
                     return s.substring(0, 1).toUpperCase() + s.substring(1);
                 }
             };
 
-            assertThat(textFormatter.merge(next).format("HELLO")).isEqualTo("Hello");
+            assertThat(textFormatter.merge(next).format("HELLO", context)).isEqualTo("Hello");
         }
 
         @Test

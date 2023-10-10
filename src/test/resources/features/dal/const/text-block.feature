@@ -273,14 +273,24 @@ Feature: ```string```
       Invalid text formatter `not-exist`, all supported formatters are:
         LF:
           use \n as new line
+              Accept: java.lang.String
+              Return: java.lang.String
         CR:
           use \r as new line
+              Accept: java.lang.String
+              Return: java.lang.String
         <:
           use < as end of line character
+              Accept: java.lang.String
+              Return: java.lang.String
         \:
           use \ as line continuation character
+              Accept: java.lang.String
+              Return: java.lang.String
         ⏎:
           use ⏎ as end of line character
+              Accept: java.lang.String
+              Return: java.lang.String
       """
       And got the following notation:
       """
@@ -390,7 +400,7 @@ Feature: ```string```
       """
       Given the following text formatter "NeedBean":
       """
-      public class NeedBean extends CustomizedTextFormatter<Bean, String> {
+      public class NeedBean extends TextFormatter<Bean, String> {
       }
       """
       When use a instance of java class "Bean" to evaluate:
@@ -410,6 +420,3 @@ Feature: ```string```
       any string
       ```
       """
-
-# invalid type
-# to new type

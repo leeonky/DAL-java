@@ -103,9 +103,8 @@ public class IntegrationTestContext {
             textFormatters.forEach((formatter, name) -> {
                 Class<?> formatterClass = classes.stream().filter(c -> c.getSimpleName().equals(name)).findFirst().get();
                 dal.getRuntimeContextBuilder().registerTextFormatter(formatter,
-                        (CustomizedTextFormatter) Suppressor.get(formatterClass::newInstance));
+                        (TextFormatter) Suppressor.get(formatterClass::newInstance));
             });
-
             result = dal.evaluate(input, expression);
         } catch (InterpreterException e) {
             exception = e;

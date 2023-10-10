@@ -6,7 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import static com.github.leeonky.util.function.Extension.oneOf;
+import static com.github.leeonky.util.function.Extension.getFirstPresent;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -29,7 +29,7 @@ class CurryingMethodGroup implements CurryingMethod {
 
     @Override
     public Object resolve() {
-        Optional<InstanceCurryingMethod> curryingMethod = oneOf(
+        Optional<InstanceCurryingMethod> curryingMethod = getFirstPresent(
                 () -> selectCurryingMethod(InstanceCurryingMethod::allParamsSameType),
                 () -> selectCurryingMethod(InstanceCurryingMethod::allParamsBaseType),
                 () -> selectCurryingMethod(InstanceCurryingMethod::allParamsConvertible));
@@ -48,7 +48,7 @@ class CurryingMethodGroup implements CurryingMethod {
         if (methods.size() > 1) {
             List<InstanceCurryingMethod> sameInstanceTypeMethods = methods.stream()
                     .filter(StaticCurryingMethod.class::isInstance).collect(toList());
-            return of(oneOf(() -> getOnlyOne(sameInstanceTypeMethods), () -> getOnlyOne(sameInstanceTypeMethods.stream()
+            return of(getFirstPresent(() -> getOnlyOne(sameInstanceTypeMethods), () -> getOnlyOne(sameInstanceTypeMethods.stream()
                     .filter(InstanceCurryingMethod::isSameInstanceType).collect(toList())))
                     .orElseThrow(() -> new InvalidPropertyException("More than one currying method:\n"
                             + methods.stream().map(instanceCurryingMethod -> "  " + instanceCurryingMethod.toString())

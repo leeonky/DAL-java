@@ -47,7 +47,7 @@ public class RuntimeContextBuilder {
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
-    private final Map<String, CustomizedTextFormatter> textFormatterMap = new LinkedHashMap<>();
+    private final Map<String, TextFormatter<?, ?>> textFormatterMap = new LinkedHashMap<>();
     private Converter converter = Converter.getInstance();
     private final ClassKeyMap<DumperFactory> dumperFactories = new ClassKeyMap<>();
     private final CheckerSet checkerSetForMatching = new CheckerSet(CheckerSet::defaultMatching);
@@ -61,7 +61,7 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerTextFormatter(String name, CustomizedTextFormatter formatter) {
+    public RuntimeContextBuilder registerTextFormatter(String name, TextFormatter<?, ?> formatter) {
         textFormatterMap.put(name, formatter);
         return this;
     }
@@ -192,6 +192,42 @@ public class RuntimeContextBuilder {
     public <T> RuntimeContextBuilder registerErrorHook(ErrorHook hook) {
         errorHook = Objects.requireNonNull(hook);
         return this;
+    }
+
+    public void mergeTextFormatter(String name, String other, String... others) {
+        TextFormatter formatter = textFormatterMap.get(other);
+        for (String o : others)
+            formatter = formatter.merge(textFormatterMap.get(o));
+        registerTextFormatter(name, delegateFormatter(formatter, "Merged from " + other + " " + String.join(" ", others)));
+    }
+
+    private TextFormatter delegateFormatter(TextFormatter formatter, final String description) {
+        return new TextFormatter() {
+            @Override
+            protected Object format(Object content, TextAttribute attribute, DALRuntimeContext context) {
+                return formatter.format(content, attribute, context);
+            }
+
+            @Override
+            protected TextAttribute attribute(TextAttribute attribute) {
+                return formatter.attribute(attribute);
+            }
+
+            @Override
+            public Class<?> returnType() {
+                return formatter.returnType();
+            }
+
+            @Override
+            public Class<?> acceptType() {
+                return formatter.acceptType();
+            }
+
+            @Override
+            public String description() {
+                return description;
+            }
+        };
     }
 
     public class DALRuntimeContext implements RuntimeContext {
@@ -348,7 +384,7 @@ public class RuntimeContextBuilder {
             return (TextFormatter<String, T>) textFormatterMap.computeIfAbsent(name, attribute -> {
                 throw new SyntaxException(format("Invalid text formatter `%s`, all supported formatters are:\n%s",
                         attribute, textFormatterMap.entrySet().stream().map(e -> format("  %s:\n    %s",
-                                e.getKey(), e.getValue().description())).collect(joining("\n"))), position);
+                                e.getKey(), e.getValue().fullDescription())).collect(joining("\n"))), position);
             });
         }
 

@@ -29,7 +29,7 @@ public class NotationAttributeNode extends DALNode {
     }
 
     public Object text(List<Character> content, RuntimeContextBuilder.DALRuntimeContext context) {
-        return attributeList.getFormatter(context).format(resolveToText(content));
+        return attributeList.getFormatter(context).format(resolveToText(content), context);
     }
 
     private String resolveToText(List<Character> content) {

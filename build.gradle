@@ -55,7 +55,7 @@ repositories {
 }
 
 dependencies {
-    compile dep(':bean-util', '0.6.3')
+    compile dep(':bean-util', '0.6.5')
     compile dep(':interpreter-core', '0.0.15')
 
     testImplementation 'com.fasterxml.jackson.core:jackson-databind:2.13.1'

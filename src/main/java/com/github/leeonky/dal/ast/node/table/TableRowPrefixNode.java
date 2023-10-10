@@ -12,7 +12,7 @@ import com.github.leeonky.interpreter.OperatorParser;
 
 import java.util.Optional;
 
-import static com.github.leeonky.util.function.Extension.oneOf;
+import static com.github.leeonky.util.function.Extension.getFirstPresent;
 
 public class TableRowPrefixNode extends DALNode {
     private static final RowType DEFAULT_INDEX = new DefaultIndexRowType(),
@@ -59,7 +59,7 @@ public class TableRowPrefixNode extends DALNode {
     }
 
     public Optional<Integer> position() {
-        return oneOf(() -> indexOrProperty.map(DALNode::getPositionBegin),
+        return getFirstPresent(() -> indexOrProperty.map(DALNode::getPositionBegin),
                 () -> rowSchema.map(c -> ((DALExpression) c.expression(InputNode.INPUT_NODE)).getOperator().getPosition()),
                 () -> rowOperator.map(Operator::getPosition));
     }
