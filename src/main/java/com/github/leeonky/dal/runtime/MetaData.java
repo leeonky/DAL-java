@@ -16,12 +16,25 @@ public class MetaData {
     private Data data;
     private Throwable error;
     private RuntimeException originalException;
+    private Object name;
 
     public MetaData(DALNode metaDataNode, DALNode symbolNode, DALRuntimeContext runtimeContext) {
         this.metaDataNode = metaDataNode;
         this.symbolNode = symbolNode;
         this.runtimeContext = runtimeContext;
+        name = symbolNode.getRootSymbolName();
         setData(() -> getMetaDataNode().evaluateData(getRuntimeContext()));
+    }
+
+    public MetaData(DALNode metaDataNode, DALNode symbolNode, DALRuntimeContext runtimeContext,
+                    Data data, Throwable error, RuntimeException originalException, String name) {
+        this.metaDataNode = metaDataNode;
+        this.symbolNode = symbolNode;
+        this.runtimeContext = runtimeContext;
+        this.name = name;
+        this.data = data;
+        this.error = error;
+        this.originalException = originalException;
     }
 
     private void setData(Supplier<Data> supplier) {
@@ -63,7 +76,7 @@ public class MetaData {
     private final List<Class<?>> callTypes = new ArrayList<>();
 
     public Object callSuper() {
-        return getRuntimeContext().fetchSuperMetaFunction(symbolNode.getRootSymbolName(), this)
+        return getRuntimeContext().fetchSuperMetaFunction(this)
                 .orElseThrow(this::noSuperError).apply(this);
     }
 
@@ -74,6 +87,30 @@ public class MetaData {
             return runtimeContext.wrap(newData);
         });
         return callSuper();
+    }
+
+    public Object callGlobal() {
+        return getRuntimeContext().fetchGlobalMetaFunction(this).apply(this);
+    }
+
+    public Object callGlobal(Supplier<Object> supplier) {
+        setData(() -> runtimeContext.wrap(supplier.get()));
+        return callGlobal();
+    }
+
+    public MetaData newMeta(String name) {
+        return new MetaData(metaDataNode, symbolNode, runtimeContext, data, error, originalException, name);
+    }
+
+    public Object callMeta(String another) {
+        MetaData metaData = newMeta(another);
+        return getRuntimeContext().fetchGlobalMetaFunction(metaData).apply(metaData);
+    }
+
+    public Object callMeta(String another, Supplier<Object> supplier) {
+        MetaData metaData = newMeta(another);
+        metaData.setData(() -> runtimeContext.wrap(supplier.get()));
+        return getRuntimeContext().fetchGlobalMetaFunction(metaData).apply(metaData);
     }
 
     private void checkType(Object data) {
@@ -102,5 +139,9 @@ public class MetaData {
 
     public boolean isInstance(Class<?> type) {
         return type.isInstance(data.getInstance());
+    }
+
+    public Object getName() {
+        return name;
     }
 }

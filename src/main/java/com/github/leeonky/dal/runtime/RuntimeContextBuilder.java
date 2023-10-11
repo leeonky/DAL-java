@@ -379,26 +379,26 @@ public class RuntimeContextBuilder {
             return fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData));
         }
 
-        private Function<MetaData, Object> fetchGlobalMetaFunction(MetaData metaData) {
-            return metaProperties.computeIfAbsent(metaData.getSymbolNode().getRootSymbolName(), k -> {
+        public Function<MetaData, Object> fetchGlobalMetaFunction(MetaData metaData) {
+            return metaProperties.computeIfAbsent(metaData.getName(), k -> {
                 throw new RuntimeException(format("Meta property `%s` not found",
-                        metaData.getSymbolNode().getRootSymbolName()), metaData.getSymbolNode().getPositionBegin());
+                        metaData.getName()), metaData.getSymbolNode().getPositionBegin());
             });
         }
 
         private Optional<Function<MetaData, Object>> fetchLocalMetaFunction(MetaData metaData) {
             return metaFunctionsByType(metaData).map(e -> {
                 metaData.addCallType(e.getKey());
-                return e.getValue().get(metaData.getSymbolNode().getRootSymbolName());
+                return e.getValue().get(metaData.getName());
             }).filter(Objects::nonNull).findFirst();
         }
 
-        public Optional<Function<MetaData, Object>> fetchSuperMetaFunction(Object property, MetaData metaData) {
+        public Optional<Function<MetaData, Object>> fetchSuperMetaFunction(MetaData metaData) {
             return metaFunctionsByType(metaData)
                     .filter(e -> !metaData.calledBy(e.getKey()))
                     .map(e -> {
                         metaData.addCallType(e.getKey());
-                        return e.getValue().get(property);
+                        return e.getValue().get(metaData.getName());
                     }).filter(Objects::nonNull).findFirst();
         }
 

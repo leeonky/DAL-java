@@ -240,12 +240,100 @@ Feature: commons
     ^
     """
 
-#  call global
-#  call global with new Value
-#  call other
-#  call other with new Value
-#  No global
+  Scenario: support call global
+    Given the following java class:
+    """
+    public class Data {
+    }
+    """
+    And register DAL:
+    """
+    dal.getRuntimeContextBuilder().registerMetaProperty(Data.class, "meta", meta-> {
+      return meta.callGlobal();
+    }
+    );
+    """
+    And register DAL:
+    """
+    dal.getRuntimeContextBuilder().registerMetaProperty("meta", meta-> {
+      return "hello";
+    });
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    ::meta: hello
+    """
 
+  Scenario: support call global with any type data
+    Given the following java class:
+    """
+    public class Data {
+    }
+    """
+    And register DAL:
+    """
+    dal.getRuntimeContextBuilder().registerMetaProperty(Data.class, "meta", meta-> {
+      return meta.callGlobal(()-> "hello");
+    }
+    );
+    """
+    And register DAL:
+    """
+    dal.getRuntimeContextBuilder().registerMetaProperty("meta", meta-> {
+      return meta.getData().getInstance();
+    });
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    ::meta: hello
+    """
 
+  Scenario: support call other meta
+    Given the following java class:
+    """
+    public class Data {
+    }
+    """
+    And register DAL:
+    """
+    dal.getRuntimeContextBuilder().registerMetaProperty(Data.class, "meta", meta-> {
+      return meta.callMeta("another");
+    }
+    );
+    """
+    And register DAL:
+    """
+    dal.getRuntimeContextBuilder().registerMetaProperty("another", meta-> {
+      return meta.getData().getInstance();
+    });
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    ::meta.class.simpleName= Data
+    """
+
+  Scenario: support call other meta with any data
+    Given the following java class:
+    """
+    public class Data {
+    }
+    """
+    And register DAL:
+    """
+    dal.getRuntimeContextBuilder().registerMetaProperty(Data.class, "meta", meta-> {
+      return meta.callMeta("another", ()-> "hello");
+    }
+    );
+    """
+    And register DAL:
+    """
+    dal.getRuntimeContextBuilder().registerMetaProperty("another", meta-> {
+      return meta.getData().getInstance();
+    });
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    ::meta= hello
+    """
 
 #  list mapping local meta
