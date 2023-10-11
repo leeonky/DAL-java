@@ -8,7 +8,7 @@ public class RuntimeException extends DalException {
     }
 
     public RuntimeException(String message, int position, Throwable cause) {
-        super(message.trim(), position);
+        super(message, position);
         this.cause = cause;
     }
 

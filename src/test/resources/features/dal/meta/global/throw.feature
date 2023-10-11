@@ -64,3 +64,23 @@ Feature: meta ::throw
     test::throw: {...}
     ^
     """
+
+  Scenario: return exception from meta properties
+    Given the following java class:
+    """
+    public class Data {
+    }
+    """
+    And register DAL:
+    """
+    dal.getRuntimeContextBuilder().registerMetaProperty(Data.class, "error", meta-> {
+      throw new java.lang.RuntimeException("error");
+    });
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    ::error::throw: {
+      class.simpleName=  RuntimeException
+      message= error
+    }
+    """

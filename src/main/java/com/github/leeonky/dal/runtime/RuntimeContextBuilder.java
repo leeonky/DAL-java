@@ -387,14 +387,14 @@ public class RuntimeContextBuilder {
         }
 
         private Optional<Function<MetaData, Object>> fetchLocalMetaFunction(MetaData metaData) {
-            return metaFunctionsByType(metaData.getData()).map(e -> {
+            return metaFunctionsByType(metaData).map(e -> {
                 metaData.addCallType(e.getKey());
                 return e.getValue().get(metaData.getSymbolNode().getRootSymbolName());
             }).filter(Objects::nonNull).findFirst();
         }
 
         public Optional<Function<MetaData, Object>> fetchSuperMetaFunction(Object property, MetaData metaData) {
-            return metaFunctionsByType(metaData.getData())
+            return metaFunctionsByType(metaData)
                     .filter(e -> !metaData.calledBy(e.getKey()))
                     .map(e -> {
                         metaData.addCallType(e.getKey());
@@ -402,8 +402,8 @@ public class RuntimeContextBuilder {
                     }).filter(Objects::nonNull).findFirst();
         }
 
-        private Stream<Map.Entry<Class<?>, Map<Object, Function<MetaData, Object>>>> metaFunctionsByType(Data data) {
-            return localMetaProperties.entrySet().stream().filter(e -> e.getKey().isInstance(data.getInstance()));
+        private Stream<Map.Entry<Class<?>, Map<Object, Function<MetaData, Object>>>> metaFunctionsByType(MetaData metaData) {
+            return localMetaProperties.entrySet().stream().filter(e -> metaData.isInstance(e.getKey()));
         }
 
         @SuppressWarnings("unchecked")
