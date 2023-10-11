@@ -336,4 +336,25 @@ Feature: commons
     ::meta= hello
     """
 
-#  list mapping local meta
+  Scenario: support type local meta property in list mapping
+    Given the following java class:
+    """
+    public class Bean {
+      public String value;
+      public Bean setValue(String v) {
+        this.value = v;
+        return this;
+      }
+      public List<Bean> beans() {
+        return Arrays.asList(new Bean().setValue("hello"), new Bean().setValue("world"));
+      }
+    }
+    """
+    And register DAL:
+    """
+    dal.getRuntimeContextBuilder().registerMetaProperty(Bean.class, "meta", meta-> meta.getData().getValue("value").getInstance());
+    """
+    Then the following verification for the instance of java class "Bean" should pass:
+    """
+    beans::meta[]= [hello world]
+    """
