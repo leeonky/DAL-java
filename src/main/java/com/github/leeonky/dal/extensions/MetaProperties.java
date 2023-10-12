@@ -31,12 +31,17 @@ public class MetaProperties implements Extension {
         return metaData.getData().getInstance() == null ? null : new OriginalJavaObject(metaData.getData());
     }
 
+    private static Object keys(MetaData metaData) {
+        return metaData.getData().getFieldNames();
+    }
+
     @Override
     public void extend(DAL dal) {
         dal.getRuntimeContextBuilder()
                 .registerMetaProperty("size", MetaProperties::size)
                 .registerMetaProperty("throw", MetaProperties::throw_)
                 .registerMetaProperty("object", MetaProperties::object_)
+                .registerMetaProperty("keys", MetaProperties::keys)
                 .registerPropertyAccessor(OriginalJavaObject.class, new PropertyAccessor<OriginalJavaObject>() {
                     @Override
                     public Object getValue(OriginalJavaObject javaObject, Object property) {
