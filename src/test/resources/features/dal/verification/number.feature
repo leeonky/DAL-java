@@ -137,3 +137,29 @@ Feature: number
       '5': 5
            ^
     """
+
+  Scenario: match BigDecimal with precision
+    Given the following java class:
+    """
+    public class Data {
+      public BigDecimal number1 = new BigDecimal("1.00");
+      public BigDecimal number2 = new BigDecimal("1");
+    }
+    """
+    Then the following verification for the instance of java class "Data" should pass:
+    """
+    number1: .number2
+    """
+    When use a instance of java class "Data" to evaluate:
+    """
+    number1= .number2
+    """
+    Then failed with the message:
+    """
+    Expected to be equal to: java.math.BigDecimal
+    <1>
+      ^
+    Actual: java.math.BigDecimal
+    <1.00>
+      ^
+    """

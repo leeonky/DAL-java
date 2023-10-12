@@ -23,7 +23,7 @@ public class CheckerSet {
     }
 
     public CheckerSet register(Class<?> expected, Class<?> actual, CheckerFactory factory) {
-        typeTypeFactories.get(expected, () -> new ClassKeyMap<>()).put(actual, factory);
+        typeTypeFactories.get(expected, ClassKeyMap::new).put(actual, factory);
         return this;
     }
 
