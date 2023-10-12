@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.compiler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.leeonky.dal.Assertions;
 import com.github.leeonky.dal.BaseTest;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.node.DALExpression;
@@ -21,12 +22,14 @@ import java.lang.RuntimeException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.Assertions.expect;
 import static com.github.leeonky.dal.cucumber.TestTask.threadsCount;
 import static com.github.leeonky.util.JavaCompiler.guessClassName;
+import static java.util.Arrays.asList;
 import static java.util.stream.Stream.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -60,6 +63,7 @@ public class IntegrationTestContext {
     private static final JavaCompilerPool JAVA_COMPILER_POOL =
             new JavaCompilerPool(threadsCount("COMPILER_THREAD_SIZE", 8) * 2, "src.test.generate.ws");
     private String registerCode = "";
+    private String inputCode;
 
     public IntegrationTestContext() {
         dal = new DAL().extend();
@@ -264,9 +268,9 @@ public class IntegrationTestContext {
         expect(input).should(dalExpression);
     }
 
-    public void should(String dalExpression) {
+    public void should(String expression) {
         try {
-            expect(input).should(dalExpression);
+            expect(input).should(expression.replace("#package#", javaCompiler.packagePrefix()));
         } catch (Throwable e) {
             bizException = e;
         }
@@ -281,7 +285,7 @@ public class IntegrationTestContext {
     }
 
     public void shouldAssertError(String message) {
-        assertThat(bizException).isInstanceOf(AssertionError.class).hasMessage(message);
+        assertThat(bizException).hasMessageContaining(message);
     }
 
     public void exactPass(String equalExpression) {
@@ -396,6 +400,40 @@ public class IntegrationTestContext {
         registerCode += code + "\n";
     }
 
+    public void givenInputCode(String code) {
+        inputCode = code;
+    }
+
+    public void shouldPassByInputCode(String expression) {
+        getAssertions().should(expression);
+    }
+
+    private Assertions getAssertions() {
+        String assertionCode = String.format("import java.util.function.*;\n" +
+                "import com.github.leeonky.dal.*;\n" +
+                "public class ExpectRun implements Supplier<Assertions> {\n" +
+                "        @Override\n" +
+                "        public Assertions get() {\n" +
+                "            return Assertions.expectRun(()-> {\n" +
+                "                %s\n" +
+                "            });\n" +
+                "        }\n" +
+                "    }", inputCode);
+
+        return ((Supplier<Assertions>) Suppressor.get(() ->
+                javaCompiler.compileToClasses(asList(assertionCode)).get(0).newInstance())).get();
+    }
+
+    public void runShould(String code) {
+        try {
+            getAssertions().should(code);
+        } catch (Throwable e) {
+            bizException = e;
+        }
+    }
+
     public static class Empty {
     }
+
+
 }

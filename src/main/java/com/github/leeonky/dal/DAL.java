@@ -6,6 +6,8 @@ import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.type.InputCode;
+import com.github.leeonky.dal.type.InputValue;
 import com.github.leeonky.dal.util.TextUtil;
 import com.github.leeonky.interpreter.SourceCode;
 import com.github.leeonky.interpreter.SyntaxException;
@@ -41,8 +43,12 @@ public class DAL {
         return runtimeContextBuilder;
     }
 
-    @SuppressWarnings("unchecked")
     public <T> List<T> evaluateAll(Object input, String expressions) {
+        return evaluateAll((InputValue<Object>) () -> input, expressions);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> List<T> evaluateAll(InputCode<Object> input, String expressions) {
         DALRuntimeContext runtimeContext = runtimeContextBuilder.build(input);
         try {
             return compiler.compile(new SourceCode(format(expressions), Notations.LINE_COMMENTS), runtimeContext).stream()
@@ -54,8 +60,12 @@ public class DAL {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T evaluate(Object input, String expression) {
+        return evaluate((InputValue<Object>) () -> input, expression);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T evaluate(InputCode<Object> input, String expression) {
         DALRuntimeContext runtimeContext = runtimeContextBuilder.build(input);
         try {
             List<DALNode> nodes = compiler.compile(new SourceCode(format(expression), Notations.LINE_COMMENTS),

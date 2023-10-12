@@ -237,7 +237,7 @@ public class IntegrationSteps {
     @When("use a instance of java class {string} to assert:")
     public void useAInstanceOfJavaClassToAssert(String type, String expression) {
         integrationTestContext.givenJavaDataByClassName(type);
-        integrationTestContext.dalExpect(expression);
+        integrationTestContext.should(expression);
     }
 
     @And("register the following BeanAsListAccessor for java class {string}:")
@@ -253,5 +253,20 @@ public class IntegrationSteps {
     @And("register DAL:")
     public void registerDAL(String code) {
         integrationTestContext.registerDAL(code);
+    }
+
+    @Given("the following input code:")
+    public void theFollowingInputCode(String code) {
+        integrationTestContext.givenInputCode(code);
+    }
+
+    @Then("the following verification of input code should pass:")
+    public void theFollowingVerificationOfInputCodeShouldPass(String expression) {
+        integrationTestContext.shouldPassByInputCode(expression);
+    }
+
+    @When("expect run by the following code:")
+    public void expectRunByTheFollowingCode(String code) {
+        integrationTestContext.runShould(code);
     }
 }

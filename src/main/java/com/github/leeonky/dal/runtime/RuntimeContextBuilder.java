@@ -7,6 +7,7 @@ import com.github.leeonky.dal.runtime.inspector.Dumper;
 import com.github.leeonky.dal.runtime.inspector.DumperFactory;
 import com.github.leeonky.dal.runtime.schema.Expect;
 import com.github.leeonky.dal.type.ExtensionName;
+import com.github.leeonky.dal.type.InputCode;
 import com.github.leeonky.dal.type.Schema;
 import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
@@ -65,7 +66,13 @@ public class RuntimeContextBuilder {
     }
 
     public DALRuntimeContext build(Object inputValue) {
-        return new DALRuntimeContext(inputValue);
+        return new DALRuntimeContext(() -> inputValue);
+    }
+
+    public DALRuntimeContext build(InputCode<?> inputSupplier) {
+        if (inputSupplier == null)
+            return new DALRuntimeContext(() -> null);
+        return new DALRuntimeContext(inputSupplier);
     }
 
     public RuntimeContextBuilder registerValueFormat(Formatter<?, ?> formatter) {
@@ -236,13 +243,30 @@ public class RuntimeContextBuilder {
     public class DALRuntimeContext implements RuntimeContext {
         private final LinkedList<Data> stack = new LinkedList<>();
         private final Map<Data, PartialPropertyStack> partialPropertyStacks;
+        private final Data inputValue;
+        private final Throwable inputError;
 
-        public DALRuntimeContext(Object inputValue) {
-            stack.push(wrap(inputValue));
+        public DALRuntimeContext(InputCode<?> supplier) {
+            Data value;
+            Throwable error;
+            try {
+                value = wrap(supplier.get());
+                error = null;
+            } catch (Throwable e) {
+                value = wrap(null);
+                error = e;
+            }
+            inputError = error;
+            inputValue = value;
             partialPropertyStacks = new HashMap<>();
         }
 
         public Data getThis() {
+            if (stack.isEmpty()) {
+                if (inputError != null)
+                    throw new InputException(new InvocationException(inputError));
+                return inputValue;
+            }
             return stack.getFirst();
         }
 
@@ -437,7 +461,7 @@ public class RuntimeContextBuilder {
             return maxDumpingLineSize;
         }
 
-        public void hookError(Object input, String expression, Throwable error) {
+        public void hookError(ThrowingSupplier<Object> input, String expression, Throwable error) {
             errorHook.handle(input, expression, error);
         }
     }

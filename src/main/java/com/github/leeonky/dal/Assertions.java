@@ -1,11 +1,14 @@
 package com.github.leeonky.dal;
 
+import com.github.leeonky.dal.runtime.InputException;
+import com.github.leeonky.dal.type.InputCode;
+import com.github.leeonky.dal.type.InputValue;
 import com.github.leeonky.interpreter.InterpreterException;
 
 import java.util.function.Supplier;
 
 public class Assertions {
-    private final Object input;
+    private final InputCode<Object> inputCode;
     public static boolean dumpInput = true;
     private DAL dal;
     private static Supplier<DAL> dalFactory = DAL::getInstance;
@@ -18,8 +21,8 @@ public class Assertions {
         dumpInput = enable;
     }
 
-    private Assertions(Object input) {
-        this.input = input;
+    private Assertions(InputCode<Object> input) {
+        inputCode = input;
         dal = dalFactory.get();
     }
 
@@ -29,7 +32,11 @@ public class Assertions {
     }
 
     public static Assertions expect(Object input) {
-        return new Assertions(input);
+        return new Assertions((InputValue<Object>) () -> input);
+    }
+
+    public static Assertions expectRun(InputCode<Object> supplier) {
+        return new Assertions(supplier);
     }
 
     public Assertions should(String dalExpression) {
@@ -39,11 +46,15 @@ public class Assertions {
     public Assertions should(String prefix, String verification) {
         String fullCode = prefix + verification;
         try {
-            dal.evaluate(input, fullCode);
+            dal.evaluate(inputCode, fullCode);
+        } catch (InputException e) {
+            String detailMessage = "\n" + e.show(fullCode, prefix.length());
+            detailMessage += "\n\nInput code got exception: " + dal.getRuntimeContextBuilder().build(null).wrap(e.getInputClause()).dumpAll();
+            throw new AssertionError(detailMessage);
         } catch (InterpreterException e) {
             String detailMessage = "\n" + e.show(fullCode, prefix.length()) + "\n\n" + e.getMessage();
             if (dumpInput)
-                detailMessage += "\n\nThe root value was: " + dal.getRuntimeContextBuilder().build(null).wrap(input).dumpAll();
+                detailMessage += "\n\nThe root value was: " + dal.getRuntimeContextBuilder().build(null).wrap(inputCode).dumpAll();
             throw new AssertionError(detailMessage);
         }
         return this;

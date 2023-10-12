@@ -84,3 +84,13 @@ Feature: meta ::throw
       message= error
     }
     """
+
+  Scenario: catch input code exception
+    Given the following input code:
+    """
+    throw new java.lang.RuntimeException("Error");
+    """
+    Then the following verification of input code should pass:
+    """
+    ::throw.message= Error
+    """
