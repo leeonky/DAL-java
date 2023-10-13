@@ -64,6 +64,22 @@ Feature: group
            ^        ^
     """
 
+  Scenario: use `[]` in group node
+    Given the following json:
+    """
+    {
+      "a": 1,
+      "b": 1
+    }
+    """
+    Then the following verification should pass:
+    """
+    : {
+      <<[a], [b]>>: 1
+      <<['a'], ['b']>>: 1
+    }
+    """
+
   Scenario: invoke property of group should also a group
     Given the following json:
     """
@@ -381,11 +397,12 @@ Feature: group
       """
       list: {
         <<0 1>>: 1
+        <<[0], [1]>>: 1
       }
       """
       And the inspect should:
       """
-      list: {<<0, 1>>: 1}
+      list: {<<0, 1>>: 1, <<[0], [1]>>: 1}
       """
       When evaluate by:
       """
