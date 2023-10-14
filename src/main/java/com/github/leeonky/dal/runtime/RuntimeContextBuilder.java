@@ -66,13 +66,17 @@ public class RuntimeContextBuilder {
     }
 
     public DALRuntimeContext build(Object inputValue) {
-        return new DALRuntimeContext(() -> inputValue);
+        return build(() -> inputValue, null);
     }
 
     public DALRuntimeContext build(InputCode<?> inputSupplier) {
+        return build(inputSupplier, null);
+    }
+
+    public DALRuntimeContext build(InputCode<?> inputSupplier, Class<?> rootSchema) {
         if (inputSupplier == null)
-            return new DALRuntimeContext(() -> null);
-        return new DALRuntimeContext(inputSupplier);
+            return new DALRuntimeContext(() -> null, rootSchema);
+        return new DALRuntimeContext(inputSupplier, rootSchema);
     }
 
     public RuntimeContextBuilder registerValueFormat(Formatter<?, ?> formatter) {
@@ -147,7 +151,7 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerCurryingMethodRange(Method method, BiFunction<Object,
+    public RuntimeContextBuilder registerCurryingMethodAvailableParameters(Method method, BiFunction<Object,
             List<Object>, List<Object>> range) {
         curryingMethodArgRanges.put(method, range);
         return this;
@@ -243,14 +247,17 @@ public class RuntimeContextBuilder {
     public class DALRuntimeContext implements RuntimeContext {
         private final LinkedList<Data> stack = new LinkedList<>();
         private final Map<Data, PartialPropertyStack> partialPropertyStacks;
+        private BeanClass<?> rootSchema = null;
         private final Data inputValue;
         private final Throwable inputError;
 
-        public DALRuntimeContext(InputCode<?> supplier) {
+        public DALRuntimeContext(InputCode<?> supplier, Class<?> schema) {
+            if (schema != null)
+                rootSchema = BeanClass.create(schema);
             Data value;
             Throwable error;
             try {
-                value = wrap(supplier.get());
+                value = wrap(supplier.get(), rootSchema);
                 error = null;
             } catch (Throwable e) {
                 value = wrap(null);
@@ -264,7 +271,7 @@ public class RuntimeContextBuilder {
         public Data getThis() {
             if (stack.isEmpty()) {
                 if (inputError != null)
-                    throw new InputException(new InvocationException(inputError));
+                    throw new InputException(inputError);
                 return inputValue;
             }
             return stack.getFirst();
@@ -341,14 +348,18 @@ public class RuntimeContextBuilder {
         }
 
         public Data wrap(Object instance) {
-            return new Data(instance, this, SchemaType.createRoot());
+            return wrap(instance, null);
         }
 
         public Data wrap(Object instance, String schema, boolean isList) {
-            BeanClass<?> schemaBeanClass = schemas.get(schema);
+            BeanClass<?> schemaType = schemas.get(schema);
             if (isList)
-                schemaBeanClass = create(Array.newInstance(schemaBeanClass.getType(), 0).getClass());
-            return new Data(instance, this, SchemaType.create(schemaBeanClass));
+                schemaType = create(Array.newInstance(schemaType.getType(), 0).getClass());
+            return wrap(instance, schemaType);
+        }
+
+        public Data wrap(Object instance, BeanClass<?> schemaType) {
+            return new Data(instance, this, SchemaType.create(schemaType));
         }
 
         public <T> DALRuntimeContext registerPropertyAccessor(T instance) {

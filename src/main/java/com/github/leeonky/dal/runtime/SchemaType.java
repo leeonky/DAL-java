@@ -32,10 +32,6 @@ public class SchemaType {
         return new SchemaType(schema);
     }
 
-    public static SchemaType createRoot() {
-        return new SchemaType(null);
-    }
-
     private String fetchFieldChain(String name) {
         return allAliases().stream().filter(fieldAlias -> fieldAlias.alias().equals(name))
                 .map(FieldAlias::field).findFirst().orElse(name);

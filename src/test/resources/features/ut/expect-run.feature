@@ -48,8 +48,7 @@ Feature: expect - run
     Then assert error with the message:
     """
 
-    = 200
-    ^
+    Error
 
     Input code got exception: java.lang.RuntimeException {
     """

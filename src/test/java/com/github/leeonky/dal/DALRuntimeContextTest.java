@@ -24,7 +24,7 @@ class DALRuntimeContextTest {
     void should_raise_error_when_property_accessor_not_register() {
         RuntimeContextBuilder.DALRuntimeContext runtimeContext = new RuntimeContextBuilder().build(null);
         assertThrows(IllegalArgumentException.class, () -> runtimeContext.getPropertyValue(new Data(new Object(),
-                new RuntimeContextBuilder().build(null), SchemaType.createRoot()), "anyc"));
+                new RuntimeContextBuilder().build(null), SchemaType.create(null)), "anyc"));
     }
 
     @Test

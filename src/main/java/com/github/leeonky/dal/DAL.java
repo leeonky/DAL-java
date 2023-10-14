@@ -64,9 +64,13 @@ public class DAL {
         return evaluate((InputValue<Object>) () -> input, expression);
     }
 
-    @SuppressWarnings("unchecked")
     public <T> T evaluate(InputCode<Object> input, String expression) {
-        DALRuntimeContext runtimeContext = runtimeContextBuilder.build(input);
+        return evaluate(input, expression, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T evaluate(InputCode<Object> input, String expression, Class<?> rootSchema) {
+        DALRuntimeContext runtimeContext = runtimeContextBuilder.build(input, rootSchema);
         try {
             List<DALNode> nodes = compiler.compile(new SourceCode(format(expression), Notations.LINE_COMMENTS),
                     runtimeContext);

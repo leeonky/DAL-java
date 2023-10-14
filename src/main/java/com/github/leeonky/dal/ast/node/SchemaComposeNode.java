@@ -30,7 +30,6 @@ public class SchemaComposeNode extends DALNode {
     }
 
     public Data verify(DALNode input, DALRuntimeContext context) {
-
         try {
             List<Object> instanceBySchema = schemas.stream().map(schemaNode ->
                     verifyAndConvertAsSchemaType(context, schemaNode, input)).collect(toList());
@@ -39,7 +38,6 @@ public class SchemaComposeNode extends DALNode {
             throw new RuntimeException(e.getMessage(), getPositionBegin());
         }
     }
-
 
     private Object verifyAndConvertAsSchemaType(DALRuntimeContext context, SchemaNode schemaNode, DALNode input) {
         Data inputData = input.evaluateData(context);
