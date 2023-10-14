@@ -9,6 +9,7 @@ import com.github.leeonky.dal.type.InputCode;
 import com.github.leeonky.dal.type.InputValue;
 import com.github.leeonky.interpreter.InterpreterException;
 
+import java.lang.reflect.Array;
 import java.util.function.Supplier;
 
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
@@ -94,5 +95,12 @@ public class Assertions {
                 detailMessage += "\n\nThe root value was: " + dal.getRuntimeContextBuilder().build(null).wrap(inputCode).dumpAll();
             throw new AssertionError(detailMessage);
         }
+    }
+
+    public Assertions is(String schema) {
+        if (schema.startsWith("[") && schema.endsWith("]"))
+            return is(Array.newInstance(dal.getRuntimeContextBuilder().schemaType(
+                    schema.replace('[', ' ').replace(']', ' ').trim()).getType(), 0).getClass());
+        return is(dal.getRuntimeContextBuilder().schemaType(schema).getType());
     }
 }

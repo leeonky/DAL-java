@@ -68,6 +68,22 @@ public class AssertionsTest {
         void use_root_schema_as_list_in_dal_verification() {
             expect(new Bean[]{new Bean().setValue(1)}).is(BeanSchema[].class).should("[0].aliasOfValue= 1");
         }
+
+        @Test
+        void specify_schema_by_name() {
+            DAL dal = new DAL();
+            dal.getRuntimeContextBuilder().registerSchema(BeanSchema.class);
+
+            expect(new Bean().setValue(1)).use(dal).is("BeanSchema").should("aliasOfValue= 1");
+        }
+
+        @Test
+        void specify_schema_list_by_name() {
+            DAL dal = new DAL();
+            dal.getRuntimeContextBuilder().registerSchema(BeanSchema.class);
+
+            expect(new Bean[]{new Bean().setValue(1)}).use(dal).is("[BeanSchema]").should("[0].aliasOfValue= 1");
+        }
     }
 
     @Getter

@@ -244,6 +244,13 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    public BeanClass<?> schemaType(String schema) {
+        BeanClass<?> type = schemas.get(schema);
+        if (type != null)
+            return type;
+        throw new IllegalStateException(String.format("Unknow schema '%s'", schema));
+    }
+
     public class DALRuntimeContext implements RuntimeContext {
         private final LinkedList<Data> stack = new LinkedList<>();
         private final Map<Data, PartialPropertyStack> partialPropertyStacks;
@@ -352,7 +359,7 @@ public class RuntimeContextBuilder {
         }
 
         public Data wrap(Object instance, String schema, boolean isList) {
-            BeanClass<?> schemaType = schemas.get(schema);
+            BeanClass<?> schemaType = schemaType(schema);
             if (isList)
                 schemaType = create(Array.newInstance(schemaType.getType(), 0).getClass());
             return wrap(instance, schemaType);
