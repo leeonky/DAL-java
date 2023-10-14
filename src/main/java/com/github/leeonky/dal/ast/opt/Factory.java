@@ -90,6 +90,21 @@ public class Factory {
         };
     }
 
+    public static DALOperator remark() {
+        return new DALOperator(Precedence.REMARK, "", true) {
+
+            @Override
+            public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
+                return left.evaluate(context);
+            }
+
+            @Override
+            public String inspect(String node1, String node2) {
+                return node1 + " " + node2;
+            }
+        };
+    }
+
     public interface NodeNodeContextObject extends TriFunction<DALNode, DALNode, DALRuntimeContext, Object> {
         static NodeNodeContextObject adapt(SupplierSupplierObject operation) {
             return (left, right, context) -> operation.apply(() -> left.evaluate(context), () -> right.evaluate(context));

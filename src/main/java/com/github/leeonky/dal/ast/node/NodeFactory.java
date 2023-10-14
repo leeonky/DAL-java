@@ -9,6 +9,8 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.github.leeonky.dal.ast.opt.Factory.remark;
+
 public class NodeFactory {
     private static final NumberParser numberParser = new NumberParser();
 
@@ -83,7 +85,7 @@ public class NodeFactory {
         if (number != null) {
             Class<? extends Number> type = number.getClass();
             if (type.equals(Integer.class) || type.equals(Long.class) || type.equals(Short.class)
-                || type.equals(Byte.class) || type.equals(BigInteger.class)) {
+                    || type.equals(Byte.class) || type.equals(BigInteger.class)) {
                 return new ConstNode(number);
             }
         }
@@ -96,4 +98,7 @@ public class NodeFactory {
         return new GroupExpression(list);
     }
 
+    public static DALNode constRemarkNode(DALNode constNode, DALNode parentheses) {
+        return new DALExpression(constNode, remark(), parentheses);
+    }
 }

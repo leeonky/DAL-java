@@ -77,7 +77,8 @@ public class Compiler {
                     .nodeParser(NodeFactory::symbolNode).parse(procedure),
             META_SYMBOL = Tokens.DOT_SYMBOL.nodeParser(NodeFactory::metaSymbolNode),
             PROPERTY_PATTERN = this::propertyPattern,
-            OPTIONAL_VERIFICATION_PROPERTY = lazyNode(() -> enableSlashProperty(enableRelaxProperty(OPTIONAL_PROPERTY_CHAIN)));
+            OPTIONAL_VERIFICATION_PROPERTY = lazyNode(() -> enableSlashProperty(enableRelaxProperty(OPTIONAL_PROPERTY_CHAIN))),
+            CONST_REMARK;
 
     private NodeParser.Mandatory<DALNode, DALProcedure> textAttribute(DALNode notationNode) {
         return many(TEXT_ATTRIBUTE).and(endWithLine()).as(attributes ->
@@ -164,9 +165,10 @@ public class Compiler {
                 positionNode(Notations.COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHeadRow::new))).concat(TABLE_BODY_CLAUSE),
                 positionNode(Notations.MATRIX_COLUMN_SPLITTER.before(DEFAULT_INDEX_HEADER).concat(TABLE_BODY_CLAUSE)));
         VERIFICATION_SPECIAL_OPERAND = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
-        OPERAND = lazyNode(() -> oneOf(Operators.UNARY_OPERATORS.unary(OPERAND), CONST, PROPERTY, PARENTHESES, INPUT))
+        CONST_REMARK = CONST.concat(PARENTHESES.clause(NodeFactory::constRemarkNode));
+        OPERAND = lazyNode(() -> oneOf(Operators.UNARY_OPERATORS.unary(OPERAND), CONST_REMARK, PROPERTY, PARENTHESES, INPUT))
                 .mandatory("Expect a value or expression");
-        VERIFICATION_VALUE_OPERAND = oneOf(Operators.UNARY_OPERATORS.unary(OPERAND), CONST, DEFAULT_INPUT.with(EXPLICIT_PROPERTY_CLAUSE), PARENTHESES);
+        VERIFICATION_VALUE_OPERAND = oneOf(Operators.UNARY_OPERATORS.unary(OPERAND), CONST_REMARK, DEFAULT_INPUT.with(EXPLICIT_PROPERTY_CLAUSE), PARENTHESES);
         ARITHMETIC_CLAUSE = Operators.BINARY_ARITHMETIC_OPERATORS.clause(OPERAND);
         VERIFICATION_CLAUSE = Operators.VERIFICATION_OPERATORS.clause(oneOf(VERIFICATION_SPECIAL_OPERAND,
                 VERIFICATION_VALUE_OPERAND).or(EXPRESSION_RELAX_STRING));
