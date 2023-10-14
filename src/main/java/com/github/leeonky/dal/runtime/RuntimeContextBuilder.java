@@ -359,7 +359,7 @@ public class RuntimeContextBuilder {
         }
 
         public Data wrap(Object instance, String schema, boolean isList) {
-            BeanClass<?> schemaType = schemaType(schema);
+            BeanClass<?> schemaType = schemas.get(schema);
             if (isList)
                 schemaType = create(Array.newInstance(schemaType.getType(), 0).getClass());
             return wrap(instance, schemaType);
