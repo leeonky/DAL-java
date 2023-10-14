@@ -10,6 +10,7 @@ import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.Notation;
 import com.github.leeonky.util.function.TriFunction;
 
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -94,8 +95,13 @@ public class Factory {
         return new DALOperator(Precedence.REMARK, "", true) {
 
             @Override
-            public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-                return left.evaluate(context);
+            public Data calculateData(DALNode left, DALNode right, DALRuntimeContext context) {
+                Data leftValue = left.evaluateData(context);
+                Data rightValue = right.evaluateData(context);
+                if (Objects.equals(leftValue.getInstance(), rightValue.getInstance()))
+                    return leftValue;
+                throw new RuntimeException(String.format("Incorrect const remark, const value was %s\nbut remark %s was %s",
+                        leftValue.dumpAll(), right.inspect(), rightValue.dumpAll()), right.getPositionBegin());
             }
 
             @Override
