@@ -120,12 +120,12 @@ public class Compiler {
                     Operators.PROPERTY_META.clause(symbolClause(META_SYMBOL.concat(META_LIST_MAPPING_CLAUSE))),
                     Operators.PROPERTY_IMPLICIT.clause(Notations.OPENING_BRACKET.with(single(INTEGER_OR_STRING.or(BRACKET_RELAX_STRING))
                             .and(endWith(Notations.CLOSING_BRACKET))
-                            .as(NodeFactory::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE)))
+                            .as(NodeFactory::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE))),
+                    Operators.PROPERTY_IMPLICIT.clause(lazyNode(() -> GROUP_PROPERTY))
             );
 
     private NodeParser.Mandatory<DALNode, DALProcedure> propertyChainNode() {
-        return symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL, NUMBER_PROPERTY,
-                lazyNode(() -> GROUP_PROPERTY)).concat(LIST_MAPPING_CLAUSE));
+        return symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL, NUMBER_PROPERTY).concat(LIST_MAPPING_CLAUSE));
     }
 
     private NodeParser.Mandatory<DALNode, DALProcedure> symbolClause(
@@ -145,7 +145,7 @@ public class Compiler {
     public Compiler() {
         PARENTHESES = lazyNode(() -> enableCommaAnd(Notations.OPENING_PARENTHESES.with(single(EXPRESSION).and(endWith(Notations.CLOSING_PARENTHESES))
                 .as(NodeFactory::parenthesesNode))));
-        PROPERTY = lazyNode(() -> oneOf(GROUP_PROPERTY, DEFAULT_INPUT.with(oneOf(EXPLICIT_PROPERTY_CLAUSE, IMPLICIT_PROPERTY_CLAUSE))));
+        PROPERTY = DEFAULT_INPUT.with(oneOf(EXPLICIT_PROPERTY_CLAUSE, IMPLICIT_PROPERTY_CLAUSE));
         OPTIONAL_PROPERTY_CHAIN = PROPERTY.concatAll(EXPLICIT_PROPERTY_CLAUSE);
         PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
         VERIFICATION_PROPERTY = enableNumberProperty(enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN)));

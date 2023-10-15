@@ -75,7 +75,7 @@ Feature: group
     Then the following verification should pass:
     """
     : {
-      <<[a], [b]>>: 1
+      <<[a], [b]>>: 1,
       <<['a'], ['b']>>: 1
     }
     """
@@ -263,19 +263,41 @@ Feature: group
     """
     Then the following verification should pass:
     """
-    list.<<0 1>>.value= 100
+    list<<0 1>>.value= 100
     """
     And the inspect should:
     """
-    list.<<0, 1>>.value= 100
+    list<<0, 1>>.value= 100
     """
     Then the following verification should pass:
     """
-    list.<<'0' '1'>>.value= 100
+    list<<'0' '1'>>.value= 100
     """
     And the inspect should:
     """
-    list.<<'0', '1'>>.value= 100
+    list<<'0', '1'>>.value= 100
+    """
+
+  Scenario: use group property without dot
+    Given the following json:
+    """
+    {
+      "list": {
+        "a": {
+          "a": {
+            "value": 100
+          }
+        },
+        "b": {
+          "value": 100
+        }
+      }
+    }
+    """
+    Then the following verification should pass:
+    """
+    list<<a.a b>>.value= 100
+#    list.<<a.a b>>.value= 100
     """
 
   Scenario: group node should return value as a list
@@ -396,7 +418,7 @@ Feature: group
       Then the following verification should pass:
       """
       list: {
-        <<0 1>>: 1
+        <<0 1>>: 1,
         <<[0], [1]>>: 1
       }
       """
