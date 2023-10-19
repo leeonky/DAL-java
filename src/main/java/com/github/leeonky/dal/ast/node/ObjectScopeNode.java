@@ -38,13 +38,14 @@ public class ObjectScopeNode extends DALNode {
     }
 
     @Override
-    public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
+    public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
         Data data = evaluateActualAndCheckNull(actualNode, context);
-        return data.newBlockScope(() -> {
+        data.newBlockScope(() -> {
             verificationExpressions.forEach(expression -> expression.evaluate(context));
             assertUnexpectedFields(collectUnexpectedFields(data, context), actualNode.inspect(), operator.getPosition());
             return true;
         });
+        return data;
     }
 
     private Data evaluateActualAndCheckNull(DALNode actualNode, DALRuntimeContext context) {
@@ -55,12 +56,13 @@ public class ObjectScopeNode extends DALNode {
     }
 
     @Override
-    public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+    public Data verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
         if (verificationExpressions.isEmpty() && !isObjectWildcard)
             throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
-        return evaluateActualAndCheckNull(actualNode, context).newBlockScope(() -> {
+        Data data = evaluateActualAndCheckNull(actualNode, context);
+        return data.newBlockScope(() -> {
             verificationExpressions.forEach(expression -> expression.evaluate(context));
-            return true;
+            return data;
         });
     }
 

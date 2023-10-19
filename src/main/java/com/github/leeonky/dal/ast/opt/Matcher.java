@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast.opt;
 
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.compiler.Notations;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 public class Matcher extends DALOperator {
@@ -10,7 +11,7 @@ public class Matcher extends DALOperator {
     }
 
     @Override
-    public Object calculate(DALNode left, DALNode right, RuntimeContextBuilder.DALRuntimeContext context) {
+    public Data calculateData(DALNode left, DALNode right, RuntimeContextBuilder.DALRuntimeContext context) {
         return right.verify(left, this, context);
     }
 

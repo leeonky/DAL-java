@@ -99,28 +99,29 @@ public class ListScopeNode extends DALNode {
     }
 
     @Override
-    public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+    public Data verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
         return verify(context, actualNode);
     }
 
     @Override
-    public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
+    public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
         return verify(context, actualNode);
     }
 
-    private boolean verify(DALRuntimeContext context, DALNode node) {
+    private Data verify(DALRuntimeContext context, DALNode node) {
         Data data = node.evaluateData(context).setListComparator(comparator).requireList(node.getOperandPosition());
         return type == Type.CONTAINS ? verifyContainElement(context, data) : verifyCorrespondingElement(context, data);
     }
 
-    private Boolean verifyCorrespondingElement(DALRuntimeContext context, Data data) {
+    private Data verifyCorrespondingElement(DALRuntimeContext context, Data data) {
         List<DALNode> expressions = getVerificationExpressions(data.getListFirstIndex());
         if (type == Type.ALL_ITEMS)
             assertListSize(expressions.size(), data.getListSize(), getPositionBegin());
-        return data.newBlockScope(() -> assertElementExpressions(context, expressions));
+        data.newBlockScope(() -> assertElementExpressions(context, expressions));
+        return data;
     }
 
-    private boolean verifyContainElement(DALRuntimeContext context, Data data) {
+    private Data verifyContainElement(DALRuntimeContext context, Data data) {
         //            TODO raise error when index list(expressionFactories == null)
         int elementIndex = 0;
         List<Clause<DALNode>> expected = trimFirstEllipsis();
@@ -132,13 +133,14 @@ public class ListScopeNode extends DALNode {
                 throw style == Style.LIST ? exception : new RowAssertionFailure(clauseIndex, exception);
             }
         }
-        return true;
+        return data;
     }
 
     private boolean isElementPassedVerification(DALRuntimeContext context, Clause<DALNode> clause,
                                                 Object element) {
         try {
-            return (boolean) clause.expression(new ConstNode(element)).evaluate(context);
+            clause.expression(new ConstNode(element)).evaluate(context);
+            return true;
         } catch (AssertionFailure ignore) {
             return false;
         }

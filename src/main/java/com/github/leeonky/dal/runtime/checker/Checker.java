@@ -39,9 +39,9 @@ public interface Checker {
         return expected;
     }
 
-    default boolean verify(CheckingContext checkingContext) {
+    default Data verify(CheckingContext checkingContext) {
         if (failed(checkingContext))
             throw new AssertionFailure(message(checkingContext), checkingContext.getPosition());
-        return true;
+        return checkingContext.getOriginalActual();
     }
 }

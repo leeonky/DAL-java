@@ -24,16 +24,16 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         return evaluateData(context).getInstance();
     }
 
-    public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
+    public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
         return verify(actualNode, context, DALRuntimeContext::fetchEqualsChecker);
     }
 
-    public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+    public Data verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
         return verify(actualNode, context, DALRuntimeContext::fetchMatchingChecker);
     }
 
-    private boolean verify(DALNode actualNode, DALRuntimeContext context,
-                           TriFunction<DALRuntimeContext, Data, Data, Checker> factory) {
+    private Data verify(DALNode actualNode, DALRuntimeContext context,
+                        TriFunction<DALRuntimeContext, Data, Data, Checker> factory) {
         Data expected = evaluateData(context);
         expected.isNullWithPosition(getOperandPosition());
         Data actual = actualNode.evaluateData(context);

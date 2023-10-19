@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Matcher;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 public class WildcardNode extends DALNode {
@@ -12,13 +13,13 @@ public class WildcardNode extends DALNode {
     }
 
     @Override
-    public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        return true;
+    public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
+        return context.wrap(true);
     }
 
     @Override
-    public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
-        return true;
+    public Data verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+        return context.wrap(null);
     }
 
     @Override

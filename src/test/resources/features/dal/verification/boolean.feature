@@ -1,14 +1,13 @@
 Feature: boolean
 
-  Scenario Outline: compare boolean
+  Scenario Outline: compare boolean and return actual value
     Then the following verification should pass:
     """
-      true<opt> true and
+      true<opt> true
+    """
+    Then the following verification should pass:
+    """
       false<opt> false
-    """
-    And the following verification should failed:
-    """
-      false<opt> true
     """
     Examples:
       | opt |

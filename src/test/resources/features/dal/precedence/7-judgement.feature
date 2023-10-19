@@ -10,11 +10,15 @@ Feature: verification operators
     : <result>
     """
     Examples:
-      | opt  | input | result |
-      | &&   | false | false  |
-      | and  | false | false  |
-      | \|\| | false | true   |
-      | or   | false | true   |
+      | input | opt  | result |
+      | false | &&   | false  |
+      | true  | and  | 5      |
+      | 0     | and  | 0      |
+      | null  | and  | null   |
+      | false | \|\| | 5      |
+      | false | or   | 5      |
+      | true  | or   | true   |
+      | 100   | or   | 100    |
 
   Scenario Outline: = with logical opt
     When evaluate by:
@@ -26,11 +30,15 @@ Feature: verification operators
     : <result>
     """
     Examples:
-      | opt  | input | result |
-      | &&   | false | false  |
-      | and  | false | false  |
-      | \|\| | false | true   |
-      | or   | false | true   |
+      | input | opt  | result |
+      | false | &&   | false  |
+      | true  | and  | 5      |
+      | 0     | and  | 0      |
+      | null  | and  | null   |
+      | false | \|\| | 5      |
+      | false | or   | 5      |
+      | true  | or   | true   |
+      | 100   | or   | 100    |
 
   Scenario Outline: with which
     Given the following json:
@@ -53,5 +61,5 @@ Feature: verification operators
     """
     Examples:
       | opt | result |
-      | :   | true   |
-      | =   | true   |
+      | :   | 10     |
+      | =   | 10     |

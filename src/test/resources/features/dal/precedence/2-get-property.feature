@@ -32,8 +32,8 @@ Feature: property
       | 10    | >=       | 10    | true   |
       | 5     | <=       | 4     | false  |
       | 5     | !=       | 3     | true   |
-      | 5     | =        | 5     | true   |
-      | 3     | :        | 3.0   | true   |
+      | 5     | =        | 5     | 5      |
+      | 3     | :        | 3.0   | 3      |
 
   Scenario: which precedence
     Given the following json:

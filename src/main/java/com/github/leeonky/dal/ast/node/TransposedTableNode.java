@@ -18,7 +18,7 @@ public class TransposedTableNode extends DALNode {
     }
 
     @Override
-    public boolean verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
+    public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
         Data actual = actualNode.evaluateData(context);
         try {
             return transpose().convertToVerificationNode(actual, operator, context).verify(actualNode, operator, context);
@@ -28,7 +28,7 @@ public class TransposedTableNode extends DALNode {
     }
 
     @Override
-    public boolean verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+    public Data verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
         Data actual = actualNode.evaluateData(context);
         try {
             return transpose().convertToVerificationNode(actual, operator, context).verify(actualNode, operator, context);

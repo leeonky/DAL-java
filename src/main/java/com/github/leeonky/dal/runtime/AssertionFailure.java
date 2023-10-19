@@ -18,16 +18,14 @@ public class AssertionFailure extends DalException {
                             .collect(joining(", ")), element.isEmpty() ? "" : " in " + element), position);
     }
 
-    public static boolean assertRegexMatches(Pattern pattern, String actual, int position) {
+    public static void assertRegexMatches(Pattern pattern, String actual, int position) {
         if (!pattern.matcher(actual).matches())
             throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s>", pattern, actual), position);
-        return true;
     }
 
-    public static boolean assertRegexMatches(Pattern pattern, String converted, Data input, int position) {
+    public static void assertRegexMatches(Pattern pattern, String converted, Data input, int position) {
         if (!pattern.matcher(converted).matches())
             throw new AssertionFailure(format("Expected to match: /%s/\nActual: <%s> converted from: %s", pattern,
                     converted, input.dumpAll()), position);
-        return true;
     }
 }

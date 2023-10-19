@@ -67,6 +67,6 @@ class ExpressionTest {
     private void assertPassed(Object s1, Object s2, DALOperator operator) {
         Object evaluate = new DALExpression(new ConstNode(s1), operator, new ConstNode(s2)).evaluate(new RuntimeContextBuilder().build(null));
 
-        assertThat(evaluate).isEqualTo(true);
+        assertThat(evaluate).isEqualTo(s1);
     }
 }

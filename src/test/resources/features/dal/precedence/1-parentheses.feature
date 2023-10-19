@@ -60,8 +60,8 @@ Feature: parentheses
     """
     Examples:
       | input | operator | value | result |
-      | 5     | =        | 5     | true   |
-      | 3     | :        | 3.0   | true   |
+      | 5     | =        | 5     | 5      |
+      | 3     | :        | 3.0   | 3      |
 
   Scenario: parentheses and which precedence
     Given the following json:

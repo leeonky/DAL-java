@@ -9,6 +9,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,7 +22,8 @@ class ListScopeNodeTest {
 
     @Test
     void empty_list_equal_to_or_matches_empty_list() {
-        assertThat(listScopeNode.verify(new ConstNode(Collections.emptyList()), EQUAL, DALRuntimeContext)).isTrue();
-        assertThat(listScopeNode.verify(new ConstNode(Collections.emptyList()), MATCHER, DALRuntimeContext)).isTrue();
+        List<Object> emptyList = Collections.emptyList();
+        assertThat(listScopeNode.verify(new ConstNode(emptyList), EQUAL, DALRuntimeContext).getInstance()).isSameAs(emptyList);
+        assertThat(listScopeNode.verify(new ConstNode(emptyList), MATCHER, DALRuntimeContext).getInstance()).isSameAs(emptyList);
     }
 }

@@ -32,7 +32,7 @@ Feature: chain
     Examples:
       | code                   | value | inspect                |
       | 1+ -2 *3               | -5    | 1 + -2 * 3             |
-      | 1+1: 2                 | true  | 1 + 1: 2               |
+      | 1+1: 2                 | 2     | 1 + 1: 2               |
       | 'a' + 'b' . length     | 'a1'  | 'a' + 'b'.length       |
       | 'a' + 'b' which length | 2     | 'a' + 'b' which length |
       | 4/2 is Number          | 2     | 4 / 2 is Number        |
@@ -51,12 +51,12 @@ Feature: chain
     <inspect>
     """
     Examples:
-      | code                | value  | inspect             |
-      | 4: 2+2              | true   | 4: 2 + 2            |
-      | 4: 4: true          | true   | 4: 4: true          |
-      | '4': '4'.toString   | true   | '4': '4'.toString   |
-      | 4: 4 which toString | 'true' | 4: 4 which toString |
-      | 4: 4 is Boolean     | true   | 4: 4 is Boolean     |
+      | code                | value | inspect             |
+      | 4: 2+2              | 4     | 4: 2 + 2            |
+      | 4: 4: 4             | 4     | 4: 4: 4             |
+      | '4': '4'.toString   | '4'   | '4': '4'.toString   |
+      | 4: 4 which toString | '4'   | 4: 4 which toString |
+      | 4: 4 is Number      | 4     | 4: 4 is Number      |
 
   Scenario Outline: chain after property
     When evaluate by:
@@ -74,7 +74,7 @@ Feature: chain
     Examples:
       | code                      | value | inspect                   |
       | 'a'.length+2              | 3     | 'a'.length + 2            |
-      | 'a'.length: 1             | true  | 'a'.length: 1             |
+      | 'a'.length: 1             | 1     | 'a'.length: 1             |
       | 'a'.length.toString       | '1'   | 'a'.length.toString       |
       | 'a'.length which toString | '1'   | 'a'.length which toString |
       | 'a'.length is Number      | 1     | 'a'.length is Number      |
@@ -95,7 +95,7 @@ Feature: chain
     Examples:
       | code                            | value | inspect                         |
       | 'a' which length+1              | 2     | 'a' which length + 1            |
-      | 'a' which length:1              | true  | 'a' which length: 1             |
+      | 'a' which length:1              | 1     | 'a' which length: 1             |
       | 'a' which length.toString       | '1'   | 'a' which length.toString       |
       | 'a' which length which toString | '1'   | 'a' which length which toString |
       | 'a' which length is Number      | 1     | 'a' which length is Number      |
@@ -115,6 +115,6 @@ Feature: chain
     """
     Examples:
       | code                  | value | inspect               |
-      | 1 is Number :1        | true  | 1 is Number: 1        |
+      | 1 is Number :1        | 1     | 1 is Number: 1        |
       | 1 is Number which 1   | 1     | 1 is Number which 1   |
       | 1 is Number is Number | 1     | 1 is Number is Number |
