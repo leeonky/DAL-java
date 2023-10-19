@@ -41,16 +41,10 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     @Override
     public Data evaluateData(DALRuntimeContext context) {
         try {
-            return logFalseResultAsNeeded(operator.calculateData(left, right, context));
+            return operator.calculateData(left, right, context);
         } catch (IllegalArgumentException ex) {
             throw new RuntimeException(ex.getMessage(), operator.getPosition());
         }
-    }
-
-    private Data logFalseResultAsNeeded(Data result) {
-        if (operator.isNeedInspect() && (result.getInstance() instanceof Boolean) && !(boolean) result.getInstance())
-            System.err.println("Warning: Expression `" + inspect() + "` got false.");
-        return result;
     }
 
     @Override

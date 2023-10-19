@@ -228,33 +228,4 @@ class CalculatorTest {
             assertIllegalArgument(() -> Calculator.negate(context.wrap("2"), context), "Operands should be number but 'java.lang.String'");
         }
     }
-
-    @Nested
-    class Logical {
-
-        @Test
-        void logical_calculate() {
-            assertThat(Calculator.and(() -> true, () -> false)).isEqualTo(false);
-            assertThat(Calculator.and(() -> true, () -> true)).isEqualTo(true);
-            assertThat(Calculator.and(() -> false, () -> true)).isEqualTo(false);
-            assertThat(Calculator.and(() -> false, () -> false)).isEqualTo(false);
-
-            assertThat(Calculator.or(() -> true, () -> false)).isEqualTo(true);
-            assertThat(Calculator.or(() -> true, () -> true)).isEqualTo(true);
-            assertThat(Calculator.or(() -> false, () -> true)).isEqualTo(true);
-            assertThat(Calculator.or(() -> false, () -> false)).isEqualTo(false);
-
-            assertThat(Calculator.not(true)).isEqualTo(false);
-            assertThat(Calculator.not(false)).isEqualTo(true);
-        }
-
-        @Test
-        void input_value_should_be_logical_type() {
-            assertIllegalArgument(() -> Calculator.and(() -> "2", () -> true), "Operand 1 should be boolean but 'java.lang.String'");
-            assertIllegalArgument(() -> Calculator.and(() -> true, () -> 1), "Operand 2 should be boolean but 'java.lang.Integer'");
-            assertIllegalArgument(() -> Calculator.or(() -> "2", () -> true), "Operand 1 should be boolean but 'java.lang.String'");
-            assertIllegalArgument(() -> Calculator.or(() -> false, () -> 1), "Operand 2 should be boolean but 'java.lang.Integer'");
-            assertIllegalArgument(() -> Calculator.not(1), "Operand should be boolean but 'java.lang.Integer'");
-        }
-    }
 }

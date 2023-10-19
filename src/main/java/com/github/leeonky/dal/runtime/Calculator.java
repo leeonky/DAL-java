@@ -2,6 +2,7 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.CollectionHelper;
+import com.github.leeonky.util.NumberType;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -14,6 +15,8 @@ import static java.util.Comparator.reverseOrder;
 import static java.util.stream.Collectors.toList;
 
 public class Calculator {
+    private static final NumberType numberType = new NumberType();
+
     public static int compare(Object v1, Object v2, DALRuntimeContext context) {
         if (v1 == null || v2 == null)
             throw new IllegalArgumentException(format("Can not compare [%s] and [%s]", v1, v2));
@@ -64,26 +67,22 @@ public class Calculator {
                     getClassName(v1), getClassName(v2)));
     }
 
-    public static Object and(Supplier<Object> s1, Supplier<Object> s2) {
-        Object v1 = s1.get();
-        requireBooleanType(v1, "Operand 1");
-        if ((boolean) v1) {
-            Object v2 = s2.get();
-            requireBooleanType(v2, "Operand 2");
-            return v2;
-        }
-        return false;
+    public static Data and(Supplier<Data> s1, Supplier<Data> s2) {
+        Data v1 = s1.get();
+        return isTrue(v1) ? s2.get() : v1;
     }
 
-    public static Object or(Supplier<Object> s1, Supplier<Object> s2) {
-        Object v1 = s1.get();
-        requireBooleanType(v1, "Operand 1");
-        if (!(boolean) v1) {
-            Object v2 = s2.get();
-            requireBooleanType(v2, "Operand 2");
-            return v2;
-        }
-        return true;
+    private static boolean isTrue(Data value) {
+        if (value.getInstance() instanceof Boolean)
+            return (boolean) value.getInstance();
+        if (value.getInstance() instanceof Number)
+            return numberType.compare(0, (Number) value.getInstance()) != 0;
+        return !value.isNull();
+    }
+
+    public static Data or(Supplier<Data> s1, Supplier<Data> s2) {
+        Data v1 = s1.get();
+        return isTrue(v1) ? v1 : s2.get();
     }
 
     public static Object not(Object v) {

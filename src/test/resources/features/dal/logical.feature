@@ -49,3 +49,33 @@ Feature: logic
     """
     =true
     """
+
+  Scenario Outline: value logic false contains (null, false, number 0)
+    When evaluate by:
+    """
+      <input> <operator> <value>
+    """
+    Then the result should:
+    """
+    : <result>
+    """
+    Examples:
+      | input   | operator | value   | result  |
+      | 'hello' | &&       | 'world' | 'world' |
+      | 'hello' | &&       | false   | false   |
+      | 'hello' | &&       | null    | null    |
+      | 'hello' | &&       | 0       | 0       |
+      | false   | &&       | 'hello' | false   |
+      | null    | &&       | 'hello' | null    |
+      | 0       | &&       | 'hello' | 0       |
+      | 0.0     | &&       | 'hello' | 0.0     |
+      | 0.0BD   | &&       | 'hello' | 0.0BD   |
+      | 'hello' | \|\|     | 'world' | hello   |
+      | 'hello' | \|\|     | false   | hello   |
+      | 'hello' | \|\|     | null    | hello   |
+      | 'hello' | \|\|     | 0       | hello   |
+      | false   | \|\|     | 'hello' | hello   |
+      | null    | \|\|     | 'hello' | hello   |
+      | 0       | \|\|     | 'hello' | hello   |
+      | 0.0     | \|\|     | 'hello' | hello   |
+      | 0.0BD   | \|\|     | 'hello' | hello   |

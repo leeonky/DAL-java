@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Factory {
-    public static DALOperator logical(Notation<?, ?, ?> notation, NodeNodeContextObject.SupplierSupplierObject logical) {
+    public static DALOperator logical(Notation<?, ?, ?> notation, NodeNodeContextObject.SupplierSupplierData logical) {
         return new Operator(Precedence.LOGICAL, notation, NodeNodeContextObject.adapt(logical), true);
     }
 
@@ -112,8 +112,9 @@ public class Factory {
     }
 
     public interface NodeNodeContextObject extends TriFunction<DALNode, DALNode, DALRuntimeContext, Object> {
-        static NodeNodeContextObject adapt(SupplierSupplierObject operation) {
-            return (left, right, context) -> operation.apply(() -> left.evaluate(context), () -> right.evaluate(context));
+        static NodeNodeContextObject adapt(SupplierSupplierData operation) {
+            return (left, right, context) -> operation.apply(() -> left.evaluateData(context),
+                    () -> right.evaluateData(context)).getInstance();
         }
 
         static NodeNodeContextObject adapt(ObjectObjectContextObject operation) {
@@ -132,7 +133,7 @@ public class Factory {
             return (left, right, context) -> operation.apply(left.evaluateData(context), right.evaluateData(context));
         }
 
-        interface SupplierSupplierObject extends BiFunction<Supplier<Object>, Supplier<Object>, Object> {
+        interface SupplierSupplierData extends BiFunction<Supplier<Data>, Supplier<Data>, Data> {
         }
 
         interface ObjectObjectContextObject extends TriFunction<Object, Object, DALRuntimeContext, Object> {
