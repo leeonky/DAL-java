@@ -9,13 +9,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DALTest {
+    public static String staticMethod(String str) {
+        return str.toUpperCase();
+    }
 
     @Test
     void support_extend() {
         DALExtension.extensionForTest = dal ->
-                dal.getRuntimeContextBuilder().registerSchema("ExtensionSchema", (a, c) -> true);
+                dal.getRuntimeContextBuilder().registerStaticMethodExtension(DALTest.class);
 
-        assertThat(new DAL().extend().<String>evaluate("input", "is ExtensionSchema")).isEqualTo("input");
+        assertThat(new DAL().extend().<String>evaluate("input", "staticMethod")).isEqualTo("INPUT");
     }
 
     public boolean isCalled = false;

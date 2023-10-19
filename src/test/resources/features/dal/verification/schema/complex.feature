@@ -94,6 +94,20 @@ Feature: multiple schema and list schema
     is [IdZero / IdZero]
     """
 
+  Scenario: verify list data matches with not exist schema
+    Given the following json:
+    """
+      [1]
+    """
+    When evaluate by:
+    """
+      is [NotExist]
+    """
+    Then failed with the message:
+    """
+    Schema 'NotExist' not registered
+    """
+
   Scenario: raise error when one element is not matched schema
     Given the following json:
     """

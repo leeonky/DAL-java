@@ -135,3 +135,26 @@ Feature: verify object
     value | 1      |
     ^
     """
+
+  Scenario: property chain in row header
+    Given the following json:
+    """
+    {
+      "data": {
+        "key1": "hello",
+        "key2": "world"
+      },
+      "copy": {
+        "data": {
+          "key1": "goodbye",
+          "key2": "world"
+        }
+      }
+    }
+    """
+    Then the following verification should pass:
+    """
+    =         | key1    | key2  |
+    data      | hello   | world |
+    copy.data | goodbye | world |
+    """
