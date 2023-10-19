@@ -13,6 +13,13 @@ public interface ListAccessor<T> {
         return true;
     }
 
+    //    TODO refactor
+    default int size(T instance) {
+        int i = 0;
+        for (Object object : toIterable(instance)) i++;
+        return i;
+    }
+
     static <T extends Iterable<?>> ListAccessor<T> changeFirstIndex(Function<T, Integer> indexFunction) {
         return new ListAccessor<T>() {
             @Override

@@ -21,7 +21,7 @@ public class Data {
     private final SchemaType schemaType;
     private final DALRuntimeContext context;
     private final Object instance;
-    private List<Object> listValue;
+    private Iterator<Object> iterator;
     private Comparator<Object> listComparator = SortGroupNode.NOP_COMPARATOR;
 
     public Data(Object instance, DALRuntimeContext context, SchemaType schemaType) {
@@ -42,15 +42,23 @@ public class Data {
         return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
+    @Deprecated
     public int getListSize() {
-        return getValueList().size();
+        return sizeOfList();
     }
 
+    public int sizeOfList() {
+        return context.getListSize(instance);
+    }
+
+    @Deprecated
     public List<Object> getValueList() {
-        return listValue == null ? (listValue = stream(context.getList(instance).spliterator(), false)
-                .sorted(listComparator).collect(toList())) : listValue;
+        if (iterator == null)
+            iterator = context.getList(instance).iterator();
+        return stream(context.getList(instance).spliterator(), false).sorted(listComparator).collect(toList());
     }
 
+    @Deprecated
     public List<Data> getDataList() {
         AtomicInteger index = new AtomicInteger(0);
         return getValueList().stream().map(object -> new Data(object, context,

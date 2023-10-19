@@ -325,6 +325,11 @@ public class RuntimeContextBuilder {
                     .orElseGet(() -> arrayIterable(instance));
         }
 
+        public int getListSize(Object instance) {
+            return listAccessors.tryGetData(instance).map(l -> l.size(instance))
+                    .orElseGet(() -> Array.getLength(instance));
+        }
+
         public int getListFirstIndex(Object instance) {
             return listAccessors.tryGetData(instance).map(listAccessor -> listAccessor.firstIndex(instance)).orElse(0);
         }
