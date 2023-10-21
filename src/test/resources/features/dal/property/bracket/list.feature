@@ -93,3 +93,21 @@ Feature: access list element by [n]
     null['any']
         ^
     """
+
+#  Scenario: all supported build in collection
+#    Given the following java class:
+#    """
+#    public class Bean {
+#      public String[] array = new String[] {"hello", "world"};
+#      public List<String> list = Arrays.asList("hello", "world");
+#      public java.util.stream.Stream<String> stream = Arrays.asList("hello", "world").stream();
+#    }
+#    """
+#    Then the following verification for the instance of java class "Bean" should pass:
+#    """
+#    : {
+#      <<array, list, stream>>= [hello world]
+#      <<array, list, stream>>[0]= hello
+#      <<array, list, stream>>[1]= world
+#    }
+#    """

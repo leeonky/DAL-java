@@ -3,7 +3,6 @@ package com.github.leeonky.dal.runtime.inspector;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.util.Classes;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 public class ListDumper implements Dumper.Cacheable {
@@ -16,11 +15,10 @@ public class ListDumper implements Dumper.Cacheable {
 
     private void dumpBody(Data data, DumpingBuffer dumpingBuffer) {
         DumpingBuffer indentContext = dumpingBuffer.append("[").indent();
-        List<Data> dataList = data.getDataList();
-        for (int i = 0; i < dataList.size(); i++) {
-            indentContext.index(i).newLine().dumpValue(dataList.get(i));
+        data.indexedListData().forEach(ie -> {
+            indentContext.index(ie.index()).newLine().dumpValue(ie.value());
             indentContext.appendThen(",");
-        }
+        });
         dumpingBuffer.optionalNewLine().append("]");
     }
 

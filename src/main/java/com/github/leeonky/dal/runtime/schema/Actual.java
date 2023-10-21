@@ -18,7 +18,6 @@ import java.util.stream.Stream;
 import static com.github.leeonky.util.Classes.getClassName;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.IntStream.range;
 
 public class Actual {
     private final String property;
@@ -81,10 +80,6 @@ public class Actual {
 
     public Stream<Object> fieldNames() {
         return actual.getFieldNames().stream();
-    }
-
-    public Stream<Integer> indexStream() {
-        return range(0, actual.getListSize()).boxed();
     }
 
     public Stream<Actual> subElements() {

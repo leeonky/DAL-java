@@ -6,7 +6,6 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -58,21 +57,12 @@ public class Data {
                 new IndexedElement<>(e.index(), new Data(e.value(), context, schemaType.access(e.index()))));
     }
 
-    @Deprecated
-    public int getListSize() {
-        return sizeOfList();
+    public Stream<Object> list() {
+        return listWrapper().list();
     }
 
-    @Deprecated
-    public List<Object> getValueList() {
-        return listWrapper().listData();
-    }
-
-    @Deprecated
-    public List<Data> getDataList() {
-        AtomicInteger index = new AtomicInteger(0);
-        return getValueList().stream().map(object -> new Data(object, context,
-                schemaType.access(index.incrementAndGet()))).collect(toList());
+    public Stream<Data> listData() {
+        return listWrapper().indexedList().map(e -> new Data(e.value(), context, schemaType.access(e.index())));
     }
 
     public boolean isNull() {
@@ -147,7 +137,7 @@ public class Data {
     }
 
     public AutoMappingList listMap(Function<Data, Object> mapper) {
-        return new AutoMappingList(getListFirstIndex(), getDataList(), mapper);
+        return new AutoMappingList(getListFirstIndex(), listData().collect(toList()), mapper);
     }
 
     public Data filter(String prefix) {
@@ -191,7 +181,7 @@ public class Data {
         if (!isList())
             throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()), position);
         try {
-            getValueList();
+            list();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), position, e);
         }

@@ -43,7 +43,7 @@ public class SchemaComposeNode extends DALNode {
         Data inputData = input.evaluateData(context);
         if (isList) {
             AtomicInteger index = new AtomicInteger(0);
-            return inputData.requireList(input.getPositionBegin()).getDataList().stream().map(element ->
+            return inputData.requireList(input.getPositionBegin()).listData().map(element ->
                     convertViaSchema(context, schemaNode, element,
                             format("%s[%d]", input.inspect(), index.getAndIncrement()))).collect(toList());
         } else

@@ -17,8 +17,13 @@ public class ListWrapper {
     private final int firstIndex;
 
     public ListWrapper(ListAccessor<Object> listAccessor, Object list, Comparator<Object> listComparator) {
-        this.listAccessor = listAccessor;
-        this.list = list;
+        if (list instanceof Stream) {
+            this.list = ((Stream) list).collect(toList());
+            this.listAccessor = instance -> ((List) instance);
+        } else {
+            this.list = list;
+            this.listAccessor = listAccessor;
+        }
         this.listComparator = listComparator;
         firstIndex = listAccessor.firstIndex(list);
     }
