@@ -42,7 +42,7 @@ public class Data {
         return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
-    public ListWrapper listWrapper() {
+    private ListWrapper listWrapper() {
         if (listWrapper == null)
             listWrapper = context.getListWrapper(instance, listComparator);
         return listWrapper;
@@ -57,12 +57,12 @@ public class Data {
                 new IndexedElement<>(e.index(), new Data(e.value(), context, schemaType.access(e.index()))));
     }
 
-    public Stream<Object> list() {
-        return listWrapper().list();
+    public Stream<Data> listData() {
+        return indexedListData().map(IndexedElement::value);
     }
 
-    public Stream<Data> listData() {
-        return listWrapper().indexedList().map(e -> new Data(e.value(), context, schemaType.access(e.index())));
+    public Stream<Object> list() {
+        return listData().map(Data::getInstance);
     }
 
     public boolean isNull() {
@@ -108,6 +108,7 @@ public class Data {
         return property instanceof String ? context.getPropertyValue(this, property) : listWrapper().getByIndex((int) property);
     }
 
+    @Deprecated
     public int getListFirstIndex() {
         return context.getListFirstIndex(instance);
     }

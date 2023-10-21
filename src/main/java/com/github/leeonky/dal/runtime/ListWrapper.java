@@ -32,17 +32,6 @@ public class ListWrapper {
         return listAccessor.size(list);
     }
 
-
-    @Deprecated
-    public List<Object> listData() {
-        return list().collect(toList());
-    }
-
-    @Deprecated
-    public Stream<Object> list() {
-        return (Stream<Object>) stream(listAccessor.toIterable(list).spliterator(), false).sorted(listComparator);
-    }
-
     public Stream<IndexedElement<Object>> indexedList() {
         AtomicInteger index = new AtomicInteger(firstIndex);
         return stream(listAccessor.toIterable(list).spliterator(), false).sorted(listComparator)
@@ -51,7 +40,8 @@ public class ListWrapper {
 
     @Deprecated
     public Object getByPosition(int index) {
-        return listData().get(index);
+        return ((Stream<Object>) stream(listAccessor.toIterable(list).spliterator(), false).sorted(listComparator))
+                .collect(toList()).get(index);
     }
 
     public Object getByIndex(int index) {

@@ -25,6 +25,21 @@ Feature: list
     """
     When evaluate by:
     """
+    : [1 2]
+    """
+    Then failed with the message:
+    """
+    Different list size
+    Expected: <2>
+    Actual: <1>
+    """
+    And got the following notation:
+    """
+    : [1 2]
+      ^
+    """
+    When evaluate by:
+    """
     : []
     """
     Then failed with the message:
