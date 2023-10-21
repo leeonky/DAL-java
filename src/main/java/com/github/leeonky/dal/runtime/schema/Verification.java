@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime.schema;
 
+import com.github.leeonky.dal.Zipped;
 import com.github.leeonky.dal.runtime.IllegalFieldException;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -7,6 +8,7 @@ import com.github.leeonky.interpreter.TriplePredicate;
 import com.github.leeonky.util.BeanClass;
 import com.github.leeonky.util.function.IfFactory;
 
+import static com.github.leeonky.dal.Zipped.zip;
 import static com.github.leeonky.util.function.When.when;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
@@ -69,11 +71,20 @@ public class Verification {
     }
 
     private boolean collectionStructure(DALRuntimeContext context, Actual actual) {
-        return actual.indexStream().allMatch(index -> expect(expect.sub(index)).verify(context, actual.sub(index)));
+        return zip(actual.subElements(), expect.subElements()).stream()
+                .allMatch(e -> expect(e.right()).verify(context, e.left()));
     }
 
     private boolean collectionContent(DALRuntimeContext context, Actual actual) {
-        return actual.verifySize(Actual::indexStream, expect.collectionSize()) && collectionStructure(context, actual);
+        Zipped<Actual, Expect> zipped = zip(actual.subElements(), expect.subElements());
+        if (zipped.stream().allMatch(e -> expect(e.right()).verify(context, e.left()))) {
+            if (zipped.hasLeft())
+                return actual.lessExpectSize(zipped.index());
+            if (zipped.hasRight())
+                return actual.moreExpectSize(zipped.index());
+            return true;
+        }
+        return false;
     }
 
     private boolean formatter(DALRuntimeContext runtimeContext, Actual actual) {

@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.IndexedElement;
 import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
@@ -8,20 +9,20 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
 import static com.github.leeonky.util.Classes.named;
 import static java.lang.String.format;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 //TODO use generic
 public class Data {
     private final SchemaType schemaType;
     private final DALRuntimeContext context;
     private final Object instance;
-    private Iterator<Object> iterator;
+    private ListWrapper listWrapper;
     private Comparator<Object> listComparator = SortGroupNode.NOP_COMPARATOR;
 
     public Data(Object instance, DALRuntimeContext context, SchemaType schemaType) {
@@ -42,20 +43,29 @@ public class Data {
         return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
+    public ListWrapper listWrapper() {
+        if (listWrapper == null)
+            listWrapper = context.getListWrapper(instance, listComparator);
+        return listWrapper;
+    }
+
+    public int sizeOfList() {
+        return listWrapper().size();
+    }
+
+    public Stream<IndexedElement<Data>> indexedListData() {
+        return listWrapper().indexedList().map(e ->
+                new IndexedElement<>(e.index(), new Data(e.value(), context, schemaType.access(e.index()))));
+    }
+
     @Deprecated
     public int getListSize() {
         return sizeOfList();
     }
 
-    public int sizeOfList() {
-        return context.getListSize(instance);
-    }
-
     @Deprecated
     public List<Object> getValueList() {
-        if (iterator == null)
-            iterator = context.getList(instance).iterator();
-        return stream(context.getList(instance).spliterator(), false).sorted(listComparator).collect(toList());
+        return listWrapper().listData();
     }
 
     @Deprecated
@@ -105,11 +115,7 @@ public class Data {
     }
 
     private Object fetchFromList(Object property) {
-        if (property instanceof String)
-            return context.getPropertyValue(this, property);
-        if ((int) property < 0)
-            return getValueList().get(getListSize() + (int) property);
-        return getValueList().get((int) property - getListFirstIndex());
+        return property instanceof String ? context.getPropertyValue(this, property) : listWrapper().getByIndex((int) property);
     }
 
     public int getListFirstIndex() {
@@ -132,6 +138,7 @@ public class Data {
 
     public Data setListComparator(Comparator<Object> listComparator) {
         this.listComparator = listComparator;
+        listWrapper = null;
         return this;
     }
 

@@ -15,7 +15,7 @@ public class MetaProperties implements Extension {
     private static Object size(MetaData metaData) {
         Data data = metaData.getData();
         if (data.isList())
-            return data.getListSize();
+            return data.sizeOfList();
         throw new IllegalStateException(format("Invalid meta property `size` for: %s", data.dumpAll()));
     }
 

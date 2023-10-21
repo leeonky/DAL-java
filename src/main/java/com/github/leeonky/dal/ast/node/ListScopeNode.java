@@ -116,7 +116,7 @@ public class ListScopeNode extends DALNode {
     private Data verifyCorrespondingElement(DALRuntimeContext context, Data data) {
         List<DALNode> expressions = getVerificationExpressions(data.getListFirstIndex());
         if (type == Type.ALL_ITEMS)
-            assertListSize(expressions.size(), data.getListSize(), getPositionBegin());
+            assertListSize(expressions.size(), data.sizeOfList(), getPositionBegin());
         data.newBlockScope(() -> assertElementExpressions(context, expressions));
         return data;
     }
@@ -147,9 +147,11 @@ public class ListScopeNode extends DALNode {
     }
 
     private Object getElement(Data data, int elementIndex, Clause<DALNode> clause) {
-        if (elementIndex == data.getListSize())
+        try {
+            return data.listWrapper().getByPosition(elementIndex);
+        } catch (IndexOutOfBoundsException ignore) {
             throw new AssertionFailure("No such element", clause.expression(INPUT_NODE).getOperandPosition());
-        return data.getValueList().get(elementIndex);
+        }
     }
 
     private List<Clause<DALNode>> trimFirstEllipsis() {

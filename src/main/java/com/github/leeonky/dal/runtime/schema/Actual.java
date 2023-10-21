@@ -87,6 +87,10 @@ public class Actual {
         return range(0, actual.getListSize()).boxed();
     }
 
+    public Stream<Actual> subElements() {
+        return actual.indexedListData().map(data -> new Actual(property + "[" + data.index() + "]", data.value()));
+    }
+
     public boolean verifyFormatter(Formatter<Object, Object> formatter) {
         return formatter.isValid(actual.getInstance())
                 || Verification.errorLog("Expected field `%s` to be formatter `%s`\nActual: %s", property,
@@ -97,6 +101,15 @@ public class Actual {
         return actualStream.apply(this).count() == expectSize
                 || Verification.errorLog("Expected field `%s` to be size <%d>, but was size <%d>",
                 property, expectSize, actualStream.apply(this).count());
+    }
+
+    boolean moreExpectSize(int size) {
+        return Verification.errorLog("Collection Field `%s` size was only <%d>, expected too more",
+                property, size);
+    }
+
+    public boolean lessExpectSize(int size) {
+        return Verification.errorLog("Expected collection field `%s` to be size <%d>, but too many elements", property, size);
     }
 
     boolean verifyType(Type<Object> expect) {

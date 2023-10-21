@@ -210,3 +210,41 @@ Feature: single schema when verification failed
     """
     is String
     """
+
+  Scenario: raise error when element size is different
+    Given the following schema class:
+    """
+    public class BeanSchema implements Schema {
+        public String value1[] = new String [] {"hello", "world"};
+    }
+    """
+    Given the following json:
+    """
+    {
+      "value1": ["hello"]
+    }
+    """
+    When evaluate by:
+    """
+    is BeanSchema
+    """
+    Then failed with the message:
+    """
+    Expected to match schema `BeanSchema` but was not
+        Collection Field `.value1` size was only <1>, expected too more
+    """
+    Given the following json:
+    """
+    {
+      "value1": ["hello", "world", "!"]
+    }
+    """
+    When evaluate by:
+    """
+    is BeanSchema
+    """
+    Then failed with the message:
+    """
+    Expected to match schema `BeanSchema` but was not
+        Expected collection field `.value1` to be size <2>, but too many elements
+    """

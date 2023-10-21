@@ -16,6 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
@@ -102,12 +103,20 @@ public class Expect {
     }
 
     @SuppressWarnings("unchecked")
+    @Deprecated
     public int mapKeysSize() {
         return ((Map<?, Object>) expect).size();
     }
 
+    @Deprecated
     public int collectionSize() {
         return (int) toStream(expect).count();
+    }
+
+    public Stream<Expect> subElements() {
+        AtomicInteger index = new AtomicInteger();
+        return expect == null ? Stream.generate(() -> sub(index.getAndIncrement()))
+                : toStream(expect).map(e -> sub(index.getAndIncrement()));
     }
 
     @SuppressWarnings("unchecked")

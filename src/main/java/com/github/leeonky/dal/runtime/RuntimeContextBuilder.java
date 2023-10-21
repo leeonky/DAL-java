@@ -319,21 +319,23 @@ public class RuntimeContextBuilder {
             }
         }
 
+        public ListWrapper getListWrapper(Object instance, Comparator<Object> listComparator) {
+            return new ListWrapper(listAccessors.tryGetData(instance).orElseGet(JavaArrayAccessor::new), instance, listComparator);
+        }
+
         @SuppressWarnings("unchecked")
+        @Deprecated
         public Iterable<Object> getList(Object instance) {
             return listAccessors.tryGetData(instance).map(l -> (Iterable<Object>) l.toIterable(instance))
                     .orElseGet(() -> arrayIterable(instance));
         }
 
-        public int getListSize(Object instance) {
-            return listAccessors.tryGetData(instance).map(l -> l.size(instance))
-                    .orElseGet(() -> Array.getLength(instance));
-        }
-
+        @Deprecated
         public int getListFirstIndex(Object instance) {
             return listAccessors.tryGetData(instance).map(listAccessor -> listAccessor.firstIndex(instance)).orElse(0);
         }
 
+        @Deprecated
         private Iterable<Object> arrayIterable(Object instance) {
             return () -> new Iterator<Object>() {
                 private final int length = Array.getLength(instance);
