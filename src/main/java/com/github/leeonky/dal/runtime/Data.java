@@ -61,6 +61,7 @@ public class Data {
         return indexedListData().map(IndexedElement::value);
     }
 
+    @Deprecated
     public Stream<Object> list() {
         return listData().map(Data::getInstance);
     }
@@ -137,7 +138,7 @@ public class Data {
     }
 
     public AutoMappingList listMap(Function<Data, Object> mapper) {
-        return new AutoMappingList(getListFirstIndex(), listData().collect(toList()), mapper);
+        return new AutoMappingList(getListFirstIndex(), mapper, this);
     }
 
     public Data filter(String prefix) {
@@ -177,11 +178,13 @@ public class Data {
         return context.getImplicitObject(instance).flatMap(obj -> currying(obj, property));
     }
 
+    @Deprecated
     public Data requireList(int position) {
         if (!isList())
             throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()), position);
         try {
-            list();
+//    TODO error should not open the stream
+            listData();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), position, e);
         }

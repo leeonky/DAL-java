@@ -1,27 +1,45 @@
 package com.github.leeonky.dal.runtime;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import com.github.leeonky.dal.IndexedElement;
+
+import java.util.Iterator;
 import java.util.function.Function;
 
-@Deprecated
-public class AutoMappingList extends ArrayList<Object> {
+public class AutoMappingList implements Iterable<Object> {
     private final int firstIndex;
+    private final Function<Data, Object> mapper;
+    private final Data data;
 
-    public <T> AutoMappingList(int firstIndex, Collection<T> collection, Function<T, Object> mapper) {
+    public AutoMappingList(int firstIndex, Function<Data, Object> mapper, Data data) {
         this.firstIndex = firstIndex;
-        collection.forEach(obj -> {
-            try {
-                add(mapper.apply(obj));
-            } catch (PropertyAccessException e) {
-                throw new ElementAccessException(size() + this.firstIndex, e);
-            } catch (Exception e) {
-                throw new ElementAccessException(size() + this.firstIndex, new PropertyAccessException(e.getMessage(), e));
-            }
-        });
+        this.mapper = mapper;
+        this.data = data;
     }
 
     public int firstIndex() {
         return firstIndex;
+    }
+
+    @Override
+    public Iterator<Object> iterator() {
+        Iterator<IndexedElement<Data>> iterator = data.indexedListData().iterator();
+        return new Iterator<Object>() {
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public Object next() {
+                IndexedElement<Data> indexedElement = iterator.next();
+                try {
+                    return mapper.apply(indexedElement.value());
+                } catch (PropertyAccessException e) {
+                    throw new ElementAccessException(indexedElement.index(), e);
+                } catch (Exception e) {
+                    throw new ElementAccessException(indexedElement.index(), new PropertyAccessException(e.getMessage(), e));
+                }
+            }
+        };
     }
 }

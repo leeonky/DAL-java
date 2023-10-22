@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.ElementAccessException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 public class ListMappingNode extends DALNode implements ExecutableNode {
@@ -19,11 +18,7 @@ public class ListMappingNode extends DALNode implements ExecutableNode {
 
     @Override
     public Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
-        try {
-            return data.requireList(getPositionBegin()).listMap(symbolNode.getRootSymbolName());
-        } catch (ElementAccessException e) {
-            throw e.toDalError(symbolNode.getPositionBegin());
-        }
+        return data.requireList(getPositionBegin()).listMap(symbolNode.getRootSymbolName());
     }
 
     @Override

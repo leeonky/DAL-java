@@ -68,9 +68,9 @@ public class ListScopeNode extends DALNode {
                             new SymbolNode(negativeIndex--, BRACKET))));
             } else {
                 Zipped<IndexedElement<Data>, Clause<DALNode>> zipped = zip(data.indexedListData(), inputClauses);
-                zipped.forEachElement((object, clause) ->
+                zipped.forEachElement((indexedData, clause) ->
                         add(clause.expression(new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
-                                new SymbolNode(object.index(), BRACKET)))));
+                                new SymbolNode(indexedData.index(), BRACKET)))));
                 if (type == Type.ALL_ITEMS) {
                     if (zipped.hasRight()) {
                         String message = format("Different list size\nExpected: <%d>\nActual: <%d>", inputClauses.size(), zipped.index());
@@ -143,7 +143,11 @@ public class ListScopeNode extends DALNode {
 
     private Data verify(DALRuntimeContext context, DALNode node) {
         Data data = node.evaluateData(context).setListComparator(comparator).requireList(node.getOperandPosition());
-        return type == Type.CONTAINS ? verifyContainElement(context, data) : verifyCorrespondingElement(context, data);
+        try {
+            return type == Type.CONTAINS ? verifyContainElement(context, data) : verifyCorrespondingElement(context, data);
+        } catch (ElementAccessException e) {
+            throw e.toDalError(node.getOperandPosition());
+        }
     }
 
     private Data verifyCorrespondingElement(DALRuntimeContext context, Data data) {

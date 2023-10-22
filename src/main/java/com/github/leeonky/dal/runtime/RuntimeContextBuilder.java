@@ -249,17 +249,17 @@ public class RuntimeContextBuilder {
         BeanClass<?> type = schemas.get(schema);
         if (type != null)
             return type;
-        throw new IllegalStateException(String.format("Unknow schema '%s'", schema));
+        throw new IllegalStateException(String.format("Unknown schema '%s'", schema));
     }
 
     public class DALRuntimeContext implements RuntimeContext {
         private final LinkedList<Data> stack = new LinkedList<>();
         private final Map<Data, PartialPropertyStack> partialPropertyStacks;
-        private BeanClass<?> rootSchema = null;
         private final Data inputValue;
         private final Throwable inputError;
 
         public DALRuntimeContext(InputCode<?> supplier, Class<?> schema) {
+            BeanClass<?> rootSchema = null;
             if (schema != null)
                 rootSchema = BeanClass.create(schema);
             Data value;
