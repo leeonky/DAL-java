@@ -252,15 +252,19 @@ Feature: list
   Scenario: support schema expression
     Given the following json:
     """
-    [ "1" ]
+    [ "1", 2 ]
     """
     Then the following verification should pass:
     """
-    : [ is String ]
+    : [ is String, is Number ]
     """
     And the inspect should:
     """
-    : [[0] is String]
+    : [[0] is String, [1] is Number]
+    """
+    Given the following json:
+    """
+    [ "1" ]
     """
     And the following verification should failed:
     """

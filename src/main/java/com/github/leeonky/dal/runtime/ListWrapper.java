@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -38,21 +39,23 @@ public class ListWrapper {
                 .map(o -> new IndexedElement<>(index.getAndIncrement(), o));
     }
 
-    @Deprecated
-    public Object getByPosition(int index) {
-        return ((Stream<Object>) stream(listAccessor.toIterable(list).spliterator(), false).sorted(listComparator))
-                .collect(toList()).get(index);
+    private Object getByPosition(int index) {
+        return indexedList().collect(toList()).get(index).value();
     }
 
     public Object getByIndex(int index) {
-        if (index < 0)
-            return getByPosition(size() + index);
-        return getByPosition(index - firstIndex);
+        try {
+            if (index < 0)
+                return getByPosition(size() + index);
+            return getByPosition(index - firstIndex);
+        } catch (IndexOutOfBoundsException e) {
+            throw new IndexOutOfBoundsException(format("Index out of bounds (%d), first index is: %d",
+                    index, firstIndex));
+        }
     }
 
     @Deprecated
     public int firstIndex() {
         return firstIndex;
     }
-
 }

@@ -46,7 +46,6 @@ Feature: access list element by [n]
       | [ -2 ]   | 2     | [-2]    |
       | [\n-3\n] | 1     | [-3]    |
 
-#    TODO java 11 compile
   Scenario: raise error when index out of bound
     Given the following json:
     """
@@ -56,10 +55,10 @@ Feature: access list element by [n]
     """
       [3]
     """
-#    Then failed with the message:
-#    """
-#    Index out of bounds (Index: 3, Size: 2)
-#    """
+    Then failed with the message:
+    """
+    Index out of bounds (3), first index is: 0
+    """
     And got the following notation:
     """
       [3]
@@ -69,10 +68,10 @@ Feature: access list element by [n]
     """
       [-3]
     """
-#    Then failed with the message:
-#    """
-#    Index out of bounds (-1)
-#    """
+    Then failed with the message:
+    """
+    Index out of bounds (-3), first index is: 0
+    """
     And got the following notation:
     """
       [-3]

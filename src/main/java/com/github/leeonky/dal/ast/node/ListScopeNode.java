@@ -31,6 +31,7 @@ public class ListScopeNode extends DALNode {
     private List<Clause<DALNode>> inputClauses;
     private final Type type;
     private final Style style;
+    @Deprecated
     private final Comparator<Object> comparator;
 
     public ListScopeNode(List<Clause<DALNode>> clauses, Comparator<Object> comparator, Style style) {

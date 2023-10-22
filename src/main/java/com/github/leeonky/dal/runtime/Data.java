@@ -81,8 +81,7 @@ public class Data {
                 return new Data(getPropertyValue(propertyChain), context, propertySchema(propertyChain));
             return getValue(chain);
         } catch (IndexOutOfBoundsException ex) {
-            throw new PropertyAccessException(format("Index out of bounds (%s), first index is: %d",
-                    ex.getMessage(), getListFirstIndex()), ex);
+            throw new PropertyAccessException(ex.getMessage(), ex);
         } catch (Exception e) {
             throw new PropertyAccessException(format("Get property `%s` failed, property can be:\n" +
                             "  1. public field\n" +

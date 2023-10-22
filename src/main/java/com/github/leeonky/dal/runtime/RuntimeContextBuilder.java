@@ -116,6 +116,7 @@ public class RuntimeContextBuilder {
     }
 
     @SuppressWarnings("unchecked")
+    @Deprecated
     public <T> RuntimeContextBuilder registerListAccessor(Class<T> type, ListAccessor<? extends T> listAccessor) {
         listAccessors.put(type, (ListAccessor<Object>) listAccessor);
         return this;
