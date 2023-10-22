@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.function.Function;
 
 @Deprecated
-//unlimited list
 public class AutoMappingList extends ArrayList<Object> {
     private final int firstIndex;
 

@@ -110,7 +110,7 @@ public class Data {
 
     @Deprecated
     public int getListFirstIndex() {
-        return context.getListFirstIndex(instance);
+        return listWrapper().firstIndex();
     }
 
     private SchemaType propertySchema(Object property) {

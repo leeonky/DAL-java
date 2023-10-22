@@ -323,36 +323,6 @@ public class RuntimeContextBuilder {
             return new ListWrapper(listAccessors.tryGetData(instance).orElseGet(JavaArrayAccessor::new), instance, listComparator);
         }
 
-        @SuppressWarnings("unchecked")
-        @Deprecated
-        public Iterable<Object> getList(Object instance) {
-            return listAccessors.tryGetData(instance).map(l -> (Iterable<Object>) l.toIterable(instance))
-                    .orElseGet(() -> arrayIterable(instance));
-        }
-
-        @Deprecated
-        public int getListFirstIndex(Object instance) {
-            return listAccessors.tryGetData(instance).map(listAccessor -> listAccessor.firstIndex(instance)).orElse(0);
-        }
-
-        @Deprecated
-        private Iterable<Object> arrayIterable(Object instance) {
-            return () -> new Iterator<Object>() {
-                private final int length = Array.getLength(instance);
-                private int index = 0;
-
-                @Override
-                public boolean hasNext() {
-                    return index < length;
-                }
-
-                @Override
-                public Object next() {
-                    return Array.get(instance, index++);
-                }
-            };
-        }
-
         public boolean isRegisteredList(Object instance) {
             return listAccessors.tryGetData(instance).map(listAccessor -> listAccessor.isList(instance)).orElse(false);
         }
