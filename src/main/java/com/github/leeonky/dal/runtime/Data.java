@@ -138,7 +138,7 @@ public class Data {
     }
 
     public AutoMappingList listMap(Function<Data, Object> mapper) {
-        return new AutoMappingList(getListFirstIndex(), mapper, this);
+        return new AutoMappingList(mapper, this);
     }
 
     public Data filter(String prefix) {

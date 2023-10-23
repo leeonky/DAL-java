@@ -11,6 +11,7 @@ import static com.github.leeonky.dal.runtime.Order.BUILD_IN;
 
 @Order(BUILD_IN)
 public class Types implements Extension {
+
     @Override
     public void extend(DAL dal) {
         RuntimeContextBuilder builder = dal.getRuntimeContextBuilder();

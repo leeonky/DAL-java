@@ -6,18 +6,16 @@ import java.util.Iterator;
 import java.util.function.Function;
 
 public class AutoMappingList implements Iterable<Object> {
-    private final int firstIndex;
     private final Function<Data, Object> mapper;
     private final Data data;
 
-    public AutoMappingList(int firstIndex, Function<Data, Object> mapper, Data data) {
-        this.firstIndex = firstIndex;
+    public AutoMappingList(Function<Data, Object> mapper, Data data) {
         this.mapper = mapper;
         this.data = data;
     }
 
     public int firstIndex() {
-        return firstIndex;
+        return data.getListFirstIndex();
     }
 
     @Override
