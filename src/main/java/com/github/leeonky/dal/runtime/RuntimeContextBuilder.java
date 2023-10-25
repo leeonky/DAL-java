@@ -126,7 +126,7 @@ public class RuntimeContextBuilder {
             @Override
             public DataList<Object> create(Object instance, Comparator<Object> comparator) {
                 return new LegacyDataList((ListAccessor<Object>) listAccessor, instance, comparator,
-                        (Iterator<Object>) ((ListAccessor<Object>) listAccessor).toIterable(instance).iterator());
+                        (Iterable<Object>) ((ListAccessor<Object>) listAccessor).toIterable(instance));
             }
         });
         return this;
@@ -336,10 +336,10 @@ public class RuntimeContextBuilder {
             }
         }
 
-        public DataList<Object> getListWrapper(Object instance, Comparator<Object> comparator) {
+        public DataList<Object> createDataList(Object instance, Comparator<Object> comparator) {
             return dataListFactories.tryGetData(instance).map(factory -> factory.create(instance, comparator))
                     .orElseGet(() -> new LegacyDataList(new JavaArrayAccessor(), instance, comparator,
-                            new JavaArrayAccessor().toIterable(instance).iterator()));
+                            new JavaArrayAccessor().toIterable(instance)));
         }
 
         public boolean isRegisteredList(Object instance) {

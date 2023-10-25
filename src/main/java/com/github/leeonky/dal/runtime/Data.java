@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
 import static com.github.leeonky.util.Classes.named;
@@ -42,18 +43,19 @@ public class Data {
         return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
-    private DataList<Object> listWrapper() {
+    private DataList<Object> dataList() {
         if (dataList == null)
-            dataList = context.getListWrapper(instance, listComparator);
+            dataList = context.createDataList(instance, listComparator);
         return dataList;
     }
 
     public int sizeOfList() {
-        return listWrapper().size();
+        return dataList().size();
     }
 
+    @Deprecated
     public Stream<IndexedElement<Data>> indexedListData() {
-        return listWrapper().indexedStream().map(e -> new IndexedElement<>(e.index(),
+        return StreamSupport.stream(dataList().spliterator(), false).map(e -> new IndexedElement<>(e.index(),
                 new Data(e.value(), context, schemaType.access(e.index()))));
     }
 
@@ -106,12 +108,12 @@ public class Data {
     }
 
     private Object fetchFromList(Object property) {
-        return property instanceof String ? context.getPropertyValue(this, property) : listWrapper().getByIndex((int) property);
+        return property instanceof String ? context.getPropertyValue(this, property) : dataList().getByIndex((int) property);
     }
 
     @Deprecated
     public int getListFirstIndex() {
-        return listWrapper().firstIndex();
+        return dataList().firstIndex();
     }
 
     private SchemaType propertySchema(Object property) {

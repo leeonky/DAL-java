@@ -15,12 +15,12 @@ public class Types implements Extension {
     @Override
     public void extend(DAL dal) {
         RuntimeContextBuilder builder = dal.getRuntimeContextBuilder();
-        builder.registerListAccessor(Iterable.class, iterable -> iterable)
-                .registerListAccessor(Stream.class, stream -> stream::iterator)
-                .registerListAccessor(AutoMappingList.class, changeFirstIndex(AutoMappingList::firstIndex))
+        builder.registerListAccessor(AutoMappingList.class, changeFirstIndex(AutoMappingList::firstIndex))
                 .registerPropertyAccessor(Map.class, new MapPropertyAccessor())
                 .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor())
                 .registerPropertyAccessor(CurryingMethod.class, new CurryingMethodPropertyAccessor(builder))
-        ;
+                .registerDataListFactory(Iterable.class, IterableDataList::new)
+                .registerDataListFactory(Stream.class, (stream, comparator) ->
+                        new IterableDataList<Object>(stream::iterator, comparator));
     }
 }
