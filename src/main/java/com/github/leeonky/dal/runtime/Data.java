@@ -43,20 +43,31 @@ public class Data {
         return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
-    private DataList<Object> dataList() {
+    public DataList<Object> dataList() {
         if (dataList == null)
             dataList = context.createDataList(instance, listComparator);
         return dataList;
     }
 
-    public int sizeOfList() {
-        return dataList().size();
-    }
-
     @Deprecated
     public Stream<IndexedElement<Data>> indexedListData() {
-        return StreamSupport.stream(dataList().spliterator(), false).map(e -> new IndexedElement<>(e.index(),
-                new Data(e.value(), context, schemaType.access(e.index()))));
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), 0), false);
+    }
+
+    public Iterator<IndexedElement<Data>> iterator() {
+        Iterator<IndexedElement<Object>> iterator = dataList().iterator();
+        return new Iterator<IndexedElement<Data>>() {
+            @Override
+            public boolean hasNext() {
+                return iterator.hasNext();
+            }
+
+            @Override
+            public IndexedElement<Data> next() {
+                IndexedElement<Object> next = iterator.next();
+                return new IndexedElement<>(next.index(), new Data(next.value(), context, schemaType.access(next.index())));
+            }
+        };
     }
 
     @Deprecated
@@ -109,11 +120,6 @@ public class Data {
 
     private Object fetchFromList(Object property) {
         return property instanceof String ? context.getPropertyValue(this, property) : dataList().getByIndex((int) property);
-    }
-
-    @Deprecated
-    public int getListFirstIndex() {
-        return dataList().firstIndex();
     }
 
     private SchemaType propertySchema(Object property) {

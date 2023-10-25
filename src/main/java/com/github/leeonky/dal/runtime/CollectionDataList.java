@@ -21,8 +21,8 @@ public class CollectionDataList<E> extends DataList<E> {
     }
 
     @Override
-    protected E getByPosition(int index) {
-        return list.get(index);
+    protected E getByPosition(int position) {
+        return list.get(position);
     }
 
     @Override

@@ -48,13 +48,13 @@ public class IterableDataList<E> extends DataList<E> {
     }
 
     @Override
-    protected E getByPosition(int index) {
-        if (index < cached.size())
-            return cached.get(index);
+    protected E getByPosition(int position) {
+        if (position < cached.size())
+            return cached.get(position);
         while (iterator.hasNext()) {
             getNext();
-            if (index < cached.size())
-                return cached.get(index);
+            if (position < cached.size())
+                return cached.get(position);
         }
         throw new IndexOutOfBoundsException();
     }

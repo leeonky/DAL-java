@@ -22,5 +22,5 @@ public abstract class DataList<E> implements Iterable<IndexedElement<E>> {
         return 0;
     }
 
-    protected abstract E getByPosition(int index);
+    protected abstract E getByPosition(int position);
 }
