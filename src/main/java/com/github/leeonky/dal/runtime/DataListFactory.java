@@ -7,5 +7,5 @@ public interface DataListFactory<T, E> {
         return true;
     }
 
-    DataList<Object, E> wrap(T instance, Comparator<E> comparator);
+    DataList<E> create(T instance, Comparator<E> comparator);
 }

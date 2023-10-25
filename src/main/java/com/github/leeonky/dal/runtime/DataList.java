@@ -2,24 +2,19 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.IndexedElement;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
 
-public abstract class DataList<C, E> implements Iterable<IndexedElement<E>> {
-    protected final C list;
-    protected final Comparator<E> comparator;
-    private Iterator<E> iterator = null;
+public abstract class DataList<E> implements Iterable<IndexedElement<E>> {
+    private final Iterator<E> iterator;
     private final List<E> cached = new ArrayList<>();
 
-    public DataList(C list, Comparator<E> comparator) {
-        this.list = list;
-        this.comparator = comparator;
+    public DataList(Comparator<E> comparator, Iterator<E> iterator) {
+        this.iterator = StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false)
+                .sorted(comparator).iterator();
     }
 
     @Deprecated
@@ -38,18 +33,11 @@ public abstract class DataList<C, E> implements Iterable<IndexedElement<E>> {
         }
     }
 
-    public DataList<C, E> touch() {
-        innerIterator();
-        return this;
-    }
-
     protected int firstIndex() {
         return 0;
     }
 
     protected Iterator<E> innerIterator() {
-        if (iterator == null)
-            iterator = stream().sorted(comparator).iterator();
         return iterator;
     }
 
@@ -84,6 +72,4 @@ public abstract class DataList<C, E> implements Iterable<IndexedElement<E>> {
     }
 
     protected abstract E getByPosition(int index);
-
-    protected abstract Stream<E> stream();
 }

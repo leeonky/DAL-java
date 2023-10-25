@@ -21,7 +21,7 @@ public class Data {
     private final SchemaType schemaType;
     private final DALRuntimeContext context;
     private final Object instance;
-    private DataList<Object, Object> dataList;
+    private DataList<Object> dataList;
     private Comparator<Object> listComparator = SortGroupNode.NOP_COMPARATOR;
 
     public Data(Object instance, DALRuntimeContext context, SchemaType schemaType) {
@@ -42,7 +42,7 @@ public class Data {
         return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
-    private DataList<Object, Object> listWrapper() {
+    private DataList<Object> listWrapper() {
         if (dataList == null)
             dataList = context.getListWrapper(instance, listComparator);
         return dataList;

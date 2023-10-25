@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
 import static com.github.leeonky.dal.runtime.schema.Verification.expect;
-import static com.github.leeonky.util.BeanClass.create;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
@@ -35,8 +34,6 @@ import static java.util.stream.Collectors.joining;
 
 public class RuntimeContextBuilder {
     private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
-    @Deprecated
-    private final ClassKeyMap<ListAccessor<Object>> listAccessors = new ClassKeyMap<>();
     private final ClassKeyMap<DataListFactory<Object, Object>> dataListFactories = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Object>> objectImplicitMapper = new ClassKeyMap<>();
     private final Map<String, ConstructorViaSchema> valueConstructors = new LinkedHashMap<>();
@@ -97,9 +94,9 @@ public class RuntimeContextBuilder {
 
     @SuppressWarnings("unchecked")
     public RuntimeContextBuilder registerSchema(String name, Class<? extends Schema> schema) {
-        schemas.put(name, create(schema));
+        schemas.put(name, BeanClass.create(schema));
         return registerSchema(name, (data, context) ->
-                expect(new Expect(create((Class) schema), null)).verify(context, actual(data)));
+                expect(new Expect(BeanClass.create((Class) schema), null)).verify(context, actual(data)));
     }
 
     public RuntimeContextBuilder registerSchema(String name, BiFunction<Data, DALRuntimeContext, Boolean> predicate) {
@@ -120,8 +117,6 @@ public class RuntimeContextBuilder {
     @SuppressWarnings("unchecked")
     @Deprecated
     public <T> RuntimeContextBuilder registerListAccessor(Class<T> type, ListAccessor<? extends T> listAccessor) {
-        listAccessors.put(type, (ListAccessor<Object>) listAccessor);
-
         dataListFactories.put(type, new DataListFactory<Object, Object>() {
             @Override
             public boolean isList(Object instance) {
@@ -129,8 +124,9 @@ public class RuntimeContextBuilder {
             }
 
             @Override
-            public DataList<Object, Object> wrap(Object instance, Comparator<Object> comparator) {
-                return new LegacyDataList((ListAccessor<Object>) listAccessor, instance, comparator);
+            public DataList<Object> create(Object instance, Comparator<Object> comparator) {
+                return new LegacyDataList((ListAccessor<Object>) listAccessor, instance, comparator,
+                        (Iterator<Object>) ((ListAccessor<Object>) listAccessor).toIterable(instance).iterator());
             }
         });
         return this;
@@ -340,9 +336,10 @@ public class RuntimeContextBuilder {
             }
         }
 
-        public DataList<Object, Object> getListWrapper(Object instance, Comparator<Object> comparator) {
-            return dataListFactories.tryGetData(instance).map(factory -> factory.wrap(instance, comparator))
-                    .orElseGet(() -> new LegacyDataList(listAccessors.tryGetData(instance).orElseGet(JavaArrayAccessor::new), instance, comparator)).touch();
+        public DataList<Object> getListWrapper(Object instance, Comparator<Object> comparator) {
+            return dataListFactories.tryGetData(instance).map(factory -> factory.create(instance, comparator))
+                    .orElseGet(() -> new LegacyDataList(new JavaArrayAccessor(), instance, comparator,
+                            new JavaArrayAccessor().toIterable(instance).iterator()));
         }
 
         public boolean isRegisteredList(Object instance) {
@@ -360,7 +357,7 @@ public class RuntimeContextBuilder {
         public Data wrap(Object instance, String schema, boolean isList) {
             BeanClass<?> schemaType = schemas.get(schema);
             if (isList && schemaType != null)
-                schemaType = create(Array.newInstance(schemaType.getType(), 0).getClass());
+                schemaType = BeanClass.create(Array.newInstance(schemaType.getType(), 0).getClass());
             return wrap(instance, schemaType);
         }
 
