@@ -35,7 +35,9 @@ import static java.util.stream.Collectors.joining;
 
 public class RuntimeContextBuilder {
     private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
+    @Deprecated
     private final ClassKeyMap<ListAccessor<Object>> listAccessors = new ClassKeyMap<>();
+    private final ClassKeyMap<DataListFactory<Object, Object>> dataListFactories = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Object>> objectImplicitMapper = new ClassKeyMap<>();
     private final Map<String, ConstructorViaSchema> valueConstructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
@@ -119,6 +121,24 @@ public class RuntimeContextBuilder {
     @Deprecated
     public <T> RuntimeContextBuilder registerListAccessor(Class<T> type, ListAccessor<? extends T> listAccessor) {
         listAccessors.put(type, (ListAccessor<Object>) listAccessor);
+
+        dataListFactories.put(type, new DataListFactory<Object, Object>() {
+            @Override
+            public boolean isList(Object instance) {
+                return ((ListAccessor<Object>) listAccessor).isList(instance);
+            }
+
+            @Override
+            public DataList<Object, Object> wrap(Object instance, Comparator<Object> comparator) {
+                return new LegacyDataList((ListAccessor<Object>) listAccessor, instance, comparator);
+            }
+        });
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T, E> RuntimeContextBuilder registerDataListFactory(Class<T> type, DataListFactory<T, E> dataListFactory) {
+        dataListFactories.put(type, (DataListFactory<Object, Object>) dataListFactory);
         return this;
     }
 
@@ -320,12 +340,13 @@ public class RuntimeContextBuilder {
             }
         }
 
-        public ListWrapper getListWrapper(Object instance, Comparator<Object> listComparator) {
-            return new ListWrapper(listAccessors.tryGetData(instance).orElseGet(JavaArrayAccessor::new), instance, listComparator);
+        public DataList<Object, Object> getListWrapper(Object instance, Comparator<Object> comparator) {
+            return dataListFactories.tryGetData(instance).map(factory -> factory.wrap(instance, comparator))
+                    .orElseGet(() -> new LegacyDataList(listAccessors.tryGetData(instance).orElseGet(JavaArrayAccessor::new), instance, comparator)).touch();
         }
 
         public boolean isRegisteredList(Object instance) {
-            return listAccessors.tryGetData(instance).map(listAccessor -> listAccessor.isList(instance)).orElse(false);
+            return dataListFactories.tryGetData(instance).map(f -> f.isList(instance)).orElse(false);
         }
 
         public Converter getConverter() {

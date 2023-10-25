@@ -6,7 +6,9 @@ Feature: add
     public class Bean {
       public String[] array = new String[] {"hello", "world"};
       public List<String> list = Arrays.asList("hello", "world");
-      public java.util.stream.Stream<String> stream = Arrays.asList("hello", "world").stream();
+      public java.util.stream.Stream<String> stream() {
+        return Arrays.asList("hello", "world").stream();
+      }
     }
     """
     Then the following verification for the instance of java class "Bean" should pass:

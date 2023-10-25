@@ -21,7 +21,7 @@ public class Data {
     private final SchemaType schemaType;
     private final DALRuntimeContext context;
     private final Object instance;
-    private ListWrapper listWrapper;
+    private DataList<Object, Object> dataList;
     private Comparator<Object> listComparator = SortGroupNode.NOP_COMPARATOR;
 
     public Data(Object instance, DALRuntimeContext context, SchemaType schemaType) {
@@ -42,10 +42,10 @@ public class Data {
         return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
-    private ListWrapper listWrapper() {
-        if (listWrapper == null)
-            listWrapper = context.getListWrapper(instance, listComparator);
-        return listWrapper;
+    private DataList<Object, Object> listWrapper() {
+        if (dataList == null)
+            dataList = context.getListWrapper(instance, listComparator);
+        return dataList;
     }
 
     public int sizeOfList() {
@@ -53,10 +53,11 @@ public class Data {
     }
 
     public Stream<IndexedElement<Data>> indexedListData() {
-        return listWrapper().indexedList().map(e ->
-                new IndexedElement<>(e.index(), new Data(e.value(), context, schemaType.access(e.index()))));
+        return listWrapper().indexedStream().map(e -> new IndexedElement<>(e.index(),
+                new Data(e.value(), context, schemaType.access(e.index()))));
     }
 
+    @Deprecated
     public Stream<Data> listData() {
         return indexedListData().map(IndexedElement::value);
     }
@@ -129,7 +130,7 @@ public class Data {
 
     public Data setListComparator(Comparator<Object> listComparator) {
         this.listComparator = listComparator;
-        listWrapper = null;
+        dataList = null;
         return this;
     }
 
