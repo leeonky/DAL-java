@@ -6,6 +6,7 @@ Feature: add
     public class Bean {
       public String[] array = new String[] {"hello", "world"};
       public List<String> list = Arrays.asList("hello", "world");
+      public Collection<String> set = new LinkedHashSet<>(Arrays.asList("hello", "world"));
       public java.util.stream.Stream<String> stream() {
         return Arrays.asList("hello", "world").stream();
       }
@@ -14,9 +15,9 @@ Feature: add
     Then the following verification for the instance of java class "Bean" should pass:
     """
     : {
-      <<array, list, stream>>= [hello world]
-      <<array, list, stream>>[0]= hello
-      <<array, list, stream>>[1]= world
+      <<array, set, list, stream>>= [hello world]
+      <<array, set, list, stream>>[0]= hello
+      <<array, set, list, stream>>[1]= world
     }
     """
 
