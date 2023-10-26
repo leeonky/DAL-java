@@ -1,9 +1,10 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.IndexedElement;
-import com.github.leeonky.dal.util.CollectionHelper;
 
 import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -29,6 +30,10 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
 
     protected abstract E getByPosition(int position);
 
+    public List<E> collect() {
+        return stream().map(IndexedElement::value).collect(Collectors.toList());
+    }
+
     public <R> DALCollection<R> map(IndexedElement.Mapper<? super E, ? extends R> mapper) {
         return new DALCollection<R>() {
             @Override
@@ -48,7 +53,19 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
 
             @Override
             public Iterator<IndexedElement<R>> iterator() {
-                return CollectionHelper.map(DALCollection.this, it -> it.<R>map(mapper)).iterator();
+                return new Iterator<IndexedElement<R>>() {
+                    final Iterator<IndexedElement<E>> iterator = (DALCollection.this).iterator();
+
+                    @Override
+                    public boolean hasNext() {
+                        return iterator.hasNext();
+                    }
+
+                    @Override
+                    public IndexedElement<R> next() {
+                        return iterator.next().map(mapper);
+                    }
+                };
             }
         };
     }
@@ -83,6 +100,11 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         @Override
         protected int firstIndex() {
             return origin.firstIndex();
+        }
+
+        @Override
+        public List<E> collect() {
+            return origin.collect();
         }
     }
 }

@@ -41,8 +41,9 @@ public class SchemaComposeNode extends DALNode {
     private Object verifyAndConvertAsSchemaType(DALRuntimeContext context, SchemaNode schemaNode, DALNode input) {
         Data inputData = input.evaluateData(context);
         if (isList)
-            return inputData.list(input.getPositionBegin()).map((index, data) -> convertViaSchema(context, schemaNode, data,
-                    format("%s[%d]", input.inspect(), index))).stream().collect(toList());
+            //collect to list avoid lazy mode, should verify element with schema
+            return inputData.list(input.getPositionBegin()).map((index, data) ->
+                    convertViaSchema(context, schemaNode, data, format("%s[%d]", input.inspect(), index))).collect();
         else
             return convertViaSchema(context, schemaNode, inputData, input.inspect());
     }

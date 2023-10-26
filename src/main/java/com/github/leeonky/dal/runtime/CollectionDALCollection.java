@@ -42,4 +42,8 @@ public class CollectionDALCollection<E> extends DALCollection<E> {
         };
     }
 
+    @Override
+    public List<E> collect() {
+        return list;
+    }
 }
