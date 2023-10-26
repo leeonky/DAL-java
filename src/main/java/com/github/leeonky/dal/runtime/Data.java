@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.IndexedElement;
-import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 
@@ -10,6 +9,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
 import static com.github.leeonky.util.Classes.named;
 import static java.lang.String.format;
@@ -22,8 +22,6 @@ public class Data {
     private final DALRuntimeContext context;
     private final Object instance;
     private DataList list;
-    @Deprecated
-    private Comparator<Object> listComparator = SortGroupNode.NOP_COMPARATOR;
 
     public Data(Object instance, DALRuntimeContext context, SchemaType schemaType) {
         this.instance = instance;
@@ -44,21 +42,25 @@ public class Data {
     }
 
     public DataList list() {
-        if (list == null) {
-            list = new DataList(context.createCollection(instance, listComparator)
-                    .map((index, e) -> new Data(e, context, schemaType.access(index))));
-        }
-        return list;
+        return list(0);
     }
 
     public DataList list(int position) {
-        if (!isList())
-            throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()), position);
-        try {
-            return list();
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), position, e);
+        return list(position, NOP_COMPARATOR);
+    }
+
+    public DataList list(int position, Comparator<Object> comparator) {
+        if (list == null) {
+            if (!isList())
+                throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()), position);
+            try {
+                list = new DataList(context.createCollection(instance, comparator)
+                        .map((index, e) -> new Data(e, context, schemaType.access(index))));
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage(), position, e);
+            }
         }
+        return list;
     }
 
     public boolean isNull() {
@@ -118,20 +120,12 @@ public class Data {
         return new Data(context.getConverter().convert(target, instance), context, schemaType);
     }
 
-    @Deprecated
-    public Data setListComparator(Comparator<Object> listComparator) {
-        this.listComparator = listComparator;
-        return this;
-    }
-
     public Data filter(String prefix) {
         FilteredObject filteredObject = new FilteredObject();
         getFieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
                 .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
                         filteredObject.put(trimPrefix(prefix, fieldName), getValue(fieldName).getInstance()));
-        return new Data(filteredObject, context, schemaType)
-//                TODO need test
-                .setListComparator(listComparator);
+        return new Data(filteredObject, context, schemaType);
     }
 
     private String trimPrefix(String prefix, String fieldName) {

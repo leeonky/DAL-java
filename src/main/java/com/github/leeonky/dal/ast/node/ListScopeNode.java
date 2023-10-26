@@ -31,7 +31,6 @@ public class ListScopeNode extends DALNode {
     private List<Clause<DALNode>> inputClauses;
     private final Type type;
     private final Style style;
-    @Deprecated
     private final Comparator<Object> comparator;
 
     public ListScopeNode(List<Clause<DALNode>> clauses, Comparator<Object> comparator, Style style) {
@@ -142,13 +141,13 @@ public class ListScopeNode extends DALNode {
     }
 
     private Data verify(DALRuntimeContext context, DALNode node) {
-        Data data = node.evaluateData(context).setListComparator(comparator);
+        Data data = node.evaluateData(context);
         try {
             return data.newBlockScope(() -> {
                 if (type == Type.CONTAINS)
-                    verifyContainElement(context, data.list(node.getOperandPosition()));
+                    verifyContainElement(context, data.list(node.getOperandPosition(), comparator));
                 else
-                    verifyCorrespondingElement(context, getVerificationExpressions(data.list(node.getOperandPosition())));
+                    verifyCorrespondingElement(context, getVerificationExpressions(data.list(node.getOperandPosition(), comparator)));
                 return data;
             });
         } catch (ElementAccessException e) {
@@ -175,8 +174,7 @@ public class ListScopeNode extends DALNode {
         throw new AssertionFailure("No such element", clause.expression(INPUT_NODE).getOperandPosition());
     }
 
-    private boolean isElementPassedVerification(DALRuntimeContext context, Clause<DALNode> clause,
-                                                Object element) {
+    private boolean isElementPassedVerification(DALRuntimeContext context, Clause<DALNode> clause, Object element) {
         try {
 //            TODO need test, failed when use alise in element property, should use Data here !!!
             clause.expression(new ConstNode(element)).evaluate(context);

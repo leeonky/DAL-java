@@ -108,11 +108,6 @@ public class Expect {
         return ((Map<?, Object>) expect).size();
     }
 
-    @Deprecated
-    public int collectionSize() {
-        return (int) toStream(expect).count();
-    }
-
     public Stream<Expect> subElements() {
         AtomicInteger index = new AtomicInteger();
         return expect == null ? Stream.generate(() -> sub(index.getAndIncrement()))
