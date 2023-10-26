@@ -20,6 +20,7 @@ public class Types implements Extension {
                 .registerPropertyAccessor(CurryingMethod.class, new CurryingMethodPropertyAccessor(builder))
                 .registerDALCollectionFactory(Iterable.class, IterableDALCollection::new)
                 .registerDALCollectionFactory(Collection.class, CollectionDALCollection::new)
+                .registerPropertyAccessor(Callable.class, new CallableJavaClassPropertyAccessor())
                 .registerDALCollectionFactory(Stream.class, (stream, comparator) ->
                         new IterableDALCollection<Object>(stream::iterator, comparator))
                 .registerDALCollectionFactory(DALCollection.class, (instance, comparator) -> instance);
