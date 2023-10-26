@@ -48,7 +48,7 @@ public class Dumpers implements Extension {
         @Override
         public void dump(Data data, DumpingBuffer dumpingBuffer) {
             DumpingBuffer sub = dumpingBuffer.indent();
-            data.list().forEach(s -> sub.newLine().append("at " + s.toString()));
+            data.list().instances().forEach(s -> sub.newLine().append("at " + s.toString()));
         }
     }
 

@@ -8,10 +8,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class CollectionDataList<E> extends DataList<E> {
+public class CollectionDALCollection<E> extends DALCollection<E> {
     private final List<E> list;
 
-    public CollectionDataList(Collection<E> collection, Comparator<E> comparator) {
+    public CollectionDALCollection(Collection<E> collection, Comparator<E> comparator) {
         list = collection.stream().sorted(comparator).collect(Collectors.toList());
     }
 

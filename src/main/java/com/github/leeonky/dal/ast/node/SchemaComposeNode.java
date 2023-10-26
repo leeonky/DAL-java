@@ -7,7 +7,6 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collector;
 
 import static java.lang.String.format;
@@ -41,12 +40,10 @@ public class SchemaComposeNode extends DALNode {
 
     private Object verifyAndConvertAsSchemaType(DALRuntimeContext context, SchemaNode schemaNode, DALNode input) {
         Data inputData = input.evaluateData(context);
-        if (isList) {
-            AtomicInteger index = new AtomicInteger(0);
-            return inputData.requireList(input.getPositionBegin()).listData().map(element ->
-                    convertViaSchema(context, schemaNode, element,
-                            format("%s[%d]", input.inspect(), index.getAndIncrement()))).collect(toList());
-        } else
+        if (isList)
+            return inputData.list(input.getPositionBegin()).map((index, data) -> convertViaSchema(context, schemaNode, data,
+                    format("%s[%d]", input.inspect(), index))).stream().collect(toList());
+        else
             return convertViaSchema(context, schemaNode, inputData, input.inspect());
     }
 

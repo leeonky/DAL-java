@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.ast;
 
-import com.github.leeonky.dal.runtime.ListAccessor;
+import com.github.leeonky.dal.runtime.CollectionDALCollection;
+import com.github.leeonky.dal.runtime.IterableDALCollection;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.spec.Base;
@@ -20,17 +21,14 @@ class PropertyNodeTest {
     @Test
     void support_first_index_of_list() {
         RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
-                .registerListAccessor(ArrayList.class, new ListAccessor<ArrayList<?>>() {
-                    @Override
-                    public Iterable<?> toIterable(ArrayList<?> instance) {
-                        return instance;
-                    }
-
-                    @Override
-                    public int firstIndex(ArrayList<?> instance) {
-                        return 1;
-                    }
-                }).build(new ArrayList<>(Arrays.asList(1, 2)));
+                .registerDALCollectionFactory(ArrayList.class, (instance, comparator) ->
+                        new CollectionDALCollection<Object>(instance, comparator) {
+                            @Override
+                            protected int firstIndex() {
+                                return 1;
+                            }
+                        })
+                .build(new ArrayList<>(Arrays.asList(1, 2)));
 
         assertThat(Base.createPropertyNode(INPUT_NODE, 1).evaluate(DALRuntimeContext)).isEqualTo(1);
         assertThat(Base.createPropertyNode(INPUT_NODE, -1).evaluate(DALRuntimeContext)).isEqualTo(2);
@@ -53,7 +51,7 @@ class PropertyNodeTest {
     @Test
     void access_customized_list_property() {
         RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
-                .registerListAccessor(CustomizedList.class, instance -> emptyList())
+                .registerDALCollectionFactory(CustomizedList.class, (instance, comparator) -> new IterableDALCollection<>(emptyList(), comparator))
                 .build(new CustomizedList());
 
         assertThat(Base.createPropertyNode(INPUT_NODE, "value").evaluate(DALRuntimeContext)).isEqualTo(100);
@@ -62,7 +60,7 @@ class PropertyNodeTest {
     @Test
     void access_customized_list_method() {
         RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
-                .registerListAccessor(CustomizedList.class, instance -> emptyList())
+                .registerDALCollectionFactory(CustomizedList.class, (instance, comparator) -> new IterableDALCollection<>(emptyList(), comparator))
                 .build(new CustomizedList());
 
         assertThat(Base.createPropertyNode(INPUT_NODE, "isEmpty").evaluate(DALRuntimeContext)).isEqualTo(true);
@@ -71,7 +69,7 @@ class PropertyNodeTest {
     @Test
     void access_customized_list_static_extension_method() {
         RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
-                .registerListAccessor(CustomizedList.class, instance -> emptyList())
+                .registerDALCollectionFactory(CustomizedList.class, (instance, comparator) -> new IterableDALCollection<>(emptyList(), comparator))
                 .registerStaticMethodExtension(CustomizedListStaticExtensionMethod.class)
                 .build(new CustomizedList());
 

@@ -26,15 +26,17 @@ import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
 import static com.github.leeonky.dal.runtime.schema.Verification.expect;
+import static com.github.leeonky.util.CollectionHelper.toStream;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.STATIC;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class RuntimeContextBuilder {
     private final ClassKeyMap<PropertyAccessor<Object>> propertyAccessors = new ClassKeyMap<>();
-    private final ClassKeyMap<DataListFactory<Object, Object>> dataListFactories = new ClassKeyMap<>();
+    private final ClassKeyMap<DALCollectionFactory<Object, Object>> dALCollectionFactories = new ClassKeyMap<>();
     private final ClassKeyMap<Function<Object, Object>> objectImplicitMapper = new ClassKeyMap<>();
     private final Map<String, ConstructorViaSchema> valueConstructors = new LinkedHashMap<>();
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
@@ -115,26 +117,8 @@ public class RuntimeContextBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    @Deprecated
-    public <T> RuntimeContextBuilder registerListAccessor(Class<T> type, ListAccessor<? extends T> listAccessor) {
-        dataListFactories.put(type, new DataListFactory<Object, Object>() {
-            @Override
-            public boolean isList(Object instance) {
-                return ((ListAccessor<Object>) listAccessor).isList(instance);
-            }
-
-            @Override
-            public DataList<Object> create(Object instance, Comparator<Object> comparator) {
-                return new LegacyDataList((ListAccessor<Object>) listAccessor, instance, comparator,
-                        (Iterable<Object>) ((ListAccessor<Object>) listAccessor).toIterable(instance));
-            }
-        });
-        return this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T, E> RuntimeContextBuilder registerDataListFactory(Class<T> type, DataListFactory<T, E> dataListFactory) {
-        dataListFactories.put(type, (DataListFactory<Object, Object>) dataListFactory);
+    public <T, E> RuntimeContextBuilder registerDALCollectionFactory(Class<T> type, DALCollectionFactory<T, E> DALCollectionFactory) {
+        dALCollectionFactories.put(type, (DALCollectionFactory<Object, Object>) DALCollectionFactory);
         return this;
     }
 
@@ -336,14 +320,13 @@ public class RuntimeContextBuilder {
             }
         }
 
-        public DataList<Object> createDataList(Object instance, Comparator<Object> comparator) {
-            return dataListFactories.tryGetData(instance).map(factory -> factory.create(instance, comparator))
-                    .orElseGet(() -> new LegacyDataList(new JavaArrayAccessor(), instance, comparator,
-                            new JavaArrayAccessor().toIterable(instance)));
+        public DALCollection<Object> createCollection(Object instance, Comparator<Object> comparator) {
+            return dALCollectionFactories.tryGetData(instance).map(factory -> factory.create(instance, comparator))
+                    .orElseGet(() -> new CollectionDALCollection<>(toStream(instance).collect(toList()), comparator));
         }
 
         public boolean isRegisteredList(Object instance) {
-            return dataListFactories.tryGetData(instance).map(f -> f.isList(instance)).orElse(false);
+            return dALCollectionFactories.tryGetData(instance).map(f -> f.isList(instance)).orElse(false);
         }
 
         public Converter getConverter() {
@@ -413,10 +396,6 @@ public class RuntimeContextBuilder {
             return RuntimeContextBuilder.this.methodToCurrying(type, methodName);
         }
 
-        public Function<MetaData, Object> fetchMetaFunction(MetaData metaData) {
-            return fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData));
-        }
-
         public Function<MetaData, Object> fetchGlobalMetaFunction(MetaData metaData) {
             return metaProperties.computeIfAbsent(metaData.getName(), k -> {
                 throw new RuntimeException(format("Meta property `%s` not found",
@@ -477,6 +456,10 @@ public class RuntimeContextBuilder {
 
         public void hookError(ThrowingSupplier<Object> input, String expression, Throwable error) {
             errorHook.handle(input, expression, error);
+        }
+
+        public Object invokeMetaProperty(MetaData metaData) {
+            return fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).apply(metaData);
         }
     }
 }

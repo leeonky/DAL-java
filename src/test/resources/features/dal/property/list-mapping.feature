@@ -152,7 +152,7 @@ Feature: list mapping
     And set the first element index to 1 of list "DataItem"
     When use a instance of java class "Data" to evaluate:
     """
-      list.invalid[]= []
+      list.invalid[]= [1]
     """
     Then failed with the message:
     """
@@ -168,7 +168,7 @@ Feature: list mapping
     """
     And got the following notation:
     """
-      list.invalid[]= []
+      list.invalid[]= [1]
                   ^
     """
 

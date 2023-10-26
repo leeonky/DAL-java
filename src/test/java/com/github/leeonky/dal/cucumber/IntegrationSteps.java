@@ -240,11 +240,6 @@ public class IntegrationSteps {
         integrationTestContext.should(expression);
     }
 
-    @And("register the following BeanAsListAccessor for java class {string}:")
-    public void registerTheFollowingBeanAsListAccessorForJavaClass(String type, String code) {
-        integrationTestContext.givenListAccessor(type, code);
-    }
-
     @Given("the following text formatter {string}:")
     public void theFollowingTextFormatter(String name, String code) {
         integrationTestContext.givenTextFormatter(name, code);
@@ -268,5 +263,10 @@ public class IntegrationSteps {
     @When("expect run by the following code:")
     public void expectRunByTheFollowingCode(String code) {
         integrationTestContext.runShould(code);
+    }
+
+    @And("register the following BeanDALCollectionFactory for java class {string}:")
+    public void registerTheFollowingBeanDataListFactoryForJavaClass(String type, String code) {
+        integrationTestContext.givenDALCollectionFactory(type, code);
     }
 }

@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.spec;
 
-import com.github.leeonky.dal.runtime.ArrayAccessor;
+import com.github.leeonky.dal.cucumber.JSONArrayDALCollectionFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.jupiter.api.Test;
@@ -41,21 +41,8 @@ class VerifyList extends Base {
 
     @Test
     void should_support_customer_array_type() throws JSONException {
-        dal.getRuntimeContextBuilder().registerListAccessor(JSONArray.class, new ArrayAccessor<JSONArray>() {
-            @Override
-            public Object get(JSONArray jsonArray, int index) {
-                try {
-                    return jsonArray.get(index);
-                } catch (JSONException e) {
-                    throw new IllegalArgumentException(e);
-                }
-            }
-
-            @Override
-            public int size(JSONArray jsonArray) {
-                return jsonArray.length();
-            }
-        });
+        dal.getRuntimeContextBuilder()
+                .registerDALCollectionFactory(JSONArray.class, new JSONArrayDALCollectionFactory());
 
         assertPass(new JSONArray("[2]"), "= [*]");
     }

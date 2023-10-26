@@ -101,7 +101,7 @@ public class Calculator {
         if (value instanceof Number)
             return context.getNumberType().negate((Number) value);
         if (data.isList())
-            return data.list().sorted((Comparator) reverseOrder()).collect(toList());
+            return data.list().instances().sorted((Comparator) reverseOrder()).collect(toList());
         throw new IllegalArgumentException(format("Operands should be number but '%s'", getClassName(value)));
     }
 
@@ -111,7 +111,7 @@ public class Calculator {
         if (value instanceof Number)
             return value;
         if (data.isList())
-            return data.list().sorted((Comparator) naturalOrder()).collect(toList());
+            return data.list().instances().sorted((Comparator) naturalOrder()).collect(toList());
         throw new IllegalArgumentException(format("Operands should be List but '%s'", getClassName(value)));
     }
 

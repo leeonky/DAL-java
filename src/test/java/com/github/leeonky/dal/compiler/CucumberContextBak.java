@@ -4,9 +4,9 @@ import com.github.leeonky.dal.BaseTest;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
-import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
+import com.github.leeonky.dal.cucumber.JSONArrayDALCollectionFactory;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
-import com.github.leeonky.dal.runtime.ListAccessor;
+import com.github.leeonky.dal.runtime.IterableDALCollection;
 import com.github.leeonky.interpreter.InterpreterException;
 import com.github.leeonky.util.JavaCompiler;
 import com.github.leeonky.util.JavaCompilerPool;
@@ -45,7 +45,8 @@ public class CucumberContextBak {
     public CucumberContextBak() {
         dal.getRuntimeContextBuilder()
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                .registerListAccessor(JSONArray.class, new JSONArrayAccessor());
+                .registerDALCollectionFactory(JSONArray.class, new JSONArrayDALCollectionFactory())
+        ;
         javaCompiler = JAVA_COMPILER_POOL.take();
     }
 
@@ -142,17 +143,13 @@ public class CucumberContextBak {
                     .findFirst().orElseThrow(() -> new IllegalArgumentException
                             ("cannot find bean class: " + className + "\nclasses: " + classes));
             if (firstIndexes.containsKey(className)) {
-                dal.getRuntimeContextBuilder().registerListAccessor(type, new ListAccessor<Object>() {
-                    @Override
-                    public Iterable<?> toIterable(Object instance) {
-                        return (Iterable<?>) instance;
-                    }
-
-                    @Override
-                    public int firstIndex(Object instance) {
-                        return firstIndexes.get(className);
-                    }
-                });
+                dal.getRuntimeContextBuilder().registerDALCollectionFactory(type, (instance, comparator) ->
+                        new IterableDALCollection((Iterable) instance, comparator) {
+                            @Override
+                            protected int firstIndex() {
+                                return firstIndexes.get(className);
+                            }
+                        });
             }
             dal.evaluateAll(type.newInstance(), assertion);
         } catch (InterpreterException e) {

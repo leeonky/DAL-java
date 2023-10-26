@@ -9,7 +9,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
 import static com.github.leeonky.util.Classes.named;
@@ -22,7 +21,8 @@ public class Data {
     private final SchemaType schemaType;
     private final DALRuntimeContext context;
     private final Object instance;
-    private DataList<Object> dataList;
+    private DataList list;
+    @Deprecated
     private Comparator<Object> listComparator = SortGroupNode.NOP_COMPARATOR;
 
     public Data(Object instance, DALRuntimeContext context, SchemaType schemaType) {
@@ -43,41 +43,22 @@ public class Data {
         return context.isRegisteredList(instance) || (instance != null && instance.getClass().isArray());
     }
 
-    public DataList<Object> dataList() {
-        if (dataList == null)
-            dataList = context.createDataList(instance, listComparator);
-        return dataList;
+    public DataList list() {
+        if (list == null) {
+            list = new DataList(context.createCollection(instance, listComparator)
+                    .map((index, e) -> new Data(e, context, schemaType.access(index))));
+        }
+        return list;
     }
 
-    @Deprecated
-    public Stream<IndexedElement<Data>> indexedListData() {
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), 0), false);
-    }
-
-    public Iterator<IndexedElement<Data>> iterator() {
-        Iterator<IndexedElement<Object>> iterator = dataList().iterator();
-        return new Iterator<IndexedElement<Data>>() {
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
-
-            @Override
-            public IndexedElement<Data> next() {
-                IndexedElement<Object> next = iterator.next();
-                return new IndexedElement<>(next.index(), new Data(next.value(), context, schemaType.access(next.index())));
-            }
-        };
-    }
-
-    @Deprecated
-    public Stream<Data> listData() {
-        return indexedListData().map(IndexedElement::value);
-    }
-
-    @Deprecated
-    public Stream<Object> list() {
-        return listData().map(Data::getInstance);
+    public DataList list(int position) {
+        if (!isList())
+            throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()), position);
+        try {
+            return list();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), position, e);
+        }
     }
 
     public boolean isNull() {
@@ -119,7 +100,8 @@ public class Data {
     }
 
     private Object fetchFromList(Object property) {
-        return property instanceof String ? context.getPropertyValue(this, property) : dataList().getByIndex((int) property);
+        return property instanceof String ? context.getPropertyValue(this, property) :
+                list().getByIndex((int) property).getInstance();
     }
 
     private SchemaType propertySchema(Object property) {
@@ -136,18 +118,10 @@ public class Data {
         return new Data(context.getConverter().convert(target, instance), context, schemaType);
     }
 
+    @Deprecated
     public Data setListComparator(Comparator<Object> listComparator) {
         this.listComparator = listComparator;
-        dataList = null;
         return this;
-    }
-
-    public Data listMap(Object property) {
-        return new Data(listMap(data -> data.getValue(property).getInstance()), context, propertySchema(property));
-    }
-
-    public AutoMappingList listMap(Function<Data, Object> mapper) {
-        return new AutoMappingList(mapper, this);
     }
 
     public Data filter(String prefix) {
@@ -155,7 +129,9 @@ public class Data {
         getFieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
                 .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
                         filteredObject.put(trimPrefix(prefix, fieldName), getValue(fieldName).getInstance()));
-        return new Data(filteredObject, context, schemaType).setListComparator(listComparator);
+        return new Data(filteredObject, context, schemaType)
+//                TODO need test
+                .setListComparator(listComparator);
     }
 
     private String trimPrefix(String prefix, String fieldName) {
@@ -187,19 +163,6 @@ public class Data {
         return context.getImplicitObject(instance).flatMap(obj -> currying(obj, property));
     }
 
-    @Deprecated
-    public Data requireList(int position) {
-        if (!isList())
-            throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()), position);
-        try {
-//    TODO error should not open the stream
-            listData();
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), position, e);
-        }
-        return this;
-    }
-
     public boolean isNullWithPosition(int position) {
         boolean isNull;
         try {
@@ -211,5 +174,27 @@ public class Data {
     }
 
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
+    }
+
+    public class DataList extends DALCollection.Decorated<Data> {
+        public DataList(DALCollection<Data> origin) {
+            super(origin);
+        }
+
+        public Stream<Data> values() {
+            return stream().map(IndexedElement::value);
+        }
+
+        public Stream<Object> instances() {
+            return stream().map(element -> element.value().getInstance());
+        }
+
+        public Data listMap(Object property) {
+            return new Data(listMap(data -> data.getValue(property).getInstance()), context, propertySchema(property));
+        }
+
+        public AutoMappingList listMap(Function<Data, Object> mapper) {
+            return new AutoMappingList(mapper, this);
+        }
     }
 }

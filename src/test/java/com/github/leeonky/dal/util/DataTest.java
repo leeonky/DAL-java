@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.util;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.cucumber.JSONArrayAccessor;
+import com.github.leeonky.dal.cucumber.JSONArrayDALCollectionFactory;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.type.FieldAlias;
@@ -75,7 +75,7 @@ class DataTest {
     class GetPropertyOrIndexValue {
         RuntimeContextBuilder runtimeContextBuilder = new DAL().extend().getRuntimeContextBuilder()
                 .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                .registerListAccessor(JSONArray.class, new JSONArrayAccessor());
+                .registerDALCollectionFactory(JSONArray.class, new JSONArrayDALCollectionFactory());
 
         @Test
         void access_java_class_property() {
@@ -152,7 +152,7 @@ class DataTest {
         }
 
         private void assertListSize(Object object, int size) {
-            assertThat(runtimeContextBuilder.build(null).wrap(object).dataList().size()).isEqualTo(size);
+            assertThat(runtimeContextBuilder.build(null).wrap(object).list().size()).isEqualTo(size);
         }
     }
 

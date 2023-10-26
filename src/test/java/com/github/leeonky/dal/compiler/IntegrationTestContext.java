@@ -44,8 +44,8 @@ public class IntegrationTestContext {
     private final List<String> schemas = new ArrayList<>();
     private final List<String> javaClasses = new ArrayList<>();
     private final Map<String, String> propertyAccessors = new LinkedHashMap<>();
-    private final Map<String, String> listAccessors = new LinkedHashMap<>();
     private final Map<String, String> textFormatters = new LinkedHashMap<>();
+    private final Map<String, String> dALCollectionFactories = new LinkedHashMap<>();
     private final Compiler compiler = new Compiler();
     private final Map<String, NodeParser<DALNode,
             DALProcedure>> parserMap = new HashMap<String, NodeParser<DALNode,
@@ -102,11 +102,12 @@ public class IntegrationTestContext {
                 Suppressor.run(() -> dal.getRuntimeContextBuilder().registerPropertyAccessor(beanType,
                         (PropertyAccessor) accessorType.newInstance()));
             });
-            listAccessors.forEach((type, accessor) -> {
+            dALCollectionFactories.forEach((type, factory) -> {
                 Class<?> beanType = classes.stream().filter(c -> c.getSimpleName().equals(type)).findFirst().get();
-                Class<?> accessorType = classes.stream().filter(c -> c.getSimpleName().equals(accessor)).findFirst().get();
-                Suppressor.run(() -> dal.getRuntimeContextBuilder().registerListAccessor(beanType,
-                        (ListAccessor) accessorType.newInstance()));
+                Class<?> factoryType = classes.stream().filter(c -> c.getSimpleName().equals(factory)).findFirst().get();
+                Suppressor.run(() -> dal.getRuntimeContextBuilder()
+                        .registerDALCollectionFactory(beanType, (DALCollectionFactory) factoryType.newInstance())
+                );
             });
             textFormatters.forEach((formatter, name) -> {
                 Class<?> formatterClass = classes.stream().filter(c -> c.getSimpleName().equals(name)).findFirst().get();
@@ -135,17 +136,13 @@ public class IntegrationTestContext {
     public void givenJavaDataByClassName(String className) {
         compileAll();
         Class type = getType(className);
-        firstIndexes.forEach((t, i) -> dal.getRuntimeContextBuilder().registerListAccessor(getType(t), new ListAccessor<Object>() {
-            @Override
-            public Iterable<?> toIterable(Object instance) {
-                return (Iterable<?>) instance;
-            }
-
-            @Override
-            public int firstIndex(Object instance) {
-                return i;
-            }
-        }));
+        firstIndexes.forEach((t, i) -> dal.getRuntimeContextBuilder().registerDALCollectionFactory(getType(t), (instance, comparator) ->
+                new IterableDALCollection<Object>((Iterable<Object>) instance, comparator) {
+                    @Override
+                    protected int firstIndex() {
+                        return i;
+                    }
+                }));
         input = type.newInstance();
     }
 
@@ -378,19 +375,6 @@ public class IntegrationTestContext {
         expect(bizException).should(expression.replace("#package#", javaCompiler.packagePrefix()));
     }
 
-    public void dalExpect(String expression) {
-        try {
-            expect(input).should(expression.replace("#package#", javaCompiler.packagePrefix()));
-        } catch (Throwable e) {
-            bizException = e;
-        }
-    }
-
-    public void givenListAccessor(String type, String code) {
-        javaClasses.add(code);
-        listAccessors.put(type, guessClassName(code));
-    }
-
     public void givenTextFormatter(String name, String code) {
         javaClasses.add(code);
         textFormatters.put(name, guessClassName(code));
@@ -430,6 +414,11 @@ public class IntegrationTestContext {
         } catch (Throwable e) {
             bizException = e;
         }
+    }
+
+    public void givenDALCollectionFactory(String type, String code) {
+        javaClasses.add(code);
+        dALCollectionFactories.put(type, guessClassName(code));
     }
 
     public static class Empty {

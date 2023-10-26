@@ -16,4 +16,13 @@ public class IndexedElement<T> {
     public T value() {
         return value;
     }
+
+    public <R> IndexedElement<R> map(Mapper<? super T, ? extends R> mapper) {
+        return new IndexedElement<>(index, mapper.apply(index, value));
+    }
+
+    @FunctionalInterface
+    public interface Mapper<E, R> {
+        R apply(int index, E e);
+    }
 }

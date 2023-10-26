@@ -8,11 +8,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
-public class IterableDataList<E> extends DataList<E> {
+public class IterableDALCollection<E> extends DALCollection<E> {
     private final Iterator<E> iterator;
     private final List<E> cached = new ArrayList<>();
 
-    public IterableDataList(Iterable<E> iterable, Comparator<E> comparator) {
+    public IterableDALCollection(Iterable<E> iterable, Comparator<E> comparator) {
         iterator = StreamSupport.stream(iterable.spliterator(), false)
                 .sorted(comparator).iterator();
     }

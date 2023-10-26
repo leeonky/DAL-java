@@ -15,8 +15,7 @@ public class MetaSymbolNode extends SymbolNode {
     @Override
     public Data getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
         try {
-            MetaData metaData = new MetaData(left, this, context);
-            return context.wrap(context.fetchMetaFunction(metaData).apply(metaData));
+            return context.wrap(context.invokeMetaProperty(new MetaData(left, this, context)));
         } catch (InterpreterException e) {
             throw e;
         } catch (Exception e) {

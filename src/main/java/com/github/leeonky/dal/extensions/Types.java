@@ -18,10 +18,10 @@ public class Types implements Extension {
         builder.registerPropertyAccessor(Map.class, new MapPropertyAccessor())
                 .registerPropertyAccessor(AutoMappingList.class, new AutoMappingListPropertyAccessor())
                 .registerPropertyAccessor(CurryingMethod.class, new CurryingMethodPropertyAccessor(builder))
-                .registerDataListFactory(Iterable.class, IterableDataList::new)
-                .registerDataListFactory(Collection.class, CollectionDataList::new)
-                .registerDataListFactory(Stream.class, (stream, comparator) ->
-                        new IterableDataList<Object>(stream::iterator, comparator))
-                .registerDataListFactory(DataList.class, (instance, comparator) -> instance);
+                .registerDALCollectionFactory(Iterable.class, IterableDALCollection::new)
+                .registerDALCollectionFactory(Collection.class, CollectionDALCollection::new)
+                .registerDALCollectionFactory(Stream.class, (stream, comparator) ->
+                        new IterableDALCollection<Object>(stream::iterator, comparator))
+                .registerDALCollectionFactory(DALCollection.class, (instance, comparator) -> instance);
     }
 }

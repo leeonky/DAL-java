@@ -83,7 +83,7 @@ public class Actual {
     }
 
     public Stream<Actual> subElements() {
-        return actual.indexedListData().map(data -> new Actual(property + "[" + data.index() + "]", data.value()));
+        return actual.list().stream().map(data -> new Actual(property + "[" + data.index() + "]", data.value()));
     }
 
     public boolean verifyFormatter(Formatter<Object, Object> formatter) {

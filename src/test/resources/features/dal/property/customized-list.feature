@@ -12,11 +12,11 @@ Feature: customized list
       public Bean bean = new Bean();
     }
     """
-    And register the following BeanAsListAccessor for java class "Bean":
+    And register the following BeanDALCollectionFactory for java class "Bean":
     """
-    public class BeanAsListAccessor implements ListAccessor<Bean> {
-      public Iterable<?> toIterable(Bean bean) {
-        return java.util.Arrays.asList("hello", "world");
+    public class BeanDALCollectionFactory implements DALCollectionFactory<Bean, String> {
+      public DALCollection<String> create(Bean bean, Comparator<String> comparator) {
+        return new CollectionDALCollection<>(java.util.Arrays.asList("hello", "world"), comparator);
       }
     }
     """
@@ -38,10 +38,10 @@ Feature: customized list
         public Bean bean = new Bean();
       }
       """
-      And register the following BeanAsListAccessor for java class "Bean":
+      And register the following BeanDALCollectionFactory for java class "Bean":
       """
-      public class BeanAsListAccessor implements ListAccessor<Bean> {
-        public Iterable<?> toIterable(Bean bean) {
+      public class BeanDALCollectionFactory implements DALCollectionFactory<Bean, String> {
+        public DALCollection<String> create(Bean bean, Comparator<String> comparator) {
           throw new java.lang.RuntimeException("Error");
         }
       }

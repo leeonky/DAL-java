@@ -52,12 +52,12 @@ public class ListScopeNode extends DALNode {
         this(clauses, SortGroupNode.NOP_COMPARATOR, Style.LIST);
     }
 
-    private List<DALNode> getVerificationExpressions(Data data) {
-        return verificationExpressions != null ? verificationExpressions : buildVerificationExpressions(data)
+    private List<DALNode> getVerificationExpressions(Data.DataList list) {
+        return verificationExpressions != null ? verificationExpressions : buildVerificationExpressions(list)
                 .stream().filter(node -> !(node instanceof ListEllipsisNode)).collect(toList());
     }
 
-    private List<DALNode> buildVerificationExpressions(Data data) {
+    private List<DALNode> buildVerificationExpressions(Data.DataList list) {
         if (inputExpressions != null)
             return inputExpressions;
         return new ArrayList<DALNode>() {{
@@ -67,7 +67,7 @@ public class ListScopeNode extends DALNode {
                     add(0, inputClauses.get(i).expression(new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
                             new SymbolNode(negativeIndex--, BRACKET))));
             } else {
-                Zipped<IndexedElement<Data>, Clause<DALNode>> zipped = zip(data.indexedListData(), inputClauses);
+                Zipped<IndexedElement<Data>, Clause<DALNode>> zipped = zip(list, inputClauses);
                 zipped.forEachElement((indexedData, clause) ->
                         add(clause.expression(new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
                                 new SymbolNode(indexedData.index(), BRACKET)))));
@@ -78,7 +78,7 @@ public class ListScopeNode extends DALNode {
                                 : new AssertionFailure(message, getPositionBegin());
                     }
                     if (zipped.hasLeft()) {
-                        String message = format("Different list size\nExpected: <%d>\nActual: <%d>", inputClauses.size(), data.dataList().size());
+                        String message = format("Different list size\nExpected: <%d>\nActual: <%d>", inputClauses.size(), list.size());
                         throw style == Style.ROW ? new DifferentCellSize(message, getPositionBegin())
                                 : new AssertionFailure(message, getPositionBegin());
                     }
@@ -142,24 +142,23 @@ public class ListScopeNode extends DALNode {
     }
 
     private Data verify(DALRuntimeContext context, DALNode node) {
-        Data data = node.evaluateData(context).setListComparator(comparator).requireList(node.getOperandPosition());
+        Data data = node.evaluateData(context).setListComparator(comparator);
         try {
-            return type == Type.CONTAINS ? verifyContainElement(context, data) : verifyCorrespondingElement(context, data);
+            return data.newBlockScope(() -> {
+                if (type == Type.CONTAINS)
+                    verifyContainElement(context, data.list(node.getOperandPosition()));
+                else
+                    verifyCorrespondingElement(context, getVerificationExpressions(data.list(node.getOperandPosition())));
+                return data;
+            });
         } catch (ElementAccessException e) {
             throw e.toDalError(node.getOperandPosition());
         }
     }
 
-    private Data verifyCorrespondingElement(DALRuntimeContext context, Data data) {
-        return data.newBlockScope(() -> {
-            assertElementExpressions(context, getVerificationExpressions(data));
-            return data;
-        });
-    }
-
-    private Data verifyContainElement(DALRuntimeContext context, Data data) {
+    private void verifyContainElement(DALRuntimeContext context, Data.DataList list) {
         //            TODO raise error when index list(expressionFactories == null)
-        Iterator<Object> iterator = data.list().iterator();
+        Iterator<Object> iterator = list.instances().iterator();
         List<Clause<DALNode>> expected = trimFirstEllipsis();
         for (int clauseIndex = 0; clauseIndex < expected.size(); clauseIndex++) {
             Clause<DALNode> clause = expected.get(clauseIndex);
@@ -169,7 +168,11 @@ public class ListScopeNode extends DALNode {
                 throw style == Style.LIST ? exception : new RowAssertionFailure(clauseIndex, exception);
             }
         }
-        return data;
+    }
+
+    private Object getElement(Clause<DALNode> clause, Iterator<Object> iterator) {
+        if (iterator.hasNext()) return iterator.next();
+        throw new AssertionFailure("No such element", clause.expression(INPUT_NODE).getOperandPosition());
     }
 
     private boolean isElementPassedVerification(DALRuntimeContext context, Clause<DALNode> clause,
@@ -183,16 +186,11 @@ public class ListScopeNode extends DALNode {
         }
     }
 
-    private Object getElement(Clause<DALNode> clause, Iterator<Object> iterator) {
-        if (iterator.hasNext()) return iterator.next();
-        throw new AssertionFailure("No such element", clause.expression(INPUT_NODE).getOperandPosition());
-    }
-
     private List<Clause<DALNode>> trimFirstEllipsis() {
         return inputClauses.subList(1, inputClauses.size() - 1);
     }
 
-    private void assertElementExpressions(DALRuntimeContext context, List<DALNode> expressions) {
+    private void verifyCorrespondingElement(DALRuntimeContext context, List<DALNode> expressions) {
         if (style != Style.LIST)
             for (int index = 0; index < expressions.size(); index++)
                 try {

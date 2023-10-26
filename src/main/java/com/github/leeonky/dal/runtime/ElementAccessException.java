@@ -12,4 +12,8 @@ public class ElementAccessException extends java.lang.RuntimeException {
     public RuntimeException toDalError(int position) {
         return exception.toDalError(String.format("Mapping element[%d]:\n", index), position);
     }
+
+    public int index() {
+        return index;
+    }
 }

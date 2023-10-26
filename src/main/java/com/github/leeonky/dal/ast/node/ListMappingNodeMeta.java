@@ -11,9 +11,8 @@ public class ListMappingNodeMeta extends ListMappingNode {
 
     @Override
     public Data getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
-        return context.wrap(left.evaluateData(context).requireList(getPositionBegin()).listMap(item -> {
-            MetaData metaData = new MetaData(new ConstNode(item.getInstance()), this, context);
-            return context.fetchMetaFunction(metaData).apply(metaData);
-        }));
+        return context.wrap(left.evaluateData(context).list(getPositionBegin()).listMap(item ->
+                context.invokeMetaProperty(new MetaData(new ConstNode(item.getInstance()), this, context))));
     }
+
 }
