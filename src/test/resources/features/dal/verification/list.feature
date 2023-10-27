@@ -519,5 +519,43 @@ Feature: list
     : [[0]: +[[0]: 1, [1]: 2, [2]: 3], [1]: -[[0]: 3, [1]: 2, [2]: 1]]
     """
 
+  Scenario: support access variable length list by index
+    Given the following java class:
+    """
+    public class VarList implements Iterable<Integer> {
+      private int index=0;
+
+      public Iterator<Integer> iterator() {
+        return new Iterator<Integer>() {
+          @Override
+          public boolean hasNext() {
+            return true;
+          }
+
+          @Override
+          public Integer next() {
+            return (index++)*2;
+          }
+        };
+      }
+    }
+    """
+    Then the following verification for the instance of java class "VarList" should pass:
+    """
+    : {
+      [0]= 0,
+      [1]= 2,
+      [2]= 4
+    }
+    """
+    And the following verification for the instance of java class "VarList" should pass:
+    """
+    : | toString |
+      | '0'      |
+      | '2'      |
+      | '4'      |
+      | ...      |
+    """
+
 #  TODO contains not allow set index or key in table
 #  TODO try to support [1 ... 2] ?
