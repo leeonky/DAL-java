@@ -5,6 +5,7 @@ import com.github.leeonky.util.CollectionHelper;
 import com.github.leeonky.util.NumberType;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -95,23 +96,26 @@ public class Calculator {
             throw new IllegalArgumentException(operand + " should be boolean but '" + getClassName(v) + "'");
     }
 
-    @SuppressWarnings("unchecked")
     public static Object negate(Data data, DALRuntimeContext context) {
         Object value = data.getInstance();
         if (value instanceof Number)
             return context.getNumberType().negate((Number) value);
         if (data.isList())
-            return data.list(0, (Comparator) reverseOrder()).instances().collect(toList());
+            return sortList(data, reverseOrder());
         throw new IllegalArgumentException(format("Operands should be number but '%s'", getClassName(value)));
     }
 
     @SuppressWarnings("unchecked")
+    private static List<Object> sortList(Data data, Comparator<?> comparator) {
+        return data.list(0, (Comparator) comparator).values().collect(toList());
+    }
+
     public static Object positive(Data data, DALRuntimeContext context) {
         Object value = data.getInstance();
         if (value instanceof Number)
             return value;
         if (data.isList())
-            return data.list(0, (Comparator) naturalOrder()).instances().collect(toList());
+            return sortList(data, naturalOrder());
         throw new IllegalArgumentException(format("Operands should be List but '%s'", getClassName(value)));
     }
 

@@ -24,24 +24,24 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     }
 
     @Override
-    public DALNode getLeftOperand() {
+    public DALNode left() {
         return left;
     }
 
     @Override
-    public DALNode getRightOperand() {
+    public DALNode right() {
         return right;
     }
 
     @Override
-    public DALOperator getOperator() {
+    public DALOperator operator() {
         return operator;
     }
 
     @Override
     public Data evaluateData(DALRuntimeContext context) {
         try {
-            return operator.calculateData(left, right, context);
+            return operator.calculateData(this, context);
         } catch (IllegalArgumentException ex) {
             throw new RuntimeException(ex.getMessage(), operator.getPosition());
         }
@@ -58,7 +58,7 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     }
 
     private boolean isRootPropertyThis() {
-        return left instanceof DALExpression && ((DALExpression) left).getRightOperand() instanceof PropertyThis;
+        return left instanceof DALExpression && ((DALExpression) left).right() instanceof PropertyThis;
     }
 
     @Override
@@ -76,9 +76,9 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
 
     @Override
     public Stream<Object> collectFields(Data data) {
-        if (((DALExpression) getLeftOperand()).getRightOperand() instanceof PropertyThis)
-            if (getRightOperand() instanceof ObjectScopeNode)
-                return getRightOperand().collectFields(data);
+        if (((DALExpression) left()).right() instanceof PropertyThis)
+            if (right() instanceof ObjectScopeNode)
+                return right().collectFields(data);
         return super.collectFields(data);
     }
 

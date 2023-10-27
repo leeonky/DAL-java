@@ -15,7 +15,7 @@ public class ListDumper implements Dumper.Cacheable {
 
     private void dumpBody(Data data, DumpingBuffer dumpingBuffer) {
         DumpingBuffer indentContext = dumpingBuffer.append("[").indent();
-        data.list().forEach(ie -> {
+        data.list().wrap().forEach(ie -> {
             indentContext.index(ie.index()).newLine().dumpValue(ie.value());
             indentContext.appendThen(",");
         });

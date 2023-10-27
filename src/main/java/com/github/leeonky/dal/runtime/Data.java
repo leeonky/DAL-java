@@ -1,13 +1,11 @@
 package com.github.leeonky.dal.runtime;
 
-import com.github.leeonky.dal.IndexedElement;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static com.github.leeonky.dal.runtime.CurryingMethod.createCurryingMethod;
@@ -42,7 +40,7 @@ public class Data {
     }
 
     public DataList list() {
-        return list(0);
+        return list(0, NOP_COMPARATOR);
     }
 
     public DataList list(int position) {
@@ -54,8 +52,7 @@ public class Data {
             if (!isList())
                 throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()), position);
             try {
-                list = new DataList(context.createCollection(instance, comparator)
-                        .map((index, e) -> new Data(e, context, schemaType.access(index))));
+                list = new DataList(context.createCollection(instance, comparator));
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), position, e);
             }
@@ -103,7 +100,7 @@ public class Data {
 
     private Object fetchFromList(Object property) {
         return property instanceof String ? context.getPropertyValue(this, property) :
-                list().getByIndex((int) property).getInstance();
+                list().getByIndex((int) property);
     }
 
     private SchemaType propertySchema(Object property) {
@@ -170,17 +167,13 @@ public class Data {
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
     }
 
-    public class DataList extends DALCollection.Decorated<Data> {
-        public DataList(DALCollection<Data> origin) {
+    public class DataList extends DALCollection.Decorated<Object> {
+        public DataList(DALCollection<Object> origin) {
             super(origin);
         }
 
-        public Stream<Data> values() {
-            return stream().map(IndexedElement::value);
-        }
-
-        public Stream<Object> instances() {
-            return stream().map(element -> element.value().getInstance());
+        public DALCollection<Data> wrap() {
+            return map((index, e) -> new Data(e, context, schemaType.access(index)));
         }
 
         public Data listMap(Object property) {
@@ -188,7 +181,7 @@ public class Data {
         }
 
         public AutoMappingList listMap(Function<Data, Object> mapper) {
-            return new AutoMappingList(mapper, this);
+            return new AutoMappingList(mapper, wrap());
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.ast.node;
 
-import com.github.leeonky.dal.IndexedElement;
 import com.github.leeonky.dal.Zipped;
 import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Factory;
@@ -18,6 +17,7 @@ import java.util.List;
 
 import static com.github.leeonky.dal.Zipped.zip;
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
+import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static com.github.leeonky.dal.ast.node.SymbolNode.Type.BRACKET;
 import static java.lang.String.format;
 import static java.util.Comparator.naturalOrder;
@@ -48,7 +48,7 @@ public class ListScopeNode extends DALNode {
     }
 
     public ListScopeNode(List<Clause<DALNode>> clauses) {
-        this(clauses, SortGroupNode.NOP_COMPARATOR, Style.LIST);
+        this(clauses, NOP_COMPARATOR, Style.LIST);
     }
 
     private List<DALNode> getVerificationExpressions(Data.DataList list) {
@@ -66,10 +66,10 @@ public class ListScopeNode extends DALNode {
                     add(0, inputClauses.get(i).expression(new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
                             new SymbolNode(negativeIndex--, BRACKET))));
             } else {
-                Zipped<IndexedElement<Data>, Clause<DALNode>> zipped = zip(list, inputClauses);
-                zipped.forEachElement((indexedData, clause) ->
+                Zipped<Integer, Clause<DALNode>> zipped = zip(list.indexes(), inputClauses);
+                zipped.forEachElement((index, clause) ->
                         add(clause.expression(new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
-                                new SymbolNode(indexedData.index(), BRACKET)))));
+                                new SymbolNode(index, BRACKET)))));
                 if (type == Type.ALL_ITEMS) {
                     if (zipped.hasRight()) {
                         String message = format("Different list size\nExpected: <%d>\nActual: <%d>", inputClauses.size(), zipped.index());
@@ -157,8 +157,7 @@ public class ListScopeNode extends DALNode {
     }
 
     private void verifyContainElement(DALRuntimeContext context, Data.DataList list) {
-        //            TODO raise error when index list(expressionFactories == null)
-        Iterator<IndexedElement<Data>> iterator = list.iterator();
+        Iterator<Integer> iterator = list.indexes().iterator();
         List<Clause<DALNode>> expected = trimFirstEllipsis();
         for (int clauseIndex = 0; clauseIndex < expected.size(); clauseIndex++) {
             Clause<DALNode> clause = expected.get(clauseIndex);
@@ -170,9 +169,9 @@ public class ListScopeNode extends DALNode {
         }
     }
 
-    private int getElementIndex(Clause<DALNode> clause, Iterator<IndexedElement<Data>> iterator) {
+    private int getElementIndex(Clause<DALNode> clause, Iterator<Integer> iterator) {
         if (iterator.hasNext())
-            return iterator.next().index();
+            return iterator.next();
         throw new AssertionFailure("No such element", clause.expression(INPUT_NODE).getOperandPosition());
     }
 

@@ -134,7 +134,7 @@ public class Compiler {
     }
 
     private ClauseParser.Mandatory<DALNode, DALProcedure> shortVerificationClause(
-            OperatorParser.Mandatory<DALNode, DALOperator, DALProcedure> operatorMandatory,
+            OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression> operatorMandatory,
             NodeParser.Mandatory<DALNode, DALProcedure> operand) {
         return SCHEMA_CLAUSE.concat(Operators.VERIFICATION_OPERATORS.clause(operand)).or(operatorMandatory.clause(operand));
     }

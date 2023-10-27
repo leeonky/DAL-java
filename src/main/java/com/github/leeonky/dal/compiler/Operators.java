@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.compiler;
 
+import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.ast.opt.Equal;
@@ -7,10 +8,11 @@ import com.github.leeonky.dal.ast.opt.Factory;
 import com.github.leeonky.dal.ast.opt.Matcher;
 import com.github.leeonky.dal.compiler.Notations.Keywords;
 import com.github.leeonky.dal.runtime.Calculator;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.OperatorParser;
 import com.github.leeonky.interpreter.Procedure;
 
-import static com.github.leeonky.dal.ast.opt.Factory.NodeNodeContextObject.adapt;
+import static com.github.leeonky.dal.ast.opt.Factory.ExpressionContextObject.adapt;
 import static com.github.leeonky.dal.ast.opt.Factory.*;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
 import static com.github.leeonky.dal.compiler.Notations.COMMA;
@@ -21,11 +23,11 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 public class Operators {
-    private static final OperatorParser<DALNode, DALOperator, DALProcedure>
+    private static final OperatorParser<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression>
             DEFAULT_OPERATOR = Procedure::currentOperator,
             MAYBE_PROPERTY_SLASH = SLASH.operator(() -> Factory.executable(SLASH));
 
-    static final OperatorParser<DALNode, DALOperator, DALProcedure>
+    static final OperatorParser<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression>
             IS = Notations.Operators.IS.keywordOperator(Factory::is, PROPERTY_DELIMITER_STRING),
             WHICH = Notations.Operators.WHICH.operator(Factory::which),
             PROPERTY_DOT = DOT.operator(() -> Factory.executable(DOT), not(DALProcedure::mayBeElementEllipsis)),
@@ -53,6 +55,6 @@ public class Operators {
             VERIFICATION_OPERATORS = oneOf(MATCHER.operator(Matcher::new, not(DALProcedure::mayBeMetaProperty)),
                     EQUAL.operator(Equal::new));
 
-    static final OperatorParser.Mandatory<DALNode, DALOperator, DALProcedure>
+    static final OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression>
             DEFAULT_VERIFICATION_OPERATOR = DEFAULT_OPERATOR.mandatory("");
 }

@@ -18,7 +18,7 @@ public class IterableDALCollection<E> extends DALCollection<E> {
     public IterableDALCollection(Iterable<E> iterable, Comparator<E> comparator) {
         Stream<E> stream = StreamSupport.stream(iterable.spliterator(), false);
         if (comparator != NOP_COMPARATOR) {
-            checkVariableLength("Can not sort variable length collection");
+            requireLimitedCollection();
             stream = stream.sorted(comparator);
         }
         iterator = stream.iterator();
@@ -68,7 +68,7 @@ public class IterableDALCollection<E> extends DALCollection<E> {
 
     @Override
     public int size() {
-        checkVariableLength("Can not get size of variable length collection");
+        requireLimitedCollection();
         return (int) StreamSupport.stream(spliterator(), false).count();
     }
 

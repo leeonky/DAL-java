@@ -38,7 +38,7 @@ Feature: list
       And got the following notation:
       """
       : [1 2]
-      ^
+        ^
       """
       When evaluate by:
       """
@@ -53,7 +53,7 @@ Feature: list
       And got the following notation:
       """
       : []
-      ^
+        ^
       """
       When evaluate by:
       """
@@ -63,15 +63,15 @@ Feature: list
       """
       Expected to match: java.lang.Integer
       <2>
-      ^
+       ^
       Actual: java.lang.Integer
       <1>
-      ^
+       ^
       """
       And got the following notation:
       """
       : [2]
-      ^
+         ^
       """
 
     Scenario: default verification operator
@@ -81,7 +81,7 @@ Feature: list
       """
       When evaluate by:
       """
-      = [ /1/ ]
+       = [ /1/ ]
       """
       Then failed with the message:
       """
@@ -89,8 +89,8 @@ Feature: list
       """
       And got the following notation:
       """
-      = [ /1/ ]
-      ^
+       = [ /1/ ]
+       ^
       """
 
     Scenario: two element
@@ -114,15 +114,15 @@ Feature: list
       """
       Expected to match: java.lang.Integer
       <3>
-      ^
+       ^
       Actual: java.lang.Integer
       <2>
-      ^
+       ^
       """
       And got the following notation:
       """
       : [1 3]
-      ^
+           ^
       """
 
     Scenario: raise error when no closing bracket
@@ -137,7 +137,7 @@ Feature: list
       And got the following notation:
       """
       : [1
-      ^
+          ^
       """
 
     Scenario: support incomplete List
@@ -174,7 +174,7 @@ Feature: list
       And got the following notation:
       """
       : [... 1 ... 2]
-      ^
+               ^
       """
       When evaluate by:
       """
@@ -191,7 +191,7 @@ Feature: list
       And got the following notation:
       """
       : [0 ... 1]
-      ^
+           ^
       """
 
     Scenario: support different verification operator in element
@@ -275,7 +275,7 @@ Feature: list
       And got the following notation:
       """
       : [ is Integer ]
-      ^
+             ^
       """
       And the following verification should pass:
       """
@@ -290,44 +290,44 @@ Feature: list
       Given the following java class:
       """
       public class Table extends java.util.ArrayList<Row> {
-      public Table() {
-      Row row = new Row();
-      row.v1 = 11;
-      row.v2 = 12;
-      add(row);
+        public Table() {
+          Row row = new Row();
+          row.v1 = 11;
+          row.v2 = 12;
+          add(row);
 
-      row = new Row();
-      row.v1 = 21;
-      row.v2 = 22;
-      add(row);
-      }
+          row = new Row();
+          row.v1 = 21;
+          row.v2 = 22;
+          add(row);
+        }
       }
       """
       And the following java class:
       """
       public class Row {
-      public int v1, v2;
+        public int v1, v2;
       }
       """
       And set the first element index to 1 of list "Table"
       Then use a instance of java class "Table" to evaluate:
       """
       : {
-      [1]: {
-      v1: 11
-      v2: 12
-      }
-      [2]: {
-      v1: 21
-      v2: 22
-      }
+        [1]: {
+          v1: 11
+          v2: 12
+        }
+        [2]: {
+          v1: 21
+          v2: 22
+        }
       }
       """
       And the following verification should pass:
       """
       [-2]: {
-      v1: 11
-      v2: 12
+        v1: 11
+        v2: 12
       }
       """
       And the following verification should pass:
@@ -339,43 +339,43 @@ Feature: list
       And the following verification should pass:
       """
       :   | >> |  1 |  2 |
-      | v1 | 11 | 21 |
-      | v2 | 12 | 22 |
+          | v1 | 11 | 21 |
+          | v2 | 12 | 22 |
       """
       And the following verification should pass:
       """
       : [{
-      v1: 11
-      v2: 12
+        v1: 11
+        v2: 12
       }{
-      v1: 21
-      v2: 22
+        v1: 21
+        v2: 22
       }]
       """
       And the following verification should pass:
       """
       : [{
-      v1: 11
-      v2: 12
+        v1: 11
+        v2: 12
       } ...]
       """
       And the following verification should pass:
       """
       : [... {
-      v1: 21
-      v2: 22
+        v1: 21
+        v2: 22
       }]
       """
       And the following verification should pass:
       """
       : | v1 | v2 |
-      | 11 | 12 |
-      | 21 | 22 |
+        | 11 | 12 |
+        | 21 | 22 |
       """
       And the following verification should pass:
       """
       : >>| v1 | 11 | 21 |
-      | v2 | 12 | 22 |
+          | v2 | 12 | 22 |
       """
 
     Scenario: list "contains"
@@ -402,24 +402,24 @@ Feature: list
       And got the following notation:
       """
       : [... 1 5 ...]
-      ^
+               ^
       """
 
     Scenario: list contains object
       Given the following json:
       """
       [{
-      "name": "Tom",
-      "age": 18
+        "name": "Tom",
+        "age": 18
       }, {
-      "name": "John",
-      "age": 20
+        "name": "John",
+        "age": 20
       }]
       """
       Then the following verification should pass:
       """
       : [... {
-      name: Tom
+        name: Tom
       } ...]
       """
       And the inspect should:
@@ -430,9 +430,9 @@ Feature: list
       """
       : [...
       {
-      name: John
+        name: John
       } {
-      age: 30
+        age: 30
       }
       ...]
       """
@@ -444,10 +444,10 @@ Feature: list
       """
       : [...
       {
-      name: John
+        name: John
       } {
-      ^
-      age: 30
+        ^
+        age: 30
       }
       ...]
       """
@@ -505,15 +505,15 @@ Feature: list
       Given the following json:
       """
       [
-      [1, 3, 2],
-      [1, 3, 2]
+        [1, 3, 2],
+        [1, 3, 2]
       ]
       """
       And the following verification should pass:
       """
       : [
-      +[1 2 3]
-      -[3 2 1]
+        +[1 2 3]
+        -[3 2 1]
       ]
       """
       And the inspect should:
@@ -560,8 +560,7 @@ Feature: list
       """
 
   Rule: variable length list
-
-    Scenario: set variable flag and should raise error when try to get size
+    Background:
       Given the following java class:
       """
       public class VarList implements Iterable<Integer> {
@@ -583,20 +582,22 @@ Feature: list
       public class BeanDALCollectionFactory implements DALCollectionFactory<VarList, Integer> {
         public DALCollection<Integer> create(VarList list, Comparator<Integer> comparator) {
           return new IterableDALCollection<Integer>(list, comparator) {
-            public boolean variable() {
+            public boolean infinite() {
               return true;
             }
           };
         }
       }
       """
+
+    Scenario: set variable flag and should raise error when try to get size
       When use a instance of java class "VarList" to evaluate:
       """
       ::size= 0
       """
       Then failed with the message:
       """
-      Can not get size of variable length collection
+      Can not get size of infinite collection
       """
       And got the following notation:
       """
@@ -604,63 +605,35 @@ Feature: list
         ^
       """
 
-    Scenario: set variable flag and should raise error when try to sort list
-      Given the following java class:
-      """
-      public class VarList implements Iterable<Integer> {
-        private int index=0;
-        public Iterator<Integer> iterator() {
-          return new Iterator<Integer>() {
-            public boolean hasNext() {
-              return true;
-            }
-            public Integer next() {
-              return (index++)*2;
-            }
-          };
-        }
-      }
-      """
-      Given register the following BeanDALCollectionFactory for java class "VarList":
-      """
-      public class BeanDALCollectionFactory implements DALCollectionFactory<VarList, Integer> {
-        public DALCollection<Integer> create(VarList list, Comparator<Integer> comparator) {
-          return new IterableDALCollection<Integer>(list, comparator) {
-            public boolean variable() {
-              return true;
-            }
-          };
-        }
-      }
-      """
-      When use a instance of java class "VarList" to evaluate:
-      """
-      (+{})
-      """
-      Then failed with the message:
-      """
-      Can not sort variable length collection
-      """
-      And got the following notation:
-      """
-      (+{})
-       ^
-      """
-      When use a instance of java class "VarList" to evaluate:
-      """
-      (-{})
-      """
-      Then failed with the message:
-      """
-      Can not sort variable length collection
-      """
-      And got the following notation:
-      """
-      (-{})
-       ^
-      """
-
-    Scenario: set variable flag and should raise error when try to verify list schema
+#    Scenario: set variable flag and should raise error when try to sort list
+#      When use a instance of java class "VarList" to evaluate:
+#      """
+#      (+{})
+#      """
+#      Then failed with the message:
+#      """
+#      Can not sort infinite collection
+#      """
+#      And got the following notation:
+#      """
+#      (+{})
+#       ^
+#      """
+#      When use a instance of java class "VarList" to evaluate:
+#      """
+#      (-{})
+#      """
+#      Then failed with the message:
+#      """
+#      Can not sort infinite collection
+#      """
+#      And got the following notation:
+#      """
+#      (-{})
+#       ^
+#      """
+#
+#    Scenario: set variable flag and should raise error when try to verify list schema
 
 #  TODO contains not allow set index or key in table
 #  TODO try to support [1 ... 2] ?

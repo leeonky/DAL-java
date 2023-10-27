@@ -6,6 +6,7 @@ import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.node.InputNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.compiler.DALProcedure;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.Operator;
 import com.github.leeonky.interpreter.OperatorParser;
@@ -43,7 +44,7 @@ public class TableRowPrefixNode extends DALNode {
                 rowOperator.orElse(defaultOperator), expectedRow);
     }
 
-    public OperatorParser<DALNode, DALOperator, DALProcedure> operator() {
+    public OperatorParser<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression> operator() {
         return procedure -> rowOperator;
     }
 
@@ -60,7 +61,7 @@ public class TableRowPrefixNode extends DALNode {
 
     public Optional<Integer> position() {
         return getFirstPresent(() -> indexOrProperty.map(DALNode::getPositionBegin),
-                () -> rowSchema.map(c -> ((DALExpression) c.expression(InputNode.INPUT_NODE)).getOperator().getPosition()),
+                () -> rowSchema.map(c -> ((DALExpression) c.expression(InputNode.INPUT_NODE)).operator().getPosition()),
                 () -> rowOperator.map(Operator::getPosition));
     }
 }

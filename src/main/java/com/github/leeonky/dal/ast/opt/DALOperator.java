@@ -1,11 +1,12 @@
 package com.github.leeonky.dal.ast.opt;
 
+import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Operator;
 
-public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, DALOperator> {
+public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, DALOperator, DALExpression> {
     private final boolean needInspect;
 
     protected DALOperator(int precedence, String label, boolean needInspect) {
@@ -13,13 +14,13 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
         this.needInspect = needInspect;
     }
 
-    public Data calculateData(DALNode left, DALNode right, DALRuntimeContext context) {
-        return context.wrap(calculate(left, right, context));
+    public Data calculateData(DALExpression expression, DALRuntimeContext context) {
+        return context.wrap(calculate(expression, context));
     }
 
     @Override
-    public Object calculate(DALNode left, DALNode right, DALRuntimeContext context) {
-        return calculateData(left, right, context).getInstance();
+    public Object calculate(DALExpression expression, DALRuntimeContext context) {
+        return calculateData(expression, context).getInstance();
     }
 
     public boolean isNeedInspect() {

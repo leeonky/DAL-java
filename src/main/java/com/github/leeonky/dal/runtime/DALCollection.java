@@ -28,16 +28,24 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         return 0;
     }
 
-    protected void checkVariableLength(String message) {
-        if (variable())
-            throw new IllegalTypeException(message);
+    public void requireLimitedCollection() {
+        if (infinite())
+            throw new InfiniteCollectionException();
     }
 
     protected abstract E getByPosition(int position);
 
     public List<E> collect() {
-        checkVariableLength("Can not sort variable length collection");
+        requireLimitedCollection();
         return stream().map(IndexedElement::value).collect(Collectors.toList());
+    }
+
+    public Stream<E> values() {
+        return stream().map(IndexedElement::value);
+    }
+
+    public Stream<Integer> indexes() {
+        return stream().map(IndexedElement::index);
     }
 
     public <R> DALCollection<R> map(IndexedElement.Mapper<? super E, ? extends R> mapper) {
@@ -73,6 +81,11 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
                     }
                 };
             }
+
+            @Override
+            public boolean infinite() {
+                return DALCollection.this.infinite();
+            }
         };
     }
 
@@ -80,7 +93,7 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         return StreamSupport.stream(spliterator(), false);
     }
 
-    public boolean variable() {
+    public boolean infinite() {
         return false;
     }
 
@@ -118,8 +131,23 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         }
 
         @Override
-        public boolean variable() {
-            return origin.variable();
+        public boolean infinite() {
+            return origin.infinite();
+        }
+
+        @Override
+        public Stream<E> values() {
+            return origin.values();
+        }
+
+        @Override
+        public Stream<Integer> indexes() {
+            return origin.indexes();
+        }
+
+        @Override
+        public void requireLimitedCollection() {
+            origin.requireLimitedCollection();
         }
     }
 }
