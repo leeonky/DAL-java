@@ -28,9 +28,15 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         return 0;
     }
 
+    protected void checkVariableLength(String message) {
+        if (variable())
+            throw new IllegalTypeException(message);
+    }
+
     protected abstract E getByPosition(int position);
 
     public List<E> collect() {
+        checkVariableLength("Can not sort variable length collection");
         return stream().map(IndexedElement::value).collect(Collectors.toList());
     }
 
@@ -74,6 +80,10 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         return StreamSupport.stream(spliterator(), false);
     }
 
+    public boolean variable() {
+        return false;
+    }
+
     public static class Decorated<E> extends DALCollection<E> {
 
         private final DALCollection<E> origin;
@@ -105,6 +115,11 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         @Override
         public List<E> collect() {
             return origin.collect();
+        }
+
+        @Override
+        public boolean variable() {
+            return origin.variable();
         }
     }
 }
