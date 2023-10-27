@@ -528,3 +528,32 @@ Feature: define field alias in schema
         is [Order]: [{aliasOfId: 0}]
       ]
     """
+
+  Scenario: list contains should support field alias
+    Given the following schema class:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfId", field = "id")
+    })
+    public class Order implements Schema{
+    }
+    """
+    And the following json:
+    """
+      [
+        { "id": 0 },
+        { "id": 1 },
+        { "id": 2 },
+        { "id": 3 }
+      ]
+    """
+    Then the following verification should pass:
+    """
+      is [Order]: [
+        ...
+        {aliasOfId: 1}
+        {aliasOfId: 2}
+        ...
+      ]
+    """

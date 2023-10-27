@@ -144,10 +144,11 @@ public class ListScopeNode extends DALNode {
         Data data = node.evaluateData(context);
         try {
             return data.newBlockScope(() -> {
+                Data.DataList list = data.list(node.getOperandPosition(), comparator);
                 if (type == Type.CONTAINS)
-                    verifyContainElement(context, data.list(node.getOperandPosition(), comparator));
+                    verifyContainElement(context, list);
                 else
-                    verifyCorrespondingElement(context, getVerificationExpressions(data.list(node.getOperandPosition(), comparator)));
+                    verifyCorrespondingElement(context, getVerificationExpressions(list));
                 return data;
             });
         } catch (ElementAccessException e) {
@@ -157,27 +158,28 @@ public class ListScopeNode extends DALNode {
 
     private void verifyContainElement(DALRuntimeContext context, Data.DataList list) {
         //            TODO raise error when index list(expressionFactories == null)
-        Iterator<Object> iterator = list.instances().iterator();
+        Iterator<IndexedElement<Data>> iterator = list.iterator();
         List<Clause<DALNode>> expected = trimFirstEllipsis();
         for (int clauseIndex = 0; clauseIndex < expected.size(); clauseIndex++) {
             Clause<DALNode> clause = expected.get(clauseIndex);
             try {
-                while (!isElementPassedVerification(context, clause, getElement(clause, iterator))) ;
+                while (!isElementPassedVerification(context, clause, getElementIndex(clause, iterator))) ;
             } catch (AssertionFailure exception) {
                 throw style == Style.LIST ? exception : new RowAssertionFailure(clauseIndex, exception);
             }
         }
     }
 
-    private Object getElement(Clause<DALNode> clause, Iterator<Object> iterator) {
-        if (iterator.hasNext()) return iterator.next();
+    private int getElementIndex(Clause<DALNode> clause, Iterator<IndexedElement<Data>> iterator) {
+        if (iterator.hasNext())
+            return iterator.next().index();
         throw new AssertionFailure("No such element", clause.expression(INPUT_NODE).getOperandPosition());
     }
 
-    private boolean isElementPassedVerification(DALRuntimeContext context, Clause<DALNode> clause, Object element) {
+    private boolean isElementPassedVerification(DALRuntimeContext context, Clause<DALNode> clause, int index) {
         try {
-//            TODO need test, failed when use alise in element property, should use Data here !!!
-            clause.expression(new ConstNode(element)).evaluate(context);
+            clause.expression(new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
+                    new SymbolNode(index, BRACKET))).evaluate(context);
             return true;
         } catch (AssertionFailure ignore) {
             return false;

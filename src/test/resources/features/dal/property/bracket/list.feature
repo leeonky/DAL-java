@@ -1,5 +1,26 @@
 Feature: access list element by [n]
 
+  Scenario: all supported build in collection
+    Given the following java class:
+    """
+    public class Bean {
+      public String[] array = new String[] {"hello", "world"};
+      public List<String> list = Arrays.asList("hello", "world");
+      public Collection<String> set = new LinkedHashSet<>(Arrays.asList("hello", "world"));
+      public java.util.stream.Stream<String> stream() {
+        return Arrays.asList("hello", "world").stream();
+      }
+    }
+    """
+    Then the following verification for the instance of java class "Bean" should pass:
+    """
+    : {
+      <<array, set, list, stream>>= [hello world]
+      <<array, set, list, stream>>[0]= hello
+      <<array, set, list, stream>>[1]= world
+    }
+    """
+
   Scenario Outline: access input list
     Given the following json:
     """

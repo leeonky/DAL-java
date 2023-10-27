@@ -286,3 +286,26 @@ Feature: skip
     ^^^^^^^^^^^^^^^^^^
       | ...         |
     """
+
+  Scenario: skip row should check size
+    Given the following json:
+    """
+    []
+    """
+    When evaluate by:
+    """
+     = | name | age | id |
+       | ***             |
+    """
+    Then failed with the message:
+    """
+    Different list size
+    Expected: <1>
+    Actual: <0>
+    """
+    And got the following notation:
+    """
+     = | name | age | id |
+       ^
+       | ***             |
+    """
