@@ -5,6 +5,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static java.lang.String.format;
@@ -17,17 +18,19 @@ public class DumpingBuffer {
     private StringBuilder splits;
     private int length = 0;
     private final DALRuntimeContext runtimeContext;
+    private AtomicInteger dumpedObjectCount;
 
-    private DumpingBuffer(String path, int indent, StringBuilder splits, LineBuffer buffer, DALRuntimeContext context) {
+    private DumpingBuffer(String path, int indent, StringBuilder splits, LineBuffer buffer, DALRuntimeContext context, AtomicInteger dumpedObjectCount) {
         this.path = path;
         lineBuffer = buffer;
         runtimeContext = context;
         this.indent = indent;
         this.splits = splits;
+        this.dumpedObjectCount = dumpedObjectCount;
     }
 
     public static DumpingBuffer rootContext(DALRuntimeContext context) {
-        return new DumpingBuffer("root", 0, new StringBuilder(), new LineBuffer(context), context);
+        return new DumpingBuffer("root", 0, new StringBuilder(), new LineBuffer(context), context, new AtomicInteger(0));
     }
 
     public String getPath() {
@@ -38,7 +41,13 @@ public class DumpingBuffer {
         return runtimeContext;
     }
 
+    private void checkCount() {
+        if (dumpedObjectCount.getAndIncrement() == runtimeContext.maxDumpingObjectSize())
+            throw new MaximizeDump();
+    }
+
     public DumpingBuffer dump(Data data) {
+        checkCount();
         try {
             runtimeContext.fetchDumper(data).dump(data, this);
         } catch (Exception e) {
@@ -48,6 +57,7 @@ public class DumpingBuffer {
     }
 
     public DumpingBuffer dumpValue(Data data) {
+        checkCount();
         try {
             runtimeContext.fetchDumper(data).dumpValue(data, this);
         } catch (Exception e) {
@@ -68,12 +78,23 @@ public class DumpingBuffer {
         return createSub(path, 1);
     }
 
+    public DumpingBuffer indent(Consumer<DumpingBuffer> subDump) {
+        DumpingBuffer sub = indent();
+        try {
+            subDump.accept(sub);
+        } catch (MaximizeDump ignore) {
+            sub.newLine().append("*... Too many objects!*");
+        }
+        return this;
+    }
+
     public DumpingBuffer sub() {
         return createSub(path, 0);
     }
 
     private DumpingBuffer createSub(String subPath, int indent) {
-        return new DumpingBuffer(subPath, this.indent + indent, takeSplits(), lineBuffer, runtimeContext);
+        return new DumpingBuffer(subPath, this.indent + indent, takeSplits(), lineBuffer, runtimeContext,
+                indent == 0 ? dumpedObjectCount : new AtomicInteger(0));
     }
 
     private StringBuilder takeSplits() {
@@ -157,5 +178,8 @@ public class DumpingBuffer {
             }
             return this;
         }
+    }
+
+    public static class MaximizeDump extends RuntimeException {
     }
 }

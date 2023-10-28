@@ -14,12 +14,11 @@ public class ListDumper implements Dumper.Cacheable {
     }
 
     private void dumpBody(Data data, DumpingBuffer dumpingBuffer) {
-        DumpingBuffer indentContext = dumpingBuffer.append("[").indent();
-        data.list().wraps().forEach(ie -> {
-            indentContext.index(ie.index()).newLine().dumpValue(ie.value());
-            indentContext.appendThen(",");
-        });
-        dumpingBuffer.optionalNewLine().append("]");
+        dumpingBuffer.append("[").indent(indentBuffer ->
+                data.list().wraps().forEach(ie -> {
+                    indentBuffer.index(ie.index()).newLine().dumpValue(ie.value());
+                    indentBuffer.appendThen(",");
+                })).optionalNewLine().append("]");
     }
 
     protected void dumpType(Data data, DumpingBuffer context) {

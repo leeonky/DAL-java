@@ -50,7 +50,8 @@ public class RuntimeContextBuilder {
     private final ClassKeyMap<DumperFactory> dumperFactories = new ClassKeyMap<>();
     private final CheckerSet checkerSetForMatching = new CheckerSet(CheckerSet::defaultMatching);
     private final CheckerSet checkerSetForEqualing = new CheckerSet(CheckerSet::defaultEqualing);
-    private int maxDumpingLineSize = 100;
+    private int maxDumpingLineSize = 2000;
+    private int maxDumpingObjectSize = 255;
     private ErrorHook errorHook = (i, code, e) -> {
     };
     private final Map<Class<?>, Map<Object, Function<MetaData, Object>>> localMetaProperties
@@ -250,6 +251,10 @@ public class RuntimeContextBuilder {
         if (type != null)
             return type;
         throw new IllegalStateException(String.format("Unknown schema '%s'", schema));
+    }
+
+    public void setMaxDumpingObjectSize(int maxDumpingObjectSize) {
+        this.maxDumpingObjectSize = maxDumpingObjectSize;
     }
 
     public class DALRuntimeContext implements RuntimeContext {
@@ -452,6 +457,10 @@ public class RuntimeContextBuilder {
 
         public int maxDumpingLineCount() {
             return maxDumpingLineSize;
+        }
+
+        public int maxDumpingObjectSize() {
+            return maxDumpingObjectSize;
         }
 
         public void hookError(ThrowingSupplier<Object> input, String expression, Throwable error) {

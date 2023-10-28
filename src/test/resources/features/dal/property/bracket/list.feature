@@ -10,6 +10,24 @@ Feature: access list element by [n]
       public java.util.stream.Stream<String> stream() {
         return Arrays.asList("hello", "world").stream();
       }
+      public Iterable<Integer> iterable() {
+        return new Iterable<Integer>() {
+          int index = 0;
+          public Iterator<Integer> iterator() {
+            return new Iterator<Integer>() {
+                @Override
+                public boolean hasNext() {
+                  return true;
+                }
+
+                @Override
+                public Integer next() {
+                  return (index++)*2;
+                }
+            };
+          }
+        };
+      };
     }
     """
     Then the following verification for the instance of java class "Bean" should pass:
@@ -18,6 +36,9 @@ Feature: access list element by [n]
       <<array, set, list, stream>>= [hello world]
       <<array, set, list, stream>>[0]= hello
       <<array, set, list, stream>>[1]= world
+      iterable= [0 2 4 6 ...]
+      iterable[0]= 0
+      iterable[1]= 2
     }
     """
 
