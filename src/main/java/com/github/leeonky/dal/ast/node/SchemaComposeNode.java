@@ -1,10 +1,8 @@
 package com.github.leeonky.dal.ast.node;
 
-import com.github.leeonky.dal.runtime.AssertionFailure;
-import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.IllegalTypeException;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeException;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 import java.util.List;
 import java.util.stream.Collector;
@@ -42,8 +40,12 @@ public class SchemaComposeNode extends DALNode {
         Data inputData = input.evaluateData(context);
         if (isList)
             //collect to list avoid lazy mode, should verify element with schema
-            return inputData.list(input.getPositionBegin()).wraps().map((index, data) ->
-                    convertViaSchema(context, schemaNode, data, format("%s[%d]", input.inspect(), index))).collect();
+            try {
+                return inputData.list(input.getPositionBegin()).wraps().map((index, data) ->
+                        convertViaSchema(context, schemaNode, data, format("%s[%d]", input.inspect(), index))).collect();
+            } catch (InfiniteCollectionException e) {
+                throw new RuntimeException("Not supported for infinite collection", getPositionBegin());
+            }
         else
             return convertViaSchema(context, schemaNode, inputData, input.inspect());
     }

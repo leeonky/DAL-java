@@ -597,7 +597,7 @@ Feature: list
       """
       Then failed with the message:
       """
-      Can not get size of infinite collection
+      Not supported for infinite collection
       """
       And got the following notation:
       """
@@ -605,35 +605,71 @@ Feature: list
         ^
       """
 
-#    Scenario: set variable flag and should raise error when try to sort list
-#      When use a instance of java class "VarList" to evaluate:
-#      """
-#      (+{})
-#      """
-#      Then failed with the message:
-#      """
-#      Can not sort infinite collection
-#      """
-#      And got the following notation:
-#      """
-#      (+{})
-#       ^
-#      """
-#      When use a instance of java class "VarList" to evaluate:
-#      """
-#      (-{})
-#      """
-#      Then failed with the message:
-#      """
-#      Can not sort infinite collection
-#      """
-#      And got the following notation:
-#      """
-#      (-{})
-#       ^
-#      """
-#
-#    Scenario: set variable flag and should raise error when try to verify list schema
+    Scenario: set variable flag and should raise error when try to sort list
+      When use a instance of java class "VarList" to evaluate:
+      """
+      (+{})
+      """
+      Then failed with the message:
+      """
+      Can not sort infinite collection
+      """
+      And got the following notation:
+      """
+      (+{})
+       ^
+      """
+      When use a instance of java class "VarList" to evaluate:
+      """
+      (-{})
+      """
+      Then failed with the message:
+      """
+      Can not sort infinite collection
+      """
+      And got the following notation:
+      """
+      (-{})
+       ^
+      """
+
+    Scenario: set variable flag and should raise error when try to verify list schema
+      When use a instance of java class "VarList" to evaluate:
+      """
+      is [String]
+      """
+      Then failed with the message:
+      """
+      Not supported for infinite collection
+      """
+      And got the following notation:
+      """
+      is [String]
+         ^
+      """
+
+    Scenario: set variable flag and should raise error when use negative index
+      When use a instance of java class "VarList" to evaluate:
+      """
+      [-1]
+      """
+      Then failed with the message:
+      """
+      Get property `-1` failed, property can be:
+        1. public field
+        2. public getter
+        3. public no args method
+        4. Map key value
+        5. customized type getter
+        6. static method extension
+      Not support negative index in infinite collection
+      Implicit list mapping is not allowed in current version of DAL, use `-1[]` instead
+      """
+      And got the following notation:
+      """
+      [-1]
+      ^
+      """
 
 #  TODO contains not allow set index or key in table
 #  TODO try to support [1 ... 2] ?

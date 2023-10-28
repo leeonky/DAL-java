@@ -15,11 +15,11 @@ public class MetaProperties implements Extension {
     private static Object size(MetaData metaData) {
         Data data = metaData.getData();
         if (data.isList())
-            try {
-                return data.list().size();
-            } catch (InfiniteCollectionException e) {
-                throw new IllegalStateException("Can not get size of infinite collection");
-            }
+//            try {
+            return data.list().size();
+//            } catch (InfiniteCollectionException e) {
+//                throw new IllegalStateException("Can not get size of infinite collection");
+//            }
         throw new IllegalStateException(format("Invalid meta property `size` for: %s", data.dumpAll()));
     }
 

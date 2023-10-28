@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.ast.node;
 
-import com.github.leeonky.dal.Zipped;
 import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Factory;
 import com.github.leeonky.dal.ast.opt.Matcher;
@@ -9,16 +8,17 @@ import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.SyntaxException;
+import com.github.leeonky.util.Zipped;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.github.leeonky.dal.Zipped.zip;
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static com.github.leeonky.dal.ast.node.SymbolNode.Type.BRACKET;
+import static com.github.leeonky.util.Zipped.zip;
 import static java.lang.String.format;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.reverseOrder;

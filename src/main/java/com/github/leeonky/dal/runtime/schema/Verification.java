@@ -1,14 +1,14 @@
 package com.github.leeonky.dal.runtime.schema;
 
-import com.github.leeonky.dal.Zipped;
 import com.github.leeonky.dal.runtime.IllegalFieldException;
 import com.github.leeonky.dal.runtime.IllegalTypeException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.TriplePredicate;
 import com.github.leeonky.util.BeanClass;
+import com.github.leeonky.util.Zipped;
 import com.github.leeonky.util.function.IfFactory;
 
-import static com.github.leeonky.dal.Zipped.zip;
+import static com.github.leeonky.util.Zipped.zip;
 import static com.github.leeonky.util.function.When.when;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;

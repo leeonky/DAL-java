@@ -107,7 +107,11 @@ public class Calculator {
 
     @SuppressWarnings("unchecked")
     private static List<Object> sortList(Data data, Comparator<?> comparator) {
-        return data.list(0).sort((Comparator) comparator).values().collect(toList());
+        try {
+            return data.list(0).sort((Comparator) comparator).values().collect(toList());
+        } catch (InfiniteCollectionException e) {
+            throw new IllegalArgumentException("Can not sort infinite collection");
+        }
     }
 
     public static Object positive(Data data, DALRuntimeContext context) {

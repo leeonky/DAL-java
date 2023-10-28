@@ -59,8 +59,7 @@ public class IterableDALCollection<E> extends DALCollection<E> {
 
     @Override
     public int size() {
-        requireLimitedCollection();
+        requireLimitedCollection("Not supported for infinite collection");
         return (int) StreamSupport.stream(spliterator(), false).count();
     }
-
 }
