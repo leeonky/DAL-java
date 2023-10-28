@@ -143,8 +143,8 @@ public class ListScopeNode extends DALNode {
     private Data verify(DALRuntimeContext context, DALNode node) {
         Data data = node.evaluateData(context);
         try {
-            return data.newBlockScope(() -> {
-                Data.DataList list = data.list(node.getOperandPosition(), comparator);
+            Data.DataList list = data.list(node.getOperandPosition()).sort(comparator);
+            return list.wrap().execute(() -> {
                 if (type == Type.CONTAINS)
                     verifyContainElement(context, list);
                 else

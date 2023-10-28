@@ -580,8 +580,8 @@ Feature: list
       Given register the following BeanDALCollectionFactory for java class "VarList":
       """
       public class BeanDALCollectionFactory implements DALCollectionFactory<VarList, Integer> {
-        public DALCollection<Integer> create(VarList list, Comparator<Integer> comparator) {
-          return new IterableDALCollection<Integer>(list, comparator) {
+        public DALCollection<Integer> create(VarList list) {
+          return new IterableDALCollection<Integer>(list) {
             public boolean infinite() {
               return true;
             }

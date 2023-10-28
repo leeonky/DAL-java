@@ -143,8 +143,8 @@ public class CucumberContextBak {
                     .findFirst().orElseThrow(() -> new IllegalArgumentException
                             ("cannot find bean class: " + className + "\nclasses: " + classes));
             if (firstIndexes.containsKey(className)) {
-                dal.getRuntimeContextBuilder().registerDALCollectionFactory(type, (instance, comparator) ->
-                        new IterableDALCollection((Iterable) instance, comparator) {
+                dal.getRuntimeContextBuilder().registerDALCollectionFactory(type, (instance) ->
+                        new IterableDALCollection((Iterable) instance) {
                             @Override
                             protected int firstIndex() {
                                 return firstIndexes.get(className);

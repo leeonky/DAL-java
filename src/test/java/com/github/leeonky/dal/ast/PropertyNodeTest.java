@@ -21,8 +21,8 @@ class PropertyNodeTest {
     @Test
     void support_first_index_of_list() {
         RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
-                .registerDALCollectionFactory(ArrayList.class, (instance, comparator) ->
-                        new CollectionDALCollection<Object>(instance, comparator) {
+                .registerDALCollectionFactory(ArrayList.class, (instance) ->
+                        new CollectionDALCollection<Object>(instance) {
                             @Override
                             protected int firstIndex() {
                                 return 1;
@@ -51,7 +51,7 @@ class PropertyNodeTest {
     @Test
     void access_customized_list_property() {
         RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
-                .registerDALCollectionFactory(CustomizedList.class, (instance, comparator) -> new IterableDALCollection<>(emptyList(), comparator))
+                .registerDALCollectionFactory(CustomizedList.class, (instance) -> new IterableDALCollection<>(emptyList()))
                 .build(new CustomizedList());
 
         assertThat(Base.createPropertyNode(INPUT_NODE, "value").evaluate(DALRuntimeContext)).isEqualTo(100);
@@ -60,7 +60,7 @@ class PropertyNodeTest {
     @Test
     void access_customized_list_method() {
         RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
-                .registerDALCollectionFactory(CustomizedList.class, (instance, comparator) -> new IterableDALCollection<>(emptyList(), comparator))
+                .registerDALCollectionFactory(CustomizedList.class, (instance) -> new IterableDALCollection<>(emptyList()))
                 .build(new CustomizedList());
 
         assertThat(Base.createPropertyNode(INPUT_NODE, "isEmpty").evaluate(DALRuntimeContext)).isEqualTo(true);
@@ -69,7 +69,7 @@ class PropertyNodeTest {
     @Test
     void access_customized_list_static_extension_method() {
         RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new RuntimeContextBuilder()
-                .registerDALCollectionFactory(CustomizedList.class, (instance, comparator) -> new IterableDALCollection<>(emptyList(), comparator))
+                .registerDALCollectionFactory(CustomizedList.class, (instance) -> new IterableDALCollection<>(emptyList()))
                 .registerStaticMethodExtension(CustomizedListStaticExtensionMethod.class)
                 .build(new CustomizedList());
 

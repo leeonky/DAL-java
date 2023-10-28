@@ -3,25 +3,16 @@ package com.github.leeonky.dal.runtime;
 import com.github.leeonky.dal.IndexedElement;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 
 public class IterableDALCollection<E> extends DALCollection<E> {
     private final Iterator<E> iterator;
     private final List<E> cached = new ArrayList<>();
 
-    public IterableDALCollection(Iterable<E> iterable, Comparator<E> comparator) {
-        Stream<E> stream = StreamSupport.stream(iterable.spliterator(), false);
-        if (comparator != NOP_COMPARATOR) {
-            requireLimitedCollection();
-            stream = stream.sorted(comparator);
-        }
-        iterator = stream.iterator();
+    public IterableDALCollection(Iterable<E> iterable) {
+        iterator = StreamSupport.stream(iterable.spliterator(), false).iterator();
     }
 
     @Override

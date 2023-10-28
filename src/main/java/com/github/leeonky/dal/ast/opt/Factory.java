@@ -83,7 +83,7 @@ public class Factory {
             @Override
             public Object calculate(DALExpression expression, DALRuntimeContext context) {
                 try {
-                    return expression.left().evaluateData(context).newBlockScope(() -> expression.right().evaluate(context));
+                    return expression.left().evaluateData(context).execute(() -> expression.right().evaluate(context));
                 } catch (IllegalStateException e) {
                     throw new RuntimeException(e.getMessage(), getPosition());
                 }

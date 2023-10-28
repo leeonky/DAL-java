@@ -21,8 +21,8 @@ public class Types implements Extension {
                 .registerDALCollectionFactory(Iterable.class, IterableDALCollection::new)
                 .registerDALCollectionFactory(Collection.class, CollectionDALCollection::new)
                 .registerPropertyAccessor(Callable.class, new CallableJavaClassPropertyAccessor())
-                .registerDALCollectionFactory(Stream.class, (stream, comparator) ->
-                        new IterableDALCollection<Object>(stream::iterator, comparator))
-                .registerDALCollectionFactory(DALCollection.class, (instance, comparator) -> instance);
+                .registerDALCollectionFactory(Stream.class, (stream) ->
+                        new IterableDALCollection<Object>(stream::iterator))
+                .registerDALCollectionFactory(DALCollection.class, instance -> instance);
     }
 }

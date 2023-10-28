@@ -10,8 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Comparator;
-
 import static com.github.leeonky.dal.Assertions.expect;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +45,7 @@ class DALRuntimeContextTest {
         void return_false_when_checking_return_false() {
             runtimeContextBuilder.registerDALCollectionFactory(DynamicList.class, new DALCollectionFactory<DynamicList, Object>() {
                 @Override
-                public DALCollection<Object> create(DynamicList instance, Comparator<Object> comparator) {
+                public DALCollection<Object> create(DynamicList instance) {
                     return null;
                 }
 

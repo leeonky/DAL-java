@@ -2,17 +2,16 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.IndexedElement;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CollectionDALCollection<E> extends DALCollection<E> {
     private final List<E> list;
 
-    public CollectionDALCollection(Collection<E> collection, Comparator<E> comparator) {
-        list = collection.stream().sorted(comparator).collect(Collectors.toList());
+    public CollectionDALCollection(Collection<E> collection) {
+        list = new ArrayList<>(collection);
     }
 
     @Override

@@ -40,19 +40,15 @@ public class Data {
     }
 
     public DataList list() {
-        return list(0, NOP_COMPARATOR);
+        return list(0);
     }
 
     public DataList list(int position) {
-        return list(position, NOP_COMPARATOR);
-    }
-
-    public DataList list(int position, Comparator<Object> comparator) {
         if (list == null) {
             if (!isList())
                 throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()), position);
             try {
-                list = new DataList(context.createCollection(instance, comparator));
+                list = new DataList(context.createCollection(instance));
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage(), position, e);
             }
@@ -138,8 +134,8 @@ public class Data {
         return DumpingBuffer.rootContext(context).dumpValue(this).content();
     }
 
-    public <T> T newBlockScope(Supplier<T> supplier) {
-        return context.newBlockScope(this, supplier);
+    public <T> T execute(Supplier<T> supplier) {
+        return context.pushAndExecute(this, supplier);
     }
 
     public Optional<CurryingMethod> currying(Object property) {
@@ -172,7 +168,7 @@ public class Data {
             super(origin);
         }
 
-        public DALCollection<Data> wrap() {
+        public DALCollection<Data> wraps() {
             return map((index, e) -> new Data(e, context, schemaType.access(index)));
         }
 
@@ -181,7 +177,28 @@ public class Data {
         }
 
         public AutoMappingList listMap(Function<Data, Object> mapper) {
-            return new AutoMappingList(mapper, wrap());
+            return new AutoMappingList(mapper, wraps());
+        }
+
+        public DataList sort(Comparator<Object> comparator) {
+            if (comparator != NOP_COMPARATOR) {
+                return new DataList(new CollectionDALCollection<Object>(collect().stream().sorted(comparator).collect(toList())) {
+                    @Override
+                    protected int firstIndex() {
+                        return DataList.this.firstIndex();
+                    }
+
+                    @Override
+                    public boolean infinite() {
+                        return DataList.this.infinite();
+                    }
+                });
+            }
+            return this;
+        }
+
+        public Data wrap() {
+            return new Data(this, context, schemaType);
         }
     }
 }

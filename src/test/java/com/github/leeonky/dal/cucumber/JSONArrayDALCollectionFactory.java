@@ -7,18 +7,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class JSONArrayDALCollectionFactory implements DALCollectionFactory<JSONArray, Object> {
     @Override
-    public DALCollection<Object> create(JSONArray array, Comparator<Object> comparator) {
+    public DALCollection<Object> create(JSONArray array) {
         List<Object> list = new ArrayList<>(array.length());
         try {
             for (int i = 0; i < array.length(); i++) {
                 list.add(array.get(i));
             }
-            return new CollectionDALCollection<>(list, comparator);
+            return new CollectionDALCollection<>(list);
         } catch (JSONException e) {
             throw new RuntimeException(e);
         }

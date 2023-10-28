@@ -84,7 +84,7 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
 
     @Override
     public Data getValue(Data data, DALRuntimeContext context) {
-        return context.newBlockScope(data, () -> evaluateData(context));
+        return context.pushAndExecute(data, () -> evaluateData(context));
     }
 
     @Override

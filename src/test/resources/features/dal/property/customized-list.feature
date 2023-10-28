@@ -15,8 +15,8 @@ Feature: customized list
     And register the following BeanDALCollectionFactory for java class "Bean":
     """
     public class BeanDALCollectionFactory implements DALCollectionFactory<Bean, String> {
-      public DALCollection<String> create(Bean bean, Comparator<String> comparator) {
-        return new CollectionDALCollection<>(java.util.Arrays.asList("hello", "world"), comparator);
+      public DALCollection<String> create(Bean bean) {
+        return new CollectionDALCollection<>(java.util.Arrays.asList("hello", "world"));
       }
     }
     """
@@ -41,7 +41,7 @@ Feature: customized list
       And register the following BeanDALCollectionFactory for java class "Bean":
       """
       public class BeanDALCollectionFactory implements DALCollectionFactory<Bean, String> {
-        public DALCollection<String> create(Bean bean, Comparator<String> comparator) {
+        public DALCollection<String> create(Bean bean) {
           throw new java.lang.RuntimeException("Error");
         }
       }

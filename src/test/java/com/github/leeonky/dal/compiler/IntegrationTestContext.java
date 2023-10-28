@@ -136,8 +136,8 @@ public class IntegrationTestContext {
     public void givenJavaDataByClassName(String className) {
         compileAll();
         Class type = getType(className);
-        firstIndexes.forEach((t, i) -> dal.getRuntimeContextBuilder().registerDALCollectionFactory(getType(t), (instance, comparator) ->
-                new IterableDALCollection<Object>((Iterable<Object>) instance, comparator) {
+        firstIndexes.forEach((t, i) -> dal.getRuntimeContextBuilder().registerDALCollectionFactory(getType(t), (instance) ->
+                new IterableDALCollection<Object>((Iterable<Object>) instance) {
                     @Override
                     protected int firstIndex() {
                         return i;

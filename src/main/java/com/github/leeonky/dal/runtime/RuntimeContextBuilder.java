@@ -285,7 +285,7 @@ public class RuntimeContextBuilder {
             return stack.getFirst();
         }
 
-        public <T> T newBlockScope(Data data, Supplier<T> supplier) {
+        public <T> T pushAndExecute(Data data, Supplier<T> supplier) {
             try {
                 stack.push(data);
                 return supplier.get();
@@ -320,9 +320,9 @@ public class RuntimeContextBuilder {
             }
         }
 
-        public DALCollection<Object> createCollection(Object instance, Comparator<Object> comparator) {
-            return dALCollectionFactories.tryGetData(instance).map(factory -> factory.create(instance, comparator))
-                    .orElseGet(() -> new CollectionDALCollection<>(toStream(instance).collect(toList()), comparator));
+        public DALCollection<Object> createCollection(Object instance) {
+            return dALCollectionFactories.tryGetData(instance).map(factory -> factory.create(instance))
+                    .orElseGet(() -> new CollectionDALCollection<>(toStream(instance).collect(toList())));
         }
 
         public boolean isRegisteredList(Object instance) {
