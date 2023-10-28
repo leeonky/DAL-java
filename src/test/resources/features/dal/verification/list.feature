@@ -559,7 +559,74 @@ Feature: list
         | ...      |
       """
 
+    Scenario: sort list should inherit origin list first index and schema
+      Given the following java class:
+      """
+      public class Bean implements Comparable<Bean>{
+        public final String id;
+        public Bean(String v) {
+          this.id=v;
+        }
+
+        public int compareTo(Bean o) {
+          return id.compareTo(o.id);
+        }
+      }
+      """
+      Given the following java class:
+      """
+      public class BeanList extends ArrayList<Bean> {
+        public BeanList() {
+          add(new Bean("a"));
+          add(new Bean("c"));
+          add(new Bean("b"));
+        }
+      }
+      """
+      And the following schema class:
+      """
+      @Partial
+      @FieldAliases({
+              @FieldAlias(alias = "aliasOfId", field = "id")
+      })
+      public class BeanSchema implements Schema{
+      }
+      """
+      And register the following BeanDALCollectionFactory for java class "BeanList":
+      """
+      public class BeanDALCollectionFactory implements DALCollectionFactory<BeanList, Bean> {
+        public DALCollection<Bean> create(BeanList list) {
+          return new CollectionDALCollection<Bean>(list) {
+            protected int firstIndex() {
+              return 1;
+            }
+          };
+        }
+      }
+      """
+#      Then the following verification for the instance of java class "BeanList" should pass:
+#      """
+#      (+({} is [BeanSchema]))[2].aliasOfId= b
+#      """
+#      Then the following verification for the instance of java class "BeanList" should pass:
+#      """
+#      (+({} is [BeanSchema])): | aliasOfId |
+#                             2 | b         |
+#                            -1 | c         |
+#      """
+#      Then the following verification for the instance of java class "BeanList" should pass:
+#      """
+#      is [BeanSchema]: +[{aliasOfId= a}{aliasOfId= b}{aliasOfId= c}]
+#      """
+      Then the following verification for the instance of java class "BeanList" should pass:
+      """
+      is [BeanSchema]:  | +aliasOfId |
+                      2 | b          |
+                     -1 | c          |
+      """
+
   Rule: variable length list
+
     Background:
       Given the following java class:
       """

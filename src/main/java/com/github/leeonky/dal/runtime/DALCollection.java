@@ -16,8 +16,8 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
     public E getByIndex(int index) {
         try {
             if (index < 0) {
-                requireLimitedCollection("Not support negative index in infinite collection");
-                return getByPosition(size() + index);
+                return requireLimitedCollection("Not support negative index in infinite collection")
+                        .getByPosition(size() + index);
             }
             return getByPosition(index - firstIndex());
         } catch (IndexOutOfBoundsException e) {
@@ -30,16 +30,17 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         return 0;
     }
 
-    public void requireLimitedCollection(String message) {
+    public DALCollection<E> requireLimitedCollection(String message) {
         if (infinite())
             throw new InfiniteCollectionException(message);
+        return this;
     }
 
     protected abstract E getByPosition(int position);
 
     public List<E> collect() {
-        requireLimitedCollection("Not supported for infinite collection");
-        return stream().map(IndexedElement::value).collect(Collectors.toList());
+        return requireLimitedCollection("Not supported for infinite collection").stream()
+                .map(IndexedElement::value).collect(Collectors.toList());
     }
 
     public Stream<E> values() {
@@ -148,8 +149,9 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         }
 
         @Override
-        public void requireLimitedCollection(String message) {
+        public DALCollection<E> requireLimitedCollection(String message) {
             origin.requireLimitedCollection(message);
+            return this;
         }
     }
 }

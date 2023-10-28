@@ -31,16 +31,16 @@ public class ListScopeNode extends DALNode {
     private List<Clause<DALNode>> inputClauses;
     private final Type type;
     private final Style style;
-    private final Comparator<Object> comparator;
+    private final Comparator<Data> comparator;
 
-    public ListScopeNode(List<Clause<DALNode>> clauses, Comparator<Object> comparator, Style style) {
+    public ListScopeNode(List<Clause<DALNode>> clauses, Comparator<Data> comparator, Style style) {
         type = guessType(clauses);
         inputClauses = clauses;
         this.comparator = comparator;
         this.style = style;
     }
 
-    public ListScopeNode(List<DALNode> verificationExpressions, Type type, Comparator<Object> comparator, Style style) {
+    public ListScopeNode(List<DALNode> verificationExpressions, Type type, Comparator<Data> comparator, Style style) {
         this.verificationExpressions = inputExpressions = new ArrayList<>(verificationExpressions);
         this.type = type;
         this.comparator = comparator;
@@ -221,7 +221,7 @@ public class ListScopeNode extends DALNode {
 
         @SuppressWarnings("unchecked")
         public NatureOrder(List<Clause<DALNode>> clauses) {
-            super(clauses, (Comparator) naturalOrder(), Style.LIST);
+            super(clauses, Comparator.comparing(Data::getInstance, (Comparator) naturalOrder()), Style.LIST);
         }
 
         @Override
@@ -234,7 +234,7 @@ public class ListScopeNode extends DALNode {
 
         @SuppressWarnings("unchecked")
         public ReverseOrder(List<Clause<DALNode>> clauses) {
-            super(clauses, (Comparator) reverseOrder(), Style.LIST);
+            super(clauses, Comparator.comparing(Data::getInstance, (Comparator) reverseOrder()), Style.LIST);
         }
 
         @Override

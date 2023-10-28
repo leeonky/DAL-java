@@ -5,6 +5,7 @@ import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.compiler.DALProcedure;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.OperatorParser;
 
@@ -36,8 +37,8 @@ public class HeaderNode extends DALNode {
         return procedure -> operator;
     }
 
-    public Comparator<Object> comparator(DALRuntimeContext context) {
-        return sort.comparator(o -> context.wrap(o).execute(() -> property.evaluate(context)));
+    public Comparator<Data> comparator(DALRuntimeContext context) {
+        return sort.comparator(data -> data.execute(() -> property.evaluate(context)));
     }
 
     public static Comparator<HeaderNode> bySequence() {

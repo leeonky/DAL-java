@@ -39,10 +39,12 @@ public class SchemaComposeNode extends DALNode {
     private Object verifyAndConvertAsSchemaType(DALRuntimeContext context, SchemaNode schemaNode, DALNode input) {
         Data inputData = input.evaluateData(context);
         if (isList)
-            //collect to list avoid lazy mode, should verify element with schema
             try {
-                return inputData.list(input.getPositionBegin()).wraps().map((index, data) ->
-                        convertViaSchema(context, schemaNode, data, format("%s[%d]", input.inspect(), index))).collect();
+                DALCollection<Object> collection = inputData.list(input.getPositionBegin()).wraps().map((index, data) ->
+                        convertViaSchema(context, schemaNode, data, format("%s[%d]", input.inspect(), index)));
+                //get size to avoid lazy mode, should verify element with schema
+                collection.collect();
+                return collection;
             } catch (InfiniteCollectionException e) {
                 throw new RuntimeException("Not supported for infinite collection", getPositionBegin());
             }

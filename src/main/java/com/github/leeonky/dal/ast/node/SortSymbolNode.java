@@ -35,12 +35,12 @@ public class SortSymbolNode extends DALNode {
     public enum Type {
         AZ, ZA {
             @Override
-            Comparator<Object> azOrZa(Comparator<Object> comparator) {
+            <T> Comparator<T> azOrZa(Comparator<T> comparator) {
                 return comparator.reversed();
             }
         };
 
-        Comparator<Object> azOrZa(Comparator<Object> comparator) {
+        <T> Comparator<T> azOrZa(Comparator<T> comparator) {
             return comparator;
         }
     }

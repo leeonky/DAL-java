@@ -43,7 +43,7 @@ public class TableBody extends DALNode {
         return rows.stream().map(TableRowNode::inspect).collect(Collectors.joining("\n"));
     }
 
-    public DALNode convertToVerificationNode(Data actual, DALOperator operator, Comparator<Object> comparator) {
+    public DALNode convertToVerificationNode(Data actual, DALOperator operator, Comparator<Data> comparator) {
         return rowType.constructVerificationNode(actual, rows.stream().map(rowNode ->
                 rowNode.constructVerificationClause(operator, rowType)), comparator);
     }

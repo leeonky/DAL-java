@@ -35,7 +35,7 @@ abstract class RowType {
     }
 
     public abstract DALNode constructVerificationNode(Data actual, Stream<Clause<DALNode>> rowClauses,
-                                                      Comparator<Object> comparator);
+                                                      Comparator<Data> comparator);
 
     public DALNode constructAccessingRowNode(DALNode input, Optional<DALNode> indexOrKey) {
         return input;
@@ -66,7 +66,7 @@ class EmptyTableRowType extends RowType {
 
     @Override
     public DALNode constructVerificationNode(Data actual, Stream<Clause<DALNode>> rowClauses,
-                                             Comparator<Object> comparator) {
+                                             Comparator<Data> comparator) {
         return actual.isList() ? new ListScopeNode(rowClauses.collect(toList()), comparator, ListScopeNode.Style.TABLE)
                 : new ObjectScopeNode(Collections.emptyList());
     }
@@ -90,7 +90,7 @@ class SpecifyIndexRowType extends RowType {
 
     @Override
     public DALNode constructVerificationNode(Data actual, Stream<Clause<DALNode>> rowClauses,
-                                             Comparator<Object> comparator) {
+                                             Comparator<Data> comparator) {
         List<DALNode> rowNodes = rowClauses.map(rowClause -> rowClause.expression(null))
                 .collect(toList());
         if (actual.isList())
@@ -122,7 +122,7 @@ class DefaultIndexRowType extends RowType {
 
     @Override
     public DALNode constructVerificationNode(Data actual, Stream<Clause<DALNode>> rowClauses,
-                                             Comparator<Object> comparator) {
+                                             Comparator<Data> comparator) {
         return new ListScopeNode(rowClauses.collect(toList()), comparator, ListScopeNode.Style.TABLE);
     }
 }
@@ -136,7 +136,7 @@ class SpecifyPropertyRowType extends RowType {
 
     @Override
     public DALNode constructVerificationNode(Data actual, Stream<Clause<DALNode>> rowClauses,
-                                             Comparator<Object> comparator) {
+                                             Comparator<Data> comparator) {
         return new ObjectScopeNode(rowClauses.map(rowNode -> rowNode.expression(null)).collect(toList()));
     }
 

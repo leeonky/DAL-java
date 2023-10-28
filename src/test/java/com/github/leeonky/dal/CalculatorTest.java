@@ -2,6 +2,7 @@ package com.github.leeonky.dal;
 
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.Calculator;
+import com.github.leeonky.dal.runtime.IllegalOperationException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Nested;
@@ -22,8 +23,8 @@ class CalculatorTest {
     }
 
     private void assertIllegalArgument(Executable executable, String message) {
-        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, executable);
-        assertThat(illegalArgumentException).hasMessage(message);
+        IllegalOperationException exception = assertThrows(IllegalOperationException.class, executable);
+        assertThat(exception).hasMessage(message);
     }
 
     @Nested
@@ -219,8 +220,8 @@ class CalculatorTest {
 
         @Test
         void support_all_number_type() {
-            assertThat(Calculator.negate(context.wrap(1), context)).isEqualTo(-1);
-            assertThat(Calculator.negate(context.wrap(1L), context)).isEqualTo(-1L);
+            assertThat(Calculator.negate(context.wrap(1), context).getInstance()).isEqualTo(-1);
+            assertThat(Calculator.negate(context.wrap(1L), context).getInstance()).isEqualTo(-1L);
         }
 
         @Test

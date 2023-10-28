@@ -3,6 +3,7 @@ package com.github.leeonky.dal.ast.node.table;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.node.SortGroupNode;
 import com.github.leeonky.dal.ast.node.TableNode;
+import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class TableHeadRow extends DALNode {
         return TableNode.printLine(headers) + "\n";
     }
 
-    public Comparator<Object> collectComparator(RuntimeContextBuilder.DALRuntimeContext context) {
+    public Comparator<Data> collectComparator(RuntimeContextBuilder.DALRuntimeContext context) {
         return headers.stream().sorted(HeaderNode.bySequence()).map(headerNode -> headerNode.comparator(context))
                 .reduce(Comparator::thenComparing).orElse(SortGroupNode.NOP_COMPARATOR);
     }

@@ -12,7 +12,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.OperatorParser;
 import com.github.leeonky.interpreter.Procedure;
 
-import static com.github.leeonky.dal.ast.opt.Factory.ExpressionContextObject.adapt;
+import static com.github.leeonky.dal.ast.opt.Factory.ExpressionContextData.adapt;
 import static com.github.leeonky.dal.ast.opt.Factory.*;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
 import static com.github.leeonky.dal.compiler.Notations.COMMA;

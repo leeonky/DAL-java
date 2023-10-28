@@ -180,9 +180,10 @@ public class Data {
             return new AutoMappingList(mapper, wraps());
         }
 
-        public DataList sort(Comparator<Object> comparator) {
+        public DataList sort(Comparator<Data> comparator) {
             if (comparator != NOP_COMPARATOR) {
-                return new DataList(new CollectionDALCollection<Object>(collect().stream().sorted(comparator).collect(toList())) {
+                return new DataList(new CollectionDALCollection<Object>(wraps().collect().stream()
+                        .sorted(comparator).map(Data::getInstance).collect(toList())) {
                     @Override
                     protected int firstIndex() {
                         return DataList.this.firstIndex();

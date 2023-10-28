@@ -16,23 +16,23 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class Factory {
-    public static DALOperator logical(Notation<?, ?, ?, ?, ?> notation, ExpressionContextObject.SupplierSupplierData logical) {
-        return new Operator(Precedence.LOGICAL, notation, ExpressionContextObject.adapt(logical), true);
+    public static DALOperator logical(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.SupplierSupplierData logical) {
+        return new Operator(Precedence.LOGICAL, notation, ExpressionContextData.adapt(logical), true);
     }
 
-    public static DALOperator plusSub(Notation<?, ?, ?, ?, ?> notation, ExpressionContextObject.ObjectObjectContextObject plusSub) {
-        return new Operator(Precedence.PLUS_SUB, notation, ExpressionContextObject.adapt(plusSub), false);
+    public static DALOperator plusSub(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.ObjectObjectContextObject plusSub) {
+        return new Operator(Precedence.PLUS_SUB, notation, ExpressionContextData.adapt(plusSub), false);
     }
 
-    public static DALOperator mulDiv(Notation<?, ?, ?, ?, ?> notation, ExpressionContextObject.ObjectObjectContextObject mulDiv) {
-        return new Operator(Precedence.MUL_DIV, notation, ExpressionContextObject.adapt(mulDiv), false);
+    public static DALOperator mulDiv(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.ObjectObjectContextObject mulDiv) {
+        return new Operator(Precedence.MUL_DIV, notation, ExpressionContextData.adapt(mulDiv), false);
     }
 
-    public static DALOperator comparator(Notation<?, ?, ?, ?, ?> notation, ExpressionContextObject operation) {
+    public static DALOperator comparator(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData operation) {
         return new Operator(Precedence.COMPARISON, notation, operation, true);
     }
 
-    public static DALOperator unary(Notation<?, ?, ?, ?, ?> notation, ExpressionContextObject unary) {
+    public static DALOperator unary(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData unary) {
         return new Operator(Precedence.UNARY_OPERATION, notation, unary, true) {
             @Override
             public String inspect(String node1, String node2) {
@@ -111,26 +111,26 @@ public class Factory {
         };
     }
 
-    public interface ExpressionContextObject extends BiFunction<DALExpression, DALRuntimeContext, Object> {
-        static ExpressionContextObject adapt(SupplierSupplierData operation) {
-            return (expression, context) -> operation.apply(() -> expression.left().evaluateData(context),
-                    () -> expression.right().evaluateData(context)).getInstance();
+    public interface ExpressionContextData extends BiFunction<DALExpression, DALRuntimeContext, Data> {
+        static ExpressionContextData adapt(SupplierSupplierData operation) {
+            return (expression, context) -> context.wrap(operation.apply(() -> expression.left().evaluateData(context),
+                    () -> expression.right().evaluateData(context)).getInstance());
         }
 
-        static ExpressionContextObject adapt(ObjectObjectContextObject operation) {
-            return (expression, context) -> operation.apply(expression.left().evaluate(context), expression.right().evaluate(context), context);
+        static ExpressionContextData adapt(ObjectObjectContextObject operation) {
+            return (expression, context) -> context.wrap(operation.apply(expression.left().evaluate(context), expression.right().evaluate(context), context));
         }
 
-        static ExpressionContextObject adapt(DataContextObject operation) {
+        static ExpressionContextData adapt(DataContextData operation) {
             return (expression, context) -> operation.apply(expression.right().evaluateData(context), context);
         }
 
-        static ExpressionContextObject adapt(ObjectObject operation) {
-            return (expression, context) -> operation.apply(expression.right().evaluate(context));
+        static ExpressionContextData adapt(ObjectObject operation) {
+            return (expression, context) -> context.wrap(operation.apply(expression.right().evaluate(context)));
         }
 
-        static ExpressionContextObject adapt(DataDataObject operation) {
-            return (expression, context) -> operation.apply(expression.left().evaluateData(context), expression.right().evaluateData(context));
+        static ExpressionContextData adapt(DataDataObject operation) {
+            return (expression, context) -> context.wrap(operation.apply(expression.left().evaluateData(context), expression.right().evaluateData(context)));
         }
 
         interface SupplierSupplierData extends BiFunction<Supplier<Data>, Supplier<Data>, Data> {
@@ -139,7 +139,7 @@ public class Factory {
         interface ObjectObjectContextObject extends TriFunction<Object, Object, DALRuntimeContext, Object> {
         }
 
-        interface DataContextObject extends BiFunction<Data, DALRuntimeContext, Object> {
+        interface DataContextData extends BiFunction<Data, DALRuntimeContext, Data> {
         }
 
         interface ObjectObject extends Function<Object, Object> {
@@ -150,15 +150,16 @@ public class Factory {
     }
 
     static class Operator extends DALOperator {
-        private final ExpressionContextObject operation;
+        private final ExpressionContextData operation;
 
-        public Operator(int precedence, Notation<?, ?, ?, ?, ?> notation, ExpressionContextObject operation, boolean needInspect) {
+        public Operator(int precedence, Notation<?, ?, ?, ?, ?> notation,
+                        ExpressionContextData operation, boolean needInspect) {
             super(precedence, notation.getLabel(), needInspect);
             this.operation = operation;
         }
 
         @Override
-        public Object calculate(DALExpression expression, DALRuntimeContext context) {
+        public Data calculateData(DALExpression expression, DALRuntimeContext context) {
             return operation.apply(expression, context);
         }
     }

@@ -150,3 +150,49 @@ Feature: multiple schema and list schema
       1 is [IdZero]
       ^
     """
+
+  Scenario: should inherit first index of list
+    Given the following java class:
+    """
+    public class Bean {
+      public final String id;
+      public Bean(String v) {
+        this.id=v;
+      }
+    }
+    """
+    Given the following java class:
+    """
+    public class BeanList extends ArrayList<Bean> {
+      public BeanList() {
+        add(new Bean("a"));
+        add(new Bean("b"));
+        add(new Bean("c"));
+      }
+    }
+    """
+    And register the following BeanDALCollectionFactory for java class "BeanList":
+    """
+    public class BeanDALCollectionFactory implements DALCollectionFactory<BeanList, Bean> {
+      public DALCollection<Bean> create(BeanList list) {
+        return new CollectionDALCollection<Bean>(list) {
+          protected int firstIndex() {
+            return 1;
+          }
+        };
+      }
+    }
+    """
+    And the following schema class:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfId", field = "id")
+    })
+    public class BeanSchema implements Schema{
+    }
+    """
+    Then the following verification for the instance of java class "BeanList" should pass:
+    """
+    ({} is [BeanSchema])[1].id= a
+    """
