@@ -73,6 +73,9 @@ public class Data {
             return getValue(chain);
         } catch (IndexOutOfBoundsException ex) {
             throw new PropertyAccessException(ex.getMessage(), ex);
+        } catch (ListMappingElementAccessException ex) {
+            throw new PropertyAccessException(ex.toDalError(0).getMessage(),
+                    ex.propertyAccessException().getCause());
         } catch (Exception e) {
             throw new PropertyAccessException(format("Get property `%s` failed, property can be:\n" +
                             "  1. public field\n" +

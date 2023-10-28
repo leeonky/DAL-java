@@ -8,9 +8,9 @@ public class AutoMappingList extends DALCollection.Decorated<Object> {
             try {
                 return mapper.apply(data);
             } catch (PropertyAccessException e) {
-                throw new ElementAccessException(index, e);
+                throw new ListMappingElementAccessException(index, e);
             } catch (Exception e) {
-                throw new ElementAccessException(index, new PropertyAccessException(e.getMessage(), e));
+                throw new ListMappingElementAccessException(index, new PropertyAccessException(e.getMessage(), e));
             }
         }));
     }

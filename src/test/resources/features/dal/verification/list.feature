@@ -559,7 +559,7 @@ Feature: list
         | ...      |
       """
 
-    Scenario: sort list should inherit origin list first index and schema
+    Scenario: sort list and verification should inherit origin list first index and schema
       Given the following java class:
       """
       public class Bean implements Comparable<Bean>{
@@ -604,20 +604,20 @@ Feature: list
         }
       }
       """
-#      Then the following verification for the instance of java class "BeanList" should pass:
-#      """
-#      (+({} is [BeanSchema]))[2].aliasOfId= b
-#      """
-#      Then the following verification for the instance of java class "BeanList" should pass:
-#      """
-#      (+({} is [BeanSchema])): | aliasOfId |
-#                             2 | b         |
-#                            -1 | c         |
-#      """
-#      Then the following verification for the instance of java class "BeanList" should pass:
-#      """
-#      is [BeanSchema]: +[{aliasOfId= a}{aliasOfId= b}{aliasOfId= c}]
-#      """
+      Then the following verification for the instance of java class "BeanList" should pass:
+      """
+      (+({} is [BeanSchema]))[2].aliasOfId= b
+      """
+      Then the following verification for the instance of java class "BeanList" should pass:
+      """
+      (+({} is [BeanSchema])): | aliasOfId |
+                             2 | b         |
+                            -1 | c         |
+      """
+      Then the following verification for the instance of java class "BeanList" should pass:
+      """
+      is [BeanSchema]: +[{aliasOfId= a}{aliasOfId= b}{aliasOfId= c}]
+      """
       Then the following verification for the instance of java class "BeanList" should pass:
       """
       is [BeanSchema]:  | +aliasOfId |

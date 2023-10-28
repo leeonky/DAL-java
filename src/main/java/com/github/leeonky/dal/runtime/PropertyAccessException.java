@@ -11,4 +11,9 @@ public class PropertyAccessException extends java.lang.RuntimeException {
     public RuntimeException toDalError(String prefix, int position) {
         return new RuntimeException(prefix + message, position, getCause());
     }
+
+    @Override
+    public Exception getCause() {
+        return (Exception) super.getCause();
+    }
 }

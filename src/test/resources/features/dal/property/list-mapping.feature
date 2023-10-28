@@ -171,6 +171,27 @@ Feature: list mapping
       list.invalid[]= [1]
                   ^
     """
+    When use a instance of java class "Data" to evaluate:
+    """
+      list.trim[].invalid= [1]
+    """
+    Then failed with the message:
+    """
+    Mapping element[1]:
+    Get property `invalid` failed, property can be:
+      1. public field
+      2. public getter
+      3. public no args method
+      4. Map key value
+      5. customized type getter
+      6. static method extension
+    Method or property `invalid` does not exist in `java.lang.String`
+    """
+    And got the following notation:
+    """
+      list.trim[].invalid= [1]
+                  ^
+    """
 
   Scenario: raise error when instance is not list
     Given the following java class:
@@ -222,4 +243,126 @@ Feature: list mapping
       list.key1[].key2[1]= 100
       list.key1[].key2= [100]
     }
+    """
+
+  Scenario: inherit schema after mapping
+    Given the following java class:
+    """
+    public class Bean {
+      public final String id;
+      public Bean(String v) {
+        this.id = v;
+      }
+    }
+    """
+    Given the following java class:
+    """
+    public class BeanRef {
+      public final Bean bean;
+      public BeanRef(Bean b) {
+        this.bean = b;
+      }
+    }
+    """
+    Given the following java class:
+    """
+    public class BeanList extends ArrayList<BeanRef> {
+      public BeanList() {
+        add(new BeanRef(new Bean("a")));
+        add(new BeanRef(new Bean("b")));
+      }
+    }
+    """
+    And the following schema class:
+    """
+    public class BeanRefSchema implements Schema{
+      public BeanSchema bean;
+    }
+    """
+    And the following schema class:
+    """
+    @Partial
+    @FieldAliases({
+            @FieldAlias(alias = "aliasOfId", field = "id")
+    })
+    public class BeanSchema implements Schema{
+    }
+    """
+    Then the following verification for the instance of java class "BeanList" should pass:
+    """
+    is [BeanRefSchema]: {
+      bean[].aliasOfId= [a b]
+    }
+    """
+
+  Scenario: raise error when get element error
+    Given the following java class:
+    """
+    public class Money {
+      public int value() {
+        throw new java.lang.RuntimeException("Error");
+      }
+    }
+    """
+    Given the following java class:
+    """
+    public class Product {
+      public Money price = new Money();
+    }
+    """
+    Given the following java class:
+    """
+    public class Order {
+      public Product product = new Product();
+    }
+    """
+    Given the following java class:
+    """
+    public class Data {
+      public List<Order> orders = new ArrayList() {{
+        add(new Order());
+      }};
+    }
+    """
+    When use a instance of java class "Data" to evaluate:
+    """
+    orders.product[].price.value.invalid.invalid= []
+    """
+    Then failed with the message:
+    """
+    Mapping element[0]:
+    Get property `value` failed, property can be:
+      1. public field
+      2. public getter
+      3. public no args method
+      4. Map key value
+      5. customized type getter
+      6. static method extension
+    java.lang.RuntimeException: Error
+    """
+    And got the following notation:
+    """
+    orders.product[].price.value.invalid.invalid= []
+                                         ^
+    """
+    When use a instance of java class "Data" to evaluate:
+    """
+    orders.product[].price.value.invalid.invalid[0]: {...}
+    """
+    Then failed with the message:
+    """
+    Mapping element[0]:
+    Get property `value` failed, property can be:
+      1. public field
+      2. public getter
+      3. public no args method
+      4. Map key value
+      5. customized type getter
+      6. static method extension
+    java.lang.RuntimeException: Error
+    """
+    And got the following notation:
+    """
+    orders.product[].price.value.invalid.invalid[0]: {...}
+                                                ^
     """

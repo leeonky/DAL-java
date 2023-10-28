@@ -151,7 +151,7 @@ public class ListScopeNode extends DALNode {
                     verifyCorrespondingElement(context, getVerificationExpressions(list));
                 return data;
             });
-        } catch (ElementAccessException e) {
+        } catch (ListMappingElementAccessException e) {
             throw e.toDalError(node.getOperandPosition());
         }
     }
