@@ -76,7 +76,7 @@ public class ListScopeNode extends DALNode {
                         throw style == Style.ROW ? new DifferentCellSize(message, getPositionBegin())
                                 : new AssertionFailure(message, getPositionBegin());
                     }
-                    if (zipped.hasLeft()) {
+                    if (zipped.hasLeft() && !list.infinite()) {
                         String message = format("Different list size\nExpected: <%d>\nActual: <%d>", inputClauses.size(), list.size());
                         throw style == Style.ROW ? new DifferentCellSize(message, getPositionBegin())
                                 : new AssertionFailure(message, getPositionBegin());

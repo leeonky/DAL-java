@@ -521,10 +521,10 @@ Feature: list
       : [[0]: +[[0]: 1, [1]: 2, [2]: 3], [1]: -[[0]: 3, [1]: 2, [2]: 1]]
       """
 
-    Scenario: support access variable length list by index
+    Scenario: support access infinite collection by index
       Given the following java class:
       """
-      public class VarList implements Iterable<Integer> {
+      public class InfiniteCollection implements Iterable<Integer> {
         private int index=0;
 
         public Iterator<Integer> iterator() {
@@ -542,7 +542,7 @@ Feature: list
         }
       }
       """
-      Then the following verification for the instance of java class "VarList" should pass:
+      Then the following verification for the instance of java class "InfiniteCollection" should pass:
       """
       : {
         [0]= 0,
@@ -550,7 +550,7 @@ Feature: list
         [2]= 4
       }
       """
-      And the following verification for the instance of java class "VarList" should pass:
+      And the following verification for the instance of java class "InfiniteCollection" should pass:
       """
       : | toString |
         | '0'      |
@@ -625,12 +625,12 @@ Feature: list
                      -1 | c          |
       """
 
-  Rule: variable length list
+  Rule: infinite collection
 
     Background:
       Given the following java class:
       """
-      public class VarList implements Iterable<Integer> {
+      public class InfiniteCollection implements Iterable<Integer> {
         private int index=0;
         public Iterator<Integer> iterator() {
           return new Iterator<Integer>() {
@@ -644,10 +644,10 @@ Feature: list
         }
       }
       """
-      Given register the following BeanDALCollectionFactory for java class "VarList":
+      Given register the following BeanDALCollectionFactory for java class "InfiniteCollection":
       """
-      public class BeanDALCollectionFactory implements DALCollectionFactory<VarList, Integer> {
-        public DALCollection<Integer> create(VarList list) {
+      public class BeanDALCollectionFactory implements DALCollectionFactory<InfiniteCollection, Integer> {
+        public DALCollection<Integer> create(InfiniteCollection list) {
           return new IterableDALCollection<Integer>(list) {
             public boolean infinite() {
               return true;
@@ -657,8 +657,8 @@ Feature: list
       }
       """
 
-    Scenario: set variable flag and should raise error when try to get size
-      When use a instance of java class "VarList" to evaluate:
+    Scenario: set infinite flag and should raise error when try to get size
+      When use a instance of java class "InfiniteCollection" to evaluate:
       """
       ::size= 0
       """
@@ -672,8 +672,8 @@ Feature: list
         ^
       """
 
-    Scenario: set variable flag and should raise error when try to sort list
-      When use a instance of java class "VarList" to evaluate:
+    Scenario: set infinite flag and should raise error when try to sort list
+      When use a instance of java class "InfiniteCollection" to evaluate:
       """
       (+{})
       """
@@ -686,7 +686,7 @@ Feature: list
       (+{})
        ^
       """
-      When use a instance of java class "VarList" to evaluate:
+      When use a instance of java class "InfiniteCollection" to evaluate:
       """
       (-{})
       """
@@ -700,8 +700,8 @@ Feature: list
        ^
       """
 
-    Scenario: set variable flag and should raise error when try to verify list schema
-      When use a instance of java class "VarList" to evaluate:
+    Scenario: set infinite flag and should raise error when try to verify list schema
+      When use a instance of java class "InfiniteCollection" to evaluate:
       """
       is [String]
       """
@@ -715,8 +715,8 @@ Feature: list
          ^
       """
 
-    Scenario: set variable flag and should raise error when use negative index
-      When use a instance of java class "VarList" to evaluate:
+    Scenario: set infinite flag and should raise error when use negative index
+      When use a instance of java class "InfiniteCollection" to evaluate:
       """
       [-1]
       """
@@ -736,6 +736,30 @@ Feature: list
       """
       [-1]
       ^
+      """
+
+    Scenario: set infinite flag and should ignore list size in verification
+      Then the following verification for the instance of java class "InfiniteCollection" should pass:
+      """
+      {}= [0 2 4], {}= [0 2 4 6],
+
+      {}= | intValue |
+          | 0        |
+          | 2        |
+          | 4        |
+      ,
+
+      {}= | intValue |
+          | 0        |
+          | 2        |
+          | ...      |
+      ,
+
+      {}= | intValue |
+          | 0        |
+          | 2        |
+          | 4        |
+          | 6        |
       """
 
 #  TODO contains not allow set index or key in table
