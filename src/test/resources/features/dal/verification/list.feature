@@ -738,15 +738,15 @@ Feature: list
       ^
       """
 
-    Scenario: set infinite flag and should ignore list size in verification
+    Scenario: set infinite flag and should ignore list size in verification (multi column make sure merged NOP_COMPARATOR is also NOP_COMPARATOR)
       Then the following verification for the instance of java class "InfiniteCollection" should pass:
       """
       {}= [0 2 4], {}= [0 2 4 6],
 
-      {}= | intValue |
-          | 0        |
-          | 2        |
-          | 4        |
+      {}: | intValue | longValue |
+          | 0        | 0         |
+          | 2        | 2         |
+          | 4        | 4         |
       ,
 
       {}= | intValue |

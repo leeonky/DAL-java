@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
+import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static java.util.stream.Collectors.toList;
 
 public class TableHeadRow extends DALNode {
@@ -28,7 +29,8 @@ public class TableHeadRow extends DALNode {
 
     public Comparator<Data> collectComparator(RuntimeContextBuilder.DALRuntimeContext context) {
         return headers.stream().sorted(HeaderNode.bySequence()).map(headerNode -> headerNode.comparator(context))
-                .reduce(Comparator::thenComparing).orElse(SortGroupNode.NOP_COMPARATOR);
+                .reduce((comparator, other) -> comparator == NOP_COMPARATOR ? other : comparator.thenComparing(other))
+                .orElse(NOP_COMPARATOR);
     }
 
     public HeaderNode getHeader(int index) {
