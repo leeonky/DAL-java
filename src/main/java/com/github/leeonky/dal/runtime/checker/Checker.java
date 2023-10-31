@@ -10,6 +10,8 @@ public interface Checker {
     Checker MATCH_NULL_CHECKER = CheckingContext::messageMatch;
     Checker EQUALS_CHECKER = new EqualsChecker();
     Checker MATCHES_CHECKER = new MatchesChecker();
+    Checker OBJECT_SCOPE_CHECKER = new ObjectScopeChecker();
+    Checker LIST_SCOPE_CHECKER = new ListScopeChecker();
 
     static Checker forceFailed(Function<CheckingContext, String> message) {
         return new Checker() {

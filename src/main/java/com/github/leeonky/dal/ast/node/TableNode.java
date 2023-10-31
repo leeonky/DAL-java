@@ -35,9 +35,10 @@ public class TableNode extends DALNode {
 
     @Override
     public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        Data actual = actualNode.evaluateData(context);
+        DelegateNode node = new DelegateNode(actualNode);
+        Data actual = node.evaluateData(context);
         try {
-            return convertToVerificationNode(actual, operator, context).verify(actualNode, operator, context);
+            return convertToVerificationNode(actual, operator, context).verify(node, operator, context);
         } catch (RowAssertionFailure rowAssertionFailure) {
             throw rowAssertionFailure.linePositionException(this);
         }

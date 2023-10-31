@@ -2,6 +2,7 @@ package com.github.leeonky.dal.runtime.checker;
 
 import com.github.leeonky.dal.runtime.ClassKeyMap;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.NodeType;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -54,10 +55,20 @@ public class CheckerSet {
     }
 
     public static Checker defaultMatching(Data expected, Data actual) {
-        return expected.isNull() ? Checker.MATCH_NULL_CHECKER : Checker.MATCHES_CHECKER;
+        if (expected.isNull())
+            return Checker.MATCH_NULL_CHECKER;
+        if (NodeType.OBJECT_SCOPE.equals(expected.getInstance()))
+            return Checker.OBJECT_SCOPE_CHECKER;
+        if (NodeType.LIST_SCOPE.equals(expected.getInstance()))
+            return Checker.LIST_SCOPE_CHECKER;
+        return Checker.MATCHES_CHECKER;
     }
 
     public static Checker defaultEqualing(Data expected, Data actual) {
+        if (NodeType.OBJECT_SCOPE.equals(expected.getInstance()))
+            return Checker.OBJECT_SCOPE_CHECKER;
+        if (NodeType.LIST_SCOPE.equals(expected.getInstance()))
+            return Checker.LIST_SCOPE_CHECKER;
         return Checker.EQUALS_CHECKER;
     }
 }

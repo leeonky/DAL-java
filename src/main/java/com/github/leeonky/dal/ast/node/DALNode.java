@@ -38,7 +38,10 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         expected.isNullWithPosition(getOperandPosition());
         Data actual = actualNode.evaluateData(context);
         actual.isNullWithPosition(actualNode.getOperandPosition());
-        Checker checker = factory.apply(context, expected, actual);
+        return checkerVerify(factory.apply(context, expected, actual), expected, actual, context);
+    }
+
+    protected Data checkerVerify(Checker checker, Data expected, Data actual, DALRuntimeContext context) {
         return checker.verify(createContext(context, expected, actual, checker));
     }
 

@@ -18,7 +18,7 @@ Feature: integer node
     Then parse the following "integer" node:
     """
     : {
-      class.simpleName: 'ConstNode'
+      class.simpleName: 'ConstValueNode'
       inspect: '<inspect>'
       positionBegin: 1
     }

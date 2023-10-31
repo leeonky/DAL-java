@@ -296,7 +296,7 @@ public class Compiler {
     private Optional<DALNode> compileUserDefinedLiteral(DALProcedure dalProcedure) {
         return dalProcedure.getSourceCode().tryFetch(() -> Tokens.USER_LITERAL_SYMBOL.scan(dalProcedure.getSourceCode())
                 .flatMap(token -> dalProcedure.getRuntimeContext().takeUserDefinedLiteral(token.getContent())
-                        .map(result -> new ConstNode(result.getValue()).setPositionBegin(token.getPosition()))));
+                        .map(result -> new ConstValueNode(result.getValue()).setPositionBegin(token.getPosition()))));
     }
 
     private ObjectParser.Mandatory<DALProcedure, Character> charNode(EscapeChars escapeChars) {

@@ -104,8 +104,8 @@ class SpecifyIndexRowType extends RowType {
     }
 
     static Optional<DALNode> indexToExpression(DALNode node) {
-        return when(node instanceof ConstNode).optional(() -> new DALExpression(INPUT_NODE, Factory.executable(EMPTY),
-                new SymbolNode(((ConstNode) node).getValue(), BRACKET).setPositionBegin(node.getPositionBegin())));
+        return when(node instanceof ConstValueNode).optional(() -> new DALExpression(INPUT_NODE, Factory.executable(EMPTY),
+                new SymbolNode(((ConstValueNode) node).getValue(), BRACKET).setPositionBegin(node.getPositionBegin())));
     }
 }
 

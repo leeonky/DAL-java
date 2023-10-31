@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.ast.node.table;
 
-import com.github.leeonky.dal.ast.node.ConstNode;
+import com.github.leeonky.dal.ast.node.ConstValueNode;
 import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.node.InputNode;
@@ -50,7 +50,7 @@ public class TableRowPrefixNode extends DALNode {
 
     public RowType resolveRowType() {
         return indexOrProperty.map(dalNode -> {
-            if (dalNode instanceof ConstNode)
+            if (dalNode instanceof ConstValueNode)
                 return SPECIFY_INDEX;
             else if (dalNode instanceof DALExpression)
                 return SPECIFY_PROPERTY;

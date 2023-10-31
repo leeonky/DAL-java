@@ -5,6 +5,7 @@ import com.github.leeonky.dal.ast.opt.Matcher;
 import com.github.leeonky.dal.runtime.AssertionFailure;
 import com.github.leeonky.dal.runtime.CurryingMethod;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.NodeType;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
 
@@ -38,6 +39,11 @@ public class ObjectScopeNode extends DALNode {
     }
 
     @Override
+    public Object evaluate(DALRuntimeContext context) {
+        return NodeType.OBJECT_SCOPE;
+    }
+
+    @Override
     public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
         Data data = evaluateActualAndCheckNull(actualNode, context);
         data.execute(() -> {
@@ -45,7 +51,9 @@ public class ObjectScopeNode extends DALNode {
             assertUnexpectedFields(collectUnexpectedFields(data, context), actualNode.inspect(), operator.getPosition());
             return true;
         });
-        return data;
+
+        Data placeholder = evaluateData(context);
+        return checkerVerify(context.fetchEqualsChecker(placeholder, data), placeholder, data, context);
     }
 
     private Data evaluateActualAndCheckNull(DALNode actualNode, DALRuntimeContext context) {
@@ -60,10 +68,12 @@ public class ObjectScopeNode extends DALNode {
         if (verificationExpressions.isEmpty() && !isObjectWildcard)
             throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
         Data data = evaluateActualAndCheckNull(actualNode, context);
-        return data.execute(() -> {
+        data.execute(() -> {
             verificationExpressions.forEach(expression -> expression.evaluate(context));
             return data;
         });
+        Data placeholder = evaluateData(context);
+        return checkerVerify(context.fetchMatchingChecker(placeholder, data), placeholder, data, context);
     }
 
     private Set<Object> collectUnexpectedFields(Data data, DALRuntimeContext context) {

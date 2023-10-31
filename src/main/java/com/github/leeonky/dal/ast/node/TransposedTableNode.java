@@ -19,9 +19,10 @@ public class TransposedTableNode extends DALNode {
 
     @Override
     public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        Data actual = actualNode.evaluateData(context);
+        DelegateNode node = new DelegateNode(actualNode);
+        Data actual = node.evaluateData(context);
         try {
-            return transpose().convertToVerificationNode(actual, operator, context).verify(actualNode, operator, context);
+            return transpose().convertToVerificationNode(actual, operator, context).verify(node, operator, context);
         } catch (RowAssertionFailure rowAssertionFailure) {
             throw rowAssertionFailure.columnPositionException(this);
         }

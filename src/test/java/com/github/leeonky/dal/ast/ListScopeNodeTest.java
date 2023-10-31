@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.ast.node.ConstNode;
+import com.github.leeonky.dal.ast.node.ConstValueNode;
 import com.github.leeonky.dal.ast.node.ListScopeNode;
 import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Matcher;
@@ -23,7 +23,7 @@ class ListScopeNodeTest {
     @Test
     void empty_list_equal_to_or_matches_empty_list() {
         List<Object> emptyList = Collections.emptyList();
-        assertThat(listScopeNode.verify(new ConstNode(emptyList), EQUAL, DALRuntimeContext).getInstance()).isSameAs(emptyList);
-        assertThat(listScopeNode.verify(new ConstNode(emptyList), MATCHER, DALRuntimeContext).getInstance()).isSameAs(emptyList);
+        assertThat(listScopeNode.verify(new ConstValueNode(emptyList), EQUAL, DALRuntimeContext).getInstance()).isSameAs(emptyList);
+        assertThat(listScopeNode.verify(new ConstValueNode(emptyList), MATCHER, DALRuntimeContext).getInstance()).isSameAs(emptyList);
     }
 }

@@ -2,11 +2,11 @@ package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
-public class ConstNode extends DALNode {
+public class ConstValueNode extends DALNode {
 
     private final Object value;
 
-    public ConstNode(Object value) {
+    public ConstValueNode(Object value) {
         this.value = value;
     }
 

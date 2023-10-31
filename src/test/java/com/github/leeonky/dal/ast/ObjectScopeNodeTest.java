@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.ast.node.ConstNode;
+import com.github.leeonky.dal.ast.node.ConstValueNode;
 import com.github.leeonky.dal.ast.node.ListEllipsisNode;
 import com.github.leeonky.dal.ast.node.ObjectScopeNode;
 import com.github.leeonky.dal.ast.opt.Equal;
@@ -30,13 +30,13 @@ class ObjectScopeNodeTest {
         @Test
         void empty_data_equal_to_empty_object() {
             HashMap<Object, Object> emptyMap = new HashMap<>();
-            assertThat(objectScopeNode.verify(new ConstNode(emptyMap), EQUAL, DALRuntimeContext).getInstance()).isSameAs(emptyMap);
+            assertThat(objectScopeNode.verify(new ConstValueNode(emptyMap), EQUAL, DALRuntimeContext).getInstance()).isSameAs(emptyMap);
         }
 
         @Test
         void not_equal_when_has_unexpected_field() {
             assertThrows(AssertionFailure.class, () ->
-                    objectScopeNode.verify(new ConstNode(new HashMap<String, Object>() {{
+                    objectScopeNode.verify(new ConstValueNode(new HashMap<String, Object>() {{
                         put("unexpected", "field");
                     }}), EQUAL, DALRuntimeContext));
         }
@@ -52,13 +52,13 @@ class ObjectScopeNodeTest {
             HashMap<String, Object> data = new HashMap<String, Object>() {{
                 put("any fields", "any value");
             }};
-            assertThat(objectScopeNode.verify(new ConstNode(data), MATCHER, DALRuntimeContext).getInstance()).isSameAs(data);
+            assertThat(objectScopeNode.verify(new ConstValueNode(data), MATCHER, DALRuntimeContext).getInstance()).isSameAs(data);
         }
 
         @Test
         void null_does_not_match_empty_object() {
             assertThrows(AssertionFailure.class, () ->
-                    objectScopeNode.verify(new ConstNode(null), MATCHER, DALRuntimeContext)
+                    objectScopeNode.verify(new ConstValueNode(null), MATCHER, DALRuntimeContext)
             );
         }
     }

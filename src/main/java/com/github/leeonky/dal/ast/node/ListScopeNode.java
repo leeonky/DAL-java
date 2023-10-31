@@ -123,6 +123,11 @@ public class ListScopeNode extends DALNode {
     }
 
     @Override
+    public Object evaluate(DALRuntimeContext context) {
+        return NodeType.LIST_SCOPE;
+    }
+
+    @Override
     public String inspect() {
         if (type == Type.CONTAINS)
             return inputClauses.stream().map(clause -> clause.expression(INPUT_NODE).inspect())
@@ -132,12 +137,16 @@ public class ListScopeNode extends DALNode {
 
     @Override
     public Data verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
-        return verify(context, actualNode);
+        Data data = verify(context, actualNode);
+        Data placeholder = evaluateData(context);
+        return checkerVerify(context.fetchMatchingChecker(placeholder, data), placeholder, data, context);
     }
 
     @Override
     public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        return verify(context, actualNode);
+        Data data = verify(context, actualNode);
+        Data placeholder = evaluateData(context);
+        return checkerVerify(context.fetchEqualsChecker(placeholder, data), placeholder, data, context);
     }
 
     private Data verify(DALRuntimeContext context, DALNode node) {
