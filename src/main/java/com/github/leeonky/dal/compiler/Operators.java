@@ -53,7 +53,8 @@ public class Operators {
                     PLUS.operator(() -> unary(PLUS, adapt(Calculator::positive)), not(DALProcedure::isCodeBeginning)),
                     NOT.operator(() -> unary(NOT, adapt(Calculator::not)), not(DALProcedure::mayBeUnEqual))),
             VERIFICATION_OPERATORS = oneOf(MATCHER.operator(Matcher::new, not(DALProcedure::mayBeMetaProperty)),
-                    EQUAL.operator(Equal::new));
+                    EQUAL.operator(Equal::new)),
+            DATA_REMARK = Notations.Operators.DATA_REMARK.operator(Factory::dataRemark);
 
     static final OperatorParser.Mandatory<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression>
             DEFAULT_VERIFICATION_OPERATOR = DEFAULT_OPERATOR.mandatory("");

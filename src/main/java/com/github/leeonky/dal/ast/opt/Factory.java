@@ -5,6 +5,7 @@ import com.github.leeonky.dal.ast.node.ExecutableNode;
 import com.github.leeonky.dal.ast.node.SchemaComposeNode;
 import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.RemarkData;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.Notation;
@@ -91,7 +92,7 @@ public class Factory {
         };
     }
 
-    public static DALOperator remark() {
+    public static DALOperator constRemark() {
         return new DALOperator(Precedence.REMARK, "", true) {
 
             @Override
@@ -107,6 +108,24 @@ public class Factory {
             @Override
             public String inspect(String node1, String node2) {
                 return node1 + " " + node2;
+            }
+        };
+    }
+
+    public static DALOperator dataRemark() {
+        return new DALOperator(Precedence.REMARK, "", false) {
+
+            @Override
+            public Data calculateData(DALExpression expression, DALRuntimeContext context) {
+                Data leftValue = expression.left().evaluateData(context);
+                Data rightValue = expression.right().evaluateData(context);
+                return context.invokeDataRemark(new RemarkData(leftValue, expression.left(),
+                        expression.right(), context));
+            }
+
+            @Override
+            public String inspect(String node1, String node2) {
+                return node1 + "(" + node2 + ")";
             }
         };
     }

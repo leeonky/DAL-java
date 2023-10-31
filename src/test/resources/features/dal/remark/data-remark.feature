@@ -15,12 +15,12 @@ Feature: data remark
     """
     And register DAL:
     """
-    dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->rd.remark()+i));
+    dal.getRuntimeContextBuilder().registerDataRemark(Bean.class, rd-> rd.data().map(i->((Bean)i).value+rd.remark()));
     """
-    When the following verification for the instance of java class "Bean" should pass:
+    When the following verification for the instance of java class "BeanRef" should pass:
     """
     : {
-      bean(World)= helloWorld
+      bean(World)= helloWorld,
       ['bean'](World)= helloWorld
     }
     """
@@ -32,4 +32,5 @@ Feature: data remark
 #    remark on row header with row index
 #    remark on row header with row key
 #    raise error when no remark register
+#    precedence
 

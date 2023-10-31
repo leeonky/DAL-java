@@ -56,7 +56,8 @@ public class Notations {
                 SLASH = notation("/"),
                 META = notation("::"),
                 IS = Keywords.IS,
-                WHICH = Keywords.WHICH;
+                WHICH = Keywords.WHICH,
+                DATA_REMARK = notation("(");
     }
 
     public static final Notation<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression>

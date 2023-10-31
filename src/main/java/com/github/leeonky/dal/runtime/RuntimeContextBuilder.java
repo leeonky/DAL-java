@@ -476,5 +476,13 @@ public class RuntimeContextBuilder {
         public Object invokeMetaProperty(MetaData metaData) {
             return fetchLocalMetaFunction(metaData).orElseGet(() -> fetchGlobalMetaFunction(metaData)).apply(metaData);
         }
+
+        public Data invokeDataRemark(RemarkData remarkData) {
+            Object instance = remarkData.data().getInstance();
+            return remarks.tryGetData(instance)
+                    .orElseThrow(() -> new RuntimeException("Not implement operator () of " +
+                            Classes.getClassName(instance), remarkData.remarkNode().getPositionBegin()))
+                    .apply(remarkData);
+        }
     }
 }

@@ -103,7 +103,9 @@ public class Compiler {
             LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(NodeFactory::relaxString),
             TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(NodeFactory::relaxString),
             BRACKET_RELAX_STRING = Tokens.BRACKET_RELAX_STRING.nodeParser(NodeFactory::relaxString),
-            DEFAULT_INDEX_HEADER = procedure -> new TableDefaultIndexHeadRow();
+            DEFAULT_INDEX_HEADER = procedure -> new TableDefaultIndexHeadRow(),
+            DATA_REMARK = many(charNode(new EscapeChars())).and(endWith(Notations.CLOSING_PARENTHESES)).
+                    as(NodeFactory::dataRemarkNode);
 
     public ClauseParser<DALNode, DALProcedure>
             ARITHMETIC_CLAUSE, VERIFICATION_CLAUSE,
@@ -112,20 +114,20 @@ public class Compiler {
             ELEMENT_ELLIPSIS_CLAUSE = Notations.Operators.ELEMENT_ELLIPSIS.clause((token, input) -> new ListEllipsisNode()),
             ROW_WILDCARD_CLAUSE = Notations.Operators.ROW_WILDCARD.clause((token, input) -> new WildcardNode(token.getContent())),
             LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
+            PROPERTY_POSTFIX = oneOf(LIST_MAPPING_CLAUSE, Operators.DATA_REMARK.clause(DATA_REMARK)),
             META_LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNodeMeta(symbolNode)),
             IMPLICIT_PROPERTY_CLAUSE = Operators.PROPERTY_IMPLICIT.clause(oneOf(PROPERTY_PATTERN,
-                    oneOf(STRING_PROPERTY, NUMBER_PROPERTY, SYMBOL).concat(LIST_MAPPING_CLAUSE))),
+                    oneOf(STRING_PROPERTY, NUMBER_PROPERTY, SYMBOL).concat(PROPERTY_POSTFIX))),
             EXPLICIT_PROPERTY_CLAUSE = oneOf(Operators.PROPERTY_DOT.clause(PROPERTY_PATTERN.or(propertyChainNode())),
                     Operators.PROPERTY_SLASH.clause(propertyChainNode()),
                     Operators.PROPERTY_META.clause(symbolClause(META_SYMBOL.concat(META_LIST_MAPPING_CLAUSE))),
                     Operators.PROPERTY_IMPLICIT.clause(Notations.OPENING_BRACKET.with(single(INTEGER_OR_STRING.or(BRACKET_RELAX_STRING))
                             .and(endWith(Notations.CLOSING_BRACKET))
-                            .as(NodeFactory::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE))),
-                    Operators.PROPERTY_IMPLICIT.clause(lazyNode(() -> GROUP_PROPERTY))
-            );
+                            .as(NodeFactory::bracketSymbolNode).concat(PROPERTY_POSTFIX))),
+                    Operators.PROPERTY_IMPLICIT.clause(lazyNode(() -> GROUP_PROPERTY)));
 
     private NodeParser.Mandatory<DALNode, DALProcedure> propertyChainNode() {
-        return symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL, NUMBER_PROPERTY).concat(LIST_MAPPING_CLAUSE));
+        return symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL, NUMBER_PROPERTY).concat(PROPERTY_POSTFIX));
     }
 
     private NodeParser.Mandatory<DALNode, DALProcedure> symbolClause(
