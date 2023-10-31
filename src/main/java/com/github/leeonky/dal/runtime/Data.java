@@ -116,6 +116,10 @@ public class Data {
         return new Data(context.getConverter().convert(target, instance), context, schemaType);
     }
 
+    public Data map(Function<Object, Object> mapper) {
+        return new Data(mapper.apply(instance), context, schemaType);
+    }
+
     public Data filter(String prefix) {
         FilteredObject filteredObject = new FilteredObject();
         getFieldNames().stream().filter(String.class::isInstance).map(String.class::cast)

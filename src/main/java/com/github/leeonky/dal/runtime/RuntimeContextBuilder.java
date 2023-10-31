@@ -42,6 +42,7 @@ public class RuntimeContextBuilder {
     private final Map<String, BeanClass<?>> schemas = new HashMap<>();
     private final Set<Method> extensionMethods = new HashSet<>();
     private final Map<Object, Function<MetaData, Object>> metaProperties = new HashMap<>();
+    private final ClassKeyMap<Function<RemarkData, Data>> remarks = new ClassKeyMap<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
@@ -246,6 +247,11 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    public RuntimeContextBuilder registerDataRemark(Class<?> type, Function<RemarkData, Data> remark) {
+        remarks.put(type, remark);
+        return this;
+    }
+
     public BeanClass<?> schemaType(String schema) {
         BeanClass<?> type = schemas.get(schema);
         if (type != null)
@@ -402,16 +408,16 @@ public class RuntimeContextBuilder {
         }
 
         public Function<MetaData, Object> fetchGlobalMetaFunction(MetaData metaData) {
-            return metaProperties.computeIfAbsent(metaData.getName(), k -> {
+            return metaProperties.computeIfAbsent(metaData.name(), k -> {
                 throw new RuntimeException(format("Meta property `%s` not found",
-                        metaData.getName()), metaData.getSymbolNode().getPositionBegin());
+                        metaData.name()), metaData.symbolNode().getPositionBegin());
             });
         }
 
         private Optional<Function<MetaData, Object>> fetchLocalMetaFunction(MetaData metaData) {
             return metaFunctionsByType(metaData).map(e -> {
                 metaData.addCallType(e.getKey());
-                return e.getValue().get(metaData.getName());
+                return e.getValue().get(metaData.name());
             }).filter(Objects::nonNull).findFirst();
         }
 
@@ -420,7 +426,7 @@ public class RuntimeContextBuilder {
                     .filter(e -> !metaData.calledBy(e.getKey()))
                     .map(e -> {
                         metaData.addCallType(e.getKey());
-                        return e.getValue().get(metaData.getName());
+                        return e.getValue().get(metaData.name());
                     }).filter(Objects::nonNull).findFirst();
         }
 

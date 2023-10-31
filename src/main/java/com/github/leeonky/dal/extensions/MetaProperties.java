@@ -13,7 +13,7 @@ import static java.lang.String.format;
 @Order(BUILD_IN)
 public class MetaProperties implements Extension {
     private static Object size(MetaData metaData) {
-        Data data = metaData.getData();
+        Data data = metaData.data();
         if (data.isList())
 //            try {
             return data.list().size();
@@ -27,16 +27,16 @@ public class MetaProperties implements Extension {
         Throwable error = metaData.catchError();
         if (error == null)
             throw new AssertionFailure("Expecting an error to be thrown, but nothing was thrown",
-                    metaData.getSymbolNode().getPositionBegin());
+                    metaData.symbolNode().getPositionBegin());
         return error;
     }
 
     private static Object object_(MetaData metaData) {
-        return metaData.getData().getInstance() == null ? null : new OriginalJavaObject(metaData.getData());
+        return metaData.data().getInstance() == null ? null : new OriginalJavaObject(metaData.data());
     }
 
     private static Object keys(MetaData metaData) {
-        return metaData.getData().getFieldNames();
+        return metaData.data().getFieldNames();
     }
 
     @Override
