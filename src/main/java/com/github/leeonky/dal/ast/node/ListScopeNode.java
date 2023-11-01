@@ -67,9 +67,8 @@ public class ListScopeNode extends DALNode {
                             new SymbolNode(negativeIndex--, BRACKET))));
             } else {
                 Zipped<Integer, Clause<DALNode>> zipped = zip(list.indexes(), inputClauses);
-                zipped.forEachElement((index, clause) ->
-                        add(clause.expression(new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
-                                new SymbolNode(index, BRACKET)))));
+                zipped.forEachElement((index, clause) -> add(clause.expression(
+                        new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY), new SymbolNode(index, BRACKET)))));
                 if (type == Type.ALL_ITEMS) {
                     if (zipped.hasRight()) {
                         String message = format("Different list size\nExpected: <%d>\nActual: <%d>", inputClauses.size(), zipped.index());

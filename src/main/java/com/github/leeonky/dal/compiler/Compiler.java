@@ -43,7 +43,7 @@ public class Compiler {
     NodeParser<DALNode, DALProcedure>
             PROPERTY, OBJECT, SORTED_LIST, LIST, PARENTHESES, VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND,
             TABLE, SHORT_VERIFICATION_OPERAND, CELL_VERIFICATION_OPERAND, GROUP_PROPERTY, OPTIONAL_PROPERTY_CHAIN,
-            INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> INPUT_NODE),
+            ROOT_INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> INPUT_NODE),
             NUMBER = Tokens.NUMBER.nodeParser(NodeFactory::constNumber),
             INTEGER = Tokens.INTEGER.nodeParser(NodeFactory::constInteger),
             SINGLE_QUOTED_STRING = Notations.SINGLE_QUOTED.with(many(charNode(SINGLE_QUOTED_ESCAPES))
@@ -169,7 +169,7 @@ public class Compiler {
                 positionNode(Notations.MATRIX_COLUMN_SPLITTER.before(DEFAULT_INDEX_HEADER).concat(TABLE_BODY_CLAUSE)));
         VERIFICATION_SPECIAL_OPERAND = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         CONST_REMARK = CONST.concat(PARENTHESES.clause(NodeFactory::constRemarkNode));
-        OPERAND = lazyNode(() -> oneOf(Operators.UNARY_OPERATORS.unary(OPERAND), CONST_REMARK, PROPERTY, PARENTHESES, INPUT))
+        OPERAND = lazyNode(() -> oneOf(Operators.UNARY_OPERATORS.unary(OPERAND), CONST_REMARK, PROPERTY, PARENTHESES, ROOT_INPUT))
                 .mandatory("Expect a value or expression");
         VERIFICATION_VALUE_OPERAND = oneOf(Operators.UNARY_OPERATORS.unary(OPERAND), CONST_REMARK, DEFAULT_INPUT.with(EXPLICIT_PROPERTY_CLAUSE), PARENTHESES);
         ARITHMETIC_CLAUSE = Operators.BINARY_ARITHMETIC_OPERATORS.clause(OPERAND);
@@ -227,7 +227,7 @@ public class Compiler {
             SEQUENCE_ZA = Notations.SEQUENCE_ZA.node(SortSymbolNode::new),
             SEQUENCE_AZ_2 = Notations.SEQUENCE_AZ_2.node(SortSymbolNode::new),
             SEQUENCE_ZA_2 = Notations.SEQUENCE_ZA_2.node(SortSymbolNode::new),
-            ROW_KEY = oneOf(INTEGER, INPUT.with(DATA_REMARK_CLAUSE), OPTIONAL_VERIFICATION_PROPERTY);
+            ROW_KEY = oneOf(INTEGER, OPTIONAL_VERIFICATION_PROPERTY);
 
     private final NodeParser.Mandatory<DALNode, DALProcedure>
             SEQUENCE = oneOf(
@@ -237,8 +237,11 @@ public class Compiler {
             many(SEQUENCE_ZA_2).and(atLeast(1)).as(SortGroupNode::new)).or(procedure -> SortGroupNode.noSequence()),
             EMPTY_TRANSPOSED_HEAD = procedure -> new EmptyTransposedRowHeaderRow();
 
+    public ClauseParser<DALNode, DALProcedure>
+            ROW_HEADER_CLAUSE = oneOf(DATA_REMARK_CLAUSE, SCHEMA_CLAUSE).concatAll(oneOf(DATA_REMARK_CLAUSE, SCHEMA_CLAUSE));
+
     private final NodeParser.Mandatory<DALNode, DALProcedure>
-            ROW_PREFIX = procedure -> new RowHeader(ROW_KEY.parse(procedure), SCHEMA_CLAUSE.parse(procedure),
+            ROW_PREFIX = procedure -> new RowHeader(ROW_KEY.parse(procedure), ROW_HEADER_CLAUSE.parse(procedure),
             Operators.VERIFICATION_OPERATORS.parse(procedure)),
             TABLE_HEADER = procedure -> new ColumnHeader((SortGroupNode) SEQUENCE.parse(procedure),
                     VERIFICATION_PROPERTY.concat(SCHEMA_CLAUSE).parse(procedure),

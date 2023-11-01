@@ -34,34 +34,41 @@ Feature: data remark
     When the following verification for the instance of java class "Beans" should pass:
     """
     : {
-#      hello(World)= helloWorld,
-#      ['hello'](World)= helloWorld
-#
-#      beanRefs: | bean(remark) |
-#                | b1remark     |
-#                | b2remark     |
-#
-#      beanRefs: >>| bean(remark) | b1remark | b2remark |
-#
-#      {}:           | toUpperCase |
-#       hello(World) | HELLOWORLD  |
+      hello(World)= helloWorld,
+      ['hello'](World)= helloWorld
+
+      beanRefs: | bean(remark) |
+                | b1remark     |
+                | b2remark     |
+
+      beanRefs: >>| bean(remark) | b1remark | b2remark |
+
+      {}:           | toUpperCase |
+       hello(World) | HELLOWORLD  |
 
       beans:    | toUpperCase |
         (hello) | B1HELLO     |
         (World) | B2WORLD     |
 
-#      beans: | >>          | (hello) | (World) |
-#             | toUpperCase | B1WORLD | B2WORLD |
-#
+      beans: | >>          | (hello) | (World) |
+             | toUpperCase | B1HELLO | B2WORLD |
 
-#      beans:     | toUpperCase |
-#        0(World) | B1WORLD     |
-#        1(World) | B2WORLD     |
+      beans:     | toUpperCase |
+        0(HELLO) | B1HELLO     |
+        1(World) | B2WORLD     |
+
+      beans: | >>          | 0(hello) | 1(World) |
+             | toUpperCase | B1HELLO  | B2WORLD  |
+
+      beans:       | toUpperCase |
+        [0](HELLO) | B1HELLO     |
+        [1](World) | B2WORLD     |
+
+      beans: | >>          | [0](hello) | [1](World) |
+             | toUpperCase | B1HELLO    | B2WORLD    |
     }
     """
 
-#    remark on row header with default index
-#    remark on row header with row index
 #    raise error when no remark register
 #    precedence
 
