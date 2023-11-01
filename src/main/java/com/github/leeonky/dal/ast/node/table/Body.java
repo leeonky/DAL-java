@@ -13,17 +13,17 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.interpreter.InterpreterException.Position.Type.ROW;
 import static java.util.stream.Collectors.toList;
 
-public class TableBody extends DALNode {
+public class Body extends DALNode {
     private static final RowType EMPTY_TABLE_ROW_TYPE = new EmptyTableRowType();
-    private final List<TableRowNode> rows;
+    private final List<Row> rows;
     private final RowType rowType;
 
-    public TableBody(List<? extends DALNode> rows) {
+    public Body(List<? extends DALNode> rows) {
         this(rows, ROW);
     }
 
-    public TableBody(List<? extends DALNode> rows, InterpreterException.Position.Type type) {
-        this.rows = rows.stream().map(TableRowNode.class::cast).collect(toList());
+    public Body(List<? extends DALNode> rows, InterpreterException.Position.Type type) {
+        this.rows = rows.stream().map(Row.class::cast).collect(toList());
         rowType = resolveRowType(type);
     }
 
@@ -40,7 +40,7 @@ public class TableBody extends DALNode {
 
     @Override
     public String inspect() {
-        return rows.stream().map(TableRowNode::inspect).collect(Collectors.joining("\n"));
+        return rows.stream().map(Row::inspect).collect(Collectors.joining("\n"));
     }
 
     public DALNode convertToVerificationNode(Data actual, DALOperator operator, Comparator<Data> comparator) {
@@ -48,12 +48,12 @@ public class TableBody extends DALNode {
                 rowNode.constructVerificationClause(operator, rowType)), comparator);
     }
 
-    public TableRowNode dataRowSkipEllipsis(int indexSkipEllipsis) {
-        return rows.stream().filter(TableRowNode::isData).collect(toList()).get(indexSkipEllipsis);
+    public Row dataRowSkipEllipsis(int indexSkipEllipsis) {
+        return rows.stream().filter(Row::isData).collect(toList()).get(indexSkipEllipsis);
     }
 
-    public TableBody checkFormat(TableHeadRow headRow) {
-        rows.forEach(headRow::checkDataCellSize);
+    public Body checkFormat(ColumnHeaderRow columnHeaderRow) {
+        rows.forEach(columnHeaderRow::checkDataCellSize);
         return this;
     }
 }

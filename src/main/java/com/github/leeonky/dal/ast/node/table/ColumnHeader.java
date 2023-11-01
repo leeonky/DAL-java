@@ -12,12 +12,12 @@ import com.github.leeonky.interpreter.OperatorParser;
 import java.util.Comparator;
 import java.util.Optional;
 
-public class HeaderNode extends DALNode {
+public class ColumnHeader extends DALNode {
     private final SortGroupNode sort;
     private final DALNode property;
     private final Optional<DALOperator> operator;
 
-    public HeaderNode(SortGroupNode sort, DALNode property, Optional<DALOperator> operator) {
+    public ColumnHeader(SortGroupNode sort, DALNode property, Optional<DALOperator> operator) {
         this.sort = sort;
         this.property = property;
         this.operator = operator;
@@ -41,7 +41,7 @@ public class HeaderNode extends DALNode {
         return sort.comparator(data -> data.execute(() -> property.evaluate(context)));
     }
 
-    public static Comparator<HeaderNode> bySequence() {
+    public static Comparator<ColumnHeader> bySequence() {
         return Comparator.comparing(headerNode -> headerNode.sort, SortGroupNode.comparator().reversed());
     }
 }

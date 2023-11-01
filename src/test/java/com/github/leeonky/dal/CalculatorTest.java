@@ -220,8 +220,8 @@ class CalculatorTest {
 
         @Test
         void support_all_number_type() {
-            assertThat(Calculator.negate(context.wrap(1), context).getInstance()).isEqualTo(-1);
-            assertThat(Calculator.negate(context.wrap(1L), context).getInstance()).isEqualTo(-1L);
+            assertThat(Calculator.negate(context.wrap(1), context).instance()).isEqualTo(-1);
+            assertThat(Calculator.negate(context.wrap(1L), context).instance()).isEqualTo(-1L);
         }
 
         @Test

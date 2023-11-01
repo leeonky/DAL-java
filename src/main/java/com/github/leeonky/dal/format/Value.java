@@ -71,7 +71,7 @@ public interface Value<T> extends Type<T> {
     default T convertAs(Data actual, BeanClass<?> type) {
         if (type == null)
             throw new IllegalFieldException();
-        return (T) actual.convert(type.getType()).getInstance();
+        return (T) actual.convert(type.getType()).instance();
     }
 
     class ComparableValue<T extends Comparable<T>> extends ComparableType<T> implements Value<T> {

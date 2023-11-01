@@ -230,7 +230,7 @@ public class ListScopeNode extends DALNode {
 
         @SuppressWarnings("unchecked")
         public NatureOrder(List<Clause<DALNode>> clauses) {
-            super(clauses, Comparator.comparing(Data::getInstance, (Comparator) naturalOrder()), Style.LIST);
+            super(clauses, Comparator.comparing(Data::instance, (Comparator) naturalOrder()), Style.LIST);
         }
 
         @Override
@@ -243,7 +243,7 @@ public class ListScopeNode extends DALNode {
 
         @SuppressWarnings("unchecked")
         public ReverseOrder(List<Clause<DALNode>> clauses) {
-            super(clauses, Comparator.comparing(Data::getInstance, (Comparator) reverseOrder()), Style.LIST);
+            super(clauses, Comparator.comparing(Data::instance, (Comparator) reverseOrder()), Style.LIST);
         }
 
         @Override

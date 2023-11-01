@@ -114,7 +114,7 @@ public class MetaData {
     }
 
     private void checkType(Object data) {
-        Class<?> expect = this.data.getInstance().getClass();
+        Class<?> expect = this.data.instance().getClass();
         Class<?> actual = Objects.requireNonNull(data).getClass();
         if (actual.isAnonymousClass())
             actual = actual.getSuperclass();
@@ -138,7 +138,7 @@ public class MetaData {
     }
 
     public boolean isInstance(Class<?> type) {
-        return type.isInstance(data.getInstance());
+        return type.isInstance(data.instance());
     }
 
     public Object name() {

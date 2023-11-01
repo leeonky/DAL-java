@@ -103,7 +103,7 @@ public class Compiler {
             LIST_SCOPE_RELAX_STRING = Tokens.LIST_SCOPE_RELAX_STRING.nodeParser(NodeFactory::relaxString),
             TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(NodeFactory::relaxString),
             BRACKET_RELAX_STRING = Tokens.BRACKET_RELAX_STRING.nodeParser(NodeFactory::relaxString),
-            DEFAULT_INDEX_HEADER = procedure -> new TableDefaultIndexHeadRow(),
+            DEFAULT_INDEX_HEADER = procedure -> new DefaultIndexColumnHeaderRow(),
             DATA_REMARK = many(charNode(new EscapeChars())).and(endWith(Notations.CLOSING_PARENTHESES)).
                     as(NodeFactory::dataRemarkNode);
 
@@ -114,7 +114,8 @@ public class Compiler {
             ELEMENT_ELLIPSIS_CLAUSE = Notations.Operators.ELEMENT_ELLIPSIS.clause((token, input) -> new ListEllipsisNode()),
             ROW_WILDCARD_CLAUSE = Notations.Operators.ROW_WILDCARD.clause((token, input) -> new WildcardNode(token.getContent())),
             LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
-            PROPERTY_POSTFIX = oneOf(LIST_MAPPING_CLAUSE, Operators.DATA_REMARK.clause(DATA_REMARK)),
+            DATA_REMARK_CLAUSE = Operators.DATA_REMARK.clause(DATA_REMARK),
+            PROPERTY_POSTFIX = oneOf(LIST_MAPPING_CLAUSE, DATA_REMARK_CLAUSE),
             META_LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNodeMeta(symbolNode)),
             IMPLICIT_PROPERTY_CLAUSE = Operators.PROPERTY_IMPLICIT.clause(oneOf(PROPERTY_PATTERN,
                     oneOf(STRING_PROPERTY, NUMBER_PROPERTY, SYMBOL).concat(PROPERTY_POSTFIX))),
@@ -163,8 +164,8 @@ public class Compiler {
         LIST = oneOf(pureList(ListScopeNode::new), SORTED_LIST);
         TABLE = oneOf(Notations.TRANSPOSE_MARK.with(EMPTY_TRANSPOSED_HEAD.with(transposeTable())),
                 positionNode(Notations.COLUMN_SPLITTER.before(Notations.TRANSPOSE_MARK.before(Notations.COLUMN_SPLITTER.before(tableLine(ROW_PREFIX)
-                        .as(TransposedTableHead::new))))).concat(transposeTable()),
-                positionNode(Notations.COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(TableHeadRow::new))).concat(TABLE_BODY_CLAUSE),
+                        .as(TransposedRowHeaderRow::new))))).concat(transposeTable()),
+                positionNode(Notations.COLUMN_SPLITTER.before(tableLine(TABLE_HEADER).as(ColumnHeaderRow::new))).concat(TABLE_BODY_CLAUSE),
                 positionNode(Notations.MATRIX_COLUMN_SPLITTER.before(DEFAULT_INDEX_HEADER).concat(TABLE_BODY_CLAUSE)));
         VERIFICATION_SPECIAL_OPERAND = oneOf(REGEX, OBJECT, LIST, WILDCARD, TABLE);
         CONST_REMARK = CONST.concat(PARENTHESES.clause(NodeFactory::constRemarkNode));
@@ -226,7 +227,7 @@ public class Compiler {
             SEQUENCE_ZA = Notations.SEQUENCE_ZA.node(SortSymbolNode::new),
             SEQUENCE_AZ_2 = Notations.SEQUENCE_AZ_2.node(SortSymbolNode::new),
             SEQUENCE_ZA_2 = Notations.SEQUENCE_ZA_2.node(SortSymbolNode::new),
-            ROW_KEY = oneOf(INTEGER, OPTIONAL_VERIFICATION_PROPERTY);
+            ROW_KEY = oneOf(INTEGER, INPUT.with(DATA_REMARK_CLAUSE), OPTIONAL_VERIFICATION_PROPERTY);
 
     private final NodeParser.Mandatory<DALNode, DALProcedure>
             SEQUENCE = oneOf(
@@ -234,53 +235,53 @@ public class Compiler {
             many(SEQUENCE_AZ_2).and(atLeast(1)).as(SortGroupNode::new),
             many(SEQUENCE_ZA).and(atLeast(1)).as(SortGroupNode::new),
             many(SEQUENCE_ZA_2).and(atLeast(1)).as(SortGroupNode::new)).or(procedure -> SortGroupNode.noSequence()),
-            EMPTY_TRANSPOSED_HEAD = procedure -> new EmptyTransposedTableHead();
+            EMPTY_TRANSPOSED_HEAD = procedure -> new EmptyTransposedRowHeaderRow();
 
     private final NodeParser.Mandatory<DALNode, DALProcedure>
-            ROW_PREFIX = procedure -> new TableRowPrefixNode(ROW_KEY.parse(procedure), SCHEMA_CLAUSE.parse(procedure),
+            ROW_PREFIX = procedure -> new RowHeader(ROW_KEY.parse(procedure), SCHEMA_CLAUSE.parse(procedure),
             Operators.VERIFICATION_OPERATORS.parse(procedure)),
-            TABLE_HEADER = procedure -> new HeaderNode((SortGroupNode) SEQUENCE.parse(procedure),
+            TABLE_HEADER = procedure -> new ColumnHeader((SortGroupNode) SEQUENCE.parse(procedure),
                     VERIFICATION_PROPERTY.concat(SCHEMA_CLAUSE).parse(procedure),
                     Operators.VERIFICATION_OPERATORS.parse(procedure));
 
     private final ClauseParser.Mandatory<DALNode, DALProcedure>
-            TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((TableHeadRow) head, (TableBody) many(ROW_PREFIX.with(oneOf(
-            Notations.COLUMN_SPLITTER.before(singleCellRow(ELEMENT_ELLIPSIS, (TableHeadRow) head)),
-            Notations.COLUMN_SPLITTER.before(singleCellRow(ROW_WILDCARD, (TableHeadRow) head)),
-            Notations.COLUMN_SPLITTER.before(tableRow((TableHeadRow) head))))).and(endWithOptionalLine())
-            .as(TableBody::new).parse(procedure));
+            TABLE_BODY_CLAUSE = procedure -> head -> new TableNode((ColumnHeaderRow) head, (Body) many(ROW_PREFIX.with(oneOf(
+            Notations.COLUMN_SPLITTER.before(singleCellRow(ELEMENT_ELLIPSIS, (ColumnHeaderRow) head)),
+            Notations.COLUMN_SPLITTER.before(singleCellRow(ROW_WILDCARD, (ColumnHeaderRow) head)),
+            Notations.COLUMN_SPLITTER.before(tableRow((ColumnHeaderRow) head))))).and(endWithOptionalLine())
+            .as(Body::new).parse(procedure));
 
     private ClauseParser<DALNode, DALProcedure> singleCellRow(NodeParser<DALNode, DALProcedure> nodeParser,
-                                                              TableHeadRow head) {
+                                                              ColumnHeaderRow head) {
         return single(single(nodeParser).and(endWith(Notations.COLUMN_SPLITTER)).as()).and(endWithLine()).as()
-                .clause((prefix, cell) -> new TableRowNode(prefix, cell, head));
+                .clause((prefix, cell) -> new Row(prefix, cell, head));
     }
 
-    private ClauseParser.Mandatory<DALNode, DALProcedure> tableCell(DALNode rowPrefix, TableHeadRow head) {
+    private ClauseParser.Mandatory<DALNode, DALProcedure> tableCell(DALNode rowPrefix, ColumnHeaderRow head) {
         return positionClause(ClauseParser.<DALNode, DALProcedure>
                 columnMandatory(column -> shortVerificationClause(oneOf(Operators.VERIFICATION_OPERATORS,
-                head.getHeader(column).operator(), ((TableRowPrefixNode) rowPrefix).operator()).or(
+                head.getHeader(column).operator(), ((RowHeader) rowPrefix).operator()).or(
                 Operators.DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING))));
     }
 
-    private ClauseParser.Mandatory<DALNode, DALProcedure> tableRow(TableHeadRow headRow) {
-        return clause(rowPrefix -> tableLine(tableCell(rowPrefix, headRow))
-                .as(cells -> new TableRowNode(rowPrefix, cells, headRow)));
+    private ClauseParser.Mandatory<DALNode, DALProcedure> tableRow(ColumnHeaderRow columnHeaderRow) {
+        return clause(rowPrefix -> tableLine(tableCell(rowPrefix, columnHeaderRow))
+                .as(cells -> new Row(rowPrefix, cells, columnHeaderRow)));
     }
 
     private ClauseParser.Mandatory<DALNode, DALProcedure> transposeTableCell(DALNode prefix, DALNode header) {
         return positionClause(ClauseParser.<DALNode, DALProcedure>
                 columnMandatory(column -> oneOf(ELEMENT_ELLIPSIS_CLAUSE, ROW_WILDCARD_CLAUSE)
-                .or(shortVerificationClause(oneOf(Operators.VERIFICATION_OPERATORS, ((HeaderNode) prefix).operator(),
-                        ((TransposedTableHead) header).getPrefix(column).operator())
+                .or(shortVerificationClause(oneOf(Operators.VERIFICATION_OPERATORS, ((ColumnHeader) prefix).operator(),
+                        ((TransposedRowHeaderRow) header).getRowHeader(column).operator())
                         .or(Operators.DEFAULT_VERIFICATION_OPERATOR), CELL_VERIFICATION_OPERAND.or(TABLE_CELL_RELAX_STRING)))));
     }
 
     private ClauseParser.Mandatory<DALNode, DALProcedure> transposeTable() {
         return procedure -> header -> new TransposedTableNode(header, many(positionNode(Notations.COLUMN_SPLITTER.before(
                 single(TABLE_HEADER).and(endWith(Notations.COLUMN_SPLITTER)).as())).concat(clause(prefix -> tableLine(
-                transposeTableCell(prefix, header)).as(cells -> new TransposedRowNode(prefix, cells))))).and(atLeast(1))
-                .and(endWithOptionalLine()).as(TransposedTableBody::new).mandatory("Expecting a table").parse(procedure));
+                transposeTableCell(prefix, header)).as(cells -> new TransposedRow(prefix, cells))))).and(atLeast(1))
+                .and(endWithOptionalLine()).as(TransposedBody::new).mandatory("Expecting a table").parse(procedure));
     }
 
     private static Syntax<DALNode, DALProcedure, NodeParser<DALNode, DALProcedure>, NodeParser.Mandatory<DALNode,

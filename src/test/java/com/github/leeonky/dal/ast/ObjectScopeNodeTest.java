@@ -30,7 +30,7 @@ class ObjectScopeNodeTest {
         @Test
         void empty_data_equal_to_empty_object() {
             HashMap<Object, Object> emptyMap = new HashMap<>();
-            assertThat(objectScopeNode.verify(new ConstValueNode(emptyMap), EQUAL, DALRuntimeContext).getInstance()).isSameAs(emptyMap);
+            assertThat(objectScopeNode.verify(new ConstValueNode(emptyMap), EQUAL, DALRuntimeContext).instance()).isSameAs(emptyMap);
         }
 
         @Test
@@ -52,7 +52,7 @@ class ObjectScopeNodeTest {
             HashMap<String, Object> data = new HashMap<String, Object>() {{
                 put("any fields", "any value");
             }};
-            assertThat(objectScopeNode.verify(new ConstValueNode(data), MATCHER, DALRuntimeContext).getInstance()).isSameAs(data);
+            assertThat(objectScopeNode.verify(new ConstValueNode(data), MATCHER, DALRuntimeContext).instance()).isSameAs(data);
         }
 
         @Test

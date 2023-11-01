@@ -36,7 +36,7 @@ public class CheckingContext {
     }
 
     public String messageMatch() {
-        return verificationMessage("Expected to match: ", actual.getInstance() == originalActual.getInstance() ? ""
+        return verificationMessage("Expected to match: ", actual.instance() == originalActual.instance() ? ""
                 : " converted from: " + originalActual.dumpAll());
     }
 

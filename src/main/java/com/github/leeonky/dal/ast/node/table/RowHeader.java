@@ -15,7 +15,7 @@ import java.util.Optional;
 
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
 
-public class TableRowPrefixNode extends DALNode {
+public class RowHeader extends DALNode {
     private static final RowType DEFAULT_INDEX = new DefaultIndexRowType(),
             SPECIFY_INDEX = new SpecifyIndexRowType(),
             SPECIFY_PROPERTY = new SpecifyPropertyRowType();
@@ -23,8 +23,8 @@ public class TableRowPrefixNode extends DALNode {
     private final Optional<Clause<DALNode>> rowSchema;
     private final Optional<DALOperator> rowOperator;
 
-    public TableRowPrefixNode(Optional<DALNode> indexOrProperty, Optional<Clause<DALNode>> rowSchema,
-                              Optional<DALOperator> rowOperator) {
+    public RowHeader(Optional<DALNode> indexOrProperty, Optional<Clause<DALNode>> rowSchema,
+                     Optional<DALOperator> rowOperator) {
         this.rowSchema = rowSchema;
         this.rowOperator = rowOperator;
         this.indexOrProperty = indexOrProperty;

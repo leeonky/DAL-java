@@ -9,7 +9,7 @@ public class MatchesChecker implements Checker {
 
     @Override
     public Data transformActual(Data actual, Data expected, RuntimeContextBuilder.DALRuntimeContext context) {
-        return actual.convert(expected.getInstance().getClass());
+        return actual.convert(expected.instance().getClass());
     }
 
     @Override
@@ -19,10 +19,10 @@ public class MatchesChecker implements Checker {
 
     @Override
     public boolean failed(CheckingContext checkingContext) {
-        if (checkingContext.getExpected().getInstance() instanceof BigDecimal
-                && checkingContext.getActual().getInstance() instanceof BigDecimal)
-            return ((BigDecimal) checkingContext.getExpected().getInstance())
-                    .compareTo((BigDecimal) checkingContext.getActual().getInstance()) != 0;
+        if (checkingContext.getExpected().instance() instanceof BigDecimal
+                && checkingContext.getActual().instance() instanceof BigDecimal)
+            return ((BigDecimal) checkingContext.getExpected().instance())
+                    .compareTo((BigDecimal) checkingContext.getActual().instance()) != 0;
         return Checker.super.failed(checkingContext);
     }
 }

@@ -40,11 +40,11 @@ public class MapDumper implements Dumper.Cacheable {
     }
 
     protected Set<Object> getFieldNames(Data data) {
-        return data.getFieldNames();
+        return data.fieldNames();
     }
 
     protected void dumpType(Data data, DumpingBuffer dumpingBuffer) {
-        if (!(data.getInstance() instanceof Map))
-            dumpingBuffer.append(Classes.getClassName(data.getInstance())).appendThen(" ");
+        if (!(data.instance() instanceof Map))
+            dumpingBuffer.append(Classes.getClassName(data.instance())).appendThen(" ");
     }
 }

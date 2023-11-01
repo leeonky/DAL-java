@@ -40,12 +40,12 @@ public class CheckerSet {
     }
 
     private Optional<Checker> fetchByExpectedType(Data expected, Data actual) {
-        return typeFactories.tryGetData(expected.getInstance()).flatMap(factory -> factory.create(expected, actual));
+        return typeFactories.tryGetData(expected.instance()).flatMap(factory -> factory.create(expected, actual));
     }
 
     private Optional<Checker> fetchByExpectedTypeAndActualType(Data expected, Data actual) {
-        return typeTypeFactories.tryGetData(expected.getInstance())
-                .flatMap(classKeyMap -> classKeyMap.tryGetData(actual.getInstance()))
+        return typeTypeFactories.tryGetData(expected.instance())
+                .flatMap(classKeyMap -> classKeyMap.tryGetData(actual.instance()))
                 .flatMap(factory -> factory.create(expected, actual));
     }
 
@@ -57,17 +57,17 @@ public class CheckerSet {
     public static Checker defaultMatching(Data expected, Data actual) {
         if (expected.isNull())
             return Checker.MATCH_NULL_CHECKER;
-        if (NodeType.OBJECT_SCOPE.equals(expected.getInstance()))
+        if (NodeType.OBJECT_SCOPE.equals(expected.instance()))
             return Checker.OBJECT_SCOPE_CHECKER;
-        if (NodeType.LIST_SCOPE.equals(expected.getInstance()))
+        if (NodeType.LIST_SCOPE.equals(expected.instance()))
             return Checker.LIST_SCOPE_CHECKER;
         return Checker.MATCHES_CHECKER;
     }
 
     public static Checker defaultEqualing(Data expected, Data actual) {
-        if (NodeType.OBJECT_SCOPE.equals(expected.getInstance()))
+        if (NodeType.OBJECT_SCOPE.equals(expected.instance()))
             return Checker.OBJECT_SCOPE_CHECKER;
-        if (NodeType.LIST_SCOPE.equals(expected.getInstance()))
+        if (NodeType.LIST_SCOPE.equals(expected.instance()))
             return Checker.LIST_SCOPE_CHECKER;
         return Checker.EQUALS_CHECKER;
     }

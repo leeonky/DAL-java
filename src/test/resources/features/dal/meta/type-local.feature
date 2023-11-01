@@ -164,7 +164,7 @@ Feature: commons
     """
     And register DAL:
     """
-    dal.getRuntimeContextBuilder().registerMetaProperty(Bean.class, "beanMeta", meta-> meta.getData().getInstance());
+    dal.getRuntimeContextBuilder().registerMetaProperty(Bean.class, "beanMeta", meta-> meta.data().instance());
     dal.getRuntimeContextBuilder().registerMetaProperty(SubBean.class, "beanMeta", meta-> {
     return meta.callSuper(()->new SubBean(){{value=2;}});
     });
@@ -216,7 +216,7 @@ Feature: commons
     And register DAL:
     """
     dal.getRuntimeContextBuilder().registerMetaProperty("meta", meta-> {
-      return meta.getData().getInstance();
+      return meta.data().instance();
     });
     """
     When use a instance of java class "Data" to evaluate:
@@ -280,7 +280,7 @@ Feature: commons
     And register DAL:
     """
     dal.getRuntimeContextBuilder().registerMetaProperty("meta", meta-> {
-      return meta.getData().getInstance();
+      return meta.data().instance();
     });
     """
     Then the following verification for the instance of java class "Data" should pass:
@@ -304,7 +304,7 @@ Feature: commons
     And register DAL:
     """
     dal.getRuntimeContextBuilder().registerMetaProperty("another", meta-> {
-      return meta.getData().getInstance();
+      return meta.data().instance();
     });
     """
     Then the following verification for the instance of java class "Data" should pass:
@@ -328,7 +328,7 @@ Feature: commons
     And register DAL:
     """
     dal.getRuntimeContextBuilder().registerMetaProperty("another", meta-> {
-      return meta.getData().getInstance();
+      return meta.data().instance();
     });
     """
     Then the following verification for the instance of java class "Data" should pass:
@@ -352,7 +352,7 @@ Feature: commons
     """
     And register DAL:
     """
-    dal.getRuntimeContextBuilder().registerMetaProperty(Bean.class, "meta", meta-> meta.getData().getValue("value").getInstance());
+    dal.getRuntimeContextBuilder().registerMetaProperty(Bean.class, "meta", meta-> meta.data().getValue("value").instance());
     """
     Then the following verification for the instance of java class "Bean" should pass:
     """

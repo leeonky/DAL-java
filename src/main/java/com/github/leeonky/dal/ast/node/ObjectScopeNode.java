@@ -77,15 +77,15 @@ public class ObjectScopeNode extends DALNode {
     }
 
     private Set<Object> collectUnexpectedFields(Data data, DALRuntimeContext context) {
-        return new LinkedHashSet<Object>(data.getFieldNames()) {{
+        return new LinkedHashSet<Object>(data.fieldNames()) {{
             Stream.concat(collectFields(data), context.collectPartialProperties(data).stream())
                     .map(obj -> convertFiled(data, obj)).forEach(this::remove);
         }};
     }
 
     private Object convertFiled(Data data, Object obj) {
-        return data.getInstance() instanceof CurryingMethod ?
-                ((CurryingMethod) data.getInstance()).convertToArgType(obj) : obj;
+        return data.instance() instanceof CurryingMethod ?
+                ((CurryingMethod) data.instance()).convertToArgType(obj) : obj;
     }
 
     @Override

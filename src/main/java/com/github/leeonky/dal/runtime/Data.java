@@ -27,11 +27,11 @@ public class Data {
         this.context = context.registerPropertyAccessor(instance);
     }
 
-    public Object getInstance() {
+    public Object instance() {
         return instance;
     }
 
-    public Set<Object> getFieldNames() {
+    public Set<Object> fieldNames() {
         return context.findPropertyReaderNames(instance);
     }
 
@@ -122,9 +122,9 @@ public class Data {
 
     public Data filter(String prefix) {
         FilteredObject filteredObject = new FilteredObject();
-        getFieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
+        fieldNames().stream().filter(String.class::isInstance).map(String.class::cast)
                 .filter(field -> field.startsWith(prefix)).forEach(fieldName ->
-                        filteredObject.put(trimPrefix(prefix, fieldName), getValue(fieldName).getInstance()));
+                        filteredObject.put(trimPrefix(prefix, fieldName), getValue(fieldName).instance()));
         return new Data(filteredObject, context, schemaType);
     }
 
@@ -180,7 +180,7 @@ public class Data {
         }
 
         public Data listMap(Object property) {
-            return new Data(listMap(data -> data.getValue(property).getInstance()), context, propertySchema(property));
+            return new Data(listMap(data -> data.getValue(property).instance()), context, propertySchema(property));
         }
 
         public AutoMappingList listMap(Function<Data, Object> mapper) {
@@ -190,7 +190,7 @@ public class Data {
         public DataList sort(Comparator<Data> comparator) {
             if (comparator != NOP_COMPARATOR) {
                 return new DataList(new CollectionDALCollection<Object>(wraps().collect().stream()
-                        .sorted(comparator).map(Data::getInstance).collect(toList())) {
+                        .sorted(comparator).map(Data::instance).collect(toList())) {
                     @Override
                     protected int firstIndex() {
                         return DataList.this.firstIndex();

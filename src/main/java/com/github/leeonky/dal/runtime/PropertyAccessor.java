@@ -7,7 +7,7 @@ public interface PropertyAccessor<T> {
 
     @SuppressWarnings("unchecked")
     default Object getValueByData(Data data, Object property) {
-        return getValue((T) data.getInstance(), property);
+        return getValue((T) data.instance(), property);
     }
 
     Object getValue(T instance, Object property);

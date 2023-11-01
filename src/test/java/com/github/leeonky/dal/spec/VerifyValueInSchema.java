@@ -247,7 +247,7 @@ public class VerifyValueInSchema extends Base {
 
         @Override
         public Integer convertAs(Data actual, BeanClass<?> type) {
-            return (int) actual.getInstance() + 1;
+            return (int) actual.instance() + 1;
         }
 
         @Override

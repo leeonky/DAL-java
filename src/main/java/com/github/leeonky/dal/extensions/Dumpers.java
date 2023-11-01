@@ -56,7 +56,7 @@ public class Dumpers implements Extension {
 
         @Override
         public void dump(Data data, DumpingBuffer dumpingBuffer) {
-            dumpingBuffer.dump(dumpingBuffer.getRuntimeContext().wrap(((InputValue<?>) data.getInstance()).get()));
+            dumpingBuffer.dump(dumpingBuffer.getRuntimeContext().wrap(((InputValue<?>) data.instance()).get()));
         }
     }
 
@@ -65,7 +65,7 @@ public class Dumpers implements Extension {
         @Override
         public void dump(Data data, DumpingBuffer dumpingBuffer) {
             dumpingBuffer.append("InputCode return value was ");
-            InputCode<?> inputCode = (InputCode<?>) data.getInstance();
+            InputCode<?> inputCode = (InputCode<?>) data.instance();
             try {
                 dumpingBuffer.dump(dumpingBuffer.getRuntimeContext().wrap(inputCode.get()));
             } catch (Throwable e) {

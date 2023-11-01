@@ -1,8 +1,8 @@
 package com.github.leeonky.dal.ast.node;
 
-import com.github.leeonky.dal.ast.node.table.TableBody;
-import com.github.leeonky.dal.ast.node.table.TableHeadRow;
-import com.github.leeonky.dal.ast.node.table.TableRowNode;
+import com.github.leeonky.dal.ast.node.table.Body;
+import com.github.leeonky.dal.ast.node.table.ColumnHeaderRow;
+import com.github.leeonky.dal.ast.node.table.Row;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Matcher;
@@ -14,13 +14,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TableNode extends DALNode {
-    private final TableHeadRow headRow;
-    private final TableBody tableBody;
+    private final ColumnHeaderRow columnHeaderRow;
+    private final Body body;
 
-    public TableNode(TableHeadRow headRow, TableBody tableBody) {
-        this.headRow = headRow;
-        this.tableBody = tableBody.checkFormat(this.headRow);
-        setPositionBegin(headRow.getPositionBegin());
+    public TableNode(ColumnHeaderRow columnHeaderRow, Body body) {
+        this.columnHeaderRow = columnHeaderRow;
+        this.body = body.checkFormat(this.columnHeaderRow);
+        setPositionBegin(columnHeaderRow.getPositionBegin());
     }
 
     @Override
@@ -46,20 +46,20 @@ public class TableNode extends DALNode {
     }
 
     public DALNode convertToVerificationNode(Data actual, DALOperator operator, DALRuntimeContext context) {
-        return tableBody.convertToVerificationNode(actual, operator, headRow.collectComparator(context))
+        return body.convertToVerificationNode(actual, operator, columnHeaderRow.collectComparator(context))
                 .setPositionBegin(getPositionBegin());
     }
 
     @Override
     public String inspect() {
-        return (headRow.inspect() + tableBody.inspect()).trim();
+        return (columnHeaderRow.inspect() + body.inspect()).trim();
     }
 
     public static String printLine(List<? extends DALNode> nodes) {
         return nodes.stream().map(DALNode::inspect).collect(Collectors.joining(" | ", "| ", " |"));
     }
 
-    public TableRowNode fetchDataRowSkipEllipsis(int indexSkipEllipsis) {
-        return tableBody.dataRowSkipEllipsis(indexSkipEllipsis);
+    public Row fetchDataRowSkipEllipsis(int indexSkipEllipsis) {
+        return body.dataRowSkipEllipsis(indexSkipEllipsis);
     }
 }

@@ -143,11 +143,11 @@ class DataTest {
             assertThat(new Data(new HashMap<String, Object>() {{
                 put("age", 100);
             }}, runtimeContextBuilder.build(null), SchemaType.create(BeanClass.create(User.class)))
-                    .getValue("aliasOfAge").getInstance()).isEqualTo(100);
+                    .getValue("aliasOfAge").instance()).isEqualTo(100);
         }
 
         private void assertDataAccess(Object object, Object expected, Object... properties) {
-            assertThat(runtimeContextBuilder.build(null).wrap(object).getValue(asList(properties)).getInstance())
+            assertThat(runtimeContextBuilder.build(null).wrap(object).getValue(asList(properties)).instance())
                     .isEqualTo(expected);
         }
 

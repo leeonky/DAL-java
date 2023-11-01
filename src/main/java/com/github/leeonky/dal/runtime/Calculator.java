@@ -31,8 +31,8 @@ public class Calculator {
         if (v2.isNull())
             return v1.isNull();
         if (v2.isList())
-            return CollectionHelper.equals(v1.getInstance(), v2.getInstance());
-        return Objects.equals(v1.getInstance(), v2.getInstance());
+            return CollectionHelper.equals(v1.instance(), v2.instance());
+        return Objects.equals(v1.instance(), v2.instance());
     }
 
     public static Object plus(Object v1, Object v2, DALRuntimeContext context) {
@@ -72,10 +72,10 @@ public class Calculator {
     }
 
     private static boolean isTrue(Data value) {
-        if (value.getInstance() instanceof Boolean)
-            return (boolean) value.getInstance();
-        if (value.getInstance() instanceof Number)
-            return numberType.compare(0, (Number) value.getInstance()) != 0;
+        if (value.instance() instanceof Boolean)
+            return (boolean) value.instance();
+        if (value.instance() instanceof Number)
+            return numberType.compare(0, (Number) value.instance()) != 0;
         return !value.isNull();
     }
 
@@ -95,7 +95,7 @@ public class Calculator {
     }
 
     public static Data negate(Data data, DALRuntimeContext context) {
-        Object value = data.getInstance();
+        Object value = data.instance();
         if (value instanceof Number)
             return context.wrap(context.getNumberType().negate((Number) value));
         if (data.isList())
@@ -106,14 +106,14 @@ public class Calculator {
     @SuppressWarnings("unchecked")
     private static Data sortList(Data data, Comparator<?> comparator) {
         try {
-            return data.list().sort(Comparator.comparing(Data::getInstance, (Comparator<Object>) comparator)).wrap();
+            return data.list().sort(Comparator.comparing(Data::instance, (Comparator<Object>) comparator)).wrap();
         } catch (InfiniteCollectionException e) {
             throw new IllegalOperationException("Can not sort infinite collection");
         }
     }
 
     public static Data positive(Data data, DALRuntimeContext context) {
-        Object value = data.getInstance();
+        Object value = data.instance();
         if (value instanceof Number)
             return context.wrap(value);
         if (data.isList())

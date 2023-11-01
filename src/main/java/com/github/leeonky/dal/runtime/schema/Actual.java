@@ -49,7 +49,7 @@ public class Actual {
     @SuppressWarnings("unchecked")
     public Class<Object> polymorphicSchemaType(Class<?> schemaType) {
         return ofNullable(schemaType.getAnnotation(SubType.class)).map(subType -> {
-            Object subTypeProperty = actual.getValue(compiler.toChainNodes(subType.property())).getInstance();
+            Object subTypeProperty = actual.getValue(compiler.toChainNodes(subType.property())).instance();
             return (Class<Object>) Stream.of(subType.types()).filter(t -> t.value().equals(subTypeProperty))
                     .map(SubType.Type::type).findFirst().orElseThrow(() -> new IllegalStateException(
                             format("Cannot guess sub type through property type value[%s]", subTypeProperty)));
@@ -69,17 +69,17 @@ public class Actual {
             return true;
         } catch (Exception ignore) {
             return Verification.errorLog("Can not convert field `%s` (%s: %s) to %s", property,
-                    getClassName(actual.getInstance()), actual.getInstance(), inspect);
+                    getClassName(actual.instance()), actual.instance(), inspect);
         }
     }
 
     public boolean verifyValue(Value<Object> value, BeanClass<?> type) {
         return value.verify(value.convertAs(actual, type))
-                || Verification.errorLog(value.errorMessage(property, actual.getInstance()));
+                || Verification.errorLog(value.errorMessage(property, actual.instance()));
     }
 
     public Stream<Object> fieldNames() {
-        return actual.getFieldNames().stream();
+        return actual.fieldNames().stream();
     }
 
     public Stream<Actual> subElements() {
@@ -87,7 +87,7 @@ public class Actual {
     }
 
     public boolean verifyFormatter(Formatter<Object, Object> formatter) {
-        return formatter.isValid(actual.getInstance())
+        return formatter.isValid(actual.instance())
                 || Verification.errorLog("Expected field `%s` to be formatter `%s`\nActual: %s", property,
                 formatter.getFormatterName(), actual.dumpAll());
     }
@@ -108,18 +108,18 @@ public class Actual {
     }
 
     boolean verifyType(Type<Object> expect) {
-        return expect.verify(actual.getInstance()) ||
-                Verification.errorLog(expect.errorMessage(property, actual.getInstance()));
+        return expect.verify(actual.instance()) ||
+                Verification.errorLog(expect.errorMessage(property, actual.instance()));
     }
 
     boolean inInstanceOf(BeanClass<?> type) {
-        return type.isInstance(actual.getInstance()) ||
+        return type.isInstance(actual.instance()) ||
                 Verification.errorLog(String.format("Expected field `%s` to be %s\nActual: %s", property,
                         type.getName(), actual.dumpAll()));
     }
 
     public boolean equalsExpect(Object expect, DALRuntimeContext runtimeContext) {
-        return Objects.equals(expect, actual.getInstance()) ||
+        return Objects.equals(expect, actual.instance()) ||
                 Verification.errorLog(format("Expected field `%s` to be %s\nActual: %s", property,
                         runtimeContext.wrap(expect).dumpAll(), actual.dumpAll()));
     }

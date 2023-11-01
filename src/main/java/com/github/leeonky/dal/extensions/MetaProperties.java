@@ -32,11 +32,11 @@ public class MetaProperties implements Extension {
     }
 
     private static Object object_(MetaData metaData) {
-        return metaData.data().getInstance() == null ? null : new OriginalJavaObject(metaData.data());
+        return metaData.data().instance() == null ? null : new OriginalJavaObject(metaData.data());
     }
 
     private static Object keys(MetaData metaData) {
-        return metaData.data().getFieldNames();
+        return metaData.data().fieldNames();
     }
 
     @Override
@@ -74,10 +74,10 @@ public class MetaProperties implements Extension {
 
         public Object getValue(Object property) {
             try {
-                Object instance = data.getInstance();
+                Object instance = data.instance();
                 return BeanClass.createFrom(instance).getPropertyValue(instance, property.toString());
             } catch (NoSuchAccessorException ignore) {
-                return data.getValue(property).getInstance();
+                return data.getValue(property).instance();
             }
         }
     }

@@ -10,20 +10,20 @@ import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 
-public class TableDefaultIndexHeadRow extends TableHeadRow {
+public class DefaultIndexColumnHeaderRow extends ColumnHeaderRow {
 
-    public TableDefaultIndexHeadRow() {
+    public DefaultIndexColumnHeaderRow() {
         super(emptyList());
     }
 
     @Override
-    public HeaderNode getHeader(int index) {
-        return new HeaderNode(SortGroupNode.NO_SEQUENCE, new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
+    public ColumnHeader getHeader(int index) {
+        return new ColumnHeader(SortGroupNode.NO_SEQUENCE, new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
                 new SymbolNode(index, SymbolNode.Type.NUMBER)), empty());
     }
 
     @Override
-    public void checkDataCellSize(TableRowNode rowNode) {
+    public void checkDataCellSize(Row rowNode) {
     }
 
     @Override

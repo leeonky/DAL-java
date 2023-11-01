@@ -13,46 +13,46 @@ import java.util.stream.Collectors;
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static java.util.Collections.singletonList;
 
-public class TransposedRowNode extends DALNode {
-    private final HeaderNode headerNode;
+public class TransposedRow extends DALNode {
+    private final ColumnHeader columnHeader;
     private final List<Clause<DALNode>> cellClauses;
 
-    public TransposedRowNode(DALNode header, List<Clause<DALNode>> clauses) {
+    public TransposedRow(DALNode header, List<Clause<DALNode>> clauses) {
         cellClauses = clauses;
-        headerNode = (HeaderNode) header;
+        columnHeader = (ColumnHeader) header;
         setPositionBegin(header.getPositionBegin());
     }
 
     @Override
     public String inspect() {
         return TableNode.printLine(new ArrayList<DALNode>() {{
-            add(headerNode);
+            add(columnHeader);
             addAll(cellClauses.stream().map(clause -> clause.expression(INPUT_NODE)).collect(Collectors.toList())
             );
         }});
     }
 
-    public List<TableRowNode> transpose(TransposedTableHead transposedTableHead) {
-        return new ArrayList<TableRowNode>() {{
+    public List<Row> transpose(TransposedRowHeaderRow transposedRowHeaderRow) {
+        return new ArrayList<Row>() {{
             for (int i = 0; i < cellClauses.size(); i++)
-                add(new TableRowNode(transposedTableHead.getPrefix(i), singletonList(cellClauses.get(i)),
-                        new TableHeadRow(singletonList(headerNode))));
+                add(new Row(transposedRowHeaderRow.getRowHeader(i), singletonList(cellClauses.get(i)),
+                        new ColumnHeaderRow(singletonList(columnHeader))));
         }};
     }
 
-    public HeaderNode getHeader() {
-        return headerNode;
+    public ColumnHeader getHeader() {
+        return columnHeader;
     }
 
     public int cellCount() {
         return cellClauses.size();
     }
 
-    public void replaceEmptyCell(TransposedRowNode firstRow) {
+    public void replaceEmptyCell(TransposedRow firstRow) {
         for (int i = 0; i < firstRow.cellClauses.size(); i++) {
             DALNode row = firstRow.cellClauses.get(i).expression(INPUT_NODE);
             if (row instanceof WildcardNode || row instanceof ListEllipsisNode) {
-                cellClauses.set(i, node -> new EmptyCellNode());
+                cellClauses.set(i, node -> new EmptyCell());
             }
         }
     }

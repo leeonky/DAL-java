@@ -2,8 +2,8 @@ package com.github.leeonky.dal.ast.node.table;
 
 import java.util.Collections;
 
-public class EmptyTransposedTableHead extends TransposedTableHead {
-    public EmptyTransposedTableHead() {
+public class EmptyTransposedRowHeaderRow extends TransposedRowHeaderRow {
+    public EmptyTransposedRowHeaderRow() {
         super(Collections.emptyList());
     }
 
@@ -13,7 +13,7 @@ public class EmptyTransposedTableHead extends TransposedTableHead {
     }
 
     @Override
-    public void checkSize(TransposedRowNode row) {
+    public void checkSize(TransposedRow row) {
     }
 }
 

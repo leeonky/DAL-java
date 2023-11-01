@@ -99,7 +99,7 @@ public class Factory {
             public Data calculateData(DALExpression expression, DALRuntimeContext context) {
                 Data leftValue = expression.left().evaluateData(context);
                 Data rightValue = expression.right().evaluateData(context);
-                if (Objects.equals(leftValue.getInstance(), rightValue.getInstance()))
+                if (Objects.equals(leftValue.instance(), rightValue.instance()))
                     return leftValue;
                 throw new RuntimeException(String.format("Incorrect const remark, const value was %s\nbut remark %s was %s",
                         leftValue.dumpAll(), expression.right().inspect(), rightValue.dumpAll()), expression.right().getPositionBegin());
@@ -133,7 +133,7 @@ public class Factory {
     public interface ExpressionContextData extends BiFunction<DALExpression, DALRuntimeContext, Data> {
         static ExpressionContextData adapt(SupplierSupplierData operation) {
             return (expression, context) -> context.wrap(operation.apply(() -> expression.left().evaluateData(context),
-                    () -> expression.right().evaluateData(context)).getInstance());
+                    () -> expression.right().evaluateData(context)).instance());
         }
 
         static ExpressionContextData adapt(ObjectObjectContextObject operation) {

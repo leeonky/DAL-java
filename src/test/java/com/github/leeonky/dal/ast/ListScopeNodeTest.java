@@ -23,7 +23,7 @@ class ListScopeNodeTest {
     @Test
     void empty_list_equal_to_or_matches_empty_list() {
         List<Object> emptyList = Collections.emptyList();
-        assertThat(listScopeNode.verify(new ConstValueNode(emptyList), EQUAL, DALRuntimeContext).getInstance()).isSameAs(emptyList);
-        assertThat(listScopeNode.verify(new ConstValueNode(emptyList), MATCHER, DALRuntimeContext).getInstance()).isSameAs(emptyList);
+        assertThat(listScopeNode.verify(new ConstValueNode(emptyList), EQUAL, DALRuntimeContext).instance()).isSameAs(emptyList);
+        assertThat(listScopeNode.verify(new ConstValueNode(emptyList), MATCHER, DALRuntimeContext).instance()).isSameAs(emptyList);
     }
 }

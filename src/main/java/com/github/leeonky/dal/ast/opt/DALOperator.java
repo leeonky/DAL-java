@@ -20,7 +20,7 @@ public abstract class DALOperator extends Operator<DALRuntimeContext, DALNode, D
 
     @Override
     public Object calculate(DALExpression expression, DALRuntimeContext context) {
-        return calculateData(expression, context).getInstance();
+        return calculateData(expression, context).instance();
     }
 
     public boolean isNeedInspect() {

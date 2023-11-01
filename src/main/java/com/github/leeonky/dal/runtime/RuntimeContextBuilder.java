@@ -88,7 +88,7 @@ public class RuntimeContextBuilder {
 
     @SuppressWarnings("unchecked")
     public RuntimeContextBuilder registerValueFormat(String name, Formatter<?, ?> formatter) {
-        valueConstructors.put(name, (o, c) -> ((Formatter<Object, ?>) formatter).transform(o.getInstance()));
+        valueConstructors.put(name, (o, c) -> ((Formatter<Object, ?>) formatter).transform(o.instance()));
         return this;
     }
 
@@ -106,7 +106,7 @@ public class RuntimeContextBuilder {
     public RuntimeContextBuilder registerSchema(String name, BiFunction<Data, DALRuntimeContext, Boolean> predicate) {
         valueConstructors.put(name, (o, context) -> {
             if (predicate.apply(o, context))
-                return o.getInstance();
+                return o.instance();
             throw new IllegalTypeException();
         });
         return this;
@@ -319,7 +319,7 @@ public class RuntimeContextBuilder {
         }
 
         public Object getPropertyValue(Data data, Object property) {
-            PropertyAccessor<Object> propertyAccessor = propertyAccessors.getData(data.getInstance());
+            PropertyAccessor<Object> propertyAccessor = propertyAccessors.getData(data.instance());
             try {
                 return propertyAccessor.getValueByData(data, property);
             } catch (InvalidPropertyException e) {
@@ -452,7 +452,7 @@ public class RuntimeContextBuilder {
         }
 
         public Dumper fetchDumper(Data data) {
-            return dumperFactories.tryGetData(data.getInstance()).map(factory -> factory.apply(data)).orElseGet(() -> {
+            return dumperFactories.tryGetData(data.instance()).map(factory -> factory.apply(data)).orElseGet(() -> {
                 if (data.isNull())
                     return (_data, dumpingContext) -> dumpingContext.append("null");
                 if (data.isList())
@@ -478,7 +478,7 @@ public class RuntimeContextBuilder {
         }
 
         public Data invokeDataRemark(RemarkData remarkData) {
-            Object instance = remarkData.data().getInstance();
+            Object instance = remarkData.data().instance();
             return remarks.tryGetData(instance)
                     .orElseThrow(() -> new RuntimeException("Not implement operator () of " +
                             Classes.getClassName(instance), remarkData.remarkNode().getPositionBegin()))
