@@ -16,6 +16,7 @@ import static java.util.Arrays.asList;
 
 public class Notations {
 
+
     public static class Keywords {
         public static final Notation<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression>
                 WHICH = notation("which"),
@@ -57,7 +58,8 @@ public class Notations {
                 META = notation("::"),
                 IS = Keywords.IS,
                 WHICH = Keywords.WHICH,
-                DATA_REMARK = notation("(");
+                DATA_REMARK = notation("("),
+                EXCLAMATION = notation("!");
     }
 
     public static final Notation<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression>

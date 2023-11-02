@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
+import static com.github.leeonky.dal.ast.opt.Factory.exclamation;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
 import static com.github.leeonky.dal.compiler.DALProcedure.*;
 import static com.github.leeonky.interpreter.ClauseParser.Mandatory.clause;
@@ -114,8 +115,10 @@ public class Compiler {
             ELEMENT_ELLIPSIS_CLAUSE = Notations.Operators.ELEMENT_ELLIPSIS.clause((token, input) -> new ListEllipsisNode()),
             ROW_WILDCARD_CLAUSE = Notations.Operators.ROW_WILDCARD.clause((token, input) -> new WildcardNode(token.getContent())),
             LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
+            EXCLAMATION_CLAUSE = many(Notations.Operators.EXCLAMATION).and(atLeast(1)).as(ExclamationNode::new)
+                    .clause((n1, n2) -> new DALExpression(n1, exclamation(), n2).applyPrecedence(DALExpression::new)),
             DATA_REMARK_CLAUSE = Operators.DATA_REMARK.clause(DATA_REMARK),
-            PROPERTY_POSTFIX = oneOf(LIST_MAPPING_CLAUSE, DATA_REMARK_CLAUSE),
+            PROPERTY_POSTFIX = oneOf(LIST_MAPPING_CLAUSE, DATA_REMARK_CLAUSE, EXCLAMATION_CLAUSE),
             META_LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNodeMeta(symbolNode)),
             IMPLICIT_PROPERTY_CLAUSE = Operators.PROPERTY_IMPLICIT.clause(oneOf(PROPERTY_PATTERN,
                     oneOf(STRING_PROPERTY, NUMBER_PROPERTY, SYMBOL).concat(PROPERTY_POSTFIX))),
@@ -237,8 +240,8 @@ public class Compiler {
             many(SEQUENCE_ZA_2).and(atLeast(1)).as(SortGroupNode::new)).or(procedure -> SortGroupNode.noSequence()),
             EMPTY_TRANSPOSED_HEAD = procedure -> new EmptyTransposedRowHeaderRow();
 
-    public ClauseParser<DALNode, DALProcedure>
-            ROW_HEADER_CLAUSE = oneOf(DATA_REMARK_CLAUSE, SCHEMA_CLAUSE).concatAll(oneOf(DATA_REMARK_CLAUSE, SCHEMA_CLAUSE));
+    public ClauseParser<DALNode, DALProcedure> ROW_HEADER_CLAUSE = oneOf(DATA_REMARK_CLAUSE, SCHEMA_CLAUSE)
+            .concatAll(oneOf(DATA_REMARK_CLAUSE, SCHEMA_CLAUSE)).concat(EXCLAMATION_CLAUSE);
 
     private final NodeParser.Mandatory<DALNode, DALProcedure>
             ROW_PREFIX = procedure -> new RowHeader(ROW_KEY.parse(procedure), ROW_HEADER_CLAUSE.parse(procedure),

@@ -43,6 +43,7 @@ public class RuntimeContextBuilder {
     private final Set<Method> extensionMethods = new HashSet<>();
     private final Map<Object, Function<MetaData, Object>> metaProperties = new HashMap<>();
     private final ClassKeyMap<Function<RemarkData, Data>> remarks = new ClassKeyMap<>();
+    private final ClassKeyMap<Function<RuntimeData, Data>> exclamations = new ClassKeyMap<>();
     private final List<UserLiteralRule> userDefinedLiterals = new ArrayList<>();
     private final NumberType numberType = new NumberType();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
@@ -247,13 +248,13 @@ public class RuntimeContextBuilder {
         return this;
     }
 
-    public RuntimeContextBuilder registerDataRemark(Class<?> type, Function<RemarkData, Data> remark) {
-        remarks.put(type, remark);
+    public RuntimeContextBuilder registerDataRemark(Class<?> type, Function<RemarkData, Data> action) {
+        remarks.put(type, action);
         return this;
     }
 
-    public RuntimeContextBuilder registerExclamation(Class<?> type, Function<RemarkData, Data> remark) {
-        remarks.put(type, remark);
+    public RuntimeContextBuilder registerExclamation(Class<?> type, Function<RuntimeData, Data> action) {
+        exclamations.put(type, action);
         return this;
     }
 
@@ -261,7 +262,7 @@ public class RuntimeContextBuilder {
         BeanClass<?> type = schemas.get(schema);
         if (type != null)
             return type;
-        throw new IllegalStateException(String.format("Unknown schema '%s'", schema));
+        throw new IllegalStateException(format("Unknown schema '%s'", schema));
     }
 
     public void setMaxDumpingObjectSize(int maxDumpingObjectSize) {
@@ -488,6 +489,14 @@ public class RuntimeContextBuilder {
                     .orElseThrow(() -> new RuntimeException("Not implement operator () of " +
                             Classes.getClassName(instance), remarkData.operator().getPosition()))
                     .apply(remarkData);
+        }
+
+        public Data invokeExclamations(RuntimeData runtimeData) {
+            Object instance = runtimeData.data().instance();
+            return exclamations.tryGetData(instance)
+                    .orElseThrow(() -> new RuntimeException(format("Not implement operator %s of %s", runtimeData.operandNode().inspect(),
+                            Classes.getClassName(instance)), runtimeData.operandNode().getPositionBegin()))
+                    .apply(runtimeData);
         }
     }
 }

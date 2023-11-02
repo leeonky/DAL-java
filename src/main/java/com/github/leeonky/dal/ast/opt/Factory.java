@@ -7,6 +7,7 @@ import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RemarkData;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.RuntimeData;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.Notation;
 import com.github.leeonky.util.function.TriFunction;
@@ -124,6 +125,23 @@ public class Factory {
             @Override
             public String inspect(String node1, String node2) {
                 return node1 + "(" + node2 + ")";
+            }
+        };
+    }
+
+
+    public static DALOperator exclamation() {
+        return new DALOperator(Precedence.REMARK, "", false) {
+
+            @Override
+            public Data calculateData(DALExpression expression, DALRuntimeContext context) {
+                return context.invokeExclamations(new RuntimeData(expression.left().evaluateData(context),
+                        expression.left(), expression.right(), context, expression.operator()));
+            }
+
+            @Override
+            public String inspect(String node1, String node2) {
+                return node1 + node2;
             }
         };
     }
