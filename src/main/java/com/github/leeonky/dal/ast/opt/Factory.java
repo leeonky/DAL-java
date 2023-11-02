@@ -117,10 +117,8 @@ public class Factory {
 
             @Override
             public Data calculateData(DALExpression expression, DALRuntimeContext context) {
-                Data leftValue = expression.left().evaluateData(context);
-                Data rightValue = expression.right().evaluateData(context);
-                return context.invokeDataRemark(new RemarkData(leftValue, expression.left(),
-                        expression.right(), context));
+                return context.invokeDataRemark(new RemarkData(expression.left().evaluateData(context),
+                        expression.left(), expression.right(), context, expression.operator()));
             }
 
             @Override

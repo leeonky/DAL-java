@@ -15,11 +15,7 @@ public class MetaProperties implements Extension {
     private static Object size(MetaData metaData) {
         Data data = metaData.data();
         if (data.isList())
-//            try {
             return data.list().size();
-//            } catch (InfiniteCollectionException e) {
-//                throw new IllegalStateException("Can not get size of infinite collection");
-//            }
         throw new IllegalStateException(format("Invalid meta property `size` for: %s", data.dumpAll()));
     }
 
@@ -27,7 +23,7 @@ public class MetaProperties implements Extension {
         Throwable error = metaData.catchError();
         if (error == null)
             throw new AssertionFailure("Expecting an error to be thrown, but nothing was thrown",
-                    metaData.symbolNode().getPositionBegin());
+                    metaData.operandNode().getPositionBegin());
         return error;
     }
 

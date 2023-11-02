@@ -252,6 +252,11 @@ public class RuntimeContextBuilder {
         return this;
     }
 
+    public RuntimeContextBuilder registerExclamation(Class<?> type, Function<RemarkData, Data> remark) {
+        remarks.put(type, remark);
+        return this;
+    }
+
     public BeanClass<?> schemaType(String schema) {
         BeanClass<?> type = schemas.get(schema);
         if (type != null)
@@ -410,7 +415,7 @@ public class RuntimeContextBuilder {
         public Function<MetaData, Object> fetchGlobalMetaFunction(MetaData metaData) {
             return metaProperties.computeIfAbsent(metaData.name(), k -> {
                 throw new RuntimeException(format("Meta property `%s` not found",
-                        metaData.name()), metaData.symbolNode().getPositionBegin());
+                        metaData.name()), metaData.operandNode().getPositionBegin());
             });
         }
 
@@ -481,7 +486,7 @@ public class RuntimeContextBuilder {
             Object instance = remarkData.data().instance();
             return remarks.tryGetData(instance)
                     .orElseThrow(() -> new RuntimeException("Not implement operator () of " +
-                            Classes.getClassName(instance), remarkData.remarkNode().getPositionBegin()))
+                            Classes.getClassName(instance), remarkData.operator().getPosition()))
                     .apply(remarkData);
         }
     }

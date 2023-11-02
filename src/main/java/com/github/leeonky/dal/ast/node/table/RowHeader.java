@@ -17,19 +17,19 @@ public class RowHeader extends DALNode {
             SPECIFY_INDEX = new SpecifyIndexRowType(),
             SPECIFY_PROPERTY = new SpecifyPropertyRowType();
     private final Optional<DALNode> indexOrProperty;
-    private final Optional<Clause<DALNode>> rowRemark;
+    private final Optional<Clause<DALNode>> clause;
     private final Optional<DALOperator> rowOperator;
 
-    public RowHeader(Optional<DALNode> indexOrProperty, Optional<Clause<DALNode>> rowRemark,
+    public RowHeader(Optional<DALNode> indexOrProperty, Optional<Clause<DALNode>> clause,
                      Optional<DALOperator> rowOperator) {
         this.rowOperator = rowOperator;
         this.indexOrProperty = indexOrProperty;
-        this.rowRemark = rowRemark;
+        this.clause = clause;
     }
 
     @Override
     public String inspect() {
-        String indexAndSchema = (indexOrProperty.map(DALNode::inspect).orElse("") + " " + rowRemark.map(clause ->
+        String indexAndSchema = (indexOrProperty.map(DALNode::inspect).orElse("") + " " + clause.map(clause ->
                 clause.expression(null).inspect()).orElse("")).trim();
         return rowOperator.map(dalOperator -> dalOperator.inspect(indexAndSchema, "").trim()).orElse(indexAndSchema);
     }
@@ -37,7 +37,7 @@ public class RowHeader extends DALNode {
     public DALExpression makeExpressionWithOptionalIndexAndSchema(RowType rowType, DALNode input,
                                                                   DALOperator defaultOperator, DALNode expectedRow) {
         DALNode rowAccessor = rowType.constructAccessingRowNode(input, indexOrProperty);
-        DALNode rowAccessorWithRemark = rowRemark.map(clause -> clause.expression(rowAccessor)).orElse(rowAccessor);
+        DALNode rowAccessorWithRemark = clause.map(clause -> clause.expression(rowAccessor)).orElse(rowAccessor);
         return new DALExpression(rowAccessorWithRemark, rowOperator.orElse(defaultOperator), expectedRow);
     }
 
@@ -61,7 +61,7 @@ public class RowHeader extends DALNode {
 
     public Optional<Integer> position() {
         return getFirstPresent(() -> indexOrProperty.map(DALNode::getPositionBegin),
-                () -> rowRemark.map(c -> ((DALExpression) c.expression(InputNode.INPUT_NODE)).operator().getPosition()),
+                () -> clause.map(c -> ((DALExpression) c.expression(InputNode.INPUT_NODE)).operator().getPosition()),
                 () -> rowOperator.map(Operator::getPosition));
     }
 }

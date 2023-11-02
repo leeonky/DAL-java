@@ -69,6 +69,35 @@ Feature: data remark
     }
     """
 
-#    raise error when no remark register
+  Scenario: raise error when no remark register
+    Given the following json:
+    """
+    [{
+      "key": "k1",
+      "value": "a"
+    }, {
+      "key": "k2",
+      "value": "b"
+    }]
+    """
+    When evaluate by:
+    """
+    : | key(xx) | value |
+      | k1      | a     |
+      | k2      | b     |
+    """
+    Then failed with the message:
+    """
+    Not implement operator () of java.lang.String
+    """
+    And got the following notation:
+    """
+    : | key(xx) | value |
+           ^
+      | k1      | a     |
+    ^^^^^^^^^^^^^^^^^^^^^^
+      | k2      | b     |
+    """
+
 #    precedence
 
