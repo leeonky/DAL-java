@@ -41,24 +41,24 @@ Feature: exclamation
                 | b1!   |
                 | b2!   |
 
-#      beanRefs: >>| bean! | b1! | b2! |
-#
-#      {}:     | toUpperCase |
-#       hello! | HELLO!      |
-#
-#      beans: | toUpperCase |
-#           ! | B1HELLO     |
-#           ! | B2WORLD     |
-#
-#      beans: | >>          | !   | !   |
-#             | toUpperCase | B1! | B2! |
-#
-#      beans: | toUpperCase |
-#        0!   | B1HELLO     |
-#        1!   | B2WORLD     |
-#
-#      beans: | >>          | 0!  | 1!  |
-#             | toUpperCase | B1! | B2! |
+      beanRefs: >>| bean! | b1! | b2! |
+
+      {}:     | toUpperCase |
+       hello! | HELLO!      |
+
+      beans: | toUpperCase |
+           ! | B1!         |
+           ! | B2!         |
+
+      beans: | >>          | !   | !   |
+             | toUpperCase | B1! | B2! |
+
+      beans: | toUpperCase |
+        0!   | B1!         |
+        1!   | B2!         |
+
+      beans: | >>          | 0!  | 1!  |
+             | toUpperCase | B1! | B2! |
 
       beans: | toUpperCase |
         [0]! | B1!         |

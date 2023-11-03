@@ -240,8 +240,8 @@ public class Compiler {
             many(SEQUENCE_ZA_2).and(atLeast(1)).as(SortGroupNode::new)).or(procedure -> SortGroupNode.noSequence()),
             EMPTY_TRANSPOSED_HEAD = procedure -> new EmptyTransposedRowHeaderRow();
 
-    public ClauseParser<DALNode, DALProcedure> ROW_HEADER_CLAUSE = oneOf(DATA_REMARK_CLAUSE, SCHEMA_CLAUSE)
-            .concatAll(oneOf(DATA_REMARK_CLAUSE, SCHEMA_CLAUSE)).concat(EXCLAMATION_CLAUSE);
+    public ClauseParser<DALNode, DALProcedure> ROW_HEADER_CLAUSE = oneOf(DATA_REMARK_CLAUSE, SCHEMA_CLAUSE, EXCLAMATION_CLAUSE)
+            .concatAll(oneOf(DATA_REMARK_CLAUSE, SCHEMA_CLAUSE, EXCLAMATION_CLAUSE));
 
     private final NodeParser.Mandatory<DALNode, DALProcedure>
             ROW_PREFIX = procedure -> new RowHeader(ROW_KEY.parse(procedure), ROW_HEADER_CLAUSE.parse(procedure),
