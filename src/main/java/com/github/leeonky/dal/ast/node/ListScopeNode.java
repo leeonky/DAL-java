@@ -204,7 +204,7 @@ public class ListScopeNode extends DALNode {
                     expressions.get(index).evaluate(context);
                 } catch (DifferentCellSize differentCellSize) {
                     throw new RowAssertionFailure(index, differentCellSize);
-                } catch (DalException dalException) {
+                } catch (DALException dalException) {
                     if (style == Style.TABLE)
                         throw new ElementAssertionFailure(index, dalException);
                     throw dalException;

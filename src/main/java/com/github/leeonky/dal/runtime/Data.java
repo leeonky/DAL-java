@@ -158,13 +158,11 @@ public class Data {
     }
 
     public boolean isNullWithPosition(int position) {
-        boolean isNull;
         try {
-            isNull = isNull();
+            return isNull();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), position, e);
         }
-        return isNull;
     }
 
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {

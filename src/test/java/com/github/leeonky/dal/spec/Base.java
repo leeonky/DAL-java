@@ -5,7 +5,7 @@ import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.node.SymbolNode;
 import com.github.leeonky.dal.compiler.Notations;
-import com.github.leeonky.dal.runtime.DalException;
+import com.github.leeonky.dal.runtime.DALException;
 
 import static com.github.leeonky.dal.ast.opt.Factory.executable;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,11 +22,11 @@ public class Base {
         dal.evaluate(input, expression);
     }
 
-    protected DalException assertFailed(Object input, String expression) {
-        DalException dalException = null;
+    protected DALException assertFailed(Object input, String expression) {
+        DALException dalException = null;
         try {
             dal.evaluate(input, expression);
-        } catch (DalException failure) {
+        } catch (DALException failure) {
             dalException = failure;
         }
         assertThat(dalException).isNotNull();
@@ -42,7 +42,7 @@ public class Base {
     }
 
     protected void assertErrorContains(Object input, String expression, String errorMessage) {
-        assertThat(assertThrows(DalException.class, () -> {
+        assertThat(assertThrows(DALException.class, () -> {
             dal.evaluate(input, expression);
         })).hasMessage(errorMessage);
     }

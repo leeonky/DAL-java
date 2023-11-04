@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.format.Value;
-import com.github.leeonky.dal.runtime.DalException;
+import com.github.leeonky.dal.runtime.DALException;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.type.AllowNull;
@@ -121,7 +121,7 @@ public class VerifyValueInSchema extends Base {
         assertPass(new HashMap<String, Object>() {{
             put("value", "0");
         }}, "is MatchType");
-        DalException dalException = assertFailed(new HashMap<String, Object>() {{
+        DALException dalException = assertFailed(new HashMap<String, Object>() {{
             put("value", "invalid int");
         }}, "is MatchType");
         assertThat(dalException).hasMessage("Expected to match schema `MatchType` but was not\n" +

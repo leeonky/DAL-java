@@ -2,7 +2,7 @@ package com.github.leeonky.dal.ast.node.table;
 
 import com.github.leeonky.dal.ast.node.*;
 import com.github.leeonky.dal.ast.opt.DALOperator;
-import com.github.leeonky.dal.runtime.DalException;
+import com.github.leeonky.dal.runtime.DALException;
 import com.github.leeonky.interpreter.Clause;
 import com.github.leeonky.interpreter.SyntaxException;
 
@@ -98,7 +98,7 @@ public class Row extends DALNode {
     }
 
 
-    public DalException markPositionOnCells(DalException dalException) {
+    public DALException markPositionOnCells(DALException dalException) {
         rowHeader.position().ifPresent(position -> dalException.multiPosition(position, COLUMN));
         return cells.stream().reduce(dalException, (e, cell) ->
                 e.multiPosition(cell.expression(null).getPositionBegin(), COLUMN), notAllowParallelReduce());

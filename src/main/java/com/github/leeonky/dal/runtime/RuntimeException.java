@@ -1,6 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
-public class RuntimeException extends DalException {
+public class RuntimeException extends DALException {
     private final Throwable cause;
 
     public RuntimeException(String message, int position) {

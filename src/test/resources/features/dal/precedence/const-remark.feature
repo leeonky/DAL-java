@@ -67,7 +67,7 @@ Feature: const remark
          ^
       }
       """
-# TODO missing test
+
 #    Scenario: should keep expression before property
 #      Then the following verification should pass:
 #      """
