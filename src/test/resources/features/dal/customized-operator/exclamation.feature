@@ -68,3 +68,6 @@ Feature: exclamation
              | toUpperCase | B1!  | B2!  |
     }
     """
+
+#    precedence
+#    in expression

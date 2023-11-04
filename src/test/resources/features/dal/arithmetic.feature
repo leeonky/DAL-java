@@ -38,7 +38,8 @@ Feature: arithmetic
       | -1    | -1     | -1      |
       | !true | false  | !true   |
 
-  Scenario: should not parse as minus when start with minus
+#  Scenario: should not parse as minus when start with minus (old version DAL)
+  Scenario: start with minus const number should parse as a negative const number
     Given the following json:
     """
     1
@@ -49,5 +50,7 @@ Feature: arithmetic
     """
     Then the result should:
     """
-    : 0
+#    old version DAL
+#    : 0
+    : -1
     """

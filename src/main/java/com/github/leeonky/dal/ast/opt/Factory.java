@@ -44,7 +44,7 @@ public class Factory {
     }
 
     public static DALOperator parentheses() {
-        return new DALOperator(Precedence.PARENTHESES, "", false) {
+        return new DALOperator(Precedence.PARENTHESES, "PARENTHESES", false) {
             @Override
             public Data calculateData(DALExpression expression, DALRuntimeContext context) {
                 return expression.right().evaluateData(context);
@@ -94,7 +94,7 @@ public class Factory {
     }
 
     public static DALOperator constRemark() {
-        return new DALOperator(Precedence.REMARK, "", true) {
+        return new DALOperator(Precedence.REMARK, "CONST_REMARK", true) {
 
             @Override
             public Data calculateData(DALExpression expression, DALRuntimeContext context) {
@@ -114,7 +114,7 @@ public class Factory {
     }
 
     public static DALOperator dataRemark() {
-        return new DALOperator(Precedence.REMARK, "", false) {
+        return new DALOperator(Precedence.REMARK, "DATA_REMARK", false) {
 
             @Override
             public Data calculateData(DALExpression expression, DALRuntimeContext context) {
@@ -131,7 +131,7 @@ public class Factory {
 
 
     public static DALOperator exclamation() {
-        return new DALOperator(Precedence.REMARK, "", false) {
+        return new DALOperator(Precedence.REMARK, "EXCLAMATION", false) {
 
             @Override
             public Data calculateData(DALExpression expression, DALRuntimeContext context) {

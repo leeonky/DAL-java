@@ -34,7 +34,7 @@ Feature: calculation
     Examples:
       | input | code   | value |
       | 1     | +1     | 2     |
-      | 5     | -4     | 1     |
+      | 5     | -(4)   | 1     |
       | 2     | * 3    | 6     |
       | 4     | / 2    | 2     |
       | 2     | +3*2   | 8     |

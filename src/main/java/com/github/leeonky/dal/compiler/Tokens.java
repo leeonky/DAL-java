@@ -25,7 +25,7 @@ public class Tokens {
     }
 
     public static final TokenScanner<RuntimeContextBuilder.DALRuntimeContext, DALNode, DALExpression, DALOperator, DALProcedure>
-            NUMBER = tokenSpec(DIGITAL::contains, emptySet(), Tokens::notNumber).predicate(Tokens::isNumber).scanner(),
+            NUMBER = tokenSpec(DIGITAL_OR_MINUS::contains, emptySet(), Tokens::notNumber).predicate(Tokens::isNumber).scanner(),
             INTEGER = tokenSpec(DIGITAL_OR_MINUS::contains, emptySet(), Tokens::notNumber)
                     .predicate(Tokens::isNumber).scanner(),
             SYMBOL = tokenSpec(not(PROPERTY_DELIMITER::contains), Keywords.ALL_STRING, PROPERTY_DELIMITER)
