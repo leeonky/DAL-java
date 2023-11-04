@@ -12,7 +12,6 @@ import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.Notation;
 import com.github.leeonky.util.function.TriFunction;
 
-import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -89,26 +88,6 @@ public class Factory {
                 } catch (IllegalStateException e) {
                     throw new RuntimeException(e.getMessage(), getPosition());
                 }
-            }
-        };
-    }
-
-    public static DALOperator constRemark() {
-        return new DALOperator(Precedence.REMARK, "CONST_REMARK", true) {
-
-            @Override
-            public Data calculateData(DALExpression expression, DALRuntimeContext context) {
-                Data leftValue = expression.left().evaluateData(context);
-                Data rightValue = expression.right().evaluateData(context);
-                if (Objects.equals(leftValue.instance(), rightValue.instance()))
-                    return leftValue;
-                throw new RuntimeException(String.format("Incorrect const remark, const value was %s\nbut remark %s was %s",
-                        leftValue.dumpAll(), expression.right().inspect(), rightValue.dumpAll()), expression.right().getPositionBegin());
-            }
-
-            @Override
-            public String inspect(String node1, String node2) {
-                return node1 + " " + node2;
             }
         };
     }

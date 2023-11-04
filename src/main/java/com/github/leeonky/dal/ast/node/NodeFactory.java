@@ -9,8 +9,6 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.github.leeonky.dal.ast.opt.Factory.constRemark;
-
 public class NodeFactory {
     private static final NumberParser numberParser = new NumberParser();
 
@@ -99,7 +97,7 @@ public class NodeFactory {
     }
 
     public static DALNode constRemarkNode(DALNode constNode, DALNode parentheses) {
-        return new DALExpression(constNode, constRemark(), parentheses);
+        return new ConstRemarkNode(constNode, parentheses);
     }
 
     public static DALNode dataRemarkNode(List<Character> characters) {

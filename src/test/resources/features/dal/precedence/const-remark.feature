@@ -89,12 +89,15 @@ Feature: const remark
       """
       Then failed with the message:
       """
-      Operand should be boolean but 'java.lang.Integer'
+      Incorrect const remark, const value was java.lang.Integer
+      <2>
+      but remark (-2) was java.lang.Integer
+      <-2>
       """
       And got the following notation:
       """
       !2(-2)
-      ^
+        ^
       """
 
   Rule: arithmetic * /
