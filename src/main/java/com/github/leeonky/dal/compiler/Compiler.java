@@ -105,7 +105,7 @@ public class Compiler {
             TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(NodeFactory::relaxString),
             BRACKET_RELAX_STRING = Tokens.BRACKET_RELAX_STRING.nodeParser(NodeFactory::relaxString),
             DEFAULT_INDEX_HEADER = procedure -> new DefaultIndexColumnHeaderRow(),
-            DATA_REMARK = many(charNode(new EscapeChars())).and(endWith(Notations.CLOSING_PARENTHESES)).
+            DATA_REMARK = many(charNode(new EscapeChars())).and(endWith(Notations.CLOSING_PARENTHESES.getLabel())).
                     as(NodeFactory::dataRemarkNode);
 
     public ClauseParser<DALNode, DALProcedure>
