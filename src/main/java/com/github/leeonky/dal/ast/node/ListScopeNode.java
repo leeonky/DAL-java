@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.github.leeonky.dal.ast.node.DALExpression.expression;
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static com.github.leeonky.dal.ast.node.SymbolNode.Type.BRACKET;
@@ -63,12 +64,12 @@ public class ListScopeNode extends DALNode {
             if (type == Type.LAST_N_ITEMS) {
                 int negativeIndex = -1;
                 for (int i = inputClauses.size() - 1; i >= 0; i--)
-                    add(0, inputClauses.get(i).expression(new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
+                    add(0, inputClauses.get(i).expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
                             new SymbolNode(negativeIndex--, BRACKET))));
             } else {
                 Zipped<Integer, Clause<DALNode>> zipped = zip(list.indexes(), inputClauses);
                 zipped.forEachElement((index, clause) -> add(clause.expression(
-                        new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY), new SymbolNode(index, BRACKET)))));
+                        expression(INPUT_NODE, Factory.executable(Notations.EMPTY), new SymbolNode(index, BRACKET)))));
                 if (type == Type.ALL_ITEMS) {
                     if (zipped.hasRight()) {
                         String message = format("Different list size\nExpected: <%d>\nActual: <%d>", inputClauses.size(), zipped.index());
@@ -93,12 +94,12 @@ public class ListScopeNode extends DALNode {
             if (type == Type.LAST_N_ITEMS) {
                 int negativeIndex = -1;
                 for (int i = inputClauses.size() - 1; i >= 0; i--) {
-                    add(0, inputClauses.get(i).expression(new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
+                    add(0, inputClauses.get(i).expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
                             new SymbolNode(negativeIndex--, BRACKET))));
                 }
             } else {
                 for (int i = 0; i < inputClauses.size(); i++)
-                    add(inputClauses.get(i).expression(new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
+                    add(inputClauses.get(i).expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
                             new SymbolNode(i, BRACKET))));
             }
         }};
@@ -185,7 +186,7 @@ public class ListScopeNode extends DALNode {
 
     private boolean isElementPassedVerification(DALRuntimeContext context, Clause<DALNode> clause, int index) {
         try {
-            clause.expression(new DALExpression(INPUT_NODE, Factory.executable(Notations.EMPTY),
+            clause.expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
                     new SymbolNode(index, BRACKET))).evaluate(context);
             return true;
         } catch (AssertionFailure ignore) {

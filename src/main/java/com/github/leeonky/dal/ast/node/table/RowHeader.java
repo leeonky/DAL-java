@@ -10,6 +10,7 @@ import com.github.leeonky.interpreter.OperatorParser;
 
 import java.util.Optional;
 
+import static com.github.leeonky.dal.ast.node.DALExpression.expression;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
 
 public class RowHeader extends DALNode {
@@ -34,11 +35,11 @@ public class RowHeader extends DALNode {
         return rowOperator.map(dalOperator -> dalOperator.inspect(indexAndSchema, "").trim()).orElse(indexAndSchema);
     }
 
-    public DALExpression makeExpressionWithOptionalIndexAndSchema(RowType rowType, DALNode input,
-                                                                  DALOperator defaultOperator, DALNode expectedRow) {
+    public DALNode makeExpressionWithOptionalIndexAndSchema(RowType rowType, DALNode input,
+                                                            DALOperator defaultOperator, DALNode expectedRow) {
         DALNode rowAccessor = rowType.constructAccessingRowNode(input, indexOrProperty);
-        DALNode rowAccessorWithRemark = clause.map(clause -> clause.expression(rowAccessor)).orElse(rowAccessor);
-        return new DALExpression(rowAccessorWithRemark, rowOperator.orElse(defaultOperator), expectedRow);
+        return expression(clause.map(clause -> clause.expression(rowAccessor)).orElse(rowAccessor),
+                rowOperator.orElse(defaultOperator), expectedRow);
     }
 
     public OperatorParser<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression> operator() {

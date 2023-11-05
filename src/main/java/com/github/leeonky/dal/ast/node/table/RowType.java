@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.ast.node.DALExpression.expression;
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.node.SymbolNode.Type.BRACKET;
 import static com.github.leeonky.dal.ast.node.table.SpecifyIndexRowType.indexToExpression;
@@ -104,7 +105,7 @@ class SpecifyIndexRowType extends RowType {
     }
 
     static Optional<DALNode> indexToExpression(DALNode node) {
-        return when(node instanceof ConstValueNode).optional(() -> new DALExpression(INPUT_NODE, Factory.executable(EMPTY),
+        return when(node instanceof ConstValueNode).optional(() -> expression(INPUT_NODE, Factory.executable(EMPTY),
                 new SymbolNode(((ConstValueNode) node).getValue(), BRACKET).setPositionBegin(node.getPositionBegin())));
     }
 }

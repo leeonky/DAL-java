@@ -2,7 +2,6 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.BaseTest;
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.cucumber.JSONArrayDALCollectionFactory;
 import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
@@ -56,7 +55,7 @@ public class CucumberContextBak {
 
     public void giveDalSourceCode(String code) {
         dalProcedure = new DALProcedure(BaseTest.createSourceCode(sourceCodeString = parseTabAndSpace(code)),
-                dal.getRuntimeContextBuilder().build(null), DALExpression::new);
+                dal.getRuntimeContextBuilder().build(null));
     }
 
     private String parseTabAndSpace(String code) {

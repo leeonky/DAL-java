@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.dal.Assertions;
 import com.github.leeonky.dal.BaseTest;
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.inspector.DumpingBuffer;
@@ -216,7 +215,7 @@ public class IntegrationTestContext {
     public DALNode parseNode(String factory) {
         try {
             return dalNode = parserMap.get(factory).parse(new DALProcedure(BaseTest.createSourceCode(expression),
-                    dal.getRuntimeContextBuilder().build(null), DALExpression::new)).orElse(null);
+                    dal.getRuntimeContextBuilder().build(null))).orElse(null);
         } catch (InterpreterException e) {
             exception = e;
             return null;

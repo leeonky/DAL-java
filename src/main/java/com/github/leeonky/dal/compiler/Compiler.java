@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static com.github.leeonky.dal.ast.node.DALExpression.expression;
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.opt.Factory.exclamation;
 import static com.github.leeonky.dal.compiler.Constants.PROPERTY_DELIMITER_STRING;
@@ -116,7 +117,7 @@ public class Compiler {
             ROW_WILDCARD_CLAUSE = Notations.Operators.ROW_WILDCARD.clause((token, input) -> new WildcardNode(token.getContent())),
             LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
             EXCLAMATION_CLAUSE = many(Notations.Operators.EXCLAMATION).and(atLeast(1)).as(ExclamationNode::new)
-                    .clause((n1, n2) -> new DALExpression(n1, exclamation(), n2).applyPrecedence(DALExpression::new)),
+                    .clause((n1, n2) -> expression(n1, exclamation(), n2)),
             DATA_REMARK_CLAUSE = Operators.DATA_REMARK.clause(DATA_REMARK),
             PROPERTY_POSTFIX = oneOf(LIST_MAPPING_CLAUSE, DATA_REMARK_CLAUSE, EXCLAMATION_CLAUSE),
             META_LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNodeMeta(symbolNode)),
@@ -211,7 +212,7 @@ public class Compiler {
 
     public List<DALNode> compile(SourceCode sourceCode, DALRuntimeContext DALRuntimeContext) {
         return new ArrayList<DALNode>() {{
-            DALProcedure dalParser = new DALProcedure(sourceCode, DALRuntimeContext, DALExpression::new);
+            DALProcedure dalParser = new DALProcedure(sourceCode, DALRuntimeContext);
             add(EXPRESSION.parse(dalParser));
             if (sourceCode.isBeginning() && sourceCode.hasCode())
                 throw sourceCode.syntaxError("Unexpected token", 0);
@@ -222,7 +223,7 @@ public class Compiler {
 
     public List<Object> toChainNodes(String sourceCode) {
         return PROPERTY_CHAIN.parse(new DALProcedure(new SourceCode(sourceCode, Notations.LINE_COMMENTS),
-                null, DALExpression::new)).propertyChain();
+                null)).propertyChain();
     }
 
     private final NodeParser<DALNode, DALProcedure>

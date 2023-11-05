@@ -47,7 +47,7 @@ public class NodeFactory {
     }
 
     public static DALNode parenthesesNode(DALNode node) {
-        return new DALExpression(null, com.github.leeonky.dal.ast.opt.Factory.parentheses(), node);
+        return new ParenthesesNode(node);
     }
 
     public static DALNode constString(List<Character> characters) {

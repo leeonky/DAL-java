@@ -42,20 +42,6 @@ public class Factory {
         };
     }
 
-    public static DALOperator parentheses() {
-        return new DALOperator(Precedence.PARENTHESES, "PARENTHESES", false) {
-            @Override
-            public Data calculateData(DALExpression expression, DALRuntimeContext context) {
-                return expression.right().evaluateData(context);
-            }
-
-            @Override
-            public String inspect(String node1, String node2) {
-                return String.format("(%s)", node2);
-            }
-        };
-    }
-
     public static DALOperator executable(Notation<?, ?, ?, ?, ?> notation) {
         return new DALOperator(Precedence.PROPERTY, notation.getLabel(), false) {
             @Override

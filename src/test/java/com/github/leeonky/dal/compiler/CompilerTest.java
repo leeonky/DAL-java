@@ -1,7 +1,6 @@
 package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.runtime.Result;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.UserLiteralRule;
@@ -35,7 +34,7 @@ class CompilerTest {
 
         private void relaxStringShouldBe(String code, String expected) {
             assertThat(compiler.EXPRESSION_RELAX_STRING.parse(new DALProcedure(new SourceCode(code, emptyList()),
-                    runtimeContext, DALExpression::new)).evaluate(runtimeContext)).isEqualTo(expected);
+                    runtimeContext)).evaluate(runtimeContext)).isEqualTo(expected);
         }
     }
 
@@ -55,7 +54,7 @@ class CompilerTest {
 
         private void relaxStringShouldBe(String code, String expected) {
             assertThat(compiler.OBJECT_SCOPE_RELAX_STRING.parse(new DALProcedure(new SourceCode(code, emptyList()),
-                    runtimeContext, DALExpression::new)).evaluate(runtimeContext)).isEqualTo(expected);
+                    runtimeContext)).evaluate(runtimeContext)).isEqualTo(expected);
         }
     }
 
@@ -75,7 +74,7 @@ class CompilerTest {
 
         private void relaxStringShouldBe(String code, String expected) {
             assertThat(compiler.LIST_SCOPE_RELAX_STRING.parse(new DALProcedure(new SourceCode(code, emptyList()),
-                    runtimeContext, DALExpression::new)).evaluate(runtimeContext)).isEqualTo(expected);
+                    runtimeContext)).evaluate(runtimeContext)).isEqualTo(expected);
         }
     }
 

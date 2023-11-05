@@ -9,5 +9,4 @@ public class Precedence {
     static final int REMARK = 499;
     static final int UNARY_OPERATION = 500;
     static final int PROPERTY = 501;
-    static final int PARENTHESES = Integer.MAX_VALUE;
 }

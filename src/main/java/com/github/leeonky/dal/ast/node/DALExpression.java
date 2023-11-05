@@ -17,11 +17,19 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     private final DALOperator operator;
     private final DALNode right;
 
-    public DALExpression(DALNode left, DALOperator operator, DALNode right) {
+    private DALExpression(DALNode left, DALOperator operator, DALNode right) {
         this.left = left;
         this.right = right;
         this.operator = operator;
         setPositionBegin(operator.getPosition());
+    }
+
+    public static DALNode expression(DALNode left, DALOperator operator, DALNode right) {
+        if (left instanceof GroupExpression)
+            return ((GroupExpression) left).append(operator, right);
+        if (right instanceof GroupExpression)
+            return ((GroupExpression) right).insert(left, operator);
+        return new DALExpression(left, operator, right).applyPrecedence(DALExpression::new);
     }
 
     @Override

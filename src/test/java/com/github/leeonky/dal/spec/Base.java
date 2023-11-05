@@ -1,12 +1,12 @@
 package com.github.leeonky.dal.spec;
 
 import com.github.leeonky.dal.DAL;
-import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.node.SymbolNode;
 import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.DALException;
 
+import static com.github.leeonky.dal.ast.node.DALExpression.expression;
 import static com.github.leeonky.dal.ast.opt.Factory.executable;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -15,7 +15,7 @@ public class Base {
     protected DAL dal = new DAL().extend();
 
     public static DALNode createPropertyNode(DALNode instanceNode, Object name) {
-        return new DALExpression(instanceNode, executable(Notations.EMPTY), new SymbolNode(name, SymbolNode.Type.BRACKET));
+        return expression(instanceNode, executable(Notations.EMPTY), new SymbolNode(name, SymbolNode.Type.BRACKET));
     }
 
     protected void assertPass(Object input, String expression) {

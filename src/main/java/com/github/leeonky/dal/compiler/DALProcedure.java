@@ -2,10 +2,8 @@ package com.github.leeonky.dal.compiler;
 
 import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.DALNode;
-import com.github.leeonky.dal.ast.node.GroupExpression;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.interpreter.ExpressionFactory;
 import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.NodeParser.Mandatory;
 import com.github.leeonky.interpreter.Procedure;
@@ -25,9 +23,8 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
 
     private boolean enableSlashProperty = false, enableRelaxProperty = false, enableNumberProperty = false;
 
-    public DALProcedure(SourceCode sourceCode, DALRuntimeContext runtimeContext,
-                        ExpressionFactory<DALRuntimeContext, DALNode, DALExpression, DALOperator> expressionFactory) {
-        super(sourceCode, runtimeContext, expressionFactory);
+    public DALProcedure(SourceCode sourceCode, DALRuntimeContext runtimeContext) {
+        super(sourceCode, runtimeContext);
     }
 
     public static NodeParser<DALNode, DALProcedure> disableCommaAnd(NodeParser<DALNode, DALProcedure> nodeParser) {
@@ -132,11 +129,8 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
     }
 
     @Override
+    @Deprecated
     public DALNode createExpression(DALNode left, DALOperator operator, DALNode right) {
-        if (left instanceof GroupExpression)
-            return ((GroupExpression) left).append(operator, right, this);
-        if (right instanceof GroupExpression)
-            return ((GroupExpression) right).insert(left, operator, this);
-        return super.createExpression(left, operator, right);
+        return DALExpression.expression(left, operator, right);
     }
 }
