@@ -100,7 +100,7 @@ public class Calculator {
             return context.wrap(context.getNumberType().negate((Number) value));
         if (data.isList())
             return sortList(data, reverseOrder());
-        throw new IllegalOperationException(format("Operands should be number but '%s'", getClassName(value)));
+        throw new IllegalOperationException(format("Operand should be number but '%s'", getClassName(value)));
     }
 
     @SuppressWarnings("unchecked")

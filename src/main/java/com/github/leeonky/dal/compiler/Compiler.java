@@ -119,20 +119,19 @@ public class Compiler {
             EXCLAMATION_CLAUSE = many(Notations.Operators.EXCLAMATION).and(atLeast(1)).as(ExclamationNode::new)
                     .clause((n1, n2) -> expression(n1, exclamation(), n2)),
             DATA_REMARK_CLAUSE = Operators.DATA_REMARK.clause(DATA_REMARK),
-            PROPERTY_POSTFIX = oneOf(LIST_MAPPING_CLAUSE, DATA_REMARK_CLAUSE, EXCLAMATION_CLAUSE),
             META_LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNodeMeta(symbolNode)),
             IMPLICIT_PROPERTY_CLAUSE = Operators.PROPERTY_IMPLICIT.clause(oneOf(PROPERTY_PATTERN,
-                    oneOf(STRING_PROPERTY, NUMBER_PROPERTY, SYMBOL).concat(PROPERTY_POSTFIX))),
+                    oneOf(STRING_PROPERTY, NUMBER_PROPERTY, SYMBOL).concat(LIST_MAPPING_CLAUSE))),
             EXPLICIT_PROPERTY_CLAUSE = oneOf(Operators.PROPERTY_DOT.clause(PROPERTY_PATTERN.or(propertyChainNode())),
                     Operators.PROPERTY_SLASH.clause(propertyChainNode()),
                     Operators.PROPERTY_META.clause(symbolClause(META_SYMBOL.concat(META_LIST_MAPPING_CLAUSE))),
                     Operators.PROPERTY_IMPLICIT.clause(Notations.OPENING_BRACKET.with(single(INTEGER_OR_STRING.or(BRACKET_RELAX_STRING))
                             .and(endWith(Notations.CLOSING_BRACKET))
-                            .as(NodeFactory::bracketSymbolNode).concat(PROPERTY_POSTFIX))),
+                            .as(NodeFactory::bracketSymbolNode).concat(LIST_MAPPING_CLAUSE))),
                     Operators.PROPERTY_IMPLICIT.clause(lazyNode(() -> GROUP_PROPERTY)));
 
     private NodeParser.Mandatory<DALNode, DALProcedure> propertyChainNode() {
-        return symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL, NUMBER_PROPERTY).concat(PROPERTY_POSTFIX));
+        return symbolClause(oneOf(STRING_PROPERTY, DOT_SYMBOL, NUMBER_PROPERTY).concat(LIST_MAPPING_CLAUSE));
     }
 
     private NodeParser.Mandatory<DALNode, DALProcedure> symbolClause(
@@ -152,7 +151,7 @@ public class Compiler {
     public Compiler() {
         PARENTHESES = lazyNode(() -> enableCommaAnd(Notations.OPENING_PARENTHESES.with(single(EXPRESSION).and(endWith(Notations.CLOSING_PARENTHESES))
                 .as(NodeFactory::parenthesesNode))));
-        PROPERTY = DEFAULT_INPUT.with(oneOf(EXPLICIT_PROPERTY_CLAUSE, IMPLICIT_PROPERTY_CLAUSE));
+        PROPERTY = DEFAULT_INPUT.with(oneOf(EXPLICIT_PROPERTY_CLAUSE, IMPLICIT_PROPERTY_CLAUSE)).concat(oneOf(DATA_REMARK_CLAUSE, EXCLAMATION_CLAUSE));
         OPTIONAL_PROPERTY_CHAIN = PROPERTY.concatAll(EXPLICIT_PROPERTY_CLAUSE);
         PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
         VERIFICATION_PROPERTY = enableNumberProperty(enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN)));
