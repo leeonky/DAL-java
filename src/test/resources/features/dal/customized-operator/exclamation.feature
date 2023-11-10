@@ -69,5 +69,36 @@ Feature: exclamation
     }
     """
 
-#    precedence
-#    in expression
+  Scenario: raise error when not register
+    Given the following json:
+    """
+    [{
+      "key": "k1",
+      "value": "a"
+    }, {
+      "key": "k2",
+      "value": "b"
+    }]
+    """
+    When evaluate by:
+    """
+    : | key! | value |
+      | k1   | a     |
+      | k2   | b     |
+    """
+    Then failed with the message:
+    """
+    Not implement operator ! of java.lang.String
+    """
+    And got the following notation:
+    """
+    : | key! | value |
+           ^
+      | k1   | a     |
+    ^^^^^^^^^^^^^^^^^^^
+      | k2   | b     |
+    """
+
+
+#  chain: a! !
+#  in property chain a!.b!

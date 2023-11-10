@@ -80,6 +80,7 @@ public class IntegrationTestContext {
     }
 
     public void evaluate(String expression) {
+        compileAll();
         givenDALExpression(expression);
         exception = null;
         result = null;

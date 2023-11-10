@@ -22,21 +22,6 @@ Feature: data remark
       }
     }
     """
-    Given the following java class:
-    """
-    public class BeanList extends ArrayList<Bean> {{
-      this.add(new Bean("b1"));
-      this.add(new Bean("b2"));
-    }}
-    """
-    Given the following java class:
-    """
-    public class Beans {
-      public Bean hello = new Bean("hello");
-      public List<BeanRef> beanRefs = Arrays.asList(new BeanRef(new Bean("b1")), new BeanRef(new Bean("b2")));
-      public List<Bean> beans = Arrays.asList(new Bean("b1"), new Bean("b2"));
-    }
-    """
 
   Rule: N/A for parentheses ()
 
@@ -173,8 +158,8 @@ Feature: data remark
         | bean(18) | <=  | 17       | false | before   |
         | bean(18) | <=  | 18       | true  | before   |
         | bean(18) | <=  | 19       | true  | before   |
-        | bean(20) | !=  | 20       | false | before   |
-        | bean(20) | !=  | 21       | true  | before   |
+#        | bean(20) | !=  | 20       | false | before   | considered as (bean(20)!)=
+#        | bean(20) | !=  | 21       | true  | before   | considered as (bean(20)!)=
 
   Rule: higher precedence than comparison logical && || and or
 

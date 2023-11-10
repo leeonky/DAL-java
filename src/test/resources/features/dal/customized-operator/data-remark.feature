@@ -99,5 +99,56 @@ Feature: data remark
       | k2      | b     |
     """
 
+  Scenario: data-remark-chain
+    When register DAL:
+    """
+    dal.getRuntimeContextBuilder()
+      .registerDataRemark(Map.class, rd-> rd.data().map(m->((Map)m).get(rd.remark())))
+      .registerDataRemark(String.class, rd-> rd.data().map(m->m+rd.remark()));
+    """
+    And the following json:
+    """
+    {
+      "data": {
+        "key": "hello"
+      }
+    }
+    """
+    When evaluate by:
+    """
+    data(key)(world)
+    """
+    Then the result should:
+    """
+    = helloworld
+    """
+
+  Scenario: data-remark in property chain
+    When register DAL:
+    """
+    dal.getRuntimeContextBuilder()
+      .registerDataRemark(Map.class, rd-> rd.data().map(m->((Map)m).get(rd.remark())));
+    """
+    And the following json:
+    """
+    {
+      "data": {
+        "key": {
+          "sub": {
+            "value": "hello"
+          }
+        }
+      }
+    }
+    """
+    When evaluate by:
+    """
+    data(key).sub(value)
+    """
+    Then the result should:
+    """
+    = hello
+    """
+
 #    precedence
 #    in expression

@@ -226,7 +226,7 @@ class CalculatorTest {
 
         @Test
         void should_raise_error_when_negate_non_number_types() {
-            assertIllegalArgument(() -> Calculator.negate(context.wrap("2"), context), "Operands should be number but 'java.lang.String'");
+            assertIllegalArgument(() -> Calculator.negate(context.wrap("2"), context), "Operand should be number but 'java.lang.String'");
         }
     }
 }
