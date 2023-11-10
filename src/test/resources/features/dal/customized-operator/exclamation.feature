@@ -99,6 +99,52 @@ Feature: exclamation
       | k2   | b     |
     """
 
+  Scenario: exclamation chain
+    When register DAL:
+    """
+    dal.getRuntimeContextBuilder()
+      .registerExclamation(Map.class, rd-> rd.data().map(m->((Map)m).get("key")))
+      .registerExclamation(String.class, rd-> rd.data().map(m->((String)m).toUpperCase()));
+    """
+    And the following json:
+    """
+    {
+      "data": {
+        "key": "hello"
+      }
+    }
+    """
+    When evaluate by:
+    """
+    data! !
+    """
+    Then the result should:
+    """
+    = HELLO
+    """
 
-#  chain: a! !
-#  in property chain a!.b!
+  Scenario: exclamation in property chain
+    When register DAL:
+    """
+    dal.getRuntimeContextBuilder()
+      .registerExclamation(Map.class, rd-> rd.data().map(m->((Map)m).get("key")))
+      .registerExclamation(String.class, rd-> rd.data().map(m->((String)m).toUpperCase()));
+    """
+    And the following json:
+    """
+    {
+      "data": {
+        "key": {
+          "subKey": "hello"
+        }
+      }
+    }
+    """
+    When evaluate by:
+    """
+    data!.subKey!
+    """
+    Then the result should:
+    """
+    = HELLO
+    """

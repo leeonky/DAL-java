@@ -149,6 +149,3 @@ Feature: data remark
     """
     = hello
     """
-
-#    precedence
-#    in expression
