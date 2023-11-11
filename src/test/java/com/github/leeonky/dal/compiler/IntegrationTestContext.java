@@ -241,7 +241,7 @@ public class IntegrationTestContext {
     }
 
     public void shouldFailed() {
-        assertThat(exception).isInstanceOf(DALException.class);
+        assertThat(exception).isInstanceOf(DalException.class);
     }
 
     public void shouldSyntaxError() {

@@ -6,19 +6,19 @@ import com.github.leeonky.interpreter.InterpreterException;
 
 public class RowAssertionFailure extends java.lang.RuntimeException {
     protected final int indexSkipEllipsis;
-    protected final DALException dalException;
+    protected final DalException dalException;
 
-    public RowAssertionFailure(int indexSkipEllipsis, DALException dalException) {
+    public RowAssertionFailure(int indexSkipEllipsis, DalException dalException) {
         this.indexSkipEllipsis = indexSkipEllipsis;
         this.dalException = dalException;
     }
 
-    public DALException linePositionException(TableNode tableNode) {
+    public DalException linePositionException(TableNode tableNode) {
         dalException.setType(InterpreterException.Position.Type.ROW);
         return dalException;
     }
 
-    public DALException columnPositionException(TransposedTableNode transposedTableNode) {
+    public DalException columnPositionException(TransposedTableNode transposedTableNode) {
         dalException.clearPosition();
         return transposedTableNode.transpose().fetchDataRowSkipEllipsis(indexSkipEllipsis).markPositionOnCells(dalException);
     }

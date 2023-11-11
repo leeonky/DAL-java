@@ -4,7 +4,7 @@ import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.node.SymbolNode;
 import com.github.leeonky.dal.compiler.Notations;
-import com.github.leeonky.dal.runtime.DALException;
+import com.github.leeonky.dal.runtime.DalException;
 
 import static com.github.leeonky.dal.ast.node.DALExpression.expression;
 import static com.github.leeonky.dal.ast.opt.Factory.executable;
@@ -22,11 +22,11 @@ public class Base {
         dal.evaluate(input, expression);
     }
 
-    protected DALException assertFailed(Object input, String expression) {
-        DALException dalException = null;
+    protected DalException assertFailed(Object input, String expression) {
+        DalException dalException = null;
         try {
             dal.evaluate(input, expression);
-        } catch (DALException failure) {
+        } catch (DalException failure) {
             dalException = failure;
         }
         assertThat(dalException).isNotNull();
@@ -42,7 +42,7 @@ public class Base {
     }
 
     protected void assertErrorContains(Object input, String expression, String errorMessage) {
-        assertThat(assertThrows(DALException.class, () -> {
+        assertThat(assertThrows(DalException.class, () -> {
             dal.evaluate(input, expression);
         })).hasMessage(errorMessage);
     }

@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
-public class AssertionFailure extends DALException {
+public class AssertionFailure extends DalException {
     public AssertionFailure(String message, int position) {
         super(message, position);
     }
