@@ -1,6 +1,9 @@
 package com.github.leeonky.dal;
 
-import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.DALCollection;
+import com.github.leeonky.dal.runtime.DALCollectionFactory;
+import com.github.leeonky.dal.runtime.Result;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckingContext;
 import lombok.Getter;
@@ -14,18 +17,10 @@ import static com.github.leeonky.dal.Assertions.expect;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class DALRuntimeContextTest {
-
-    @Test
-    void should_raise_error_when_property_accessor_not_register() {
-        RuntimeContextBuilder.DALRuntimeContext runtimeContext = new RuntimeContextBuilder().build(null);
-        assertThrows(IllegalArgumentException.class, () -> runtimeContext.getPropertyValue(new Data(new Object(),
-                new RuntimeContextBuilder().build(null), SchemaType.create(null)), "anyc"));
-    }
 
     @Test
     void invoke_static_extended_method_through_object_implicit_data() {

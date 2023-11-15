@@ -24,7 +24,7 @@ public class Data {
     public Data(Object instance, DALRuntimeContext context, SchemaType schemaType) {
         this.instance = instance;
         this.schemaType = schemaType;
-        this.context = context.registerPropertyAccessor(instance);
+        this.context = context;
     }
 
     public Object instance() {

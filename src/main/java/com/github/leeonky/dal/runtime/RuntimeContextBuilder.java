@@ -316,7 +316,12 @@ public class RuntimeContextBuilder {
         }
 
         public Set<Object> findPropertyReaderNames(Object instance) {
-            return propertyAccessors.getData(instance).getPropertyNames(instance);
+            return getObjectPropertyAccessor(instance).getPropertyNames(instance);
+        }
+
+        private PropertyAccessor<Object> getObjectPropertyAccessor(Object instance) {
+            return propertyAccessors.tryGetData(instance)
+                    .orElseGet(() -> new JavaClassPropertyAccessor<>(BeanClass.createFrom(instance)));
         }
 
         public Boolean isNull(Object instance) {
@@ -325,7 +330,7 @@ public class RuntimeContextBuilder {
         }
 
         public Object getPropertyValue(Data data, Object property) {
-            PropertyAccessor<Object> propertyAccessor = propertyAccessors.getData(data.instance());
+            PropertyAccessor<Object> propertyAccessor = getObjectPropertyAccessor(data.instance());
             try {
                 return propertyAccessor.getValueByData(data, property);
             } catch (InvalidPropertyException e) {
@@ -363,13 +368,6 @@ public class RuntimeContextBuilder {
 
         public Data wrap(Object instance, BeanClass<?> schemaType) {
             return new Data(instance, this, SchemaType.create(schemaType));
-        }
-
-        public <T> DALRuntimeContext registerPropertyAccessor(T instance) {
-            if (!Objects.equals(instance, null) && !propertyAccessors.containsType(instance))
-                propertyAccessors.put(BeanClass.getClass(instance),
-                        new JavaClassPropertyAccessor<>(BeanClass.createFrom(instance)));
-            return this;
         }
 
         public Optional<Result> takeUserDefinedLiteral(String token) {
