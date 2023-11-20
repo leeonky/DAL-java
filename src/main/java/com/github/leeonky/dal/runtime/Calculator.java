@@ -1,10 +1,10 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.util.CollectionHelper;
 import com.github.leeonky.util.NumberType;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -30,9 +30,17 @@ public class Calculator {
     public static boolean equals(Data v1, Data v2) {
         if (v2.isNull())
             return v1.isNull();
-        if (v2.isList())
-            return CollectionHelper.equals(v1.instance(), v2.instance());
+        if (v2.isList() && v1.isList())
+            return v1.instance() == v2.instance() || collect(v2, "2").equals(collect(v1, "1"));
         return Objects.equals(v1.instance(), v2.instance());
+    }
+
+    private static List<Object> collect(Data v2, String index) {
+        try {
+            return v2.list().collect();
+        } catch (InfiniteCollectionException ignore) {
+            throw new IllegalOperationException("Invalid operation, operand " + index + " is infinite collection");
+        }
     }
 
     public static Object plus(Object v1, Object v2, DALRuntimeContext context) {

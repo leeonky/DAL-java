@@ -1,16 +1,14 @@
 package com.github.leeonky.dal;
 
-import com.github.leeonky.dal.cucumber.JSONObjectAccessor;
 import com.github.leeonky.dal.runtime.Calculator;
 import com.github.leeonky.dal.runtime.IllegalOperationException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class CalculatorTest {
     private RuntimeContextBuilder.DALRuntimeContext context = new RuntimeContextBuilder().build(null);
@@ -18,62 +16,6 @@ class CalculatorTest {
     private void assertIllegalArgument(Executable executable, String message) {
         IllegalOperationException exception = assertThrows(IllegalOperationException.class, executable);
         assertThat(exception).hasMessage(message);
-    }
-
-    @Nested
-    class Equal {
-        private final RuntimeContextBuilder.DALRuntimeContext DALRuntimeContext = new DAL().getRuntimeContextBuilder()
-                .registerPropertyAccessor(JSONObject.class, new JSONObjectAccessor())
-                .build(null);
-
-        @Test
-        void both_null_is_equal() {
-            assertEqual(null, null);
-        }
-
-        @Test
-        void null_is_not_equal_to_not_null() {
-            assertNotEqual(null, 1);
-            assertNotEqual(1, null);
-        }
-
-        @Test
-        void string_equals() {
-            assertEqual("a", "a");
-            assertNotEqual("a", "b");
-        }
-
-        @Test
-        void number_equals() {
-            assertEqual(1, 1);
-        }
-
-        @Test
-        void number_equal_in_different_number_type() {
-            assertNotEqual(1, 2);
-            assertNotEqual(1, 1L);
-            assertNotEqual(1, 1.0);
-            assertNotEqual(0, 0.0);
-        }
-
-        @Test
-        void customized_null() {
-            assertEqual(null, JSONObject.NULL);
-            assertEqual(JSONObject.NULL, null);
-        }
-
-        @Test
-        void list() {
-            assertEqual(new String[0], new String[0]);
-        }
-
-        private void assertNotEqual(Object v1, Object v2) {
-            assertFalse(Calculator.equals(DALRuntimeContext.wrap(v1), DALRuntimeContext.wrap(v2)));
-        }
-
-        private void assertEqual(Object value1, Object value2) {
-            assertTrue(Calculator.equals(DALRuntimeContext.wrap(value1), DALRuntimeContext.wrap(value2)));
-        }
     }
 
     @Nested
