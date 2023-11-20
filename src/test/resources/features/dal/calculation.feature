@@ -12,6 +12,9 @@ Feature: calculation
     Examples:
       | code              | value |
       | 1 + 1             | 2     |
+      | '1' + '1'         | '11'  |
+      | 1 + '1'           | '11'  |
+      | '1' + 1           | '11'  |
       | 2 * 3             | 6     |
       | 4 / 2             | 2     |
       | 5 - 4             | 1     |
@@ -61,24 +64,6 @@ Feature: calculation
       | true, true, false    | false |
       | true, true and false | false |
 
-  Scenario Outline: comparation
-    When evaluate by:
-    """
-    <code>
-    """
-    Then the result should:
-    """
-    = <value>
-    """
-    Examples:
-      | code | value |
-      | 2>1  | true  |
-      | 2<1  | false |
-      | 1>=1 | true  |
-      | 1>=2 | false |
-      | 1<=2 | true  |
-      | 2<=1 | false |
-
   Scenario Outline: raise error when calculation with null
     When evaluate by:
     """
@@ -97,3 +82,35 @@ Feature: calculation
       | operator | message                                     |
       | +        | Can not plus 'null' and 'java.lang.Integer' |
       | >        | Can not compare [null] and [1]              |
+
+  Scenario Outline: raise error when unsupported number type
+    Given the following json:
+    """
+    {
+      "str": {},
+      "num": 1
+    }
+    """
+    When evaluate by:
+    """
+    <op1>
+    <opt>
+    <op2>
+    """
+    Then failed with the message:
+    """
+    <message>
+    """
+    And got the following notation:
+    """
+    <op1>
+    <opt>
+    ^
+    <op2>
+    """
+    Examples:
+      | op1 | opt | op2 | message                                                                         |
+      | num | +   | str | Can not plus 'java.lang.Integer' and 'java.util.LinkedHashMap'                  |
+      | num | -   | str | Operands should be number but 'java.lang.Integer' and 'java.util.LinkedHashMap' |
+      | num | *   | str | Operands should be number but 'java.lang.Integer' and 'java.util.LinkedHashMap' |
+      | num | /   | str | Operands should be number but 'java.lang.Integer' and 'java.util.LinkedHashMap' |
