@@ -78,6 +78,7 @@ Feature: equal
       """
 
   Rule: list
+
     Background:
       Given the following java class:
       """
@@ -291,4 +292,32 @@ Feature: equal
       """
       1= 2
          ^
+      """
+
+    Scenario: with input
+      Given the following json:
+      """
+      2
+      """
+      Then the following verification should pass:
+      """
+      = 2
+      """
+      When evaluate by:
+      """
+      = 1
+      """
+      Then failed with the message:
+      """
+      Expected to be equal to: java.lang.Integer
+      <1>
+       ^
+      Actual: java.lang.Integer
+      <2>
+       ^
+      """
+      And got the following notation:
+      """
+      = 1
+        ^
       """

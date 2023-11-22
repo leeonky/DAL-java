@@ -74,3 +74,21 @@ Feature: comparison
     '' > 1
        ^
     """
+
+  Scenario Outline: compare with input
+    Given the following json:
+    """
+    2
+    """
+    When evaluate by:
+    """
+    <code>
+    """
+    Then the result should:
+    """
+    = <value>
+    """
+    Examples:
+      | code | value |
+      | >1   | true  |
+      | <1   | false |

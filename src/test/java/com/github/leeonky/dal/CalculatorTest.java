@@ -19,62 +19,6 @@ class CalculatorTest {
     }
 
     @Nested
-    class Multi {
-
-        @Test
-        void support_calculate_in_same_type() {
-            assertThat(Calculator.multiply(1, 2, context)).isEqualTo(2);
-        }
-
-        @Test
-        void support_calculate_in_different_type() {
-            assertThat(Calculator.multiply(1, 2L, context)).isEqualTo(2L);
-        }
-
-        @Test
-        void all_input_number_should_number_type() {
-            assertIllegalArgument(() -> Calculator.multiply("2", "4", context), "Operands should be number but 'java.lang.String' and 'java.lang.String'");
-        }
-    }
-
-    @Nested
-    class Div {
-        @Test
-        void support_calculate_in_same_number_type() {
-            assertThat(Calculator.divide(8, 2, context)).isEqualTo(4);
-        }
-
-        @Test
-        void support_calculate_in_different_number_type() {
-            assertThat(Calculator.divide(8, 2L, context)).isEqualTo(4L);
-        }
-
-        @Test
-        void all_input_number_should_number_type() {
-            assertIllegalArgument(() -> Calculator.divide("2", "4", context), "Operands should be number but 'java.lang.String' and 'java.lang.String'");
-        }
-    }
-
-    @Nested
-    class Sub {
-
-        @Test
-        void support_calculate_in_same_number_type() {
-            assertThat(Calculator.subtract(4, 1, context)).isEqualTo(3);
-        }
-
-        @Test
-        void support_calculate_in_different_number_type() {
-            assertThat(Calculator.subtract(4, 1L, context)).isEqualTo(3L);
-        }
-
-        @Test
-        void all_input_number_should_number_type() {
-            assertIllegalArgument(() -> Calculator.subtract("2", "4", context), "Operands should be number but 'java.lang.String' and 'java.lang.String'");
-        }
-    }
-
-    @Nested
     class Negate {
 
         @Test
