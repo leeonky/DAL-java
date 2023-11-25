@@ -203,7 +203,7 @@ Feature: exclamation
       """
       When use a instance of java class "BeanRef" to evaluate:
       """
-      bean!= 100
+      bean! = 100
       """
       Then failed with the message:
       """

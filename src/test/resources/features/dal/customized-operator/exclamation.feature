@@ -34,8 +34,8 @@ Feature: exclamation
     When the following verification for the instance of java class "Beans" should pass:
     """
     : {
-      hello!= hello!,
-      ['hello']!= hello!
+      hello! = hello!,
+      ['hello']! = hello!
 
       beanRefs: | bean! |
                 | b1!   |

@@ -116,8 +116,8 @@ public class Compiler {
             ELEMENT_ELLIPSIS_CLAUSE = Notations.Operators.ELEMENT_ELLIPSIS.clause((token, input) -> new ListEllipsisNode()),
             ROW_WILDCARD_CLAUSE = Notations.Operators.ROW_WILDCARD.clause((token, input) -> new WildcardNode(token.getContent())),
             LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNode(symbolNode)),
-            EXCLAMATION_CLAUSE = positionNode(many(Notations.Operators.EXCLAMATION).and(atLeast(1)).as(ExclamationNode::new))
-                    .clause((n1, n2) -> expression(n1, exclamation(), n2)),
+            EXCLAMATION_CLAUSE = positionNode(many(Notations.Operators.EXCLAMATION).and(atLeast(1)).as(ExclamationNode::new)
+                    .notStartWith(Notations.Operators.NOT_EQUAL)).clause((n1, n2) -> expression(n1, exclamation(), n2)),
             DATA_REMARK_CLAUSE = Operators.DATA_REMARK.clause(DATA_REMARK),
             PROPERTY_POSTFIX = oneOf(EXCLAMATION_CLAUSE, DATA_REMARK_CLAUSE),
             META_LIST_MAPPING_CLAUSE = Notations.LIST_MAPPING.clause((token, symbolNode) -> new ListMappingNodeMeta(symbolNode)),

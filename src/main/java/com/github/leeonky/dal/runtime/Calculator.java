@@ -28,10 +28,12 @@ public class Calculator {
     }
 
     public static boolean equals(Data v1, Data v2) {
+        if (v1.instance() == v2.instance())
+            return true;
         if (v2.isNull())
             return v1.isNull();
         if (v2.isList() && v1.isList())
-            return v1.instance() == v2.instance() || collect(v2, "2").equals(collect(v1, "1"));
+            return collect(v2, "2").equals(collect(v1, "1"));
         return Objects.equals(v1.instance(), v2.instance());
     }
 
@@ -93,13 +95,9 @@ public class Calculator {
     }
 
     public static Object not(Object v) {
-        requireBooleanType(v, "Operand");
-        return !(boolean) v;
-    }
-
-    public static void requireBooleanType(Object v, final String operand) {
         if (!(v instanceof Boolean))
-            throw new IllegalOperationException(operand + " should be boolean but '" + getClassName(v) + "'");
+            throw new IllegalOperationException("Operand" + " should be boolean but '" + getClassName(v) + "'");
+        return !(boolean) v;
     }
 
     public static Data negate(Data data, DALRuntimeContext context) {
@@ -108,7 +106,7 @@ public class Calculator {
             return context.wrap(context.getNumberType().negate((Number) value));
         if (data.isList())
             return sortList(data, reverseOrder());
-        throw new IllegalOperationException(format("Operand should be number but '%s'", getClassName(value)));
+        throw new IllegalOperationException(format("Operand should be number or list but '%s'", getClassName(value)));
     }
 
     @SuppressWarnings("unchecked")
@@ -122,11 +120,9 @@ public class Calculator {
 
     public static Data positive(Data data, DALRuntimeContext context) {
         Object value = data.instance();
-        if (value instanceof Number)
-            return context.wrap(value);
         if (data.isList())
             return sortList(data, naturalOrder());
-        throw new IllegalOperationException(format("Operands should be List but '%s'", getClassName(value)));
+        throw new IllegalOperationException(format("Operand should be list but '%s'", getClassName(value)));
     }
 
     public static boolean less(Object left, Object right, DALRuntimeContext context) {
@@ -137,8 +133,8 @@ public class Calculator {
         return compare(left, right, context) >= 0;
     }
 
-    public static boolean lessOrEqual(Object left, Object rgiht, DALRuntimeContext context) {
-        return compare(left, rgiht, context) <= 0;
+    public static boolean lessOrEqual(Object left, Object right, DALRuntimeContext context) {
+        return compare(left, right, context) <= 0;
     }
 
     public static boolean greater(Object left, Object right, DALRuntimeContext context) {
