@@ -82,6 +82,6 @@ Feature: plus
     <op2>
     """
     Examples:
-      | op1    | opt | op2    | message                                                        |
-      | object | +   | num    | Can not plus 'java.util.LinkedHashMap' and 'java.lang.Integer' |
-      | num    | +   | object | Can not plus 'java.lang.Integer' and 'java.util.LinkedHashMap' |
+      | op1    | opt | op2    | message                                                                       |
+      | object | +   | num    | No operation `PLUS` between 'java.util.LinkedHashMap' and 'java.lang.Integer' |
+      | num    | +   | object | No operation `PLUS` between 'java.lang.Integer' and 'java.util.LinkedHashMap' |

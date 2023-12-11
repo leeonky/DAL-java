@@ -16,15 +16,17 @@ import static java.util.Comparator.reverseOrder;
 public class Calculator {
     private static final NumberType numberType = new NumberType();
 
-    public static int compare(Object v1, Object v2, DALRuntimeContext context) {
-        if (v1 == null || v2 == null)
-            throw new IllegalOperationException(format("Can not compare [%s] and [%s]", v1, v2));
-        if (v1 instanceof Number && v2 instanceof Number)
-            return context.getNumberType().compare((Number) v1, (Number) v2);
-        if (v1 instanceof String && v2 instanceof String)
-            return ((String) v1).compareTo((String) v2);
+    private static int compare(Data v1, Data v2, DALRuntimeContext context) {
+        Object instance1 = v1.instance();
+        Object instance2 = v2.instance();
+        if (instance1 == null || instance2 == null)
+            throw new IllegalOperationException(format("Can not compare [%s] and [%s]", instance1, instance2));
+        if (instance1 instanceof Number && instance2 instanceof Number)
+            return context.getNumberType().compare((Number) instance1, (Number) instance2);
+        if (instance1 instanceof String && instance2 instanceof String)
+            return ((String) instance1).compareTo((String) instance2);
         throw new IllegalOperationException(format("Can not compare [%s: %s] and [%s: %s]",
-                getClassName(v1), v1, getClassName(v2), v2));
+                getClassName(instance1), instance1, getClassName(instance2), instance2));
     }
 
     public static boolean equals(Data v1, Data v2) {
@@ -45,35 +47,20 @@ public class Calculator {
         }
     }
 
-    public static Object plus(Object v1, Object v2, DALRuntimeContext context) {
-        if (v1 instanceof Number && v2 instanceof Number)
-            return context.getNumberType().plus((Number) v1, (Number) v2);
-        if (v1 instanceof String)
-            return v1.toString() + v2;
-        if (v2 instanceof String)
-            return v1 + v2.toString();
-        throw new IllegalOperationException(format("Can not plus '%s' and '%s'", getClassName(v1), getClassName(v2)));
+    public static Object plus(Data v1, Data v2, DALRuntimeContext context) {
+        return context.calculate(v1, Operators.PLUS, v2);
     }
 
-    public static Object subtract(Object v1, Object v2, DALRuntimeContext context) {
-        requireNumber(v1, v2);
-        return context.getNumberType().subtract((Number) v1, (Number) v2);
+    public static Object subtract(Data v1, Data v2, DALRuntimeContext context) {
+        return context.calculate(v1, Operators.SUB, v2);
     }
 
-    public static Object multiply(Object v1, Object v2, DALRuntimeContext context) {
-        requireNumber(v1, v2);
-        return context.getNumberType().multiply((Number) v1, (Number) v2);
+    public static Object multiply(Data v1, Data v2, DALRuntimeContext context) {
+        return context.calculate(v1, Operators.MUL, v2);
     }
 
-    public static Object divide(Object v1, Object v2, DALRuntimeContext context) {
-        requireNumber(v1, v2);
-        return context.getNumberType().divide((Number) v1, (Number) v2);
-    }
-
-    private static void requireNumber(Object v1, Object v2) {
-        if (!(v1 instanceof Number && v2 instanceof Number))
-            throw new IllegalOperationException(format("Operands should be number but '%s' and '%s'",
-                    getClassName(v1), getClassName(v2)));
+    public static Object divide(Data v1, Data v2, DALRuntimeContext context) {
+        return context.calculate(v1, Operators.DIV, v2);
     }
 
     public static Data and(Supplier<Data> s1, Supplier<Data> s2) {
@@ -125,19 +112,19 @@ public class Calculator {
         throw new IllegalOperationException(format("Operand should be list but '%s'", getClassName(value)));
     }
 
-    public static boolean less(Object left, Object right, DALRuntimeContext context) {
+    public static boolean less(Data left, Data right, DALRuntimeContext context) {
         return compare(left, right, context) < 0;
     }
 
-    public static boolean greaterOrEqual(Object left, Object right, DALRuntimeContext context) {
+    public static boolean greaterOrEqual(Data left, Data right, DALRuntimeContext context) {
         return compare(left, right, context) >= 0;
     }
 
-    public static boolean lessOrEqual(Object left, Object right, DALRuntimeContext context) {
+    public static boolean lessOrEqual(Data left, Data right, DALRuntimeContext context) {
         return compare(left, right, context) <= 0;
     }
 
-    public static boolean greater(Object left, Object right, DALRuntimeContext context) {
+    public static boolean greater(Data left, Data right, DALRuntimeContext context) {
         return compare(left, right, context) > 0;
     }
 

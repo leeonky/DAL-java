@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
 import static com.github.leeonky.dal.runtime.schema.Verification.expect;
+import static com.github.leeonky.util.Classes.getClassName;
 import static com.github.leeonky.util.CollectionHelper.toStream;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.STATIC;
@@ -48,10 +49,12 @@ public class RuntimeContextBuilder {
     private final NumberType numberType = new NumberType();
     private final Map<Method, BiFunction<Object, List<Object>, List<Object>>> curryingMethodArgRanges = new HashMap<>();
     private final Map<String, TextFormatter<?, ?>> textFormatterMap = new LinkedHashMap<>();
+    private final Map<Operators, LinkedList<Operation>> operations = new HashMap<>();
     private Converter converter = Converter.getInstance();
     private final ClassKeyMap<DumperFactory> dumperFactories = new ClassKeyMap<>();
     private final CheckerSet checkerSetForMatching = new CheckerSet(CheckerSet::defaultMatching);
     private final CheckerSet checkerSetForEqualing = new CheckerSet(CheckerSet::defaultEqualing);
+    //    private final
     private int maxDumpingLineSize = 2000;
     private int maxDumpingObjectSize = 255;
     private ErrorHook errorHook = (i, code, e) -> {
@@ -255,6 +258,11 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerExclamation(Class<?> type, Function<RuntimeData, Data> action) {
         exclamations.put(type, action);
+        return this;
+    }
+
+    public RuntimeContextBuilder registerOperator(Operators operator, Operation operation) {
+        operations.computeIfAbsent(operator, o -> new LinkedList<>()).addFirst(operation);
         return this;
     }
 
@@ -495,6 +503,13 @@ public class RuntimeContextBuilder {
                     .orElseThrow(() -> new RuntimeException(format("Not implement operator %s of %s", runtimeData.operandNode().inspect(),
                             Classes.getClassName(instance)), runtimeData.operandNode().getPositionBegin()))
                     .apply(runtimeData);
+        }
+
+        public Object calculate(Data v1, Operators operator, Data v2) {
+            for (Operation operation : operations.get(operator))
+                if (operation.match(v1, v2, this))
+                    return operation.operate(v1, v2, this);
+            throw new IllegalOperationException(format("No operation `%s` between '%s' and '%s'", operator, getClassName(v1.instance()), getClassName(v2.instance())));
         }
     }
 }

@@ -44,7 +44,7 @@ Feature: sub mul div
     """
     Then failed with the message:
     """
-    Operands should be number but 'java.lang.String' and 'java.lang.Integer'
+    No operation `SUB` between 'java.lang.String' and 'java.lang.Integer'
     """
     And got the following notation:
     """
@@ -57,7 +57,7 @@ Feature: sub mul div
     """
     Then failed with the message:
     """
-    Operands should be number but 'java.lang.Integer' and 'java.lang.String'
+    No operation `SUB` between 'java.lang.Integer' and 'java.lang.String'
     """
     And got the following notation:
     """
@@ -70,7 +70,7 @@ Feature: sub mul div
     """
     Then failed with the message:
     """
-    Operands should be number but 'java.lang.String' and 'java.lang.Integer'
+    No operation `MUL` between 'java.lang.String' and 'java.lang.Integer'
     """
     And got the following notation:
     """
@@ -83,7 +83,7 @@ Feature: sub mul div
     """
     Then failed with the message:
     """
-    Operands should be number but 'java.lang.Integer' and 'java.lang.String'
+    No operation `MUL` between 'java.lang.Integer' and 'java.lang.String'
     """
     And got the following notation:
     """
@@ -96,7 +96,7 @@ Feature: sub mul div
     """
     Then failed with the message:
     """
-    Operands should be number but 'java.lang.String' and 'java.lang.Integer'
+    No operation `DIV` between 'java.lang.String' and 'java.lang.Integer'
     """
     And got the following notation:
     """
@@ -109,7 +109,7 @@ Feature: sub mul div
     """
     Then failed with the message:
     """
-    Operands should be number but 'java.lang.Integer' and 'java.lang.String'
+    No operation `DIV` between 'java.lang.Integer' and 'java.lang.String'
     """
     And got the following notation:
     """

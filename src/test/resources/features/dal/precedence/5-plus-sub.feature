@@ -28,7 +28,7 @@ Feature: plus-sub
     """
     Then failed with the message:
     """
-    Can not plus 'java.lang.Integer' and 'java.lang.Boolean'
+    No operation `PLUS` between 'java.lang.Integer' and 'java.lang.Boolean'
     """
     Examples:
       | input | opt  |
@@ -75,7 +75,7 @@ Feature: plus-sub
     """
     Then failed with the message:
     """
-    Operands should be number but 'java.lang.Integer' and 'java.lang.Boolean'
+    No operation `SUB` between 'java.lang.Integer' and 'java.lang.Boolean'
     """
     Examples:
       | input | opt  |

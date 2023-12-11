@@ -21,11 +21,11 @@ public class Factory {
         return new Operator(Precedence.LOGICAL, notation, ExpressionContextData.adapt(logical), true);
     }
 
-    public static DALOperator plusSub(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.ObjectObjectContextObject plusSub) {
+    public static DALOperator plusSub(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.DataDataContextObject plusSub) {
         return new Operator(Precedence.PLUS_SUB, notation, ExpressionContextData.adapt(plusSub), false);
     }
 
-    public static DALOperator mulDiv(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.ObjectObjectContextObject mulDiv) {
+    public static DALOperator mulDiv(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.DataDataContextObject mulDiv) {
         return new Operator(Precedence.MUL_DIV, notation, ExpressionContextData.adapt(mulDiv), false);
     }
 
@@ -117,32 +117,32 @@ public class Factory {
                     () -> expression.right().evaluateData(context)).instance());
         }
 
-        static ExpressionContextData adapt(ObjectObjectContextObject operation) {
-            return (expression, context) -> context.wrap(operation.apply(expression.left().evaluate(context), expression.right().evaluate(context), context));
+        static ExpressionContextData adapt(DataDataObject operation) {
+            return (expression, context) -> context.wrap(operation.apply(expression.left().evaluateData(context), expression.right().evaluateData(context)));
+        }
+
+        static ExpressionContextData adapt(DataDataContextObject operation) {
+            return (expression, context) -> context.wrap(operation.apply(expression.left().evaluateData(context), expression.right().evaluateData(context), context));
         }
 
         static ExpressionContextData adapt(DataContextData operation) {
             return (expression, context) -> operation.apply(expression.right().evaluateData(context), context);
         }
 
-        static ExpressionContextData adapt(ObjectObject operation) {
+        static ExpressionContextData adapt(DataObject operation) {
             return (expression, context) -> context.wrap(operation.apply(expression.right().evaluate(context)));
-        }
-
-        static ExpressionContextData adapt(DataDataObject operation) {
-            return (expression, context) -> context.wrap(operation.apply(expression.left().evaluateData(context), expression.right().evaluateData(context)));
         }
 
         interface SupplierSupplierData extends BiFunction<Supplier<Data>, Supplier<Data>, Data> {
         }
 
-        interface ObjectObjectContextObject extends TriFunction<Object, Object, DALRuntimeContext, Object> {
+        interface DataDataContextObject extends TriFunction<Data, Data, DALRuntimeContext, Object> {
         }
 
         interface DataContextData extends BiFunction<Data, DALRuntimeContext, Data> {
         }
 
-        interface ObjectObject extends Function<Object, Object> {
+        interface DataObject extends Function<Object, Object> {
         }
 
         interface DataDataObject extends BiFunction<Data, Data, Object> {

@@ -32,7 +32,7 @@ Feature: mul-div
     """
     Then failed with the message:
     """
-    Operands should be number but 'java.lang.Integer' and 'java.lang.Boolean'
+    No operation `MUL` between 'java.lang.Integer' and 'java.lang.Boolean'
     """
     Examples:
       | input | opt  |
@@ -83,7 +83,7 @@ Feature: mul-div
     """
     Then failed with the message:
     """
-    Operands should be number but 'java.lang.Integer' and 'java.lang.Boolean'
+    No operation `DIV` between 'java.lang.Integer' and 'java.lang.Boolean'
     """
     Examples:
       | input | opt  |
