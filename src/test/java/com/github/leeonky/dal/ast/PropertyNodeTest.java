@@ -24,7 +24,7 @@ class PropertyNodeTest {
                 .registerDALCollectionFactory(ArrayList.class, (instance) ->
                         new CollectionDALCollection<Object>(instance) {
                             @Override
-                            protected int firstIndex() {
+                            public int firstIndex() {
                                 return 1;
                             }
                         })

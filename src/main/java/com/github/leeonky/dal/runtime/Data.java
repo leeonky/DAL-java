@@ -190,7 +190,7 @@ public class Data {
                 return new DataList(new CollectionDALCollection<Object>(wraps().collect().stream()
                         .sorted(comparator).map(Data::instance).collect(toList())) {
                     @Override
-                    protected int firstIndex() {
+                    public int firstIndex() {
                         return DataList.this.firstIndex();
                     }
 

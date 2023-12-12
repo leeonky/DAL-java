@@ -139,7 +139,7 @@ public class IntegrationTestContext {
         firstIndexes.forEach((t, i) -> dal.getRuntimeContextBuilder().registerDALCollectionFactory(getType(t), (instance) ->
                 new IterableDALCollection<Object>((Iterable<Object>) instance) {
                     @Override
-                    protected int firstIndex() {
+                    public int firstIndex() {
                         return i;
                     }
                 }));

@@ -145,7 +145,7 @@ public class CucumberContextBak {
                 dal.getRuntimeContextBuilder().registerDALCollectionFactory(type, (instance) ->
                         new IterableDALCollection((Iterable) instance) {
                             @Override
-                            protected int firstIndex() {
+                            public int firstIndex() {
                                 return firstIndexes.get(className);
                             }
                         });

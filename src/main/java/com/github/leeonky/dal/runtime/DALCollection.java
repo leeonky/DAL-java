@@ -26,7 +26,7 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         }
     }
 
-    protected int firstIndex() {
+    public int firstIndex() {
         return 0;
     }
 
@@ -59,7 +59,7 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
             }
 
             @Override
-            protected int firstIndex() {
+            public int firstIndex() {
                 return DALCollection.this.firstIndex();
             }
 
@@ -100,6 +100,15 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         return false;
     }
 
+    public DALCollection<Object> limit(Integer size) {
+        return new CollectionDALCollection<Object>(values().limit(size).collect(Collectors.toList())) {
+            @Override
+            public int firstIndex() {
+                return DALCollection.this.firstIndex();
+            }
+        };
+    }
+
     public static class Decorated<E> extends DALCollection<E> {
 
         private final DALCollection<E> origin;
@@ -124,7 +133,7 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         }
 
         @Override
-        protected int firstIndex() {
+        public int firstIndex() {
             return origin.firstIndex();
         }
 
