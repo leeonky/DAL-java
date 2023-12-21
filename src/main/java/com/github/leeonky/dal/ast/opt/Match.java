@@ -1,13 +1,14 @@
 package com.github.leeonky.dal.ast.opt;
 
 import com.github.leeonky.dal.ast.node.*;
+import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.interpreter.InterpreterException;
 
-public class Equal extends DALOperator {
-    public Equal() {
-        super(Precedence.VERIFICATION, "=", true);
+public class Match extends DALOperator {
+    public Match() {
+        super(Precedence.VERIFICATION, Notations.Operators.MATCHER.getLabel(), true);
     }
 
     @Override
@@ -19,9 +20,8 @@ public class Equal extends DALOperator {
                 || expression.right() instanceof RegexNode
                 || expression.right() instanceof WildcardNode)
             return expression.right().verify(expression.left(), this, context);
-
         try {
-            return context.calculate(expression.left().evaluateData(context), Operators.EQUAL,
+            return context.calculate(expression.left().evaluateData(context), Operators.MATCH,
                     expression.right().evaluateData(context));
         } catch (InterpreterException | IllegalOperationException e) {
             throw e;

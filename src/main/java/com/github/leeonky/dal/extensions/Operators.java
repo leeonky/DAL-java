@@ -10,6 +10,8 @@ import com.github.leeonky.dal.runtime.checker.CheckingContext;
 import com.github.leeonky.util.NumberType;
 import com.github.leeonky.util.function.TriFunction;
 
+import static com.github.leeonky.dal.runtime.IllegalOperationException.opt1;
+import static com.github.leeonky.dal.runtime.IllegalOperationException.opt2;
 import static com.github.leeonky.dal.runtime.Operators.*;
 
 public class Operators implements Extension {
@@ -25,6 +27,26 @@ public class Operators implements Extension {
 
         numberCalculator(dal, DIV, NumberType::divide);
 
+        defaultEqual(dal);
+
+        dal.getRuntimeContextBuilder().registerOperator(MATCH, new Operation() {
+
+            @Override
+            public boolean match(Data v1, Data v2, DALRuntimeContext context) {
+                return true;
+            }
+
+            @Override
+            public Data operate(Data v1, Data v2, DALRuntimeContext context) {
+                Checker checker = context.fetchMatchingChecker(v2, v1);
+                return checker.verify(new CheckingContext(v2, v1,
+                        opt2(() -> checker.transformExpected(v2, context)),
+                        opt1(() -> checker.transformActual(v1, v2, context)), -1));
+            }
+        });
+    }
+
+    private void defaultEqual(DAL dal) {
         dal.getRuntimeContextBuilder().registerOperator(EQUAL, new Operation() {
 
             @Override
@@ -35,8 +57,9 @@ public class Operators implements Extension {
             @Override
             public Data operate(Data v1, Data v2, DALRuntimeContext context) {
                 Checker checker = context.fetchEqualsChecker(v2, v1);
-                return checker.verify(new CheckingContext(v2, v1, checker.transformExpected(v2, context),
-                        checker.transformActual(v1, v2, context), -1));
+                return checker.verify(new CheckingContext(v2, v1,
+                        opt2(() -> checker.transformExpected(v2, context)),
+                        opt1(() -> checker.transformActual(v1, v2, context)), -1));
             }
         });
     }

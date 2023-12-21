@@ -5,7 +5,7 @@ import com.github.leeonky.dal.ast.node.ConstValueNode;
 import com.github.leeonky.dal.ast.node.ListEllipsisNode;
 import com.github.leeonky.dal.ast.node.ObjectScopeNode;
 import com.github.leeonky.dal.ast.opt.Equal;
-import com.github.leeonky.dal.ast.opt.Matcher;
+import com.github.leeonky.dal.ast.opt.Match;
 import com.github.leeonky.dal.runtime.AssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 import org.junit.jupiter.api.Nested;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class ObjectScopeNodeTest {
 
     public static final Equal EQUAL = new Equal();
-    public static final Matcher MATCHER = new Matcher();
+    public static final Match MATCH = new Match();
 
     @Nested
     class EqualTo {
@@ -52,13 +52,13 @@ class ObjectScopeNodeTest {
             HashMap<String, Object> data = new HashMap<String, Object>() {{
                 put("any fields", "any value");
             }};
-            assertThat(objectScopeNode.verify(new ConstValueNode(data), MATCHER, DALRuntimeContext).instance()).isSameAs(data);
+            assertThat(objectScopeNode.verify(new ConstValueNode(data), MATCH, DALRuntimeContext).instance()).isSameAs(data);
         }
 
         @Test
         void null_does_not_match_empty_object() {
             assertThrows(AssertionFailure.class, () ->
-                    objectScopeNode.verify(new ConstValueNode(null), MATCHER, DALRuntimeContext)
+                    objectScopeNode.verify(new ConstValueNode(null), MATCH, DALRuntimeContext)
             );
         }
     }

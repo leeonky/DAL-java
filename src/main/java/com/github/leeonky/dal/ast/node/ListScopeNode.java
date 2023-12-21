@@ -2,7 +2,7 @@ package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Factory;
-import com.github.leeonky.dal.ast.opt.Matcher;
+import com.github.leeonky.dal.ast.opt.Match;
 import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -136,7 +136,7 @@ public class ListScopeNode extends DALNode {
     }
 
     @Override
-    public Data verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+    public Data verify(DALNode actualNode, Match operator, DALRuntimeContext context) {
         Data data = verify(context, actualNode);
         Data placeholder = evaluateData(context);
         return checkerVerify(context.fetchMatchingChecker(placeholder, data), placeholder, data, context);

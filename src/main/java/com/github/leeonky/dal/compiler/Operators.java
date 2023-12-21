@@ -5,7 +5,7 @@ import com.github.leeonky.dal.ast.node.DALNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Factory;
-import com.github.leeonky.dal.ast.opt.Matcher;
+import com.github.leeonky.dal.ast.opt.Match;
 import com.github.leeonky.dal.compiler.Notations.Keywords;
 import com.github.leeonky.dal.runtime.Calculator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -52,7 +52,7 @@ public class Operators {
             UNARY_OPERATORS = oneOf(MINUS.operator(() -> unary(MINUS, adapt(Calculator::negate)), not(DALProcedure::isCodeBeginning)),
                     PLUS.operator(() -> unary(PLUS, adapt(Calculator::positive)), not(DALProcedure::isCodeBeginning)),
                     NOT.operator(() -> unary(NOT, adapt(Calculator::not)), not(DALProcedure::mayBeUnEqual))),
-            VERIFICATION_OPERATORS = oneOf(MATCHER.operator(Matcher::new, not(DALProcedure::mayBeMetaProperty)),
+            VERIFICATION_OPERATORS = oneOf(MATCHER.operator(Match::new, not(DALProcedure::mayBeMetaProperty)),
                     EQUAL.operator(Equal::new)),
             DATA_REMARK = Notations.Operators.DATA_REMARK.operator(Factory::dataRemark);
 

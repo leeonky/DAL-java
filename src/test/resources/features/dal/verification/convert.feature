@@ -18,5 +18,5 @@ Feature: converter
     And got the following notation:
     """
     "invalid type": .object
-                    ^
+    ^
     """

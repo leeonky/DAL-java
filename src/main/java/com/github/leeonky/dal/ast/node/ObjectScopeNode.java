@@ -1,7 +1,7 @@
 package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.ast.opt.Equal;
-import com.github.leeonky.dal.ast.opt.Matcher;
+import com.github.leeonky.dal.ast.opt.Match;
 import com.github.leeonky.dal.runtime.AssertionFailure;
 import com.github.leeonky.dal.runtime.CurryingMethod;
 import com.github.leeonky.dal.runtime.Data;
@@ -64,7 +64,7 @@ public class ObjectScopeNode extends DALNode {
     }
 
     @Override
-    public Data verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
+    public Data verify(DALNode actualNode, Match operator, DALRuntimeContext context) {
         if (verificationExpressions.isEmpty() && !isObjectWildcard)
             throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
         Data data = evaluateActualAndCheckNull(actualNode, context);

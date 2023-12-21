@@ -57,7 +57,7 @@ public class Factory {
     }
 
     public static DALOperator is() {
-        return new DALOperator(Precedence.COMPARISON, Notations.Operators.IS.getLabel(), true) {
+        return new DALOperator(Precedence.VERIFICATION, Notations.Operators.IS.getLabel(), true) {
             @Override
             public Data calculateData(DALExpression expression, DALRuntimeContext context) {
                 return ((SchemaComposeNode) expression.right()).verify(expression.left(), context);
