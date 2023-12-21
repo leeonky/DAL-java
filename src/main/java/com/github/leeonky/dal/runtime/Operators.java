@@ -1,5 +1,5 @@
 package com.github.leeonky.dal.runtime;
 
 public enum Operators {
-    PLUS, SUB, MUL, DIV
+    PLUS, SUB, MUL, DIV, EQUAL
 }

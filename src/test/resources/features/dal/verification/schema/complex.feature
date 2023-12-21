@@ -176,7 +176,7 @@ Feature: multiple schema and list schema
     public class BeanDALCollectionFactory implements DALCollectionFactory<BeanList, Bean> {
       public DALCollection<Bean> create(BeanList list) {
         return new CollectionDALCollection<Bean>(list) {
-          protected int firstIndex() {
+          public int firstIndex() {
             return 1;
           }
         };

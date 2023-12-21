@@ -12,7 +12,7 @@ public class TextFormatterTest {
 
     @Test
     void support_merge_format() {
-        DAL dal = new DAL();
+        DAL dal = new DAL().extend();
         dal.getRuntimeContextBuilder().registerTextFormatter("Int", new TextFormatter<String, Integer>() {
             @Override
             protected Integer format(String content, TextAttribute attribute, RuntimeContextBuilder.DALRuntimeContext context) {

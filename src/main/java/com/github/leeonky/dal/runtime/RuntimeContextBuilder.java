@@ -505,7 +505,7 @@ public class RuntimeContextBuilder {
                     .apply(runtimeData);
         }
 
-        public Object calculate(Data v1, Operators operator, Data v2) {
+        public Data calculate(Data v1, Operators operator, Data v2) {
             for (Operation operation : operations.get(operator))
                 if (operation.match(v1, v2, this))
                     return operation.operate(v1, v2, this);

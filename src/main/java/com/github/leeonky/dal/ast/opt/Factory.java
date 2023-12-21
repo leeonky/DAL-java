@@ -21,11 +21,11 @@ public class Factory {
         return new Operator(Precedence.LOGICAL, notation, ExpressionContextData.adapt(logical), true);
     }
 
-    public static DALOperator plusSub(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.DataDataContextObject plusSub) {
+    public static DALOperator plusSub(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.DataDataContextData plusSub) {
         return new Operator(Precedence.PLUS_SUB, notation, ExpressionContextData.adapt(plusSub), false);
     }
 
-    public static DALOperator mulDiv(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.DataDataContextObject mulDiv) {
+    public static DALOperator mulDiv(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.DataDataContextData mulDiv) {
         return new Operator(Precedence.MUL_DIV, notation, ExpressionContextData.adapt(mulDiv), false);
     }
 
@@ -121,8 +121,8 @@ public class Factory {
             return (expression, context) -> context.wrap(operation.apply(expression.left().evaluateData(context), expression.right().evaluateData(context)));
         }
 
-        static ExpressionContextData adapt(DataDataContextObject operation) {
-            return (expression, context) -> context.wrap(operation.apply(expression.left().evaluateData(context), expression.right().evaluateData(context), context));
+        static ExpressionContextData adapt(DataDataContextData operation) {
+            return (expression, context) -> operation.apply(expression.left().evaluateData(context), expression.right().evaluateData(context), context);
         }
 
         static ExpressionContextData adapt(DataContextData operation) {
@@ -136,7 +136,7 @@ public class Factory {
         interface SupplierSupplierData extends BiFunction<Supplier<Data>, Supplier<Data>, Data> {
         }
 
-        interface DataDataContextObject extends TriFunction<Data, Data, DALRuntimeContext, Object> {
+        interface DataDataContextData extends TriFunction<Data, Data, DALRuntimeContext, Data> {
         }
 
         interface DataContextData extends BiFunction<Data, DALRuntimeContext, Data> {

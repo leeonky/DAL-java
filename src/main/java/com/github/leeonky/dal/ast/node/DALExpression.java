@@ -52,7 +52,14 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
         try {
             return operator.calculateData(this, context);
         } catch (IllegalOperationException ex) {
-            throw new RuntimeException(ex.getMessage(), operator.getPosition());
+            switch (ex.type()) {
+                case OP1:
+                    throw new RuntimeException(ex.getCause().getMessage(), left.getOperandPosition(), ex.getCause());
+                case OP2:
+                    throw new RuntimeException(ex.getCause().getMessage(), right.getOperandPosition(), ex.getCause());
+                default:
+                    throw new RuntimeException(ex.getMessage(), operator.getPosition());
+            }
         }
     }
 

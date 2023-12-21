@@ -71,7 +71,7 @@ public class AssertionsTest {
 
         @Test
         void specify_schema_by_name() {
-            DAL dal = new DAL();
+            DAL dal = new DAL().extend();
             dal.getRuntimeContextBuilder().registerSchema(BeanSchema.class);
 
             expect(new Bean().setValue(1)).use(dal).is("BeanSchema").should("aliasOfValue= 1");
@@ -79,7 +79,7 @@ public class AssertionsTest {
 
         @Test
         void specify_schema_list_by_name() {
-            DAL dal = new DAL();
+            DAL dal = new DAL().extend();
             dal.getRuntimeContextBuilder().registerSchema(BeanSchema.class);
 
             expect(new Bean[]{new Bean().setValue(1)}).use(dal).is("[BeanSchema]").should("[0].aliasOfValue= 1");

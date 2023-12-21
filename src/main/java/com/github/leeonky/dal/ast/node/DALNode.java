@@ -24,14 +24,17 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         return evaluateData(context).instance();
     }
 
+    @Deprecated
     public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
         return verify(actualNode, context, DALRuntimeContext::fetchEqualsChecker);
     }
 
+    @Deprecated
     public Data verify(DALNode actualNode, Matcher operator, DALRuntimeContext context) {
         return verify(actualNode, context, DALRuntimeContext::fetchMatchingChecker);
     }
 
+    @Deprecated
     private Data verify(DALNode actualNode, DALRuntimeContext context,
                         TriFunction<DALRuntimeContext, Data, Data, Checker> factory) {
         Data expected = evaluateData(context);
@@ -41,10 +44,12 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
         return checkerVerify(factory.apply(context, expected, actual), expected, actual, context);
     }
 
+    @Deprecated
     protected Data checkerVerify(Checker checker, Data expected, Data actual, DALRuntimeContext context) {
         return checker.verify(createContext(context, expected, actual, checker));
     }
 
+    @Deprecated
     private CheckingContext createContext(DALRuntimeContext context, Data expected, Data actual, Checker checker) {
         Data transformedActual;
         try {

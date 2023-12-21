@@ -42,8 +42,12 @@ public interface Checker {
     }
 
     default Data verify(CheckingContext checkingContext) {
-        if (failed(checkingContext))
+        if (failed(checkingContext)) {
+            if (checkingContext.getPosition() == -1)
+                throw new AssertionError(message(checkingContext));
+//            TODO remove
             throw new AssertionFailure(message(checkingContext), checkingContext.getPosition());
+        }
         return checkingContext.getOriginalActual();
     }
 }

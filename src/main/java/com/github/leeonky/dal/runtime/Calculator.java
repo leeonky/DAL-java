@@ -32,8 +32,8 @@ public class Calculator {
     public static boolean equals(Data v1, Data v2) {
         if (v1.instance() == v2.instance())
             return true;
-        if (v2.isNull())
-            return v1.isNull();
+        if (IllegalOperationException.opt2(v2::isNull))
+            return IllegalOperationException.opt1(v1::isNull);
         if (v2.isList() && v1.isList())
             return collect(v2, "2").equals(collect(v1, "1"));
         return Objects.equals(v1.instance(), v2.instance());
@@ -47,19 +47,19 @@ public class Calculator {
         }
     }
 
-    public static Object plus(Data v1, Data v2, DALRuntimeContext context) {
+    public static Data plus(Data v1, Data v2, DALRuntimeContext context) {
         return context.calculate(v1, Operators.PLUS, v2);
     }
 
-    public static Object subtract(Data v1, Data v2, DALRuntimeContext context) {
+    public static Data subtract(Data v1, Data v2, DALRuntimeContext context) {
         return context.calculate(v1, Operators.SUB, v2);
     }
 
-    public static Object multiply(Data v1, Data v2, DALRuntimeContext context) {
+    public static Data multiply(Data v1, Data v2, DALRuntimeContext context) {
         return context.calculate(v1, Operators.MUL, v2);
     }
 
-    public static Object divide(Data v1, Data v2, DALRuntimeContext context) {
+    public static Data divide(Data v1, Data v2, DALRuntimeContext context) {
         return context.calculate(v1, Operators.DIV, v2);
     }
 
@@ -112,20 +112,20 @@ public class Calculator {
         throw new IllegalOperationException(format("Operand should be list but '%s'", getClassName(value)));
     }
 
-    public static boolean less(Data left, Data right, DALRuntimeContext context) {
-        return compare(left, right, context) < 0;
+    public static Data less(Data left, Data right, DALRuntimeContext context) {
+        return context.wrap(compare(left, right, context) < 0);
     }
 
-    public static boolean greaterOrEqual(Data left, Data right, DALRuntimeContext context) {
-        return compare(left, right, context) >= 0;
+    public static Data greaterOrEqual(Data left, Data right, DALRuntimeContext context) {
+        return context.wrap(compare(left, right, context) >= 0);
     }
 
-    public static boolean lessOrEqual(Data left, Data right, DALRuntimeContext context) {
-        return compare(left, right, context) <= 0;
+    public static Data lessOrEqual(Data left, Data right, DALRuntimeContext context) {
+        return context.wrap(compare(left, right, context) <= 0);
     }
 
-    public static boolean greater(Data left, Data right, DALRuntimeContext context) {
-        return compare(left, right, context) > 0;
+    public static Data greater(Data left, Data right, DALRuntimeContext context) {
+        return context.wrap(compare(left, right, context) > 0);
     }
 
     public static boolean notEqual(Data left, Data right) {

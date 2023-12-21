@@ -5,6 +5,8 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.Operation;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
+import com.github.leeonky.dal.runtime.checker.Checker;
+import com.github.leeonky.dal.runtime.checker.CheckingContext;
 import com.github.leeonky.util.NumberType;
 import com.github.leeonky.util.function.TriFunction;
 
@@ -22,6 +24,21 @@ public class Operators implements Extension {
         numberCalculator(dal, MUL, NumberType::multiply);
 
         numberCalculator(dal, DIV, NumberType::divide);
+
+        dal.getRuntimeContextBuilder().registerOperator(EQUAL, new Operation() {
+
+            @Override
+            public boolean match(Data v1, Data v2, DALRuntimeContext context) {
+                return true;
+            }
+
+            @Override
+            public Data operate(Data v1, Data v2, DALRuntimeContext context) {
+                Checker checker = context.fetchEqualsChecker(v2, v1);
+                return checker.verify(new CheckingContext(v2, v1, checker.transformExpected(v2, context),
+                        checker.transformActual(v1, v2, context), -1));
+            }
+        });
     }
 
     private void stringPlus(DAL dal) {
@@ -33,8 +50,8 @@ public class Operators implements Extension {
             }
 
             @Override
-            public Object operate(Data v1, Data v2, DALRuntimeContext context) {
-                return String.valueOf(v1.instance()) + v2.instance();
+            public Data operate(Data v1, Data v2, DALRuntimeContext context) {
+                return context.wrap(String.valueOf(v1.instance()) + v2.instance());
             }
         });
     }
@@ -49,8 +66,9 @@ public class Operators implements Extension {
             }
 
             @Override
-            public Object operate(Data v1, Data v2, DALRuntimeContext context) {
-                return action.apply(context.getNumberType(), (Number) v1.instance(), (Number) v2.instance());
+            public Data operate(Data v1, Data v2, DALRuntimeContext context) {
+                return context.wrap(action.apply(context.getNumberType(), (Number) v1.instance(),
+                        (Number) v2.instance()));
             }
         });
     }
