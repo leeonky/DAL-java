@@ -16,7 +16,6 @@ public class Equal extends DALOperator {
                 || expression.right() instanceof TransposedTableNode
                 || expression.right() instanceof ListScopeNode
                 || expression.right() instanceof ObjectScopeNode
-                || expression.right() instanceof RegexNode
                 || expression.right() instanceof WildcardNode)
             return expression.right().verify(expression.left(), this, context);
 

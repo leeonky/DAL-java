@@ -2,6 +2,7 @@ package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.Expectation;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.Operation;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -20,15 +21,47 @@ public class Operators implements Extension {
     public void extend(DAL dal) {
         numberCalculator(dal, PLUS, NumberType::plus);
         stringPlus(dal);
-
         numberCalculator(dal, SUB, NumberType::subtract);
-
         numberCalculator(dal, MUL, NumberType::multiply);
-
         numberCalculator(dal, DIV, NumberType::divide);
 
         defaultEqual(dal);
+        assertEqual(dal);
+        defaultMatch(dal);
+        assertMatch(dal);
+    }
 
+    private void assertMatch(DAL dal) {
+        dal.getRuntimeContextBuilder().registerOperator(MATCH, new Operation() {
+
+            @Override
+            public boolean match(Data v1, Data v2, DALRuntimeContext context) {
+                return v2.instance() instanceof Expectation;
+            }
+
+            @Override
+            public Data operate(Data v1, Data v2, DALRuntimeContext context) {
+                return ((Expectation) v2.instance()).matches(v1);
+            }
+        });
+    }
+
+    private void assertEqual(DAL dal) {
+        dal.getRuntimeContextBuilder().registerOperator(EQUAL, new Operation() {
+
+            @Override
+            public boolean match(Data v1, Data v2, DALRuntimeContext context) {
+                return v2.instance() instanceof Expectation;
+            }
+
+            @Override
+            public Data operate(Data v1, Data v2, DALRuntimeContext context) {
+                return ((Expectation) v2.instance()).equalTo(v1);
+            }
+        });
+    }
+
+    private void defaultMatch(DAL dal) {
         dal.getRuntimeContextBuilder().registerOperator(MATCH, new Operation() {
 
             @Override

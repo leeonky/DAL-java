@@ -1,14 +1,14 @@
 package com.github.leeonky.dal.ast.node;
 
-import com.github.leeonky.dal.ast.opt.Equal;
-import com.github.leeonky.dal.ast.opt.Match;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.Expectation;
+import com.github.leeonky.dal.runtime.IllegalOperationException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.dal.runtime.RuntimeException;
 
 import java.util.regex.Pattern;
 
 import static com.github.leeonky.dal.runtime.AssertionFailure.assertRegexMatches;
+import static com.github.leeonky.dal.runtime.IllegalOperationException.opt2;
 import static java.lang.String.format;
 
 public class RegexNode extends DALNode {
@@ -24,19 +24,23 @@ public class RegexNode extends DALNode {
     }
 
     @Override
-    public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        Data actual = actualNode.evaluateData(context);
-        if (actual.instance() instanceof String) {
-            assertRegexMatches(pattern, (String) actual.instance(), getPositionBegin());
-            return actual;
-        }
-        throw new RuntimeException("Operator = before regex need a string input value", operator.getPosition());
-    }
+    public Data evaluateData(DALRuntimeContext context) {
+        return context.wrap(new Expectation() {
+            @Override
+            public Data equalTo(Data actual) {
+                if (actual.instance() instanceof String) {
+                    assertRegexMatches(pattern, (String) actual.instance(), getPositionBegin());
+                    return actual;
+                }
+                throw new IllegalOperationException("Operator = before regex need a string input value");
+            }
 
-    @Override
-    public Data verify(DALNode actualNode, Match operator, DALRuntimeContext context) {
-        Data actual = actualNode.evaluateData(context);
-        assertRegexMatches(pattern, (String) actual.convert(String.class).instance(), actual, getPositionBegin());
-        return actual;
+            @Override
+            public Data matches(Data actual) {
+                assertRegexMatches(pattern, opt2(() -> (String) actual.convert(String.class).instance()), actual,
+                        getPositionBegin());
+                return actual;
+            }
+        });
     }
 }
