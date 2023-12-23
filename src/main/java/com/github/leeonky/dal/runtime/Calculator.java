@@ -32,8 +32,8 @@ public class Calculator {
     public static boolean equals(Data v1, Data v2) {
         if (v1.instance() == v2.instance())
             return true;
-        if (IllegalOperationException.opt2(v2::isNull))
-            return IllegalOperationException.opt1(v1::isNull);
+        if (ExpressionException.opt2(v2::isNull))
+            return ExpressionException.opt1(v1::isNull);
         if (v2.isList() && v1.isList())
             return collect(v2, "2").equals(collect(v1, "1"));
         return Objects.equals(v1.instance(), v2.instance());

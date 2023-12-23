@@ -11,8 +11,8 @@ import com.github.leeonky.dal.runtime.checker.CheckingContext;
 import com.github.leeonky.util.NumberType;
 import com.github.leeonky.util.function.TriFunction;
 
-import static com.github.leeonky.dal.runtime.IllegalOperationException.opt1;
-import static com.github.leeonky.dal.runtime.IllegalOperationException.opt2;
+import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
+import static com.github.leeonky.dal.runtime.ExpressionException.opt2;
 import static com.github.leeonky.dal.runtime.Operators.*;
 
 public class Operators implements Extension {

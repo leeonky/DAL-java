@@ -2,6 +2,7 @@ package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.ExpressionException;
 import com.github.leeonky.dal.runtime.IllegalOperationException;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
@@ -51,6 +52,8 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     public Data evaluateData(DALRuntimeContext context) {
         try {
             return operator.calculateData(this, context);
+        } catch (ExpressionException ex) {
+            throw ex.rethrow(this);
         } catch (IllegalOperationException ex) {
             switch (ex.type()) {
                 case OP1:

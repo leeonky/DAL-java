@@ -22,7 +22,7 @@ public class Equal extends DALOperator {
         try {
             return context.calculate(expression.left().evaluateData(context), Operators.EQUAL,
                     expression.right().evaluateData(context));
-        } catch (InterpreterException | IllegalOperationException e) {
+        } catch (InterpreterException | IllegalOperationException | ExpressionException e) {
             throw e;
         } catch (AssertionError error) {
             throw new AssertionFailure(error.getMessage(), expression.right().getPositionBegin());

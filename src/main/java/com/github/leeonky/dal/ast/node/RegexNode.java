@@ -8,7 +8,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import java.util.regex.Pattern;
 
 import static com.github.leeonky.dal.runtime.AssertionFailure.assertRegexMatches;
-import static com.github.leeonky.dal.runtime.IllegalOperationException.opt2;
+import static com.github.leeonky.dal.runtime.ExpressionException.opt2;
 import static java.lang.String.format;
 
 public class RegexNode extends DALNode {

@@ -1,10 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
-import java.util.function.Supplier;
-
-import static com.github.leeonky.dal.runtime.IllegalOperationException.Type.OP1;
-import static com.github.leeonky.dal.runtime.IllegalOperationException.Type.OP2;
-
+@Deprecated
 public class IllegalOperationException extends java.lang.RuntimeException {
     private final Type type;
 
@@ -26,19 +22,4 @@ public class IllegalOperationException extends java.lang.RuntimeException {
         OP1, OP2, OPT
     }
 
-    public static <T> T opt1(Supplier<T> supplier) {
-        try {
-            return supplier.get();
-        } catch (Exception e) {
-            throw new IllegalOperationException(e, OP1);
-        }
-    }
-
-    public static <T> T opt2(Supplier<T> supplier) {
-        try {
-            return supplier.get();
-        } catch (Exception e) {
-            throw new IllegalOperationException(e, OP2);
-        }
-    }
 }
