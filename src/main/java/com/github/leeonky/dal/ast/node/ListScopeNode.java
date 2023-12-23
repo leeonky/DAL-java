@@ -19,6 +19,8 @@ import static com.github.leeonky.dal.ast.node.DALExpression.expression;
 import static com.github.leeonky.dal.ast.node.InputNode.INPUT_NODE;
 import static com.github.leeonky.dal.ast.node.SortGroupNode.NOP_COMPARATOR;
 import static com.github.leeonky.dal.ast.node.SymbolNode.Type.BRACKET;
+import static com.github.leeonky.dal.runtime.ExpressionException.exception;
+import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
 import static com.github.leeonky.util.Zipped.zip;
 import static java.lang.String.format;
 import static java.util.Comparator.naturalOrder;
@@ -86,6 +88,32 @@ public class ListScopeNode extends DALNode {
         }};
     }
 
+    @Override
+    public Data evaluateData(DALRuntimeContext context) {
+        return context.wrap(new Expectation() {
+            @Override
+            public Data equalTo(Data actual) {
+                try {
+                    Data.DataList list = opt1(actual::list).sort(comparator);
+                    return list.wrap().execute(() -> {
+                        if (type == Type.CONTAINS)
+                            verifyContainElement(context, list);
+                        else
+                            verifyCorrespondingElement(context, getVerificationExpressions(list));
+                        return actual;
+                    });
+                } catch (ListMappingElementAccessException e) {
+                    throw exception(expression -> e.toDalError(expression.left().getOperandPosition()));
+                }
+            }
+
+            @Override
+            public Data matches(Data actual) {
+                return equalTo(actual);
+            }
+        });
+    }
+
     //    TODO tobe refactored
     private List<DALNode> buildVerificationExpressions() {
         if (inputExpressions != null)
@@ -138,15 +166,17 @@ public class ListScopeNode extends DALNode {
     @Override
     public Data verify(DALNode actualNode, Match operator, DALRuntimeContext context) {
         Data data = verify(context, actualNode);
-        Data placeholder = evaluateData(context);
-        return checkerVerify(context.fetchMatchingChecker(placeholder, data), placeholder, data, context);
+        return data;
+//        Data placeholder = evaluateData(context);
+//        return checkerVerify(context.fetchMatchingChecker(placeholder, data), placeholder, data, context);
     }
 
     @Override
     public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
         Data data = verify(context, actualNode);
-        Data placeholder = evaluateData(context);
-        return checkerVerify(context.fetchEqualsChecker(placeholder, data), placeholder, data, context);
+        return data;
+//        Data placeholder = evaluateData(context);
+//        return checkerVerify(context.fetchEqualsChecker(placeholder, data), placeholder, data, context);
     }
 
     private Data verify(DALRuntimeContext context, DALNode node) {

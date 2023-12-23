@@ -11,6 +11,7 @@ public class AssertionFailure extends DalException {
         super(message, position);
     }
 
+    @Deprecated
     public static void assertUnexpectedFields(Set<Object> dataFields, String element, int position) {
         if (!dataFields.isEmpty())
             throw new AssertionFailure(format("Unexpected fields %s%s",

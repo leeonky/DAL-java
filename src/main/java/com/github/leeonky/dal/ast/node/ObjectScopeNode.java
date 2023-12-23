@@ -2,10 +2,7 @@ package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Match;
-import com.github.leeonky.dal.runtime.AssertionFailure;
-import com.github.leeonky.dal.runtime.CurryingMethod;
-import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.NodeType;
+import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
 
@@ -16,6 +13,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.runtime.AssertionFailure.assertUnexpectedFields;
+import static com.github.leeonky.dal.runtime.ExpressionException.exception;
+import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
@@ -44,6 +43,41 @@ public class ObjectScopeNode extends DALNode {
     }
 
     @Override
+    public Data evaluateData(DALRuntimeContext context) {
+        return context.wrap(new Expectation() {
+            @Override
+            public Data equalTo(Data actual) {
+                if (opt1(actual::isNull))
+                    throw new AssertionFailure("The input value is null", getOperandPosition());
+                return actual.execute(() -> {
+                    verificationExpressions.forEach(expression -> expression.evaluate(context));
+                    Set<Object> dataFields = collectUnexpectedFields(actual, context);
+                    if (!dataFields.isEmpty())
+                        throw exception(expression -> {
+                            String element = expression.left().inspect();
+                            return new AssertionFailure(format("Unexpected fields %s%s",
+                                    dataFields.stream().map(s -> s instanceof String ? format("`%s`", s) : s.toString())
+                                            .collect(joining(", ")), element.isEmpty() ? "" : " in " + element), expression.operator().getPosition());
+                        });
+                    return actual;
+                });
+            }
+
+            @Override
+            public Data matches(Data actual) {
+                if (verificationExpressions.isEmpty() && !isObjectWildcard)
+                    throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
+                if (opt1(actual::isNull))
+                    throw new AssertionFailure("The input value is null", getOperandPosition());
+                return actual.execute(() -> {
+                    verificationExpressions.forEach(expression -> expression.evaluate(context));
+                    return actual;
+                });
+            }
+        });
+    }
+
+    @Override
     public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
         Data data = evaluateActualAndCheckNull(actualNode, context);
         data.execute(() -> {
@@ -52,8 +86,9 @@ public class ObjectScopeNode extends DALNode {
             return true;
         });
 
-        Data placeholder = evaluateData(context);
-        return checkerVerify(context.fetchEqualsChecker(placeholder, data), placeholder, data, context);
+        return data;
+//        Data placeholder = evaluateData(context);
+//        return checkerVerify(context.fetchEqualsChecker(placeholder, data), placeholder, data, context);
     }
 
     private Data evaluateActualAndCheckNull(DALNode actualNode, DALRuntimeContext context) {
@@ -72,8 +107,9 @@ public class ObjectScopeNode extends DALNode {
             verificationExpressions.forEach(expression -> expression.evaluate(context));
             return data;
         });
-        Data placeholder = evaluateData(context);
-        return checkerVerify(context.fetchMatchingChecker(placeholder, data), placeholder, data, context);
+        return data;
+//        Data placeholder = evaluateData(context);
+//        return checkerVerify(context.fetchMatchingChecker(placeholder, data), placeholder, data, context);
     }
 
     private Set<Object> collectUnexpectedFields(Data data, DALRuntimeContext context) {
