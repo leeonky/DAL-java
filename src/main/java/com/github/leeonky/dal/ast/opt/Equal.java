@@ -1,8 +1,6 @@
 package com.github.leeonky.dal.ast.opt;
 
 import com.github.leeonky.dal.ast.node.DALExpression;
-import com.github.leeonky.dal.ast.node.TableNode;
-import com.github.leeonky.dal.ast.node.TransposedTableNode;
 import com.github.leeonky.dal.ast.node.WildcardNode;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.dal.runtime.*;
@@ -10,21 +8,17 @@ import com.github.leeonky.interpreter.InterpreterException;
 
 public class Equal extends DALOperator {
     public Equal() {
-        super(Precedence.VERIFICATION, "=", true);
+        super(Precedence.VERIFICATION, "=", true, Operators.EQUAL);
     }
 
     @Override
     public Data calculateData(DALExpression expression, RuntimeContextBuilder.DALRuntimeContext context) {
-        if (expression.right() instanceof TableNode
-                || expression.right() instanceof TransposedTableNode
-//                || expression.right() instanceof ListScopeNode
-//                || expression.right() instanceof ObjectScopeNode
-                || expression.right() instanceof WildcardNode)
+        if (expression.right() instanceof WildcardNode)
             return expression.right().verify(expression.left(), this, context);
 
         try {
-            return context.calculate(expression.left().evaluateData(context), Operators.EQUAL,
-                    expression.right().evaluateData(context));
+            return context.calculate(expression.left().evaluateData(context),
+                    expression.operator(), expression.right().evaluateData(context));
         } catch (InterpreterException | IllegalOperationException | ExpressionException e) {
             throw e;
         } catch (AssertionError error) {

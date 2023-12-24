@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.util.NumberType;
 
@@ -47,20 +48,20 @@ public class Calculator {
         }
     }
 
-    public static Data plus(Data v1, Data v2, DALRuntimeContext context) {
-        return context.calculate(v1, Operators.PLUS, v2);
+    public static Data plus(Data v1, DALOperator opt, Data v2, DALRuntimeContext context) {
+        return context.calculate(v1, opt, v2);
     }
 
-    public static Data subtract(Data v1, Data v2, DALRuntimeContext context) {
-        return context.calculate(v1, Operators.SUB, v2);
+    public static Data subtract(Data v1, DALOperator opt, Data v2, DALRuntimeContext context) {
+        return context.calculate(v1, opt, v2);
     }
 
-    public static Data multiply(Data v1, Data v2, DALRuntimeContext context) {
-        return context.calculate(v1, Operators.MUL, v2);
+    public static Data multiply(Data v1, DALOperator opt, Data v2, DALRuntimeContext context) {
+        return context.calculate(v1, opt, v2);
     }
 
-    public static Data divide(Data v1, Data v2, DALRuntimeContext context) {
-        return context.calculate(v1, Operators.DIV, v2);
+    public static Data divide(Data v1, DALOperator opt, Data v2, DALRuntimeContext context) {
+        return context.calculate(v1, opt, v2);
     }
 
     public static Data and(Supplier<Data> s1, Supplier<Data> s2) {
@@ -112,19 +113,19 @@ public class Calculator {
         throw new IllegalOperationException(format("Operand should be list but '%s'", getClassName(value)));
     }
 
-    public static Data less(Data left, Data right, DALRuntimeContext context) {
+    public static Data less(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
         return context.wrap(compare(left, right, context) < 0);
     }
 
-    public static Data greaterOrEqual(Data left, Data right, DALRuntimeContext context) {
+    public static Data greaterOrEqual(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
         return context.wrap(compare(left, right, context) >= 0);
     }
 
-    public static Data lessOrEqual(Data left, Data right, DALRuntimeContext context) {
+    public static Data lessOrEqual(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
         return context.wrap(compare(left, right, context) <= 0);
     }
 
-    public static Data greater(Data left, Data right, DALRuntimeContext context) {
+    public static Data greater(Data left, DALOperator opt, Data right, DALRuntimeContext context) {
         return context.wrap(compare(left, right, context) > 0);
     }
 

@@ -4,13 +4,10 @@ import com.github.leeonky.dal.ast.node.DALExpression;
 import com.github.leeonky.dal.ast.node.ExecutableNode;
 import com.github.leeonky.dal.ast.node.SchemaComposeNode;
 import com.github.leeonky.dal.compiler.Notations;
-import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.RemarkData;
-import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.dal.runtime.RuntimeData;
+import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeException;
+import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.Notation;
-import com.github.leeonky.util.function.TriFunction;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -18,23 +15,23 @@ import java.util.function.Supplier;
 
 public class Factory {
     public static DALOperator logical(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.SupplierSupplierData logical) {
-        return new Operator(Precedence.LOGICAL, notation, ExpressionContextData.adapt(logical), true);
+        return new Operator(Precedence.LOGICAL, notation, ExpressionContextData.adapt(logical), true, Operators.NA);
     }
 
-    public static DALOperator plusSub(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.DataDataContextData plusSub) {
-        return new Operator(Precedence.PLUS_SUB, notation, ExpressionContextData.adapt(plusSub), false);
+    public static DALOperator plusSub(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.DataOptDataContextData plusSub, Operators type) {
+        return new Operator(Precedence.PLUS_SUB, notation, ExpressionContextData.adapt(plusSub), false, type);
     }
 
-    public static DALOperator mulDiv(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.DataDataContextData mulDiv) {
-        return new Operator(Precedence.MUL_DIV, notation, ExpressionContextData.adapt(mulDiv), false);
+    public static DALOperator mulDiv(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData.DataOptDataContextData mulDiv, Operators type) {
+        return new Operator(Precedence.MUL_DIV, notation, ExpressionContextData.adapt(mulDiv), false, type);
     }
 
     public static DALOperator comparator(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData operation) {
-        return new Operator(Precedence.COMPARISON, notation, operation, true);
+        return new Operator(Precedence.COMPARISON, notation, operation, true, Operators.NA);
     }
 
     public static DALOperator unary(Notation<?, ?, ?, ?, ?> notation, ExpressionContextData unary) {
-        return new Operator(Precedence.UNARY_OPERATION, notation, unary, true) {
+        return new Operator(Precedence.UNARY_OPERATION, notation, unary, true, Operators.NA) {
             @Override
             public String inspect(String node1, String node2) {
                 return notation.getLabel() + node2;
@@ -43,7 +40,7 @@ public class Factory {
     }
 
     public static DALOperator executable(Notation<?, ?, ?, ?, ?> notation) {
-        return new DALOperator(Precedence.PROPERTY, notation.getLabel(), false) {
+        return new DALOperator(Precedence.PROPERTY, notation.getLabel(), false, Operators.NA) {
             @Override
             public Data calculateData(DALExpression expression, DALRuntimeContext context) {
                 return ((ExecutableNode) expression.right()).getValue(expression.left(), context);
@@ -57,7 +54,7 @@ public class Factory {
     }
 
     public static DALOperator is() {
-        return new DALOperator(Precedence.VERIFICATION, Notations.Operators.IS.getLabel(), true) {
+        return new DALOperator(Precedence.VERIFICATION, Notations.Operators.IS.getLabel(), true, Operators.NA) {
             @Override
             public Data calculateData(DALExpression expression, DALRuntimeContext context) {
                 return ((SchemaComposeNode) expression.right()).verify(expression.left(), context);
@@ -66,7 +63,7 @@ public class Factory {
     }
 
     public static DALOperator which() {
-        return new DALOperator(Precedence.WHICH, Notations.Operators.WHICH.getLabel(), true) {
+        return new DALOperator(Precedence.WHICH, Notations.Operators.WHICH.getLabel(), true, Operators.NA) {
             @Override
             public Object calculate(DALExpression expression, DALRuntimeContext context) {
                 try {
@@ -79,7 +76,7 @@ public class Factory {
     }
 
     public static DALOperator dataRemark() {
-        return new DALOperator(Precedence.REMARK_EXCLAMATION, "DATA_REMARK", false) {
+        return new DALOperator(Precedence.REMARK_EXCLAMATION, "DATA_REMARK", false, Operators.NA) {
 
             @Override
             public Data calculateData(DALExpression expression, DALRuntimeContext context) {
@@ -96,7 +93,7 @@ public class Factory {
 
 
     public static DALOperator exclamation() {
-        return new DALOperator(Precedence.REMARK_EXCLAMATION, "EXCLAMATION", false) {
+        return new DALOperator(Precedence.REMARK_EXCLAMATION, "EXCLAMATION", false, Operators.NA) {
 
             @Override
             public Data calculateData(DALExpression expression, DALRuntimeContext context) {
@@ -121,8 +118,9 @@ public class Factory {
             return (expression, context) -> context.wrap(operation.apply(expression.left().evaluateData(context), expression.right().evaluateData(context)));
         }
 
-        static ExpressionContextData adapt(DataDataContextData operation) {
-            return (expression, context) -> operation.apply(expression.left().evaluateData(context), expression.right().evaluateData(context), context);
+        static ExpressionContextData adapt(DataOptDataContextData operation) {
+            return (expression, context) -> operation.apply(expression.left().evaluateData(context),
+                    expression.operator(), expression.right().evaluateData(context), context);
         }
 
         static ExpressionContextData adapt(DataContextData operation) {
@@ -136,7 +134,7 @@ public class Factory {
         interface SupplierSupplierData extends BiFunction<Supplier<Data>, Supplier<Data>, Data> {
         }
 
-        interface DataDataContextData extends TriFunction<Data, Data, DALRuntimeContext, Data> {
+        interface DataOptDataContextData extends QuadFunction<Data, DALOperator, Data, DALRuntimeContext, Data> {
         }
 
         interface DataContextData extends BiFunction<Data, DALRuntimeContext, Data> {
@@ -153,8 +151,8 @@ public class Factory {
         private final ExpressionContextData operation;
 
         public Operator(int precedence, Notation<?, ?, ?, ?, ?> notation,
-                        ExpressionContextData operation, boolean needInspect) {
-            super(precedence, notation.getLabel(), needInspect);
+                        ExpressionContextData operation, boolean needInspect, Operators type) {
+            super(precedence, notation.getLabel(), needInspect, type);
             this.operation = operation;
         }
 
@@ -162,5 +160,9 @@ public class Factory {
         public Data calculateData(DALExpression expression, DALRuntimeContext context) {
             return operation.apply(expression, context);
         }
+    }
+
+    public interface QuadFunction<T1, T2, T3, T4, R> {
+        R apply(T1 obj1, T2 obj2, T3 obj3, T4 obj4);
     }
 }

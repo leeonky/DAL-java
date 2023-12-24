@@ -7,6 +7,7 @@ import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Match;
 import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.Expectation;
 import com.github.leeonky.dal.runtime.RowAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
@@ -21,6 +22,31 @@ public class TableNode extends DALNode {
         this.columnHeaderRow = columnHeaderRow;
         this.body = body.checkFormat(this.columnHeaderRow);
         setPositionBegin(columnHeaderRow.getPositionBegin());
+    }
+
+    @Override
+    public Data evaluateData(DALRuntimeContext context) {
+        return context.wrap(new Expectation() {
+            @Override
+            public Data equalTo(DALOperator operator, Data actual) {
+                try {
+                    return ((Expectation) convertToVerificationNode(actual, operator, context)
+                            .evaluateData(context).instance()).equalTo(operator, actual);
+                } catch (RowAssertionFailure rowAssertionFailure) {
+                    throw rowAssertionFailure.linePositionException(TableNode.this);
+                }
+            }
+
+            @Override
+            public Data matches(DALOperator operator, Data actual) {
+                try {
+                    return ((Expectation) convertToVerificationNode(actual, operator, context)
+                            .evaluateData(context).instance()).matches(operator, actual);
+                } catch (RowAssertionFailure rowAssertionFailure) {
+                    throw rowAssertionFailure.linePositionException(TableNode.this);
+                }
+            }
+        });
     }
 
     @Override

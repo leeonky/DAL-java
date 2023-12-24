@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.runtime;
 
+import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.format.Formatter;
 import com.github.leeonky.dal.runtime.checker.Checker;
 import com.github.leeonky.dal.runtime.checker.CheckerSet;
@@ -24,6 +25,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.runtime.ExpressionException.exception;
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
 import static com.github.leeonky.dal.runtime.schema.Verification.expect;
 import static com.github.leeonky.util.Classes.getClassName;
@@ -505,11 +507,12 @@ public class RuntimeContextBuilder {
                     .apply(runtimeData);
         }
 
-        public Data calculate(Data v1, Operators operator, Data v2) {
-            for (Operation operation : operations.get(operator))
-                if (operation.match(v1, v2, this))
-                    return operation.operate(v1, v2, this);
-            throw new IllegalOperationException(format("No operation `%s` between '%s' and '%s'", operator, getClassName(v1.instance()), getClassName(v2.instance())));
+        public Data calculate(Data v1, DALOperator opt, Data v2) {
+            for (Operation operation : operations.get(opt.overrideType()))
+                if (operation.match(v1, opt, v2, this))
+                    return operation.operate(v1, opt, v2, this);
+            throw exception(expression -> new RuntimeException(format("No operation `%s` between '%s' and '%s'",
+                    opt.overrideType(), getClassName(v1.instance()), getClassName(v2.instance())), expression.operator().getPosition()));
         }
     }
 }

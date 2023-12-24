@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast.node;
 
+import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Match;
 import com.github.leeonky.dal.runtime.*;
@@ -46,7 +47,7 @@ public class ObjectScopeNode extends DALNode {
     public Data evaluateData(DALRuntimeContext context) {
         return context.wrap(new Expectation() {
             @Override
-            public Data equalTo(Data actual) {
+            public Data equalTo(DALOperator operator, Data actual) {
                 if (opt1(actual::isNull))
                     throw new AssertionFailure("The input value is null", getOperandPosition());
                 return actual.execute(() -> {
@@ -64,7 +65,7 @@ public class ObjectScopeNode extends DALNode {
             }
 
             @Override
-            public Data matches(Data actual) {
+            public Data matches(DALOperator operator, Data actual) {
                 if (verificationExpressions.isEmpty() && !isObjectWildcard)
                     throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
                 if (opt1(actual::isNull))

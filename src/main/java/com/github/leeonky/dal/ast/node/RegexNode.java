@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast.node;
 
+import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Expectation;
 import com.github.leeonky.dal.runtime.IllegalOperationException;
@@ -27,7 +28,7 @@ public class RegexNode extends DALNode {
     public Data evaluateData(DALRuntimeContext context) {
         return context.wrap(new Expectation() {
             @Override
-            public Data equalTo(Data actual) {
+            public Data equalTo(DALOperator operator, Data actual) {
                 if (actual.instance() instanceof String) {
                     assertRegexMatches(pattern, (String) actual.instance(), getPositionBegin());
                     return actual;
@@ -36,7 +37,7 @@ public class RegexNode extends DALNode {
             }
 
             @Override
-            public Data matches(Data actual) {
+            public Data matches(DALOperator operator, Data actual) {
                 assertRegexMatches(pattern, opt2(() -> (String) actual.convert(String.class).instance()), actual,
                         getPositionBegin());
                 return actual;

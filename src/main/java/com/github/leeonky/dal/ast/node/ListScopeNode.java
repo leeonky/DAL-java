@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast.node;
 
+import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Factory;
 import com.github.leeonky.dal.ast.opt.Match;
@@ -92,7 +93,7 @@ public class ListScopeNode extends DALNode {
     public Data evaluateData(DALRuntimeContext context) {
         return context.wrap(new Expectation() {
             @Override
-            public Data equalTo(Data actual) {
+            public Data equalTo(DALOperator operator, Data actual) {
                 try {
                     Data.DataList list = opt1(actual::list).sort(comparator);
                     return list.wrap().execute(() -> {
@@ -108,8 +109,8 @@ public class ListScopeNode extends DALNode {
             }
 
             @Override
-            public Data matches(Data actual) {
-                return equalTo(actual);
+            public Data matches(DALOperator operator, Data actual) {
+                return equalTo(operator, actual);
             }
         });
     }

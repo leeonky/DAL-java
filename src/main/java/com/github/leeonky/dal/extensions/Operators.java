@@ -1,6 +1,7 @@
 package com.github.leeonky.dal.extensions;
 
 import com.github.leeonky.dal.DAL;
+import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Expectation;
 import com.github.leeonky.dal.runtime.Extension;
@@ -35,13 +36,13 @@ public class Operators implements Extension {
         dal.getRuntimeContextBuilder().registerOperator(MATCH, new Operation() {
 
             @Override
-            public boolean match(Data v1, Data v2, DALRuntimeContext context) {
+            public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                 return v2.instance() instanceof Expectation;
             }
 
             @Override
-            public Data operate(Data v1, Data v2, DALRuntimeContext context) {
-                return ((Expectation) v2.instance()).matches(v1);
+            public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+                return ((Expectation) v2.instance()).matches(operator, v1);
             }
         });
     }
@@ -50,13 +51,13 @@ public class Operators implements Extension {
         dal.getRuntimeContextBuilder().registerOperator(EQUAL, new Operation() {
 
             @Override
-            public boolean match(Data v1, Data v2, DALRuntimeContext context) {
+            public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                 return v2.instance() instanceof Expectation;
             }
 
             @Override
-            public Data operate(Data v1, Data v2, DALRuntimeContext context) {
-                return ((Expectation) v2.instance()).equalTo(v1);
+            public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
+                return ((Expectation) v2.instance()).equalTo(operator, v1);
             }
         });
     }
@@ -65,12 +66,12 @@ public class Operators implements Extension {
         dal.getRuntimeContextBuilder().registerOperator(MATCH, new Operation() {
 
             @Override
-            public boolean match(Data v1, Data v2, DALRuntimeContext context) {
+            public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                 return true;
             }
 
             @Override
-            public Data operate(Data v1, Data v2, DALRuntimeContext context) {
+            public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                 Checker checker = context.fetchMatchingChecker(v2, v1);
                 return checker.verify(new CheckingContext(v2, v1,
                         opt2(() -> checker.transformExpected(v2, context)),
@@ -83,12 +84,12 @@ public class Operators implements Extension {
         dal.getRuntimeContextBuilder().registerOperator(EQUAL, new Operation() {
 
             @Override
-            public boolean match(Data v1, Data v2, DALRuntimeContext context) {
+            public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                 return true;
             }
 
             @Override
-            public Data operate(Data v1, Data v2, DALRuntimeContext context) {
+            public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                 Checker checker = context.fetchEqualsChecker(v2, v1);
                 return checker.verify(new CheckingContext(v2, v1,
                         opt2(() -> checker.transformExpected(v2, context)),
@@ -101,12 +102,12 @@ public class Operators implements Extension {
         dal.getRuntimeContextBuilder().registerOperator(PLUS, new Operation() {
 
             @Override
-            public boolean match(Data v1, Data v2, DALRuntimeContext context) {
+            public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                 return v1.instance() instanceof String || v2.instance() instanceof String;
             }
 
             @Override
-            public Data operate(Data v1, Data v2, DALRuntimeContext context) {
+            public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                 return context.wrap(String.valueOf(v1.instance()) + v2.instance());
             }
         });
@@ -117,12 +118,12 @@ public class Operators implements Extension {
         dal.getRuntimeContextBuilder().registerOperator(operator, new Operation() {
 
             @Override
-            public boolean match(Data v1, Data v2, DALRuntimeContext context) {
+            public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                 return v1.instance() instanceof Number && v2.instance() instanceof Number;
             }
 
             @Override
-            public Data operate(Data v1, Data v2, DALRuntimeContext context) {
+            public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                 return context.wrap(action.apply(context.getNumberType(), (Number) v1.instance(),
                         (Number) v2.instance()));
             }
