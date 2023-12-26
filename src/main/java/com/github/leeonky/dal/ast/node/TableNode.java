@@ -4,8 +4,6 @@ import com.github.leeonky.dal.ast.node.table.Body;
 import com.github.leeonky.dal.ast.node.table.ColumnHeaderRow;
 import com.github.leeonky.dal.ast.node.table.Row;
 import com.github.leeonky.dal.ast.opt.DALOperator;
-import com.github.leeonky.dal.ast.opt.Equal;
-import com.github.leeonky.dal.ast.opt.Match;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.Expectation;
 import com.github.leeonky.dal.runtime.RowAssertionFailure;
@@ -47,28 +45,6 @@ public class TableNode extends DALNode {
                 }
             }
         });
-    }
-
-    @Override
-    public Data verify(DALNode actualNode, Match operator, DALRuntimeContext context) {
-        DelegateNode node = new DelegateNode(actualNode);
-        Data actual = node.evaluateData(context);
-        try {
-            return convertToVerificationNode(actual, operator, context).verify(node, operator, context);
-        } catch (RowAssertionFailure rowAssertionFailure) {
-            throw rowAssertionFailure.linePositionException(this);
-        }
-    }
-
-    @Override
-    public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        DelegateNode node = new DelegateNode(actualNode);
-        Data actual = node.evaluateData(context);
-        try {
-            return convertToVerificationNode(actual, operator, context).verify(node, operator, context);
-        } catch (RowAssertionFailure rowAssertionFailure) {
-            throw rowAssertionFailure.linePositionException(this);
-        }
     }
 
     public DALNode convertToVerificationNode(Data actual, DALOperator operator, DALRuntimeContext context) {

@@ -36,4 +36,16 @@ public abstract class ExpressionException extends java.lang.RuntimeException {
             }
         };
     }
+
+    public static ExpressionException illegalOperationRuntimeException(String message) {
+        return exception(expression -> new RuntimeException(message, expression.operator().getPosition()));
+    }
+
+    public static ExpressionException illegalOp2RuntimeException(String message) {
+        return exception(expression -> new RuntimeException(message, expression.right().getOperandPosition()));
+    }
+
+    public static ExpressionException illegalOp1RuntimeException(String message) {
+        return exception(expression -> new RuntimeException(message, expression.left().getOperandPosition()));
+    }
 }

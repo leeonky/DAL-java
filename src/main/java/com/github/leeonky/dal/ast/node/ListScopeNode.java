@@ -1,9 +1,7 @@
 package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.ast.opt.DALOperator;
-import com.github.leeonky.dal.ast.opt.Equal;
 import com.github.leeonky.dal.ast.opt.Factory;
-import com.github.leeonky.dal.ast.opt.Match;
 import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.*;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -162,38 +160,6 @@ public class ListScopeNode extends DALNode {
             return inputClauses.stream().map(clause -> clause.expression(INPUT_NODE).inspect())
                     .collect(joining(", ", "[", "]"));
         return buildVerificationExpressions().stream().map(DALNode::inspect).collect(joining(", ", "[", "]"));
-    }
-
-    @Override
-    public Data verify(DALNode actualNode, Match operator, DALRuntimeContext context) {
-        Data data = verify(context, actualNode);
-        return data;
-//        Data placeholder = evaluateData(context);
-//        return checkerVerify(context.fetchMatchingChecker(placeholder, data), placeholder, data, context);
-    }
-
-    @Override
-    public Data verify(DALNode actualNode, Equal operator, DALRuntimeContext context) {
-        Data data = verify(context, actualNode);
-        return data;
-//        Data placeholder = evaluateData(context);
-//        return checkerVerify(context.fetchEqualsChecker(placeholder, data), placeholder, data, context);
-    }
-
-    private Data verify(DALRuntimeContext context, DALNode node) {
-        Data data = node.evaluateData(context);
-        try {
-            Data.DataList list = data.list(node.getOperandPosition()).sort(comparator);
-            return list.wrap().execute(() -> {
-                if (type == Type.CONTAINS)
-                    verifyContainElement(context, list);
-                else
-                    verifyCorrespondingElement(context, getVerificationExpressions(list));
-                return data;
-            });
-        } catch (ListMappingElementAccessException e) {
-            throw e.toDalError(node.getOperandPosition());
-        }
     }
 
     private void verifyContainElement(DALRuntimeContext context, Data.DataList list) {

@@ -9,6 +9,11 @@ Feature: positive
     """
     Operand should be list but 'java.lang.Integer'
     """
+    And got the following notation:
+    """
+    (+1)
+      ^
+    """
 
   Scenario: sort list for list
     Given the following json:
