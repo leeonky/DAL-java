@@ -91,7 +91,6 @@ public class Factory {
         };
     }
 
-
     public static DALOperator exclamation() {
         return new DALOperator(Precedence.REMARK_EXCLAMATION, "EXCLAMATION", false, Operators.NA) {
 
@@ -106,6 +105,14 @@ public class Factory {
                 return node1 + node2;
             }
         };
+    }
+
+    public static DALOperator equal() {
+        return new VerificationOperator(Notations.Operators.EQUAL.getLabel(), Operators.EQUAL);
+    }
+
+    public static DALOperator match() {
+        return new VerificationOperator(Notations.Operators.MATCHER.getLabel(), Operators.MATCH);
     }
 
     public interface ExpressionContextData extends BiFunction<DALExpression, DALRuntimeContext, Data> {
@@ -164,5 +171,21 @@ public class Factory {
 
     public interface QuadFunction<T1, T2, T3, T4, R> {
         R apply(T1 obj1, T2 obj2, T3 obj3, T4 obj4);
+    }
+
+    public static class VerificationOperator extends DALOperator {
+        public VerificationOperator(String label, Operators type) {
+            super(Precedence.VERIFICATION, label, true, type);
+        }
+
+        @Override
+        public Data calculateData(DALExpression expression, DALRuntimeContext context) {
+            return expression.right().verify(expression.operator(), expression.left(), context);
+        }
+
+        @Override
+        public String inspect(String node1, String node2) {
+            return String.format("%s%s %s", node1, label, node2);
+        }
     }
 }
