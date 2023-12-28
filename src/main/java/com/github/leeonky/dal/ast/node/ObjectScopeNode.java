@@ -41,36 +41,47 @@ public class ObjectScopeNode extends DALNode {
     }
 
     @Override
+    @Deprecated
     public Data evaluateData(DALRuntimeContext context) {
-        return context.wrap(new Expectation() {
+        return context.wrap(new ExpectationFactory() {
             @Override
-            public Data equalTo(DALOperator operator, Data actual) {
-                if (opt1(actual::isNull))
-                    throw new AssertionFailure("The input value is null", getOperandPosition());
-                return actual.execute(() -> {
-                    verificationExpressions.forEach(expression -> expression.evaluate(context));
-                    Set<Object> dataFields = collectUnexpectedFields(actual, context);
-                    if (!dataFields.isEmpty())
-                        throw exception(expression -> {
-                            String element = expression.left().inspect();
-                            return new AssertionFailure(format("Unexpected fields %s%s",
-                                    dataFields.stream().map(s -> s instanceof String ? format("`%s`", s) : s.toString())
-                                            .collect(joining(", ")), element.isEmpty() ? "" : " in " + element), expression.operator().getPosition());
+            public Expectation create(DALOperator operator, Data actual) {
+                return new Expectation() {
+                    @Override
+                    public Data matches() {
+                        if (verificationExpressions.isEmpty() && !isObjectWildcard)
+                            throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
+                        if (opt1(actual::isNull))
+                            throw new AssertionFailure("The input value is null", getOperandPosition());
+                        return actual.execute(() -> {
+                            verificationExpressions.forEach(expression -> expression.evaluate(context));
+                            return actual;
                         });
-                    return actual;
-                });
-            }
+                    }
 
-            @Override
-            public Data matches(DALOperator operator, Data actual) {
-                if (verificationExpressions.isEmpty() && !isObjectWildcard)
-                    throw new SyntaxException("Should use `{...}` to verify any non null object", getPositionBegin());
-                if (opt1(actual::isNull))
-                    throw new AssertionFailure("The input value is null", getOperandPosition());
-                return actual.execute(() -> {
-                    verificationExpressions.forEach(expression -> expression.evaluate(context));
-                    return actual;
-                });
+                    @Override
+                    public Data equalTo() {
+                        if (opt1(actual::isNull))
+                            throw new AssertionFailure("The input value is null", getOperandPosition());
+                        return actual.execute(() -> {
+                            verificationExpressions.forEach(expression -> expression.evaluate(context));
+                            Set<Object> dataFields = collectUnexpectedFields(actual, context);
+                            if (!dataFields.isEmpty())
+                                throw exception(expression -> {
+                                    String element = expression.left().inspect();
+                                    return new AssertionFailure(format("Unexpected fields %s%s",
+                                            dataFields.stream().map(s -> s instanceof String ? format("`%s`", s) : s.toString())
+                                                    .collect(joining(", ")), element.isEmpty() ? "" : " in " + element), expression.operator().getPosition());
+                                });
+                            return actual;
+                        });
+                    }
+
+                    @Override
+                    public Type type() {
+                        return Type.OBJECT;
+                    }
+                };
             }
         });
     }

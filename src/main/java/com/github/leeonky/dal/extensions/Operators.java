@@ -3,7 +3,7 @@ package com.github.leeonky.dal.extensions;
 import com.github.leeonky.dal.DAL;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.Expectation;
+import com.github.leeonky.dal.runtime.ExpectationFactory;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.Operation;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -37,12 +37,12 @@ public class Operators implements Extension {
 
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return v2.instance() instanceof Expectation;
+                return v2.instance() instanceof ExpectationFactory;
             }
 
             @Override
             public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return ((Expectation) v2.instance()).matches(operator, v1);
+                return ((ExpectationFactory) v2.instance()).create(operator, v1).matches();
             }
         });
     }
@@ -52,12 +52,12 @@ public class Operators implements Extension {
 
             @Override
             public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return v2.instance() instanceof Expectation;
+                return v2.instance() instanceof ExpectationFactory;
             }
 
             @Override
             public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return ((Expectation) v2.instance()).equalTo(operator, v1);
+                return ((ExpectationFactory) v2.instance()).create(operator, v1).equalTo();
             }
         });
     }

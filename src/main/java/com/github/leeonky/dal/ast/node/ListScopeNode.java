@@ -88,27 +88,38 @@ public class ListScopeNode extends DALNode {
     }
 
     @Override
+    @Deprecated
     public Data evaluateData(DALRuntimeContext context) {
-        return context.wrap(new Expectation() {
+        return context.wrap(new ExpectationFactory() {
             @Override
-            public Data equalTo(DALOperator operator, Data actual) {
-                try {
-                    Data.DataList list = opt1(actual::list).sort(comparator);
-                    return list.wrap().execute(() -> {
-                        if (type == Type.CONTAINS)
-                            verifyContainElement(context, list);
-                        else
-                            verifyCorrespondingElement(context, getVerificationExpressions(list));
-                        return actual;
-                    });
-                } catch (ListMappingElementAccessException e) {
-                    throw exception(expression -> e.toDalError(expression.left().getOperandPosition()));
-                }
-            }
+            public Expectation create(DALOperator operator, Data actual) {
+                return new Expectation() {
+                    @Override
+                    public Data matches() {
+                        return equalTo();
+                    }
 
-            @Override
-            public Data matches(DALOperator operator, Data actual) {
-                return equalTo(operator, actual);
+                    @Override
+                    public Data equalTo() {
+                        try {
+                            Data.DataList list = opt1(actual::list).sort(comparator);
+                            return list.wrap().execute(() -> {
+                                if (type == ListScopeNode.Type.CONTAINS)
+                                    verifyContainElement(context, list);
+                                else
+                                    verifyCorrespondingElement(context, getVerificationExpressions(list));
+                                return actual;
+                            });
+                        } catch (ListMappingElementAccessException e) {
+                            throw exception(expression -> e.toDalError(expression.left().getOperandPosition()));
+                        }
+                    }
+
+                    @Override
+                    public Type type() {
+                        return Type.LIST;
+                    }
+                };
             }
         });
     }

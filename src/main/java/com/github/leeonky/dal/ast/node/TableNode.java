@@ -5,7 +5,7 @@ import com.github.leeonky.dal.ast.node.table.ColumnHeaderRow;
 import com.github.leeonky.dal.ast.node.table.Row;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.Data;
-import com.github.leeonky.dal.runtime.Expectation;
+import com.github.leeonky.dal.runtime.ExpectationFactory;
 import com.github.leeonky.dal.runtime.RowAssertionFailure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
@@ -23,26 +23,37 @@ public class TableNode extends DALNode {
     }
 
     @Override
+    @Deprecated
     public Data evaluateData(DALRuntimeContext context) {
-        return context.wrap(new Expectation() {
+        return context.wrap(new ExpectationFactory() {
             @Override
-            public Data equalTo(DALOperator operator, Data actual) {
-                try {
-                    return ((Expectation) convertToVerificationNode(actual, operator, context)
-                            .evaluateData(context).instance()).equalTo(operator, actual);
-                } catch (RowAssertionFailure rowAssertionFailure) {
-                    throw rowAssertionFailure.linePositionException(TableNode.this);
-                }
-            }
+            public Expectation create(DALOperator operator, Data actual) {
+                Expectation verificationExpectation = ((ExpectationFactory) convertToVerificationNode(actual, operator,
+                        context).evaluateData(context).instance()).create(operator, actual);
+                return new Expectation() {
+                    @Override
+                    public Data matches() {
+                        try {
+                            return verificationExpectation.matches();
+                        } catch (RowAssertionFailure rowAssertionFailure) {
+                            throw rowAssertionFailure.linePositionException(TableNode.this);
+                        }
+                    }
 
-            @Override
-            public Data matches(DALOperator operator, Data actual) {
-                try {
-                    return ((Expectation) convertToVerificationNode(actual, operator, context)
-                            .evaluateData(context).instance()).matches(operator, actual);
-                } catch (RowAssertionFailure rowAssertionFailure) {
-                    throw rowAssertionFailure.linePositionException(TableNode.this);
-                }
+                    @Override
+                    public Data equalTo() {
+                        try {
+                            return verificationExpectation.equalTo();
+                        } catch (RowAssertionFailure rowAssertionFailure) {
+                            throw rowAssertionFailure.linePositionException(TableNode.this);
+                        }
+                    }
+
+                    @Override
+                    public Type type() {
+                        return verificationExpectation.type();
+                    }
+                };
             }
         });
     }
