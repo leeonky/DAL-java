@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.runtime.checker;
 
-import com.github.leeonky.dal.runtime.AssertionFailure;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
@@ -42,12 +41,8 @@ public interface Checker {
     }
 
     default Data verify(CheckingContext checkingContext) {
-        if (failed(checkingContext)) {
-            if (checkingContext.getPosition() == -1)
-                throw new AssertionError(message(checkingContext));
-//            TODO remove
-            throw new AssertionFailure(message(checkingContext), checkingContext.getPosition());
-        }
+        if (failed(checkingContext))
+            throw new AssertionError(message(checkingContext));
         return checkingContext.getOriginalActual();
     }
 }

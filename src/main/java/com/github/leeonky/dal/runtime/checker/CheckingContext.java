@@ -9,7 +9,6 @@ import static java.lang.String.format;
 
 public class CheckingContext {
     private final Data originalExpected, originalActual, expected, actual;
-    private final int position;
 
     public Data getOriginalActual() {
         return originalActual;
@@ -19,12 +18,11 @@ public class CheckingContext {
         return originalExpected;
     }
 
-    public CheckingContext(Data originalExpected, Data originalActual, Data expected, Data actual, int position) {
+    public CheckingContext(Data originalExpected, Data originalActual, Data expected, Data actual) {
         this.originalExpected = originalExpected;
         this.originalActual = originalActual;
         this.expected = expected;
         this.actual = actual;
-        this.position = position;
     }
 
     public boolean objectNotEquals() {
@@ -50,10 +48,6 @@ public class CheckingContext {
 
     public String cannotCompare() {
         return format("Cannot compare between %s\nand %s", actual.dumpAll(), expected.dumpAll());
-    }
-
-    public int getPosition() {
-        return position;
     }
 
     public Data getExpected() {
