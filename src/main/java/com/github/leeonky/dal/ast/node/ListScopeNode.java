@@ -1,6 +1,5 @@
 package com.github.leeonky.dal.ast.node;
 
-import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.ast.opt.Factory;
 import com.github.leeonky.dal.compiler.Notations;
 import com.github.leeonky.dal.runtime.*;
@@ -88,40 +87,34 @@ public class ListScopeNode extends DALNode {
     }
 
     @Override
-    @Deprecated
-    public Data evaluateData(DALRuntimeContext context) {
-        return context.wrap(new ExpectationFactory() {
+    protected ExpectationFactory toVerify(DALRuntimeContext context) {
+        return (operator, actual) -> new ExpectationFactory.Expectation() {
             @Override
-            public Expectation create(DALOperator operator, Data actual) {
-                return new Expectation() {
-                    @Override
-                    public Data matches() {
-                        return equalTo();
-                    }
-
-                    @Override
-                    public Data equalTo() {
-                        try {
-                            Data.DataList list = opt1(actual::list).sort(comparator);
-                            return list.wrap().execute(() -> {
-                                if (type == ListScopeNode.Type.CONTAINS)
-                                    verifyContainElement(context, list);
-                                else
-                                    verifyCorrespondingElement(context, getVerificationExpressions(list));
-                                return actual;
-                            });
-                        } catch (ListMappingElementAccessException e) {
-                            throw exception(expression -> e.toDalError(expression.left().getOperandPosition()));
-                        }
-                    }
-
-                    @Override
-                    public Type type() {
-                        return Type.LIST;
-                    }
-                };
+            public Data matches() {
+                return equalTo();
             }
-        });
+
+            @Override
+            public Data equalTo() {
+                try {
+                    Data.DataList list = opt1(actual::list).sort(comparator);
+                    return list.wrap().execute(() -> {
+                        if (type == Type.CONTAINS)
+                            verifyContainElement(context, list);
+                        else
+                            verifyCorrespondingElement(context, getVerificationExpressions(list));
+                        return actual;
+                    });
+                } catch (ListMappingElementAccessException e) {
+                    throw exception(expression -> e.toDalError(expression.left().getOperandPosition()));
+                }
+            }
+
+            @Override
+            public ExpectationFactory.Type type() {
+                return ExpectationFactory.Type.LIST;
+            }
+        };
     }
 
     //    TODO tobe refactored

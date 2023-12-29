@@ -2,7 +2,6 @@ package com.github.leeonky.dal.ast.node;
 
 import com.github.leeonky.dal.ast.node.table.TransposedBody;
 import com.github.leeonky.dal.ast.node.table.TransposedRowHeaderRow;
-import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ExpectationFactory;
 import com.github.leeonky.dal.runtime.RowAssertionFailure;
@@ -17,41 +16,37 @@ public class TransposedTableNode extends DALNode {
         tableBody = ((TransposedBody) transposedTableBody).checkFormat(tableHead);
     }
 
-    @Deprecated
     @Override
-    public Data evaluateData(DALRuntimeContext context) {
-        return context.wrap(new ExpectationFactory() {
-            @Override
-            public Expectation create(DALOperator operator, Data actual) {
-                Expectation expectation = ((ExpectationFactory) transpose().convertToVerificationNode(actual,
-                        operator, context).evaluateData(context).instance()).create(operator, actual);
+    protected ExpectationFactory toVerify(DALRuntimeContext context) {
+        return (operator, actual) -> {
+            ExpectationFactory.Expectation expectation = transpose().convertToVerificationNode(actual, operator, context)
+                    .toVerify(context).create(operator, actual);
 
-                return new Expectation() {
-                    @Override
-                    public Data matches() {
-                        try {
-                            return expectation.matches();
-                        } catch (RowAssertionFailure rowAssertionFailure) {
-                            throw rowAssertionFailure.columnPositionException(TransposedTableNode.this);
-                        }
+            return new ExpectationFactory.Expectation() {
+                @Override
+                public Data matches() {
+                    try {
+                        return expectation.matches();
+                    } catch (RowAssertionFailure rowAssertionFailure) {
+                        throw rowAssertionFailure.columnPositionException(TransposedTableNode.this);
                     }
+                }
 
-                    @Override
-                    public Data equalTo() {
-                        try {
-                            return expectation.equalTo();
-                        } catch (RowAssertionFailure rowAssertionFailure) {
-                            throw rowAssertionFailure.columnPositionException(TransposedTableNode.this);
-                        }
+                @Override
+                public Data equalTo() {
+                    try {
+                        return expectation.equalTo();
+                    } catch (RowAssertionFailure rowAssertionFailure) {
+                        throw rowAssertionFailure.columnPositionException(TransposedTableNode.this);
                     }
+                }
 
-                    @Override
-                    public Type type() {
-                        return expectation.type();
-                    }
-                };
-            }
-        });
+                @Override
+                public ExpectationFactory.Type type() {
+                    return expectation.type();
+                }
+            };
+        };
     }
 
     public TableNode transpose() {

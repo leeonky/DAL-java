@@ -7,13 +7,9 @@ import com.github.leeonky.dal.runtime.ExpectationFactory;
 import com.github.leeonky.dal.runtime.Extension;
 import com.github.leeonky.dal.runtime.Operation;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
-import com.github.leeonky.dal.runtime.checker.Checker;
-import com.github.leeonky.dal.runtime.checker.CheckingContext;
 import com.github.leeonky.util.NumberType;
 import com.github.leeonky.util.function.TriFunction;
 
-import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
-import static com.github.leeonky.dal.runtime.ExpressionException.opt2;
 import static com.github.leeonky.dal.runtime.Operators.*;
 
 public class Operators implements Extension {
@@ -26,9 +22,7 @@ public class Operators implements Extension {
         numberCalculator(dal, MUL, NumberType::multiply);
         numberCalculator(dal, DIV, NumberType::divide);
 
-        defaultEqual(dal);
         assertEqual(dal);
-        defaultMatch(dal);
         assertMatch(dal);
     }
 
@@ -58,42 +52,6 @@ public class Operators implements Extension {
             @Override
             public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
                 return ((ExpectationFactory) v2.instance()).create(operator, v1).equalTo();
-            }
-        });
-    }
-
-    private void defaultMatch(DAL dal) {
-        dal.getRuntimeContextBuilder().registerOperator(MATCH, new Operation() {
-
-            @Override
-            public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return true;
-            }
-
-            @Override
-            public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                Checker checker = context.fetchMatchingChecker(v2, v1);
-                return checker.verify(new CheckingContext(v2, v1,
-                        opt2(() -> checker.transformExpected(v2, context)),
-                        opt1(() -> checker.transformActual(v1, v2, context)), -1));
-            }
-        });
-    }
-
-    private void defaultEqual(DAL dal) {
-        dal.getRuntimeContextBuilder().registerOperator(EQUAL, new Operation() {
-
-            @Override
-            public boolean match(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                return true;
-            }
-
-            @Override
-            public Data operate(Data v1, DALOperator operator, Data v2, DALRuntimeContext context) {
-                Checker checker = context.fetchEqualsChecker(v2, v1);
-                return checker.verify(new CheckingContext(v2, v1,
-                        opt2(() -> checker.transformExpected(v2, context)),
-                        opt1(() -> checker.transformActual(v1, v2, context)), -1));
             }
         });
     }

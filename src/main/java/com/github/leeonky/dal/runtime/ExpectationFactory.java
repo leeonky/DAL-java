@@ -14,6 +14,6 @@ public interface ExpectationFactory {
     }
 
     enum Type {
-        OBJECT, REGEX, LIST
+        OBJECT, REGEX, VALUE, LIST
     }
 }

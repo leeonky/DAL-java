@@ -23,39 +23,35 @@ public class TableNode extends DALNode {
     }
 
     @Override
-    @Deprecated
-    public Data evaluateData(DALRuntimeContext context) {
-        return context.wrap(new ExpectationFactory() {
-            @Override
-            public Expectation create(DALOperator operator, Data actual) {
-                Expectation verificationExpectation = ((ExpectationFactory) convertToVerificationNode(actual, operator,
-                        context).evaluateData(context).instance()).create(operator, actual);
-                return new Expectation() {
-                    @Override
-                    public Data matches() {
-                        try {
-                            return verificationExpectation.matches();
-                        } catch (RowAssertionFailure rowAssertionFailure) {
-                            throw rowAssertionFailure.linePositionException(TableNode.this);
-                        }
+    protected ExpectationFactory toVerify(DALRuntimeContext context) {
+        return (operator, actual) -> {
+            ExpectationFactory.Expectation verificationExpectation = convertToVerificationNode(actual, operator,
+                    context).toVerify(context).create(operator, actual);
+            return new ExpectationFactory.Expectation() {
+                @Override
+                public Data matches() {
+                    try {
+                        return verificationExpectation.matches();
+                    } catch (RowAssertionFailure rowAssertionFailure) {
+                        throw rowAssertionFailure.linePositionException(TableNode.this);
                     }
+                }
 
-                    @Override
-                    public Data equalTo() {
-                        try {
-                            return verificationExpectation.equalTo();
-                        } catch (RowAssertionFailure rowAssertionFailure) {
-                            throw rowAssertionFailure.linePositionException(TableNode.this);
-                        }
+                @Override
+                public Data equalTo() {
+                    try {
+                        return verificationExpectation.equalTo();
+                    } catch (RowAssertionFailure rowAssertionFailure) {
+                        throw rowAssertionFailure.linePositionException(TableNode.this);
                     }
+                }
 
-                    @Override
-                    public Type type() {
-                        return verificationExpectation.type();
-                    }
-                };
-            }
-        });
+                @Override
+                public ExpectationFactory.Type type() {
+                    return verificationExpectation.type();
+                }
+            };
+        };
     }
 
     public DALNode convertToVerificationNode(Data actual, DALOperator operator, DALRuntimeContext context) {
