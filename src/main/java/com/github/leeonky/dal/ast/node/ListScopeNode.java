@@ -154,11 +154,6 @@ public class ListScopeNode extends DALNode {
     }
 
     @Override
-    public Object evaluate(DALRuntimeContext context) {
-        return NodeType.LIST_SCOPE;
-    }
-
-    @Override
     public String inspect() {
         if (type == Type.CONTAINS)
             return inputClauses.stream().map(clause -> clause.expression(INPUT_NODE).inspect())

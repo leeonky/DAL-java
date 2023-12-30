@@ -129,7 +129,6 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
     }
 
     @Override
-    @Deprecated
     public DALNode createExpression(DALNode left, DALOperator operator, DALNode right) {
         return DALExpression.expression(left, operator, right);
     }

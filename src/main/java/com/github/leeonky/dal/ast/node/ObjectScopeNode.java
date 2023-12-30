@@ -1,6 +1,9 @@
 package com.github.leeonky.dal.ast.node;
 
-import com.github.leeonky.dal.runtime.*;
+import com.github.leeonky.dal.runtime.AssertionFailure;
+import com.github.leeonky.dal.runtime.CurryingMethod;
+import com.github.leeonky.dal.runtime.Data;
+import com.github.leeonky.dal.runtime.ExpectationFactory;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
 
@@ -32,11 +35,6 @@ public class ObjectScopeNode extends DALNode {
     public String inspect() {
         return format("{%s}", isObjectWildcard ? "..." : verificationExpressions.stream().map(DALNode::inspect)
                 .collect(joining(", ")));
-    }
-
-    @Override
-    public Object evaluate(DALRuntimeContext context) {
-        return NodeType.OBJECT_SCOPE;
     }
 
     @Override

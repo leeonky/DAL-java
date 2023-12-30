@@ -81,7 +81,7 @@ public class Expect {
     public Formatter<Object, Object> extractFormatter() {
         if (expect == null)
             return (Formatter<Object, Object>) type.getTypeArguments(0)
-                    .map(t -> type.newInstance((Object) t.getType())).orElseGet(type::newInstance);
+                    .map(t -> type.newInstance(t.getType())).orElseGet(type::newInstance);
         return (Formatter<Object, Object>) expect;
     }
 
