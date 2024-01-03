@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2RuntimeException;
 import static com.github.leeonky.dal.runtime.ExpressionException.illegalOperationRuntimeException;
 import static com.github.leeonky.dal.runtime.schema.Actual.actual;
 import static com.github.leeonky.dal.runtime.schema.Verification.expect;
@@ -494,16 +495,15 @@ public class RuntimeContextBuilder {
         public Data invokeDataRemark(RemarkData remarkData) {
             Object instance = remarkData.data().instance();
             return remarks.tryGetData(instance)
-                    .orElseThrow(() -> new RuntimeException("Not implement operator () of " +
-                            Classes.getClassName(instance), remarkData.operator().getPosition()))
+                    .orElseThrow(() -> illegalOperationRuntimeException("Not implement operator () of " + Classes.getClassName(instance)))
                     .apply(remarkData);
         }
 
         public Data invokeExclamations(RuntimeData runtimeData) {
             Object instance = runtimeData.data().instance();
             return exclamations.tryGetData(instance)
-                    .orElseThrow(() -> new RuntimeException(format("Not implement operator %s of %s", runtimeData.operandNode().inspect(),
-                            Classes.getClassName(instance)), runtimeData.operandNode().getPositionBegin()))
+                    .orElseThrow(() -> illegalOp2RuntimeException(format("Not implement operator %s of %s",
+                            runtimeData.operandNode().inspect(), Classes.getClassName(instance))))
                     .apply(runtimeData);
         }
 

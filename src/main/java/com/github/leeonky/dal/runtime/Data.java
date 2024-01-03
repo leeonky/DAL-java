@@ -43,6 +43,7 @@ public class Data {
         return list(0);
     }
 
+    @Deprecated
     public DataList list(int position) {
         if (list == null) {
             if (!isList())

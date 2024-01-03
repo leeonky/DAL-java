@@ -22,8 +22,7 @@ public class MetaProperties implements Extension {
     private static Object throw_(MetaData metaData) {
         Throwable error = metaData.catchError();
         if (error == null)
-            throw new AssertionFailure("Expecting an error to be thrown, but nothing was thrown",
-                    metaData.operandNode().getPositionBegin());
+            throw new AssertionError("Expecting an error to be thrown, but nothing was thrown");
         return error;
     }
 

@@ -16,14 +16,14 @@ public class MetaData extends RuntimeData {
     protected Data data;
 
     public MetaData(DALNode inputNode, DALNode operandNode, DALRuntimeContext runtimeContext) {
-        super(null, inputNode, operandNode, runtimeContext, null);
+        super(null, inputNode, operandNode, runtimeContext);
         name = operandNode.getRootSymbolName();
         setData(() -> inputNode().evaluateData(runtimeContext()));
     }
 
     private MetaData(DALNode inputNode, DALNode operandNode, DALRuntimeContext runtimeContext,
                      Data data, Throwable error, RuntimeException originalException, String name) {
-        super(null, inputNode, operandNode, runtimeContext, null);
+        super(null, inputNode, operandNode, runtimeContext);
         this.name = name;
         this.error = error;
         this.originalException = originalException;
@@ -74,7 +74,7 @@ public class MetaData extends RuntimeData {
     }
 
     private MetaData newMeta(String name) {
-        return new MetaData(inputNode, OperandNode, runtimeContext, data, error, originalException, name);
+        return new MetaData(inputNode, operandNode, runtimeContext, data, error, originalException, name);
     }
 
     public Object callMeta(String another) {
@@ -95,13 +95,13 @@ public class MetaData extends RuntimeData {
             actual = actual.getSuperclass();
         if (!actual.equals(expect))
             throw new RuntimeException(String.format("Do not allow change data type in callSuper, expect %s but %s",
-                    expect.getName(), actual.getName()), OperandNode.getPositionBegin());
+                    expect.getName(), actual.getName()), operandNode.getPositionBegin());
     }
 
     private RuntimeException noSuperError() {
         return new RuntimeException(String.format("Local meta property `%s` has no super in type %s",
-                OperandNode.getRootSymbolName(), callTypes.get(callTypes.size() - 1).getName()),
-                OperandNode.getPositionBegin());
+                operandNode.getRootSymbolName(), callTypes.get(callTypes.size() - 1).getName()),
+                operandNode.getPositionBegin());
     }
 
     public void addCallType(Class<?> callType) {

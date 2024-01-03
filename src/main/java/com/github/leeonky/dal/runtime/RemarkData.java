@@ -1,16 +1,17 @@
 package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.ast.node.DALNode;
-import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 
 public class RemarkData extends RuntimeData {
-    public RemarkData(Data data, DALNode inputNode, DALNode remarkNode,
-                      DALRuntimeContext runtimeContext, DALOperator operator) {
-        super(data, inputNode, remarkNode, runtimeContext, operator);
+    private final String remark;
+
+    public RemarkData(Data data, DALNode inputNode, DALNode remarkNode, DALRuntimeContext runtimeContext, String remark) {
+        super(data, inputNode, remarkNode, runtimeContext);
+        this.remark = remark;
     }
 
     public String remark() {
-        return operandNode().inspect();
+        return remark;
     }
 }
