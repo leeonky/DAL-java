@@ -19,14 +19,14 @@ public class MetaData extends RuntimeData {
     protected Data data;
 
     public MetaData(DALNode inputNode, DALNode operandNode, DALRuntimeContext runtimeContext) {
-        super(null, inputNode, runtimeContext);
+        super(null, runtimeContext);
         name = operandNode.getRootSymbolName();
         setData(() -> inputNode.evaluateData(runtimeContext()));
     }
 
-    private MetaData(DALNode inputNode, DALNode operandNode, DALRuntimeContext runtimeContext,
+    private MetaData(DALRuntimeContext runtimeContext,
                      Data data, Throwable error, RuntimeException originalException, String name) {
-        super(null, inputNode, runtimeContext);
+        super(null, runtimeContext);
         this.name = name;
         this.error = error;
         this.originalException = originalException;
@@ -78,7 +78,7 @@ public class MetaData extends RuntimeData {
     }
 
     private MetaData newMeta(String name) {
-        return new MetaData(inputNode, null, runtimeContext, data, error, originalException, name);
+        return new MetaData(runtimeContext, data, error, originalException, name);
     }
 
     public Object callMeta(String another) {

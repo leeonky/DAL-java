@@ -3,6 +3,8 @@ package com.github.leeonky.dal.ast.node;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
+import static com.github.leeonky.dal.runtime.ExpressionException.opt2;
+
 public class ListMappingNode extends DALNode implements ExecutableNode {
     private final SymbolNode symbolNode;
 
@@ -18,7 +20,7 @@ public class ListMappingNode extends DALNode implements ExecutableNode {
 
     @Override
     public Data getValue(Data data, RuntimeContextBuilder.DALRuntimeContext context) {
-        return data.list(getPositionBegin()).listMap(symbolNode.getRootSymbolName());
+        return opt2(data::list).listMap(symbolNode.getRootSymbolName());
     }
 
     @Override

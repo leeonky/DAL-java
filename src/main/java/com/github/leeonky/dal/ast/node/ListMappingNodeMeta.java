@@ -4,6 +4,8 @@ import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.MetaData;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
+import static com.github.leeonky.dal.runtime.ExpressionException.opt2;
+
 public class ListMappingNodeMeta extends ListMappingNode {
     public ListMappingNodeMeta(DALNode symbolNode) {
         super(symbolNode);
@@ -11,7 +13,7 @@ public class ListMappingNodeMeta extends ListMappingNode {
 
     @Override
     public Data getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
-        return context.wrap(left.evaluateData(context).list(getPositionBegin()).listMap(item ->
+        return context.wrap(opt2(left.evaluateData(context)::list).listMap(item ->
                 context.invokeMetaProperty(new MetaData(new ConstValueNode(item.instance()), this, context))));
     }
 

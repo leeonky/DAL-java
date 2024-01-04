@@ -40,19 +40,10 @@ public class Data {
     }
 
     public DataList list() {
-        return list(0);
-    }
-
-    @Deprecated
-    public DataList list(int position) {
         if (list == null) {
             if (!isList())
-                throw new RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()), position);
-            try {
-                list = new DataList(context.createCollection(instance));
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage(), position, e);
-            }
+                throw new java.lang.RuntimeException(format("Invalid input value, expect a List but: %s", dumpAll().trim()));
+            list = new DataList(context.createCollection(instance));
         }
         return list;
     }

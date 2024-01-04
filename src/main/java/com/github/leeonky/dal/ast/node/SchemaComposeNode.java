@@ -7,6 +7,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import java.util.List;
 import java.util.stream.Collector;
 
+import static com.github.leeonky.dal.runtime.ExpressionException.opt1;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -40,7 +41,7 @@ public class SchemaComposeNode extends DALNode {
         Data inputData = input.evaluateData(context);
         if (isList)
             try {
-                DALCollection<Object> collection = inputData.list(input.getPositionBegin()).wraps().map((index, data) ->
+                DALCollection<Object> collection = opt1(inputData::list).wraps().map((index, data) ->
                         convertViaSchema(context, schemaNode, data, format("%s[%d]", input.inspect(), index)));
                 //get size to avoid lazy mode, should verify element with schema
                 collection.collect();

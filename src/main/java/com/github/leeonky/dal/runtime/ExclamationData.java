@@ -6,7 +6,7 @@ public class ExclamationData extends RuntimeData {
     private final String label;
 
     public ExclamationData(Data data, DALNode inputNode, DALNode operandNode, RuntimeContextBuilder.DALRuntimeContext runtimeContext) {
-        super(data, inputNode, runtimeContext);
+        super(data, runtimeContext);
         label = operandNode.inspect();
     }
 
