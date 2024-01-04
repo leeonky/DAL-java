@@ -423,9 +423,9 @@ public class RuntimeContextBuilder {
         }
 
         public Function<MetaData, Object> fetchGlobalMetaFunction(MetaData metaData) {
+
             return metaProperties.computeIfAbsent(metaData.name(), k -> {
-                throw new RuntimeException(format("Meta property `%s` not found",
-                        metaData.name()), metaData.operandNode().getPositionBegin());
+                throw illegalOp2RuntimeException(format("Meta property `%s` not found", metaData.name()));
             });
         }
 
@@ -499,12 +499,12 @@ public class RuntimeContextBuilder {
                     .apply(remarkData);
         }
 
-        public Data invokeExclamations(RuntimeData runtimeData) {
-            Object instance = runtimeData.data().instance();
+        public Data invokeExclamations(ExclamationData exclamationData) {
+            Object instance = exclamationData.data().instance();
             return exclamations.tryGetData(instance)
                     .orElseThrow(() -> illegalOp2RuntimeException(format("Not implement operator %s of %s",
-                            runtimeData.operandNode().inspect(), Classes.getClassName(instance))))
-                    .apply(runtimeData);
+                            exclamationData.label(), Classes.getClassName(instance))))
+                    .apply(exclamationData);
         }
 
         public Data calculate(Data v1, DALOperator opt, Data v2) {

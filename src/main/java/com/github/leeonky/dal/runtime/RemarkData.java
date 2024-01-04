@@ -7,7 +7,7 @@ public class RemarkData extends RuntimeData {
     private final String remark;
 
     public RemarkData(Data data, DALNode inputNode, DALNode remarkNode, DALRuntimeContext runtimeContext, String remark) {
-        super(data, inputNode, remarkNode, runtimeContext);
+        super(data, inputNode, runtimeContext);
         this.remark = remark;
     }
 

@@ -8,6 +8,7 @@ import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
 import com.github.leeonky.dal.runtime.RuntimeException;
 import com.github.leeonky.interpreter.Expression;
 import com.github.leeonky.interpreter.InterpreterException;
+import com.github.leeonky.util.InvocationException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +61,7 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
         } catch (AssertionError error) {
             throw new AssertionFailure(error.getMessage(), right().getPositionBegin());
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), operator().getPosition());
+            throw new RuntimeException(e.getMessage(), operator().getPosition(), new InvocationException(e));
         }
     }
 

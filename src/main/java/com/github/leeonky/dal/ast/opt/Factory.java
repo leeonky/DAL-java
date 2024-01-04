@@ -96,7 +96,7 @@ public class Factory {
 
             @Override
             public Data calculateData(DALExpression expression, DALRuntimeContext context) {
-                return context.invokeExclamations(new RuntimeData(expression.left().evaluateData(context),
+                return context.invokeExclamations(new ExclamationData(expression.left().evaluateData(context),
                         expression.left(), expression.right(), context));
             }
 

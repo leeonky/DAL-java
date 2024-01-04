@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import static com.github.leeonky.dal.runtime.ExpressionException.illegalOp2RuntimeException;
+import static java.lang.String.format;
+
 public class MetaData extends RuntimeData {
     private Throwable error;
     private RuntimeException originalException;
@@ -16,14 +19,14 @@ public class MetaData extends RuntimeData {
     protected Data data;
 
     public MetaData(DALNode inputNode, DALNode operandNode, DALRuntimeContext runtimeContext) {
-        super(null, inputNode, operandNode, runtimeContext);
+        super(null, inputNode, runtimeContext);
         name = operandNode.getRootSymbolName();
-        setData(() -> inputNode().evaluateData(runtimeContext()));
+        setData(() -> inputNode.evaluateData(runtimeContext()));
     }
 
     private MetaData(DALNode inputNode, DALNode operandNode, DALRuntimeContext runtimeContext,
                      Data data, Throwable error, RuntimeException originalException, String name) {
-        super(null, inputNode, operandNode, runtimeContext);
+        super(null, inputNode, runtimeContext);
         this.name = name;
         this.error = error;
         this.originalException = originalException;
@@ -51,8 +54,9 @@ public class MetaData extends RuntimeData {
     private final List<Class<?>> callTypes = new ArrayList<>();
 
     public Object callSuper() {
-        return runtimeContext().fetchSuperMetaFunction(this)
-                .orElseThrow(this::noSuperError).apply(this);
+        return runtimeContext().fetchSuperMetaFunction(this).orElseThrow(() -> illegalOp2RuntimeException(format(
+                        "Local meta property `%s` has no super in type %s", name, callTypes.get(callTypes.size() - 1).getName())))
+                .apply(this);
     }
 
     public Object callSuper(Supplier<Object> supplier) {
@@ -74,7 +78,7 @@ public class MetaData extends RuntimeData {
     }
 
     private MetaData newMeta(String name) {
-        return new MetaData(inputNode, operandNode, runtimeContext, data, error, originalException, name);
+        return new MetaData(inputNode, null, runtimeContext, data, error, originalException, name);
     }
 
     public Object callMeta(String another) {
@@ -94,14 +98,8 @@ public class MetaData extends RuntimeData {
         if (actual.isAnonymousClass())
             actual = actual.getSuperclass();
         if (!actual.equals(expect))
-            throw new RuntimeException(String.format("Do not allow change data type in callSuper, expect %s but %s",
-                    expect.getName(), actual.getName()), operandNode.getPositionBegin());
-    }
-
-    private RuntimeException noSuperError() {
-        return new RuntimeException(String.format("Local meta property `%s` has no super in type %s",
-                operandNode.getRootSymbolName(), callTypes.get(callTypes.size() - 1).getName()),
-                operandNode.getPositionBegin());
+            throw illegalOp2RuntimeException(format("Do not allow change data type in callSuper, expect %s but %s",
+                    expect.getName(), actual.getName()));
     }
 
     public void addCallType(Class<?> callType) {
