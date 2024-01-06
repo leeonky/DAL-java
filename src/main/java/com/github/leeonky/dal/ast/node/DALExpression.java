@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.ast.node;
 
+import com.github.leeonky.dal.ast.node.table.RowHeader;
+import com.github.leeonky.dal.ast.node.table.RowType;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.AssertionFailure;
 import com.github.leeonky.dal.runtime.Data;
@@ -109,5 +111,12 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
     public int getPositionBegin() {
         if (left == null || left instanceof InputNode) return super.getPositionBegin();
         return Math.min(super.getPositionBegin(), left.getPositionBegin());
+    }
+
+    @Override
+    public RowType guessTableHeaderType() {
+        if (left() instanceof InputNode && right() instanceof DataRemarkNode)
+            return RowHeader.DEFAULT_INDEX;
+        return RowHeader.SPECIFY_PROPERTY;
     }
 }

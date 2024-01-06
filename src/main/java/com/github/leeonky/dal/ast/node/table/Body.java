@@ -14,7 +14,7 @@ import static com.github.leeonky.interpreter.InterpreterException.Position.Type.
 import static java.util.stream.Collectors.toList;
 
 public class Body extends DALNode {
-    private static final RowType EMPTY_TABLE_ROW_TYPE = new EmptyTableRowType();
+    public static final RowType EMPTY_TABLE_ROW_TYPE = new EmptyTableRowType();
     private final List<Row> rows;
     private final RowType rowType;
 

@@ -19,7 +19,7 @@ import static com.github.leeonky.dal.compiler.Notations.EMPTY;
 import static com.github.leeonky.util.function.When.when;
 import static java.util.stream.Collectors.toList;
 
-abstract class RowType {
+public abstract class RowType {
 
     public abstract RowType merge(RowType another);
 

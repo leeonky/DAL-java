@@ -1,6 +1,8 @@
 package com.github.leeonky.dal.ast.node.table;
 
-import com.github.leeonky.dal.ast.node.*;
+import com.github.leeonky.dal.ast.node.DALExpression;
+import com.github.leeonky.dal.ast.node.DALNode;
+import com.github.leeonky.dal.ast.node.InputNode;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.compiler.DALProcedure;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -14,9 +16,9 @@ import static com.github.leeonky.dal.ast.node.DALExpression.expression;
 import static com.github.leeonky.util.function.Extension.getFirstPresent;
 
 public class RowHeader extends DALNode {
-    private static final RowType DEFAULT_INDEX = new DefaultIndexRowType(),
-            SPECIFY_INDEX = new SpecifyIndexRowType(),
-            SPECIFY_PROPERTY = new SpecifyPropertyRowType();
+    public static final RowType DEFAULT_INDEX = new DefaultIndexRowType();
+    public static final RowType SPECIFY_INDEX = new SpecifyIndexRowType();
+    public static final RowType SPECIFY_PROPERTY = new SpecifyPropertyRowType();
     private final Optional<DALNode> indexOrProperty;
     private final Optional<Clause<DALNode>> clause;
     private final Optional<DALOperator> rowOperator;
@@ -47,17 +49,7 @@ public class RowHeader extends DALNode {
     }
 
     public RowType resolveRowType() {
-        return indexOrProperty.map(dalNode -> {
-            if (dalNode instanceof ConstValueNode)
-                return SPECIFY_INDEX;
-            else if (dalNode instanceof DALExpression) {
-                DALExpression expression = (DALExpression) dalNode;
-                if (expression.left() instanceof InputNode && expression.right() instanceof DataRemarkNode)
-                    return DEFAULT_INDEX;
-                return SPECIFY_PROPERTY;
-            } else
-                return DEFAULT_INDEX;
-        }).orElse(DEFAULT_INDEX);
+        return indexOrProperty.map(DALNode::guessTableHeaderType).orElse(DEFAULT_INDEX);
     }
 
     public Optional<Integer> position() {

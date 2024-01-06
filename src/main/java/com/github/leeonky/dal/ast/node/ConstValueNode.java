@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.ast.node;
 
+import com.github.leeonky.dal.ast.node.table.RowHeader;
+import com.github.leeonky.dal.ast.node.table.RowType;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder;
 
 public class ConstValueNode extends DALNode {
@@ -26,5 +28,10 @@ public class ConstValueNode extends DALNode {
         if (value instanceof String)
             return String.format("'%s'", value);
         return value.toString();
+    }
+
+    @Override
+    public RowType guessTableHeaderType() {
+        return RowHeader.SPECIFY_INDEX;
     }
 }

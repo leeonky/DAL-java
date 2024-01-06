@@ -1,5 +1,7 @@
 package com.github.leeonky.dal.ast.node;
 
+import com.github.leeonky.dal.ast.node.table.RowHeader;
+import com.github.leeonky.dal.ast.node.table.RowType;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.ExpectationFactory;
@@ -67,5 +69,9 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
                 return ExpectationFactory.Type.VALUE;
             }
         };
+    }
+
+    public RowType guessTableHeaderType() {
+        return RowHeader.DEFAULT_INDEX;
     }
 }

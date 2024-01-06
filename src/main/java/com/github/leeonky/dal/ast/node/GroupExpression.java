@@ -1,5 +1,6 @@
 package com.github.leeonky.dal.ast.node;
 
+import com.github.leeonky.dal.ast.node.table.RowType;
 import com.github.leeonky.dal.ast.opt.DALOperator;
 import com.github.leeonky.dal.runtime.Data;
 import com.github.leeonky.dal.runtime.RuntimeContextBuilder.DALRuntimeContext;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.leeonky.dal.ast.node.DALExpression.expression;
+import static com.github.leeonky.dal.ast.node.table.Body.EMPTY_TABLE_ROW_TYPE;
 import static java.util.stream.Collectors.toList;
 
 public class GroupExpression extends DALNode {
@@ -67,5 +69,13 @@ public class GroupExpression extends DALNode {
     @Override
     public Stream<Object> collectFields(Data data) {
         return expressions.stream().map(e -> data.firstFieldFromAlias(e.getRootSymbolName()));
+    }
+
+    @Override
+    public RowType guessTableHeaderType() {
+        RowType rowType = EMPTY_TABLE_ROW_TYPE;
+        for (DALNode expression : expressions)
+            rowType = rowType.merge(expression.guessTableHeaderType());
+        return rowType;
     }
 }
