@@ -80,8 +80,8 @@ public class Factory {
 
             @Override
             public Data calculateData(DALExpression expression, DALRuntimeContext context) {
-                return context.invokeDataRemark(new RemarkData(expression.left().evaluateData(context),
-                        expression.left(), expression.right(), context, expression.right().inspect()));
+                return context.invokeDataRemark(new RemarkData(expression.left().evaluateData(context), context,
+                        expression.right().inspect()));
             }
 
             @Override

@@ -26,6 +26,7 @@ Feature: customized list
     """
 
   Rule: exception in list method
+
     Background:
       Given the following java class:
       """

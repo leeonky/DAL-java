@@ -13,7 +13,7 @@ public class MetaSymbolNode extends SymbolNode {
     @Override
     public Data getValue(DALNode left, RuntimeContextBuilder.DALRuntimeContext context) {
         try {
-            return context.wrap(context.invokeMetaProperty(new MetaData(left, this, context)));
+            return context.wrap(context.invokeMetaProperty(new MetaData(left, getRootSymbolName(), context)));
         } catch (InterpreterException | ExpressionException e) {
             throw e;
         } catch (Exception e) {
