@@ -149,14 +149,6 @@ public class Data {
         return context.getImplicitObject(instance).flatMap(obj -> currying(obj, property));
     }
 
-    public boolean isNullWithPosition(int position) {
-        try {
-            return isNull();
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), position, e);
-        }
-    }
-
     static class FilteredObject extends LinkedHashMap<String, Object> implements PartialObject {
     }
 
