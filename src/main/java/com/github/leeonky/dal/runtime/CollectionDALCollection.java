@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class CollectionDALCollection<E> extends DALCollection<E> {
     private final List<E> list;
@@ -44,5 +46,15 @@ public class CollectionDALCollection<E> extends DALCollection<E> {
     @Override
     public List<E> collect() {
         return list;
+    }
+
+    @Override
+    public CollectionDALCollection<E> filter(Predicate<E> predicate) {
+        return new CollectionDALCollection<E>(list.stream().filter(predicate).collect(Collectors.toList())) {
+            @Override
+            public int firstIndex() {
+                return CollectionDALCollection.this.firstIndex();
+            }
+        };
     }
 }

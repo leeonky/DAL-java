@@ -137,7 +137,7 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerStaticMethodExtension(Class<?> staticMethodExtensionClass) {
         Stream.of(staticMethodExtensionClass.getMethods()).filter(method -> method.getParameterCount() >= 1
-                && (STATIC & method.getModifiers()) != 0).forEach(extensionMethods::add);
+                                                                            && (STATIC & method.getModifiers()) != 0).forEach(extensionMethods::add);
         return this;
     }
 
@@ -423,7 +423,6 @@ public class RuntimeContextBuilder {
         }
 
         public Function<MetaData, Object> fetchGlobalMetaFunction(MetaData metaData) {
-
             return metaProperties.computeIfAbsent(metaData.name(), k -> {
                 throw illegalOp2RuntimeException(format("Meta property `%s` not found", metaData.name()));
             });

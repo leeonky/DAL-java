@@ -4,6 +4,7 @@ import com.github.leeonky.dal.IndexedElement;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -41,6 +42,11 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
     public List<E> collect() {
         return requireLimitedCollection("Not supported for infinite collection").stream()
                 .map(IndexedElement::value).collect(Collectors.toList());
+    }
+
+    //    TODO tobe abstract
+    public DALCollection<E> filter(Predicate<E> predicate) {
+        return this;
     }
 
     public Stream<E> values() {
@@ -158,7 +164,7 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         }
 
         @Override
-        public DALCollection<E> requireLimitedCollection(String message) {
+        public Decorated<E> requireLimitedCollection(String message) {
             origin.requireLimitedCollection(message);
             return this;
         }

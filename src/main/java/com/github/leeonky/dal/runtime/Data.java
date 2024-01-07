@@ -70,12 +70,12 @@ public class Data {
                     ex.propertyAccessException().getCause());
         } catch (Exception e) {
             throw new PropertyAccessException(format("Get property `%s` failed, property can be:\n" +
-                            "  1. public field\n" +
-                            "  2. public getter\n" +
-                            "  3. public no args method\n" +
-                            "  4. Map key value\n" +
-                            "  5. customized type getter\n" +
-                            "  6. static method extension\n%s%s",
+                                                     "  1. public field\n" +
+                                                     "  2. public getter\n" +
+                                                     "  3. public no args method\n" +
+                                                     "  4. Map key value\n" +
+                                                     "  5. customized type getter\n" +
+                                                     "  6. static method extension\n%s%s",
                     propertyChain, e.getMessage(), listMappingMessage(this, propertyChain)), e);
         }
     }
@@ -122,7 +122,7 @@ public class Data {
 
     private String trimPrefix(String prefix, String fieldName) {
         return fieldName.substring(prefix.length(), prefix.length() + 1).toLowerCase()
-                + fieldName.substring(prefix.length() + 1);
+               + fieldName.substring(prefix.length() + 1);
     }
 
     public String dumpAll() {

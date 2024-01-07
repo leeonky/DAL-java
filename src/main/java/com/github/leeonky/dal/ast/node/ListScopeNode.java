@@ -61,23 +61,26 @@ public class ListScopeNode extends DALNode {
         if (inputExpressions != null)
             return inputExpressions;
         return new ArrayList<DALNode>() {{
+            List<Clause<DALNode>> usefulInputClauses = inputClauses;
+            if (type == Type.FIRST_N_ITEMS)
+                usefulInputClauses.remove(usefulInputClauses.size() - 1);
             if (type == Type.LAST_N_ITEMS) {
                 int negativeIndex = -1;
-                for (int i = inputClauses.size() - 1; i >= 0; i--)
-                    add(0, inputClauses.get(i).expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
+                for (int i = usefulInputClauses.size() - 1; i >= 0; i--)
+                    add(0, usefulInputClauses.get(i).expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
                             new SymbolNode(negativeIndex--, BRACKET))));
             } else {
-                Zipped<Integer, Clause<DALNode>> zipped = zip(list.indexes(), inputClauses);
-                zipped.forEachElement((index, clause) -> add(clause.expression(
+                Zipped<Clause<DALNode>, Integer> zipped = zip(usefulInputClauses, list.indexes());
+                zipped.forEachElement((clause, index) -> add(clause.expression(
                         expression(INPUT_NODE, Factory.executable(Notations.EMPTY), new SymbolNode(index, BRACKET)))));
                 if (type == Type.ALL_ITEMS) {
-                    if (zipped.hasRight()) {
-                        String message = format("Different list size\nExpected: <%d>\nActual: <%d>", inputClauses.size(), zipped.index());
+                    if (zipped.hasLeft()) {
+                        String message = format("Different list size\nExpected: <%d>\nActual: <%d>", usefulInputClauses.size(), zipped.index());
                         throw style == Style.ROW ? new DifferentCellSize(message, getPositionBegin())
                                 : new AssertionFailure(message, getPositionBegin());
                     }
-                    if (zipped.hasLeft() && !list.infinite()) {
-                        String message = format("Different list size\nExpected: <%d>\nActual: <%d>", inputClauses.size(), list.size());
+                    if (zipped.hasRight() && !list.infinite()) {
+                        String message = format("Different list size\nExpected: <%d>\nActual: <%d>", usefulInputClauses.size(), list.size());
                         throw style == Style.ROW ? new DifferentCellSize(message, getPositionBegin())
                                 : new AssertionFailure(message, getPositionBegin());
                     }

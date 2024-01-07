@@ -2,9 +2,8 @@ package com.github.leeonky.dal.runtime;
 
 import com.github.leeonky.dal.IndexedElement;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
 public class IterableDALCollection<E> extends DALCollection<E> {
@@ -61,5 +60,17 @@ public class IterableDALCollection<E> extends DALCollection<E> {
     public int size() {
         return (int) StreamSupport.stream(
                 requireLimitedCollection("Not supported for infinite collection").spliterator(), false).count();
+    }
+
+    @Override
+    public DALCollection<E> filter(Predicate<E> predicate) {
+        return new IterableDALCollection<E>(() -> Spliterators.iterator(StreamSupport.stream(
+                Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false).filter(predicate).spliterator())) {
+
+            @Override
+            public int firstIndex() {
+                return IterableDALCollection.this.firstIndex();
+            }
+        };
     }
 }
