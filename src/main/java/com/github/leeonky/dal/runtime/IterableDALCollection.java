@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
-public class IterableDALCollection<E> extends DALCollection<E> {
+public class IterableDALCollection<E> extends DALCollectionBase<E> {
     private final Iterator<E> iterator;
     private final List<E> cached = new ArrayList<>();
 

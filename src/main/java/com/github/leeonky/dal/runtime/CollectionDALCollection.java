@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class CollectionDALCollection<E> extends DALCollection<E> {
+public class CollectionDALCollection<E> extends DALCollectionBase<E> {
     private final List<E> list;
 
     public CollectionDALCollection(Collection<E> collection) {

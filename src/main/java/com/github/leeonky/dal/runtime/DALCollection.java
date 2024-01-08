@@ -4,110 +4,23 @@ import com.github.leeonky.dal.IndexedElement;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterators;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-import static java.lang.String.format;
+public interface DALCollection<E> extends Iterable<IndexedElement<E>> {
+    int size();
 
-public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
-    public abstract int size();
+    E getByIndex(int index);
 
-    public E getByIndex(int index) {
-        try {
-            if (index < 0) {
-                return requireLimitedCollection("Not support negative index in infinite collection")
-                        .getByPosition(size() + index);
-            }
-            return getByPosition(index - firstIndex());
-        } catch (IndexOutOfBoundsException e) {
-            throw new IndexOutOfBoundsException(format("Index out of bounds (%d), first index is: %d",
-                    index, firstIndex()));
-        }
-    }
+    int firstIndex();
 
-    public int firstIndex() {
-        return 0;
-    }
+    DALCollection<E> requireLimitedCollection(String message);
 
-    public DALCollection<E> requireLimitedCollection(String message) {
-        if (infinite())
-            throw new InfiniteCollectionException(message);
-        return this;
-    }
+    List<E> collect();
 
-    protected abstract E getByPosition(int position);
-
-    public List<E> collect() {
-        return requireLimitedCollection("Not supported for infinite collection").stream()
-                .map(IndexedElement::value).collect(Collectors.toList());
-    }
-
-    //    TODO tobe abstract
-    public DALCollection<E> filter(Predicate<E> predicate) {
-        return this;
-    }
-
-    public Stream<E> values() {
-        return stream().map(IndexedElement::value);
-    }
-
-    public Stream<Integer> indexes() {
-        return stream().map(IndexedElement::index);
-    }
-
-    public <R> DALCollection<R> map(IndexedElement.Mapper<? super E, ? extends R> mapper) {
-        return new DALCollection<R>() {
-            @Override
-            public int size() {
-                return DALCollection.this.size();
-            }
-
-            @Override
-            public int firstIndex() {
-                return DALCollection.this.firstIndex();
-            }
-
-            @Override
-            protected R getByPosition(int position) {
-                return mapper.apply(position + firstIndex(), DALCollection.this.getByPosition(position));
-            }
-
-            @Override
-            public Iterator<IndexedElement<R>> iterator() {
-                return new Iterator<IndexedElement<R>>() {
-                    final Iterator<IndexedElement<E>> iterator = (DALCollection.this).iterator();
-
-                    @Override
-                    public boolean hasNext() {
-                        return iterator.hasNext();
-                    }
-
-                    @Override
-                    public IndexedElement<R> next() {
-                        return iterator.next().map(mapper);
-                    }
-                };
-            }
-
-            @Override
-            public boolean infinite() {
-                return DALCollection.this.infinite();
-            }
-        };
-    }
-
-    public Stream<IndexedElement<E>> stream() {
-        return StreamSupport.stream(spliterator(), false);
-    }
-
-    public boolean infinite() {
-        return false;
-    }
-
-    public DALCollection<Object> limit(Integer size) {
-        return new CollectionDALCollection<Object>(values().limit(size).collect(Collectors.toList())) {
+    default DALCollection<E> filter(Predicate<E> predicate) {
+        return new IterableDALCollection<E>(() -> Spliterators.iterator(values().filter(predicate).spliterator())) {
             @Override
             public int firstIndex() {
                 return DALCollection.this.firstIndex();
@@ -115,7 +28,19 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         };
     }
 
-    public static class Decorated<E> extends DALCollection<E> {
+    Stream<E> values();
+
+    Stream<Integer> indexes();
+
+    <R> DALCollection<R> map(IndexedElement.Mapper<? super E, ? extends R> mapper);
+
+    Stream<IndexedElement<E>> stream();
+
+    boolean infinite();
+
+    DALCollection<Object> limit(int size);
+
+    class Decorated<E> implements DALCollection<E> {
 
         private final DALCollection<E> origin;
 
@@ -129,8 +54,8 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         }
 
         @Override
-        protected E getByPosition(int position) {
-            return origin.getByPosition(position);
+        public E getByIndex(int index) {
+            return origin.getByIndex(index);
         }
 
         @Override
@@ -149,8 +74,18 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         }
 
         @Override
+        public DALCollection<E> filter(Predicate<E> predicate) {
+            return origin.filter(predicate);
+        }
+
+        @Override
         public boolean infinite() {
             return origin.infinite();
+        }
+
+        @Override
+        public DALCollection<Object> limit(int size) {
+            return origin.limit(size);
         }
 
         @Override
@@ -161,6 +96,16 @@ public abstract class DALCollection<E> implements Iterable<IndexedElement<E>> {
         @Override
         public Stream<Integer> indexes() {
             return origin.indexes();
+        }
+
+        @Override
+        public <R> DALCollection<R> map(IndexedElement.Mapper<? super E, ? extends R> mapper) {
+            return origin.map(mapper);
+        }
+
+        @Override
+        public Stream<IndexedElement<E>> stream() {
+            return origin.stream();
         }
 
         @Override
