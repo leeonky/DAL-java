@@ -15,6 +15,11 @@ import static com.github.leeonky.dal.runtime.Operators.*;
 public class Operators implements Extension {
 
     @Override
+    public int order() {
+        return Integer.MIN_VALUE;
+    }
+
+    @Override
     public void extend(DAL dal) {
         numberCalculator(dal, PLUS, NumberType::plus);
         stringPlus(dal);
