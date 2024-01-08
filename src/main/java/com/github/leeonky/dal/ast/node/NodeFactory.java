@@ -83,7 +83,7 @@ public class NodeFactory {
         if (number != null) {
             Class<? extends Number> type = number.getClass();
             if (type.equals(Integer.class) || type.equals(Long.class) || type.equals(Short.class)
-                    || type.equals(Byte.class) || type.equals(BigInteger.class)) {
+                || type.equals(Byte.class) || type.equals(BigInteger.class)) {
                 return new ConstValueNode(number);
             }
         }

@@ -26,6 +26,17 @@ public class TextFormatters implements Extension {
                         return attribute.newLine("\r");
                     }
                 })
+                .registerTextFormatter("CRLF", new TextFormatter<String, String>() {
+                    @Override
+                    public String description() {
+                        return "use \\r\\n as new line";
+                    }
+
+                    @Override
+                    protected TextAttribute attribute(TextAttribute attribute) {
+                        return attribute.newLine("\r\n");
+                    }
+                })
                 .registerTextFormatter("<", TextFormatter.DEFAULT_END_OF_LINE)
                 .registerTextFormatter("\\", TextFormatter.DEFAULT_CONTINUE_CHAR)
                 .registerTextFormatter("⏎", new TextFormatter<String, String>() {

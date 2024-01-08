@@ -279,6 +279,10 @@ Feature: ```string```
           use \r as new line
               Accept: java.lang.String
               Return: java.lang.String
+        CRLF:
+          use \r\n as new line
+              Accept: java.lang.String
+              Return: java.lang.String
         <:
           use < as end of line character
               Accept: java.lang.String
@@ -311,6 +315,21 @@ Feature: ```string```
       Then the following verification should pass:
       """
       key= ``` CR
+           a
+           b
+           ```
+      """
+
+    Scenario: use CRLF to join lines
+      Given the following json:
+      """
+      {
+        "key": "a\r\nb"
+      }
+      """
+      Then the following verification should pass:
+      """
+      key= ``` CRLF
            a
            b
            ```
