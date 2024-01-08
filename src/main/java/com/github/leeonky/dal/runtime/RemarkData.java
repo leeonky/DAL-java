@@ -13,4 +13,8 @@ public class RemarkData extends RuntimeData {
     public String remark() {
         return remark;
     }
+
+    public Data acceptRemarkAsParameter() {
+        return data().map(acceptor -> ((DataRemarkParameterAcceptor) acceptor).apply(remark()));
+    }
 }

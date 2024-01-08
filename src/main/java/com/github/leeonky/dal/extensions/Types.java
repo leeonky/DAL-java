@@ -23,6 +23,7 @@ public class Types implements Extension {
                 .registerPropertyAccessor(Callable.class, new CallableJavaClassPropertyAccessor())
                 .registerDALCollectionFactory(Stream.class, (stream) ->
                         new IterableDALCollection<Object>(stream::iterator))
-                .registerDALCollectionFactory(DALCollection.class, instance -> instance);
+                .registerDALCollectionFactory(DALCollection.class, instance -> instance)
+                .registerDataRemark(DataRemarkParameterAcceptor.class, RemarkData::acceptRemarkAsParameter);
     }
 }
