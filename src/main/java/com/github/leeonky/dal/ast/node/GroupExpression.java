@@ -34,10 +34,10 @@ public class GroupExpression extends DALNode {
 
     @Override
     public Object evaluate(DALRuntimeContext context) {
-        return new ArrayList<Object>() {{
-            for (int i = 0; i < expressions.size(); i++)
-                add(evaluateExpression(context, expressions.get(i), i));
-        }};
+        Object result = null;
+        for (int i = 0; i < expressions.size(); i++)
+            result = evaluateExpression(context, expressions.get(i), i);
+        return result;
     }
 
     private Object evaluateExpression(DALRuntimeContext context, DALNode expression, int index) {

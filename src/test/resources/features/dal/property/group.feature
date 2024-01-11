@@ -300,7 +300,7 @@ Feature: group
 #    list.<<a.a b>>.value= 100
     """
 
-  Scenario: group node should return value as a list
+  Scenario: group node should return last experssion result
     Given the following json:
     """
     {
@@ -316,7 +316,7 @@ Feature: group
     """
     Then the result should:
     """
-    :[1 2]
+    : 2
     """
     When evaluate by:
     """
@@ -324,7 +324,7 @@ Feature: group
     """
     Then the result should:
     """
-    :[[4 5] [5 6]]
+    : 6
     """
 
   Scenario: which / is after group
@@ -342,7 +342,7 @@ Feature: group
     """
     Then the result should:
     """
-    :['1' '2']
+    : '2'
     """
     Then the following verification should pass:
     """
