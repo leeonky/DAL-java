@@ -45,6 +45,7 @@ public class Compiler {
     NodeParser<DALNode, DALProcedure>
             PROPERTY, OBJECT, SORTED_LIST, LIST, PARENTHESES, VERIFICATION_SPECIAL_OPERAND, VERIFICATION_VALUE_OPERAND,
             TABLE, SHORT_VERIFICATION_OPERAND, CELL_VERIFICATION_OPERAND, GROUP_PROPERTY, OPTIONAL_PROPERTY_CHAIN,
+            OBJECT_VERIFICATION_PROPERTY,
             ROOT_INPUT = procedure -> when(procedure.isCodeBeginning()).optional(() -> INPUT_NODE),
             NUMBER = Tokens.NUMBER.nodeParser(NodeFactory::constNumber),
             INTEGER = Tokens.INTEGER.nodeParser(NodeFactory::constInteger),
@@ -94,7 +95,7 @@ public class Compiler {
     }
 
     public NodeParser.Mandatory<DALNode, DALProcedure>
-            PROPERTY_CHAIN, OPERAND, EXPRESSION, VERIFICATION_PROPERTY, OBJECT_VERIFICATION_PROPERTY,
+            PROPERTY_CHAIN, OPERAND, EXPRESSION, VERIFICATION_PROPERTY,
             DEFAULT_INPUT = procedure -> INPUT_NODE,
             SCHEMA_COMPOSE = Notations.OPENING_BRACKET.with(single(many(SCHEMA.mandatory("Expect a schema"))
                     .and(splitBy(Notations.SCHEMA_AND)).as(NodeFactory::elementSchemas))
@@ -156,7 +157,7 @@ public class Compiler {
         OPTIONAL_PROPERTY_CHAIN = PROPERTY.concatAll(EXPLICIT_PROPERTY_CLAUSE);
         PROPERTY_CHAIN = OPTIONAL_PROPERTY_CHAIN.mandatory("Expect a object property");
         VERIFICATION_PROPERTY = enableNumberProperty(enableRelaxProperty(enableSlashProperty(PROPERTY_CHAIN)));
-        OBJECT_VERIFICATION_PROPERTY = many(VERIFICATION_PROPERTY).and(splitBy(Notations.COMMA))
+        OBJECT_VERIFICATION_PROPERTY = many(VERIFICATION_PROPERTY).and(atLeast(1)).and(splitBy(Notations.COMMA))
 //                TODO miss test for error message
                 .and(endWith(this::verificationNotations, () -> "Expect a verification operator")).as(NodeFactory::createVerificationGroup);
         OBJECT = lazyNode(() -> disableCommaAnd(Notations.OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(Notations.CLOSING_BRACES))
@@ -199,8 +200,8 @@ public class Compiler {
     private boolean verificationNotations(DALProcedure procedure) {
         SourceCode sourceCode = procedure.getSourceCode();
         return sourceCode.startsWith(Notations.Operators.EQUAL)
-                || sourceCode.startsWith(Notations.Operators.MATCHER, Notations.Operators.META.getLabel())
-                || Notations.Operators.IS.postfix(Constants.PROPERTY_DELIMITER).stream().anyMatch(sourceCode::startsWith);
+               || sourceCode.startsWith(Notations.Operators.MATCHER, Notations.Operators.META.getLabel())
+               || Notations.Operators.IS.postfix(Constants.PROPERTY_DELIMITER).stream().anyMatch(sourceCode::startsWith);
     }
 
     private NodeParser<DALNode, DALProcedure> pureList(Function<List<Clause<DALNode>>, DALNode> factory) {
