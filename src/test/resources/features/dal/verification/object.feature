@@ -209,6 +209,28 @@ Feature: object
     }
     """
 
+  Scenario: verification chain
+    Given the following json:
+    """
+    {
+      "value": 5
+    }
+    """
+    Then the following verification should pass:
+    """
+    = {
+      value= 5
+           = 2+3
+    }
+    """
+    Then the following verification should pass:
+    """
+    = {
+      value is Number
+            is Number
+    }
+    """
+
   Scenario: nested object verification
     Given the following json:
     """

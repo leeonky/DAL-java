@@ -147,6 +147,12 @@ public class Compiler {
         return SCHEMA_CLAUSE.concat(Operators.VERIFICATION_OPERATORS.clause(operand)).or(operatorMandatory.clause(operand));
     }
 
+    private ClauseParser<DALNode, DALProcedure> objectVerificationClauseChain(
+            OperatorParser<DALRuntimeContext, DALNode, DALOperator, DALProcedure, DALExpression> operator,
+            NodeParser.Mandatory<DALNode, DALProcedure> operand) {
+        return oneOf(SCHEMA_CLAUSE.concat(Operators.VERIFICATION_OPERATORS.clause(operand)), operator.clause(operand));
+    }
+
     private ClauseParser<DALNode, DALProcedure> ARITHMETIC_CLAUSE_CHAIN, VERIFICATION_CLAUSE_CHAIN,
             EXPLICIT_PROPERTY_CHAIN, WHICH_CLAUSE_CHAIN, SCHEMA_CLAUSE_CHAIN, EXPRESSION_CLAUSE;
 
@@ -162,7 +168,8 @@ public class Compiler {
                 .and(endWith(this::verificationNotations, () -> "Expect a verification operator")).as(NodeFactory::createVerificationGroup);
         OBJECT = lazyNode(() -> disableCommaAnd(Notations.OPENING_BRACES.with(single(ELEMENT_ELLIPSIS).and(endWith(Notations.CLOSING_BRACES))
                 .as(ObjectScopeNode::new).or(many(OBJECT_VERIFICATION_PROPERTY.concat(shortVerificationClause(Operators.VERIFICATION_OPERATORS
-                        .mandatory("Expect operator `:` or `=`"), SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING))))
+                                .mandatory("Expect operator `:` or `=`"), SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING)))
+                        .concatAll(objectVerificationClauseChain(Operators.VERIFICATION_OPERATORS, SHORT_VERIFICATION_OPERAND.or(OBJECT_SCOPE_RELAX_STRING))))
                         .and(optionalSplitBy(Notations.COMMA)).and(endWith(Notations.CLOSING_BRACES)).as(ObjectScopeNode::new)))));
         SORTED_LIST = oneOf(Notations.Operators.PLUS.before(pureList(ListScopeNode.NatureOrder::new)),
                 Notations.Operators.SUBTRACTION.before(pureList(ListScopeNode.ReverseOrder::new)));
