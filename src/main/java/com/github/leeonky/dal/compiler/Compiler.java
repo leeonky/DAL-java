@@ -107,8 +107,8 @@ public class Compiler {
             TABLE_CELL_RELAX_STRING = Tokens.TABLE_CELL_RELAX_STRING.nodeParser(NodeFactory::relaxString),
             BRACKET_RELAX_STRING = Tokens.BRACKET_RELAX_STRING.nodeParser(NodeFactory::relaxString),
             DEFAULT_INDEX_HEADER = procedure -> new DefaultIndexColumnHeaderRow(),
-            DATA_REMARK = many(charNode(new EscapeChars())).and(endWith(Notations.CLOSING_PARENTHESES.getLabel())).
-                    as(NodeFactory::dataRemarkNode);
+            DATA_REMARK = positionNode(many(charNode(new EscapeChars())).and(endWith(Notations.CLOSING_PARENTHESES.getLabel())).
+                    as(NodeFactory::dataRemarkNode));
 
     public ClauseParser<DALNode, DALProcedure>
             ARITHMETIC_CLAUSE, VERIFICATION_CLAUSE,
@@ -207,8 +207,8 @@ public class Compiler {
     private boolean verificationNotations(DALProcedure procedure) {
         SourceCode sourceCode = procedure.getSourceCode();
         return sourceCode.startsWith(Notations.Operators.EQUAL)
-               || sourceCode.startsWith(Notations.Operators.MATCHER, Notations.Operators.META.getLabel())
-               || Notations.Operators.IS.postfix(Constants.PROPERTY_DELIMITER).stream().anyMatch(sourceCode::startsWith);
+                || sourceCode.startsWith(Notations.Operators.MATCHER, Notations.Operators.META.getLabel())
+                || Notations.Operators.IS.postfix(Constants.PROPERTY_DELIMITER).stream().anyMatch(sourceCode::startsWith);
     }
 
     private NodeParser<DALNode, DALProcedure> pureList(Function<List<Clause<DALNode>>, DALNode> factory) {
