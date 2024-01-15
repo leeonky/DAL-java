@@ -22,13 +22,13 @@ Feature: prefix
     Then the result should:
     """
     = {
-      "a": {
+      "A": {
         "value": "A"
       },
-      "b": {
+      "B": {
         "value": "B"
       },
-      "c": {
+      "C": {
         "value": "C"
       }
     }
@@ -61,9 +61,9 @@ Feature: prefix
     """
     = {
       value{}: {
-        a.value: A
-        b.value: B
-        c.value: C
+        A.value: A
+        B.value: B
+        C.value: C
       }
     }
     """
