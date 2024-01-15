@@ -101,13 +101,8 @@ public class ListScopeNode extends DALNode {
             public Data equalTo() {
                 try {
                     Data.DataList list = opt1(actual::list).sort(comparator);
-                    return list.wrap().execute(() -> {
-                        if (type == Type.CONTAINS)
-                            verifyContainElement(context, list);
-                        else
-                            verifyCorrespondingElement(context, getVerificationExpressions(list));
-                        return actual;
-                    });
+                    return list.wrap().execute(() -> type == Type.CONTAINS ? verifyContainElement(context, list)
+                            : verifyCorrespondingElement(context, getVerificationExpressions(list)));
                 } catch (ListMappingElementAccessException e) {
                     throw exception(expression -> e.toDalError(expression.left().getOperandPosition()));
                 }
@@ -164,17 +159,27 @@ public class ListScopeNode extends DALNode {
         return buildVerificationExpressions().stream().map(DALNode::inspect).collect(joining(", ", "[", "]"));
     }
 
-    private void verifyContainElement(DALRuntimeContext context, Data.DataList list) {
+    private Data verifyContainElement(DALRuntimeContext context, Data.DataList list) {
         Iterator<Integer> iterator = list.indexes().iterator();
         List<Clause<DALNode>> expected = trimFirstEllipsis();
+        Data result = context.wrap(null);
         for (int clauseIndex = 0; clauseIndex < expected.size(); clauseIndex++) {
             Clause<DALNode> clause = expected.get(clauseIndex);
             try {
-                while (!isElementPassedVerification(context, clause, getElementIndex(clause, iterator))) ;
+                while (true) {
+                    int elementIndex = getElementIndex(clause, iterator);
+                    try {
+                        clause.expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
+                                new SymbolNode(elementIndex, BRACKET))).evaluate(context);
+                        break;
+                    } catch (AssertionFailure ignore) {
+                    }
+                }
             } catch (AssertionFailure exception) {
                 throw style == Style.LIST ? exception : new RowAssertionFailure(clauseIndex, exception);
             }
         }
+        return result;
     }
 
     private int getElementIndex(Clause<DALNode> clause, Iterator<Integer> iterator) {
@@ -183,25 +188,16 @@ public class ListScopeNode extends DALNode {
         throw new AssertionFailure("No such element", clause.expression(INPUT_NODE).getOperandPosition());
     }
 
-    private boolean isElementPassedVerification(DALRuntimeContext context, Clause<DALNode> clause, int index) {
-        try {
-            clause.expression(expression(INPUT_NODE, Factory.executable(Notations.EMPTY),
-                    new SymbolNode(index, BRACKET))).evaluate(context);
-            return true;
-        } catch (AssertionFailure ignore) {
-            return false;
-        }
-    }
-
     private List<Clause<DALNode>> trimFirstEllipsis() {
         return inputClauses.subList(1, inputClauses.size() - 1);
     }
 
-    private void verifyCorrespondingElement(DALRuntimeContext context, List<DALNode> expressions) {
+    private Data verifyCorrespondingElement(DALRuntimeContext context, List<DALNode> expressions) {
+        Data result = context.wrap(null);
         if (style != Style.LIST)
             for (int index = 0; index < expressions.size(); index++)
                 try {
-                    expressions.get(index).evaluate(context);
+                    result = expressions.get(index).evaluateData(context);
                 } catch (DifferentCellSize differentCellSize) {
                     throw new RowAssertionFailure(index, differentCellSize);
                 } catch (DalException dalException) {
@@ -209,8 +205,11 @@ public class ListScopeNode extends DALNode {
                         throw new ElementAssertionFailure(index, dalException);
                     throw dalException;
                 }
-        else
-            expressions.forEach(expression -> expression.evaluate(context));
+        else {
+            for (DALNode expression : expressions)
+                result = expression.evaluateData(context);
+        }
+        return result;
     }
 
     private boolean isListEllipsis(Clause<DALNode> clause) {

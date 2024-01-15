@@ -47,8 +47,10 @@ public class ObjectScopeNode extends DALNode {
                 if (opt1(actual::isNull))
                     throw new AssertionFailure("The input value is null", getOperandPosition());
                 return actual.execute(() -> {
-                    verificationExpressions.forEach(expression -> expression.evaluate(context));
-                    return actual;
+                    Data result = context.wrap(null);
+                    for (DALNode expression : verificationExpressions)
+                        result = expression.evaluateData(context);
+                    return result;
                 });
             }
 
@@ -56,18 +58,21 @@ public class ObjectScopeNode extends DALNode {
             public Data equalTo() {
                 if (opt1(actual::isNull))
                     throw new AssertionFailure("The input value is null", getOperandPosition());
-                return actual.execute(() -> {
-                    verificationExpressions.forEach(expression -> expression.evaluate(context));
-                    Set<Object> dataFields = collectUnexpectedFields(actual, context);
-                    if (!dataFields.isEmpty())
-                        throw exception(expression -> {
-                            String element = expression.left().inspect();
-                            return new AssertionFailure(format("Unexpected fields %s%s",
-                                    dataFields.stream().map(s -> s instanceof String ? format("`%s`", s) : s.toString())
-                                            .collect(joining(", ")), element.isEmpty() ? "" : " in " + element), expression.operator().getPosition());
-                        });
-                    return actual;
+                Data execute = actual.execute(() -> {
+                    Data result = context.wrap(null);
+                    for (DALNode expression : verificationExpressions)
+                        result = expression.evaluateData(context);
+                    return result;
                 });
+                Set<Object> dataFields = collectUnexpectedFields(actual, context);
+                if (!dataFields.isEmpty())
+                    throw exception(expression -> {
+                        String element = expression.left().inspect();
+                        return new AssertionFailure(format("Unexpected fields %s%s",
+                                dataFields.stream().map(s -> s instanceof String ? format("`%s`", s) : s.toString())
+                                        .collect(joining(", ")), element.isEmpty() ? "" : " in " + element), expression.operator().getPosition());
+                    });
+                return execute;
             }
 
             @Override
