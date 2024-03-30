@@ -24,7 +24,7 @@ Feature: syntax-warning
       ^
     }
 
-    Warning: Ambiguity detected. Please add a comma or remove whitespace to clear this warning.
+    Warning: may be ambiguous. Please add a comma or remove whitespace to clear this warning.
     """
     Then the following verification should pass:
     """
@@ -42,7 +42,7 @@ Feature: syntax-warning
       ^
     }
 
-    Warning: Ambiguity detected. Please add a comma or remove whitespace to clear this warning.
+    Warning: may be ambiguous. Please add a comma or remove whitespace to clear this warning.
     """
     Then the following verification should pass:
     """
@@ -60,7 +60,7 @@ Feature: syntax-warning
       ^
     }
 
-    Warning: Ambiguity detected. Please add a comma or remove whitespace to clear this warning.
+    Warning: may be ambiguous. Please add a comma or remove whitespace to clear this warning.
     """
 
 # space before . [] :: in any expression

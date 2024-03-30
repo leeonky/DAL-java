@@ -139,7 +139,7 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
                 StringWithPosition stringWithPosition = new StringWithPosition(getSourceCode().chars().getCode());
                 stringWithPosition.position(first).position(rightPosition);
                 runtimeContext.warningOutput().append(stringWithPosition.result())
-                        .append("\n\nWarning: Ambiguity detected. Please add a comma or remove whitespace to clear this warning.");
+                        .append("\n\nWarning: may be ambiguous. Please add a comma or remove whitespace to clear this warning.");
             }
         }
         return DALExpression.expression(left, operator, right);
