@@ -65,4 +65,9 @@ public class SymbolNode extends DALNode implements ExecutableNode {
             return symbol.toString();
         }
     }
+
+    @Override
+    public boolean needPrefixBlankWarningCheck() {
+        return true;
+    }
 }

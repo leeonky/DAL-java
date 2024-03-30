@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.leeonky.dal.compiler.IntegrationTestContext;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
-import io.cucumber.java.en.And;
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.When;
+import io.cucumber.java.en.*;
 import lombok.SneakyThrows;
 
 import java.util.List;
@@ -268,5 +265,10 @@ public class IntegrationSteps {
     @And("register the following BeanDALCollectionFactory for java class {string}:")
     public void registerTheFollowingBeanDataListFactoryForJavaClass(String type, String code) {
         integrationTestContext.givenDALCollectionFactory(type, code);
+    }
+
+    @But("got the following warning:")
+    public void gotTheFollowingWarning(String verification) {
+        integrationTestContext.shouldHaveWarning(verification);
     }
 }

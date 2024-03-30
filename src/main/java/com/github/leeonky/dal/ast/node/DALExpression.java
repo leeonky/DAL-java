@@ -119,4 +119,9 @@ public class DALExpression extends DALNode implements Expression<DALRuntimeConte
             return RowHeader.DEFAULT_INDEX;
         return RowHeader.SPECIFY_PROPERTY;
     }
+
+    @Override
+    public boolean needPostBlankWarningCheck() {
+        return true;
+    }
 }

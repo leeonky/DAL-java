@@ -18,7 +18,7 @@ public class DumpingBuffer {
     private StringBuilder splits;
     private int length = 0;
     private final DALRuntimeContext runtimeContext;
-    private AtomicInteger dumpedObjectCount;
+    private final AtomicInteger dumpedObjectCount;
 
     private DumpingBuffer(String path, int indent, StringBuilder splits, LineBuffer buffer, DALRuntimeContext context, AtomicInteger dumpedObjectCount) {
         this.path = path;

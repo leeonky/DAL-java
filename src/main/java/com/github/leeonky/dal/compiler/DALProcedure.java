@@ -8,6 +8,7 @@ import com.github.leeonky.interpreter.NodeParser;
 import com.github.leeonky.interpreter.NodeParser.Mandatory;
 import com.github.leeonky.interpreter.Procedure;
 import com.github.leeonky.interpreter.SourceCode;
+import com.github.leeonky.interpreter.StringWithPosition;
 
 import java.util.LinkedList;
 import java.util.Optional;
@@ -18,13 +19,14 @@ import static com.github.leeonky.dal.compiler.Notations.Operators.NOT_EQUAL;
 import static java.util.Collections.singleton;
 
 public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpression, DALOperator> {
-
     private final LinkedList<Boolean> enableAndComma = new LinkedList<>(singleton(true));
+    private final DALRuntimeContext runtimeContext;
 
     private boolean enableSlashProperty = false, enableRelaxProperty = false, enableNumberProperty = false;
 
     public DALProcedure(SourceCode sourceCode, DALRuntimeContext runtimeContext) {
         super(sourceCode, runtimeContext);
+        this.runtimeContext = runtimeContext;
     }
 
     public static NodeParser<DALNode, DALProcedure> disableCommaAnd(NodeParser<DALNode, DALProcedure> nodeParser) {
@@ -130,6 +132,17 @@ public class DALProcedure extends Procedure<DALRuntimeContext, DALNode, DALExpre
 
     @Override
     public DALNode createExpression(DALNode left, DALOperator operator, DALNode right) {
+        if (right.needPrefixBlankWarningCheck() && left.needPostBlankWarningCheck()) {
+            int rightPosition = operator.getPosition() > 0 ? operator.getPosition() : right.getPositionBegin();
+            int first = getSourceCode().chars().newlineBetween(left.getOperandPosition(), rightPosition);
+            if (first != -1) {
+                StringWithPosition stringWithPosition = new StringWithPosition(getSourceCode().chars().getCode());
+                stringWithPosition.position(first).position(rightPosition);
+                runtimeContext.warningOutput().append(stringWithPosition.result())
+                        .append("\n\nWarning: Ambiguity detected. Please add a comma or remove whitespace to clear this warning.");
+            }
+        }
         return DALExpression.expression(left, operator, right);
     }
+
 }

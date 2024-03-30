@@ -74,4 +74,12 @@ public abstract class DALNode extends NodeBase<DALRuntimeContext, DALNode> {
     public RowType guessTableHeaderType() {
         return RowHeader.DEFAULT_INDEX;
     }
+
+    public boolean needPrefixBlankWarningCheck() {
+        return false;
+    }
+
+    public boolean needPostBlankWarningCheck() {
+        return false;
+    }
 }

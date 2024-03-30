@@ -17,6 +17,8 @@ import com.github.leeonky.util.JavaCompilerPool;
 import com.github.leeonky.util.Suppressor;
 import lombok.SneakyThrows;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.RuntimeException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -35,6 +37,7 @@ import static org.assertj.core.api.Assertions.fail;
 
 public class IntegrationTestContext {
     private final DAL dal;
+    private ByteArrayOutputStream waringOutput;
     private Object input = null;
     private Object result;
     private InterpreterException exception;
@@ -66,12 +69,15 @@ public class IntegrationTestContext {
 
     public IntegrationTestContext() {
         dal = new DAL().extend();
+        waringOutput = new ByteArrayOutputStream();
+        dal.getRuntimeContextBuilder().setWarningOutput(new PrintStream(waringOutput));
         javaCompiler = JAVA_COMPILER_POOL.take();
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
     public void release() {
         JAVA_COMPILER_POOL.giveBack(javaCompiler);
+        assertThat(waringOutput.toString()).isEqualTo("");
     }
 
     private static NodeParser<DALNode, DALProcedure> optional(
@@ -421,8 +427,15 @@ public class IntegrationTestContext {
         dALCollectionFactories.put(type, guessClassName(code));
     }
 
-    public static class Empty {
+    @SneakyThrows
+    public void shouldHaveWarning(String verification) {
+        String message = waringOutput.toString();
+        waringOutput.close();
+        waringOutput = new ByteArrayOutputStream();
+        dal.getRuntimeContextBuilder().setWarningOutput(new PrintStream(waringOutput));
+        assertThat("\n" + message).isEqualTo("\n" + verification);
     }
 
-
+    public static class Empty {
+    }
 }

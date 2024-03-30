@@ -34,4 +34,9 @@ public class ConstValueNode extends DALNode {
     public RowType guessTableHeaderType() {
         return RowHeader.SPECIFY_INDEX;
     }
+
+    @Override
+    public boolean needPostBlankWarningCheck() {
+        return true;
+    }
 }

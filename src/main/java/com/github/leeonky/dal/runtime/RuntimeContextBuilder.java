@@ -14,6 +14,7 @@ import com.github.leeonky.interpreter.RuntimeContext;
 import com.github.leeonky.interpreter.SyntaxException;
 import com.github.leeonky.util.*;
 
+import java.io.PrintStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -64,6 +65,7 @@ public class RuntimeContextBuilder {
     };
     private final Map<Class<?>, Map<Object, Function<MetaData, Object>>> localMetaProperties
             = new TreeMap<>(Classes::compareByExtends);
+    private PrintStream warning = System.err;
 
     public RuntimeContextBuilder registerMetaProperty(Object property, Function<MetaData, Object> function) {
         metaProperties.put(property, function);
@@ -137,7 +139,7 @@ public class RuntimeContextBuilder {
 
     public RuntimeContextBuilder registerStaticMethodExtension(Class<?> staticMethodExtensionClass) {
         Stream.of(staticMethodExtensionClass.getMethods()).filter(method -> method.getParameterCount() >= 1
-                                                                            && (STATIC & method.getModifiers()) != 0).forEach(extensionMethods::add);
+                && (STATIC & method.getModifiers()) != 0).forEach(extensionMethods::add);
         return this;
     }
 
@@ -278,6 +280,11 @@ public class RuntimeContextBuilder {
 
     public void setMaxDumpingObjectSize(int maxDumpingObjectSize) {
         this.maxDumpingObjectSize = maxDumpingObjectSize;
+    }
+
+    public RuntimeContextBuilder setWarningOutput(PrintStream printStream) {
+        warning = printStream;
+        return this;
     }
 
     public class DALRuntimeContext implements RuntimeContext {
@@ -512,6 +519,10 @@ public class RuntimeContextBuilder {
                     return operation.operate(v1, opt, v2, this);
             throw illegalOperationRuntimeException(format("No operation `%s` between '%s' and '%s'", opt.overrideType(),
                     getClassName(v1.instance()), getClassName(v2.instance())));
+        }
+
+        public PrintStream warningOutput() {
+            return warning;
         }
     }
 }
